@@ -1,46 +1,45 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Env
+.env
+*.env.local
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+venv*/
+*.egg-info/
 
-# testing
-/coverage
+# DB
+*.db
+*.sqlite3
 
-# next.js
-/.next/
-/.vinext/
-/out/
+# Uploaded document storage (local disk, MVP only)
+backend/storage/
 
-# misc
+# Node
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+TEST_REPORT.md.bak
+tests/e2e/node_modules/
+tests/e2e/e2e.db
+backend/storage_e2e/
+
+# Local scratch / transfer artifacts
+_src_bundle.tar.gz
+_to_delete/
+_write_test.txt
+
+# OS
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
-
-# local preview
-dev-server*.log
-
-# vercel
-.vercel
-
-# typescript
-next-env.d.ts
-/dist/
-/.wrangler/
-/outputs/
-/work/
+.next/

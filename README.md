@@ -1,52 +1,134 @@
-# CaseBridge prototype
+# CaseBridge
 
-CaseBridge is an AI-assisted legal triage and verified-lawyer marketplace for local and cross-border cases. This repository contains a functional, production-style prototype using realistic mock data; it does not provide legal advice.
+**AI-Powered Legal Case Intelligence** — an MVP workspace for law firms combining case management, multi-perspective AI lawsuit simulation, and firm-wide case analytics.
 
-## Run locally
+> Status: The case-management MVP and the interactive courtroom training mode are implemented. Docker Compose, PostgreSQL migrations, seed data, the production frontend build, and a real local Ollama turn with `qwen3.5:9b` have been verified on Apple Silicon. See `docs/IMPLEMENTATION_LOG.md` for the implementation history and known limitations.
 
-1. Install Node.js 22.13 or later.
-2. Install dependencies with `npm install`.
-3. Start the prototype with `npm run dev`.
-4. Open the local address shown by the development server.
+## Product
 
-No API keys are required. Copy `.env.example` to `.env.local` only when connecting optional integrations.
+CaseBridge helps a law firm:
+- Manage active/closed cases, clients, opposing parties, documents, hearings, and timelines.
+- Run an AI case simulation across four perspectives (Judge, Plaintiff Lawyer, Defendant Lawyer, Legal Researcher) to surface arguments, risks, missing information, and suggested next steps — always labeled as an AI-generated estimate, never a guaranteed outcome.
+- Practice a six-stage fictional hearing as plaintiff or defendant counsel. A local model plays opposing counsel and judge with isolated role prompts, evidence access rules, a resumable transcript, and a final 100-point training evaluation.
+- See firm-wide analytics: win/loss ratio, performance by category, historical trends.
+- Generate a case handover summary when a case changes hands.
+- (Foundation only, MVP uses mock data) Track legal/regulatory updates that may affect active cases.
 
-## Demo credentials
+Full product spec: see the original requirements this build is based on; architectural decisions are in `docs/ARCHITECTURE.md`.
 
-- Individual: `user@casebridge.demo` / `demo123`
-- Lawyer: `lawyer@casebridge.demo` / `demo123`
+## Architecture
 
-The sign-in screen also provides one-click demo access.
+See `docs/ARCHITECTURE.md` for the full breakdown. Summary:
 
-## Main demo paths
+```
+Frontend (Next.js/TS/Tailwind) → API (FastAPI) → Services → Repositories → DB (SQLite/PostgreSQL)
+AI: Service → Prompt/agent layer → LLMProvider → Ollama / Qwen API / OpenAI / Mock
+```
 
-- Landing, registration and pricing
-- Individual dashboard, seven-step case wizard and autosaved draft
-- Simulated AI analysis, structured preliminary case report and anonymous publishing
-- Lawyer marketplace, anonymized case detail and representation offer
-- Lawyer dashboard, analytics, professional profile and secure messages
-- English and Turkish landing-page localization with a persisted preference
+Multi-tenant: every case-scoped table carries `law_firm_id`; repositories enforce the filter server-side. See `docs/DB_SCHEMA.md` for entities.
 
-## Structure
+## Folder structure
 
-- `app/` — App Router pages and global design system
-- `components/` — reusable shell and interface primitives
-- `features/` — public, individual and lawyer product surfaces
-- `lib/` — AI abstraction, data models, jurisdictions, seed data and optional Supabase client
-- `messages/` — localization dictionaries
+```
+casebridge/
+├── backend/          # FastAPI app, tests, AI provider layer
+├── frontend/         # Next.js app
+├── tests/e2e/         # Playwright E2E specs
+├── docs/              # Architecture, DB schema, test plan
+├── .env / .env.example
+├── README.md
+├── PROGRESS.md
+└── TEST_REPORT.md     # generated at Milestone 10
+```
 
-## Current prototype limitations
+## Installation (to be finalized as milestones land)
 
-- Authentication, file uploads, messaging, offers and publishing are simulated in the browser.
-- AI methods return deterministic mocked responses.
-- Supabase is optional and is not connected without environment variables.
-- Pricing is explicitly illustrative; no billing is performed.
-- Legal output is preliminary, qualitative and always requires licensed-lawyer review.
+### Environment configuration
+1. Copy `.env.example` to `.env` if not already present (already created for local dev).
+2. Set `LLM_PROVIDER` (`ollama` | `mock` | `openai` | `qwen`). Courtroom mode defaults are tuned for local `qwen3.5:9b`; `mock` runs a deterministic offline demo without a real model.
+3. `.env` is git-ignored; never commit it.
 
-## Planned production integrations
+### Backend
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head   # applies migrations; `uvicorn`'s create_all() also covers a first run, but
+                        # migrations are the source of truth going forward - run this after every pull
+uvicorn app.main:app --reload
+```
 
-- Supabase Auth, PostgreSQL row-level security and private Storage buckets
-- jurisdiction-reviewed legal knowledge sources and auditable AI workflows
-- real lawyer license verification, secure consent logs and document access policies
-- notifications, billing, moderation, malware scanning and retention controls
-- full English, Turkish, German, French, Spanish and Arabic localization
+To add a schema change: edit the model, then
+`alembic revision --autogenerate -m "describe the change"` and re-run
+`alembic upgrade head`. Always review the generated migration file
+before committing it - autogenerate is a starting point, not a
+guarantee.
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Runs on `http://localhost:3000` and calls the API at `http://localhost:8000` by default (override with `NEXT_PUBLIC_API_URL`). The backend must be running first — CORS is configured to allow `localhost:3000`/`127.0.0.1:3000` only.
+
+### Docker (alternative to the manual steps above)
+
+For the real local courtroom actors, install/start Ollama and make sure the model is present:
+
+```bash
+ollama pull qwen3.5:9b
+ollama serve                 # skip if the Ollama app is already running
+```
+
+Set `LLM_PROVIDER=ollama` and `OLLAMA_MODEL=qwen3.5:9b` in `.env`, then:
+
+```bash
+cp .env.example .env   # only when .env does not exist; keep its JWT secret private
+docker compose up -d --build
+```
+Starts Postgres, applies migrations, seeds the demo accounts/cases/five courtroom scenarios, and launches the backend (`:8000`) plus frontend (`:3000`). Inside Docker the backend reaches host Ollama through `host.docker.internal`. The seed is idempotent, so container restarts do not duplicate data.
+
+### Database
+SQLite file created automatically on backend startup at `backend/casebridge.db` (or Postgres when run via `docker compose`, see above). Migrations live in `backend/alembic/` - run `alembic upgrade head` after pulling any change that touches a model. Seed demo data with:
+```bash
+python -m app.db.seed
+```
+
+### Demo credentials
+Created by `python -m app.db.seed` (idempotent - safe to re-run):
+- `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
+- `avukat@demo.casebridge.dev` / `demo1234` (Lawyer, Demo Hukuk Bürosu)
+
+The seed also creates demo cases and five fictional courtroom scenarios. Open **Simülasyonlar → Canlı duruşma**, choose a case and then choose **Davacı ol** or **Davalı ol**.
+
+## Test commands
+
+| Suite | Command | Notes |
+|---|---|---|
+| Backend (unit/integration/API/AI-contract) | `pytest` (from `backend/`) | Uses `MockProvider`, no OpenAI credits consumed |
+| Frontend component | `npm run test` (from `frontend/`) | Vitest + React Testing Library |
+| E2E | `npm test` (from `tests/e2e/`, run `npm install` there first) | Playwright boots its own backend (port 8010, dedicated SQLite DB, auto-seeded) and frontend (port 3010) via `webServer`; no manual setup needed. Uses `MockProvider` (no `OPENAI_API_KEY`), so simulations complete with a clearly-labeled placeholder AI result. |
+| **Optional real OpenAI test** | `pytest backend/tests_manual -m real_openai --run-real-openai` | NOT run by default `pytest`. Costs real tokens. Requires `OPENAI_API_KEY` set. |
+
+## Known MVP limitations
+
+- No vector database / semantic search yet — institutional memory search is plain SQL filtering (by design, section 17 of spec).
+- Mevzuat Takibi (legal-update tracking) was removed from primary navigation - no live legislation feed exists, so per the project's honesty rule it was not left as a placeholder.
+- Document text extraction is best-effort (pdf/docx/txt), not OCR for scanned images.
+- RBAC limited to Admin/Lawyer roles.
+- No production-grade file storage (local disk under `backend/storage/`) — swap for object storage before real deployment.
+- Login is rate-limited (5 attempts/60s per IP+email); no other endpoint has rate limiting.
+- JWT is stored in `localStorage`, not an HttpOnly cookie — acceptable for MVP demo, revisit before production.
+- AI outputs are decision-support only and must be reviewed by a licensed professional; this is enforced in UI copy and disclaimer fields, not a substitute for legal judgment.
+- Courtroom results are fictional training feedback, not legal advice or a prediction of a real case. Local models may still misstate facts; the prompts constrain fabrication and every final result remains marked for verification.
+- Both in-process AI workers are single-instance MVP queues. Do not horizontally scale the backend without moving them to a durable queue/row-locking design.
+- Task assignment (`assigned_to`) is accepted by the API but not yet surfaced in either Görevler UI (case-level or firm-wide) — assignment by lawyer, and per-lawyer task filtering, are not built yet.
+- `/system/ai-status` and the Ayarlar user list are firm-scoped but not role-gated server-side; only the frontend hides the user list from non-admins.
+- Reports CSV export has no pagination/streaming; fine at MVP scale.
+- CORS allow-list defaults to `localhost:3000`/`127.0.0.1:3000`; extra origins (e.g. for E2E) are added via the `EXTRA_CORS_ORIGINS` env var, not hardcoded.
+- No user-registration endpoint yet — accounts are created via the seed script (`python -m app.db.seed`) only.
+- `logout` does not revoke the JWT (stateless, short-lived tokens) — acceptable for MVP, no server-side session store.
+- `assigned_lawyer_id` on a case is not validated against real users in the same firm.
+- Pagination added to `GET /cases` (`limit`/`offset`, opt-in); `/analytics`, `/tasks`, `/documents`, `/simulations` still unpaginated — will matter once large demo datasets (section 25) are seeded.
+- npm dependency audit flags several dev-tooling-only CVEs (Next.js dev server, Vite, Vitest) — run `npm audit` and address before any production deployment; not chased here as they don't affect the built/shipped app.
