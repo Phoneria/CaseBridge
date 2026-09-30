@@ -8,7 +8,6 @@ import {
   TASK_LIST_PARAM_KEYS,
   describeTaskListQuery,
   filterTasks,
-  isDueWithinWeek,
   isOverdue,
   parseTaskListQuery,
   sortTasks,
@@ -69,21 +68,28 @@ export function TasksView() {
 
   const today = new Date();
   const visible = sortTasks(filterTasks(tasks, query, today), today);
-  const completedCount = tasks.filter((task) => task.status === "completed").length;
-  const pendingCount = tasks.length - completedCount;
-  const dueSoonCount = tasks.filter((task) => isDueWithinWeek(task, today)).length;
-  const overdueCount = tasks.filter((task) => isOverdue(task, today)).length;
   const chips = describeTaskListQuery(query, (caseId) => tasks.find((t) => t.case_id === caseId)?.case_name);
 
-  function toggleHref<K extends keyof TaskListQuery>(key: K, value: NonNullable<TaskListQuery[K]>) {
-    return hrefWith({ [key]: query[key] === value ? null : value });
+  // Each card's number is the row count of the list its own link opens (spec 5.1).
+  function card<K extends "durum" | "vade">(label: string, tone: Tone, key: K, value: NonNullable<TaskListQuery[K]>) {
+    const active = query[key] === value;
+    const next: TaskListQuery = { ...query };
+    if (active) delete next[key];
+    else next[key] = value;
+    return {
+      label,
+      tone,
+      active,
+      value: filterTasks(tasks, next, today).length,
+      href: hrefWith({ [key]: active ? null : value }),
+    };
   }
 
-  const cards: Array<{ label: string; value: number; tone: Tone; href: string; active: boolean }> = [
-    { label: "Açık görev", value: pendingCount, tone: "navy", href: toggleHref("durum", "acik"), active: query.durum === "acik" },
-    { label: "Tamamlanan", value: completedCount, tone: "emerald", href: toggleHref("durum", "tamamlanan"), active: query.durum === "tamamlanan" },
-    { label: "7 gün içinde", value: dueSoonCount, tone: "amber", href: toggleHref("vade", "7gun"), active: query.vade === "7gun" },
-    { label: "Gecikmiş", value: overdueCount, tone: "red", href: toggleHref("vade", "gecikmis"), active: query.vade === "gecikmis" },
+  const cards = [
+    card("Açık görev", "navy", "durum", "acik"),
+    card("Tamamlanan", "emerald", "durum", "tamamlanan"),
+    card("7 gün içinde", "amber", "vade", "7gun"),
+    card("Gecikmiş", "red", "vade", "gecikmis"),
   ];
 
   return (

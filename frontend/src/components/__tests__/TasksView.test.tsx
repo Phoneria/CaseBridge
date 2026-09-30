@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -128,5 +128,30 @@ describe("TasksView", () => {
     listAllTasks.mockResolvedValue([futureTask]);
     render(<TasksView />);
     expect(await screen.findByText("Bu filtrelere uyan kayıt yok.")).toBeInTheDocument();
+  });
+
+  it("keeps each card's number equal to the rows its link opens (dava scoped)", async () => {
+    const otherCase = { ...pendingTask, id: "x1", case_id: "c2", title: "Başka dava görevi 1" };
+    const otherCase2 = { ...pendingTask, id: "x2", case_id: "c2", title: "Başka dava görevi 2", due_date: "2999-01-01" };
+    const mine = { ...pendingTask, id: "m1", title: "Benim görevim", due_date: "2999-01-01" };
+    listAllTasks.mockResolvedValue([mine, otherCase, otherCase2]);
+
+    for (const [query, label] of [
+      ["dava=c1", "Açık görev"],
+      ["dava=c1&durum=tamamlanan", "Gecikmiş"],
+    ]) {
+      setUrl(`/gorevler?${query}`);
+      const first = render(<TasksView />);
+      const card = await screen.findByRole("link", { name: new RegExp(`^${label}`) });
+      const shown = Number(card.querySelector("p:last-child")?.textContent);
+      const href = card.getAttribute("href")!;
+      first.unmount();
+
+      setUrl(href);
+      render(<TasksView />);
+      await screen.findByRole("link", { name: new RegExp(`^${label}`) });
+      expect(screen.queryAllByTestId("task-title")).toHaveLength(shown);
+      cleanup();
+    }
   });
 });
