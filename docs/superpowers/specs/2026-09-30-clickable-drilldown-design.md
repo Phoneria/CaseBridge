@@ -66,7 +66,7 @@ Aynı URL mantığı filtrelere de uygulanır.
 **Açılma/kapanma**
 - `?onizle=<davaId>` varsa sağdan panel: masaüstünde ~440px, mobilde tam ekran.
 - Açılış `router.push` (geri tuşu kapatır). Kapatma: ✕, ESC, arka plan tıklaması → parametre `router.replace` ile silinir.
-- `useQuickViewHref(caseId, odak?)` mevcut URL'i (filtreler dahil) koruyarak parametreyi ekler.
+- `useQuickViewHref()` ile üretilen linkler mevcut URL'i (filtreler dahil) koruyarak parametreyi ekler.
 - Panel açıkken başka satıra tıklanırsa içerik yerinde yenilenir.
 
 **İçerik (yukarıdan aşağı)**
@@ -94,7 +94,7 @@ Aynı URL mantığı filtrelere de uygulanır.
 ### 4.3 URL durumu — `lib/urlState.ts`
 
 - `useUrlFilters()`: parametreleri okur/günceller (`replace` ile; her tuş vuruşu geçmişe yazılmaz).
-- `useQuickViewHref(caseId, odak?)`.
+- `useQuickViewHref()` → `(caseId, odak?) => href` üreten bir fonksiyon döndürür.
 - `parseOdak(value)` → `{ type: "gorev" | "belge" | "olay", id } | null`.
 - `sayfa` parametresi ayrılmıştır (bu işte kullanılmaz; sayfalama ileride eklenecek).
 
@@ -178,7 +178,7 @@ Bir karttaki sayı, tıklanınca açılan listenin satır sayısına **eşit** o
 
 ### 5.7 Analitik (`/analitik`)
 
-- Kartlar Dashboard ile aynı hedefler; "Ort. Dava Süresi" tıklanmaz.
+- Kartlar Dashboard ile aynı hedefler; bu sayfada "Kazanma Oranı" (kendi sayfasına gideceği için) ve "Ort. Dava Süresi" tıklanmaz.
 - Kategori başarı grafiği çubuğu + lejant → `/davalar?kategori=<x>&arsiv=dahil`.
 - Kaybedilen davalar: satır → önizleme; dava adı → detay.
 
@@ -207,7 +207,7 @@ DB şeması değişmez. Tüm yeni endpoint'ler `get_current_law_firm_id` kullan�
 2. **Analitik** — `AnalyticsOverview`'a `by_status: list[{status, total}]` eklenir (mevcut `by_category` ile aynı taban sorgu).
 3. **Takvim** — `CalendarEventOut`'a `task_id: Optional[str]`; görev olaylarında dolu, duruşmalarda `None`.
 4. **Belge indirme** — `GET /documents/{id}/download`: `FileResponse`, orijinal ad `Content-Disposition` ile. Belge kiracıya göre bulunur; başka büronun belgesi ve diskte olmayan dosya için aynı 404. Çözümlenen yolun `settings.storage_dir` içinde kaldığı doğrulanır.
-5. **Raporlar** — `ReportService`: `hearings_csv`, `tasks_csv`, `performance_csv`, `summary`. Route'lar: `/reports/hearings.csv`, `/reports/tasks.csv`, `/reports/performance.csv` (mevcut `cases.csv` kalıbı: UTF-8 BOM, Türkçe başlıklar), `GET /reports/summary` → `{ total_cases, upcoming_hearings_30d, open_tasks, win_rate }`. `total_cases` ve `win_rate` analitik servisiyle aynı tanımı kullanır (arşiv dahil). `upcoming_hearings_30d` `GET /cases?hearing_within_days=30` ile, `open_tasks` `GET /tasks?status=pending` ile aynı tanımı kullanır; böylece §5.1 tutarlılık kuralı Raporlar kartları için de geçerlidir.
+5. **Raporlar** — `ReportService`: `hearings_csv`, `tasks_csv`, `performance_csv`, `summary`. Route'lar: `/reports/hearings.csv`, `/reports/tasks.csv`, `/reports/performance.csv` (UTF-8 BOM ve Türkçe başlıklar; mevcut `cases.csv` biçimi değişmez), `GET /reports/summary` → `{ total_cases, upcoming_hearings_30d, open_tasks, win_rate }`. `total_cases` ve `win_rate` analitik servisiyle aynı tanımı kullanır (arşiv dahil). `upcoming_hearings_30d` `GET /cases?hearing_within_days=30` ile, `open_tasks` `GET /tasks?status=pending` ile aynı tanımı kullanır; böylece §5.1 tutarlılık kuralı Raporlar kartları için de geçerlidir.
 6. **Son gelişmeler** — değişiklik yok (`id`, `case_id` zaten mevcut).
 
 ## 7. Gerçek veriye hazırlık
@@ -222,7 +222,7 @@ Bir sonraki işte seed yerine gerçek veri kullanılacak. Bu tasarım veri kayna
 
 **Yeni (frontend):** `lib/urlState.ts`, `lib/filters.ts`, `components/CaseQuickView.tsx`, `components/FilterChips.tsx`, `components/ChartLegendLinks.tsx`.
 
-**Değişen (frontend):** `AppShell`, `StatCard`, `DashboardView`, `CaseListView`, `TasksView`, `DocumentsView`, `CalendarView`, `AnalyticsView`, `ReportsView`, `CaseDetailView`, `SimulationsView` (yalnızca link), `lib/api.ts`, `types/index.ts`. `useSearchParams` kullanan sayfa sarmalayıcıları `<Suspense>` ile sarılır (Next 14 build gereği).
+**Değişen (frontend):** `AppShell`, `StatCard`, `DashboardView`, `CaseListView`, `TasksView`, `DocumentsView`, `CalendarView`, `AnalyticsView`, `ReportsView`, `CaseDetailView`, `SimulationsView` (yalnızca link), `lib/api.ts`, `types/index.ts`. `useSearchParams` için gereken `<Suspense>` sınırı tek seferde `AppShell` içine eklenir (Next 14 build gereği).
 
 **Değişen (backend):** `repositories/case_repository.py`, `services/case_service.py`, `api/routes/cases.py`, `schemas/analytics.py`, `services/analytics_service.py`, `schemas/calendar.py`, `api/routes/calendar.py`, `api/routes/documents.py`, `services/document_service.py`, `services/report_service.py`, `api/routes/reports.py`.
 
