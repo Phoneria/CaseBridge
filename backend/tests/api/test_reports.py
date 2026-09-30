@@ -130,3 +130,18 @@ def test_summary_isolated_by_law_firm(client, two_firms_two_users):
     _create_case(client, headers_a, case_number="2026/951")
 
     assert client.get("/reports/summary", headers=headers_b).json()["total_cases"] == 0
+
+
+def test_csv_exports_neutralise_spreadsheet_formulas(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers, case_number="2026/950", case_name="=SUM(1)", client_name="@cmd")
+    client.post(f"/cases/{case['id']}/tasks", json={"title": "+1+1"}, headers=headers)
+
+    cases_lines = client.get("/reports/cases.csv", headers=headers).text.splitlines()
+    tasks_lines = _csv_lines(client.get("/reports/tasks.csv", headers=headers))
+
+    row = next(line for line in cases_lines if "2026/950" in line)
+    assert ",'=SUM(1)," in row
+    assert ",'@cmd," in row
+    assert any(line.startswith("'+1+1,") for line in tasks_lines)
+    assert any(",'=SUM(1)," in line for line in tasks_lines)

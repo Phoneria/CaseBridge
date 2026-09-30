@@ -40,9 +40,20 @@ _CASE_TYPE_LABELS = {
 }
 
 
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _safe_cell(value):
+    """Neutralise spreadsheet formula injection: text that Excel would treat
+    as a formula gets a leading quote. Numbers and other values pass through."""
+    if isinstance(value, str) and value.startswith(_FORMULA_PREFIXES):
+        return "'" + value
+    return value
+
+
 def _bom_csv(rows: list[list]) -> str:
     buffer = io.StringIO()
-    csv.writer(buffer).writerows(rows)
+    csv.writer(buffer).writerows([[_safe_cell(cell) for cell in row] for row in rows])
     return _BOM + buffer.getvalue()
 
 
@@ -58,7 +69,8 @@ class ReportService:
         writer.writerow(_HEADERS)
         for case in cases:
             writer.writerow(
-                [
+                _safe_cell(cell)
+                for cell in [
                     case.case_number,
                     case.case_name,
                     case.client_name,
