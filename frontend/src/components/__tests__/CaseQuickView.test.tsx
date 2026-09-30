@@ -131,6 +131,19 @@ describe("CaseQuickView", () => {
 describe("pickWithFocus", () => {
   const items = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
 
+  it("traps Shift+Tab from the panel itself onto the last focusable element", async () => {
+    setUrl("/dashboard?onizle=c1");
+    getCase.mockResolvedValue(detail);
+    render(<CaseQuickView />);
+    const dialog = await screen.findByRole("dialog", { name: "Ticari Kira Uyarlama Davası" });
+    await waitFor(() => expect(dialog).toHaveFocus());
+
+    await userEvent.tab({ shift: true });
+
+    const focusable = dialog.querySelectorAll<HTMLElement>("a[href], button:not([disabled])");
+    expect(focusable[focusable.length - 1]).toHaveFocus();
+  });
+
   it("keeps the first items when the focus is among them or absent", () => {
     expect(pickWithFocus(items, undefined).map((i) => i.id)).toEqual(["a", "b", "c"]);
     expect(pickWithFocus(items, "b").map((i) => i.id)).toEqual(["a", "b", "c"]);
