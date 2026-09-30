@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models.case import Case, CaseEvent, CaseStatus, CaseType
+from app.models.case import Case, CaseEvent, CaseOutcome, CaseStatus, CaseType
 from app.repositories.case_event_repository import CaseEventRepository
 from app.repositories.case_repository import CaseRepository
 from app.schemas.case import CaseCreate, CaseEventCreate, CaseUpdate
@@ -45,6 +45,9 @@ class CaseService:
         include_archived: bool = False,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
+        outcome: Optional[CaseOutcome] = None,
+        active: Optional[bool] = None,
+        hearing_within_days: Optional[int] = None,
     ) -> list[Case]:
         return self.cases.list_in_firm(
             law_firm_id,
@@ -55,6 +58,9 @@ class CaseService:
             include_archived=include_archived,
             limit=limit,
             offset=offset,
+            outcome=outcome,
+            active=active,
+            hearing_within_days=hearing_within_days,
         )
 
     def update_case(self, case: Case, payload: CaseUpdate) -> Case:

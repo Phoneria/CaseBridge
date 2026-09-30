@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.db.session import get_db
-from app.models.case import CaseStatus, CaseType
+from app.models.case import CaseOutcome, CaseStatus, CaseType
 from app.models.user import User
 from app.schemas.case import CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseOut, CaseUpdate
 from app.services.case_service import CaseService, DuplicateCaseNumberError
@@ -39,6 +39,9 @@ def list_cases(
     case_type: Optional[CaseType] = None,
     assigned_lawyer_id: Optional[str] = None,
     include_archived: bool = False,
+    outcome: Optional[CaseOutcome] = None,
+    active: Optional[bool] = None,
+    hearing_within_days: Optional[int] = Query(default=None, ge=1, le=365),
     limit: Optional[int] = Query(default=None, ge=1, le=200),
     offset: Optional[int] = Query(default=None, ge=0),
     law_firm_id: str = Depends(get_current_law_firm_id),
@@ -53,6 +56,9 @@ def list_cases(
         include_archived=include_archived,
         limit=limit,
         offset=offset,
+        outcome=outcome,
+        active=active,
+        hearing_within_days=hearing_within_days,
     )
 
 

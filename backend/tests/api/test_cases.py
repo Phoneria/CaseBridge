@@ -1,5 +1,6 @@
 """Case management API (section 22 - Cases)."""
 import pytest
+from datetime import date, timedelta
 
 
 def _login(client, email, password):
@@ -193,3 +194,56 @@ def test_case_belongs_to_correct_law_firm(client, two_firms_two_users):
     list_response = client.get("/cases", headers=headers_b)
     ids = {c["id"] for c in list_response.json()}
     assert created["id"] not in ids
+
+
+def _create(client, headers, **overrides):
+    payload = {**VALID_CASE_PAYLOAD, **overrides}
+    response = client.post("/cases", json=payload, headers=headers)
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_filter_cases_by_outcome(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    won = _create(client, headers, case_number="2026/701")
+    _create(client, headers, case_number="2026/702")
+    client.patch(f"/cases/{won['id']}", json={"outcome": "won", "status": "kapali"}, headers=headers)
+
+    response = client.get("/cases?outcome=won", headers=headers)
+
+    assert response.status_code == 200
+    assert [c["id"] for c in response.json()] == [won["id"]]
+
+
+def test_filter_cases_active_true_and_false(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    open_case = _create(client, headers, case_number="2026/711")
+    closed_case = _create(client, headers, case_number="2026/712", status="kapali")
+
+    active_ids = [c["id"] for c in client.get("/cases?active=true", headers=headers).json()]
+    inactive_ids = [c["id"] for c in client.get("/cases?active=false", headers=headers).json()]
+
+    assert active_ids == [open_case["id"]]
+    assert inactive_ids == [closed_case["id"]]
+
+
+def test_filter_cases_by_hearing_window_is_inclusive(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    today = date.today()
+    today_case = _create(client, headers, case_number="2026/720", next_hearing_date=today.isoformat())
+    soon = _create(client, headers, case_number="2026/721", next_hearing_date=(today + timedelta(days=3)).isoformat())
+    edge = _create(client, headers, case_number="2026/722", next_hearing_date=(today + timedelta(days=30)).isoformat())
+    _create(client, headers, case_number="2026/723", next_hearing_date=(today + timedelta(days=31)).isoformat())
+    _create(client, headers, case_number="2026/724", next_hearing_date=(today - timedelta(days=1)).isoformat())
+    _create(client, headers, case_number="2026/725")
+
+    response = client.get("/cases?hearing_within_days=30", headers=headers)
+
+    assert response.status_code == 200
+    assert {c["id"] for c in response.json()} == {today_case["id"], soon["id"], edge["id"]}
+
+
+def test_hearing_window_rejects_out_of_range_values(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    assert client.get("/cases?hearing_within_days=0", headers=headers).status_code == 422
+    assert client.get("/cases?hearing_within_days=366", headers=headers).status_code == 422
