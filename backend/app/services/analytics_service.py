@@ -78,7 +78,7 @@ class AnalyticsService:
         status_counts: dict[CaseStatus, int] = {}
         for c in cases:
             status_counts[c.status] = status_counts.get(c.status, 0) + 1
-        by_status = [StatusBreakdown(status=s, total=n) for s, n in status_counts.items()]
+        by_status = [StatusBreakdown(status=s, total=status_counts[s]) for s in CaseStatus if s in status_counts]
 
         return AnalyticsOverview(
             total_cases=total_cases,

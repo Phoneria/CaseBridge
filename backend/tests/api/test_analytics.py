@@ -71,14 +71,17 @@ def test_analytics_case_type_filter(client, two_firms_two_users):
 
 def test_analytics_overview_includes_status_breakdown(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
+    # created in reverse enum order so ordering can't come from insertion order
+    _create_case(client, headers, case_number="2026/553", status="kapali")
     _create_case(client, headers, case_number="2026/551", status="devam_eden")
     _create_case(client, headers, case_number="2026/552", status="devam_eden")
-    _create_case(client, headers, case_number="2026/553", status="kapali")
 
     body = client.get("/analytics/overview", headers=headers).json()
 
     by_status = {row["status"]: row["total"] for row in body["by_status"]}
     assert by_status == {"devam_eden": 2, "kapali": 1}
+    # stable CaseStatus declaration order (pie colours depend on it)
+    assert [row["status"] for row in body["by_status"]] == ["devam_eden", "kapali"]
 
 
 def test_overview_counts_match_case_list_filters(client, two_firms_two_users):
