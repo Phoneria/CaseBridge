@@ -14,7 +14,7 @@ export function FilterChips({
   if (chips.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="Aktif filtreler">
+    <div className="flex flex-wrap items-center gap-2 text-xs" role="group" aria-label="Aktif filtreler">
       {chips.map((chip) => (
         <span key={chip.key} className="inline-flex items-center gap-1 rounded-full bg-accent-50 py-1 pl-3 pr-1 font-medium text-accent-700">
           {chip.label}

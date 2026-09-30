@@ -84,7 +84,7 @@ describe("TasksView", () => {
     await screen.findByText("Gecikmiş dilekçe");
     expect(screen.queryByText("Uzak görev")).not.toBeInTheDocument();
     expect(screen.queryByText("Biten görev")).not.toBeInTheDocument();
-    expect(within(screen.getByLabelText("Aktif filtreler")).getByText("Gecikmiş")).toBeInTheDocument();
+    expect(within(screen.getByRole("group", { name: "Aktif filtreler" })).getByText("Gecikmiş")).toBeInTheDocument();
   });
 
   it("filters by ?durum=tamamlanan", async () => {
