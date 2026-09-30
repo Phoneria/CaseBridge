@@ -97,7 +97,9 @@ export function ReportsView() {
           <article key={report.id} className="flex flex-col rounded-2xl border border-surface-border bg-white p-5 shadow-card">
             <div className="mb-4 flex items-start justify-between gap-4">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-accent-50 text-xl font-semibold text-accent-700">{report.icon}</span>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">Canlı veri</span>
+              {summaryState === "ready" && (
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">Canlı veri</span>
+              )}
             </div>
             <h2 className="text-sm font-semibold text-navy-800">{report.title}</h2>
             <p className="mt-1 min-h-10 text-xs leading-5 text-navy-500">{report.description}</p>

@@ -31,6 +31,7 @@ describe("ReportsView", () => {
     expect(screen.getByRole("link", { name: "9 açık görev" })).toHaveAttribute("href", "/gorevler?durum=acik");
     expect(screen.getByRole("link", { name: "%62,5 kazanma oranı" })).toHaveAttribute("href", "/analitik");
     expect(screen.queryByText(/bugün güncellendi/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText("Canlı veri")).toHaveLength(4);
   });
 
   it("downloads each report as a real CSV", async () => {
@@ -59,5 +60,6 @@ describe("ReportsView", () => {
 
     await waitFor(() => expect(screen.getAllByText("—")).toHaveLength(4));
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByText("Canlı veri")).not.toBeInTheDocument();
   });
 });
