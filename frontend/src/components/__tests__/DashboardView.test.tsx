@@ -11,6 +11,9 @@ vi.mock("@/lib/api", () => ({
   getRecentActivity: (...args: unknown[]) => getRecentActivity(...args),
 }));
 
+vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
+import { resetNav, setUrl } from "@/test/navigation";
+
 import { DashboardView } from "@/components/DashboardView";
 
 const overview = {
@@ -24,9 +27,15 @@ const overview = {
     { case_type: "is_hukuku", total: 20, won: 15, lost: 2, win_rate: 88.24 },
     { case_type: "kira", total: 10, won: 5, lost: 3, win_rate: 62.5 },
   ],
+  by_status: [
+    { status: "devam_eden", total: 7 },
+    { status: "kapali", total: 3 },
+  ],
 };
 
 beforeEach(() => {
+  resetNav();
+  setUrl("/dashboard");
   getAnalyticsOverview.mockReset();
   getCases.mockReset();
   getRecentActivity.mockReset();
@@ -109,5 +118,50 @@ describe("DashboardView", () => {
 
     await waitFor(() => expect(screen.getByText("Dava açıldı")).toBeInTheDocument());
     expect(screen.getByText(/Sözleşmenin Feshi Davası/)).toBeInTheDocument();
+  });
+
+  it("fetches upcoming hearings with the 30-day window", async () => {
+    getAnalyticsOverview.mockResolvedValue(overview);
+    getCases.mockResolvedValue([]);
+    render(<DashboardView />);
+    await waitFor(() => expect(getCases).toHaveBeenCalledWith({ hearing_within_days: 30 }));
+  });
+
+  it("links stat cards to analytics-consistent filtered lists", async () => {
+    getAnalyticsOverview.mockResolvedValue(overview);
+    getCases.mockResolvedValue([]);
+    render(<DashboardView />);
+
+    expect(await screen.findByRole("link", { name: /Aktif Davalar/ })).toHaveAttribute("href", "/davalar?durum=aktif&arsiv=dahil");
+    expect(screen.getByRole("link", { name: /Toplam Davalar/ })).toHaveAttribute("href", "/davalar?arsiv=dahil");
+    expect(screen.getByRole("link", { name: /Kazanılan Davalar/ })).toHaveAttribute("href", "/davalar?sonuc=kazanilan&arsiv=dahil");
+    expect(screen.getByRole("link", { name: /Kaybedilen Davalar/ })).toHaveAttribute("href", "/davalar?sonuc=kaybedilen&arsiv=dahil");
+    expect(screen.getByRole("link", { name: /Kazanma Oranı/ })).toHaveAttribute("href", "/analitik");
+  });
+
+  it("gives every chart mark a legend link", async () => {
+    getAnalyticsOverview.mockResolvedValue(overview);
+    getCases.mockResolvedValue([]);
+    render(<DashboardView />);
+
+    expect(await screen.findByRole("link", { name: "İş Hukuku · 20" })).toHaveAttribute("href", "/davalar?kategori=is_hukuku&arsiv=dahil");
+    expect(screen.getByRole("link", { name: "Devam Eden · 7" })).toHaveAttribute("href", "/davalar?durum=devam_eden&arsiv=dahil");
+    expect(screen.getByRole("list", { name: "Dava dağılımı kategorileri" })).toBeInTheDocument();
+  });
+
+  it("opens the preview from hearings and activity", async () => {
+    getAnalyticsOverview.mockResolvedValue(overview);
+    getCases.mockResolvedValue([
+      { id: "c1", case_name: "Ticari Kira Uyarlama Davası", court: null, next_hearing_date: "2999-01-01", status: "durusma_bekleyen" },
+    ]);
+    getRecentActivity.mockResolvedValue([
+      { id: "e1", case_id: "c2", case_name: "Sözleşmenin Feshi Davası", title: "Dava açıldı", event_type: "filing", event_date: "2026-01-12", created_at: "2026-01-12" },
+    ]);
+    render(<DashboardView />);
+
+    expect(await screen.findByRole("link", { name: "Ticari Kira Uyarlama Davası" })).toHaveAttribute("href", "/dashboard?onizle=c1");
+    expect(screen.getByRole("link", { name: /Dava açıldı/ })).toHaveAttribute("href", "/dashboard?onizle=c2&odak=olay%3Ae1");
+    expect(screen.getByRole("link", { name: "Tümü →" })).toHaveAttribute("href", "/davalar?durusma=yaklasan");
+    expect(screen.getByText("—")).toBeInTheDocument(); // missing court
   });
 });
