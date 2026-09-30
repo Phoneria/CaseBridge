@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const getCases = vi.fn();
@@ -189,10 +189,11 @@ describe("CaseListView", () => {
     await waitFor(() => expect(screen.getByText("Case A")).toBeInTheDocument());
     expect(screen.queryByText("Case B")).not.toBeInTheDocument();
 
-    resolveFirst([caseB]);
-    await waitFor(() => {
-      expect(screen.getByText("Case A")).toBeInTheDocument();
-      expect(screen.queryByText("Case B")).not.toBeInTheDocument();
+    await act(async () => {
+      resolveFirst([caseB]);
+      await firstPromise;
     });
+    expect(screen.getByText("Case A")).toBeInTheDocument();
+    expect(screen.queryByText("Case B")).not.toBeInTheDocument();
   });
 });
