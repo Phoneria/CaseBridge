@@ -59,6 +59,7 @@ def list_calendar_events(
                 title=task.title,
                 case_id=task.case_id,
                 case_name=case_name,
+                task_id=task.id,
             )
         )
 

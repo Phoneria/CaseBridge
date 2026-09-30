@@ -85,3 +85,20 @@ def test_calendar_isolated_by_law_firm(client, two_firms_two_users):
     response = client.get("/calendar", headers=headers_b)
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_calendar_task_events_carry_task_id(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers, case_number="2026/803", next_hearing_date="2026-10-07")
+    task = client.post(
+        f"/cases/{case['id']}/tasks",
+        json={"title": "Delil listesi", "due_date": "2026-10-08"},
+        headers=headers,
+    ).json()
+
+    body = client.get("/calendar", headers=headers).json()
+
+    task_event = next(e for e in body if e["event_type"] == "task")
+    hearing_event = next(e for e in body if e["event_type"] == "hearing")
+    assert task_event["task_id"] == task["id"]
+    assert hearing_event["task_id"] is None
