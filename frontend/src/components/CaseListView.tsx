@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { createCase, getCases } from "@/lib/api";
 import {
@@ -58,14 +58,28 @@ export function CaseListView() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const latestRequestId = useRef<number>(0);
 
   function load() {
     setLoading(true);
     setError(null);
+    const requestId = ++latestRequestId.current;
     getCases(toCaseListFilters(query))
-      .then(setCases)
-      .catch(() => setError("Davalar yüklenemedi. Lütfen daha sonra tekrar deneyin."))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (requestId === latestRequestId.current) {
+          setCases(data);
+        }
+      })
+      .catch(() => {
+        if (requestId === latestRequestId.current) {
+          setError("Davalar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+        }
+      })
+      .finally(() => {
+        if (requestId === latestRequestId.current) {
+          setLoading(false);
+        }
+      });
   }
 
   useEffect(() => {
@@ -73,6 +87,10 @@ export function CaseListView() {
     // queryKey is the serialized query; reload whenever the URL filters change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryKey]);
+
+  useEffect(() => {
+    setSearch(query.ara ?? "");
+  }, [query.ara]);
 
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault();

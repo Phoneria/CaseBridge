@@ -161,4 +161,38 @@ describe("CaseListView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Ara" }));
     expect(nav.replace).toHaveBeenLastCalledWith("/davalar?ara=kira", { scroll: false });
   });
+
+  it("ignores stale responses from slower requests when filters change", async () => {
+    const caseA = { ...icraCase, id: "cA", case_name: "Case A" };
+    const caseB = { ...icraCase, id: "cB", case_name: "Case B" };
+
+    let resolveFirst: (value: typeof caseB[]) => void = () => {};
+    let resolveSecond: (value: typeof caseA[]) => void = () => {};
+
+    const firstPromise = new Promise<typeof caseB[]>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const secondPromise = new Promise<typeof caseA[]>((resolve) => {
+      resolveSecond = resolve;
+    });
+
+    getCases.mockReturnValueOnce(firstPromise).mockReturnValueOnce(secondPromise);
+
+    const { rerender } = render(<CaseListView />);
+    expect(screen.getByText(/yükleniyor/i)).toBeInTheDocument();
+
+    setUrl("/davalar?kategori=kira");
+    rerender(<CaseListView />);
+    expect(getCases).toHaveBeenCalledTimes(2);
+
+    resolveSecond([caseA]);
+    await waitFor(() => expect(screen.getByText("Case A")).toBeInTheDocument());
+    expect(screen.queryByText("Case B")).not.toBeInTheDocument();
+
+    resolveFirst([caseB]);
+    await waitFor(() => {
+      expect(screen.getByText("Case A")).toBeInTheDocument();
+      expect(screen.queryByText("Case B")).not.toBeInTheDocument();
+    });
+  });
 });
