@@ -73,6 +73,18 @@ class DocumentService:
     def get(self, document_id: str, law_firm_id: str) -> Optional[Document]:
         return self.documents.get_by_id_in_firm(document_id, law_firm_id)
 
+    def resolve_download_path(self, document: Document) -> Optional[str]:
+        """Absolute path of the stored file, or None when the file is gone
+        or the stored path resolves outside the storage directory (defence
+        against a tampered storage_path)."""
+        storage_root = os.path.realpath(settings.storage_dir)
+        path = os.path.realpath(document.storage_path)
+        if not path.startswith(storage_root + os.sep):
+            return None
+        if not os.path.isfile(path):
+            return None
+        return path
+
     def delete(self, document: Document) -> None:
         try:
             if os.path.exists(document.storage_path):

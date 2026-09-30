@@ -1,5 +1,6 @@
 """Document management (section 22 - Documents)."""
 import io
+import os
 
 VALID_CASE_PAYLOAD = {
     "case_number": "2026/301",
@@ -228,3 +229,66 @@ def test_global_document_list_isolated_by_law_firm(client, two_firms_two_users):
     response = client.get("/documents", headers=headers_b)
     assert response.status_code == 200
     assert response.json() == []
+
+
+def _upload_txt(client, headers, case_id, content=b"Sozlesme notlari"):
+    response = client.post(
+        f"/cases/{case_id}/documents",
+        files={"file": ("notlar.txt", content, "text/plain")},
+        headers=headers,
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def test_download_document_returns_original_file(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    doc = _upload_txt(client, headers, case["id"])
+
+    response = client.get(f"/documents/{doc['id']}/download", headers=headers)
+
+    assert response.status_code == 200
+    assert response.content == b"Sozlesme notlari"
+    assert "notlar.txt" in response.headers["content-disposition"]
+
+
+def test_download_document_from_other_firm_is_404(client, two_firms_two_users):
+    headers_a = _auth_headers(client, two_firms_two_users, "user_a")
+    headers_b = _auth_headers(client, two_firms_two_users, "user_b")
+    case = _create_case(client, headers_a)
+    doc = _upload_txt(client, headers_a, case["id"])
+
+    response = client.get(f"/documents/{doc['id']}/download", headers=headers_b)
+
+    assert response.status_code == 404
+
+
+def test_download_document_with_missing_file_is_404(client, two_firms_two_users, db_session):
+    from app.models.document import Document
+
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    doc = _upload_txt(client, headers, case["id"])
+    os.remove(db_session.get(Document, doc["id"]).storage_path)
+
+    response = client.get(f"/documents/{doc['id']}/download", headers=headers)
+
+    assert response.status_code == 404
+
+
+def test_download_rejects_path_outside_storage_dir(client, two_firms_two_users, db_session, tmp_path):
+    from app.models.document import Document
+
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    doc = _upload_txt(client, headers, case["id"])
+    outside = tmp_path / "outside.txt"
+    outside.write_bytes(b"secret")
+    stored = db_session.get(Document, doc["id"])
+    stored.storage_path = str(outside)
+    db_session.commit()
+
+    response = client.get(f"/documents/{doc['id']}/download", headers=headers)
+
+    assert response.status_code == 404
