@@ -1,6 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
+import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const listAllTasks = vi.fn();
 const updateTaskStatus = vi.fn();
@@ -26,7 +29,13 @@ const pendingTask = {
   completed_at: null,
 };
 
+const overdueTask = { ...pendingTask, id: "t-old", title: "Gecikmiş dilekçe", due_date: "2000-01-01" };
+const futureTask = { ...pendingTask, id: "t-new", title: "Uzak görev", due_date: "2999-01-01" };
+const doneTask = { ...pendingTask, id: "t-done", title: "Biten görev", status: "completed", due_date: "2000-01-02" };
+
 beforeEach(() => {
+  resetNav();
+  setUrl("/gorevler");
   listAllTasks.mockReset();
   updateTaskStatus.mockReset();
 });
@@ -59,5 +68,65 @@ describe("TasksView", () => {
     await userEvent.click(screen.getByRole("checkbox"));
 
     await waitFor(() => expect(updateTaskStatus).toHaveBeenCalledWith("c1", "t1", "completed"));
+  });
+
+  it("filters by ?vade=gecikmis and lists overdue first by default", async () => {
+    listAllTasks.mockResolvedValue([futureTask, overdueTask, doneTask]);
+
+    const { unmount } = render(<TasksView />);
+    await screen.findByText("Gecikmiş dilekçe");
+    const titles = screen.getAllByTestId("task-title").map((el) => el.textContent);
+    expect(titles[0]).toBe("Gecikmiş dilekçe");
+    unmount();
+
+    setUrl("/gorevler?vade=gecikmis");
+    render(<TasksView />);
+    await screen.findByText("Gecikmiş dilekçe");
+    expect(screen.queryByText("Uzak görev")).not.toBeInTheDocument();
+    expect(screen.queryByText("Biten görev")).not.toBeInTheDocument();
+    expect(within(screen.getByLabelText("Aktif filtreler")).getByText("Gecikmiş")).toBeInTheDocument();
+  });
+
+  it("filters by ?durum=tamamlanan", async () => {
+    setUrl("/gorevler?durum=tamamlanan");
+    listAllTasks.mockResolvedValue([futureTask, doneTask]);
+    render(<TasksView />);
+    await screen.findByText("Biten görev");
+    expect(screen.queryByText("Uzak görev")).not.toBeInTheDocument();
+  });
+
+  it("turns the summary cards into toggling filter links", async () => {
+    listAllTasks.mockResolvedValue([overdueTask]);
+    const { unmount } = render(<TasksView />);
+    expect(await screen.findByRole("link", { name: /Gecikmiş\s*1/ })).toHaveAttribute("href", "/gorevler?vade=gecikmis");
+    unmount();
+
+    setUrl("/gorevler?vade=gecikmis");
+    render(<TasksView />);
+    expect(await screen.findByRole("link", { name: /Gecikmiş\s*1/ })).toHaveAttribute("href", "/gorevler");
+  });
+
+  it("links the title to the preview and the case name to the case filter", async () => {
+    listAllTasks.mockResolvedValue([pendingTask]);
+    render(<TasksView />);
+    await screen.findByText("Bilirkişi raporunu incele");
+
+    expect(screen.getByRole("link", { name: "Bilirkişi raporunu incele" })).toHaveAttribute("href", "/gorevler?onizle=c1&odak=gorev%3At1");
+    expect(screen.getByRole("link", { name: "2026/1 - Sözleşmenin Feshi Davası" })).toHaveAttribute("href", "/gorevler?dava=c1");
+  });
+
+  it("does not navigate when the checkbox is toggled", async () => {
+    listAllTasks.mockResolvedValue([pendingTask]);
+    updateTaskStatus.mockResolvedValue({ ...pendingTask, status: "completed" });
+    render(<TasksView />);
+    await userEvent.click(await screen.findByRole("checkbox"));
+    expect(nav.push).not.toHaveBeenCalled();
+  });
+
+  it("shows the filtered empty state", async () => {
+    setUrl("/gorevler?vade=gecikmis");
+    listAllTasks.mockResolvedValue([futureTask]);
+    render(<TasksView />);
+    expect(await screen.findByText("Bu filtrelere uyan kayıt yok.")).toBeInTheDocument();
   });
 });
