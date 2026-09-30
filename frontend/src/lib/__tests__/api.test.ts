@@ -50,4 +50,33 @@ describe("api request()", () => {
     expect(window.localStorage.getItem("casebridge_token")).toBe("valid-token");
     expect(window.location.href).not.toContain("/login");
   });
+
+  it("sends the new case list filters as query params", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => [] });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { getCases } = await import("@/lib/api");
+    await getCases({ outcome: "won", active: true, hearing_within_days: 30, include_archived: true });
+
+    const url = String(fetchMock.mock.calls[0][0]);
+    expect(url).toContain("/cases?");
+    expect(url).toContain("outcome=won");
+    expect(url).toContain("active=true");
+    expect(url).toContain("hearing_within_days=30");
+    expect(url).toContain("include_archived=true");
+  });
+
+  it("throws an ApiError carrying the HTTP status", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ detail: "Case not found" }),
+    }) as unknown as typeof fetch;
+
+    const { getCase } = await import("@/lib/api");
+    const { ApiError } = await import("@/lib/apiError");
+
+    await expect(getCase("missing")).rejects.toBeInstanceOf(ApiError);
+    await expect(getCase("missing")).rejects.toMatchObject({ status: 404 });
+  });
 });

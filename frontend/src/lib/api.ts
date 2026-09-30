@@ -3,10 +3,13 @@ import type {
   Case,
   CaseDetail,
   CaseEvent,
+  CaseOutcome,
   CaseStatus,
   CaseType,
   DocumentItem,
   HandoverReport,
+  ReportKind,
+  ReportSummary,
   Simulation,
   SimulationWithCase,
   ActivityItem,
@@ -23,6 +26,8 @@ import type {
   CourtroomSession,
   CourtroomSessionSummary,
 } from "@/types";
+
+import { ApiError } from "@/lib/apiError";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -70,7 +75,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       }
     }
 
-    throw new Error(detail);
+    throw new ApiError(detail, response.status);
   }
 
   if (response.status === 204) return undefined as T;
@@ -98,6 +103,9 @@ export interface CaseListFilters {
   status?: CaseStatus;
   case_type?: CaseType;
   include_archived?: boolean;
+  outcome?: CaseOutcome;
+  active?: boolean;
+  hearing_within_days?: number;
 }
 
 export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
@@ -106,6 +114,9 @@ export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
   if (filters.status) params.set("status", filters.status);
   if (filters.case_type) params.set("case_type", filters.case_type);
   if (filters.include_archived) params.set("include_archived", "true");
+  if (filters.outcome) params.set("outcome", filters.outcome);
+  if (filters.active !== undefined) params.set("active", String(filters.active));
+  if (filters.hearing_within_days) params.set("hearing_within_days", String(filters.hearing_within_days));
   const query = params.toString();
   return request(`/cases${query ? `?${query}` : ""}`);
 }
@@ -261,13 +272,29 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   return request(`/calendar`);
 }
 
-export async function downloadCasesCsv(): Promise<Blob> {
+async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {
   const token = getToken();
   const headers = new Headers();
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(`${API_BASE_URL}/reports/cases.csv`, { headers });
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers });
   if (!response.ok) {
-    throw new Error(`Rapor indirilemedi (${response.status}).`);
+    throw new ApiError(`${errorPrefix} (${response.status}).`, response.status);
   }
   return response.blob();
+}
+
+export async function downloadReportCsv(kind: ReportKind): Promise<Blob> {
+  return fetchBlob(`/reports/${kind}.csv`, "Rapor indirilemedi");
+}
+
+export async function downloadCasesCsv(): Promise<Blob> {
+  return downloadReportCsv("cases");
+}
+
+export async function getReportSummary(): Promise<ReportSummary> {
+  return request(`/reports/summary`);
+}
+
+export async function downloadDocument(documentId: string): Promise<Blob> {
+  return fetchBlob(`/documents/${documentId}/download`, "Belge indirilemedi");
 }

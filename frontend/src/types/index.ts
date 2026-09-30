@@ -71,6 +71,7 @@ export interface CalendarEvent {
   title: string;
   case_id: string;
   case_name: string;
+  task_id: string | null;
 }
 
 export type UserRole = "admin" | "lawyer";
@@ -254,6 +255,11 @@ export interface CategoryBreakdown {
   win_rate: number;
 }
 
+export interface StatusBreakdown {
+  status: CaseStatus;
+  total: number;
+}
+
 export interface AnalyticsOverview {
   total_cases: number;
   active_cases: number;
@@ -262,6 +268,7 @@ export interface AnalyticsOverview {
   win_rate: number;
   average_case_duration_days: number;
   by_category: CategoryBreakdown[];
+  by_status: StatusBreakdown[];
 }
 
 export interface HandoverReport {
@@ -284,4 +291,13 @@ export interface HandoverReport {
   pending_tasks: string[];
   upcoming_dates: string[];
   recommended_next_steps: string[];
+}
+
+export type ReportKind = "cases" | "hearings" | "tasks" | "performance";
+
+export interface ReportSummary {
+  total_cases: number;
+  upcoming_hearings_30d: number;
+  open_tasks: number;
+  win_rate: number;
 }
