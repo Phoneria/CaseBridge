@@ -67,3 +67,45 @@ def test_analytics_case_type_filter(client, two_firms_two_users):
 
     response = client.get("/analytics/overview", params={"case_type": "kira"}, headers=headers)
     assert response.json()["total_cases"] == 1
+
+
+def test_analytics_overview_includes_status_breakdown(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    _create_case(client, headers, case_number="2026/551", status="devam_eden")
+    _create_case(client, headers, case_number="2026/552", status="devam_eden")
+    _create_case(client, headers, case_number="2026/553", status="kapali")
+
+    body = client.get("/analytics/overview", headers=headers).json()
+
+    by_status = {row["status"]: row["total"] for row in body["by_status"]}
+    assert by_status == {"devam_eden": 2, "kapali": 1}
+
+
+def test_overview_counts_match_case_list_filters(client, two_firms_two_users):
+    """Spec 5.1: every analytics number must equal the row count of the
+    list it links to (links from analytics always add include_archived)."""
+    headers = _auth_headers(client, two_firms_two_users)
+    won_archived = _create_case(client, headers, case_number="2026/601", case_type="icra")
+    _create_case(client, headers, case_number="2026/602", case_type="icra")
+    lost = _create_case(client, headers, case_number="2026/603", case_type="kira")
+    _create_case(client, headers, case_number="2026/604", case_type="kira", status="karar_bekleyen")
+    client.patch(f"/cases/{won_archived['id']}", json={"outcome": "won", "status": "kapali"}, headers=headers)
+    client.patch(f"/cases/{lost['id']}", json={"outcome": "lost", "status": "kapali"}, headers=headers)
+    client.post(f"/cases/{won_archived['id']}/archive", headers=headers)
+
+    overview = client.get("/analytics/overview", headers=headers).json()
+
+    def count(query: str) -> int:
+        response = client.get(f"/cases?include_archived=true{query}", headers=headers)
+        assert response.status_code == 200
+        return len(response.json())
+
+    assert overview["won_cases"] == 1  # the archived won case is counted
+    assert overview["total_cases"] == count("")
+    assert overview["active_cases"] == count("&active=true")
+    assert overview["won_cases"] == count("&outcome=won")
+    assert overview["lost_cases"] == count("&outcome=lost")
+    for row in overview["by_category"]:
+        assert row["total"] == count(f"&case_type={row['case_type']}")
+    for row in overview["by_status"]:
+        assert row["total"] == count(f"&status={row['status']}")

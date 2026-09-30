@@ -9,7 +9,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseOutcome, CaseStatus, CaseType
-from app.schemas.analytics import AnalyticsOverview, CategoryBreakdown
+from app.schemas.analytics import AnalyticsOverview, CategoryBreakdown, StatusBreakdown
 
 _CLOSED_OUTCOMES = (CaseOutcome.WON, CaseOutcome.LOST, CaseOutcome.SETTLED)
 
@@ -75,6 +75,11 @@ class AnalyticsService:
             for case_type_key, group in by_type.items()
         ]
 
+        status_counts: dict[CaseStatus, int] = {}
+        for c in cases:
+            status_counts[c.status] = status_counts.get(c.status, 0) + 1
+        by_status = [StatusBreakdown(status=s, total=n) for s, n in status_counts.items()]
+
         return AnalyticsOverview(
             total_cases=total_cases,
             active_cases=active_cases,
@@ -83,4 +88,5 @@ class AnalyticsService:
             win_rate=win_rate,
             average_case_duration_days=average_duration,
             by_category=by_category,
+            by_status=by_status,
         )
