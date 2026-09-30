@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -10,6 +11,7 @@ import {
   listCourtroomSessions,
 } from "@/lib/api";
 import { formatDate } from "@/lib/labels";
+import { useQuickViewHref } from "@/lib/urlState";
 import type {
   CourtroomRole,
   CourtroomScenario,
@@ -83,6 +85,7 @@ function ScenarioCard({ scenario, busy, onStart }: {
 
 export function SimulationsView() {
   const router = useRouter();
+  const quickViewHref = useQuickViewHref();
   const [tab, setTab] = useState<"courtroom" | "analysis">("courtroom");
   const [scenarios, setScenarios] = useState<CourtroomScenario[]>([]);
   const [sessions, setSessions] = useState<CourtroomSessionSummary[]>([]);
@@ -174,7 +177,12 @@ export function SimulationsView() {
         <div className="space-y-4">
           {simulations.map((sim) => (
             <div key={sim.id} className="space-y-2">
-              <p className="text-xs font-medium text-navy-500">{sim.case_number} - {sim.case_name} - {formatDate(sim.started_at)}</p>
+              <p className="text-xs font-medium text-navy-500">
+                <Link href={quickViewHref(sim.case_id)} scroll={false} className="hover:text-accent-700 hover:underline">
+                  {sim.case_number} - {sim.case_name}
+                </Link>{" "}
+                - {formatDate(sim.started_at)}
+              </p>
               {sim.result ? <SimulationResultCard result={sim.result} /> : <div className="rounded-2xl border border-surface-border bg-white p-4 text-sm text-navy-600 shadow-card">Simülasyon durumu: {sim.status}{sim.error_message ? ` — ${sim.error_message}` : ""}</div>}
             </div>
           ))}

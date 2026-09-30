@@ -1,15 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
+vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
+import { nav, resetNav, setUrl } from "@/test/navigation";
+const push = nav.push;
+
 const listAllSimulations = vi.fn();
 const listCourtroomScenarios = vi.fn();
 const listCourtroomSessions = vi.fn();
 const createCourtroomSession = vi.fn();
-const push = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
-}));
 
 vi.mock("@/lib/api", () => ({
   listAllSimulations: (...args: unknown[]) => listAllSimulations(...args),
@@ -47,6 +46,8 @@ const sim = {
 };
 
 beforeEach(() => {
+  resetNav();
+  setUrl("/simulasyonlar");
   listAllSimulations.mockReset();
   listCourtroomScenarios.mockReset().mockResolvedValue([]);
   listCourtroomSessions.mockReset().mockResolvedValue([]);
@@ -74,5 +75,16 @@ describe("SimulationsView", () => {
     await waitFor(() => expect(screen.getByText("Duruşma Simülasyonları")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Dosya analizleri" }));
     expect(screen.getByText(/henüz dosya analizi yok/i)).toBeInTheDocument();
+  });
+
+  it("links case names in file analyses to the preview", async () => {
+    listCourtroomScenarios.mockResolvedValue([]);
+    listCourtroomSessions.mockResolvedValue([]);
+    listAllSimulations.mockResolvedValue([sim]);
+    render(<SimulationsView />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Dosya analizleri" }));
+
+    expect(screen.getByRole("link", { name: "2026/1 - Sözleşmenin Feshi Davası" })).toHaveAttribute("href", "/simulasyonlar?onizle=c1");
   });
 });
