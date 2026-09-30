@@ -2,6 +2,9 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
+import { nav, resetNav, setUrl } from "@/test/navigation";
+
 const getCase = vi.fn();
 const listSimulations = vi.fn();
 const listDocuments = vi.fn();
@@ -48,6 +51,9 @@ const caseDetail = {
 };
 
 beforeEach(() => {
+  resetNav();
+  setUrl("/davalar/c1");
+
   getCase.mockReset();
   listSimulations.mockReset();
   listDocuments.mockReset();
@@ -366,5 +372,40 @@ describe("CaseDetailView", () => {
     await userEvent.click(screen.getByRole("checkbox"));
 
     await waitFor(() => expect(updateTaskStatus).toHaveBeenCalledWith("c1", "t1", "completed"));
+  });
+
+  it("opens the tab named in ?sekme=", async () => {
+    setUrl("/davalar/c1?sekme=gorevler");
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    await waitFor(() => expect(screen.getByRole("tab", { name: "Görevler" })).toHaveAttribute("aria-selected", "true"));
+  });
+
+  it("falls back to Genel Bakış for an unknown ?sekme=", async () => {
+    setUrl("/davalar/c1?sekme=yok");
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    await waitFor(() => expect(screen.getByRole("tab", { name: "Genel Bakış" })).toHaveAttribute("aria-selected", "true"));
+  });
+
+  it("writes the selected tab to the URL", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("tab", { name: "Belgeler" }));
+    expect(nav.replace).toHaveBeenLastCalledWith("/davalar/c1?sekme=belgeler", { scroll: false });
+
+    await userEvent.click(screen.getByRole("tab", { name: "Genel Bakış" }));
+    expect(nav.replace).toHaveBeenLastCalledWith("/davalar/c1", { scroll: false });
   });
 });

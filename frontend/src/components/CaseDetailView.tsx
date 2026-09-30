@@ -17,6 +17,8 @@ import {
   uploadDocument,
 } from "@/lib/api";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
+import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
+import { useUrlParams } from "@/lib/urlState";
 import type { CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
@@ -24,15 +26,19 @@ import { EmptyState } from "@/components/EmptyState";
 import { SimulationResultCard } from "@/components/SimulationResultCard";
 
 const TABS = [
-  "Genel Bakış",
-  "Belgeler",
-  "Gelişmeler",
-  "Görevler",
-  "Simülasyonlar",
-  "Devir Raporu",
-  "Notlar",
-] as const;
-type Tab = (typeof TABS)[number];
+  { slug: "genel", label: "Genel Bakış" },
+  { slug: "belgeler", label: "Belgeler" },
+  { slug: "gelismeler", label: "Gelişmeler" },
+  { slug: "gorevler", label: "Görevler" },
+  { slug: "simulasyonlar", label: "Simülasyonlar" },
+  { slug: "devir", label: "Devir Raporu" },
+  { slug: "notlar", label: "Notlar" },
+] as const satisfies ReadonlyArray<{ slug: CaseTabSlug; label: string }>;
+type Tab = (typeof TABS)[number]["label"];
+
+function labelForSlug(slug: CaseTabSlug): Tab {
+  return TABS.find((tab) => tab.slug === slug)!.label;
+}
 
 // Shortened in the test environment so polling tests don't need to fake
 // timers or wait multiple real seconds - the same code path runs either way.
@@ -48,7 +54,9 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [simulations, setSimulations] = useState<Simulation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("Genel Bakış");
+  const { params, setParams } = useUrlParams();
+  const sekmeParam = params.get("sekme");
+  const [activeTab, setActiveTab] = useState<Tab>(() => labelForSlug(parseCaseTab(sekmeParam)));
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -91,6 +99,11 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
+
+  // Follow external URL changes (e.g. a quick-view shortcut to another tab of this case).
+  useEffect(() => {
+    setActiveTab(labelForSlug(parseCaseTab(sekmeParam)));
+  }, [sekmeParam]);
 
   function upsertSimulation(updated: Simulation) {
     setSimulations((prev) => {
@@ -207,6 +220,11 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     }
   }
 
+  function selectTab(tab: (typeof TABS)[number]) {
+    setActiveTab(tab.label);
+    setParams({ sekme: tab.slug === "genel" ? null : tab.slug });
+  }
+
   async function handleGenerateHandover() {
     setHandoverGenerating(true);
     setHandoverError(null);
@@ -243,17 +261,17 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       <div role="tablist" className="flex gap-1 border-b border-surface-border">
         {TABS.map((tab) => (
           <button
-            key={tab}
+            key={tab.slug}
             role="tab"
-            aria-selected={activeTab === tab}
-            onClick={() => setActiveTab(tab)}
+            aria-selected={activeTab === tab.label}
+            onClick={() => selectTab(tab)}
             className={`px-3 py-2 text-sm font-medium ${
-              activeTab === tab
+              activeTab === tab.label
                 ? "border-b-2 border-accent-600 text-accent-700"
                 : "text-navy-500 hover:text-navy-800"
             }`}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>
