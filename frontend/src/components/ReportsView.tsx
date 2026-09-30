@@ -117,7 +117,7 @@ export function ReportsView() {
                 disabled={downloading !== null}
                 className="rounded-xl bg-accent-600 px-3.5 py-2 font-medium text-white transition hover:bg-accent-700 disabled:opacity-60"
               >
-                {downloading === report.id ? "Hazırlanıyor..." : "CSV olarak indir"}
+                {downloading === report.id ? "Hazırlanıyor..." : "CSV Olarak İndir"}
               </button>
             </div>
           </article>

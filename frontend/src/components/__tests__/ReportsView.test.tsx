@@ -37,7 +37,7 @@ describe("ReportsView", () => {
     downloadReportCsv.mockResolvedValue(new Blob(["a,b\n1,2"], { type: "text/csv" }));
     render(<ReportsView />);
 
-    const buttons = await screen.findAllByRole("button", { name: /csv olarak indir/i });
+    const buttons = await screen.findAllByRole("button", { name: /^CSV Olarak İndir$/ });
     expect(buttons).toHaveLength(4);
     await userEvent.click(buttons[1]);
 
@@ -48,7 +48,7 @@ describe("ReportsView", () => {
     downloadReportCsv.mockRejectedValue(new Error("boom"));
     render(<ReportsView />);
 
-    await userEvent.click((await screen.findAllByRole("button", { name: /csv olarak indir/i }))[0]);
+    await userEvent.click((await screen.findAllByRole("button", { name: /^CSV Olarak İndir$/ }))[0]);
 
     await waitFor(() => expect(screen.getByText(/rapor indirilemedi/i)).toBeInTheDocument());
   });
