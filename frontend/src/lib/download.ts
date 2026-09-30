@@ -6,5 +6,6 @@ export function saveBlob(blob: Blob, filename: string) {
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // Revoke after the click has been handled so the download can start.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
