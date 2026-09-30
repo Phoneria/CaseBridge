@@ -2,36 +2,62 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const downloadCasesCsv = vi.fn();
+const downloadReportCsv = vi.fn();
+const getReportSummary = vi.fn();
 
 vi.mock("@/lib/api", () => ({
-  downloadCasesCsv: (...args: unknown[]) => downloadCasesCsv(...args),
+  downloadReportCsv: (...args: unknown[]) => downloadReportCsv(...args),
+  getReportSummary: (...args: unknown[]) => getReportSummary(...args),
 }));
 
 import { ReportsView } from "@/components/ReportsView";
 
+const summary = { total_cases: 20, upcoming_hearings_30d: 12, open_tasks: 9, win_rate: 62.5 };
+
 beforeEach(() => {
-  downloadCasesCsv.mockReset();
+  downloadReportCsv.mockReset();
+  getReportSummary.mockReset();
+  getReportSummary.mockResolvedValue(summary);
   global.URL.createObjectURL = vi.fn(() => "blob:mock");
   global.URL.revokeObjectURL = vi.fn();
 });
 
 describe("ReportsView", () => {
-  it("lets the user download the case CSV report", async () => {
-    downloadCasesCsv.mockResolvedValue(new Blob(["a,b\n1,2"], { type: "text/csv" }));
-
+  it("shows live numbers as links to the matching lists", async () => {
     render(<ReportsView />);
-    await userEvent.click(screen.getByRole("button", { name: /csv olarak/i }));
 
-    await waitFor(() => expect(downloadCasesCsv).toHaveBeenCalled());
+    expect(await screen.findByRole("link", { name: "20 dava kaydı" })).toHaveAttribute("href", "/davalar?arsiv=dahil");
+    expect(screen.getByRole("link", { name: "12 yaklaşan duruşma (30 gün)" })).toHaveAttribute("href", "/davalar?durusma=yaklasan");
+    expect(screen.getByRole("link", { name: "9 açık görev" })).toHaveAttribute("href", "/gorevler?durum=acik");
+    expect(screen.getByRole("link", { name: "%62,5 kazanma oranı" })).toHaveAttribute("href", "/analitik");
+    expect(screen.queryByText(/bugün güncellendi/i)).not.toBeInTheDocument();
+  });
+
+  it("downloads each report as a real CSV", async () => {
+    downloadReportCsv.mockResolvedValue(new Blob(["a,b\n1,2"], { type: "text/csv" }));
+    render(<ReportsView />);
+
+    const buttons = await screen.findAllByRole("button", { name: /csv olarak indir/i });
+    expect(buttons).toHaveLength(4);
+    await userEvent.click(buttons[1]);
+
+    await waitFor(() => expect(downloadReportCsv).toHaveBeenCalledWith("hearings"));
   });
 
   it("shows an error message when the download fails", async () => {
-    downloadCasesCsv.mockRejectedValue(new Error("boom"));
-
+    downloadReportCsv.mockRejectedValue(new Error("boom"));
     render(<ReportsView />);
-    await userEvent.click(screen.getByRole("button", { name: /csv olarak/i }));
+
+    await userEvent.click((await screen.findAllByRole("button", { name: /csv olarak indir/i }))[0]);
 
     await waitFor(() => expect(screen.getByText(/rapor indirilemedi/i)).toBeInTheDocument());
+  });
+
+  it("shows an em dash when the summary cannot be loaded", async () => {
+    getReportSummary.mockRejectedValue(new Error("boom"));
+    render(<ReportsView />);
+
+    await waitFor(() => expect(screen.getAllByText("—")).toHaveLength(4));
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });
