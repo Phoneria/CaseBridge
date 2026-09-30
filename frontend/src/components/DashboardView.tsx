@@ -187,7 +187,7 @@ export function DashboardView() {
                       <td className="py-2 text-navy-600">{c.court || "—"}</td>
                       <td className="py-2 text-navy-600">
                         {formatDate(c.next_hearing_date)}
-                        {days <= 7 && (
+                        {days >= 0 && days <= 7 && (
                           <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">Bu hafta</span>
                         )}
                       </td>
