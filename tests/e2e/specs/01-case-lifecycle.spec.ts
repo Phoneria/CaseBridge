@@ -8,7 +8,7 @@ test("full case lifecycle: create, upload document, run simulation", async ({ pa
   await login(page);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Davalar" }).click();
+  await page.getByRole("link", { name: "Davalar", exact: true }).click();
   await expect(page).toHaveURL(/\/davalar$/);
 
   await page.getByRole("button", { name: /yeni dava/i }).click();
@@ -19,11 +19,11 @@ test("full case lifecycle: create, upload document, run simulation", async ({ pa
   await page.locator("#opposing_party").fill("E2E Karşı Taraf");
   await page.getByRole("button", { name: "Kaydet" }).click();
 
-  const caseLink = page.getByRole("link", { name: "E2E Test Davası" });
+  const caseLink = page.getByRole("link", { name: "E2E Test Davası", exact: true });
   await expect(caseLink).toBeVisible();
   await caseLink.click();
 
-  await expect(page.getByRole("heading", { name: "E2E Test Davası" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "E2E Test Davası", exact: true })).toBeVisible();
 
   await page.getByRole("tab", { name: "Belgeler" }).click();
   await page.getByLabel(/belge yükle/i).setInputFiles({

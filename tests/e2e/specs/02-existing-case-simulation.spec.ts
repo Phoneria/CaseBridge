@@ -7,12 +7,12 @@ import { login } from "./helpers";
 test("open existing case, add a development, run a new simulation", async ({ page }) => {
   await login(page);
 
-  await page.getByRole("link", { name: "Davalar" }).click();
+  await page.getByRole("link", { name: "Davalar", exact: true }).click();
   await expect(page).toHaveURL(/\/davalar$/);
 
   // Open one of the seeded demo cases.
-  await page.getByRole("link", { name: "Kiracı Tahliye Davası" }).click();
-  await expect(page.getByRole("heading", { name: "Kiracı Tahliye Davası" })).toBeVisible();
+  await page.getByRole("link", { name: "Kiracı Tahliye Davası", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Kiracı Tahliye Davası", exact: true })).toBeVisible();
 
   await page.getByRole("tab", { name: "Gelişmeler" }).click();
   await page.getByLabel("Tarih").fill("2026-08-20");

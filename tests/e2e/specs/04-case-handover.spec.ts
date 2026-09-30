@@ -7,8 +7,8 @@ import { login } from "./helpers";
 test("generate and view a case handover report", async ({ page }) => {
   await login(page);
 
-  await page.getByRole("link", { name: "Davalar" }).click();
-  await page.getByRole("link", { name: "İşe İade Davası" }).click();
+  await page.getByRole("link", { name: "Davalar", exact: true }).click();
+  await page.getByRole("link", { name: "İşe İade Davası", exact: true }).click();
   await expect(page.getByRole("heading", { name: "İşe İade Davası" })).toBeVisible();
 
   await page.getByRole("tab", { name: "Devir Raporu" }).click();
