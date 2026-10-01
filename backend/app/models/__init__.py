@@ -19,3 +19,4 @@ from app.models.courtroom import (  # noqa: F401
     ScenarioDifficulty,
     ScenarioEvidence,
 )
+from app.models.chat import ChatConversation, ChatMessage, ChatMessageStatus, ChatRole  # noqa: F401

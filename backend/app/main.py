@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.security_headers import SecurityHeadersMiddleware
 
-from app.api.routes import activity, analytics, auth, calendar, cases, courtroom, documents, handover, health, reports, simulations, system, tasks, users
+from app.api.routes import activity, analytics, auth, calendar, cases, chat, courtroom, documents, handover, health, reports, simulations, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
 from app.services.simulation_worker import start_worker_thread
@@ -89,3 +89,4 @@ app.include_router(activity.router)
 app.include_router(reports.router)
 app.include_router(system.router)
 app.include_router(calendar.router)
+app.include_router(chat.router)
