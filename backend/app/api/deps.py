@@ -1,12 +1,17 @@
+from typing import Callable
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
+from app.ai.chat.base import ChatProvider
+from app.ai.chat.factory import get_chat_provider
+from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_llm_provider
 from app.ai.providers.base import LLMProvider
 from app.core.security import decode_access_token
-from app.db.session import get_db
+from app.db.session import SessionLocal, get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
@@ -55,3 +60,18 @@ def get_llm_provider_dep() -> LLMProvider:
     tests via app.dependency_overrides so no test ever needs a real
     OPENAI_API_KEY or hits the network."""
     return get_llm_provider()
+
+
+def get_chat_provider_dep() -> ChatProvider:
+    """The configured chat provider; a misconfiguration becomes a clear 503
+    instead of a 500. Overridable in tests."""
+    try:
+        return get_chat_provider()
+    except AIProviderConfigError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+
+
+def get_chat_session_factory() -> Callable[[], Session]:
+    """Session factory used to persist the streamed reply after the request
+    session has closed. Overridden in tests to reuse the test session."""
+    return SessionLocal
