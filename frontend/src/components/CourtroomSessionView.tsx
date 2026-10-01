@@ -9,12 +9,14 @@ import {
   retryCourtroomSession,
   sendCourtroomMove,
 } from "@/lib/api";
+import { AI_ROUTES } from "@/lib/ai";
 import type {
   CourtroomAction,
   CourtroomActor,
   CourtroomPhase,
   CourtroomSession,
 } from "@/types";
+import { AiMark } from "@/components/ai/AiMark";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 
@@ -207,9 +209,19 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
 
   return (
     <div className="space-y-5">
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent-600">
+        <AiMark className="h-3.5 w-3.5 text-accent-500" />
+        CaseBridge AI · Canlı Duruşma
+      </p>
       <header className="flex flex-col justify-between gap-3 xl:flex-row xl:items-center">
         <div className="flex items-start gap-3">
-          <Link href="/simulasyonlar" className="mt-1 rounded-lg border border-surface-border bg-white px-3 py-2 text-sm text-navy-600 hover:bg-surface-muted">←</Link>
+          <Link
+            href={AI_ROUTES.courtroom}
+            aria-label="Canlı Duruşma'ya dön"
+            className="mt-1 rounded-lg border border-surface-border bg-white px-3 py-2 text-sm text-navy-600 hover:bg-surface-muted"
+          >
+            ←
+          </Link>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-600">{session.scenario.category} · {session.model}</p>
             <h1 className="mt-1 text-xl font-semibold text-navy-900">{session.scenario.title}</h1>
