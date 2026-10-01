@@ -3,6 +3,7 @@ import json
 from types import SimpleNamespace
 
 import httpx
+import openai
 import pytest
 
 from app.ai.chat.factory import get_chat_provider, get_chat_provider_status
@@ -10,7 +11,7 @@ from app.ai.chat.mock_provider import MockChatProvider
 from app.ai.chat.ollama_provider import OllamaChatProvider
 from app.ai.chat.openai_provider import OpenAIChatProvider
 from app.ai.chat.prompt import CHAT_PROMPT_VERSION, CHAT_SYSTEM_PROMPT
-from app.ai.errors import AIProviderConfigError, AIProviderError
+from app.ai.errors import AIProviderConfigError, AIProviderError, AIProviderTimeoutError
 from app.core.config import settings
 
 MESSAGES = [
@@ -149,3 +150,116 @@ def test_system_prompt_is_turkish_and_versioned():
     assert CHAT_PROMPT_VERSION == "2026-10-02"
     assert "Türk hukuku" in CHAT_SYSTEM_PROMPT
     assert "hukuki danışmanlık" in CHAT_SYSTEM_PROMPT
+
+
+def test_mock_resets_last_usage_on_new_stream():
+    provider = MockChatProvider()
+    list(provider.stream(MESSAGES))
+    assert provider.last_usage is not None
+    gen = provider.stream(MESSAGES)
+    next(gen)
+    assert provider.last_usage is None
+
+
+class _MidStreamFailCompletions:
+    def __init__(self, exc):
+        self._exc = exc
+
+    def create(self, **kwargs):
+        exc = self._exc
+
+        def gen():
+            yield _openai_chunk("ilk")
+            raise exc
+
+        return gen()
+
+
+def _openai_with_failure(exc):
+    client = SimpleNamespace(chat=SimpleNamespace(completions=_MidStreamFailCompletions(exc)))
+    return OpenAIChatProvider(api_key="k", model="m", client=client)
+
+
+_REQ = httpx.Request("POST", "http://x")
+
+
+@pytest.mark.parametrize(
+    "exc,expected",
+    [
+        (openai.APITimeoutError(request=_REQ), AIProviderTimeoutError),
+        (openai.APIConnectionError(request=_REQ), AIProviderError),
+        (openai.APIError("secret-detail", request=_REQ, body=None), AIProviderError),
+        (httpx.ReadError("boom"), AIProviderError),
+        (httpx.RemoteProtocolError("boom"), AIProviderError),
+        (httpx.ReadTimeout("boom"), AIProviderTimeoutError),
+        (RuntimeError("secret-detail"), AIProviderError),
+    ],
+)
+def test_openai_maps_mid_stream_failures(exc, expected):
+    provider = _openai_with_failure(exc)
+    received = []
+    with pytest.raises(AIProviderError) as info:
+        for chunk in provider.stream(MESSAGES):
+            received.append(chunk)
+    assert received == ["ilk"]
+    assert type(info.value) is expected
+    assert "secret-detail" not in str(info.value) and "boom" not in str(info.value)
+
+
+def test_openai_generator_exit_is_not_converted():
+    provider = _openai_with_failure(httpx.ReadError("boom"))
+    gen = provider.stream(MESSAGES)
+    assert next(gen) == "ilk"
+    gen.close()  # must not raise
+
+
+def test_openai_client_construction_error_maps_to_provider_error(monkeypatch):
+    def boom(**kwargs):
+        raise openai.OpenAIError("secret-detail")
+
+    monkeypatch.setattr(openai, "OpenAI", boom)
+    provider = OpenAIChatProvider(api_key="k", model="m")
+    with pytest.raises(AIProviderError) as info:
+        list(provider.stream(MESSAGES))
+    assert "secret-detail" not in str(info.value)
+
+
+def _ollama(handler):
+    return OllamaChatProvider(
+        base_url="http://ollama.test", model="m", timeout_seconds=5, transport=httpx.MockTransport(handler)
+    )
+
+
+@pytest.mark.parametrize("body", ["[1, 2]\n", "\"text\"\n", "42\n", "null\n"])
+def test_ollama_non_dict_line_is_provider_error(body):
+    provider = _ollama(lambda request: httpx.Response(200, text=body))
+    with pytest.raises(AIProviderError):
+        list(provider.stream(MESSAGES))
+
+
+def test_ollama_error_line_uses_fixed_message():
+    body = json.dumps({"message": {"content": "a"}}) + "\n" + json.dumps({"error": "secret-detail"}) + "\n"
+    provider = _ollama(lambda request: httpx.Response(200, text=body))
+    received = []
+    with pytest.raises(AIProviderError) as info:
+        for chunk in provider.stream(MESSAGES):
+            received.append(chunk)
+    assert received == ["a"]
+    assert "secret-detail" not in str(info.value)
+
+
+def test_ollama_timeout_maps_to_timeout_error():
+    def handler(request):
+        raise httpx.ReadTimeout("slow", request=request)
+
+    with pytest.raises(AIProviderTimeoutError):
+        list(_ollama(handler).stream(MESSAGES))
+
+
+@pytest.mark.parametrize("exc", [httpx.InvalidURL("bad"), httpx.StreamClosed(), RuntimeError("x")])
+def test_ollama_non_http_errors_map_to_provider_error(exc):
+    def handler(request):
+        raise exc
+
+    with pytest.raises(AIProviderError):
+        list(_ollama(handler).stream(MESSAGES))

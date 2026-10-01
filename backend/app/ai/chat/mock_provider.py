@@ -17,6 +17,7 @@ class MockChatProvider(ChatProvider):
         self.last_usage = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
+        self.last_usage = None
         self.calls.append(list(messages))
         last_user = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
         chunks = self._chunks or [

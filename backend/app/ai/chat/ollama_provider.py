@@ -36,6 +36,10 @@ class OllamaChatProvider(ChatProvider):
                         if not line.strip():
                             continue
                         data = json.loads(line)
+                        if not isinstance(data, dict):
+                            raise ValueError("unexpected NDJSON line")
+                        if "error" in data:
+                            raise AIProviderError("Lokal model bir hata döndürdü. Lütfen tekrar deneyin.")
                         text = (data.get("message") or {}).get("content") or ""
                         if text:
                             yield text
@@ -46,5 +50,7 @@ class OllamaChatProvider(ChatProvider):
                             }
         except httpx.TimeoutException as exc:
             raise AIProviderTimeoutError("Lokal model zaman aşımına uğradı. Lütfen tekrar deneyin.") from exc
-        except (httpx.HTTPError, ValueError) as exc:
+        except AIProviderError:
+            raise
+        except Exception as exc:  # GeneratorExit is a BaseException and still propagates
             raise AIProviderError("Lokal modele ulaşılamadı veya geçersiz bir yanıt döndü.") from exc
