@@ -95,7 +95,8 @@ Tüm sayfalar mevcut endpoint'leri kullanır: `listAllSimulations`, `listCourtro
    - `CaseSearchSelect`: `getCases({ active: true })` ile yüklenen, metinle filtrelenen (dava adı/no/müvekkil, `tr-TR` küçük harf) seçici.
    - `?dava=<id>` varsa o dava önseçili gelir.
    - "Analizi başlat": `startSimulation(caseId)` → başarılıysa `router.push("/davalar/<id>?sekme=ai")`.
-   - Hata kartın içinde gösterilir; `ApiError` status 503 ise "Model yanıt vermiyor, Ayarlar'daki AI durumunu kontrol edin.", diğerlerinde "Analiz başlatılamadı. Lütfen tekrar deneyin."
+   - Analiz arka planda çalışır (`POST /cases/{id}/simulations` → 202). Başlatma isteği hata verirse kartın içinde "Analiz başlatılamadı. Lütfen tekrar deneyin." gösterilir. Model kaynaklı hatalar analizin kendisinde "Başarısız" durumu olarak görünür; model yapılandırılmamışsa kartta `getAiStatus` ile "AI modeli yapılandırılmamış" uyarısı ve `/ayarlar` linki gösterilir.
+   - `?dava=` aktif davalar arasında yoksa seçim temizlenir.
    - Dava seçilmeden buton devre dışı.
 3. **Rapor listesi** (`id="raporlar"`): `listAllSimulations`, en yeni üstte. Her raporun başlığında dava adı (önizleme linki, `useQuickViewHref`) ve tarih; tamamlanmışsa `SimulationResultCard`, değilse durum rozeti (Bekliyor/Çalışıyor/Başarısız + hata mesajı).
 
@@ -159,7 +160,7 @@ Tüm sayfalar mevcut endpoint'leri kullanır: `listAllSimulations`, `listCourtro
 **Vitest**
 - `lib/ai.ts`: son tamamlanan analiz seçimi (devam eden/başarısız atlanır), `activeSession`, `bestScore`, `mergeRecentAiActivity` sıralama + limit + href'ler.
 - `AiHubView`: istatistikler; model yapılandırılmamış uyarısı; aktif oturumda "Devam et"; aktivite linkleri; boş durum.
-- `AnalysisView`: `?dava=` önseçimi; başlatınca `startSimulation` + `router.push("/davalar/<id>?sekme=ai")`; 503 ve genel hata mesajları; seçim yokken buton devre dışı.
+- `AnalysisView`: `?dava=` önseçimi; başlatınca `startSimulation` + `router.push("/davalar/<id>?sekme=ai")`; başlatma hata mesajı; model yapılandırılmamış uyarısı; seçim yokken ve geçersiz `?dava=` ile buton devre dışı.
 - `CaseSearchSelect`: Türkçe büyük/küçük harf duyarsız arama.
 - `CourtroomLobbyView`: aktif oturum en üstte; oturum kartları `<Link>`; oturum oluşturma yönlendirmesi.
 - `DashboardAiCard`: AI endpoint hatasında yalnızca kartta hata; son analiz/duruşma; kısayol href'leri. `DashboardView` testinde AI kartı mock'lanarak ana Dashboard'un AI hatasından etkilenmediği doğrulanır.
@@ -169,7 +170,7 @@ Tüm sayfalar mevcut endpoint'leri kullanır: `listAllSimulations`, `listCourtro
 - `filters.ts`: `parseCaseTab("simulasyonlar") === "ai"`, `caseDetailHref(id, "ai")`.
 
 **E2E (Playwright)**
-- Mevcut spec'lerdeki "Simülasyonlar" sekme/link referansları güncellenir.
+- `01` ve `02` spec'lerindeki "Simülasyonu Başlat" / "Simülasyonlar" adımları yeni AI kartı ve "CaseBridge AI" sekmesine göre güncellenir.
 - Yeni `06-casebridge-ai.spec.ts`:
   1. Dashboard AI kartından "Duruşmaya gir" → `/ai/durusma`.
   2. `/simulasyonlar` → `/ai` yönlendirmesi.
