@@ -16,7 +16,7 @@ import {
   updateTaskStatus,
   uploadDocument,
 } from "@/lib/api";
-import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
+import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, SIMULATION_STATUS_LABELS, formatDate } from "@/lib/labels";
 import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
 import { useUrlParams } from "@/lib/urlState";
 import type { CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
@@ -139,7 +139,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         await pollSimulationUntilTerminal(simulation.id);
       }
     } catch {
-      setSimulationError("Simülasyon başlatılamadı. Lütfen daha sonra tekrar deneyin.");
+      setSimulationError("Analiz başlatılamadı. Lütfen daha sonra tekrar deneyin.");
     } finally {
       setSimulationRunning(false);
     }
@@ -155,7 +155,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         await pollSimulationUntilTerminal(retried.id);
       }
     } catch {
-      setSimulationError("Simülasyon tekrar başlatılamadı. Lütfen daha sonra tekrar deneyin.");
+      setSimulationError("Analiz tekrar başlatılamadı. Lütfen daha sonra tekrar deneyin.");
     } finally {
       setSimulationRunning(false);
     }
@@ -518,7 +518,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                   className="flex items-center justify-between rounded-2xl border border-surface-border bg-white p-4 text-sm text-navy-600 shadow-card"
                 >
                   <span>
-                    Simülasyon durumu: {sim.status}
+                    Analiz durumu: {SIMULATION_STATUS_LABELS[sim.status] ?? sim.status}
                     {sim.error_message ? ` — ${sim.error_message}` : ""}
                   </span>
                   {sim.status === "failed" && (

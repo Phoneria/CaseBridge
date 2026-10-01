@@ -200,11 +200,27 @@ describe("CaseDetailView", () => {
 
     await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
     expect(screen.getByText(/sağlayıcı zaman aşımına uğradı/i)).toBeInTheDocument();
+    expect(screen.getByText(/Analiz durumu: Başarısız/)).toBeInTheDocument();
+    expect(screen.queryByText(/failed|Simülasyon/)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /tekrar dene/i }));
 
     await waitFor(() => expect(retrySimulation).toHaveBeenCalledWith("c1", "sim2"));
     await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+  });
+
+  it("shows an analysis (not simulation) error when starting fails", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    startSimulation.mockRejectedValue(new Error("boom"));
+
+    render(<CaseDetailView caseId="c1" />);
+    await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
+    await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
+    await userEvent.click(screen.getByRole("button", { name: /analiz/i }));
+
+    expect(await screen.findByText("Analiz başlatılamadı. Lütfen daha sonra tekrar deneyin.")).toBeInTheDocument();
   });
 
   it("uploads a document and shows it in the list", async () => {
