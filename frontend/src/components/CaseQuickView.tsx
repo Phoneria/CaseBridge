@@ -9,6 +9,7 @@ import { caseDetailHref, daysUntil, type CaseTabSlug } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { FOCUS_PARAM, QUICK_VIEW_PARAM, parseOdak, useUrlParams, type Focus } from "@/lib/urlState";
 import type { CaseDetail, DocumentItem, Task } from "@/types";
+import { AiMark } from "@/components/ai/AiMark";
 
 type LoadState =
   | { kind: "loading" }
@@ -19,7 +20,7 @@ const SHORTCUTS: Array<[CaseTabSlug, string]> = [
   ["gorevler", "Görevler"],
   ["belgeler", "Belgeler"],
   ["gelismeler", "Gelişmeler"],
-  ["ai", "Simülasyonlar"],
+  ["ai", "AI"],
 ];
 
 const EMPTY = "—";
@@ -181,7 +182,14 @@ export function CaseQuickView() {
                   href={caseDetailHref(state.detail.id, slug)}
                   className="rounded-lg border border-surface-border px-2.5 py-1.5 font-medium text-navy-700 hover:border-accent-400 hover:text-accent-700"
                 >
-                  {label}
+                  {slug === "ai" ? (
+                    <span className="inline-flex items-center gap-1">
+                      <AiMark className="h-3 w-3 text-accent-500" />
+                      {label}
+                    </span>
+                  ) : (
+                    label
+                  )}
                 </Link>
               ))}
             </nav>

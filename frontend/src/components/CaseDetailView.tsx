@@ -24,13 +24,16 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { SimulationResultCard } from "@/components/SimulationResultCard";
+import { AiMark } from "@/components/ai/AiMark";
+import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
+import { AI_PERSPECTIVES } from "@/lib/ai";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
   { slug: "belgeler", label: "Belgeler" },
   { slug: "gelismeler", label: "Gelişmeler" },
   { slug: "gorevler", label: "Görevler" },
-  { slug: "ai", label: "Simülasyonlar" },
+  { slug: "ai", label: "CaseBridge AI" },
   { slug: "devir", label: "Devir Raporu" },
   { slug: "notlar", label: "Notlar" },
 ] as const satisfies ReadonlyArray<{ slug: CaseTabSlug; label: string }>;
@@ -242,7 +245,6 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   if (error) return <ErrorState message={error} />;
   if (!caseDetail) return null;
 
-  const latestCompletedSimulation = simulations.find((s) => s.status === "completed" && s.result);
   const notes = caseDetail.timeline.filter((e) => e.event_type === "note");
 
   return (
@@ -268,10 +270,19 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             className={`px-3 py-2 text-sm font-medium ${
               activeTab === tab.label
                 ? "border-b-2 border-accent-600 text-accent-700"
-                : "text-navy-500 hover:text-navy-800"
+                : tab.slug === "ai"
+                  ? "text-accent-600 hover:text-accent-800"
+                  : "text-navy-500 hover:text-navy-800"
             }`}
           >
-            {tab.label}
+            {tab.slug === "ai" ? (
+              <span className="inline-flex items-center gap-1.5">
+                <AiMark className="h-3.5 w-3.5 text-accent-500" />
+                {tab.label}
+              </span>
+            ) : (
+              tab.label
+            )}
           </button>
         ))}
       </div>
@@ -297,26 +308,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl border border-dashed border-accent-200 bg-accent-50 p-5">
-            <div>
-              <p className="text-sm font-medium text-accent-700">AI Dava Simülasyonu</p>
-              <p className="text-xs text-accent-600">
-                Davacı, davalı ve hakim perspektiflerinden karar-destek analizi üretin.
-              </p>
-            </div>
-            <button
-              onClick={handleStartSimulation}
-              disabled={simulationRunning}
-              className="shrink-0 rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
-            >
-              {simulationRunning ? "Çalışıyor..." : "Simülasyonu Başlat"}
-            </button>
-          </div>
-
+          <CaseAiSummaryCard
+            simulations={simulations}
+            running={simulationRunning}
+            onStart={handleStartSimulation}
+            onOpenReport={() => selectTab(TABS.find((tab) => tab.slug === "ai")!)}
+          />
           {simulationError && <ErrorState message={simulationError} />}
-          {latestCompletedSimulation?.result && (
-            <SimulationResultCard result={latestCompletedSimulation.result} />
-          )}
         </div>
       )}
 
@@ -482,10 +480,33 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
 
-      {activeTab === "Simülasyonlar" && (
+      {activeTab === "CaseBridge AI" && (
         <div className="space-y-4">
+          <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-navy-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow" />
+            <div className="relative">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent-200">
+                <AiMark className="h-3.5 w-3.5 text-accent-300" />
+                CaseBridge AI · Dosya Analizi
+              </p>
+              <p className="mt-1 text-sm text-accent-100">{AI_PERSPECTIVES.join(" · ")}</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleStartSimulation}
+              disabled={simulationRunning}
+              className="relative rounded-xl bg-white px-4 py-2 text-sm font-semibold text-navy-900 hover:bg-accent-50 disabled:opacity-60"
+            >
+              {simulationRunning
+                ? "Analiz sürüyor…"
+                : simulations.some((s) => s.status === "completed")
+                  ? "Yeniden analiz et"
+                  : "Analiz başlat"}
+            </button>
+          </div>
+          {simulationError && <ErrorState message={simulationError} />}
           {simulations.length === 0 ? (
-            <EmptyState message="Bu dava için henüz simülasyon çalıştırılmadı." />
+            <EmptyState message="Bu dava için henüz AI analizi yapılmadı." />
           ) : (
             simulations.map((sim) =>
               sim.result ? (

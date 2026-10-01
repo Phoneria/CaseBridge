@@ -74,7 +74,7 @@ afterEach(() => {
 });
 
 describe("CaseDetailView", () => {
-  it("renders the case overview and the Simülasyonu Başlat button by default", async () => {
+  it("renders the case overview with the AI card by default", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);
     listDocuments.mockResolvedValue([]);
@@ -82,7 +82,8 @@ describe("CaseDetailView", () => {
     render(<CaseDetailView caseId="c1" />);
 
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: /simülasyonu başlat/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Analizi başlat" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toBeInTheDocument();
   });
 
   it("renders the chronological timeline in the Gelişmeler tab", async () => {
@@ -161,11 +162,16 @@ describe("CaseDetailView", () => {
     render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
 
-    await userEvent.click(screen.getByRole("button", { name: /simülasyonu başlat/i }));
+    await userEvent.click(screen.getByRole("button", { name: "Analizi başlat" }));
     expect(startSimulation).toHaveBeenCalledWith("c1");
 
     await waitFor(() => expect(getSimulation).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Son AI değerlendirmesi")).toBeInTheDocument());
+    expect(screen.getByText("%55")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Raporu aç" }));
+    expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument();
   });
 
   it("resumes polling an in-flight simulation found on load (refresh-safe)", async () => {
@@ -178,7 +184,7 @@ describe("CaseDetailView", () => {
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
 
     await waitFor(() => expect(getSimulation).toHaveBeenCalledWith("c1", "sim1"));
-    await userEvent.click(screen.getByRole("tab", { name: "Simülasyonlar" }));
+    await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
     await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
   });
 
@@ -192,7 +198,7 @@ describe("CaseDetailView", () => {
     render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
 
-    await userEvent.click(screen.getByRole("tab", { name: "Simülasyonlar" }));
+    await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
     expect(screen.getByText(/sağlayıcı zaman aşımına uğradı/i)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /tekrar dene/i }));
@@ -394,6 +400,22 @@ describe("CaseDetailView", () => {
     render(<CaseDetailView caseId="c1" />);
 
     await waitFor(() => expect(screen.getByRole("tab", { name: "Genel Bakış" })).toHaveAttribute("aria-selected", "true"));
+  });
+
+  it("opens the AI tab from ?sekme=ai and the legacy ?sekme=simulasyonlar", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+
+    setUrl("/davalar/c1?sekme=ai");
+    const { unmount } = render(<CaseDetailView caseId="c1" />);
+    await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
+    expect(screen.getByText("Bu dava için henüz AI analizi yapılmadı.")).toBeInTheDocument();
+    unmount();
+
+    setUrl("/davalar/c1?sekme=simulasyonlar");
+    render(<CaseDetailView caseId="c1" />);
+    await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
   });
 
   it("writes the selected tab to the URL", async () => {
