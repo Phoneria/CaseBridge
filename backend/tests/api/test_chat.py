@@ -210,3 +210,77 @@ def test_delete_conversation_removes_its_messages(client, two_firms_two_users, c
 
     db_session.expire_all()
     assert db_session.query(ChatMessage).filter(ChatMessage.conversation_id == conversation["id"]).count() == 0
+
+
+def _make_admin(db_session, fixtures):
+    from app.models.user import UserRole
+
+    admin = fixtures["user_a"]
+    admin.role = UserRole.ADMIN
+    db_session.commit()
+    return admin
+
+
+def test_feedback_on_complete_assistant_messages(client, two_firms_two_users, chat_provider):
+    headers = _headers(client, two_firms_two_users)
+    other = _headers(client, two_firms_two_users, "user_b")  # before streaming: the stream closes the shared test session
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    events = _send(client, headers, conversation["id"], "Soru")
+    assistant_id = events[-1]["message"]["id"]
+    user_message_id = events[0]["user_message"]["id"]
+
+    liked = client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 1}, headers=headers)
+    assert liked.status_code == 200
+    assert liked.json()["feedback"] == 1
+
+    cleared = client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 0}, headers=headers)
+    assert cleared.json()["feedback"] is None
+
+    assert client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 2}, headers=headers).status_code == 422
+    assert client.put(f"/chat/messages/{user_message_id}/feedback", json={"value": 1}, headers=headers).status_code == 422
+    assert client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 1}, headers=other).status_code == 404
+
+
+def test_export_requires_admin(client, two_firms_two_users):
+    headers = _headers(client, two_firms_two_users)
+    assert client.get("/chat/export.jsonl", headers=headers).status_code == 403
+
+
+def test_export_contains_liked_answers_in_openai_format(client, two_firms_two_users, chat_provider, db_session):
+    from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT
+
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers = _headers(client, fixtures)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    first = _send(client, headers, conversation["id"], "İlk soru")[-1]["message"]
+    second = _send(client, headers, conversation["id"], "İkinci soru")[-1]["message"]
+    client.put(f"/chat/messages/{second['id']}/feedback", json={"value": 1}, headers=headers)
+    client.put(f"/chat/messages/{first['id']}/feedback", json={"value": -1}, headers=headers)
+
+    response = client.get("/chat/export.jsonl", headers=headers)
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/jsonl")
+    assert "attachment" in response.headers["content-disposition"]
+    lines = [json.loads(line) for line in response.text.splitlines() if line.strip()]
+    assert len(lines) == 1
+    messages = lines[0]["messages"]
+    assert messages[0] == {"role": "system", "content": CHAT_SYSTEM_PROMPT}
+    assert [m["role"] for m in messages[1:]] == ["user", "assistant", "user", "assistant"]
+    assert messages[-1]["content"] == second["content"]
+    assert "İkinci soru" in response.text  # ensure_ascii=False
+
+    assert client.get("/chat/export.jsonl?model=other-model", headers=headers).text == ""
+
+
+def test_export_is_scoped_to_the_admins_firm(client, two_firms_two_users, chat_provider, db_session):
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers_a = _headers(client, fixtures, "user_a")  # before streaming: the stream closes the shared test session
+    headers_b = _headers(client, fixtures, "user_b")
+    conversation = client.post("/chat/conversations", headers=headers_b).json()
+    answer = _send(client, headers_b, conversation["id"], "Soru")[-1]["message"]
+    client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers_b)
+
+    assert client.get("/chat/export.jsonl", headers=headers_a).text == ""

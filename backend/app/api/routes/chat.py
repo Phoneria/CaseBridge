@@ -1,9 +1,9 @@
 """Chat assistant API (Hukuk Asistanı). Conversations are private to their
 author: every lookup is scoped by law_firm_id AND user_id, and a miss is 404."""
-from typing import Callable
+from typing import Callable, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from fastapi.responses import StreamingResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
@@ -11,11 +11,12 @@ from app.ai.chat.factory import get_chat_provider_status
 from app.api.deps import get_chat_provider_dep, get_chat_session_factory, get_current_user
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.chat import (
     ChatConversationOut,
     ChatConversationRename,
     ChatConversationSummaryOut,
+    ChatFeedbackIn,
     ChatMessageCreate,
     ChatMessageOut,
     ChatStatusOut,
@@ -118,4 +119,35 @@ def send_message(
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.put("/messages/{message_id}/feedback", response_model=ChatMessageOut)
+def set_feedback(
+    message_id: str,
+    payload: ChatFeedbackIn,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        message = ChatService(db).set_feedback(message_id, current_user.law_firm_id, current_user.id, payload.value)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    if message is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
+    return message
+
+
+@router.get("/export.jsonl")
+def export_training_data(
+    model: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return PlainTextResponse(
+        content=ChatService(db).export_jsonl(current_user.law_firm_id, model),
+        media_type="application/jsonl",
+        headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )
