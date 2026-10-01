@@ -114,5 +114,7 @@ describe("AiHubView", () => {
     listAllSimulations.mockRejectedValue(new Error("boom"));
     render(<AiHubView />);
     expect(await screen.findByText(/AI verileri yüklenemedi/)).toBeInTheDocument();
+    expect(screen.getAllByText("—")).toHaveLength(3);
+    expect(screen.queryByText("Henüz AI aktivitesi yok.")).not.toBeInTheDocument();
   });
 });

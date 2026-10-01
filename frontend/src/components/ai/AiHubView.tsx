@@ -58,6 +58,7 @@ export function AiHubView() {
   const liveSession = activeSession(sessions);
   const activity = mergeRecentAiActivity(simulations, sessions, 6);
   const pending = "…";
+  const unavailable = "—";
 
   return (
     <div className="space-y-6">
@@ -65,9 +66,9 @@ export function AiHubView() {
         title="CaseBridge AI"
         description="Davalarınızı dört farklı perspektiften analiz edin, gerçekçi duruşma pratiği yapın."
         stats={[
-          { label: "Tamamlanan analiz", value: loading ? pending : completedCount },
-          { label: "Duruşma oturumu", value: loading ? pending : sessions.length },
-          { label: "Son duruşma puanı", value: loading ? pending : lastSession?.total_score ?? "—" },
+          { label: "Tamamlanan analiz", value: loading ? pending : error ? unavailable : completedCount },
+          { label: "Duruşma oturumu", value: loading ? pending : error ? unavailable : sessions.length },
+          { label: "Son duruşma puanı", value: loading ? pending : error ? unavailable : lastSession?.total_score ?? "—" },
         ]}
       >
         <AiModelStatus status={aiStatus} variant="dark" />
@@ -127,7 +128,7 @@ export function AiHubView() {
 
       <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         <h2 className="mb-3 text-sm font-semibold text-navy-900">Son AI aktivitesi</h2>
-        {!loading && activity.length === 0 ? (
+        {!loading && !error && activity.length === 0 ? (
           <p className="text-sm text-navy-500">Henüz AI aktivitesi yok.</p>
         ) : (
           <ul aria-label="Son AI aktivitesi" className="divide-y divide-surface-border">
