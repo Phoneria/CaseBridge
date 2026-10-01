@@ -341,5 +341,5 @@ export interface ChatConversation extends ChatConversationSummary {
 export type ChatStreamEvent =
   | { type: "start"; user_message: ChatMessage; assistant_message_id: string }
   | { type: "delta"; text: string }
-  | { type: "done"; message: ChatMessage }
+  | { type: "done"; message: ChatMessage | null }
   | { type: "error"; message: string };

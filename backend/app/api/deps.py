@@ -67,8 +67,8 @@ def get_chat_provider_dep() -> ChatProvider:
     instead of a 500. Overridable in tests."""
     try:
         return get_chat_provider()
-    except AIProviderConfigError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc))
+    except AIProviderConfigError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Sohbet modeli yapılandırılmamış.")
 
 
 def get_chat_session_factory() -> Callable[[], Session]:

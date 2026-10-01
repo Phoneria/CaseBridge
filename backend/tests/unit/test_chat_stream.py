@@ -59,3 +59,50 @@ async def test_closing_the_stream_early_saves_stopped(db_session):
     saved = db_session.get(ChatMessage, assistant.id)
     assert saved.status == ChatMessageStatus.STOPPED
     assert saved.content == "Bir "
+
+
+async def _collect(stream):
+    return [json.loads(chunk[len("data: "):]) async for chunk in stream]
+
+
+def _stream(db_session, conversation, assistant, provider):
+    return stream_assistant_reply(
+        provider=provider,
+        history=[{"role": "user", "content": "x"}],
+        start_event={"type": "start"},
+        assistant_message_id=assistant.id,
+        conversation_id=conversation.id,
+        session_factory=lambda: db_session,
+    )
+
+
+async def test_failed_final_persist_falls_back_to_stopped(db_session, monkeypatch):
+    from app.services import chat_stream
+
+    conversation, assistant = _seed(db_session)
+    real_persist = chat_stream._persist
+
+    def flaky(session_factory, message_id, conversation_id, content, status, usage, latency):
+        if status != ChatMessageStatus.STOPPED:
+            raise RuntimeError("db down")
+        return real_persist(session_factory, message_id, conversation_id, content, status, usage, latency)
+
+    monkeypatch.setattr(chat_stream, "_persist", flaky)
+    events = await _collect(_stream(db_session, conversation, assistant, MockChatProvider(chunks=["Bir ", "iki"])))
+
+    assert events[-1]["type"] == "error"
+    assert all(event["type"] != "done" for event in events)
+    db_session.expire_all()
+    saved = db_session.get(ChatMessage, assistant.id)
+    assert saved.status == ChatMessageStatus.STOPPED
+    assert saved.content == "Bir iki"
+
+
+async def test_deleted_message_emits_error_not_null_done(db_session):
+    conversation, assistant = _seed(db_session)
+    db_session.delete(assistant)
+    db_session.commit()
+    events = await _collect(_stream(db_session, conversation, assistant, MockChatProvider(chunks=["Bir"])))
+
+    assert events[-1] == {"type": "error", "message": "Sohbet silindiği için yanıt kaydedilemedi."}
+    assert all(event["type"] != "done" for event in events)

@@ -79,6 +79,37 @@ describe("ChatView", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Hukuk Asistanı" })).toBeInTheDocument();
   });
 
+  it("renders a loaded reply that is still marked streaming as stopped", async () => {
+    api.getChatConversation.mockResolvedValue({
+      ...CONVERSATION,
+      messages: [
+        msg({ id: "u1", role: "user", content: "Kira nasıl artar?", status: null, model: null }),
+        msg({ id: "a1", content: "Yarım yanıt", status: "streaming" }),
+      ],
+    });
+    setUrl("/ai/sohbet?sohbet=c1");
+    render(<ChatView />);
+
+    expect(await screen.findByText("Yarım yanıt")).toBeInTheDocument();
+    expect(screen.getByText("Durduruldu")).toBeInTheDocument();
+    expect(screen.queryByText("Yanıt yazılıyor")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Faydalı" })).not.toBeInTheDocument();
+  });
+
+  it("ignores a done event that carries no message", async () => {
+    streamChatMessage.mockImplementation(async (_id: string, content: string, { onEvent }: StreamOptions) => {
+      onEvent({ type: "start", user_message: msg({ id: "u9", role: "user", content, status: null, model: null }), assistant_message_id: "a9" });
+      onEvent({ type: "delta", text: "Kısmi" });
+      onEvent({ type: "done", message: null });
+    });
+    render(<ChatView />);
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Soru{Enter}");
+
+    expect(await screen.findByText("Kısmi")).toBeInTheDocument();
+    expect(screen.getByText("Durduruldu")).toBeInTheDocument();
+  });
+
   it("creates a conversation on the first message and streams the reply", async () => {
     streamChatMessage.mockImplementation(async (_id: string, content: string, { onEvent }: StreamOptions) => {
       onEvent({ type: "start", user_message: msg({ id: "u9", role: "user", content, status: null, model: null }), assistant_message_id: "a9" });

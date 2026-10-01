@@ -187,7 +187,10 @@ export function ChatView() {
               updateAssistant((message) => ({ ...message, content: message.content + event.text }));
               break;
             case "done":
-              updateAssistant(() => event.message);
+              if (event.message) {
+                const finished = event.message;
+                updateAssistant(() => finished);
+              }
               break;
             case "error":
               updateAssistant((message) => ({ ...message, status: "error", errorText: event.message }));
@@ -314,6 +317,7 @@ export function ChatView() {
             <ChatThread
               messages={messages}
               loading={threadLoading}
+              streaming={streaming}
               examplesDisabled={composerDisabled || streaming}
               onFeedback={rate}
               onExample={send}

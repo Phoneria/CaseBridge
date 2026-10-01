@@ -56,7 +56,9 @@ def test_create_list_rename_and_delete_conversation(client, two_firms_two_users)
     assert client.patch(f"/chat/conversations/{conversation['id']}", json={"title": "x" * 121}, headers=headers).status_code == 422
 
     assert client.delete(f"/chat/conversations/{conversation['id']}", headers=headers).status_code == 204
-    assert client.get(f"/chat/conversations/{conversation['id']}", headers=headers).status_code == 404
+    missing = client.get(f"/chat/conversations/{conversation['id']}", headers=headers)
+    assert missing.status_code == 404
+    assert missing.json()["detail"] == "Sohbet bulunamadı."
     assert client.get("/chat/conversations", headers=headers).json() == []
 
 
@@ -194,7 +196,7 @@ def test_send_message_returns_503_when_provider_misconfigured(client, two_firms_
     response = client.post(f"/chat/conversations/{conversation['id']}/messages", json={"content": "Soru"}, headers=headers)
 
     assert response.status_code == 503
-    assert "OPENAI_API_KEY" in response.json()["detail"]
+    assert response.json()["detail"] == "Sohbet modeli yapılandırılmamış."
     assert client.get(f"/chat/conversations/{conversation['id']}", headers=headers).json()["messages"] == []
 
 
@@ -238,7 +240,9 @@ def test_feedback_on_complete_assistant_messages(client, two_firms_two_users, ch
 
     assert client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 2}, headers=headers).status_code == 422
     assert client.put(f"/chat/messages/{user_message_id}/feedback", json={"value": 1}, headers=headers).status_code == 422
-    assert client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 1}, headers=other).status_code == 404
+    foreign = client.put(f"/chat/messages/{assistant_id}/feedback", json={"value": 1}, headers=other)
+    assert foreign.status_code == 404
+    assert foreign.json()["detail"] == "Mesaj bulunamadı."
 
 
 def test_export_requires_admin(client, two_firms_two_users):

@@ -43,12 +43,17 @@ function FeedbackButton({
 
 function AssistantMessage({
   message,
+  live,
   onFeedback,
 }: {
   message: ChatThreadMessage;
+  live: boolean;
   onFeedback: (message: ChatThreadMessage, value: ChatFeedbackValue) => void;
 }) {
-  const streaming = message.status === "streaming";
+  // Only the reply streaming in this session is live; a "streaming" row loaded
+  // from the server will never finish, so it reads as stopped.
+  const streaming = message.status === "streaming" && live;
+  const stopped = message.status === "stopped" || (message.status === "streaming" && !live);
   return (
     <li className="flex gap-3">
       <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy-950">
@@ -83,7 +88,7 @@ function AssistantMessage({
             Hata · {message.errorText ?? "Yanıt alınamadı."}
           </p>
         )}
-        {message.status === "stopped" && (
+        {stopped && (
           <p className="mt-1.5 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-navy-600">Durduruldu</p>
         )}
         {message.status === "complete" && (
@@ -100,12 +105,14 @@ function AssistantMessage({
 export function ChatThread({
   messages,
   loading,
+  streaming,
   examplesDisabled,
   onFeedback,
   onExample,
 }: {
   messages: ChatThreadMessage[];
   loading: boolean;
+  streaming: boolean;
   examplesDisabled: boolean;
   onFeedback: (message: ChatThreadMessage, value: ChatFeedbackValue) => void;
   onExample: (prompt: string) => void;
@@ -159,7 +166,7 @@ export function ChatThread({
               </p>
             </li>
           ) : (
-            <AssistantMessage key={message.id} message={message} onFeedback={onFeedback} />
+            <AssistantMessage key={message.id} message={message} live={streaming && message === last} onFeedback={onFeedback} />
           ),
         )}
       </ol>

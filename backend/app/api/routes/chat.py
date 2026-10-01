@@ -30,7 +30,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 def _owned_conversation_or_404(service: ChatService, conversation_id: str, user: User):
     conversation = service.get_conversation(conversation_id, user.law_firm_id, user.id)
     if conversation is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sohbet bulunamadı.")
     return conversation
 
 
@@ -134,7 +134,7 @@ def set_feedback(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     if message is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesaj bulunamadı.")
     return message
 
 

@@ -52,6 +52,20 @@ def _persist(
         db.close()
 
 
+PERSIST_FAILED_MESSAGE = "Yanıt kaydedilemedi."
+DELETED_MESSAGE = "Sohbet silindiği için yanıt kaydedilemedi."
+_FAILED = object()
+
+
+def _try_persist(*args) -> dict | None | object:
+    """_persist, but a failure returns _FAILED so the caller leaves the status
+    as 'stopped' and the finally block retries the write."""
+    try:
+        return _persist(*args)
+    except Exception:
+        return _FAILED
+
+
 async def stream_assistant_reply(
     *,
     provider: ChatProvider,
@@ -71,19 +85,29 @@ async def stream_assistant_reply(
                 parts.append(chunk)
                 yield sse({"type": "delta", "text": chunk})
         except AIProviderError as exc:
-            status = ChatMessageStatus.ERROR
-            _persist(
-                session_factory, assistant_message_id, conversation_id, "".join(parts), status,
-                provider.last_usage, (time.monotonic() - started) * 1000,
+            saved = _try_persist(
+                session_factory, assistant_message_id, conversation_id, "".join(parts),
+                ChatMessageStatus.ERROR, provider.last_usage, (time.monotonic() - started) * 1000,
             )
-            yield sse({"type": "error", "message": str(exc)})
+            if saved is _FAILED:
+                yield sse({"type": "error", "message": PERSIST_FAILED_MESSAGE})
+            else:
+                status = ChatMessageStatus.ERROR
+                yield sse({"type": "error", "message": str(exc)})
             return
-        status = ChatMessageStatus.COMPLETE
-        saved = _persist(
-            session_factory, assistant_message_id, conversation_id, "".join(parts), status,
-            provider.last_usage, (time.monotonic() - started) * 1000,
+        saved = _try_persist(
+            session_factory, assistant_message_id, conversation_id, "".join(parts),
+            ChatMessageStatus.COMPLETE, provider.last_usage, (time.monotonic() - started) * 1000,
         )
-        yield sse({"type": "done", "message": saved})
+        if saved is _FAILED:
+            yield sse({"type": "error", "message": PERSIST_FAILED_MESSAGE})
+        elif saved is None:
+            # The message vanished (conversation deleted mid-stream).
+            status = ChatMessageStatus.COMPLETE
+            yield sse({"type": "error", "message": DELETED_MESSAGE})
+        else:
+            status = ChatMessageStatus.COMPLETE
+            yield sse({"type": "done", "message": saved})
     finally:
         if status == ChatMessageStatus.STOPPED:
             _persist(
