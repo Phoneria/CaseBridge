@@ -100,7 +100,7 @@ Created by `python -m app.db.seed` (idempotent - safe to re-run):
 - `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
 - `avukat@demo.casebridge.dev` / `demo1234` (Lawyer, Demo Hukuk Bürosu)
 
-The seed also creates demo cases and five fictional courtroom scenarios. Open **Simülasyonlar → Canlı duruşma**, choose a case and then choose **Davacı ol** or **Davalı ol**.
+The seed also creates demo cases and five fictional courtroom scenarios. Open **CaseBridge AI → Canlı Duruşma**, choose a case and then choose **Davacı ol** or **Davalı ol**.
 
 ## Test commands
 
