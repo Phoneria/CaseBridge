@@ -11,6 +11,10 @@ vi.mock("@/lib/api", () => ({
   getRecentActivity: (...args: unknown[]) => getRecentActivity(...args),
 }));
 
+vi.mock("@/components/ai/DashboardAiCard", () => ({
+  DashboardAiCard: () => <section aria-label="CaseBridge AI kartı" />,
+}));
+
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
 import { resetNav, setUrl } from "@/test/navigation";
 
@@ -181,5 +185,12 @@ describe("DashboardView", () => {
     expect(screen.getByRole("link", { name: /Dava açıldı/ })).toHaveAttribute("href", "/dashboard?onizle=c2&odak=olay%3Ae1");
     expect(screen.getByRole("link", { name: "Tümü →" })).toHaveAttribute("href", "/davalar?durusma=yaklasan");
     expect(screen.getByText("—")).toBeInTheDocument(); // missing court
+  });
+
+  it("places the CaseBridge AI card on the dashboard", async () => {
+    getAnalyticsOverview.mockResolvedValue(overview);
+    getCases.mockResolvedValue([]);
+    render(<DashboardView />);
+    expect(await screen.findByRole("region", { name: "CaseBridge AI kartı" })).toBeInTheDocument();
   });
 });

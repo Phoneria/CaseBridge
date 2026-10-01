@@ -15,6 +15,7 @@ import { StatCard } from "@/components/StatCard";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { DashboardAiCard } from "@/components/ai/DashboardAiCard";
 
 const CHART_COLORS = ["#6d43f5", "#8b6bff", "#ac96ff", "#cfc4ff", "#4a25b3", "#2f1a6e"];
 
@@ -98,6 +99,8 @@ export function DashboardView() {
         <StatCard label="Kaybedilen Davalar" value={overview.lost_cases} href={analyticsCaseListHref({ sonuc: "kaybedilen" })} />
         <StatCard label="Kazanma Oranı" value={`%${overview.win_rate}`} accent href="/analitik" />
       </div>
+
+      <DashboardAiCard />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
