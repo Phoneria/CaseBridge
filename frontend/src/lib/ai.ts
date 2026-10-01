@@ -7,6 +7,7 @@ export const AI_ROUTES = {
   hub: "/ai",
   analysis: "/ai/analiz",
   courtroom: "/ai/durusma",
+  chat: "/ai/sohbet",
 } as const;
 
 export const AI_PERSPECTIVES = ["Hakim", "Davacı vekili", "Davalı vekili", "Araştırmacı"] as const;
