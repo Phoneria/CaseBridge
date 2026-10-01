@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     ollama_temperature: float = 0.2
     ollama_num_ctx: int = 16384
 
+    # Chat assistant (Hukuk Asistanı). Independent of LLM_PROVIDER so the
+    # chat can run on OpenAI (or a fine-tuned model) while analysis and
+    # courtroom stay on the local model. Defaults to "mock" so tests never
+    # call a real provider.
+    chat_provider: Literal["openai", "ollama", "mock"] = "mock"
+    chat_model: str = "gpt-4o-mini"
+    chat_timeout_seconds: float = 60
+    chat_history_limit: int = 20
+
     storage_dir: str = "storage"
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB
 

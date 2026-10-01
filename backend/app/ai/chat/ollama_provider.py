@@ -1,0 +1,50 @@
+"""Local Ollama streaming chat provider (for a locally served fine-tune)."""
+import json
+from typing import Iterator, Optional
+
+import httpx
+
+from app.ai.chat.base import ChatProvider, ChatTurn
+from app.ai.errors import AIProviderError, AIProviderTimeoutError
+
+
+class OllamaChatProvider(ChatProvider):
+    provider = "ollama"
+    external = False
+
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        timeout_seconds: float = 60.0,
+        transport: Optional[httpx.BaseTransport] = None,
+    ):
+        self.model = model
+        self._base_url = base_url.rstrip("/")
+        self._timeout = timeout_seconds
+        self._transport = transport
+        self.last_usage = None
+
+    def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
+        self.last_usage = None
+        payload = {"model": self.model, "messages": messages, "stream": True, "think": False}
+        try:
+            with httpx.Client(timeout=self._timeout, transport=self._transport) as client:
+                with client.stream("POST", f"{self._base_url}/api/chat", json=payload) as response:
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        if not line.strip():
+                            continue
+                        data = json.loads(line)
+                        text = (data.get("message") or {}).get("content") or ""
+                        if text:
+                            yield text
+                        if data.get("done"):
+                            self.last_usage = {
+                                "prompt_tokens": data.get("prompt_eval_count") or 0,
+                                "completion_tokens": data.get("eval_count") or 0,
+                            }
+        except httpx.TimeoutException as exc:
+            raise AIProviderTimeoutError("Lokal model zaman aşımına uğradı. Lütfen tekrar deneyin.") from exc
+        except (httpx.HTTPError, ValueError) as exc:
+            raise AIProviderError("Lokal modele ulaşılamadı veya geçersiz bir yanıt döndü.") from exc
