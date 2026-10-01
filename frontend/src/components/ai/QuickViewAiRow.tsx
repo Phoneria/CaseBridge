@@ -51,7 +51,7 @@ export function QuickViewAiRow({ caseId }: { caseId: string }) {
         </Link>
       ) : (
         <Link href={analysisStartHref(caseId)} className="shrink-0 font-semibold text-accent-700 hover:text-accent-800">
-          Analiz başlat
+          Analizi başlat
         </Link>
       )}
     </div>

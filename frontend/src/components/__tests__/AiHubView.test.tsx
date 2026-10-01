@@ -82,7 +82,7 @@ describe("AiHubView", () => {
     listCourtroomSessions.mockResolvedValue([session("live", "active", "2026-09-03T10:00:00", null)]);
     render(<AiHubView />);
 
-    expect(await screen.findByRole("link", { name: "Analiz başlat" })).toHaveAttribute("href", "/ai/analiz");
+    expect(await screen.findByRole("link", { name: "Analizi başlat" })).toHaveAttribute("href", "/ai/analiz");
     expect(screen.getByRole("link", { name: "Raporları gör" })).toHaveAttribute("href", "/ai/analiz#raporlar");
     expect(screen.getByRole("link", { name: "Devam et: Senaryo live" })).toHaveAttribute("href", "/ai/durusma/oturum/live");
   });

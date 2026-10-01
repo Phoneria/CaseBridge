@@ -94,7 +94,7 @@ export function AiHubView() {
           </ul>
           <div className="mt-auto flex flex-wrap items-center gap-4 pt-5">
             <Link href={AI_ROUTES.analysis} className={PRIMARY}>
-              Analiz başlat
+              Analizi başlat
             </Link>
             <Link href={`${AI_ROUTES.analysis}#raporlar`} className="text-sm font-medium text-accent-700 hover:text-accent-800">
               Raporları gör

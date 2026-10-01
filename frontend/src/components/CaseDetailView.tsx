@@ -502,7 +502,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                 ? "Analiz sürüyor…"
                 : simulations.some((s) => s.status === "completed")
                   ? "Yeniden analiz et"
-                  : "Analiz başlat"}
+                  : "Analizi başlat"}
             </button>
           </div>
           {simulationError && <ErrorState message={simulationError} />}
