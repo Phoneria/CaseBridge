@@ -301,3 +301,45 @@ export interface ReportSummary {
   open_tasks: number;
   win_rate: number;
 }
+
+// ---------- CaseBridge AI chat (Hukuk Asistanı) ----------
+
+export type ChatRole = "user" | "assistant";
+export type ChatMessageStatus = "streaming" | "complete" | "error" | "stopped";
+export type ChatFeedbackValue = 1 | -1;
+
+export interface ChatStatus {
+  provider: string;
+  model: string;
+  configured: boolean;
+  /** True when messages leave the firm (e.g. OpenAI). */
+  external: boolean;
+  error: string | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: ChatRole;
+  content: string;
+  /** Assistant messages only; null for user messages. */
+  status: ChatMessageStatus | null;
+  model: string | null;
+  feedback: ChatFeedbackValue | null;
+  created_at: string;
+}
+
+export interface ChatConversationSummary {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
+export interface ChatConversation extends ChatConversationSummary {
+  messages: ChatMessage[];
+}
+
+export type ChatStreamEvent =
+  | { type: "start"; user_message: ChatMessage; assistant_message_id: string }
+  | { type: "delta"; text: string }
+  | { type: "done"; message: ChatMessage }
+  | { type: "error"; message: string };

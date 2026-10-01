@@ -1,4 +1,8 @@
 import type {
+  ChatConversation,
+  ChatConversationSummary,
+  ChatMessage,
+  ChatStatus,
   AnalyticsOverview,
   Case,
   CaseDetail,
@@ -44,6 +48,31 @@ export function clearToken() {
   window.localStorage.removeItem("casebridge_token");
 }
 
+/** Turns a non-2xx response into an ApiError (and handles 401 logout). */
+async function throwApiError(response: Response): Promise<never> {
+  let detail = `İstek başarısız oldu (${response.status}).`;
+  try {
+    const body = await response.json();
+    if (body?.detail) detail = typeof body.detail === "string" ? body.detail : detail;
+  } catch {
+    // response had no JSON body - keep the generic message
+  }
+
+  if (response.status === 401) {
+    // Session expired or token invalid/revoked - clear it and send
+    // the user back to login instead of leaving them stuck on a
+    // page that will keep failing every request. A hard redirect
+    // (not router.push) because this runs from a plain fetch
+    // wrapper with no access to Next.js router context.
+    clearToken();
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }
+
+  throw new ApiError(detail, response.status);
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers = new Headers(options.headers);
@@ -54,29 +83,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
-  if (!response.ok) {
-    let detail = `İstek başarısız oldu (${response.status}).`;
-    try {
-      const body = await response.json();
-      if (body?.detail) detail = typeof body.detail === "string" ? body.detail : detail;
-    } catch {
-      // response had no JSON body - keep the generic message
-    }
-
-    if (response.status === 401) {
-      // Session expired or token invalid/revoked - clear it and send
-      // the user back to login instead of leaving them stuck on a
-      // page that will keep failing every request. A hard redirect
-      // (not router.push) because this runs from a plain fetch
-      // wrapper with no access to Next.js router context.
-      clearToken();
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-    }
-
-    throw new ApiError(detail, response.status);
-  }
+  if (!response.ok) await throwApiError(response);
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
@@ -297,4 +304,54 @@ export async function getReportSummary(): Promise<ReportSummary> {
 
 export async function downloadDocument(documentId: string): Promise<Blob> {
   return fetchBlob(`/documents/${documentId}/download`, "Belge indirilemedi");
+}
+
+// ---------- CaseBridge AI chat (Hukuk Asistanı) ----------
+
+export async function getChatStatus(): Promise<ChatStatus> {
+  return request("/chat/status");
+}
+
+export async function listChatConversations(): Promise<ChatConversationSummary[]> {
+  return request("/chat/conversations");
+}
+
+export async function createChatConversation(): Promise<ChatConversationSummary> {
+  return request("/chat/conversations", { method: "POST" });
+}
+
+export async function getChatConversation(id: string): Promise<ChatConversation> {
+  return request(`/chat/conversations/${id}`);
+}
+
+export async function renameChatConversation(id: string, title: string): Promise<ChatConversationSummary> {
+  return request(`/chat/conversations/${id}`, { method: "PATCH", body: JSON.stringify({ title }) });
+}
+
+export async function deleteChatConversation(id: string): Promise<void> {
+  return request(`/chat/conversations/${id}`, { method: "DELETE" });
+}
+
+/** value 0 clears the vote. */
+export async function setChatFeedback(messageId: string, value: 1 | -1 | 0): Promise<ChatMessage> {
+  return request(`/chat/messages/${messageId}/feedback`, { method: "PUT", body: JSON.stringify({ value }) });
+}
+
+export async function downloadChatExport(): Promise<Blob> {
+  return fetchBlob("/chat/export.jsonl", "Eğitim verisi indirilemedi");
+}
+
+/** Opens the SSE reply stream. The body is read by lib/chatStream. */
+export async function openChatStream(conversationId: string, content: string, signal?: AbortSignal): Promise<Response> {
+  const token = getToken();
+  const headers = new Headers({ "Content-Type": "application/json", Accept: "text/event-stream" });
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ content }),
+    signal,
+  });
+  if (!response.ok) await throwApiError(response);
+  return response;
 }

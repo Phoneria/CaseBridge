@@ -80,3 +80,26 @@ describe("api request()", () => {
     await expect(getCase("missing")).rejects.toMatchObject({ status: 404 });
   });
 });
+
+describe("chat API", () => {
+  it("calls the chat endpoints with the right methods", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const api = await import("@/lib/api");
+
+    await api.getChatStatus();
+    await api.createChatConversation();
+    await api.renameChatConversation("c1", "Yeni ad");
+    await api.setChatFeedback("m1", -1);
+
+    const calls = fetchMock.mock.calls.map(([url, init]) => [String(url).replace(/^https?:\/\/[^/]+/, ""), init?.method ?? "GET"]);
+    expect(calls).toEqual([
+      ["/chat/status", "GET"],
+      ["/chat/conversations", "POST"],
+      ["/chat/conversations/c1", "PATCH"],
+      ["/chat/messages/m1/feedback", "PUT"],
+    ]);
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({ title: "Yeni ad" });
+    expect(JSON.parse(fetchMock.mock.calls[3][1].body)).toEqual({ value: -1 });
+  });
+});
