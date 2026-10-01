@@ -115,10 +115,19 @@ class ChatService:
             query = query.filter(ChatMessage.model == model)
         lines: list[str] = []
         for target in query.order_by(ChatMessage.created_at.asc()).all():
+            if not target.content.strip():
+                continue  # OpenAI rejects empty content
             turns = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+            pending_user: Optional[ChatMessage] = None
             for message in self.repo.list_messages(target.conversation_id):
-                if message.role == ChatRole.USER or message.status == ChatMessageStatus.COMPLETE:
-                    turns.append({"role": message.role.value, "content": message.content})
+                if message.role == ChatRole.USER:
+                    pending_user = message  # a newer user turn supersedes an unanswered one
+                elif message.status == ChatMessageStatus.COMPLETE and pending_user is not None:
+                    turns.append({"role": "user", "content": pending_user.content})
+                    turns.append({"role": "assistant", "content": message.content})
+                    pending_user = None
+                else:
+                    pending_user = None  # failed/stopped reply: drop the unanswered question
                 if message.id == target.id:
                     break
             lines.append(json.dumps({"messages": turns}, ensure_ascii=False))

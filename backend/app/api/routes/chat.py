@@ -148,6 +148,6 @@ def export_training_data(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return PlainTextResponse(
         content=ChatService(db).export_jsonl(current_user.law_firm_id, model),
-        media_type="application/jsonl",
+        media_type="application/jsonl; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )

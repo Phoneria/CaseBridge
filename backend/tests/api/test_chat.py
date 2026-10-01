@@ -261,7 +261,7 @@ def test_export_contains_liked_answers_in_openai_format(client, two_firms_two_us
     response = client.get("/chat/export.jsonl", headers=headers)
 
     assert response.status_code == 200
-    assert response.headers["content-type"].startswith("application/jsonl")
+    assert response.headers["content-type"] == "application/jsonl; charset=utf-8"
     assert "attachment" in response.headers["content-disposition"]
     lines = [json.loads(line) for line in response.text.splitlines() if line.strip()]
     assert len(lines) == 1
@@ -284,3 +284,38 @@ def test_export_is_scoped_to_the_admins_firm(client, two_firms_two_users, chat_p
     client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers_b)
 
     assert client.get("/chat/export.jsonl", headers=headers_a).text == ""
+
+
+def test_export_keeps_only_answered_turns(client, two_firms_two_users, chat_provider, db_session):
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers = _headers(client, fixtures)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    chat_provider._fail_after = 0
+    _send(client, headers, conversation["id"], "Cevapsız soru")
+    chat_provider._fail_after = None
+    answer = _send(client, headers, conversation["id"], "Cevaplanan soru")[-1]["message"]
+    client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers)
+
+    lines = [json.loads(line) for line in client.get("/chat/export.jsonl", headers=headers).text.splitlines()]
+
+    assert len(lines) == 1
+    messages = lines[0]["messages"]
+    assert [m["role"] for m in messages] == ["system", "user", "assistant"]
+    assert messages[1]["content"] == "Cevaplanan soru"
+    assert messages[2]["content"] == answer["content"]
+
+
+def test_export_skips_blank_liked_answers(client, two_firms_two_users, chat_provider, db_session):
+    from app.models.chat import ChatMessage
+
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers = _headers(client, fixtures)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    answer = _send(client, headers, conversation["id"], "Soru")[-1]["message"]
+    client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers)
+    db_session.query(ChatMessage).filter(ChatMessage.id == answer["id"]).update({"content": "  "})
+    db_session.commit()
+
+    assert client.get("/chat/export.jsonl", headers=headers).text == ""
