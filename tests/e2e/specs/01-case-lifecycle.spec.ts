@@ -34,6 +34,6 @@ test("full case lifecycle: create, upload document, run simulation", async ({ pa
   await expect(page.getByText("beyan.txt")).toBeVisible();
 
   await page.getByRole("tab", { name: "Genel Bakış" }).click();
-  await page.getByRole("button", { name: /simülasyonu başlat/i }).click();
-  await expect(page.getByText(/AI Değerlendirmesi: %/)).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("button", { name: "Analizi başlat" }).click();
+  await expect(page.getByText("Son AI değerlendirmesi")).toBeVisible({ timeout: 30_000 });
 });

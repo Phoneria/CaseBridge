@@ -21,14 +21,11 @@ test("open existing case, add a development, run a new simulation", async ({ pag
   await expect(page.getByText("Bilirkişi raporu dosyaya girdi")).toBeVisible();
 
   await page.getByRole("tab", { name: "Genel Bakış" }).click();
-  await page.getByRole("button", { name: /simülasyonu başlat/i }).click();
-  await expect(page.getByText(/AI Değerlendirmesi: %/)).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("button", { name: "Analizi başlat" }).click();
+  await expect(page.getByText("Son AI değerlendirmesi")).toBeVisible({ timeout: 30_000 });
 
-  // A second simulation run should also complete and be listed alongside the first.
-  await page.getByRole("button", { name: /simülasyonu başlat/i }).click();
-  await expect(page.getByText(/AI Değerlendirmesi: %/)).toBeVisible({ timeout: 30_000 });
-
-  await page.getByRole("tab", { name: "Simülasyonlar" }).click();
-  const results = page.getByText(/AI Değerlendirmesi: %/);
-  await expect(results).toHaveCount(2);
+  // A second analysis run should also complete and be listed alongside the first.
+  await page.getByRole("button", { name: "Yeniden analiz et" }).click();
+  await page.getByRole("tab", { name: "CaseBridge AI" }).click();
+  await expect(page.getByText(/AI Değerlendirmesi: %/)).toHaveCount(2, { timeout: 30_000 });
 });
