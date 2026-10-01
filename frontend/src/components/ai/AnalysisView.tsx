@@ -56,6 +56,14 @@ export function AnalysisView() {
     };
   }, []);
 
+  // The reports section only exists after loading, so honour a #hash deep link then.
+  useEffect(() => {
+    if (loading || loadError) return;
+    const hash = window.location.hash;
+    if (hash.length > 1) document.getElementById(hash.slice(1))?.scrollIntoView?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   async function start() {
     if (!selectedCaseId) return;
     setStarting(true);

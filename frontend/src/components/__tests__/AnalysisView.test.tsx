@@ -89,6 +89,22 @@ describe("AnalysisView", () => {
     expect(screen.getByRole("button", { name: "Analizi başlat" })).toBeEnabled();
   });
 
+  it("scrolls to the #raporlar section once loading finishes", async () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    window.location.hash = "#raporlar";
+    try {
+      render(<AnalysisView />);
+      await screen.findByRole("heading", { level: 1, name: "Dosya Analizi" });
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView.mock.contexts[0]).toHaveAttribute("id", "raporlar");
+    } finally {
+      window.location.hash = "";
+      // @ts-expect-error restore jsdom default (undefined)
+      delete Element.prototype.scrollIntoView;
+    }
+  });
+
   it("shows a start error inside the card", async () => {
     setUrl("/ai/analiz?dava=c1");
     startSimulation.mockRejectedValue(new Error("boom"));
