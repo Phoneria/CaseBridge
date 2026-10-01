@@ -40,6 +40,7 @@ beforeEach(() => {
 describe("CalendarView", () => {
   it("renders events in a navigable monthly calendar", async () => {
     getCalendarEvents.mockResolvedValue([taskEvent, hearingEvent]);
+    setUrl("/takvim?ay=2026-09"); // pin the month so the test doesn't depend on today's date
 
     render(<CalendarView />);
 
