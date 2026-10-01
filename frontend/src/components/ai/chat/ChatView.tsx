@@ -52,12 +52,14 @@ export function ChatView() {
   const paramId = searchParams.get("sohbet");
   const paramRef = useRef(paramId);
   paramRef.current = paramId;
+  const activeRef = useRef<string | null>(paramId);
 
   const [status, setStatus] = useState<ChatStatus | null>(null);
   const [me, setMe] = useState<AppUser | null>(null);
   const [conversations, setConversations] = useState<ChatConversationSummary[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(paramId);
+  activeRef.current = activeId;
   const [messages, setMessages] = useState<ChatThreadMessage[]>([]);
   const [threadLoading, setThreadLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -86,8 +88,13 @@ export function ChatView() {
     refreshConversations().finally(() => setListLoading(false));
   }, [refreshConversations]);
 
+  // Abort an in-flight stream when the component goes away.
+  useEffect(() => () => abortRef.current?.abort(), []);
+
   // Follow external URL changes (e.g. the sidebar link opens a fresh chat).
   useEffect(() => {
+    // Leaving the conversation that is streaming: stop its reply.
+    if (paramId !== activeRef.current) abortRef.current?.abort();
     setActiveId(paramId);
   }, [paramId]);
 
@@ -100,12 +107,15 @@ export function ChatView() {
   // Load the open conversation.
   useEffect(() => {
     if (!activeId) {
+      skipLoadRef.current = null;
       setMessages([]);
       setThreadLoading(false);
       return;
     }
-    if (skipLoadRef.current === activeId) return;
-    skipLoadRef.current = null;
+    if (skipLoadRef.current === activeId) {
+      skipLoadRef.current = null;
+      return;
+    }
     let cancelled = false;
     setThreadLoading(true);
     getChatConversation(activeId)

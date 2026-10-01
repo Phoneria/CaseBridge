@@ -225,4 +225,65 @@ describe("ChatView", () => {
       expect(streamChatMessage).toHaveBeenCalledWith("new1", "Kira artış oranı nasıl belirlenir?", expect.anything()),
     );
   });
+
+  it("reloads a chat reopened from the list after leaving the one just created", async () => {
+    streamChatMessage.mockImplementation(async (_id: string, content: string, { onEvent }: StreamOptions) => {
+      onEvent({ type: "start", user_message: msg({ id: "u9", role: "user", content, status: null, model: null }), assistant_message_id: "a9" });
+      onEvent({ type: "done", message: msg({ id: "a9", content: "Merhaba dünya" }) });
+    });
+    api.listChatConversations
+      .mockResolvedValueOnce([CONVERSATION])
+      .mockResolvedValue([{ id: "new1", title: "Selam", updated_at: "2026-10-02T11:00:00" }, CONVERSATION]);
+    render(<ChatView />);
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Selam{Enter}");
+    await screen.findByText("Merhaba dünya");
+    await waitFor(() => expect(api.listChatConversations).toHaveBeenCalledTimes(2));
+    expect(api.getChatConversation).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Yeni sohbet" }));
+    await userEvent.click(await within(conversationList()).findByRole("button", { name: /^Selam/ }));
+
+    await waitFor(() => expect(api.getChatConversation).toHaveBeenCalledWith("new1"));
+  });
+
+  it("aborts an in-flight stream when unmounted", async () => {
+    let streamSignal: AbortSignal | undefined;
+    streamChatMessage.mockImplementation(
+      (_id: string, _content: string, { signal }: StreamOptions) =>
+        new Promise((_resolve, reject) => {
+          streamSignal = signal;
+          signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        }),
+    );
+    const { unmount } = render(<ChatView />);
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Soru{Enter}");
+    await waitFor(() => expect(streamSignal).toBeDefined());
+    expect(streamSignal!.aborted).toBe(false);
+
+    unmount();
+
+    expect(streamSignal!.aborted).toBe(true);
+  });
+
+  it("aborts the stream when ?sohbet= changes to another conversation", async () => {
+    let streamSignal: AbortSignal | undefined;
+    streamChatMessage.mockImplementation(
+      (_id: string, _content: string, { signal }: StreamOptions) =>
+        new Promise((_resolve, reject) => {
+          streamSignal = signal;
+          signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        }),
+    );
+    const { rerender } = render(<ChatView />);
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Soru{Enter}");
+    await waitFor(() => expect(streamSignal).toBeDefined());
+
+    setUrl("/ai/sohbet?sohbet=c1");
+    rerender(<ChatView />);
+
+    await waitFor(() => expect(streamSignal!.aborted).toBe(true));
+  });
 });
