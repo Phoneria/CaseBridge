@@ -64,7 +64,7 @@ export function AiHubView() {
     <div className="space-y-6">
       <AiHero
         title="CaseBridge AI"
-        description="Davalarınızı dört farklı perspektiften analiz edin, gerçekçi duruşma pratiği yapın."
+        description="Davalarınızı dört farklı perspektiften analiz edin, gerçekçi duruşma pratiği yapın, hukuki sorularınızı sorun."
         stats={[
           { label: "Tamamlanan analiz", value: loading ? pending : error ? unavailable : completedCount },
           { label: "Duruşma oturumu", value: loading ? pending : error ? unavailable : sessions.length },
@@ -76,7 +76,7 @@ export function AiHubView() {
 
       {error && <ErrorState message={error} />}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
         <AiCard>
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-accent-600">
             <AiMark className="h-3.5 w-3.5 text-accent-500" />
@@ -122,6 +122,22 @@ export function AiHubView() {
                 Duruşmaya gir
               </Link>
             )}
+          </div>
+        </AiCard>
+
+        <AiCard>
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-accent-600">
+            <AiMark className="h-3.5 w-3.5 text-accent-500" />
+            Hukuk Asistanı
+          </p>
+          <h2 className="mt-2 text-lg font-semibold text-navy-900">Hukuki sorularınızı sohbetle sorun</h2>
+          <p className="mt-1 text-sm leading-6 text-navy-500">
+            Türk hukukuna dair genel sorular için kelime kelime akan yanıtlar. Sohbetleriniz kaydedilir.
+          </p>
+          <div className="mt-auto flex flex-wrap items-center gap-4 pt-5">
+            <Link href={AI_ROUTES.chat} className={PRIMARY}>
+              Sohbete başla
+            </Link>
           </div>
         </AiCard>
       </div>

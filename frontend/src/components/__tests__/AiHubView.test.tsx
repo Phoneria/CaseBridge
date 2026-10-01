@@ -117,4 +117,10 @@ describe("AiHubView", () => {
     expect(screen.getAllByText("—")).toHaveLength(3);
     expect(screen.queryByText("Henüz AI aktivitesi yok.")).not.toBeInTheDocument();
   });
+
+  it("offers the legal assistant as a third product", async () => {
+    render(<AiHubView />);
+    expect(await screen.findByText("Hukuk Asistanı")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sohbete başla" })).toHaveAttribute("href", "/ai/sohbet");
+  });
 });

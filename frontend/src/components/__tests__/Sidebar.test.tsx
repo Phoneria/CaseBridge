@@ -27,6 +27,7 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("href", "/ai");
     expect(screen.getByRole("link", { name: "Dosya Analizi" })).toHaveAttribute("href", "/ai/analiz");
     expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("href", "/ai/durusma");
+    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("href", "/ai/sohbet");
   });
 
   it("marks the current route as active", () => {
@@ -44,6 +45,12 @@ describe("Sidebar", () => {
     pathname = "/ai";
     render(<Sidebar />);
     expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("marks the chat route as active with a conversation open", () => {
+    pathname = "/ai/sohbet";
+    render(<Sidebar />);
+    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("aria-current", "page");
   });
 
   it("renders the CaseBridge brand name", () => {

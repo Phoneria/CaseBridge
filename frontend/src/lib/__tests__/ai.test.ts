@@ -9,6 +9,7 @@ import {
   latestCompletedAnalysis,
   latestSession,
   mergeRecentAiActivity,
+  AI_ROUTES,
 } from "@/lib/ai";
 import type { CourtroomSessionSummary, SimulationWithCase } from "@/types";
 
@@ -101,6 +102,7 @@ describe("links and activity", () => {
     expect(courtroomSessionHref("o1")).toBe("/ai/durusma/oturum/o1");
     expect(analysisStartHref()).toBe("/ai/analiz");
     expect(analysisStartHref("c9")).toBe("/ai/analiz?dava=c9");
+    expect(AI_ROUTES.chat).toBe("/ai/sohbet");
   });
 
   it("merges analyses and sessions newest first and applies the limit", () => {
