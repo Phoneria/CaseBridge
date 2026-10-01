@@ -35,7 +35,7 @@ export function ScenarioCard({
       <p className="mt-2 flex-1 text-sm leading-6 text-navy-500">{scenario.summary}</p>
       <div className="mt-4 flex items-center gap-4 border-t border-surface-border pt-4 text-xs text-navy-500">
         <span>{scenario.estimated_rounds} aşama</span>
-        <button type="button" className="font-medium text-accent-700 hover:text-accent-800" onClick={() => setExpanded((value) => !value)}>
+        <button type="button" aria-expanded={expanded} className="font-medium text-accent-700 hover:text-accent-800" onClick={() => setExpanded((value) => !value)}>
           {expanded ? "Detayı gizle" : "Davayı incele"}
         </button>
       </div>

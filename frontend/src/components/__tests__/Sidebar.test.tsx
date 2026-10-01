@@ -23,6 +23,7 @@ describe("Sidebar", () => {
 
   it("renders the CaseBridge AI block", () => {
     render(<Sidebar />);
+    expect(screen.getByRole("group", { name: "CaseBridge AI" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("href", "/ai");
     expect(screen.getByRole("link", { name: "Dosya Analizi" })).toHaveAttribute("href", "/ai/analiz");
     expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("href", "/ai/durusma");

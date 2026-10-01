@@ -83,13 +83,15 @@ export function Sidebar() {
         ))}
 
         <div
+          role="group"
+          aria-label="CaseBridge AI"
           className={`relative mt-4 overflow-hidden rounded-2xl bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link
             href={AI_ROUTES.hub}
             aria-current={hubActive ? "page" : undefined}
-            className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors ${
+            className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
               hubActive ? "bg-white/15" : "hover:bg-white/10"
             }`}
           >
@@ -103,7 +105,7 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex items-center rounded-xl py-1.5 pl-9 pr-3 text-sm transition-colors ${
+                className={`relative flex items-center rounded-xl py-1.5 pl-9 pr-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
                   active ? "bg-white/15 font-medium text-white" : "text-accent-100 hover:bg-white/10 hover:text-white"
                 }`}
               >
