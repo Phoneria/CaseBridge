@@ -105,6 +105,13 @@ describe("AnalysisView", () => {
     }
   });
 
+  it("drops a ?dava= selection that is not among the active cases", async () => {
+    setUrl("/ai/analiz?dava=zzz");
+    render(<AnalysisView />);
+    await screen.findByRole("heading", { level: 1, name: "Dosya Analizi" });
+    expect(screen.getByRole("button", { name: "Analizi başlat" })).toBeDisabled();
+  });
+
   it("shows a start error inside the card", async () => {
     setUrl("/ai/analiz?dava=c1");
     startSimulation.mockRejectedValue(new Error("boom"));

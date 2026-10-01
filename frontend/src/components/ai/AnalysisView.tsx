@@ -38,6 +38,7 @@ export function AnalysisView() {
       .then(([caseRows, simRows]) => {
         if (cancelled) return;
         setCases(caseRows);
+        setSelectedCaseId((current) => (current && caseRows.some((row) => row.id === current) ? current : null));
         setSimulations(simRows);
       })
       .catch(() => {
