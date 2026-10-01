@@ -19,6 +19,8 @@ import type { CourtroomSessionSummary, SimulationWithCase } from "@/types";
 import { AiCard } from "@/components/ai/AiCard";
 import { AiMark } from "@/components/ai/AiMark";
 
+const DEFAULT_DISCLAIMER = "AI tahmini, kesin sonuç değildir.";
+
 type LoadState =
   | { kind: "loading" }
   | { kind: "error" }
@@ -46,7 +48,7 @@ export function DashboardAiCard() {
   const session = state.kind === "ready" ? latestSession(state.sessions) : null;
 
   return (
-    <AiCard>
+    <AiCard disclaimer={analysis?.result ? analysis.result.ai_disclaimer || DEFAULT_DISCLAIMER : undefined}>
       <div className="flex items-center justify-between">
         <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
           <AiMark className="h-4 w-4 text-accent-500" />

@@ -29,7 +29,7 @@ describe("QuickViewAiRow", () => {
     listSimulations.mockResolvedValue([completed]);
     render(<QuickViewAiRow caseId="c1" />);
 
-    expect(await screen.findByText(/Son AI değerlendirmesi: %72/)).toBeInTheDocument();
+    expect(await screen.findByText(/Son AI tahmini: %72/)).toBeInTheDocument();
     expect(listSimulations).toHaveBeenCalledWith("c1");
     expect(screen.getByRole("link", { name: "Analize git" })).toHaveAttribute("href", "/davalar/c1?sekme=ai");
   });

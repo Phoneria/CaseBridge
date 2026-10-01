@@ -74,6 +74,17 @@ describe("DashboardAiCard", () => {
     expect(screen.getByRole("link", { name: "Tümü →" })).toHaveAttribute("href", "/ai");
   });
 
+  it("shows the AI disclaimer next to the analysis score", async () => {
+    listAllSimulations.mockResolvedValue([{ ...sim, result: { ...sim.result, ai_disclaimer: "Model çıktısıdır." } }]);
+    const { unmount } = render(<DashboardAiCard />);
+    expect(await screen.findByText("Model çıktısıdır.")).toBeInTheDocument();
+    unmount();
+
+    listAllSimulations.mockResolvedValue([{ ...sim, result: { ...sim.result, ai_disclaimer: "" } }]);
+    render(<DashboardAiCard />);
+    expect(await screen.findByText("AI tahmini, kesin sonuç değildir.")).toBeInTheDocument();
+  });
+
   it("shows empty states when there is no AI activity", async () => {
     render(<DashboardAiCard />);
     expect(await screen.findByText("Henüz analiz yok.")).toBeInTheDocument();

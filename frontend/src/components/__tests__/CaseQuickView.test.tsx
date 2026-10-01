@@ -140,7 +140,7 @@ describe("CaseQuickView", () => {
 
     const dialog = await screen.findByRole("dialog", { name: "Ticari Kira Uyarlama Davası" });
     expect(within(dialog).getByText("Deniz Arslan")).toBeInTheDocument();
-    expect(within(dialog).queryByText(/AI değerlendirmesi|AI analizi/)).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(/AI tahmini|AI analizi/)).not.toBeInTheDocument();
   });
 
   it("shows the AI row when an analysis exists", async () => {
@@ -162,7 +162,7 @@ describe("CaseQuickView", () => {
 
     render(<CaseQuickView />);
 
-    expect(await screen.findByText(/Son AI değerlendirmesi: %64/)).toBeInTheDocument();
+    expect(await screen.findByText(/Son AI tahmini: %64/)).toBeInTheDocument();
   });
 });
 

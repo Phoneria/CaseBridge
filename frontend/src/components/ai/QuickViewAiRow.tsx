@@ -39,7 +39,7 @@ export function QuickViewAiRow({ caseId }: { caseId: string }) {
         <AiBadge />
         {state.latest?.result ? (
           <span className="truncate">
-            Son AI değerlendirmesi: %{state.latest.result.assessment.score} · {formatDate(analysisDate(state.latest))}
+            Son AI tahmini: %{state.latest.result.assessment.score} · {formatDate(analysisDate(state.latest))}
           </span>
         ) : (
           <span>Henüz AI analizi yok</span>
