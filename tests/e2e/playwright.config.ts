@@ -51,6 +51,7 @@ export default defineConfig({
         DATABASE_URL: `sqlite:///${e2eDbPath}`,
         JWT_SECRET: "e2e-test-secret",
         EXTRA_CORS_ORIGINS: FRONTEND_URL,
+        CHAT_PROVIDER: "mock",
       },
     },
     {
