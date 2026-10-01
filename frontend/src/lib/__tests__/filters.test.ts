@@ -136,6 +136,12 @@ describe("calendar, tabs and dates", () => {
     expect(parseCaseTab(null)).toBe("genel");
   });
 
+  it("uses the ai tab slug and accepts the legacy simulasyonlar slug", () => {
+    expect(parseCaseTab("ai")).toBe("ai");
+    expect(parseCaseTab("simulasyonlar")).toBe("ai");
+    expect(caseDetailHref("c1", "ai")).toBe("/davalar/c1?sekme=ai");
+  });
+
   it("counts days until a date-only string", () => {
     expect(daysUntil("2026-09-30", TODAY)).toBe(0);
     expect(daysUntil("2026-10-07", TODAY)).toBe(7);

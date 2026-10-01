@@ -48,6 +48,20 @@ const config: Config = {
       boxShadow: {
         card: "0 1px 2px rgba(15, 26, 46, 0.04), 0 4px 16px rgba(15, 26, 46, 0.06)",
       },
+      backgroundImage: {
+        "ai-glow":
+          "radial-gradient(600px circle at 85% -10%, rgba(109, 67, 245, 0.45), transparent 60%), radial-gradient(500px circle at -5% 110%, rgba(90, 47, 219, 0.35), transparent 55%)",
+        "ai-border": "linear-gradient(135deg, #8b6bff 0%, #5a2fdb 45%, #152238 100%)",
+      },
+      keyframes: {
+        "ai-glow": {
+          "0%, 100%": { opacity: "0.8" },
+          "50%": { opacity: "1" },
+        },
+      },
+      animation: {
+        "ai-glow": "ai-glow 8s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

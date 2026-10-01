@@ -19,7 +19,7 @@ const SHORTCUTS: Array<[CaseTabSlug, string]> = [
   ["gorevler", "Görevler"],
   ["belgeler", "Belgeler"],
   ["gelismeler", "Gelişmeler"],
-  ["simulasyonlar", "Simülasyonlar"],
+  ["ai", "Simülasyonlar"],
 ];
 
 const EMPTY = "—";

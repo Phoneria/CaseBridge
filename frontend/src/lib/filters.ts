@@ -254,10 +254,14 @@ export function parseCalendarQuery(params: ParamSource): CalendarQuery {
 
 // ---------- Case detail tabs ----------
 
-export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "simulasyonlar", "devir", "notlar"] as const;
+export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "ai", "devir", "notlar"] as const;
 export type CaseTabSlug = (typeof CASE_TAB_SLUGS)[number];
 
+/** Legacy slugs that still open a tab after a rename. */
+const CASE_TAB_ALIASES: Record<string, CaseTabSlug> = { simulasyonlar: "ai" };
+
 export function parseCaseTab(value: string | null): CaseTabSlug {
+  if (value !== null && Object.prototype.hasOwnProperty.call(CASE_TAB_ALIASES, value)) return CASE_TAB_ALIASES[value];
   return pick(value, CASE_TAB_SLUGS) ?? "genel";
 }
 

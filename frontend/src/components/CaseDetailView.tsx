@@ -30,7 +30,7 @@ const TABS = [
   { slug: "belgeler", label: "Belgeler" },
   { slug: "gelismeler", label: "Gelişmeler" },
   { slug: "gorevler", label: "Görevler" },
-  { slug: "simulasyonlar", label: "Simülasyonlar" },
+  { slug: "ai", label: "Simülasyonlar" },
   { slug: "devir", label: "Devir Raporu" },
   { slug: "notlar", label: "Notlar" },
 ] as const satisfies ReadonlyArray<{ slug: CaseTabSlug; label: string }>;

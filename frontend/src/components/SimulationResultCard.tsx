@@ -1,3 +1,4 @@
+import { CONFIDENCE_LABELS } from "@/lib/ai";
 import type { AIAnalysisResult } from "@/types";
 
 function BulletList({ title, items }: { title: string; items: string[] }) {
@@ -16,12 +17,6 @@ function BulletList({ title, items }: { title: string; items: string[] }) {
     </div>
   );
 }
-
-const CONFIDENCE_LABELS: Record<string, string> = {
-  low: "Düşük güven",
-  medium: "Orta güven",
-  high: "Yüksek güven",
-};
 
 export function SimulationResultCard({ result }: { result: AIAnalysisResult }) {
   return (
