@@ -10,6 +10,7 @@ import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { FOCUS_PARAM, QUICK_VIEW_PARAM, parseOdak, useUrlParams, type Focus } from "@/lib/urlState";
 import type { CaseDetail, DocumentItem, Task } from "@/types";
 import { AiMark } from "@/components/ai/AiMark";
+import { QuickViewAiRow } from "@/components/ai/QuickViewAiRow";
 
 type LoadState =
   | { kind: "loading" }
@@ -241,6 +242,8 @@ function QuickViewBody({
           </dd>
         </div>
       </dl>
+
+      <QuickViewAiRow caseId={detail.id} />
 
       <Section
         title="Açık görevler"

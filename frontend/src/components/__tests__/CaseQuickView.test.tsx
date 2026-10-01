@@ -7,11 +7,13 @@ vi.mock("next/navigation", async () => (await import("@/test/navigation")).navig
 const getCase = vi.fn();
 const listCaseTasks = vi.fn();
 const listDocuments = vi.fn();
+const listSimulations = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCase: (...args: unknown[]) => getCase(...args),
   listCaseTasks: (...args: unknown[]) => listCaseTasks(...args),
   listDocuments: (...args: unknown[]) => listDocuments(...args),
+  listSimulations: (...args: unknown[]) => listSimulations(...args),
 }));
 
 import { CaseQuickView, pickWithFocus } from "@/components/CaseQuickView";
@@ -43,8 +45,10 @@ beforeEach(() => {
   getCase.mockReset();
   listCaseTasks.mockReset();
   listDocuments.mockReset();
+  listSimulations.mockReset();
   listCaseTasks.mockResolvedValue([]);
   listDocuments.mockResolvedValue([]);
+  listSimulations.mockResolvedValue([]);
 });
 
 describe("CaseQuickView", () => {
@@ -125,6 +129,40 @@ describe("CaseQuickView", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Önizlemeyi kapat" }));
     expect(nav.replace).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows the AI row without blocking the rest of the panel when it fails", async () => {
+    setUrl("/davalar?onizle=c1");
+    getCase.mockResolvedValue(detail);
+    listSimulations.mockRejectedValue(new Error("boom"));
+
+    render(<CaseQuickView />);
+
+    const dialog = await screen.findByRole("dialog", { name: "Ticari Kira Uyarlama Davası" });
+    expect(within(dialog).getByText("Deniz Arslan")).toBeInTheDocument();
+    expect(within(dialog).queryByText(/AI değerlendirmesi|AI analizi/)).not.toBeInTheDocument();
+  });
+
+  it("shows the AI row when an analysis exists", async () => {
+    setUrl("/davalar?onizle=c1");
+    getCase.mockResolvedValue(detail);
+    listSimulations.mockResolvedValue([
+      {
+        id: "s1",
+        case_id: "c1",
+        status: "completed",
+        error_message: null,
+        started_at: "2026-09-12T10:00:00",
+        completed_at: "2026-09-12T10:05:00",
+        current_stage: null,
+        failure_category: null,
+        result: { assessment: { score: 64, confidence: "low" }, summary: "Özet" },
+      },
+    ]);
+
+    render(<CaseQuickView />);
+
+    expect(await screen.findByText(/Son AI değerlendirmesi: %64/)).toBeInTheDocument();
   });
 });
 
