@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AiMark } from "@/components/ai/AiMark";
+import { AiBrand } from "@/components/ai/AiBrand";
 
 export interface AiHeroStat {
   label: string;
@@ -8,7 +9,7 @@ export interface AiHeroStat {
 }
 
 export function AiHero({
-  eyebrow = "CaseBridge AI",
+  eyebrow,
   title,
   description,
   actions,
@@ -31,7 +32,7 @@ export function AiHero({
         <div className="max-w-2xl">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent-200">
             <AiMark className="h-3.5 w-3.5 text-accent-300" />
-            {eyebrow}
+            {eyebrow ?? <AiBrand />}
           </p>
           <h1 className={`mt-2 font-semibold tracking-tight ${compact ? "text-2xl" : "text-3xl sm:text-4xl"}`}>{title}</h1>
           {description && <p className="mt-2 text-sm leading-6 text-accent-100">{description}</p>}

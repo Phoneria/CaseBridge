@@ -25,6 +25,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { SimulationResultCard } from "@/components/SimulationResultCard";
 import { AiMark } from "@/components/ai/AiMark";
+import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
 import { AI_PERSPECTIVES } from "@/lib/ai";
 
@@ -487,7 +488,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <div className="relative">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent-200">
                 <AiMark className="h-3.5 w-3.5 text-accent-300" />
-                CaseBridge AI · Dosya Analizi
+                <AiBrand /> · Dosya Analizi
               </p>
               <p className="mt-1 text-sm text-accent-100">{AI_PERSPECTIVES.join(" · ")}</p>
             </div>

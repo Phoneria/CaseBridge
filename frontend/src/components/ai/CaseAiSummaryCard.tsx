@@ -1,5 +1,6 @@
 import { AiCard } from "@/components/ai/AiCard";
 import { AiMark } from "@/components/ai/AiMark";
+import { AiBrand } from "@/components/ai/AiBrand";
 import { CONFIDENCE_LABELS, analysisDate, isAnalysisInProgress, latestCompletedAnalysis } from "@/lib/ai";
 import { formatDate } from "@/lib/labels";
 import type { Simulation } from "@/types";
@@ -25,7 +26,7 @@ export function CaseAiSummaryCard({
     <AiCard disclaimer={latest && !inProgress ? latest.result?.ai_disclaimer : undefined}>
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-accent-600">
         <AiMark className="h-3.5 w-3.5 text-accent-500" />
-        CaseBridge AI · Dosya Analizi
+        <AiBrand /> · Dosya Analizi
       </p>
 
       {inProgress ? (

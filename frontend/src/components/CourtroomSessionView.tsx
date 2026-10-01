@@ -17,6 +17,7 @@ import type {
   CourtroomSession,
 } from "@/types";
 import { AiMark } from "@/components/ai/AiMark";
+import { AiBrand } from "@/components/ai/AiBrand";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 
@@ -211,7 +212,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     <div className="space-y-5">
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent-600">
         <AiMark className="h-3.5 w-3.5 text-accent-500" />
-        CaseBridge AI · Canlı Duruşma
+        <AiBrand /> · Canlı Duruşma
       </p>
       <header className="flex flex-col justify-between gap-3 xl:flex-row xl:items-center">
         <div className="flex items-start gap-3">

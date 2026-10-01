@@ -14,6 +14,12 @@ describe("AI design system", () => {
     expect(screen.getByText("CaseBridge AI")).toBeInTheDocument();
   });
 
+  it("keeps the default hero eyebrow brand in an English-language span", () => {
+    const { container } = render(<AiHero title="Başlık" />);
+    const brand = container.querySelector("p span[lang='en']");
+    expect(brand).toHaveTextContent("CaseBridge AI");
+  });
+
   it("renders the badge with an accessible AI label", () => {
     render(<AiBadge />);
     expect(screen.getByText("AI")).toBeInTheDocument();
