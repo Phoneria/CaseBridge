@@ -137,9 +137,6 @@ export function CalendarView() {
     setFormInitial({ date, time: time ?? "09:00" });
   }
 
-  if (!loaded) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
-
   const monthItems = items.filter((item) => item.date.startsWith(monthKey(visibleMonth)));
   const periodTitle =
     view === "ay" ? `${MONTH_NAMES[visibleMonth.getMonth()]} ${visibleMonth.getFullYear()}` : view === "hafta" ? weekTitle(weekStart) : "Önümüzdeki 30 gün";
@@ -167,7 +164,7 @@ export function CalendarView() {
         <div className="flex flex-col justify-between gap-3 border-b border-surface-border px-5 py-4 lg:flex-row lg:items-center">
           <div>
             <h2 className="font-semibold text-navy-900">{periodTitle}</h2>
-            {view === "ay" && (
+            {view === "ay" && loaded && !error && (
               <p className="mt-0.5 text-xs text-navy-500">
                 Bu ay {monthItems.filter((item) => item.event_type === "hearing").length} duruşma,{" "}
                 {monthItems.filter((item) => item.kind === "task").length} görev ve{" "}
@@ -211,6 +208,12 @@ export function CalendarView() {
           </div>
         </div>
 
+        {!loaded ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState message={error} />
+        ) : (
+          <>
         {view === "ay" && (
           <CalendarMonthView month={visibleMonth} items={shown} todayKey={todayKey} onSelect={(item) => setSelectedId(item.id)} onCreate={openCreate} />
         )}
@@ -223,6 +226,8 @@ export function CalendarView() {
           <p className="border-t border-surface-border px-5 py-4 text-center text-sm text-navy-500">
             Takvimde bu dönem için kayıt yok. Yeni etkinlik ekleyebilir veya bir davaya duruşma ya da görev tarihi girebilirsiniz.
           </p>
+        )}
+          </>
         )}
       </section>
 

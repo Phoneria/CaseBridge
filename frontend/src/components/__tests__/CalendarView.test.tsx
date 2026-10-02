@@ -203,15 +203,14 @@ describe("CalendarView", () => {
   it("ignores a stale response when the range changes quickly", async () => {
     setUrl("/takvim?ay=2026-09");
     getCalendarEvents.mockResolvedValueOnce([]);
-    const { rerender } = render(<CalendarView />);
+    render(<CalendarView />);
     await screen.findByText("Takvim");
 
     let resolveSlow: (items: CalendarEvent[]) => void = () => undefined;
     getCalendarEvents.mockImplementationOnce(() => new Promise<CalendarEvent[]>((resolve) => { resolveSlow = resolve; }));
     getCalendarEvents.mockResolvedValueOnce([item({ id: "event:e2", event_id: "e2", title: "Kasım toplantısı", date: "2026-11-03", start: "2026-11-03T10:00:00", end: "2026-11-03T11:00:00" })]);
     await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" })); // Ekim: slow
-    setUrl("/takvim?ay=2026-11"); // Kasım: fast (URL changes before Ekim settles)
-    rerender(<CalendarView />);
+    await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" })); // Kasım: fast
     await waitFor(() => expect(getCalendarEvents).toHaveBeenCalledTimes(3));
     expect(await screen.findByText("Kasım toplantısı")).toBeInTheDocument();
 
@@ -238,6 +237,24 @@ describe("CalendarView", () => {
     resolveNext([meeting]);
     expect(await screen.findByText("Müvekkil toplantısı")).toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("keeps the toolbar mounted and usable while a range request is pending", async () => {
+    setUrl("/takvim?ay=2026-09");
+    getCalendarEvents.mockResolvedValueOnce([task]);
+    render(<CalendarView />);
+    await screen.findByText("Dilekçe hazırla");
+
+    getCalendarEvents.mockImplementationOnce(() => new Promise<CalendarEvent[]>(() => undefined));
+    const next = screen.getByRole("button", { name: "Sonraki ay" });
+    await userEvent.click(next);
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sonraki ay" })).toBe(next);
+    expect(next).toBeEnabled();
+    expect(screen.getByRole("heading", { name: "Ekim 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hafta" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Tür")).toBeInTheDocument();
   });
 
   it("does not show the previous range's items under an error", async () => {
