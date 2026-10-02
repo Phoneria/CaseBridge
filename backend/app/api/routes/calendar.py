@@ -1,76 +1,52 @@
-"""Firm-wide calendar (Phase 4 - Takvim): merges case hearing dates
-and task due dates into one chronological list. Replaces the
-ComingSoon placeholder on app/takvim/page.tsx.
+"""Firm-wide calendar (Takvim).
 
-Not a new DB table - reads from Case.next_hearing_date and
-Task.due_date, both already tenant-scoped, and sorts the union in
-Python since the two source queries are cheap and small at MVP scale.
+GET /calendar merges calendar events, pending task due dates and case
+hearing dates within a date range into one chronological list.
+/calendar/events is CRUD for user-created events. Everything is scoped
+to the caller's firm.
 """
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from datetime import date, timedelta
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
-from app.models.case import Case
-from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.schemas.calendar import CalendarEventCreate, CalendarEventOut, CalendarEventUpdate, CalendarItemOut
 from app.services.calendar_service import CalendarReferenceNotFound, CalendarService
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
+DEFAULT_PAST_DAYS = 31
+DEFAULT_FUTURE_DAYS = 62
+MAX_RANGE_DAYS = 400
+EVENT_NOT_FOUND = "Etkinlik bulunamadı"
+
 
 @router.get("", response_model=list[CalendarItemOut])
-def list_calendar_events(
+def list_calendar_items(
+    from_date: Optional[date] = Query(default=None, alias="from"),
+    to_date: Optional[date] = Query(default=None, alias="to"),
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
 ):
-    events: list[CalendarItemOut] = []
-
-    hearings = (
-        db.query(Case)
-        .filter(Case.law_firm_id == law_firm_id, Case.next_hearing_date.isnot(None))
-        .all()
-    )
-    for case in hearings:
-        events.append(
-            CalendarItemOut(
-                event_type="hearing",
-                date=case.next_hearing_date,
-                title=f"Duruşma - {case.case_name}",
-                case_id=case.id,
-                case_name=case.case_name,
-            )
+    today = local_today()
+    start = from_date or today - timedelta(days=DEFAULT_PAST_DAYS)
+    end = to_date or today + timedelta(days=DEFAULT_FUTURE_DAYS)
+    if start > end:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Başlangıç tarihi bitiş tarihinden sonra olamaz.",
         )
-
-    tasks = (
-        db.query(Task, Case.case_name)
-        .join(Case, Task.case_id == Case.id)
-        .filter(
-            Task.law_firm_id == law_firm_id,
-            Task.due_date.isnot(None),
-            Task.status == TaskStatus.PENDING,
+    if (end - start).days > MAX_RANGE_DAYS:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Tarih aralığı en fazla {MAX_RANGE_DAYS} gün olabilir.",
         )
-        .all()
-    )
-    for task, case_name in tasks:
-        events.append(
-            CalendarItemOut(
-                event_type="task",
-                date=task.due_date,
-                title=task.title,
-                case_id=task.case_id,
-                case_name=case_name,
-                task_id=task.id,
-            )
-        )
-
-    events.sort(key=lambda e: e.date)
-    return events
-
-
-EVENT_NOT_FOUND = "Etkinlik bulunamadı"
+    return CalendarService(db).list_items(law_firm_id, start, end)
 
 
 def _owned_event_or_404(service: CalendarService, event_id: str, law_firm_id: str):
