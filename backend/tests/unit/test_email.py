@@ -107,3 +107,20 @@ def test_smtp_backend_without_host_fails(fake_smtp, monkeypatch):
     with pytest.raises(EmailSendError, match="SMTPHostMissing"):
         send_email(MESSAGE)
     assert fake_smtp.instances == []
+
+
+def test_header_injection_subject_raises_email_send_error(fake_smtp):
+    bad = EmailMessage(to="avukat@demo.casebridge.dev", subject="a\nb", text="x")
+    with pytest.raises(EmailSendError) as info:
+        send_email(bad)
+    assert str(info.value) == "InvalidHeader"
+    assert fake_smtp.instances == []
+
+
+def test_console_backend_log_cannot_be_forged_with_newlines(monkeypatch, caplog):
+    monkeypatch.setattr(settings, "email_backend", "console")
+    bad = EmailMessage(to="avukat@demo.casebridge.dev", subject="a\nINFO forged line", text="x")
+    with caplog.at_level(logging.INFO, logger="casebridge"):
+        send_email(bad)
+    assert "\n" not in caplog.records[-1].getMessage()
+    assert "a\\nINFO forged line" in caplog.text
