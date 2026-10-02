@@ -124,6 +124,7 @@ describe("CalendarEventDrawer", () => {
     expect(screen.getByRole("button", { name: "Düzenle" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Hatırlatmayı değiştir" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Sil" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Paneli kapat" })).toBeDisabled();
     await userEvent.keyboard("{Escape}");
     expect(handlers.onClose).not.toHaveBeenCalled();
   });

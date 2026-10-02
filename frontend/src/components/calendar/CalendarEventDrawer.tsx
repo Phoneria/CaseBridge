@@ -127,7 +127,7 @@ export function CalendarEventDrawer({
               {item.title}
             </h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Paneli kapat" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-navy-500 hover:bg-surface-muted">
+          <button type="button" disabled={busy} onClick={onClose} aria-label="Paneli kapat" className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-navy-500 hover:bg-surface-muted disabled:opacity-60">
             ✕
           </button>
         </div>

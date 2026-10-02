@@ -159,7 +159,7 @@ export function CalendarEventForm({
             <h2 id="event-form-title" className="text-base font-semibold text-navy-900">
               {editing ? "Etkinliği düzenle" : "Yeni etkinlik"}
             </h2>
-            <button type="button" onClick={onClose} aria-label="Formu kapat" className="grid h-8 w-8 place-items-center rounded-lg text-navy-500 hover:bg-surface-muted">
+            <button type="button" disabled={saving} onClick={onClose} aria-label="Formu kapat" className="grid h-8 w-8 place-items-center rounded-lg text-navy-500 hover:bg-surface-muted disabled:opacity-60">
               ✕
             </button>
           </div>

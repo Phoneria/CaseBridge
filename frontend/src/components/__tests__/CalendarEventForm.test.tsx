@@ -151,6 +151,7 @@ describe("CalendarEventForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     await waitFor(() => expect(createCalendarEvent).toHaveBeenCalled());
     expect(screen.getByRole("button", { name: "Vazgeç" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Formu kapat" })).toBeDisabled();
     await userEvent.keyboard("{Escape}");
     expect(onClose).not.toHaveBeenCalled();
   });
