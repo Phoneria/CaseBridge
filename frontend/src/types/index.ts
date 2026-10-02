@@ -307,6 +307,13 @@ export interface ReportSummary {
 export type ChatRole = "user" | "assistant";
 export type ChatMessageStatus = "streaming" | "complete" | "error" | "stopped";
 export type ChatFeedbackValue = 1 | -1;
+export type ChatLevel = "basic" | "standard" | "deep";
+
+export interface ChatLevelInfo {
+  level: ChatLevel;
+  label: string;
+  model: string;
+}
 
 export interface ChatStatus {
   provider: string;
@@ -315,6 +322,7 @@ export interface ChatStatus {
   /** True when messages leave the firm (e.g. OpenAI). */
   external: boolean;
   error: string | null;
+  levels?: ChatLevelInfo[];
 }
 
 export interface ChatMessage {
@@ -324,6 +332,7 @@ export interface ChatMessage {
   /** Assistant messages only; null for user messages. */
   status: ChatMessageStatus | null;
   model: string | null;
+  level?: ChatLevel | null;
   feedback: ChatFeedbackValue | null;
   created_at: string;
 }

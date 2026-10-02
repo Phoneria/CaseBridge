@@ -1,6 +1,7 @@
 import type {
   ChatConversation,
   ChatConversationSummary,
+  ChatLevel,
   ChatMessage,
   ChatStatus,
   AnalyticsOverview,
@@ -342,14 +343,19 @@ export async function downloadChatExport(): Promise<Blob> {
 }
 
 /** Opens the SSE reply stream. The body is read by lib/chatStream. */
-export async function openChatStream(conversationId: string, content: string, signal?: AbortSignal): Promise<Response> {
+export async function openChatStream(
+  conversationId: string,
+  content: string,
+  signal?: AbortSignal,
+  level?: ChatLevel,
+): Promise<Response> {
   const token = getToken();
   const headers = new Headers({ "Content-Type": "application/json", Accept: "text/event-stream" });
   if (token) headers.set("Authorization", `Bearer ${token}`);
   const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, level }),
     signal,
   });
   if (!response.ok) await throwApiError(response);

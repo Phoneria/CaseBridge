@@ -1,7 +1,7 @@
 /** Reads the chat reply SSE stream (fetch + ReadableStream; EventSource
  * can't send a POST body or an Authorization header). */
 import { openChatStream } from "@/lib/api";
-import type { ChatStreamEvent } from "@/types";
+import type { ChatLevel, ChatStreamEvent } from "@/types";
 
 /** Incremental SSE parser: feed it decoded text in any chunking. */
 export function createSseParser(onEvent: (event: ChatStreamEvent) => void) {
@@ -34,9 +34,9 @@ export function createSseParser(onEvent: (event: ChatStreamEvent) => void) {
 export async function streamChatMessage(
   conversationId: string,
   content: string,
-  { signal, onEvent }: { signal?: AbortSignal; onEvent: (event: ChatStreamEvent) => void },
+  { level, signal, onEvent }: { level?: ChatLevel; signal?: AbortSignal; onEvent: (event: ChatStreamEvent) => void },
 ): Promise<void> {
-  const response = await openChatStream(conversationId, content, signal);
+  const response = await openChatStream(conversationId, content, signal, level);
   if (!response.body) return;
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
