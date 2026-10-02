@@ -11,6 +11,7 @@ from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provid
 from app.core.config import settings
 from app.services.simulation_worker import start_worker_thread
 from app.services.courtroom_worker import start_courtroom_worker_thread
+from app.services.reminder_worker import should_start_reminder_worker, start_reminder_worker_thread
 from app.db.base import Base
 from app.db.session import engine
 import app.models  # noqa: F401  register models on Base before create_all
@@ -51,12 +52,21 @@ async def lifespan(app: FastAPI):
         )
         logger.info("Courtroom worker thread started.")
 
+    # E-mail reminders: same rule as the workers above (never in tests),
+    # and REMINDERS_ENABLED=false turns it off.
+    reminder_stop_event = None
+    if should_start_reminder_worker():
+        reminder_stop_event = start_reminder_worker_thread()
+        logger.info("Reminder worker thread started.")
+
     yield
 
     if worker_stop_event is not None:
         worker_stop_event.set()
     if courtroom_worker_stop_event is not None:
         courtroom_worker_stop_event.set()
+    if reminder_stop_event is not None:
+        reminder_stop_event.set()
 
 
 app = FastAPI(title="CaseBridge", version="0.1.0", lifespan=lifespan)

@@ -27,6 +27,10 @@ services:
     environment:
       DATABASE_URL: postgresql://casebridge:casebridge@db:5432/casebridge
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -48,6 +52,13 @@ services:
       - backend
     ports:
       - "3000:3000"
+
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
 
 volumes:
   casebridge_pgdata:

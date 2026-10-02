@@ -3,7 +3,7 @@ FROM python:3.11-slim AS base
 # psycopg2-binary needs libpq at runtime; build tools only needed if a
 # future dependency requires compiling (kept minimal on purpose).
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev gcc \
+    libpq-dev gcc tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

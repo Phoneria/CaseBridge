@@ -13,8 +13,10 @@ Rules (occurrence day D, offset d in reminder_days, today = now_local.date()):
     downtime); several due offsets of one occurrence go out as ONE e-mail;
   - a timed event that has already started gets no same-day (d=0) reminder;
   - each reminder is claimed in the ledger (status failed, "InFlight",
-    attempts + 1) and committed BEFORE it is sent, then marked sent; a crash
-    in between costs one retry attempt instead of a duplicate e-mail;
+    attempts + 1) and committed BEFORE it is sent, then marked sent. Delivery
+    is at-least-once: a crash or a failed final commit after a send can cause
+    one resend (bounded by REMINDER_MAX_ATTEMPTS), which is preferred over a
+    missed reminder;
   - an offset already `sent` is skipped; a `failed` one is retried while
     attempts < REMINDER_MAX_ATTEMPTS;
   - recipient: event assignee, else its creator; task assignee, else its

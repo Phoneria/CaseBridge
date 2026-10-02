@@ -344,7 +344,7 @@ def test_a_failing_final_commit_does_not_abort_the_run(world, monkeypatch):
 
     assert len(outbox.messages) == 2
     statuses = sorted((row.status.value, row.last_error) for row in deliveries(world))
-    assert statuses == [("failed", "InFlight"), ("sent", None)]  # the unconfirmed one costs a retry, not a duplicate
+    assert statuses == [("failed", "InFlight"), ("sent", None)]  # at-least-once: the unconfirmed one stays retryable and may be resent (bounded by max attempts)
 
 
 def test_the_claim_is_written_before_the_email_is_sent(world):
