@@ -8,8 +8,10 @@ from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
 from app.ai.chat.factory import get_chat_provider_status
-from app.api.deps import get_chat_provider_dep, get_chat_session_factory, get_current_user
-from app.core.config import settings
+from app.ai.chat.levels import ChatLevel, get_level_config
+from app.ai.chat.prompt import system_prompt_for
+from app.ai.errors import AIProviderConfigError
+from app.api.deps import get_chat_provider_resolver, get_chat_session_factory, get_current_user
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.schemas.chat import (
@@ -95,14 +97,19 @@ def send_message(
     payload: ChatMessageCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    provider: ChatProvider = Depends(get_chat_provider_dep),
+    resolve_provider: Callable[[str], ChatProvider] = Depends(get_chat_provider_resolver),
     session_factory: Callable[[], Session] = Depends(get_chat_session_factory),
 ):
     service = ChatService(db)
     conversation = _owned_conversation_or_404(service, conversation_id, current_user)
+    try:
+        provider = resolve_provider(payload.level)
+    except AIProviderConfigError:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Sohbet modeli yapılandırılmamış.")
+    level_config = get_level_config(payload.level)
     user_message = service.add_user_message(conversation, payload.content)
-    assistant = service.create_assistant_placeholder(conversation, provider.model)
-    history = service.build_history(conversation, settings.chat_history_limit)
+    assistant = service.create_assistant_placeholder(conversation, provider.model, payload.level)
+    history = service.build_history(conversation, level_config.history_limit, system_prompt_for(payload.level))
     start_event = {
         "type": "start",
         "user_message": ChatMessageOut.model_validate(user_message).model_dump(mode="json"),
@@ -141,13 +148,14 @@ def set_feedback(
 @router.get("/export.jsonl")
 def export_training_data(
     model: Optional[str] = None,
+    level: Optional[ChatLevel] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return PlainTextResponse(
-        content=ChatService(db).export_jsonl(current_user.law_firm_id, model),
+        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level),
         media_type="application/jsonl; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )

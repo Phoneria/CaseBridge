@@ -51,6 +51,7 @@ class ChatMessage(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False, default="")
     status: Mapped[Optional[ChatMessageStatus]] = mapped_column(str_enum(ChatMessageStatus), nullable=True)
     model: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    level: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     latency_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
 from app.ai.chat.factory import get_chat_provider
-from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_llm_provider
 from app.ai.providers.base import LLMProvider
 from app.core.security import decode_access_token
@@ -62,13 +61,10 @@ def get_llm_provider_dep() -> LLMProvider:
     return get_llm_provider()
 
 
-def get_chat_provider_dep() -> ChatProvider:
-    """The configured chat provider; a misconfiguration becomes a clear 503
-    instead of a 500. Overridable in tests."""
-    try:
-        return get_chat_provider()
-    except AIProviderConfigError:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Sohbet modeli yapılandırılmamış.")
+def get_chat_provider_resolver() -> Callable[[str], ChatProvider]:
+    """Returns level -> configured chat provider (raises AIProviderConfigError
+    when misconfigured). Overridable in tests."""
+    return get_chat_provider
 
 
 def get_chat_session_factory() -> Callable[[], Session]:

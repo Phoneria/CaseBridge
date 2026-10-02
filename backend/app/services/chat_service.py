@@ -4,10 +4,11 @@ import json
 from datetime import datetime, timezone
 from typing import Optional
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatTurn
-from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT
+from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT, system_prompt_for
 from app.models.chat import DEFAULT_CHAT_TITLE, ChatConversation, ChatMessage, ChatMessageStatus, ChatRole
 from app.repositories.chat_repository import ChatRepository
 
@@ -69,7 +70,9 @@ class ChatService:
         self.repo.save(message)
         return message
 
-    def create_assistant_placeholder(self, conversation: ChatConversation, model: str) -> ChatMessage:
+    def create_assistant_placeholder(
+        self, conversation: ChatConversation, model: str, level: Optional[str] = None
+    ) -> ChatMessage:
         message = ChatMessage(
             conversation_id=conversation.id,
             law_firm_id=conversation.law_firm_id,
@@ -77,18 +80,21 @@ class ChatService:
             content="",
             status=ChatMessageStatus.STREAMING,
             model=model,
+            level=level,
         )
         self.repo.save(message)
         return message
 
-    def build_history(self, conversation: ChatConversation, limit: int) -> list[ChatTurn]:
+    def build_history(
+        self, conversation: ChatConversation, limit: int, system_prompt: str = CHAT_SYSTEM_PROMPT
+    ) -> list[ChatTurn]:
         usable = [
             m
             for m in self.repo.list_messages(conversation.id)
             if m.role == ChatRole.USER or m.status == ChatMessageStatus.COMPLETE
         ]
         recent = usable[-limit:] if limit > 0 else usable
-        return [{"role": "system", "content": CHAT_SYSTEM_PROMPT}] + [
+        return [{"role": "system", "content": system_prompt}] + [
             {"role": m.role.value, "content": m.content} for m in recent
         ]
 
@@ -102,7 +108,7 @@ class ChatService:
         self.repo.save(message)
         return message
 
-    def export_jsonl(self, law_firm_id: str, model: Optional[str] = None) -> str:
+    def export_jsonl(self, law_firm_id: str, model: Optional[str] = None, level: Optional[str] = None) -> str:
         """One OpenAI chat fine-tuning example per liked, complete assistant
         message: system prompt + the conversation up to and including it."""
         query = self.db.query(ChatMessage).filter(
@@ -113,11 +119,15 @@ class ChatService:
         )
         if model:
             query = query.filter(ChatMessage.model == model)
+        if level == "standard":
+            query = query.filter(or_(ChatMessage.level == "standard", ChatMessage.level.is_(None)))
+        elif level:
+            query = query.filter(ChatMessage.level == level)
         lines: list[str] = []
         for target in query.order_by(ChatMessage.created_at.asc()).all():
             if not target.content.strip():
                 continue  # OpenAI rejects empty content
-            turns = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+            turns = [{"role": "system", "content": system_prompt_for(target.level)}]
             pending_user: Optional[ChatMessage] = None
             for message in self.repo.list_messages(target.conversation_id):
                 if message.role == ChatRole.USER:
