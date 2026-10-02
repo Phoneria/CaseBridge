@@ -16,6 +16,7 @@ def get_chat_provider(
     *,
     max_tokens: Optional[int] = None,
     timeout_seconds: Optional[float] = None,
+    max_retries: Optional[int] = None,
 ) -> ChatProvider:
     config = get_level_config(level)
     cap = max_tokens if max_tokens is not None else config.max_tokens
@@ -32,6 +33,7 @@ def get_chat_provider(
             model=config.model,
             timeout_seconds=timeout,
             max_tokens=cap,
+            max_retries=max_retries,
         )
     if name == "ollama":
         if not settings.ollama_base_url or not settings.ollama_base_url.strip():
@@ -56,6 +58,7 @@ def get_chat_classifier_provider() -> ChatProvider:
         "basic",
         max_tokens=CLASSIFIER_MAX_TOKENS,
         timeout_seconds=settings.chat_classifier_timeout_seconds,
+        max_retries=0,
     )
 
 

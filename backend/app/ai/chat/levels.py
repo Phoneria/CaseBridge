@@ -1,6 +1,7 @@
-"""Answer levels for the Hukuk Asistanı. The user picks a level per message;
-the backend maps it to a model, a token cap and a history size. The frontend
-only ever sends the level name, never a model name."""
+"""Answer levels for the Hukuk Asistanı. The level is chosen automatically per
+question by the classifier (or is Standart when CHAT_AUTO_LEVEL=false); the
+backend maps it to a model, a token cap and a history size. The frontend never
+sends a level or a model name."""
 from dataclasses import dataclass
 from typing import Literal, get_args
 

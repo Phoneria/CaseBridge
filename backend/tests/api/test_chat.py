@@ -361,7 +361,11 @@ def test_classifier_level_drives_provider_history_and_storage(client, two_firms_
     sent = chat_provider.calls[-1]
     assert sent[0] == {"role": "system", "content": system_prompt_for("basic")}
     assert len(sent) == 3  # system + last 2 messages
+    assert sent[-1]["content"] == "Üç"
     assert events[-1]["message"]["level"] == "basic"
+    stored = client.get(f"/chat/conversations/{conversation['id']}", headers=headers).json()["messages"]
+    assert [m["level"] for m in stored if m["role"] == "assistant"] == ["basic"] * 3
+    assert [m["level"] for m in stored if m["role"] == "user"] == [None] * 3
 
 
 def test_auto_level_off_skips_classifier(client, two_firms_two_users, chat_provider, monkeypatch):

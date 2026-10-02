@@ -34,6 +34,11 @@ _WORDS = {
 }
 
 
+def _has_level_word(text: str) -> bool:
+    normalized = text.casefold().replace("i̇", "i")
+    return any(token in _WORDS for token in re.findall(r"[a-zçğıöşü]+", normalized))
+
+
 def parse_level(text: str) -> str:
     normalized = text.casefold().replace("i̇", "i")
     for token in re.findall(r"[a-zçğıöşü]+", normalized):
@@ -57,6 +62,13 @@ def classify_level(provider: ChatProvider, question: str, previous_question: Opt
         )
     except Exception as exc:  # any failure -> Standart; never log content
         logger.warning("Chat level classification failed (%s)", type(exc).__name__)
+        return DEFAULT_CHAT_LEVEL
+    if not _has_level_word(reply):
+        logger.warning(
+            "Chat level classifier gave no usable answer (finish_reason=%s, chars=%d)",
+            getattr(provider, "last_finish_reason", None),
+            len(reply),
+        )
         return DEFAULT_CHAT_LEVEL
     return parse_level(reply)
 

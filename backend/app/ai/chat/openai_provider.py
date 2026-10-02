@@ -23,12 +23,14 @@ class OpenAIChatProvider(ChatProvider):
         timeout_seconds: float = 60.0,
         client: Optional[Any] = None,
         max_tokens: Optional[int] = None,
+        max_retries: Optional[int] = None,
     ):
         self.model = model
         self._api_key = api_key
         self._timeout = timeout_seconds
         self._client = client
         self.max_tokens = max_tokens
+        self._max_retries = max_retries
         self.last_usage = None
         self.last_finish_reason = None
 
@@ -37,7 +39,10 @@ class OpenAIChatProvider(ChatProvider):
         self.last_finish_reason = None
         try:
             if self._client is None:
-                self._client = openai.OpenAI(api_key=self._api_key, timeout=self._timeout)
+                client_kwargs: dict[str, Any] = {"api_key": self._api_key, "timeout": self._timeout}
+                if self._max_retries is not None:
+                    client_kwargs["max_retries"] = self._max_retries
+                self._client = openai.OpenAI(**client_kwargs)
             limits = {"max_completion_tokens": self.max_tokens} if self.max_tokens else {}
             response = self._client.chat.completions.create(
                 model=self.model,

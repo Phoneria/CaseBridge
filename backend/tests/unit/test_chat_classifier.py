@@ -58,7 +58,7 @@ def test_classify_level_falls_back_to_standard_on_errors(error):
     assert classify_level(Failing(), "Soru") == "standard"
 
 
-def test_classify_chat_level_uses_basic_provider_with_small_cap(monkeypatch):
+def test_classify_chat_level_uses_the_classifier_provider(monkeypatch):
     seen = {}
 
     def fake_classifier_provider():
@@ -68,6 +68,7 @@ def test_classify_chat_level_uses_basic_provider_with_small_cap(monkeypatch):
 
     monkeypatch.setattr("app.ai.chat.classifier.get_chat_classifier_provider", fake_classifier_provider)
     assert classify_chat_level("Soru") == "deep"
+    assert seen["provider"].calls
     assert CLASSIFIER_MAX_TOKENS == 16
 
 
@@ -96,3 +97,49 @@ def test_openai_classifier_provider_uses_basic_model_cap_and_timeout(monkeypatch
     monkeypatch.setattr(settings, "chat_classifier_timeout_seconds", 5)
     provider = get_chat_classifier_provider()
     assert (provider.model, provider.max_tokens, provider._timeout) == ("model-basic", 16, 5)
+
+
+def test_openai_classifier_provider_disables_sdk_retries(monkeypatch):
+    from app.ai.chat.factory import get_chat_classifier_provider, get_chat_provider
+
+    monkeypatch.setattr(settings, "chat_provider", "openai")
+    monkeypatch.setattr(settings, "openai_api_key", "sk-test")
+    assert get_chat_classifier_provider()._max_retries == 0
+    assert get_chat_provider()._max_retries is None
+
+
+def test_openai_client_gets_max_retries_only_when_set(monkeypatch):
+    from types import SimpleNamespace
+
+    import openai
+
+    from app.ai.chat.openai_provider import OpenAIChatProvider
+
+    captured = []
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            return iter([SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content="ok"), finish_reason=None)], usage=None)])
+
+    def fake_openai(**kwargs):
+        captured.append(kwargs)
+        return SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
+
+    monkeypatch.setattr(openai, "OpenAI", fake_openai)
+    msgs = [{"role": "user", "content": "x"}]
+    assert "".join(OpenAIChatProvider(api_key="k", model="m", max_retries=0).stream(msgs)) == "ok"
+    assert captured[-1]["max_retries"] == 0
+    list(OpenAIChatProvider(api_key="k", model="m").stream(msgs))
+    assert "max_retries" not in captured[-1]
+
+
+@pytest.mark.parametrize("reply_chunks", [[], ["bilmiyorum"]])
+def test_classify_level_warns_without_content_when_answer_unusable(reply_chunks, caplog):
+    import logging
+
+    provider = MockChatProvider(chunks=reply_chunks)
+    with caplog.at_level(logging.WARNING, logger="casebridge"):
+        assert classify_level(provider, "GİZLİ-SORU-METNİ") == "standard"
+    messages = [r.getMessage() for r in caplog.records]
+    assert any("no usable answer" in m for m in messages)
+    assert not any("GİZLİ-SORU-METNİ" in m for m in messages)
