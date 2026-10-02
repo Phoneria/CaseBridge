@@ -114,4 +114,29 @@ describe("CalendarEventDrawer", () => {
     await userEvent.keyboard("{Escape}");
     expect(handlers.onClose).toHaveBeenCalled();
   });
+
+  it("ignores Escape and disables actions while busy", async () => {
+    deleteCalendarEvent.mockReturnValue(new Promise(() => {}));
+    const handlers = renderDrawer(event);
+    await userEvent.click(screen.getByRole("button", { name: "Sil" }));
+    await userEvent.click(screen.getByRole("button", { name: "Evet, sil" }));
+    await waitFor(() => expect(deleteCalendarEvent).toHaveBeenCalled());
+    expect(screen.getByRole("button", { name: "Düzenle" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Hatırlatmayı değiştir" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Sil" })).toBeDisabled();
+    await userEvent.keyboard("{Escape}");
+    expect(handlers.onClose).not.toHaveBeenCalled();
+  });
+
+  it("moves focus to 'Evet, sil' and restores focus on unmount", async () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    const { unmount } = render(<CalendarEventDrawer item={event} onClose={vi.fn()} onEdit={vi.fn()} onChanged={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Sil" }));
+    expect(screen.getByRole("button", { name: "Evet, sil" })).toHaveFocus();
+    unmount();
+    expect(opener).toHaveFocus();
+    opener.remove();
+  });
 });

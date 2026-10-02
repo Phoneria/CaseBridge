@@ -43,14 +43,25 @@ export function CalendarEventDrawer({
 
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const busyRef = useRef(false);
+  busyRef.current = busy;
+  const confirmRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeRef.current();
+      if (event.key === "Escape" && !busyRef.current) closeRef.current();
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previous?.focus?.();
+    };
   }, []);
+
+  useEffect(() => {
+    if (confirmingDelete) confirmRef.current?.focus();
+  }, [confirmingDelete]);
 
   async function run(action: () => Promise<unknown>, after: () => void, failure: string) {
     setBusy(true);
@@ -97,7 +108,7 @@ export function CalendarEventDrawer({
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      <div className="absolute inset-0 bg-navy-900/30" aria-hidden="true" onClick={onClose} />
+      <div className="absolute inset-0 bg-navy-900/30" aria-hidden="true" onClick={() => !busy && onClose()} />
       <div
         ref={panelRef}
         role="dialog"
@@ -179,7 +190,7 @@ export function CalendarEventDrawer({
             <div className="space-y-3 rounded-xl border border-red-100 bg-red-50 p-3 text-red-800">
               <p>Bu etkinlik silinsin mi?</p>
               <div className="flex gap-2">
-                <button type="button" disabled={busy} onClick={remove} className="rounded-xl bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60">
+                <button type="button" ref={confirmRef} disabled={busy} onClick={remove} className="rounded-xl bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60">
                   Evet, sil
                 </button>
                 <button type="button" onClick={() => setConfirmingDelete(false)} className={SECONDARY_BUTTON}>
@@ -199,13 +210,13 @@ export function CalendarEventDrawer({
         <div className="flex flex-wrap gap-2 border-t border-surface-border p-4">
           {item.kind === "event" && (
             <>
-              <button type="button" onClick={() => onEdit(item)} className={PRIMARY_BUTTON}>
+              <button type="button" disabled={busy} onClick={() => onEdit(item)} className={PRIMARY_BUTTON}>
                 Düzenle
               </button>
-              <button type="button" onClick={() => setEditingReminders(true)} className={SECONDARY_BUTTON}>
+              <button type="button" disabled={busy} onClick={() => setEditingReminders(true)} className={SECONDARY_BUTTON}>
                 Hatırlatmayı değiştir
               </button>
-              <button type="button" onClick={() => setConfirmingDelete(true)} className={SECONDARY_BUTTON}>
+              <button type="button" disabled={busy} onClick={() => setConfirmingDelete(true)} className={SECONDARY_BUTTON}>
                 Sil
               </button>
             </>
@@ -215,11 +226,16 @@ export function CalendarEventDrawer({
               <button type="button" disabled={busy} onClick={complete} className={PRIMARY_BUTTON}>
                 Tamamlandı
               </button>
-              <button type="button" onClick={() => setEditingReminders(true)} className={SECONDARY_BUTTON}>
+              <button type="button" disabled={busy} onClick={() => setEditingReminders(true)} className={SECONDARY_BUTTON}>
                 Hatırlatmayı değiştir
               </button>
               {item.case_id && (
-                <Link href={caseDetailHref(item.case_id, "gorevler")} className={SECONDARY_BUTTON}>
+                <Link
+                  href={caseDetailHref(item.case_id, "gorevler")}
+                  aria-disabled={busy}
+                  onClick={(e) => busy && e.preventDefault()}
+                  className={`${SECONDARY_BUTTON} ${busy ? "pointer-events-none opacity-60" : ""}`}
+                >
                   Göreve git
                 </Link>
               )}

@@ -76,12 +76,20 @@ export function CalendarEventForm({
 
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const savingRef = useRef(false);
+  savingRef.current = saving;
+  const titleRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    titleRef.current?.focus();
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeRef.current();
+      if (event.key === "Escape" && !savingRef.current) closeRef.current();
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previous?.focus?.();
+    };
   }, []);
 
   function changeType(next: CalendarEventType) {
@@ -166,7 +174,7 @@ export function CalendarEventForm({
             )}
             <div className="sm:col-span-2">
               <label htmlFor="event-title" className={LABEL}>Başlık</label>
-              <input id="event-title" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className={INPUT} />
+              <input id="event-title" ref={titleRef} value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className={INPUT} />
             </div>
             <div>
               <label htmlFor="event-type" className={LABEL}>Tür</label>
@@ -233,7 +241,7 @@ export function CalendarEventForm({
           </div>
 
           <div className="flex justify-end gap-2 border-t border-surface-border px-5 py-4">
-            <button type="button" onClick={onClose} className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted">
+            <button type="button" disabled={saving} onClick={onClose} className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted disabled:opacity-60">
               Vazgeç
             </button>
             <button type="submit" disabled={saving} className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60">

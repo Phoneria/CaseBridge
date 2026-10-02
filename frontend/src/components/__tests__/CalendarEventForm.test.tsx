@@ -131,4 +131,27 @@ describe("CalendarEventForm", () => {
     await userEvent.keyboard("{Escape}");
     expect(onClose).toHaveBeenCalledTimes(2);
   });
+
+  it("focuses the title on open and restores focus on unmount", () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    const { unmount } = render(<CalendarEventForm initial={{ date: "2026-10-07" }} cases={cases} users={users} onClose={vi.fn()} onSaved={vi.fn()} />);
+    expect(screen.getByLabelText("Başlık")).toHaveFocus();
+    unmount();
+    expect(opener).toHaveFocus();
+    opener.remove();
+  });
+
+  it("ignores Escape and disables Vazgeç while saving", async () => {
+    createCalendarEvent.mockReturnValue(new Promise(() => {}));
+    const onClose = vi.fn();
+    render(<CalendarEventForm initial={{ date: "2026-10-07" }} cases={cases} users={users} onClose={onClose} onSaved={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText("Başlık"), "Toplantı");
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(createCalendarEvent).toHaveBeenCalled());
+    expect(screen.getByRole("button", { name: "Vazgeç" })).toBeDisabled();
+    await userEvent.keyboard("{Escape}");
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });
