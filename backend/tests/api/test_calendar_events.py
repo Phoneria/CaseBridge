@@ -208,6 +208,7 @@ def test_moving_a_hearing_event_earlier_updates_the_case(client, two_firms_two_u
     case = _create_case(client, headers)
     event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
 
-    client.patch(f"/calendar/events/{event['id']}", json={"starts_at": "2099-04-20T09:00:00"}, headers=headers)
+    response = client.patch(f"/calendar/events/{event['id']}", json={"starts_at": "2099-04-20T09:00:00"}, headers=headers)
 
+    assert response.status_code == 200
     assert _next_hearing(client, headers, case["id"]) == "2099-04-20"

@@ -15,7 +15,7 @@ from app.models.task import TaskStatus
 from app.models.user import User
 from app.schemas.task import TaskCreate, TaskOut, TaskUpdate, TaskWithCaseOut
 from app.services.case_service import CaseService
-from app.services.task_service import TaskService
+from app.services.task_service import AssigneeNotFound, TaskService
 
 cases_router = APIRouter(prefix="/cases", tags=["tasks"])
 tasks_router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -37,7 +37,10 @@ def create_task(
     db: Session = Depends(get_db),
 ):
     case = _get_owned_case_or_404(db, case_id, law_firm_id)
-    return TaskService(db).create_task(case, payload, created_by=current_user.id)
+    try:
+        return TaskService(db).create_task(case, payload, created_by=current_user.id)
+    except AssigneeNotFound as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
 
 
 @cases_router.get("/{case_id}/tasks", response_model=list[TaskOut])
@@ -63,7 +66,10 @@ def update_case_task(
     task = service.get(task_id, law_firm_id)
     if task is None or task.case_id != case_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-    return service.update_task(task, payload)
+    try:
+        return service.update_task(task, payload)
+    except AssigneeNotFound as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
 
 
 @tasks_router.get("", response_model=list[TaskWithCaseOut])
@@ -94,5 +100,8 @@ def update_task(
     service = TaskService(db)
     task = service.get(task_id, law_firm_id)
     if task is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-    return service.update_task(task, payload)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Görev bulunamadı")
+    try:
+        return service.update_task(task, payload)
+    except AssigneeNotFound as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)

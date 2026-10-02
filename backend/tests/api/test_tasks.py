@@ -179,3 +179,78 @@ def test_firm_wide_task_patch_is_isolated_by_firm(client, two_firms_two_users):
     response = client.patch(f"/tasks/{task['id']}", json={"status": "completed"}, headers=headers_b)
 
     assert response.status_code == 404
+
+
+def _task_for(client, headers):
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+    return case, task
+
+
+def test_firm_wide_task_patch_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    _, task = _task_for(client, headers)
+
+    response = client.patch(f"/tasks/{task['id']}", json={"assigned_to": fixtures["user_b"].id}, headers=headers)
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    tasks = client.get("/tasks", headers=headers).json()
+    assert [t["assigned_to"] for t in tasks if t["id"] == task["id"]] == [None]
+
+
+def test_case_scoped_task_patch_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    case, task = _task_for(client, headers)
+
+    response = client.patch(
+        f"/cases/{case['id']}/tasks/{task['id']}", json={"assigned_to": fixtures["user_b"].id}, headers=headers
+    )
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    tasks = client.get("/tasks", headers=headers).json()
+    assert [t["assigned_to"] for t in tasks if t["id"] == task["id"]] == [None]
+
+
+def test_task_create_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    case = _create_case(client, headers)
+
+    response = client.post(
+        f"/cases/{case['id']}/tasks",
+        json={"title": "Gorev", "assigned_to": fixtures["user_b"].id},
+        headers=headers,
+    )
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    assert client.get(f"/cases/{case['id']}/tasks", headers=headers).json() == []
+
+
+def test_task_assignee_from_same_firm_is_accepted_and_null_clears_it(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    _, task = _task_for(client, headers)
+    me = fixtures["user_a"].id
+
+    assigned = client.patch(f"/tasks/{task['id']}", json={"assigned_to": me}, headers=headers)
+    cleared = client.patch(f"/tasks/{task['id']}", json={"assigned_to": None}, headers=headers)
+
+    assert assigned.json()["assigned_to"] == me
+    assert cleared.status_code == 200 and cleared.json()["assigned_to"] is None
+
+
+def test_task_patch_rejects_null_for_required_fields(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    _, task = _task_for(client, headers)
+
+    for field in ("title", "status"):
+        response = client.patch(f"/tasks/{task['id']}", json={field: None}, headers=headers)
+        assert response.status_code == 422, field
+
+
+def test_firm_wide_task_patch_unknown_task_is_turkish_404(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    response = client.patch("/tasks/nope", json={"status": "completed"}, headers=headers)
+    assert (response.status_code, response.json()["detail"]) == (404, "Görev bulunamadı")
