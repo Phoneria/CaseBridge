@@ -1,7 +1,6 @@
 import type {
   ChatConversation,
   ChatConversationSummary,
-  ChatLevel,
   ChatMessage,
   ChatStatus,
   AnalyticsOverview,
@@ -347,7 +346,6 @@ export async function openChatStream(
   conversationId: string,
   content: string,
   signal?: AbortSignal,
-  level?: ChatLevel,
 ): Promise<Response> {
   const token = getToken();
   const headers = new Headers({ "Content-Type": "application/json", Accept: "text/event-stream" });
@@ -355,7 +353,7 @@ export async function openChatStream(
   const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content, level }),
+    body: JSON.stringify({ content }),
     signal,
   });
   if (!response.ok) await throwApiError(response);

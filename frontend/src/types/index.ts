@@ -309,12 +309,6 @@ export type ChatMessageStatus = "streaming" | "complete" | "error" | "stopped";
 export type ChatFeedbackValue = 1 | -1;
 export type ChatLevel = "basic" | "standard" | "deep";
 
-export interface ChatLevelInfo {
-  level: ChatLevel;
-  label: string;
-  model: string;
-}
-
 export interface ChatStatus {
   provider: string;
   model: string;
@@ -322,7 +316,6 @@ export interface ChatStatus {
   /** True when messages leave the firm (e.g. OpenAI). */
   external: boolean;
   error: string | null;
-  levels?: ChatLevelInfo[];
 }
 
 export interface ChatMessage {

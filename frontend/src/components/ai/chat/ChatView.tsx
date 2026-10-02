@@ -15,15 +15,13 @@ import {
   setChatFeedback,
 } from "@/lib/api";
 import { AI_ROUTES } from "@/lib/ai";
-import { DEFAULT_CHAT_LEVEL, readStoredChatLevel, storeChatLevel } from "@/lib/chatLevels";
 import { streamChatMessage } from "@/lib/chatStream";
 import { saveBlob } from "@/lib/download";
 import { buildHref } from "@/lib/filters";
-import type { AppUser, ChatConversationSummary, ChatFeedbackValue, ChatLevel, ChatMessageStatus, ChatRole, ChatStatus } from "@/types";
+import type { AppUser, ChatConversationSummary, ChatFeedbackValue, ChatMessageStatus, ChatRole, ChatStatus } from "@/types";
 import { AiHero } from "@/components/ai/AiHero";
 import { AiModelStatus } from "@/components/ai/AiModelStatus";
 import { ChatComposer } from "@/components/ai/chat/ChatComposer";
-import { ChatLevelPicker } from "@/components/ai/chat/ChatLevelPicker";
 import { ChatConversationList } from "@/components/ai/chat/ChatConversationList";
 import { ChatThread, type ChatThreadMessage } from "@/components/ai/chat/ChatThread";
 import { ErrorState } from "@/components/ErrorState";
@@ -40,7 +38,6 @@ function draftMessage(
   role: ChatRole,
   content: string,
   status: ChatMessageStatus | null,
-  level: ChatLevel | null = null,
 ): ChatThreadMessage {
   return {
     id: `local-${role}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -48,7 +45,7 @@ function draftMessage(
     content,
     status,
     model: null,
-    level,
+    level: null,
     feedback: null,
     created_at: new Date().toISOString(),
   };
@@ -73,20 +70,10 @@ export function ChatView() {
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listOpen, setListOpen] = useState(false);
-  const [level, setLevel] = useState<ChatLevel>(DEFAULT_CHAT_LEVEL);
   const abortRef = useRef<AbortController | null>(null);
   // Set when a conversation is created by send(): its messages are already
   // on screen (optimistic + streaming), so it must not be reloaded.
   const skipLoadRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    setLevel(readStoredChatLevel());
-  }, []);
-
-  function changeLevel(next: ChatLevel) {
-    setLevel(next);
-    storeChatLevel(next);
-  }
 
   const refreshConversations = useCallback(
     () =>
@@ -172,7 +159,7 @@ export function ChatView() {
     }
 
     const userDraft = draftMessage("user", content, null);
-    const assistantDraft = draftMessage("assistant", "", "streaming", level);
+    const assistantDraft = draftMessage("assistant", "", "streaming");
     let assistantId = assistantDraft.id;
     const updateAssistant = (change: (message: ChatThreadMessage) => ChatThreadMessage) =>
       setMessages((previous) =>
@@ -186,7 +173,6 @@ export function ChatView() {
 
     try {
       await streamChatMessage(conversationId, content, {
-        level,
         signal: controller.signal,
         onEvent: (event) => {
           switch (event.type) {
@@ -343,12 +329,6 @@ export function ChatView() {
             />
           </div>
           <div className="border-t border-surface-border p-3 sm:p-4">
-            <ChatLevelPicker
-              value={level}
-              levels={status?.levels ?? []}
-              disabled={composerDisabled || streaming}
-              onChange={changeLevel}
-            />
             <ChatComposer disabled={composerDisabled} streaming={streaming} onSend={send} onStop={stop} />
             <p className="mt-2 text-[11px] text-navy-500">{CHAT_DISCLAIMER}</p>
             {status?.external && <p className="mt-1 text-[11px] font-medium text-amber-700">{CHAT_EXTERNAL_WARNING}</p>}

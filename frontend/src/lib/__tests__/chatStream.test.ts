@@ -103,13 +103,4 @@ describe("streamChatMessage", () => {
     await expect(promise).rejects.toBeInstanceOf(ApiError);
     await expect(promise).rejects.toMatchObject({ status: 503, message: "Sohbet modeli yapılandırılmamış." });
   });
-
-  it("sends the chosen level in the request body", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, body: bodyFrom([]) });
-    global.fetch = fetchMock as unknown as typeof fetch;
-
-    await streamChatMessage("c1", "Merhaba", { level: "basic", onEvent: () => {} });
-
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ content: "Merhaba", level: "basic" });
-  });
 });
