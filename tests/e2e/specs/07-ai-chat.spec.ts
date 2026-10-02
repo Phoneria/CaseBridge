@@ -27,3 +27,22 @@ test("ask the legal assistant, rate the answer and reopen the conversation", asy
   await expect(conversations.getByRole("button", { name: /^Kira artışı nasıl hesaplanır\?/ })).toHaveAttribute("aria-current", "true");
   await expect(page.getByRole("button", { name: "Faydalı", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
+
+test("answer at the Basit level and keep the choice after a reload", async ({ page }) => {
+  await login(page, DEMO_LAWYER);
+  await page.goto("/ai/sohbet");
+
+  const levels = page.getByRole("radiogroup", { name: "Yanıt seviyesi" });
+  await levels.getByRole("radio", { name: "Basit" }).click();
+  await expect(levels.getByRole("radio", { name: "Basit" })).toHaveAttribute("aria-checked", "true");
+
+  await page.getByLabel("Mesajınız").fill("İstinaf süresi kaç gündür?");
+  await page.keyboard.press("Enter");
+
+  await expect(page.getByText("Sorunuz: İstinaf süresi kaç gündür?")).toBeVisible();
+  await expect(page.getByText("Basit · mock")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("radio", { name: "Basit" })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByText("Basit · mock")).toBeVisible();
+});
