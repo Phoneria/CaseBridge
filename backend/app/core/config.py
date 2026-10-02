@@ -62,6 +62,14 @@ class Settings(BaseSettings):
     chat_model: str = "gpt-4o-mini"
     chat_timeout_seconds: float = 60
     chat_history_limit: int = 20
+    # Answer levels (Basit / Standart / Kapsamlı). CHAT_MODEL is the Standart
+    # model; an empty level model falls back to CHAT_MODEL.
+    chat_model_basic: str = ""
+    chat_model_deep: str = ""
+    chat_max_tokens_basic: int = 500
+    chat_max_tokens_standard: int = 1500
+    chat_max_tokens_deep: int = 4000
+    chat_history_limit_basic: int = 6
 
     storage_dir: str = "storage"
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB

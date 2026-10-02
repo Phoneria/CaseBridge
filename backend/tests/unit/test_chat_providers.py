@@ -7,10 +7,11 @@ import openai
 import pytest
 
 from app.ai.chat.factory import get_chat_provider, get_chat_provider_status
+from app.ai.chat.levels import CHAT_LEVELS, DEFAULT_CHAT_LEVEL, get_level_config
 from app.ai.chat.mock_provider import MockChatProvider
 from app.ai.chat.ollama_provider import OllamaChatProvider
 from app.ai.chat.openai_provider import OpenAIChatProvider
-from app.ai.chat.prompt import CHAT_PROMPT_VERSION, CHAT_SYSTEM_PROMPT
+from app.ai.chat.prompt import CHAT_PROMPT_VERSION, CHAT_SYSTEM_PROMPT, system_prompt_for
 from app.ai.errors import AIProviderConfigError, AIProviderError, AIProviderTimeoutError
 from app.core.config import settings
 
@@ -117,6 +118,11 @@ def test_factory_defaults_to_mock(monkeypatch):
         "configured": True,
         "external": False,
         "error": None,
+        "levels": [
+            {"level": "basic", "label": "Basit", "model": "mock"},
+            {"level": "standard", "label": "Standart", "model": "mock"},
+            {"level": "deep", "label": "Kapsamlı", "model": "mock"},
+        ],
     }
 
 
@@ -263,3 +269,110 @@ def test_ollama_non_http_errors_map_to_provider_error(exc):
 
     with pytest.raises(AIProviderError):
         list(_ollama(handler).stream(MESSAGES))
+
+
+def _level_settings(monkeypatch, **overrides):
+    values = {
+        "chat_model": "model-standard",
+        "chat_model_basic": "",
+        "chat_model_deep": "",
+        "chat_max_tokens_basic": 500,
+        "chat_max_tokens_standard": 1500,
+        "chat_max_tokens_deep": 4000,
+        "chat_history_limit_basic": 6,
+        "chat_history_limit": 20,
+    }
+    values.update(overrides)
+    for key, value in values.items():
+        monkeypatch.setattr(settings, key, value)
+
+
+def test_levels_are_ordered_and_default_to_standard():
+    assert CHAT_LEVELS == ("basic", "standard", "deep")
+    assert DEFAULT_CHAT_LEVEL == "standard"
+
+
+def test_empty_level_models_fall_back_to_chat_model(monkeypatch):
+    _level_settings(monkeypatch)
+    basic = get_level_config("basic")
+    standard = get_level_config("standard")
+    deep = get_level_config("deep")
+    assert (basic.model, standard.model, deep.model) == ("model-standard",) * 3
+    assert (basic.label, standard.label, deep.label) == ("Basit", "Standart", "Kapsamlı")
+    assert (basic.max_tokens, standard.max_tokens, deep.max_tokens) == (500, 1500, 4000)
+    assert (basic.history_limit, standard.history_limit, deep.history_limit) == (6, 20, 20)
+
+
+def test_level_specific_models_are_used(monkeypatch):
+    _level_settings(monkeypatch, chat_model_basic=" model-basic ", chat_model_deep="model-deep")
+    assert get_level_config("basic").model == "model-basic"
+    assert get_level_config("deep").model == "model-deep"
+    assert get_level_config().model == "model-standard"
+
+
+def test_unknown_level_raises():
+    with pytest.raises(ValueError):
+        get_level_config("expert")
+
+
+def test_system_prompt_for_levels():
+    assert system_prompt_for("standard") == CHAT_SYSTEM_PROMPT
+    assert system_prompt_for(None) == CHAT_SYSTEM_PROMPT
+    basic = system_prompt_for("basic")
+    deep = system_prompt_for("deep")
+    assert basic.startswith(CHAT_SYSTEM_PROMPT + "\n\n") and "kısa ve öz" in basic
+    assert deep.startswith(CHAT_SYSTEM_PROMPT + "\n\n") and "adım adım" in deep
+
+
+def test_openai_passes_max_completion_tokens_only_when_set():
+    completions = _FakeCompletions([_openai_chunk("ok")])
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    provider = OpenAIChatProvider(api_key="k", model="m", client=client, max_tokens=500)
+    assert "".join(provider.stream(MESSAGES)) == "ok"
+    assert completions.kwargs["max_completion_tokens"] == 500
+
+    completions = _FakeCompletions([_openai_chunk("ok")])
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    list(OpenAIChatProvider(api_key="k", model="m", client=client).stream(MESSAGES))
+    assert "max_completion_tokens" not in completions.kwargs
+
+
+def test_ollama_passes_num_predict_only_when_set():
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(json.loads(request.content))
+        return httpx.Response(200, text=json.dumps({"message": {"content": "ok"}, "done": True}) + "\n")
+
+    list(OllamaChatProvider(base_url="http://ollama.test", model="m", transport=httpx.MockTransport(handler), max_tokens=300).stream(MESSAGES))
+    list(OllamaChatProvider(base_url="http://ollama.test", model="m", transport=httpx.MockTransport(handler)).stream(MESSAGES))
+    assert seen[0]["options"] == {"num_predict": 300}
+    assert "options" not in seen[1]
+
+
+def test_factory_builds_a_provider_per_level(monkeypatch):
+    _level_settings(monkeypatch, chat_model_basic="model-basic")
+    monkeypatch.setattr(settings, "chat_provider", "openai")
+    monkeypatch.setattr(settings, "openai_api_key", "sk-test")
+    basic = get_chat_provider("basic")
+    assert (basic.model, basic.max_tokens) == ("model-basic", 500)
+    standard = get_chat_provider()
+    assert (standard.model, standard.max_tokens) == ("model-standard", 1500)
+
+    monkeypatch.setattr(settings, "chat_provider", "mock")
+    mock = get_chat_provider("deep")
+    assert isinstance(mock, MockChatProvider)
+    assert (mock.model, mock.max_tokens) == ("mock", 4000)
+
+
+def test_status_lists_levels_with_models(monkeypatch):
+    _level_settings(monkeypatch, chat_model_deep="model-deep")
+    monkeypatch.setattr(settings, "chat_provider", "openai")
+    monkeypatch.setattr(settings, "openai_api_key", None)
+    status = get_chat_provider_status()
+    assert status["configured"] is False
+    assert status["levels"] == [
+        {"level": "basic", "label": "Basit", "model": "model-standard"},
+        {"level": "standard", "label": "Standart", "model": "model-standard"},
+        {"level": "deep", "label": "Kapsamlı", "model": "model-deep"},
+    ]

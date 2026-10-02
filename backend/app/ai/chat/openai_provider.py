@@ -16,11 +16,19 @@ class OpenAIChatProvider(ChatProvider):
     provider = "openai"
     external = True
 
-    def __init__(self, api_key: str, model: str, timeout_seconds: float = 60.0, client: Optional[Any] = None):
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        timeout_seconds: float = 60.0,
+        client: Optional[Any] = None,
+        max_tokens: Optional[int] = None,
+    ):
         self.model = model
         self._api_key = api_key
         self._timeout = timeout_seconds
         self._client = client
+        self.max_tokens = max_tokens
         self.last_usage = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
@@ -28,11 +36,13 @@ class OpenAIChatProvider(ChatProvider):
         try:
             if self._client is None:
                 self._client = openai.OpenAI(api_key=self._api_key, timeout=self._timeout)
+            limits = {"max_completion_tokens": self.max_tokens} if self.max_tokens else {}
             response = self._client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 stream=True,
                 stream_options={"include_usage": True},
+                **limits,
             )
             for chunk in response:
                 usage = getattr(chunk, "usage", None)

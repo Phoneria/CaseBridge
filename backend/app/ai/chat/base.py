@@ -19,6 +19,8 @@ class ChatProvider(ABC):
     model: str = ""
     #: True when messages leave the firm (hosted API); False for local models.
     external: bool = True
+    #: Upper bound on reply tokens for this provider instance (None = provider default).
+    max_tokens: Optional[int] = None
     #: {"prompt_tokens", "completion_tokens"} after a finished stream, when reported.
     last_usage: Optional[dict] = None
 

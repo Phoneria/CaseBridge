@@ -9,10 +9,17 @@ class MockChatProvider(ChatProvider):
     provider = "mock"
     external = False
 
-    def __init__(self, model: str = "mock", chunks: Optional[list[str]] = None, fail_after: Optional[int] = None):
+    def __init__(
+        self,
+        model: str = "mock",
+        chunks: Optional[list[str]] = None,
+        fail_after: Optional[int] = None,
+        max_tokens: Optional[int] = None,
+    ):
         self.model = model
         self._chunks = chunks
         self._fail_after = fail_after
+        self.max_tokens = max_tokens
         self.calls: list[list[ChatTurn]] = []
         self.last_usage = None
 

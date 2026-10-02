@@ -18,16 +18,20 @@ class OllamaChatProvider(ChatProvider):
         model: str,
         timeout_seconds: float = 60.0,
         transport: Optional[httpx.BaseTransport] = None,
+        max_tokens: Optional[int] = None,
     ):
         self.model = model
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout_seconds
         self._transport = transport
+        self.max_tokens = max_tokens
         self.last_usage = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
         self.last_usage = None
         payload = {"model": self.model, "messages": messages, "stream": True, "think": False}
+        if self.max_tokens:
+            payload["options"] = {"num_predict": self.max_tokens}
         try:
             with httpx.Client(timeout=self._timeout, transport=self._transport) as client:
                 with client.stream("POST", f"{self._base_url}/api/chat", json=payload) as response:
