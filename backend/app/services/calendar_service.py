@@ -71,16 +71,22 @@ class CalendarService:
     def update_event(self, event: CalendarEvent, payload: CalendarEventUpdate, today: date) -> CalendarEvent:
         updates = payload.model_dump(exclude_unset=True)
         self._check_references(event.law_firm_id, updates.get("case_id"), updates.get("assignee_id"))
+        old_hearing = _hearing_anchor(event)
         for field, value in updates.items():
             setattr(event, field, value)
         event.starts_at = _normalize_start(event.starts_at, event.all_day)
+        if old_hearing is not None:
+            self._release_hearing_day(event, *old_hearing, today)
         case = self._case_in_firm(event.case_id, event.law_firm_id) if event.case_id else None
         _sync_next_hearing(event, case, today)
         self.db.commit()
         self.db.refresh(event)
         return event
 
-    def delete_event(self, event: CalendarEvent) -> None:
+    def delete_event(self, event: CalendarEvent, today: date) -> None:
+        old_hearing = _hearing_anchor(event)
+        if old_hearing is not None:
+            self._release_hearing_day(event, *old_hearing, today)
         self.db.delete(event)
         self.db.commit()
 
@@ -147,6 +153,27 @@ class CalendarService:
         return {user_id: full_name for user_id, full_name in rows}
 
     # ----- helpers -----
+
+    def _release_hearing_day(self, event: CalendarEvent, case_id: str, day: date, today: date) -> None:
+        """The event no longer holds `day` for `case_id` (moved, retyped,
+        re-linked or deleted). If the case's next_hearing_date was that day,
+        recompute it from the case's other upcoming hearing events."""
+        case = self._case_in_firm(case_id, event.law_firm_id)
+        if case is None or case.next_hearing_date != day:
+            return
+        earliest = (
+            self.db.query(CalendarEvent.starts_at)
+            .filter(
+                CalendarEvent.law_firm_id == event.law_firm_id,
+                CalendarEvent.case_id == case_id,
+                CalendarEvent.event_type == CalendarEventType.HEARING,
+                CalendarEvent.id != event.id,
+                CalendarEvent.starts_at >= datetime.combine(today, time.min),
+            )
+            .order_by(CalendarEvent.starts_at)
+            .first()
+        )
+        case.next_hearing_date = earliest[0].date() if earliest else None
 
     def _case_in_firm(self, case_id: str, law_firm_id: str) -> Optional[Case]:
         return self.db.query(Case).filter(Case.id == case_id, Case.law_firm_id == law_firm_id).first()
@@ -241,3 +268,10 @@ def _sync_next_hearing(event: CalendarEvent, case: Optional[Case], today: date) 
         return
     if case.next_hearing_date is None or case.next_hearing_date > day:
         case.next_hearing_date = day
+
+
+def _hearing_anchor(event: CalendarEvent) -> Optional[tuple[str, date]]:
+    """(case_id, day) the event currently pins as a case hearing, if any."""
+    if event.event_type != CalendarEventType.HEARING or not event.case_id:
+        return None
+    return event.case_id, event.starts_at.date()

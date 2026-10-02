@@ -101,5 +101,5 @@ def delete_calendar_event(
     db: Session = Depends(get_db),
 ):
     service = CalendarService(db)
-    service.delete_event(_owned_event_or_404(service, event_id, law_firm_id))
+    service.delete_event(_owned_event_or_404(service, event_id, law_firm_id), today=local_today())
     return Response(status_code=status.HTTP_204_NO_CONTENT)

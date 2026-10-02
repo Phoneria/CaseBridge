@@ -390,3 +390,22 @@ def test_a_started_timed_event_gets_no_same_day_reminder(world):
     titles = sorted(d.title for d in ReminderService(world["db"]).collect_due(NOW))
 
     assert titles == ["Sonra", "Tüm gün"]
+
+
+def test_moving_a_hearing_event_later_sends_no_reminder_for_the_old_day(world):
+    from app.schemas.calendar import CalendarEventCreate, CalendarEventUpdate
+    from app.services.calendar_service import CalendarService
+
+    calendar = CalendarService(world["db"])
+    event = calendar.create_event(
+        world["firm"].id, world["creator"].id,
+        CalendarEventCreate(title="Duruşma", event_type="hearing", starts_at=datetime(2026, 10, 5, 10, 0),
+                            case_id=world["case"].id),
+        TODAY,
+    )
+    calendar.update_event(event, CalendarEventUpdate(starts_at=datetime(2026, 10, 20, 10, 0)), TODAY)
+    outbox = Outbox()
+
+    ReminderService(world["db"], sender=outbox).send_due(datetime(2026, 10, 4, 9, 0))
+
+    assert outbox.messages == []

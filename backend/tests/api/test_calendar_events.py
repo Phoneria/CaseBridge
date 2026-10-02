@@ -212,3 +212,98 @@ def test_moving_a_hearing_event_earlier_updates_the_case(client, two_firms_two_u
 
     assert response.status_code == 200
     assert _next_hearing(client, headers, case["id"]) == "2099-04-20"
+
+
+def _phantom_hearing_days(client, headers, case_id):
+    items = client.get("/calendar?from=2099-01-01&to=2099-12-31", headers=headers).json()
+    return [item["date"] for item in items if item["id"] == f"hearing:{case_id}"]
+
+
+def test_moving_a_hearing_event_later_moves_the_case_date_and_leaves_no_phantom(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+
+    response = client.patch(f"/calendar/events/{event['id']}", json={"starts_at": "2099-06-20T09:00:00"}, headers=headers)
+
+    assert response.status_code == 200
+    assert _next_hearing(client, headers, case["id"]) == "2099-06-20"
+    assert "2099-05-10" not in _phantom_hearing_days(client, headers, case["id"])
+
+
+def test_deleting_the_only_hearing_event_clears_the_case_date(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+
+    assert client.delete(f"/calendar/events/{event['id']}", headers=headers).status_code == 204
+
+    assert _next_hearing(client, headers, case["id"]) is None
+    assert _phantom_hearing_days(client, headers, case["id"]) == []
+
+
+def test_deleting_one_of_two_hearing_events_falls_back_to_the_other(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    first = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    _hearing(client, headers, case["id"], "2099-07-01T10:00:00")
+
+    assert client.delete(f"/calendar/events/{first['id']}", headers=headers).status_code == 204
+
+    assert _next_hearing(client, headers, case["id"]) == "2099-07-01"
+
+
+def test_changing_a_hearing_to_a_meeting_clears_or_recomputes_the_case_date(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    only = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    client.patch(f"/calendar/events/{only['id']}", json={"event_type": "meeting"}, headers=headers)
+    assert _next_hearing(client, headers, case["id"]) is None
+
+    other_case = _create_case(client, headers, case_number="2026/904")
+    early = _hearing(client, headers, other_case["id"], "2099-05-10T10:00:00")
+    _hearing(client, headers, other_case["id"], "2099-08-01T10:00:00")
+    client.patch(f"/calendar/events/{early['id']}", json={"event_type": "meeting"}, headers=headers)
+    assert _next_hearing(client, headers, other_case["id"]) == "2099-08-01"
+
+
+def test_moving_a_hearing_event_to_another_case_recomputes_old_and_sets_new(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    old_case = _create_case(client, headers)
+    new_case = _create_case(client, headers, case_number="2026/905")
+    event = _hearing(client, headers, old_case["id"], "2099-05-10T10:00:00")
+
+    response = client.patch(f"/calendar/events/{event['id']}", json={"case_id": new_case["id"]}, headers=headers)
+
+    assert response.status_code == 200
+    assert _next_hearing(client, headers, old_case["id"]) is None
+    assert _next_hearing(client, headers, new_case["id"]) == "2099-05-10"
+
+
+def test_a_case_date_that_differs_from_the_events_old_day_is_left_alone(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers, next_hearing_date="2099-04-01")
+    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
+
+    client.patch(f"/calendar/events/{event['id']}", json={"starts_at": "2099-06-20T09:00:00"}, headers=headers)
+    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
+    client.delete(f"/calendar/events/{event['id']}", headers=headers)
+    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
+
+
+def test_patch_with_an_assignee_from_another_firm_is_404_and_changes_nothing(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures)
+    event = _create_event(client, headers, assignee_id=fixtures["user_a"].id).json()
+
+    response = client.patch(
+        f"/calendar/events/{event['id']}",
+        json={"assignee_id": fixtures["user_b"].id, "title": "Değişti"},
+        headers=headers,
+    )
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    after = client.get(f"/calendar/events/{event['id']}", headers=headers).json()
+    assert after["assignee_id"] == fixtures["user_a"].id
+    assert after["title"] == "Müvekkil toplantısı"
