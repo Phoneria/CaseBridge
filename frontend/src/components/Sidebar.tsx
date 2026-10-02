@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AiMark } from "@/components/ai/AiMark";
+import { AiStatusIndicator } from "@/components/AiStatusIndicator";
 import { AI_ROUTES } from "@/lib/ai";
 
 interface NavItem {
@@ -116,8 +117,9 @@ export function Sidebar() {
           })}
         </div>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto flex flex-col gap-2 pt-4">
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
+          <AiStatusIndicator />
         </div>
       </nav>
     </aside>

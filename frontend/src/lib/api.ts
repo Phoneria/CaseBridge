@@ -19,6 +19,8 @@ import type {
   ActivityItem,
   CalendarEvent,
   AIStatus,
+  AIConnectivity,
+  AIUsage,
   AppUser,
   DocumentWithCase,
   Task,
@@ -103,6 +105,14 @@ export async function listUsers(): Promise<AppUser[]> {
 
 export async function getAiStatus(): Promise<AIStatus> {
   return request("/system/ai-status");
+}
+
+export async function getAiUsage(): Promise<AIUsage> {
+  return request("/system/ai-usage");
+}
+
+export async function getAiConnectivity(force = false): Promise<AIConnectivity> {
+  return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
 export interface CaseListFilters {

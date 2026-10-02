@@ -6,6 +6,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => pathname,
 }));
 
+vi.mock("@/lib/api", () => ({
+  getAiConnectivity: vi.fn(() => new Promise(() => {})),
+}));
+
 import { Sidebar } from "@/components/Sidebar";
 
 beforeEach(() => {
@@ -51,6 +55,11 @@ describe("Sidebar", () => {
     pathname = "/ai/sohbet";
     render(<Sidebar />);
     expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("renders the AI connection indicator", () => {
+    render(<Sidebar />);
+    expect(screen.getByRole("button", { name: /AI kontrol ediliyor/ })).toBeInTheDocument();
   });
 
   it("renders the CaseBridge brand name", () => {

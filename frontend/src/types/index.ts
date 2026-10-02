@@ -91,6 +91,28 @@ export interface AIStatus {
   error: string | null;
 }
 
+export interface AIConnectivityCheck {
+  name: string;
+  provider: string;
+  model: string;
+  reachable: boolean;
+  detail: string | null;
+}
+
+export interface AIUsage {
+  period_start: string;
+  used_tokens: number;
+  budget_tokens: number | null;
+  remaining_percent: number | null;
+  unlimited: boolean;
+}
+
+export interface AIConnectivity {
+  connected: boolean;
+  checks: AIConnectivityCheck[];
+  checked_at: number;
+}
+
 export interface DocumentItem {
   id: string;
   case_id: string;

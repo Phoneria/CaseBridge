@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     chat_auto_level: bool = True
     chat_classifier_timeout_seconds: PositiveFloat = 8
 
+    # Monthly token budget for the sidebar AI usage box. 0 = no budget set.
+    ai_monthly_token_budget: int = 0
+
     storage_dir: str = "storage"
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB
 
