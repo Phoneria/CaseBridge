@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
+import { answerLabel } from "@/lib/chatLevels";
 import { AiMark } from "@/components/ai/AiMark";
 import type { ChatFeedbackValue, ChatMessage } from "@/types";
 
@@ -53,6 +54,7 @@ function AssistantMessage({
   // Only the reply streaming in this session is live; a "streaming" row loaded
   // from the server will never finish, so it reads as stopped.
   const streaming = message.status === "streaming" && live;
+  const label = answerLabel(message.level, message.model);
   const stopped = message.status === "stopped" || (message.status === "streaming" && !live);
   return (
     <li className="flex gap-3">
@@ -97,6 +99,7 @@ function AssistantMessage({
             <FeedbackButton label="Faydalı değil" icon="👎" pressed={message.feedback === -1} onClick={() => onFeedback(message, -1)} />
           </div>
         )}
+        {label && <p className="mt-1 text-[11px] text-navy-500">{label}</p>}
       </div>
     </li>
   );

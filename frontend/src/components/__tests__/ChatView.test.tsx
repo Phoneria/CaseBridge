@@ -52,6 +52,7 @@ function conversationList() {
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   resetNav();
   setUrl("/ai/sohbet");
   Object.values(api).forEach((fn) => fn.mockReset());
@@ -316,5 +317,72 @@ describe("ChatView", () => {
     rerender(<ChatView />);
 
     await waitFor(() => expect(streamSignal!.aborted).toBe(true));
+  });
+
+  it("sends the selected level and remembers it", async () => {
+    streamChatMessage.mockResolvedValue(undefined);
+    render(<ChatView />);
+
+    const group = screen.getByRole("radiogroup", { name: "Yanıt seviyesi" });
+    expect(within(group).getByRole("radio", { name: "Standart" })).toHaveAttribute("aria-checked", "true");
+
+    await userEvent.click(within(group).getByRole("radio", { name: "Basit" }));
+    expect(within(group).getByRole("radio", { name: "Basit" })).toHaveAttribute("aria-checked", "true");
+    expect(window.localStorage.getItem("casebridge_chat_level")).toBe("basic");
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Selam{Enter}");
+    await waitFor(() =>
+      expect(streamChatMessage).toHaveBeenCalledWith("new1", "Selam", expect.objectContaining({ level: "basic" })),
+    );
+  });
+
+  it("restores the stored level", async () => {
+    window.localStorage.setItem("casebridge_chat_level", "deep");
+    render(<ChatView />);
+    await waitFor(() => expect(screen.getByRole("radio", { name: "Kapsamlı" })).toHaveAttribute("aria-checked", "true"));
+  });
+
+  it("shows each level's model in its hint", async () => {
+    api.getChatStatus.mockResolvedValue({
+      ...STATUS,
+      levels: [
+        { level: "basic", label: "Basit", model: "model-basic" },
+        { level: "standard", label: "Standart", model: "model-standard" },
+        { level: "deep", label: "Kapsamlı", model: "model-deep" },
+      ],
+    });
+    render(<ChatView />);
+    await waitFor(() => expect(screen.getByRole("radio", { name: "Basit" }).getAttribute("title")).toContain("model-basic"));
+    expect(screen.getByRole("radio", { name: "Kapsamlı" }).getAttribute("title")).toContain("model-deep");
+  });
+
+  it("labels answers with their level and model", async () => {
+    api.getChatConversation.mockResolvedValue({
+      ...CONVERSATION,
+      messages: [
+        msg({ id: "u1", role: "user", content: "Süre nedir?", status: null, model: null }),
+        msg({ id: "a1", content: "İki haftadır.", level: "basic", model: "gpt-4o-mini" }),
+      ],
+    });
+    setUrl("/ai/sohbet?sohbet=c1");
+    render(<ChatView />);
+    expect(await screen.findByText("Basit · gpt-4o-mini")).toBeInTheDocument();
+  });
+
+  it("locks the level while a reply streams", async () => {
+    streamChatMessage.mockImplementation(
+      (_id: string, content: string, { signal, onEvent }: StreamOptions) =>
+        new Promise((_resolve, reject) => {
+          onEvent({ type: "start", user_message: msg({ id: "u9", role: "user", content, status: null, model: null }), assistant_message_id: "a9" });
+          signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        }),
+    );
+    render(<ChatView />);
+
+    await userEvent.type(screen.getByLabelText("Mesajınız"), "Soru{Enter}");
+
+    await waitFor(() => expect(screen.getByRole("radio", { name: "Basit" })).toBeDisabled());
+    await userEvent.click(screen.getByRole("button", { name: "Durdur" }));
+    await waitFor(() => expect(screen.getByRole("radio", { name: "Basit" })).toBeEnabled());
   });
 });
