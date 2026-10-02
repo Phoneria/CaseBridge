@@ -6,7 +6,7 @@ this module must never log secret values.
 """
 from typing import Literal, Optional
 
-from pydantic import PositiveInt, field_validator
+from pydantic import PositiveFloat, PositiveInt, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     chat_max_tokens_standard: PositiveInt = 1500
     chat_max_tokens_deep: PositiveInt = 4000
     chat_history_limit_basic: PositiveInt = 6
+    # Automatic level selection: each question is first classified by the
+    # Basit model. Off -> every question uses Standart.
+    chat_auto_level: bool = True
+    chat_classifier_timeout_seconds: PositiveFloat = 8
 
     storage_dir: str = "storage"
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB

@@ -8,10 +8,11 @@ from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
 from app.ai.chat.factory import get_chat_provider_status
-from app.ai.chat.levels import ChatLevel, get_level_config
+from app.ai.chat.levels import DEFAULT_CHAT_LEVEL, ChatLevel, get_level_config
 from app.ai.chat.prompt import system_prompt_for
 from app.ai.errors import AIProviderConfigError
-from app.api.deps import get_chat_provider_resolver, get_chat_session_factory, get_current_user
+from app.api.deps import get_chat_level_classifier, get_chat_provider_resolver, get_chat_session_factory, get_current_user
+from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.schemas.chat import (
@@ -99,17 +100,21 @@ def send_message(
     db: Session = Depends(get_db),
     resolve_provider: Callable[[str], ChatProvider] = Depends(get_chat_provider_resolver),
     session_factory: Callable[[], Session] = Depends(get_chat_session_factory),
+    classify: Callable[[str, Optional[str]], str] = Depends(get_chat_level_classifier),
 ):
     service = ChatService(db)
     conversation = _owned_conversation_or_404(service, conversation_id, current_user)
+    level = DEFAULT_CHAT_LEVEL
+    if settings.chat_auto_level:
+        level = classify(payload.content, service.last_user_content(conversation))
     try:
-        provider = resolve_provider(payload.level)
+        provider = resolve_provider(level)
     except AIProviderConfigError:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Sohbet modeli yapılandırılmamış.")
-    level_config = get_level_config(payload.level)
+    level_config = get_level_config(level)
     user_message = service.add_user_message(conversation, payload.content)
-    assistant = service.create_assistant_placeholder(conversation, provider.model, payload.level)
-    history = service.build_history(conversation, level_config.history_limit, system_prompt_for(payload.level))
+    assistant = service.create_assistant_placeholder(conversation, provider.model, level)
+    history = service.build_history(conversation, level_config.history_limit, system_prompt_for(level))
     start_event = {
         "type": "start",
         "user_message": ChatMessageOut.model_validate(user_message).model_dump(mode="json"),

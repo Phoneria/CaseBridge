@@ -118,11 +118,6 @@ def test_factory_defaults_to_mock(monkeypatch):
         "configured": True,
         "external": False,
         "error": None,
-        "levels": [
-            {"level": "basic", "label": "Basit", "model": "mock"},
-            {"level": "standard", "label": "Standart", "model": "mock"},
-            {"level": "deep", "label": "Kapsamlı", "model": "mock"},
-        ],
     }
 
 
@@ -363,19 +358,6 @@ def test_factory_builds_a_provider_per_level(monkeypatch):
     mock = get_chat_provider("deep")
     assert isinstance(mock, MockChatProvider)
     assert (mock.model, mock.max_tokens) == ("mock", 4000)
-
-
-def test_status_lists_levels_with_models(monkeypatch):
-    _level_settings(monkeypatch, chat_model_deep="model-deep")
-    monkeypatch.setattr(settings, "chat_provider", "openai")
-    monkeypatch.setattr(settings, "openai_api_key", None)
-    status = get_chat_provider_status()
-    assert status["configured"] is False
-    assert status["levels"] == [
-        {"level": "basic", "label": "Basit", "model": "model-standard"},
-        {"level": "standard", "label": "Standart", "model": "model-standard"},
-        {"level": "deep", "label": "Kapsamlı", "model": "model-deep"},
-    ]
 
 
 def test_mock_reports_finish_reason_after_a_full_stream():

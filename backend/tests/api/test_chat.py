@@ -4,7 +4,7 @@ import json
 import pytest
 
 from app.ai.chat.mock_provider import MockChatProvider
-from app.api.deps import get_chat_provider_resolver, get_chat_session_factory
+from app.api.deps import get_chat_level_classifier, get_chat_provider_resolver, get_chat_session_factory
 from app.services.chat_service import make_title
 
 
@@ -39,11 +39,6 @@ def test_chat_status_reports_mock_provider(client, two_firms_two_users):
         "configured": True,
         "external": False,
         "error": None,
-        "levels": [
-            {"level": "basic", "label": "Basit", "model": "mock"},
-            {"level": "standard", "label": "Standart", "model": "mock"},
-            {"level": "deep", "label": "Kapsamlı", "model": "mock"},
-        ],
     }
 
 
@@ -104,22 +99,29 @@ def chat_provider(client, db_session):
 
     provider = MockChatProvider(model="gpt-test")
     provider.requested_levels = []
+    provider.classified_level = "standard"
+    provider.classify_calls = []
 
     def resolve(level):
         provider.requested_levels.append(level)
         return provider
 
+    def classify(question, previous_question=None):
+        provider.classify_calls.append((question, previous_question))
+        return provider.classified_level
+
     app.dependency_overrides[get_chat_provider_resolver] = lambda: resolve
+    app.dependency_overrides[get_chat_level_classifier] = lambda: classify
     app.dependency_overrides[get_chat_session_factory] = lambda: (lambda: db_session)
     yield provider
     app.dependency_overrides.pop(get_chat_provider_resolver, None)
+    app.dependency_overrides.pop(get_chat_level_classifier, None)
     app.dependency_overrides.pop(get_chat_session_factory, None)
 
 
-def _send(client, headers, conversation_id, content, level=None):
-    body = {"content": content} if level is None else {"content": content, "level": level}
+def _send(client, headers, conversation_id, content):
     with client.stream(
-        "POST", f"/chat/conversations/{conversation_id}/messages", json=body, headers=headers
+        "POST", f"/chat/conversations/{conversation_id}/messages", json={"content": content}, headers=headers
     ) as response:
         assert response.status_code == 200
         assert response.headers["content-type"].startswith("text/event-stream")
@@ -343,51 +345,54 @@ def test_export_skips_blank_liked_answers(client, two_firms_two_users, chat_prov
     assert client.get("/chat/export.jsonl", headers=headers).text == ""
 
 
-def test_send_defaults_to_standard_level(client, two_firms_two_users, chat_provider):
-    from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT
+def test_classifier_level_drives_provider_history_and_storage(client, two_firms_two_users, chat_provider, monkeypatch):
+    from app.ai.chat.prompt import system_prompt_for
+    from app.core.config import settings
 
+    monkeypatch.setattr(settings, "chat_history_limit_basic", 2)
+    chat_provider.classified_level = "basic"
+    headers = _headers(client, two_firms_two_users)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    for question in ("Bir", "İki", "Üç"):
+        events = _send(client, headers, conversation["id"], question)
+
+    assert chat_provider.classify_calls == [("Bir", None), ("İki", "Bir"), ("Üç", "İki")]
+    assert chat_provider.requested_levels == ["basic", "basic", "basic"]
+    sent = chat_provider.calls[-1]
+    assert sent[0] == {"role": "system", "content": system_prompt_for("basic")}
+    assert len(sent) == 3  # system + last 2 messages
+    assert events[-1]["message"]["level"] == "basic"
+
+
+def test_auto_level_off_skips_classifier(client, two_firms_two_users, chat_provider, monkeypatch):
+    from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "chat_auto_level", False)
+    chat_provider.classified_level = "deep"
     headers = _headers(client, two_firms_two_users)
     conversation = client.post("/chat/conversations", headers=headers).json()
 
     events = _send(client, headers, conversation["id"], "Soru")
 
+    assert chat_provider.classify_calls == []
     assert chat_provider.requested_levels == ["standard"]
     assert chat_provider.calls[-1][0] == {"role": "system", "content": CHAT_SYSTEM_PROMPT}
     assert events[-1]["message"]["level"] == "standard"
-    assert events[-1]["message"]["model"] == "gpt-test"
 
 
-def test_basic_level_sends_short_history_and_instruction(client, two_firms_two_users, chat_provider, monkeypatch):
-    from app.ai.chat.prompt import system_prompt_for
-    from app.core.config import settings
-
-    monkeypatch.setattr(settings, "chat_history_limit_basic", 2)
+def test_level_in_request_body_is_ignored(client, two_firms_two_users, chat_provider):
     headers = _headers(client, two_firms_two_users)
     conversation = client.post("/chat/conversations", headers=headers).json()
-    for question in ("Bir", "İki", "Üç"):
-        events = _send(client, headers, conversation["id"], question, level="basic")
-
-    sent = chat_provider.calls[-1]
-    assert sent[0] == {"role": "system", "content": system_prompt_for("basic")}
-    assert len(sent) == 3  # system + last 2 messages
-    assert sent[-1]["content"] == "Üç"
-    assert chat_provider.requested_levels == ["basic", "basic", "basic"]
-    assert events[-1]["message"]["level"] == "basic"
-    stored = client.get(f"/chat/conversations/{conversation['id']}", headers=headers).json()["messages"]
-    assert [m["level"] for m in stored if m["role"] == "assistant"] == ["basic", "basic", "basic"]
-    assert all(m["level"] is None for m in stored if m["role"] == "user")
-
-
-def test_send_rejects_unknown_level(client, two_firms_two_users, chat_provider):
-    headers = _headers(client, two_firms_two_users)
-    conversation = client.post("/chat/conversations", headers=headers).json()
-    response = client.post(
+    with client.stream(
+        "POST",
         f"/chat/conversations/{conversation['id']}/messages",
-        json={"content": "Soru", "level": "expert"},
+        json={"content": "Soru", "level": "deep"},
         headers=headers,
-    )
-    assert response.status_code == 422
-    assert chat_provider.requested_levels == []
+    ) as response:
+        assert response.status_code == 200
+        "".join(response.iter_text())
+    assert chat_provider.requested_levels == ["standard"]
 
 
 def test_export_uses_each_answers_level_prompt_and_filters_by_level(client, two_firms_two_users, chat_provider, db_session):
@@ -397,8 +402,10 @@ def test_export_uses_each_answers_level_prompt_and_filters_by_level(client, two_
     _make_admin(db_session, fixtures)
     headers = _headers(client, fixtures)
     conversation = client.post("/chat/conversations", headers=headers).json()
-    basic = _send(client, headers, conversation["id"], "Kısa soru", level="basic")[-1]["message"]
-    deep = _send(client, headers, conversation["id"], "Uzun soru", level="deep")[-1]["message"]
+    chat_provider.classified_level = "basic"
+    basic = _send(client, headers, conversation["id"], "Kısa soru")[-1]["message"]
+    chat_provider.classified_level = "deep"
+    deep = _send(client, headers, conversation["id"], "Uzun soru")[-1]["message"]
     for answer in (basic, deep):
         client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers)
 

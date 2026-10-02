@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -6,6 +6,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
+from app.ai.chat.classifier import classify_chat_level
 from app.ai.chat.factory import get_chat_provider
 from app.ai.provider_factory import get_llm_provider
 from app.ai.providers.base import LLMProvider
@@ -65,6 +66,11 @@ def get_chat_provider_resolver() -> Callable[[str], ChatProvider]:
     """Returns level -> configured chat provider (raises AIProviderConfigError
     when misconfigured). Overridable in tests."""
     return get_chat_provider
+
+
+def get_chat_level_classifier() -> Callable[[str, Optional[str]], str]:
+    """(question, previous_question) -> level. Overridable in tests."""
+    return classify_chat_level
 
 
 def get_chat_session_factory() -> Callable[[], Session]:

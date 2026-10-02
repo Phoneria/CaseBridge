@@ -88,6 +88,12 @@ class ChatService:
         self.repo.save(message)
         return message
 
+    def last_user_content(self, conversation: ChatConversation) -> Optional[str]:
+        for message in reversed(self.repo.list_messages(conversation.id)):
+            if message.role == ChatRole.USER:
+                return message.content
+        return None
+
     def build_history(
         self, conversation: ChatConversation, limit: int, system_prompt: str = CHAT_SYSTEM_PROMPT
     ) -> list[ChatTurn]:

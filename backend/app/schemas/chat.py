@@ -3,16 +3,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.ai.chat.levels import ChatLevel
 from app.models.chat import ChatMessageStatus, ChatRole
-
-
-class ChatLevelOut(BaseModel):
-    model_config = ConfigDict(protected_namespaces=())
-
-    level: str
-    label: str
-    model: str
 
 
 class ChatStatusOut(BaseModel):
@@ -21,7 +12,6 @@ class ChatStatusOut(BaseModel):
     configured: bool
     external: bool
     error: Optional[str] = None
-    levels: list[ChatLevelOut] = []
 
 
 class ChatMessageOut(BaseModel):
@@ -64,7 +54,6 @@ class ChatConversationRename(BaseModel):
 
 class ChatMessageCreate(BaseModel):
     content: str = Field(min_length=1, max_length=8000)
-    level: ChatLevel = "standard"
 
     @field_validator("content")
     @classmethod
