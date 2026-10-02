@@ -6,8 +6,10 @@ raises AIProviderConfigError rather than quietly degrading to
 MockProvider, so startup / the AI health status can report it clearly.
 """
 import json
+from typing import Callable, Optional
 
 from app.ai.errors import AIProviderConfigError
+from app.ai.llm_levels import level_for_task
 from app.ai.providers.base import LLMProvider
 from app.ai.providers.mock_provider import MockProvider
 from app.ai.providers.openai_provider import OpenAIProvider
@@ -48,7 +50,8 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
 )
 
 
-def get_llm_provider() -> LLMProvider:
+def build_llm_provider(model: str) -> LLMProvider:
+    """One real provider (LLM_PROVIDER=qwen/openai/ollama) for `model`."""
     provider_name = settings.llm_provider
 
     if provider_name == "qwen":
@@ -67,7 +70,7 @@ def get_llm_provider() -> LLMProvider:
         return QwenProvider(
             api_key=settings.qwen_api_key,
             base_url=settings.qwen_base_url,
-            model=settings.qwen_model,
+            model=model,
             timeout_seconds=settings.qwen_timeout_seconds,
             enable_thinking=settings.qwen_enable_thinking,
             max_output_tokens=settings.qwen_max_output_tokens,
@@ -80,17 +83,92 @@ def get_llm_provider() -> LLMProvider:
                 "Set OPENAI_API_KEY in your environment, or set "
                 "LLM_PROVIDER=mock to run without a real AI provider."
             )
-        return OpenAIProvider(api_key=settings.openai_api_key, model=settings.openai_model)
+        return OpenAIProvider(api_key=settings.openai_api_key, model=model)
 
     if provider_name == "ollama":
         return OllamaProvider(
             base_url=settings.ollama_base_url,
-            model=settings.ollama_model,
+            model=model,
             timeout_seconds=settings.ollama_timeout_seconds,
             temperature=settings.ollama_temperature,
             num_ctx=settings.ollama_num_ctx,
         )
 
+    raise AIProviderConfigError(f"LLM_PROVIDER={provider_name} has no real provider to build.")
+
+
+def standard_llm_model() -> str:
+    name = settings.llm_provider
+    if name == "qwen":
+        return settings.qwen_model
+    if name == "openai":
+        return settings.openai_model
+    if name == "ollama":
+        return settings.ollama_model
+    return "mock"
+
+
+def llm_model_for_level(level: str) -> str:
+    override = {"basic": settings.llm_model_basic, "deep": settings.llm_model_deep}.get(level, "")
+    return (override or "").strip() or standard_llm_model()
+
+
+class LevelRoutedProvider(LLMProvider):
+    """One LLMProvider per configured model; `for_task(task)` returns the one
+    for the task's level. Direct `complete()` calls use Standart. Usage and
+    latency reflect the most recently used underlying provider."""
+
+    def __init__(self, build: Callable[[str], LLMProvider], model_for_level: Callable[[str], str]):
+        self._build = build
+        self._model_for_level = model_for_level
+        self._providers: dict[str, LLMProvider] = {}
+        self._last: Optional[LLMProvider] = None
+        self._standard = self._provider_for_level("standard")  # surfaces config errors now
+
+    def _provider_for_level(self, level: str) -> LLMProvider:
+        model = self._model_for_level(level)
+        if model not in self._providers:
+            self._providers[model] = self._build(model)
+        return self._providers[model]
+
+    def for_task(self, task: str) -> LLMProvider:
+        return _TrackedProvider(self, self._provider_for_level(level_for_task(task)))
+
+    def complete(self, system_prompt: str, user_prompt: str, *, response_format: Optional[str] = None) -> str:
+        return _TrackedProvider(self, self._standard).complete(
+            system_prompt, user_prompt, response_format=response_format
+        )
+
+    @property
+    def last_usage(self) -> Optional[dict]:  # type: ignore[override]
+        return self._last.last_usage if self._last is not None else None
+
+    @property
+    def last_latency_ms(self) -> Optional[float]:  # type: ignore[override]
+        return self._last.last_latency_ms if self._last is not None else None
+
+
+class _TrackedProvider(LLMProvider):
+    def __init__(self, router: LevelRoutedProvider, inner: LLMProvider):
+        self._router = router
+        self._inner = inner
+
+    def complete(self, system_prompt: str, user_prompt: str, *, response_format: Optional[str] = None) -> str:
+        self._router._last = self._inner
+        return self._inner.complete(system_prompt, user_prompt, response_format=response_format)
+
+    @property
+    def last_usage(self) -> Optional[dict]:  # type: ignore[override]
+        return self._inner.last_usage
+
+    @property
+    def last_latency_ms(self) -> Optional[float]:  # type: ignore[override]
+        return self._inner.last_latency_ms
+
+
+def get_llm_provider() -> LLMProvider:
+    if settings.llm_provider in ("qwen", "openai", "ollama"):
+        return LevelRoutedProvider(build=build_llm_provider, model_for_level=llm_model_for_level)
     return MockProvider(default_response=_MOCK_DISABLED_RESPONSE)
 
 

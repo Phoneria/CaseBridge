@@ -31,13 +31,14 @@ def test_llm_provider_openai_without_key_raises_config_error(monkeypatch):
 
 
 def test_llm_provider_openai_with_key_returns_openai_provider(monkeypatch):
-    from app.ai.provider_factory import get_llm_provider
+    from app.ai.provider_factory import LevelRoutedProvider, build_llm_provider, get_llm_provider
     from app.ai.providers.openai_provider import OpenAIProvider
     from app.core.config import settings
 
     monkeypatch.setattr(settings, "llm_provider", "openai")
     monkeypatch.setattr(settings, "openai_api_key", "sk-fake-key")
-    assert isinstance(get_llm_provider(), OpenAIProvider)
+    assert isinstance(get_llm_provider(), LevelRoutedProvider)
+    assert isinstance(build_llm_provider(settings.openai_model), OpenAIProvider)
 
 
 def test_llm_provider_qwen_without_api_key_raises_config_error(monkeypatch):
@@ -67,7 +68,7 @@ def test_llm_provider_qwen_without_base_url_raises_config_error(monkeypatch):
 
 
 def test_llm_provider_qwen_with_full_config_returns_qwen_provider(monkeypatch):
-    from app.ai.provider_factory import get_llm_provider
+    from app.ai.provider_factory import LevelRoutedProvider, build_llm_provider, get_llm_provider
     from app.ai.providers.qwen_provider import QwenProvider
     from app.core.config import settings
 
@@ -75,7 +76,8 @@ def test_llm_provider_qwen_with_full_config_returns_qwen_provider(monkeypatch):
     monkeypatch.setattr(settings, "qwen_api_key", "sk-qwen-fake")
     monkeypatch.setattr(settings, "qwen_base_url", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
     monkeypatch.setattr(settings, "qwen_model", "qwen3-32b")
-    provider = get_llm_provider()
+    assert isinstance(get_llm_provider(), LevelRoutedProvider)
+    provider = build_llm_provider("qwen3-32b")
     assert isinstance(provider, QwenProvider)
 
 

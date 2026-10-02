@@ -140,3 +140,27 @@ def test_on_stage_callback_is_optional():
     )
     result = run_simulation(case_context={"case_name": "Test"}, provider=provider)
     assert result.assessment.score == 65
+
+
+class _RecordingRouter:
+    """Stands in for LevelRoutedProvider: records the task of every call."""
+
+    def __init__(self, inner):
+        self.inner = inner
+        self.tasks = []
+        self.last_usage = None
+
+    def for_task(self, task):
+        self.tasks.append(task)
+        return self.inner
+
+
+def test_each_analysis_stage_asks_for_its_task_level():
+    from app.ai.engine import run_simulation
+    from app.ai.providers.mock_provider import MockProvider
+
+    router = _RecordingRouter(
+        MockProvider(responses=["RESEARCHER_OUTPUT", "PLAINTIFF_OUTPUT", "DEFENDANT_OUTPUT", VALID_JUDGE_JSON])
+    )
+    run_simulation(case_context={"case_name": "Test"}, provider=router)
+    assert router.tasks == ["analysis.research", "analysis.plaintiff", "analysis.defendant", "analysis.judge"]

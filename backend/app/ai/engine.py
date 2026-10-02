@@ -10,6 +10,7 @@ prompt builders - never on the `openai` SDK directly (section 10, 27).
 from typing import Callable, Optional
 
 from app.ai.agents import defendant, judge, plaintiff, researcher
+from app.ai.llm_levels import provider_for
 from app.ai.providers.base import LLMProvider
 from app.ai.schemas import AIAnalysisResult, parse_ai_response
 
@@ -42,25 +43,25 @@ def run_simulation(
             on_stage(name)
 
     _stage("research")
-    researcher_notes = provider.complete(
+    researcher_notes = provider_for(provider, "analysis.research").complete(
         system_prompt=researcher.SYSTEM_PROMPT,
         user_prompt=researcher.build_user_prompt(case_context),
     )
 
     _stage("plaintiff")
-    plaintiff_argument = provider.complete(
+    plaintiff_argument = provider_for(provider, "analysis.plaintiff").complete(
         system_prompt=plaintiff.SYSTEM_PROMPT,
         user_prompt=plaintiff.build_user_prompt(case_context, researcher_notes),
     )
 
     _stage("defendant")
-    defendant_argument = provider.complete(
+    defendant_argument = provider_for(provider, "analysis.defendant").complete(
         system_prompt=defendant.SYSTEM_PROMPT,
         user_prompt=defendant.build_user_prompt(case_context, researcher_notes, plaintiff_argument),
     )
 
     _stage("judge")
-    judge_raw_response = provider.complete(
+    judge_raw_response = provider_for(provider, "analysis.judge").complete(
         system_prompt=judge.SYSTEM_PROMPT,
         user_prompt=judge.build_user_prompt(
             case_context, researcher_notes, plaintiff_argument, defendant_argument

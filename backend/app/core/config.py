@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     ollama_temperature: float = 0.2
     ollama_num_ctx: int = 16384
 
+    # Task-based model levels for analysis and courtroom (Basit / Standart /
+    # Kapsamlı). Standart is the provider's own model (OPENAI_MODEL,
+    # OLLAMA_MODEL or QWEN_MODEL); an empty level model falls back to it.
+    llm_model_basic: str = ""
+    llm_model_deep: str = ""
+
     # Chat assistant (Hukuk Asistanı). Independent of LLM_PROVIDER so the
     # chat can run on OpenAI (or a fine-tuned model) while analysis and
     # courtroom stay on the local model. Defaults to "mock" so tests never

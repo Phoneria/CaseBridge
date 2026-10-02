@@ -158,3 +158,66 @@ def test_wrong_phase_action_and_foreign_evidence_are_rejected(
         },
     )
     assert foreign_evidence.status_code == 422
+
+
+class _RecordingRouter:
+    def __init__(self, inner):
+        self.inner = inner
+        self.tasks = []
+        self.last_usage = None
+        self.last_latency_ms = 0.0
+
+    def for_task(self, task):
+        self.tasks.append(task)
+        return self.inner
+
+    def complete(self, system_prompt, user_prompt, *, response_format=None):
+        return self.inner.complete(system_prompt, user_prompt, response_format=response_format)
+
+
+def test_courtroom_calls_ask_for_their_task_levels(client, two_firms_two_users, db_session):
+    scenario = _seed_and_pick(db_session)
+    headers = _headers(client, two_firms_two_users)
+    created = client.post(
+        "/courtroom-sessions",
+        headers=headers,
+        json={"scenario_id": scenario.id, "chosen_role": "plaintiff"},
+    ).json()
+    router = _RecordingRouter(CourtroomMockProvider())
+    moves = [
+        ("opening", "Sayın hâkim, transfer geri ödenmek üzere yapılmıştır.", None),
+        ("argument", "Tarafların sonraki yazışmaları borç ilişkisini doğrulamaktadır.", None),
+        ("evidence", "Dekonttaki vade ve borç açıklaması taraf iradesini gösterir.", "BORC_DEKONT"),
+        ("answer", "Yazılı kayıtlar birbirini tamamlamakta ve zaman çizelgesiyle uyuşmaktadır.", None),
+        ("rebuttal", "İş planı imzasız bir taslaktır; borç kayıtlarını ortadan kaldırmaz.", None),
+        ("closing", "Kabul edilen dekont ve tutarlı beyanlar uyarınca talebimizin kabulünü isteriz.", None),
+    ]
+    for index, (action, content, evidence) in enumerate(moves):
+        response = client.post(
+            f"/courtroom-sessions/{created['id']}/moves",
+            headers=headers,
+            json={
+                "action_type": action,
+                "content": content,
+                "evidence_code": evidence,
+                "client_request_id": f"request-{index:02d}",
+            },
+        )
+        assert response.status_code == 202
+        process_one_pending_courtroom_turn(db_session, router)
+
+    assert router.tasks == ["courtroom.opponent", "courtroom.judge_interim"] * 5 + [
+        "courtroom.opponent",
+        "courtroom.judge_final",
+    ]
+
+
+def test_json_repair_uses_the_repair_task():
+    from app.ai.courtroom import OpponentOutput, parse_with_one_repair
+
+    router = _RecordingRouter(CourtroomMockProvider())
+    try:
+        parse_with_one_repair(router, "bozuk çıktı", OpponentOutput)
+    except Exception:
+        pass  # the mock may not produce a valid repair; only the routing matters here
+    assert router.tasks == ["courtroom.json_repair"]

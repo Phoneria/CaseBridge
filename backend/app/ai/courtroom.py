@@ -6,6 +6,7 @@ from typing import Literal, TypeVar
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.ai.errors import AIResponseValidationError
+from app.ai.llm_levels import provider_for
 from app.ai.providers.base import LLMProvider
 from app.models.courtroom import CourtroomPhase, CourtroomRole
 
@@ -95,7 +96,7 @@ def parse_structured_output(raw: str, schema: type[T]) -> T:
 
 
 def repair_structured_output(provider: LLMProvider, raw: str, schema: type[T]) -> T:
-    repaired = provider.complete(
+    repaired = provider_for(provider, "courtroom.json_repair").complete(
         system_prompt=(
             "COURTROOM_JSON_REPAIR\nSen yalnızca JSON düzelten bir doğrulayıcısın. "
             "Yeni olay veya içerik ekleme. Yalnızca verilen içeriği hedef şemaya dönüştür. "

@@ -17,6 +17,7 @@ from app.ai.courtroom import (
     build_opponent_prompts,
     parse_with_one_repair,
 )
+from app.ai.llm_levels import provider_for
 from app.ai.providers.base import LLMProvider
 from app.core.config import settings
 from app.models.courtroom import (
@@ -194,7 +195,9 @@ class CourtroomService:
             transcript=transcript,
             phase=session.phase,
         )
-        opponent_raw = provider.complete(system_prompt, user_prompt, response_format="json_object")
+        opponent_raw = provider_for(provider, "courtroom.opponent").complete(
+            system_prompt, user_prompt, response_format="json_object"
+        )
         opponent = parse_with_one_repair(provider, opponent_raw, OpponentOutput)
         # Referring to a document is not the same as formally presenting it.
         # Only accept the model's evidence_code during the evidence phase and
@@ -249,7 +252,9 @@ class CourtroomService:
                 evidence_record=evidence_record,
                 chosen_role=session.chosen_role,
             )
-            final_raw = provider.complete(judge_system, judge_user, response_format="json_object")
+            final_raw = provider_for(provider, "courtroom.judge_final").complete(
+                judge_system, judge_user, response_format="json_object"
+            )
             final = parse_with_one_repair(provider, final_raw, JudgeFinalOutput)
             total = (
                 final.relevance_score
@@ -302,7 +307,9 @@ class CourtroomService:
                 evidence_record=evidence_record,
                 phase=session.phase,
             )
-            judge_raw = provider.complete(judge_system, judge_user, response_format="json_object")
+            judge_raw = provider_for(provider, "courtroom.judge_interim").complete(
+                judge_system, judge_user, response_format="json_object"
+            )
             judge = parse_with_one_repair(provider, judge_raw, JudgeInterimOutput)
             valid_codes = set(session.presented_evidence_codes)
             admitted = [code for code in judge.admitted_evidence_codes if code in valid_codes]
