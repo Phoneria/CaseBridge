@@ -102,4 +102,50 @@ describe("chat API", () => {
     expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({ title: "Yeni ad" });
     expect(JSON.parse(fetchMock.mock.calls[3][1].body)).toEqual({ value: -1 });
   });
+
+  it("sends the calendar range and calls the calendar event, task reminder and notification endpoints", async () => {
+    window.localStorage.setItem("casebridge_token", "valid-token");
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const api = await import("@/lib/api");
+    const payload = {
+      title: "Toplantı",
+      event_type: "meeting" as const,
+      starts_at: "2026-10-07T14:30:00",
+      all_day: false,
+      duration_minutes: 60,
+      location: null,
+      notes: null,
+      case_id: null,
+      assignee_id: null,
+      reminder_days: [1],
+    };
+
+    await api.getCalendarEvents({ from: "2026-10-01", to: "2026-10-31" });
+    await api.createCalendarEvent(payload);
+    await api.updateCalendarEvent("e1", { reminder_days: [] });
+    await api.updateTaskReminders("t1", [3, 1]);
+    await api.getNotificationStatus();
+    await api.sendTestEmail();
+
+    const calls = fetchMock.mock.calls.map(([url, init]) => [url, init?.method ?? "GET", init?.body ?? null]);
+    expect(calls).toEqual([
+      ["http://localhost:8000/calendar?from=2026-10-01&to=2026-10-31", "GET", null],
+      ["http://localhost:8000/calendar/events", "POST", JSON.stringify(payload)],
+      ["http://localhost:8000/calendar/events/e1", "PATCH", JSON.stringify({ reminder_days: [] })],
+      ["http://localhost:8000/tasks/t1", "PATCH", JSON.stringify({ reminder_days: [3, 1] })],
+      ["http://localhost:8000/notifications/status", "GET", null],
+      ["http://localhost:8000/notifications/test-email", "POST", null],
+    ]);
+  });
+
+  it("deleteCalendarEvent accepts a 204 response", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204, json: async () => { throw new Error("no body"); } });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const { deleteCalendarEvent } = await import("@/lib/api");
+
+    await expect(deleteCalendarEvent("e1")).resolves.toBeUndefined();
+    expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:8000/calendar/events/e1");
+    expect(fetchMock.mock.calls[0][1].method).toBe("DELETE");
+  });
 });

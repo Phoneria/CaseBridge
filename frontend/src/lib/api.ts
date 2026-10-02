@@ -18,6 +18,10 @@ import type {
   SimulationWithCase,
   ActivityItem,
   CalendarEvent,
+  CalendarEventPayload,
+  CalendarEventRecord,
+  NotificationStatus,
+  TestEmailResult,
   AIStatus,
   AppUser,
   DocumentWithCase,
@@ -275,8 +279,37 @@ export async function getRecentActivity(limit = 10): Promise<ActivityItem[]> {
   return request(`/activity?limit=${limit}`);
 }
 
-export async function getCalendarEvents(): Promise<CalendarEvent[]> {
-  return request(`/calendar`);
+export async function getCalendarEvents(range?: { from: string; to: string }): Promise<CalendarEvent[]> {
+  const query = range ? `?${new URLSearchParams({ from: range.from, to: range.to }).toString()}` : "";
+  return request(`/calendar${query}`);
+}
+
+export async function createCalendarEvent(payload: CalendarEventPayload): Promise<CalendarEventRecord> {
+  return request("/calendar/events", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateCalendarEvent(
+  id: string,
+  payload: Partial<CalendarEventPayload>,
+): Promise<CalendarEventRecord> {
+  return request(`/calendar/events/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function deleteCalendarEvent(id: string): Promise<void> {
+  return request(`/calendar/events/${id}`, { method: "DELETE" });
+}
+
+/** null resets the task to the default reminder (1 day before). */
+export async function updateTaskReminders(taskId: string, reminderDays: number[] | null): Promise<Task> {
+  return request(`/tasks/${taskId}`, { method: "PATCH", body: JSON.stringify({ reminder_days: reminderDays }) });
+}
+
+export async function getNotificationStatus(): Promise<NotificationStatus> {
+  return request("/notifications/status");
+}
+
+export async function sendTestEmail(): Promise<TestEmailResult> {
+  return request("/notifications/test-email", { method: "POST" });
 }
 
 async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {

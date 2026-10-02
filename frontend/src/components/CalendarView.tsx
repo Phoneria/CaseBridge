@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { getCalendarEvents } from "@/lib/api";
-import { parseCalendarQuery, type CalendarQuery } from "@/lib/filters";
+import { monthRange } from "@/lib/calendar";
+import { parseCalendarQuery } from "@/lib/filters";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
 import type { CalendarEvent } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
@@ -36,6 +37,12 @@ function currentMonthStart() {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
+type LegacyShow = "durusma" | "gorev";
+
+function legacyShow(tur: string | undefined): LegacyShow | undefined {
+  return tur === "durusma" || tur === "gorev" ? tur : undefined;
+}
+
 export function CalendarView() {
   const { params, setParams } = useUrlParams();
   const quickViewHref = useQuickViewHref();
@@ -43,17 +50,17 @@ export function CalendarView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleMonth, setVisibleMonth] = useState(() => monthFromKey(parseCalendarQuery(params).ay) ?? currentMonthStart());
-  const [show, setShow] = useState<CalendarQuery["goster"]>(() => parseCalendarQuery(params).goster);
+  const [show, setShow] = useState<LegacyShow | undefined>(() => legacyShow(parseCalendarQuery(params).tur));
   const [openDay, setOpenDay] = useState<string | null>(null);
 
+  const range = monthRange(visibleMonth);
   useEffect(() => {
-    setLoading(true);
     setError(null);
-    getCalendarEvents()
+    getCalendarEvents({ from: range.from, to: range.to })
       .then(setEvents)
       .catch(() => setError("Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [range.from, range.to]);
 
   const year = visibleMonth.getFullYear();
   const month = visibleMonth.getMonth();
@@ -103,13 +110,14 @@ export function CalendarView() {
     goToMonth(currentMonthStart(), null);
   }
 
-  function toggleShow(kind: NonNullable<CalendarQuery["goster"]>) {
+  function toggleShow(kind: LegacyShow) {
     const next = show === kind ? undefined : kind;
     setShow(next);
-    setParams({ goster: next ?? null });
+    setParams({ tur: next ?? null, goster: null });
   }
 
   function eventHref(event: CalendarEvent) {
+    if (!event.case_id) return "/takvim";
     return quickViewHref(event.case_id, event.task_id ? { type: "gorev", id: event.task_id } : undefined);
   }
 
@@ -120,7 +128,7 @@ export function CalendarView() {
         key={key}
         href={eventHref(event)}
         scroll={false}
-        title={`${event.title} — ${event.case_name}`}
+        title={[event.title, event.case_name].filter(Boolean).join(" — ")}
         className={`block rounded-md border-l-2 px-2 py-1.5 text-[11px] leading-4 transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 ${
           hearing ? "border-red-500 bg-red-50 text-red-800" : "border-accent-500 bg-accent-50 text-accent-800"
         }`}

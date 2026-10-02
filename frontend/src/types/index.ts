@@ -48,6 +48,8 @@ export interface Task {
   assigned_to: string | null;
   created_at: string;
   completed_at: string | null;
+  /** null/absent -> default reminder 1 day before; [] -> no reminders. */
+  reminder_days?: number[] | null;
 }
 
 export interface TaskWithCase extends Task {
@@ -65,13 +67,74 @@ export interface ActivityItem {
   created_at: string;
 }
 
+export type CalendarEventType = "hearing" | "meeting" | "client_meeting" | "other";
+export type CalendarItemKind = "event" | "task" | "case_hearing";
+
+/** One row of GET /calendar: a calendar event, a pending task's due date or a case hearing. */
 export interface CalendarEvent {
-  event_type: "hearing" | "task";
-  date: string;
+  id: string; // "event:<id>" | "task:<id>" | "hearing:<case_id>"
+  kind: CalendarItemKind;
+  event_type: CalendarEventType | "task";
   title: string;
-  case_id: string;
-  case_name: string;
+  date: string; // YYYY-MM-DD
+  start: string | null; // naive local ISO datetime, timed events only
+  end: string | null;
+  all_day: boolean;
+  case_id: string | null;
+  case_name: string | null;
   task_id: string | null;
+  event_id: string | null;
+  assignee_id: string | null;
+  assignee_name: string | null;
+  location: string | null;
+  notes: string | null;
+  reminder_days: number[];
+  editable: boolean;
+}
+
+/** A stored calendar event (POST/GET/PATCH /calendar/events). */
+export interface CalendarEventRecord {
+  id: string;
+  title: string;
+  event_type: CalendarEventType;
+  starts_at: string;
+  all_day: boolean;
+  duration_minutes: number;
+  location: string | null;
+  notes: string | null;
+  case_id: string | null;
+  assignee_id: string | null;
+  created_by: string;
+  reminder_days: number[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CalendarEventPayload {
+  title: string;
+  event_type: CalendarEventType;
+  starts_at: string; // "YYYY-MM-DDTHH:MM:00", local time
+  all_day: boolean;
+  duration_minutes: number;
+  location: string | null;
+  notes: string | null;
+  case_id: string | null;
+  assignee_id: string | null;
+  reminder_days: number[];
+}
+
+export type EmailBackend = "console" | "smtp";
+
+export interface NotificationStatus {
+  email_backend: EmailBackend;
+  reminders_enabled: boolean;
+  reminder_send_hour: number;
+  timezone: string;
+}
+
+export interface TestEmailResult {
+  sent: boolean;
+  backend: EmailBackend;
 }
 
 export type UserRole = "admin" | "lawyer";
