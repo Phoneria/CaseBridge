@@ -294,3 +294,99 @@ def test_unexpected_sender_errors_are_recorded_without_stopping_the_run(world):
 
     assert (result.sent, result.failed) == (1, 1)
     assert {row.last_error for row in deliveries(world)} == {"RuntimeError", None}
+
+
+# ----- claim before send, firm scoping, started events -----
+
+
+def _fail_commit_once(db, monkeypatch, on_call, exc):
+    """Make the `on_call`-th commit of the session raise `exc` (after rolling back, like a real failure)."""
+    original = db.commit
+    state = {"calls": 0}
+
+    def commit():
+        state["calls"] += 1
+        if state["calls"] == on_call:
+            db.rollback()
+            raise exc
+        return original()
+
+    monkeypatch.setattr(db, "commit", commit)
+
+
+def test_a_conflicting_claim_skips_that_reminder_and_the_run_continues(world, monkeypatch):
+    from sqlalchemy.exc import IntegrityError
+
+    from app.models.calendar import ReminderDelivery
+
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id, title="A")
+    add_event(world, datetime(2026, 10, 3, 11, 0), [1], assignee_id=world["lawyer"].id, title="B")
+    outbox = Outbox()
+    _fail_commit_once(world["db"], monkeypatch, 1, IntegrityError("insert", {}, Exception("dup")))
+
+    result = ReminderService(world["db"], sender=outbox).send_due(NOW)
+
+    assert result.sent == 1
+    assert len(outbox.messages) == 1  # the claimed-by-someone-else reminder was not sent by us
+    assert world["db"].query(ReminderDelivery).count() == 1  # session still usable
+
+
+def test_a_failing_final_commit_does_not_abort_the_run(world, monkeypatch):
+    from sqlalchemy.exc import OperationalError
+
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id, title="A")
+    add_event(world, datetime(2026, 10, 3, 11, 0), [1], assignee_id=world["lawyer"].id, title="B")
+    outbox = Outbox()
+    # commit 1 = claim of the first reminder, commit 2 = its final status update
+    _fail_commit_once(world["db"], monkeypatch, 2, OperationalError("update", {}, Exception("lost")))
+
+    ReminderService(world["db"], sender=outbox).send_due(NOW)
+
+    assert len(outbox.messages) == 2
+    statuses = sorted((row.status.value, row.last_error) for row in deliveries(world))
+    assert statuses == [("failed", "InFlight"), ("sent", None)]  # the unconfirmed one costs a retry, not a duplicate
+
+
+def test_the_claim_is_written_before_the_email_is_sent(world):
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id)
+    seen = []
+
+    def sender(message):
+        seen.append([(r.status.value, r.attempts, r.last_error) for r in deliveries(world)])
+
+    ReminderService(world["db"], sender=sender).send_due(NOW)
+
+    assert seen == [[("failed", 1, "InFlight")]]
+    assert [(r.status.value, r.attempts) for r in deliveries(world)] == [("sent", 1)]
+
+
+def test_a_case_of_another_firm_is_not_exposed(world):
+    from app.models.case import Case, CaseStatus, CaseType
+
+    foreign = Case(law_firm_id=world["other_firm"].id, case_number="9", case_name="Gizli Yabancı Dava",
+                   client_name="X", case_type=CaseType.KIRA, status=CaseStatus.DEVAM_EDEN,
+                   assigned_lawyer_id=world["outsider"].id)
+    world["db"].add(foreign)
+    world["db"].commit()
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id, case_id=foreign.id)
+    add_task(world, date(2026, 10, 3), assigned_to=world["lawyer"].id).case_id = foreign.id
+    world["db"].commit()
+    outbox = Outbox()
+
+    ReminderService(world["db"], sender=outbox).send_due(NOW)
+
+    for message in outbox.messages:
+        assert "Gizli Yabancı Dava" not in message.text + message.html
+        assert foreign.id not in message.text
+
+
+def test_a_started_timed_event_gets_no_same_day_reminder(world):
+    from app.models.calendar import CalendarEventType
+
+    add_event(world, datetime(2026, 10, 2, 9, 0), [0], assignee_id=world["lawyer"].id, title="Başladı")
+    add_event(world, datetime(2026, 10, 2, 15, 0), [0], assignee_id=world["lawyer"].id, title="Sonra")
+    add_event(world, datetime(2026, 10, 2, 0, 0), [0], all_day=True, assignee_id=world["lawyer"].id, title="Tüm gün")
+
+    titles = sorted(d.title for d in ReminderService(world["db"]).collect_due(NOW))
+
+    assert titles == ["Sonra", "Tüm gün"]

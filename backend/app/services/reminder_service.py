@@ -11,6 +11,10 @@ Rules (occurrence day D, offset d in reminder_days, today = now_local.date()):
   - past occurrences (D < today) are skipped;
   - d is due when today == D - d, or when D - d < today < D (catch-up after
     downtime); several due offsets of one occurrence go out as ONE e-mail;
+  - a timed event that has already started gets no same-day (d=0) reminder;
+  - each reminder is claimed in the ledger (status failed, "InFlight",
+    attempts + 1) and committed BEFORE it is sent, then marked sent; a crash
+    in between costs one retry attempt instead of a duplicate e-mail;
   - an offset already `sent` is skipped; a `failed` one is retried while
     attempts < REMINDER_MAX_ATTEMPTS;
   - recipient: event assignee, else its creator; task assignee, else its
@@ -22,6 +26,8 @@ from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Callable, Optional
 
+from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -115,9 +121,11 @@ class ReminderService:
             user = users.get(candidate.recipient_id) if candidate.recipient_id else None
             if user is None or not user.is_active or not user.email or user.law_firm_id != candidate.law_firm_id:
                 continue
-            offsets = self._pending_offsets(
-                candidate, user.id, due_offsets(candidate.occurrence_date, candidate.reminder_days, today)
-            )
+            offsets = due_offsets(candidate.occurrence_date, candidate.reminder_days, today)
+            if candidate.source_type == ReminderSourceType.EVENT and candidate.starts_at is not None:
+                if candidate.starts_at <= now_local:
+                    offsets = [d for d in offsets if d != 0]
+            offsets = self._pending_offsets(candidate, user.id, offsets)
             if not offsets:
                 continue
             due.append(
@@ -143,6 +151,9 @@ class ReminderService:
         today = now_local.date()
         sent = failed = 0
         for due in self.collect_due(now_local):
+            rows = self._claim(due)
+            if rows is None:  # another worker claimed it, or the ledger is unavailable
+                continue
             error: Optional[str] = None
             try:
                 self.sender(build_reminder_email(due, today))
@@ -152,7 +163,7 @@ class ReminderService:
                 error = type(exc).__name__
             if error is not None:
                 logger.warning("Hatırlatma gönderilemedi (%s): %s", due.source_type.value, error)
-            self._record(due, error)
+            self._finish(rows, error)
             if error is None:
                 sent += 1
             else:
@@ -164,7 +175,7 @@ class ReminderService:
     def _event_candidates(self, today: date, last_day: date) -> list[_Candidate]:
         rows = (
             self.db.query(CalendarEvent, Case.case_name)
-            .outerjoin(Case, CalendarEvent.case_id == Case.id)
+            .outerjoin(Case, and_(CalendarEvent.case_id == Case.id, Case.law_firm_id == CalendarEvent.law_firm_id))
             .filter(
                 CalendarEvent.starts_at >= datetime.combine(today, time.min),
                 CalendarEvent.starts_at < datetime.combine(last_day + timedelta(days=1), time.min),
@@ -183,7 +194,7 @@ class ReminderService:
                 title=event.title,
                 starts_at=None if event.all_day else event.starts_at,
                 location=event.location,
-                case_id=event.case_id,
+                case_id=event.case_id if case_name is not None else None,
                 case_name=case_name,
             )
             for event, case_name in rows
@@ -192,7 +203,7 @@ class ReminderService:
     def _task_candidates(self, today: date, last_day: date) -> list[_Candidate]:
         rows = (
             self.db.query(Task, Case.case_name)
-            .join(Case, Task.case_id == Case.id)
+            .join(Case, and_(Task.case_id == Case.id, Case.law_firm_id == Task.law_firm_id))
             .filter(Task.status == TaskStatus.PENDING, Task.due_date >= today, Task.due_date <= last_day)
             .all()
         )
@@ -216,8 +227,10 @@ class ReminderService:
 
     def _hearing_candidates(self, today: date, last_day: date) -> list[_Candidate]:
         hearing_event_days = {
-            (case_id, starts_at.date())
-            for case_id, starts_at in self.db.query(CalendarEvent.case_id, CalendarEvent.starts_at)
+            (law_firm_id, case_id, starts_at.date())
+            for law_firm_id, case_id, starts_at in self.db.query(
+                CalendarEvent.law_firm_id, CalendarEvent.case_id, CalendarEvent.starts_at
+            )
             .filter(
                 CalendarEvent.event_type == CalendarEventType.HEARING,
                 CalendarEvent.case_id.isnot(None),
@@ -251,7 +264,7 @@ class ReminderService:
                 case_name=case.case_name,
             )
             for case in cases
-            if (case.id, case.next_hearing_date) not in hearing_event_days
+            if (case.law_firm_id, case.id, case.next_hearing_date) not in hearing_event_days
         ]
 
     # ----- deliveries -----
@@ -290,8 +303,19 @@ class ReminderService:
             )
         ]
 
-    def _record(self, due: DueReminder, error: Optional[str]) -> None:
+    def _commit(self, what: str) -> bool:
+        try:
+            self.db.commit()
+            return True
+        except SQLAlchemyError as exc:
+            self.db.rollback()
+            logger.warning("Hatırlatma kaydı yazılamadı (%s): %s", what, type(exc).__name__)
+            return False
+
+    def _claim(self, due: DueReminder) -> Optional[list[ReminderDelivery]]:
+        """Write the ledger rows (failed/InFlight, attempts + 1) before sending."""
         existing = self._deliveries(due.source_type, due.source_id, due.occurrence_date, due.recipient_id)
+        rows = []
         for days_before in due.days_before:
             row = existing.get(days_before)
             if row is None:
@@ -306,6 +330,23 @@ class ReminderService:
                 )
                 self.db.add(row)
             row.attempts += 1
+            row.status = ReminderDeliveryStatus.FAILED
+            row.last_error = "InFlight"
+            rows.append(row)
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            logger.info("Hatırlatma başka bir işlem tarafından alındı (%s)", due.source_type.value)
+            return None
+        except SQLAlchemyError as exc:
+            self.db.rollback()
+            logger.warning("Hatırlatma kaydı yazılamadı (claim): %s", type(exc).__name__)
+            return None
+        return rows
+
+    def _finish(self, rows: list[ReminderDelivery], error: Optional[str]) -> None:
+        for row in rows:
             if error is None:
                 row.status = ReminderDeliveryStatus.SENT
                 row.last_error = None
@@ -313,4 +354,4 @@ class ReminderService:
             else:
                 row.status = ReminderDeliveryStatus.FAILED
                 row.last_error = error[:300]
-        self.db.commit()
+        self._commit("final")
