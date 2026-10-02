@@ -127,6 +127,8 @@ describe("CalendarEventDrawer", () => {
     expect(screen.getByRole("button", { name: "Paneli kapat" })).toBeDisabled();
     await userEvent.keyboard("{Escape}");
     expect(handlers.onClose).not.toHaveBeenCalled();
+    await userEvent.click(document.querySelector('[aria-hidden="true"].absolute') as HTMLElement);
+    expect(handlers.onClose).not.toHaveBeenCalled();
   });
 
   it("moves focus to 'Evet, sil' and restores focus on unmount", async () => {

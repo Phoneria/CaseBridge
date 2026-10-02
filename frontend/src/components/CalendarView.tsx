@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getCalendarEvents, getCases, getMe, listUsers } from "@/lib/api";
 import {
@@ -41,10 +42,21 @@ function weekTitle(weekStart: Date): string {
 }
 
 export function CalendarView() {
-  const { params, setParams } = useUrlParams();
+  const { params } = useUrlParams();
+  const router = useRouter();
+  const pathname = usePathname() ?? "/takvim";
   // The URL is mirrored into local state so the page reacts immediately
   // (and so tests with a static mocked URL can still navigate).
-  const [search, setSearch] = useState(() => params.toString());
+  const urlSearch = params.toString();
+  const [search, setSearch] = useState(urlSearch);
+  const [syncedUrl, setSyncedUrl] = useState(urlSearch);
+  const searchRef = useRef(urlSearch);
+  if (syncedUrl !== urlSearch) {
+    // The URL changed from outside (sidebar link, back/forward, deep link): follow it.
+    setSyncedUrl(urlSearch);
+    setSearch(urlSearch);
+    searchRef.current = urlSearch;
+  }
   const query = useMemo(() => parseCalendarQuery(new URLSearchParams(search)), [search]);
   const view: CalendarViewSlug = query.gorunum ?? "ay";
 
@@ -54,9 +66,12 @@ export function CalendarView() {
   const weekStart = startOfWeek(query.hafta ? parseDateKey(query.hafta) : today);
   const range = view === "ay" ? monthRange(visibleMonth) : view === "hafta" ? weekRange(weekStart) : agendaRange(today);
 
-  const [items, setItems] = useState<CalendarEvent[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // The result is keyed to the range it was fetched for, so a different range never shows it.
+  const rangeKey = `${range.from}|${range.to}`;
+  const [result, setResult] = useState<{ key: string; items: CalendarEvent[]; error: string | null } | null>(null);
+  const loaded = result?.key === rangeKey;
+  const items = useMemo(() => (loaded ? result.items : []), [loaded, result]);
+  const error = loaded ? result.error : null;
   const [reloadToken, setReloadToken] = useState(0);
   const [me, setMe] = useState<AppUser | null>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -79,36 +94,29 @@ export function CalendarView() {
     let cancelled = false;
     getCalendarEvents({ from: range.from, to: range.to })
       .then((result) => {
-        if (!cancelled) {
-          setItems(result);
-          setError(null);
-        }
+        if (!cancelled) setResult({ key: rangeKey, items: result, error: null });
       })
       .catch(() => {
-        if (!cancelled) {
-          setItems([]);
-          setError("Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoaded(true);
+        if (!cancelled) setResult({ key: rangeKey, items: [], error: "Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin." });
       });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range.from, range.to, reloadToken]);
 
   const shown = useMemo(() => filterCalendarItems(items, query, me?.id ?? null), [items, query, me]);
   const selected = items.find((item) => item.id === selectedId) ?? null;
 
   function update(updates: ParamUpdates) {
-    const next = new URLSearchParams(search);
+    const next = new URLSearchParams(searchRef.current);
     for (const [key, value] of Object.entries(updates)) {
       if (value) next.set(key, value);
       else next.delete(key);
     }
-    setSearch(next.toString());
-    setParams(updates);
+    searchRef.current = next.toString();
+    setSearch(searchRef.current);
+    router.replace(searchRef.current ? `${pathname}?${searchRef.current}` : pathname, { scroll: false });
   }
 
   const reload = () => setReloadToken((token) => token + 1);

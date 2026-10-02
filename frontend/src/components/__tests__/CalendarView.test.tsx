@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const getCalendarEvents = vi.fn();
@@ -203,14 +203,15 @@ describe("CalendarView", () => {
   it("ignores a stale response when the range changes quickly", async () => {
     setUrl("/takvim?ay=2026-09");
     getCalendarEvents.mockResolvedValueOnce([]);
-    render(<CalendarView />);
+    const { rerender } = render(<CalendarView />);
     await screen.findByText("Takvim");
 
     let resolveSlow: (items: CalendarEvent[]) => void = () => undefined;
     getCalendarEvents.mockImplementationOnce(() => new Promise<CalendarEvent[]>((resolve) => { resolveSlow = resolve; }));
     getCalendarEvents.mockResolvedValueOnce([item({ id: "event:e2", event_id: "e2", title: "Kasım toplantısı", date: "2026-11-03", start: "2026-11-03T10:00:00", end: "2026-11-03T11:00:00" })]);
     await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" })); // Ekim: slow
-    await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" })); // Kasım: fast
+    setUrl("/takvim?ay=2026-11"); // Kasım: fast (URL changes before Ekim settles)
+    rerender(<CalendarView />);
     await waitFor(() => expect(getCalendarEvents).toHaveBeenCalledTimes(3));
     expect(await screen.findByText("Kasım toplantısı")).toBeInTheDocument();
 
@@ -220,15 +221,66 @@ describe("CalendarView", () => {
     expect(screen.getByText("Kasım toplantısı")).toBeInTheDocument();
   });
 
+  it("shows a loading state instead of the previous range while the next one loads", async () => {
+    setUrl("/takvim?ay=2026-09");
+    getCalendarEvents.mockResolvedValueOnce([task]);
+    render(<CalendarView />);
+    await screen.findByText("Dilekçe hazırla");
+
+    let resolveNext: (items: CalendarEvent[]) => void = () => undefined;
+    getCalendarEvents.mockImplementationOnce(() => new Promise<CalendarEvent[]>((resolve) => { resolveNext = resolve; }));
+    await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" }));
+
+    expect(screen.queryByText("Dilekçe hazırla")).not.toBeInTheDocument();
+    expect(screen.queryByText(/takvimde.*yok/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+
+    resolveNext([meeting]);
+    expect(await screen.findByText("Müvekkil toplantısı")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("does not show the previous range's items under an error", async () => {
     setUrl("/takvim?ay=2026-09");
     getCalendarEvents.mockResolvedValueOnce([task]).mockRejectedValueOnce(new Error("x"));
     render(<CalendarView />);
     await screen.findByText("Dilekçe hazırla");
-
     await userEvent.click(screen.getByRole("button", { name: "Sonraki ay" }));
-
     expect(await screen.findByText("Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin.")).toBeInTheDocument();
     expect(screen.queryByText("Dilekçe hazırla")).not.toBeInTheDocument();
+  });
+
+  it("follows external URL changes while mounted", async () => {
+    setUrl("/takvim?ay=2026-09");
+    serve([task, meeting]);
+    const { rerender } = render(<CalendarView />);
+    await screen.findByText("Dilekçe hazırla");
+
+    setUrl("/takvim?ay=2026-11&gorunum=hafta&hafta=2026-10-07");
+    rerender(<CalendarView />);
+
+    expect(await screen.findByText("5 – 11 Ekim 2026")).toBeInTheDocument();
+    expect(getCalendarEvents).toHaveBeenLastCalledWith({ from: "2026-10-05", to: "2026-10-11" });
+    expect(screen.getByRole("button", { name: "Hafta" })).toHaveAttribute("aria-pressed", "true");
+
+    setUrl("/takvim");
+    rerender(<CalendarView />);
+    expect(await screen.findByRole("button", { name: "Ay" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("merges two URL updates made in the same tick", async () => {
+    setUrl("/takvim?ay=2026-10");
+    serve([]);
+    render(<CalendarView />);
+    await screen.findByText("Takvim");
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+
+    await act(async () => {
+      screen.getByRole("button", { name: "Hafta" }).click();
+      screen.getByLabelText("Yalnızca benimkiler").click();
+    });
+
+    expect(nav.replace).toHaveBeenLastCalledWith(expect.stringContaining("benim=1"), { scroll: false });
+    expect(nav.replace).toHaveBeenLastCalledWith(expect.stringContaining("gorunum=hafta"), { scroll: false });
   });
 });
