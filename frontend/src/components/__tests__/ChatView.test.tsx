@@ -345,7 +345,7 @@ describe("ChatView", () => {
     render(<ChatView />);
 
     expect(
-      await screen.findByText("Yanıt uzunluk sınırında kesildi · daha kapsamlı bir seviyeyle tekrar sorabilirsiniz."),
+      await screen.findByText("Yanıt uzunluk sınırında kesildi · soruyu daraltarak tekrar sorabilirsiniz."),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/uzunluk sınırında kesildi/)).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Faydalı" })).toHaveLength(2);

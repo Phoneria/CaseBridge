@@ -134,7 +134,7 @@ async def test_empty_reply_cut_by_the_token_cap_is_an_error(db_session):
 
     assert events[-1] == {
         "type": "error",
-        "message": "Yanıt uzunluk sınırına ulaştı. Daha kapsamlı bir seviyeyle tekrar deneyin.",
+        "message": "Yanıt uzunluk sınırına ulaştı. Soruyu daraltarak tekrar deneyin.",
     }
     assert all(event["type"] != "done" for event in events)
     db_session.expire_all()

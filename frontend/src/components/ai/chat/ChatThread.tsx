@@ -95,7 +95,7 @@ function AssistantMessage({
         )}
         {message.status === "complete" && message.truncated && (
           <p className="mt-1.5 inline-flex rounded-lg bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-            Yanıt uzunluk sınırında kesildi · daha kapsamlı bir seviyeyle tekrar sorabilirsiniz.
+            Yanıt uzunluk sınırında kesildi · soruyu daraltarak tekrar sorabilirsiniz.
           </p>
         )}
         {message.status === "complete" && (

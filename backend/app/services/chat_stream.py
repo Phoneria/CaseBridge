@@ -61,7 +61,7 @@ def _persist(
 
 PERSIST_FAILED_MESSAGE = "Yanıt kaydedilemedi."
 DELETED_MESSAGE = "Sohbet silindiği için yanıt kaydedilemedi."
-LENGTH_LIMIT_MESSAGE = "Yanıt uzunluk sınırına ulaştı. Daha kapsamlı bir seviyeyle tekrar deneyin."
+LENGTH_LIMIT_MESSAGE = "Yanıt uzunluk sınırına ulaştı. Soruyu daraltarak tekrar deneyin."
 _FAILED = object()
 
 
