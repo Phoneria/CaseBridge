@@ -31,3 +31,19 @@ def test_migration_adds_calendar_events_and_task_reminder_days(tmp_path, monkeyp
     inspector = sa.inspect(sa.create_engine(url))
     assert "calendar_events" not in inspector.get_table_names()
     assert "reminder_days" not in {column["name"] for column in inspector.get_columns("tasks")}
+
+
+def test_migration_adds_reminder_deliveries(tmp_path, monkeypatch):
+    url = f"sqlite:///{tmp_path / 'migrations.db'}"
+    monkeypatch.setattr(settings, "database_url", url)
+    config = _alembic_config()
+
+    command.upgrade(config, "f3b5d7e9a1c2")
+    inspector = sa.inspect(sa.create_engine(url))
+    assert "reminder_deliveries" in inspector.get_table_names()
+    assert {c["name"] for c in inspector.get_unique_constraints("reminder_deliveries")} == {
+        "uq_reminder_deliveries_occurrence"
+    }
+
+    command.downgrade(config, "e2a4c6b8d0f1")
+    assert "reminder_deliveries" not in sa.inspect(sa.create_engine(url)).get_table_names()
