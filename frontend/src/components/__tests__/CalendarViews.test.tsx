@@ -73,6 +73,32 @@ describe("CalendarMonthView", () => {
   });
 });
 
+describe("CalendarMonthView popover", () => {
+  const busy = [1, 2, 3, 4, 5].map((n) => item({ id: `task:t${n}`, title: `Görev ${n}`, date: "2026-10-15", start: null, end: null, all_day: true }));
+  const renderBusy = () =>
+    render(<CalendarMonthView month={new Date(2026, 9, 1)} items={busy} todayKey="2026-10-02" onSelect={vi.fn()} onCreate={vi.fn()} />);
+
+  it("moves focus into the popover and closes on Escape, restoring focus to the trigger", async () => {
+    renderBusy();
+    const trigger = screen.getByRole("button", { name: "+2 daha" });
+    await userEvent.click(trigger);
+    const popover = screen.getByRole("dialog", { name: "15 Ekim olayları" });
+    expect(popover).toHaveFocus();
+
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+2 daha" })).toHaveFocus();
+  });
+
+  it("right-aligns the popover in the last columns", async () => {
+    // 15 Ekim 2026 is a Thursday (left-anchored); 17 Ekim is Saturday.
+    const sat = [1, 2, 3, 4].map((n) => item({ id: `task:s${n}`, title: `Cmt ${n}`, date: "2026-10-17", start: null, end: null, all_day: true }));
+    render(<CalendarMonthView month={new Date(2026, 9, 1)} items={sat} todayKey="2026-10-02" onSelect={vi.fn()} onCreate={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "+1 daha" }));
+    expect(screen.getByRole("dialog")).toHaveClass("right-1");
+  });
+});
+
 describe("CalendarWeekView", () => {
   it("puts untimed items in the all-day row and timed items in the hour grid", () => {
     render(

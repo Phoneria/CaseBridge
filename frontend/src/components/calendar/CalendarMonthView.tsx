@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 
 import { MONTH_NAMES, WEEKDAYS, groupByDate, toDateKey } from "@/lib/calendar";
 import type { CalendarEvent } from "@/types";
@@ -22,6 +22,9 @@ export function CalendarMonthView({
   onCreate: (dateKey: string) => void;
 }) {
   const [openDay, setOpenDay] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const restoreFocusTo = useRef<string | null>(null);
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
   const byDate = useMemo(() => groupByDate(items), [items]);
@@ -36,6 +39,31 @@ export function CalendarMonthView({
     while (result.length % 7 !== 0) result.push(null);
     return result;
   }, [monthIndex, year]);
+
+  useEffect(() => {
+    if (openDay) {
+      dialogRef.current?.focus();
+      return;
+    }
+    if (restoreFocusTo.current) {
+      triggerRefs.current[restoreFocusTo.current]?.focus();
+      restoreFocusTo.current = null;
+    }
+  }, [openDay]);
+
+  useEffect(() => {
+    if (!openDay) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") closePopover();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [openDay]);
+
+  function closePopover() {
+    restoreFocusTo.current = openDay;
+    setOpenDay(null);
+  }
 
   function createOnEmptyClick(key: string) {
     return (event: MouseEvent<HTMLDivElement>) => {
@@ -94,8 +122,11 @@ export function CalendarMonthView({
                   {hidden > 0 && (
                     <button
                       type="button"
+                      ref={(node) => {
+                        triggerRefs.current[key] = node;
+                      }}
                       aria-expanded={openDay === key}
-                      onClick={() => setOpenDay((current) => (current === key ? null : key))}
+                      onClick={() => (openDay === key ? closePopover() : setOpenDay(key))}
                       className="w-full rounded-md px-2 py-1 text-left text-[11px] font-medium text-navy-600 hover:bg-surface-muted"
                     >
                       +{hidden} daha
@@ -104,15 +135,17 @@ export function CalendarMonthView({
                 </div>
                 {openDay === key && (
                   <div
+                    ref={dialogRef}
                     role="dialog"
+                    tabIndex={-1}
                     aria-label={`${day} ${MONTH_NAMES[monthIndex]} olayları`}
-                    className="absolute left-1 top-10 z-20 w-64 cursor-default space-y-1.5 rounded-xl border border-surface-border bg-white p-3 shadow-xl"
+                    className={`absolute top-10 z-20 w-64 cursor-default focus:outline-none ${index % 7 >= 5 ? "right-1" : "left-1"} space-y-1.5 rounded-xl border border-surface-border bg-white p-3 shadow-xl`}
                   >
                     <div className="mb-1 flex items-center justify-between">
                       <p className="text-xs font-semibold text-navy-800">
                         {day} {MONTH_NAMES[monthIndex]}
                       </p>
-                      <button type="button" aria-label="Kapat" onClick={() => setOpenDay(null)} className="text-navy-500 hover:text-navy-800">
+                      <button type="button" aria-label="Kapat" onClick={closePopover} className="text-navy-500 hover:text-navy-800">
                         ✕
                       </button>
                     </div>
