@@ -140,3 +140,42 @@ def test_global_task_list_can_filter_by_status(client, two_firms_two_users):
     titles = {t["title"] for t in response.json()}
     assert titles == {"Pending"}
     assert pending_task["title"] in titles
+
+
+def test_firm_wide_task_patch_sets_and_resets_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+    assert task["reminder_days"] is None
+
+    response = client.patch(f"/tasks/{task['id']}", json={"reminder_days": [0, 7, 7]}, headers=headers)
+    assert response.status_code == 200
+    assert response.json()["reminder_days"] == [7, 0]
+    assert response.json()["title"] == "Gorev"
+
+    reset = client.patch(f"/tasks/{task['id']}", json={"reminder_days": None}, headers=headers)
+    assert reset.json()["reminder_days"] is None
+
+    assert client.patch(f"/tasks/{task['id']}", json={"reminder_days": [40]}, headers=headers).status_code == 422
+
+
+def test_case_scoped_task_patch_accepts_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+
+    response = client.patch(f"/cases/{case['id']}/tasks/{task['id']}", json={"reminder_days": []}, headers=headers)
+
+    assert response.json()["reminder_days"] == []
+
+
+def test_firm_wide_task_patch_is_isolated_by_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers_a = _auth_headers(client, fixtures, "user_a")
+    headers_b = _auth_headers(client, fixtures, "user_b")
+    case = _create_case(client, headers_a)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers_a).json()
+
+    response = client.patch(f"/tasks/{task['id']}", json={"status": "completed"}, headers=headers_b)
+
+    assert response.status_code == 404

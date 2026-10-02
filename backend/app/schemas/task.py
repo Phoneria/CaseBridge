@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from app.models.task import TaskStatus
+from app.schemas.calendar import ReminderDays
 
 
 class TaskCreate(BaseModel):
@@ -19,6 +20,8 @@ class TaskUpdate(BaseModel):
     due_date: Optional[date] = None
     assigned_to: Optional[str] = None
     status: Optional[TaskStatus] = None
+    #: null -> default [1]; [] -> no reminders.
+    reminder_days: Optional[ReminderDays] = None
 
 
 class TaskOut(BaseModel):
@@ -33,6 +36,7 @@ class TaskOut(BaseModel):
     assigned_to: Optional[str] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
+    reminder_days: Optional[list[int]] = None
 
 
 class TaskWithCaseOut(TaskOut):

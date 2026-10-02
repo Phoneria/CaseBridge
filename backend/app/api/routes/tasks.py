@@ -81,3 +81,18 @@ def list_all_tasks(
         )
         for task, case_name, case_number in rows
     ]
+
+
+@tasks_router.patch("/{task_id}", response_model=TaskOut)
+def update_task(
+    task_id: str,
+    payload: TaskUpdate,
+    law_firm_id: str = Depends(get_current_law_firm_id),
+    db: Session = Depends(get_db),
+):
+    """Firm-wide task update (used by the calendar for status and reminder_days)."""
+    service = TaskService(db)
+    task = service.get(task_id, law_firm_id)
+    if task is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    return service.update_task(task, payload)
