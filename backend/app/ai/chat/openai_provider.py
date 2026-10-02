@@ -30,9 +30,11 @@ class OpenAIChatProvider(ChatProvider):
         self._client = client
         self.max_tokens = max_tokens
         self.last_usage = None
+        self.last_finish_reason = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
         self.last_usage = None
+        self.last_finish_reason = None
         try:
             if self._client is None:
                 self._client = openai.OpenAI(api_key=self._api_key, timeout=self._timeout)
@@ -52,6 +54,9 @@ class OpenAIChatProvider(ChatProvider):
                         "completion_tokens": usage.completion_tokens,
                     }
                 for choice in getattr(chunk, "choices", None) or []:
+                    finish_reason = getattr(choice, "finish_reason", None)
+                    if finish_reason:
+                        self.last_finish_reason = finish_reason
                     text = getattr(choice.delta, "content", None)
                     if text:
                         yield text

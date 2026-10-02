@@ -6,7 +6,7 @@ this module must never log secret values.
 """
 from typing import Literal, Optional
 
-from pydantic import field_validator
+from pydantic import PositiveInt, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -66,10 +66,11 @@ class Settings(BaseSettings):
     # model; an empty level model falls back to CHAT_MODEL.
     chat_model_basic: str = ""
     chat_model_deep: str = ""
-    chat_max_tokens_basic: int = 500
-    chat_max_tokens_standard: int = 1500
-    chat_max_tokens_deep: int = 4000
-    chat_history_limit_basic: int = 6
+    # Positive so a typo like 0 can't silently remove the cap.
+    chat_max_tokens_basic: PositiveInt = 500
+    chat_max_tokens_standard: PositiveInt = 1500
+    chat_max_tokens_deep: PositiveInt = 4000
+    chat_history_limit_basic: PositiveInt = 6
 
     storage_dir: str = "storage"
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB

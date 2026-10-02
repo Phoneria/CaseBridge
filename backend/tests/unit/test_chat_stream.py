@@ -82,10 +82,10 @@ async def test_failed_final_persist_falls_back_to_stopped(db_session, monkeypatc
     conversation, assistant = _seed(db_session)
     real_persist = chat_stream._persist
 
-    def flaky(session_factory, message_id, conversation_id, content, status, usage, latency):
+    def flaky(session_factory, message_id, conversation_id, content, status, usage, latency, **kwargs):
         if status != ChatMessageStatus.STOPPED:
             raise RuntimeError("db down")
-        return real_persist(session_factory, message_id, conversation_id, content, status, usage, latency)
+        return real_persist(session_factory, message_id, conversation_id, content, status, usage, latency, **kwargs)
 
     monkeypatch.setattr(chat_stream, "_persist", flaky)
     events = await _collect(_stream(db_session, conversation, assistant, MockChatProvider(chunks=["Bir ", "iki"])))
@@ -106,3 +106,44 @@ async def test_deleted_message_emits_error_not_null_done(db_session):
 
     assert events[-1] == {"type": "error", "message": "Sohbet silindiği için yanıt kaydedilemedi."}
     assert all(event["type"] != "done" for event in events)
+
+
+async def test_reply_cut_by_the_token_cap_is_saved_as_truncated(db_session, caplog):
+    conversation, assistant = _seed(db_session)
+    provider = MockChatProvider(model="m-test", chunks=["Gizli ", "yarım"], finish_reason="length", max_tokens=42)
+    with caplog.at_level("WARNING", logger="casebridge"):
+        events = await _collect(_stream(db_session, conversation, assistant, provider))
+
+    assert events[-1]["type"] == "done"
+    assert events[-1]["message"]["truncated"] is True
+    assert events[-1]["message"]["status"] == "complete"
+    db_session.expire_all()
+    saved = db_session.get(ChatMessage, assistant.id)
+    assert saved.status == ChatMessageStatus.COMPLETE
+    assert saved.truncated is True
+    assert saved.content == "Gizli yarım"
+    warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert any("m-test" in w and "42" in w for w in warnings)
+    assert all("Gizli" not in w for w in warnings)
+
+
+async def test_empty_reply_cut_by_the_token_cap_is_an_error(db_session):
+    conversation, assistant = _seed(db_session)
+    provider = MockChatProvider(chunks=["", "  "], finish_reason="length", max_tokens=10)
+    events = await _collect(_stream(db_session, conversation, assistant, provider))
+
+    assert events[-1] == {
+        "type": "error",
+        "message": "Yanıt uzunluk sınırına ulaştı. Daha kapsamlı bir seviyeyle tekrar deneyin.",
+    }
+    assert all(event["type"] != "done" for event in events)
+    db_session.expire_all()
+    assert db_session.get(ChatMessage, assistant.id).status == ChatMessageStatus.ERROR
+
+
+async def test_normal_reply_is_not_truncated(db_session):
+    conversation, assistant = _seed(db_session)
+    events = await _collect(_stream(db_session, conversation, assistant, MockChatProvider(chunks=["Tam."])))
+
+    assert events[-1]["type"] == "done"
+    assert not events[-1]["message"]["truncated"]

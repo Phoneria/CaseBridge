@@ -15,16 +15,20 @@ class MockChatProvider(ChatProvider):
         chunks: Optional[list[str]] = None,
         fail_after: Optional[int] = None,
         max_tokens: Optional[int] = None,
+        finish_reason: Optional[str] = None,
     ):
         self.model = model
         self._chunks = chunks
         self._fail_after = fail_after
         self.max_tokens = max_tokens
         self.calls: list[list[ChatTurn]] = []
+        self._finish_reason = finish_reason
         self.last_usage = None
+        self.last_finish_reason = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
         self.last_usage = None
+        self.last_finish_reason = None
         self.calls.append(list(messages))
         last_user = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
         chunks = self._chunks or [
@@ -39,3 +43,4 @@ class MockChatProvider(ChatProvider):
                 raise AIProviderError("Mock sağlayıcı hatası.")
             yield chunk
         self.last_usage = {"prompt_tokens": 0, "completion_tokens": len(chunks)}
+        self.last_finish_reason = self._finish_reason or "stop"

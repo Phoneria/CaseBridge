@@ -1,5 +1,8 @@
-"""Chat conversations (Hukuk Asistanı): CRUD and titles. Message sending,
-history, feedback and export are added by later tasks."""
+"""Chat conversations (Hukuk Asistanı): conversation CRUD and auto titles,
+user/assistant message rows, the provider history for an answer level
+(system prompt + the level's history limit), 👍/👎 feedback, and the admin
+JSONL fine-tuning export of liked, complete, untruncated answers (filterable
+by model and level). Streaming the reply itself lives in chat_stream."""
 import json
 from datetime import datetime, timezone
 from typing import Optional
@@ -109,13 +112,14 @@ class ChatService:
         return message
 
     def export_jsonl(self, law_firm_id: str, model: Optional[str] = None, level: Optional[str] = None) -> str:
-        """One OpenAI chat fine-tuning example per liked, complete assistant
+        """One OpenAI chat fine-tuning example per liked, complete, untruncated assistant
         message: system prompt + the conversation up to and including it."""
         query = self.db.query(ChatMessage).filter(
             ChatMessage.law_firm_id == law_firm_id,
             ChatMessage.role == ChatRole.ASSISTANT,
             ChatMessage.status == ChatMessageStatus.COMPLETE,
             ChatMessage.feedback == 1,
+            or_(ChatMessage.truncated.is_(None), ChatMessage.truncated.is_(False)),  # cut-off replies aren't examples
         )
         if model:
             query = query.filter(ChatMessage.model == model)

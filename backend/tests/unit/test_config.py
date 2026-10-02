@@ -124,3 +124,16 @@ def test_invalid_llm_provider_value_is_rejected(monkeypatch):
 
     with pytest.raises(ValidationError):
         Settings()
+
+
+@pytest.mark.parametrize(
+    "name", ["CHAT_MAX_TOKENS_BASIC", "CHAT_MAX_TOKENS_STANDARD", "CHAT_MAX_TOKENS_DEEP", "CHAT_HISTORY_LIMIT_BASIC"]
+)
+def test_chat_level_limits_must_be_positive(monkeypatch, name):
+    monkeypatch.setenv(name, "0")
+
+    from app.core.config import Settings
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, jwt_secret="x")

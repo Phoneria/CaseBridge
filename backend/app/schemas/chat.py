@@ -33,6 +33,7 @@ class ChatMessageOut(BaseModel):
     status: Optional[ChatMessageStatus] = None
     model: Optional[str] = None
     level: Optional[str] = None
+    truncated: Optional[bool] = None
     feedback: Optional[int] = None
     created_at: datetime
 

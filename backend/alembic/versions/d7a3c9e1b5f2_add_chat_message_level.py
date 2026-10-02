@@ -1,4 +1,4 @@
-"""add answer level to chat messages
+"""add answer level and truncated flag to chat messages
 
 Revision ID: d7a3c9e1b5f2
 Revises: c4d1a7e9f2b3
@@ -18,8 +18,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     with op.batch_alter_table("chat_messages") as batch:
         batch.add_column(sa.Column("level", sa.String(length=16), nullable=True))
+        batch.add_column(sa.Column("truncated", sa.Boolean(), nullable=True))
 
 
 def downgrade() -> None:
     with op.batch_alter_table("chat_messages") as batch:
+        batch.drop_column("truncated")
         batch.drop_column("level")

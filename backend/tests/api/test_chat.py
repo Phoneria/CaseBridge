@@ -410,3 +410,41 @@ def test_export_uses_each_answers_level_prompt_and_filters_by_level(client, two_
     assert json.loads(deep_only[0])["messages"][-1]["content"] == deep["content"]
     assert client.get("/chat/export.jsonl?level=standard", headers=headers).text == ""
     assert client.get("/chat/export.jsonl?level=expert", headers=headers).status_code == 422
+
+
+def test_export_standard_includes_liked_answers_saved_without_level(client, two_firms_two_users, chat_provider, db_session):
+    from app.ai.chat.prompt import CHAT_SYSTEM_PROMPT
+    from app.models.chat import ChatMessage
+
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers = _headers(client, fixtures)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    answer = _send(client, headers, conversation["id"], "Eski soru")[-1]["message"]
+    client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers)
+    db_session.query(ChatMessage).filter(ChatMessage.id == answer["id"]).update({"level": None})
+    db_session.commit()
+
+    lines = client.get("/chat/export.jsonl?level=standard", headers=headers).text.splitlines()
+
+    assert len(lines) == 1
+    messages = json.loads(lines[0])["messages"]
+    assert messages[0] == {"role": "system", "content": CHAT_SYSTEM_PROMPT}
+    assert messages[-1]["content"] == answer["content"]
+
+
+def test_truncated_answer_is_flagged_and_not_exported(client, two_firms_two_users, chat_provider, db_session):
+    fixtures = two_firms_two_users
+    _make_admin(db_session, fixtures)
+    headers = _headers(client, fixtures)
+    conversation = client.post("/chat/conversations", headers=headers).json()
+    chat_provider._finish_reason = "length"
+    answer = _send(client, headers, conversation["id"], "Uzun soru")[-1]["message"]
+    chat_provider._finish_reason = None
+
+    assert answer["truncated"] is True
+    liked = client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers)
+    assert liked.status_code == 200
+    reloaded = client.get(f"/chat/conversations/{conversation['id']}", headers=headers).json()
+    assert reloaded["messages"][-1]["truncated"] is True
+    assert client.get("/chat/export.jsonl", headers=headers).text == ""

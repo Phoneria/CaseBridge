@@ -376,3 +376,43 @@ def test_status_lists_levels_with_models(monkeypatch):
         {"level": "standard", "label": "Standart", "model": "model-standard"},
         {"level": "deep", "label": "Kapsamlı", "model": "model-deep"},
     ]
+
+
+def test_mock_reports_finish_reason_after_a_full_stream():
+    provider = MockChatProvider(chunks=["a", "b"])
+    stream = provider.stream(MESSAGES)
+    assert next(stream) == "a"
+    assert provider.last_finish_reason is None  # reset at stream start
+    list(stream)
+    assert provider.last_finish_reason == "stop"
+
+    capped = MockChatProvider(chunks=["a"], finish_reason="length")
+    list(capped.stream(MESSAGES))
+    assert capped.last_finish_reason == "length"
+
+
+def _openai_finish_chunk(reason):
+    return SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=None), finish_reason=reason)], usage=None)
+
+
+def test_openai_records_finish_reason():
+    completions = _FakeCompletions([_openai_chunk("Yarım"), _openai_finish_chunk("length"), _openai_chunk(None)])
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+    provider = OpenAIChatProvider(api_key="k", model="m", client=client, max_tokens=5)
+    provider.last_finish_reason = "stale"
+    assert "".join(provider.stream(MESSAGES)) == "Yarım"
+    assert provider.last_finish_reason == "length"
+
+
+def test_ollama_records_done_reason():
+    body = (
+        json.dumps({"message": {"content": "Yarım"}, "done": False})
+        + "\n"
+        + json.dumps({"message": {"content": ""}, "done": True, "done_reason": "length"})
+        + "\n"
+    )
+    provider = OllamaChatProvider(
+        base_url="http://ollama.test", model="m", transport=httpx.MockTransport(lambda r: httpx.Response(200, text=body))
+    )
+    assert "".join(provider.stream(MESSAGES)) == "Yarım"
+    assert provider.last_finish_reason == "length"

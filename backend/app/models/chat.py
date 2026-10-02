@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -52,6 +52,8 @@ class ChatMessage(Base):
     status: Mapped[Optional[ChatMessageStatus]] = mapped_column(str_enum(ChatMessageStatus), nullable=True)
     model: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     level: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    #: True when a complete reply was cut off by the level's token cap.
+    truncated: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     latency_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

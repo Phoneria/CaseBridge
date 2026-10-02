@@ -333,6 +333,8 @@ export interface ChatMessage {
   status: ChatMessageStatus | null;
   model: string | null;
   level?: ChatLevel | null;
+  /** True when a complete reply was cut off by the level's length limit. */
+  truncated?: boolean | null;
   feedback: ChatFeedbackValue | null;
   created_at: string;
 }

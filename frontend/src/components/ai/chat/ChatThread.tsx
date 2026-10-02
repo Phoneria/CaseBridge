@@ -93,6 +93,11 @@ function AssistantMessage({
         {stopped && (
           <p className="mt-1.5 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-navy-600">Durduruldu</p>
         )}
+        {message.status === "complete" && message.truncated && (
+          <p className="mt-1.5 inline-flex rounded-lg bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+            Yanıt uzunluk sınırında kesildi · daha kapsamlı bir seviyeyle tekrar sorabilirsiniz.
+          </p>
+        )}
         {message.status === "complete" && (
           <div className="mt-1 flex gap-1">
             <FeedbackButton label="Faydalı" icon="👍" pressed={message.feedback === 1} onClick={() => onFeedback(message, 1)} />

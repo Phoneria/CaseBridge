@@ -26,9 +26,11 @@ class OllamaChatProvider(ChatProvider):
         self._transport = transport
         self.max_tokens = max_tokens
         self.last_usage = None
+        self.last_finish_reason = None
 
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
         self.last_usage = None
+        self.last_finish_reason = None
         payload = {"model": self.model, "messages": messages, "stream": True, "think": False}
         if self.max_tokens:
             payload["options"] = {"num_predict": self.max_tokens}
@@ -48,6 +50,7 @@ class OllamaChatProvider(ChatProvider):
                         if text:
                             yield text
                         if data.get("done"):
+                            self.last_finish_reason = data.get("done_reason")
                             self.last_usage = {
                                 "prompt_tokens": data.get("prompt_eval_count") or 0,
                                 "completion_tokens": data.get("eval_count") or 0,

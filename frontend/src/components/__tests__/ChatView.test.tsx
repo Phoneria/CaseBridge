@@ -369,6 +369,26 @@ describe("ChatView", () => {
     expect(await screen.findByText("Basit · gpt-4o-mini")).toBeInTheDocument();
   });
 
+  it("notes answers cut off by the length limit and still allows rating them", async () => {
+    api.getChatConversation.mockResolvedValue({
+      ...CONVERSATION,
+      messages: [
+        msg({ id: "u1", role: "user", content: "Uzun soru", status: null, model: null }),
+        msg({ id: "a1", content: "Yarım kalan", truncated: true }),
+        msg({ id: "u2", role: "user", content: "Kısa soru", status: null, model: null }),
+        msg({ id: "a2", content: "Tam yanıt", truncated: false }),
+      ],
+    });
+    setUrl("/ai/sohbet?sohbet=c1");
+    render(<ChatView />);
+
+    expect(
+      await screen.findByText("Yanıt uzunluk sınırında kesildi · daha kapsamlı bir seviyeyle tekrar sorabilirsiniz."),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/uzunluk sınırında kesildi/)).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Faydalı" })).toHaveLength(2);
+  });
+
   it("locks the level while a reply streams", async () => {
     streamChatMessage.mockImplementation(
       (_id: string, content: string, { signal, onEvent }: StreamOptions) =>
