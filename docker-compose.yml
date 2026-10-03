@@ -36,6 +36,7 @@ services:
       - "8000:8000"
     volumes:
       - casebridge_storage:/app/storage
+      - ./data/import:/data/import:ro
 
   frontend:
     build:

@@ -18,7 +18,9 @@ from app.models.document import Document, DocumentType
 from app.models.law_firm import LawFirm
 from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
+from app.core.config import settings
 from app.db.courtroom_seed import seed_courtroom_scenarios
+from app.db.purge import delete_cases
 
 DEMO_FIRM_NAME = "Demo Hukuk Bürosu"
 ADMIN_EMAIL = "admin@demo.casebridge.dev"
@@ -442,6 +444,19 @@ def seed() -> None:
         firm = _get_or_create_firm(db)
         _get_or_create_user(db, firm, ADMIN_EMAIL, "Demo Yönetici", UserRole.ADMIN)
         lawyer = _get_or_create_user(db, firm, LAWYER_EMAIL, "Demo Avukat", UserRole.LAWYER)
+
+        if not settings.seed_demo_data:
+            demo_numbers = [c["case_number"] for c in DEMO_CASES]
+            stale = db.query(Case).filter(Case.law_firm_id == firm.id, Case.case_number.in_(demo_numbers)).all()
+            removed = delete_cases(db, stale)
+            scenario_count = seed_courtroom_scenarios(db)
+            db.commit()
+            print(f"Seed complete (real data mode). Firm: {DEMO_FIRM_NAME}")
+            print(f"  Admin login:  {ADMIN_EMAIL} / {DEMO_PASSWORD}")
+            print(f"  Lawyer login: {LAWYER_EMAIL} / {DEMO_PASSWORD}")
+            print(f"  Demo cases removed: {removed}")
+            print(f"  Courtroom scenarios: {scenario_count}")
+            return
 
         demo_cases = {
             case_kwargs["case_number"]: _get_or_create_case(db, firm, lawyer, **case_kwargs)

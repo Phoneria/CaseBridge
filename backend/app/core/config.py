@@ -86,6 +86,9 @@ class Settings(BaseSettings):
     ai_monthly_token_budget: int = 0
 
     storage_dir: str = "storage"
+    # Demo cases/tasks/documents. false = seed only the firm and login users
+    # and remove previously seeded demo cases (real data mode).
+    seed_demo_data: bool = True
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB
 
     # Comma-separated list of extra allowed CORS origins (e.g. for E2E test
