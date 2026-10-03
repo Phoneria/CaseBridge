@@ -90,7 +90,7 @@ def test_ai_usage_default_has_no_budget(client, two_firms_two_users):
     assert body["used_tokens"] == 0
     assert body["budget_tokens"] is None
     assert body["remaining_percent"] is None
-    assert body["unlimited"] is True
+    assert body["unlimited"] is False
 
 
 def test_ai_usage_remaining_percent_with_budget(client, two_firms_two_users, db_session, monkeypatch):

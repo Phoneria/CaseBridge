@@ -54,10 +54,17 @@ export function AiStatusIndicator() {
   const providers = data ? Array.from(new Set(data.checks.map((c) => c.provider))).join(" · ") : "Sunucuya ulaşılamadı";
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={`${label}. Ayrıntılar`}
         data-state={state}
@@ -76,10 +83,11 @@ export function AiStatusIndicator() {
       </button>
 
       {open && (
+        <div className="absolute bottom-full left-0 z-20 w-64 pb-2">
         <div
           role="dialog"
           aria-label="AI bağlantı ayrıntıları"
-          className="absolute bottom-full left-0 z-20 mb-2 w-64 rounded-xl border border-surface-border bg-white p-3 shadow-lg"
+          className="rounded-xl border border-surface-border bg-white p-3 shadow-lg"
         >
           <UsageBar usage={usage} />
           {data ? (
@@ -108,6 +116,7 @@ export function AiStatusIndicator() {
           >
             {state === "checking" ? "Kontrol ediliyor…" : "Yeniden kontrol et"}
           </button>
+        </div>
         </div>
       )}
     </div>

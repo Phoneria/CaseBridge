@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.models.chat import ChatMessage
 from app.models.simulation import Simulation
 
-LOCAL_PROVIDERS = {"ollama", "mock"}
+LOCAL_PROVIDERS = {"ollama"}
 
 
 def _month_start() -> datetime:

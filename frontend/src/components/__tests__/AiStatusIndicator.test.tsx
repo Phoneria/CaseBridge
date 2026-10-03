@@ -41,9 +41,19 @@ describe("AiStatusIndicator", () => {
     render(<AiStatusIndicator />);
     const button = await screen.findByRole("button", { name: /AI bağlantısı yok/ });
     expect(button).toHaveAttribute("data-state", "offline");
-    fireEvent.click(button);
+    fireEvent.mouseEnter(button.parentElement!);
     expect(screen.getByText("Ollama sunucusuna ulaşılamadı.")).toBeInTheDocument();
     expect(await screen.findByTestId("ai-remaining")).toHaveTextContent("%75");
+  });
+
+  it("closes when the mouse leaves", async () => {
+    getAiConnectivity.mockResolvedValue({ connected: true, checked_at: 0, checks: [] });
+    render(<AiStatusIndicator />);
+    const wrapper = (await screen.findByRole("button", { name: /AI bağlı/ })).parentElement!;
+    fireEvent.mouseEnter(wrapper);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.mouseLeave(wrapper);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("does not fetch usage until opened", async () => {
@@ -56,7 +66,7 @@ describe("AiStatusIndicator", () => {
   it("is offline when the backend is unreachable and can re-check", async () => {
     getAiConnectivity.mockRejectedValue(new Error("down"));
     render(<AiStatusIndicator />);
-    fireEvent.click(await screen.findByRole("button", { name: /AI bağlantısı yok/ }));
+    fireEvent.mouseEnter((await screen.findByRole("button", { name: /AI bağlantısı yok/ })).parentElement!);
     expect(screen.getByText("Backend sunucusuna ulaşılamadı.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Yeniden kontrol et" }));
     await waitFor(() => expect(getAiConnectivity).toHaveBeenLastCalledWith(true));
