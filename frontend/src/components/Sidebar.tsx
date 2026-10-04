@@ -74,8 +74,7 @@ export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#273450] bg-[#17213A] px-4 py-6">
-      <div className="mb-8 flex items-center gap-2 px-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6941E8] text-sm font-bold text-white shadow-[0_4px_14px_rgba(105,65,232,0.3)]">CB</span>
+      <div className="mb-8 px-2">
         <div className="leading-tight">
           <p className="text-base font-semibold text-white">CaseBridge</p>
           <p className="text-[11px] text-[#9EACC7]">Hukuk bürosu çalışma alanı</p>
@@ -124,8 +123,8 @@ export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
         </div>
 
         <div className="mt-auto flex flex-col gap-2 pt-4">
-          <NavLink item={SETTINGS_ITEM} pathname={pathname} />
           <AiStatusIndicator tone="dark" />
+          <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>
     </aside>

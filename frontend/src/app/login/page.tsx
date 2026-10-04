@@ -31,10 +31,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-muted px-4">
       <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-white p-8 shadow-card">
-        <div className="mb-6 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white">
-            CB
-          </span>
+        <div className="mb-6">
           <div>
             <p className="text-base font-semibold text-navy-900">CaseBridge</p>
             <p className="text-[11px] text-navy-500">Hukuk bürosu çalışma alanı</p>

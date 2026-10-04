@@ -59,11 +59,16 @@ describe("Sidebar", () => {
 
   it("renders the AI connection indicator", () => {
     render(<Sidebar />);
-    expect(screen.getByRole("button", { name: /AI kontrol ediliyor/ })).toBeInTheDocument();
+    const indicator = screen.getByRole("button", { name: /AI kontrol ediliyor/ });
+    const settings = screen.getByRole("link", { name: "Ayarlar" });
+
+    expect(indicator).toBeInTheDocument();
+    expect(indicator.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("renders the CaseBridge brand name", () => {
     render(<Sidebar />);
     expect(screen.getByText("CaseBridge")).toBeInTheDocument();
+    expect(screen.queryByText("CB")).not.toBeInTheDocument();
   });
 });
