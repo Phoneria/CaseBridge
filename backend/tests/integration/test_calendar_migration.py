@@ -61,3 +61,25 @@ def test_upgrade_head_runs_on_a_fresh_database(tmp_path, monkeypatch):
     command.upgrade(_alembic_config(), "head")
 
     assert {"calendar_events", "reminder_deliveries"} <= set(sa.inspect(sa.create_engine(url)).get_table_names())
+
+
+def test_seed_on_a_fresh_database_leaves_alembic_at_head(tmp_path, monkeypatch):
+    """Seeding first must not create unversioned tables that a later `alembic upgrade head` collides with."""
+    from sqlalchemy.orm import sessionmaker
+
+    from app.db import seed as seed_module
+
+    url = f"sqlite:///{tmp_path / 'seeded.db'}"
+    engine = sa.create_engine(url)
+    monkeypatch.setattr(settings, "database_url", url)
+    monkeypatch.setattr(seed_module, "engine", engine)
+    monkeypatch.setattr(seed_module, "SessionLocal", sessionmaker(bind=engine))
+    monkeypatch.setattr(settings, "storage_dir", str(tmp_path / "storage"))
+
+    seed_module.seed()
+    command.upgrade(_alembic_config(), "head")
+
+    head = ScriptDirectory.from_config(_alembic_config()).get_current_head()
+    with engine.connect() as connection:
+        assert connection.execute(sa.text("select version_num from alembic_version")).scalar_one() == head
+    engine.dispose()

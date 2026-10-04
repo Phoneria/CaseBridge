@@ -134,6 +134,7 @@ def test_seed_real_data_mode_removes_demo_cases(db_session, monkeypatch):
     engine = db_session.get_bind()
     monkeypatch.setattr(seed_module, "engine", engine)
     monkeypatch.setattr(seed_module, "SessionLocal", sessionmaker(bind=engine))
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)  # db_session already has the tables
     monkeypatch.setattr(settings, "seed_demo_data", True)
 
     seed_module.seed()

@@ -53,8 +53,7 @@ casebridge/
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-alembic upgrade head   # applies migrations; `uvicorn`'s create_all() also covers a first run, but
-                        # migrations are the source of truth going forward - run this after every pull
+alembic upgrade head   # creates/updates the schema - run this after every pull
 uvicorn app.main:app --reload
 ```
 

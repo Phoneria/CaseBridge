@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from app.core.security import hash_password
-from app.db.base import Base
+from app.db.migrate import upgrade_to_head
 from app.db.session import SessionLocal, engine
 import app.models  # noqa: F401  (registers all models on Base.metadata)
 from app.models.case import Case, CaseEvent, CaseEventType, CaseStatus, CaseType, CaseOutcome
@@ -643,7 +643,7 @@ def _seed_case_detail(db, case: Case, lawyer: User) -> None:
 
 
 def seed() -> None:
-    Base.metadata.create_all(bind=engine)
+    upgrade_to_head(engine)
     db = SessionLocal()
     try:
         firm = _get_or_create_firm(db)

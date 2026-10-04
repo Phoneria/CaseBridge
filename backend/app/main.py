@@ -6,16 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.security_headers import SecurityHeadersMiddleware
 
-from app.api.routes import activity, admin, analytics, auth, calendar, cases, chat, courtroom, documents, handover, health, precedents, reports, simulations, system, tasks, users
-from app.api.routes import activity, analytics, auth, calendar, cases, chat, courtroom, documents, handover, health, notifications, reports, simulations, system, tasks, users
+from app.api.routes import activity, admin, analytics, auth, calendar, cases, chat, courtroom, documents, handover, health, notifications, precedents, reports, simulations, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
 from app.services.simulation_worker import start_worker_thread
 from app.services.courtroom_worker import start_courtroom_worker_thread
 from app.services.reminder_worker import should_start_reminder_worker, start_reminder_worker_thread
-from app.db.base import Base
-from app.db.session import engine
-import app.models  # noqa: F401  register models on Base before create_all
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("casebridge")
@@ -23,9 +19,8 @@ logger = logging.getLogger("casebridge")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # MVP: create tables directly (no migration tool yet). Safe to call
-    # repeatedly - it's a no-op for existing tables.
-    Base.metadata.create_all(bind=engine)
+    # The schema comes from Alembic (`alembic upgrade head`), never from
+    # create_all(): tables it creates are missing from alembic_version.
     ai_status = get_ai_provider_status()
     if ai_status["configured"]:
         logger.info("AI provider ready: %s", ai_status["provider"])
