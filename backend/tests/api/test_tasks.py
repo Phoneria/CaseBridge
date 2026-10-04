@@ -140,3 +140,172 @@ def test_global_task_list_can_filter_by_status(client, two_firms_two_users):
     titles = {t["title"] for t in response.json()}
     assert titles == {"Pending"}
     assert pending_task["title"] in titles
+
+
+def test_firm_wide_task_patch_sets_and_resets_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+    assert task["reminder_days"] is None
+
+    response = client.patch(f"/tasks/{task['id']}", json={"reminder_days": [0, 7, 7]}, headers=headers)
+    assert response.status_code == 200
+    assert response.json()["reminder_days"] == [7, 0]
+    assert response.json()["title"] == "Gorev"
+
+    reset = client.patch(f"/tasks/{task['id']}", json={"reminder_days": None}, headers=headers)
+    assert reset.json()["reminder_days"] is None
+
+    assert client.patch(f"/tasks/{task['id']}", json={"reminder_days": [40]}, headers=headers).status_code == 422
+
+
+def test_case_scoped_task_patch_accepts_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+
+    response = client.patch(f"/cases/{case['id']}/tasks/{task['id']}", json={"reminder_days": []}, headers=headers)
+
+    assert response.json()["reminder_days"] == []
+
+
+def test_firm_wide_task_patch_is_isolated_by_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers_a = _auth_headers(client, fixtures, "user_a")
+    headers_b = _auth_headers(client, fixtures, "user_b")
+    case = _create_case(client, headers_a)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers_a).json()
+
+    response = client.patch(f"/tasks/{task['id']}", json={"status": "completed"}, headers=headers_b)
+
+    assert response.status_code == 404
+
+
+def _task_for(client, headers):
+    case = _create_case(client, headers)
+    task = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers).json()
+    return case, task
+
+
+def test_firm_wide_task_patch_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    _, task = _task_for(client, headers)
+
+    response = client.patch(f"/tasks/{task['id']}", json={"assigned_to": fixtures["user_b"].id}, headers=headers)
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    tasks = client.get("/tasks", headers=headers).json()
+    assert [t["assigned_to"] for t in tasks if t["id"] == task["id"]] == [None]
+
+
+def test_case_scoped_task_patch_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    case, task = _task_for(client, headers)
+
+    response = client.patch(
+        f"/cases/{case['id']}/tasks/{task['id']}", json={"assigned_to": fixtures["user_b"].id}, headers=headers
+    )
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    tasks = client.get("/tasks", headers=headers).json()
+    assert [t["assigned_to"] for t in tasks if t["id"] == task["id"]] == [None]
+
+
+def test_task_create_rejects_assignee_from_another_firm(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    case = _create_case(client, headers)
+
+    response = client.post(
+        f"/cases/{case['id']}/tasks",
+        json={"title": "Gorev", "assigned_to": fixtures["user_b"].id},
+        headers=headers,
+    )
+
+    assert (response.status_code, response.json()["detail"]) == (404, "Kullanıcı bulunamadı")
+    assert client.get(f"/cases/{case['id']}/tasks", headers=headers).json() == []
+
+
+def test_task_assignee_from_same_firm_is_accepted_and_null_clears_it(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures, "user_a")
+    _, task = _task_for(client, headers)
+    me = fixtures["user_a"].id
+
+    assigned = client.patch(f"/tasks/{task['id']}", json={"assigned_to": me}, headers=headers)
+    cleared = client.patch(f"/tasks/{task['id']}", json={"assigned_to": None}, headers=headers)
+
+    assert assigned.json()["assigned_to"] == me
+    assert cleared.status_code == 200 and cleared.json()["assigned_to"] is None
+
+
+def test_task_patch_rejects_null_for_required_fields(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    _, task = _task_for(client, headers)
+
+    for field in ("title", "status"):
+        response = client.patch(f"/tasks/{task['id']}", json={field: None}, headers=headers)
+        assert response.status_code == 422, field
+
+
+def test_firm_wide_task_patch_unknown_task_is_turkish_404(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    response = client.patch("/tasks/nope", json={"status": "completed"}, headers=headers)
+    assert (response.status_code, response.json()["detail"]) == (404, "Görev bulunamadı")
+
+
+def test_task_create_saves_and_returns_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    response = client.post(
+        f"/cases/{case['id']}/tasks", json={"title": "Gorev", "reminder_days": [1, 7, 7, 0]}, headers=headers
+    )
+    empty = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev", "reminder_days": []}, headers=headers)
+
+    assert response.status_code == 201 and response.json()["reminder_days"] == [7, 1, 0]
+    assert empty.json()["reminder_days"] == []
+
+
+def test_task_create_without_reminder_days_is_null(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    response = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers)
+
+    assert response.status_code == 201 and response.json()["reminder_days"] is None
+
+
+def test_task_create_rejects_invalid_reminder_days(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    for bad in ([31], [-1]):
+        response = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev", "reminder_days": bad}, headers=headers)
+        assert response.status_code == 422, bad
+    assert client.get(f"/cases/{case['id']}/tasks", headers=headers).json() == []
+
+
+def test_task_create_validates_and_trims_title(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    url = f"/cases/{case['id']}/tasks"
+
+    assert client.post(url, json={"title": ""}, headers=headers).status_code == 422
+    assert client.post(url, json={"title": "   "}, headers=headers).status_code == 422
+    assert client.post(url, json={"title": "x" * 201}, headers=headers).status_code == 422
+    assert client.post(url, json={"title": "x" * 200}, headers=headers).status_code == 201
+    trimmed = client.post(url, json={"title": "  Dilekçe hazırla  "}, headers=headers)
+    assert trimmed.json()["title"] == "Dilekçe hazırla"
+
+
+def test_task_create_on_another_firms_case_is_404(client, two_firms_two_users):
+    fixtures = two_firms_two_users
+    case = _create_case(client, _auth_headers(client, fixtures, "user_a"))
+    headers_b = _auth_headers(client, fixtures, "user_b")
+
+    response = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers_b)
+
+    assert response.status_code == 404

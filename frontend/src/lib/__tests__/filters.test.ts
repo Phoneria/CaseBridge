@@ -122,9 +122,17 @@ describe("document list query", () => {
 });
 
 describe("calendar, tabs and dates", () => {
-  it("accepts only valid YYYY-MM months", () => {
-    expect(parseCalendarQuery(new URLSearchParams("ay=2026-10&goster=gorev"))).toEqual({ ay: "2026-10", goster: "gorev" });
+  it("accepts only valid YYYY-MM months and maps the legacy goster param to tur", () => {
+    expect(parseCalendarQuery(new URLSearchParams("ay=2026-10&goster=gorev"))).toEqual({ ay: "2026-10", tur: "gorev" });
     expect(parseCalendarQuery(new URLSearchParams("ay=2026-13&goster=x"))).toEqual({});
+  });
+
+  it("parses the calendar view, week and filters", () => {
+    expect(
+      parseCalendarQuery(new URLSearchParams("gorunum=hafta&hafta=2026-10-05&tur=muvekkil&sorumlu=u1&dava=c1&benim=1")),
+    ).toEqual({ gorunum: "hafta", hafta: "2026-10-05", tur: "muvekkil", sorumlu: "u1", dava: "c1", benim: "1" });
+    expect(parseCalendarQuery(new URLSearchParams("gorunum=ay&tur=durusma&goster=gorev"))).toEqual({ tur: "durusma" });
+    expect(parseCalendarQuery(new URLSearchParams("gorunum=yil&hafta=2026-02-30&tur=x&benim=evet"))).toEqual({});
   });
 
   it("builds case detail links and parses tab slugs", () => {

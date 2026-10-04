@@ -5,8 +5,9 @@ casebridge/.env.example). Nothing here should ever be hardcoded, and
 this module must never log secret values.
 """
 from typing import Literal, Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import PositiveFloat, PositiveInt, field_validator
+from pydantic import Field, PositiveFloat, PositiveInt, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -87,6 +88,27 @@ class Settings(BaseSettings):
     # Monthly token budget for the sidebar AI usage box. 0 = no budget set.
     ai_monthly_token_budget: int = 0
 
+    # Outgoing e-mail (calendar reminders, test e-mail). "console" only logs
+    # the recipient and subject; "smtp" sends with the stdlib smtplib.
+    # SMTP_PASSWORD is never logged or returned by any endpoint.
+    email_backend: Literal["console", "smtp"] = "console"
+    smtp_host: str = ""
+    smtp_port: PositiveInt = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+    smtp_from: str = "CaseBridge <no-reply@casebridge.local>"
+    smtp_timeout_seconds: PositiveFloat = 10
+
+    # Calendar and reminders. Event times are stored as naive local times
+    # in APP_TIMEZONE; the reminder worker computes "now" in this zone.
+    app_timezone: str = "Europe/Istanbul"
+    app_base_url: str = "http://localhost:3000"
+    reminders_enabled: bool = True
+    reminder_send_hour: int = Field(default=9, ge=0, le=23)
+    reminder_poll_seconds: PositiveInt = 900
+    reminder_max_attempts: PositiveInt = 3
+
     storage_dir: str = "storage"
     # Demo cases/tasks/documents. false = seed only the firm and login users
     # and remove previously seeded demo cases (real data mode).
@@ -109,6 +131,15 @@ class Settings(BaseSettings):
     def jwt_secret_must_not_be_empty(cls, value: str) -> str:
         if not value or not value.strip():
             raise ValueError("JWT_SECRET must be set and non-empty")
+        return value
+
+    @field_validator("app_timezone")
+    @classmethod
+    def app_timezone_must_exist(cls, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError, OSError) as exc:
+            raise ValueError(f"APP_TIMEZONE is not a known time zone: {value}") from exc
         return value
 
     @property

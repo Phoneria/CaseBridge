@@ -26,7 +26,7 @@ def test_seed_creates_demo_firm_users_and_cases(db_session, monkeypatch, tmp_pat
     import app.db.seed as seed_module
 
     monkeypatch.setattr(seed_module, "SessionLocal", lambda: db_session)
-    monkeypatch.setattr(seed_module.Base.metadata, "create_all", lambda bind=None: None)
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)
     monkeypatch.setattr(seed_module.settings, "storage_dir", str(tmp_path))
 
     seed()
@@ -69,7 +69,7 @@ def test_seed_is_idempotent(db_session, monkeypatch, tmp_path):
     import app.db.seed as seed_module
 
     monkeypatch.setattr(seed_module, "SessionLocal", lambda: db_session)
-    monkeypatch.setattr(seed_module.Base.metadata, "create_all", lambda bind=None: None)
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)
     monkeypatch.setattr(seed_module.settings, "storage_dir", str(tmp_path))
 
     seed()

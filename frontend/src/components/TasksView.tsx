@@ -15,10 +15,11 @@ import {
 } from "@/lib/filters";
 import { formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { TaskWithCase } from "@/types";
+import type { Case, Task, TaskWithCase } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
+import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { FilterChips, NoFilterResults } from "@/components/FilterChips";
 
 type Tone = "navy" | "emerald" | "amber" | "red";
@@ -38,6 +39,7 @@ export function TasksView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -57,6 +59,11 @@ export function TasksView() {
     } catch {
       setToggleError("Görev güncellenemedi. Lütfen tekrar deneyin.");
     }
+  }
+
+  function handleCreated(task: Task, taskCase: Case) {
+    setTasks((prev) => [{ ...task, case_name: taskCase.case_name, case_number: taskCase.case_number }, ...prev]);
+    setFormOpen(false);
   }
 
   function clearFilters() {
@@ -94,9 +101,18 @@ export function TasksView() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-semibold text-navy-900">Görevler</h1>
-        <p className="text-sm text-navy-500">Büronuzun tüm davalarındaki görevleri tek yerden takip edin.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-navy-900">Görevler</h1>
+          <p className="text-sm text-navy-500">Büronuzun tüm davalarındaki görevleri tek yerden takip edin.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setFormOpen(true)}
+          className="shrink-0 rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
+        >
+          Yeni görev
+        </button>
       </div>
 
       {toggleError && <ErrorState message={toggleError} />}
@@ -124,7 +140,7 @@ export function TasksView() {
       <FilterChips chips={chips} onRemove={(key) => setParams({ [key]: null })} onClear={clearFilters} resultCount={visible.length} />
 
       {tasks.length === 0 ? (
-        <EmptyState message="Henüz görev yok." hint="Görevler bir davanın Görevler sekmesinden eklenir." />
+        <EmptyState message="Henüz görev yok." hint="İlk görevi 'Yeni görev' ile ekleyin." />
       ) : visible.length === 0 ? (
         <NoFilterResults onClear={clearFilters} />
       ) : (
@@ -170,6 +186,8 @@ export function TasksView() {
           </ul>
         </div>
       )}
+
+      {formOpen && <TaskFormModal initialCaseId={query.dava} onClose={() => setFormOpen(false)} onCreated={handleCreated} />}
     </div>
   );
 }

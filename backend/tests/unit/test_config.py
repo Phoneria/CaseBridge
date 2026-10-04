@@ -137,3 +137,41 @@ def test_chat_level_limits_must_be_positive(monkeypatch, name):
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None, jwt_secret="x")
+
+
+def test_email_and_reminder_defaults(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET", "some-secret")
+    for name in (
+        "EMAIL_BACKEND", "SMTP_HOST", "SMTP_PORT", "SMTP_USE_TLS", "SMTP_FROM", "SMTP_TIMEOUT_SECONDS",
+        "APP_TIMEZONE", "APP_BASE_URL", "REMINDERS_ENABLED", "REMINDER_SEND_HOUR",
+        "REMINDER_POLL_SECONDS", "REMINDER_MAX_ATTEMPTS",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+    from app.core.config import Settings
+
+    settings = Settings(_env_file=None)
+    assert settings.email_backend == "console"
+    assert (settings.smtp_host, settings.smtp_port, settings.smtp_use_tls) == ("", 587, True)
+    assert settings.smtp_from == "CaseBridge <no-reply@casebridge.local>"
+    assert settings.smtp_timeout_seconds == 10
+    assert settings.app_timezone == "Europe/Istanbul"
+    assert settings.app_base_url == "http://localhost:3000"
+    assert settings.reminders_enabled is True
+    assert (settings.reminder_send_hour, settings.reminder_poll_seconds, settings.reminder_max_attempts) == (9, 900, 3)
+
+
+@pytest.mark.parametrize(
+    "name,value",
+    [("APP_TIMEZONE", "Mars/Olympus"), ("REMINDER_SEND_HOUR", "24"), ("REMINDER_POLL_SECONDS", "0"), ("EMAIL_BACKEND", "pigeon")],
+)
+def test_invalid_email_and_reminder_settings_fail(monkeypatch, name, value):
+    monkeypatch.setenv("JWT_SECRET", "some-secret")
+    monkeypatch.setenv(name, value)
+
+    from pydantic import ValidationError
+
+    from app.core.config import Settings
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)

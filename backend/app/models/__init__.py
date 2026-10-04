@@ -20,3 +20,10 @@ from app.models.courtroom import (  # noqa: F401
     ScenarioEvidence,
 )
 from app.models.chat import ChatConversation, ChatMessage, ChatMessageStatus, ChatRole  # noqa: F401
+from app.models.calendar import (  # noqa: F401
+    CalendarEvent,
+    CalendarEventType,
+    ReminderDelivery,
+    ReminderDeliveryStatus,
+    ReminderSourceType,
+)

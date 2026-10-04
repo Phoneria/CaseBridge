@@ -56,6 +56,11 @@ export function parseDateOnly(value: string): Date {
   return new Date(year, month - 1, day);
 }
 
+/** Local date -> "YYYY-MM-DD". */
+export function toDateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -244,16 +249,40 @@ export function describeDocumentListQuery(query: DocumentListQuery, caseLabel: (
 
 // ---------- Calendar (/takvim) ----------
 
+export const CALENDAR_VIEWS = ["ay", "hafta", "ajanda"] as const;
+export type CalendarViewSlug = (typeof CALENDAR_VIEWS)[number];
+export const CALENDAR_TYPE_SLUGS = ["durusma", "toplanti", "muvekkil", "diger", "gorev"] as const;
+export type CalendarTypeSlug = (typeof CALENDAR_TYPE_SLUGS)[number];
+/** URL keys of the calendar filters (cleared together by "Filtreleri temizle"). */
+export const CALENDAR_FILTER_KEYS = ["tur", "sorumlu", "dava", "benim"] as const;
+
 export interface CalendarQuery {
+  gorunum?: Exclude<CalendarViewSlug, "ay">; // absent = month view
   ay?: string; // YYYY-MM
-  goster?: "durusma" | "gorev";
+  hafta?: string; // YYYY-MM-DD (any day; the view starts on its Monday)
+  tur?: CalendarTypeSlug;
+  sorumlu?: string; // user id
+  dava?: string; // case id
+  benim?: "1";
+}
+
+function validDateKey(value: string | null): string | undefined {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  return toDateKey(parseDateOnly(value)) === value ? value : undefined;
 }
 
 export function parseCalendarQuery(params: ParamSource): CalendarQuery {
   const ay = params.get("ay");
+  const gorunum = pick(params.get("gorunum"), CALENDAR_VIEWS);
   return compact({
+    gorunum: gorunum === "ay" ? undefined : gorunum,
     ay: ay && /^\d{4}-(0[1-9]|1[0-2])$/.test(ay) ? ay : undefined,
-    goster: pick(params.get("goster"), ["durusma", "gorev"] as const),
+    hafta: validDateKey(params.get("hafta")),
+    // Legacy ?goster=durusma|gorev links keep working.
+    tur: pick(params.get("tur"), CALENDAR_TYPE_SLUGS) ?? pick(params.get("goster"), ["durusma", "gorev"] as const),
+    sorumlu: params.get("sorumlu") || undefined,
+    dava: params.get("dava") || undefined,
+    benim: pick(params.get("benim"), ["1"] as const),
   });
 }
 

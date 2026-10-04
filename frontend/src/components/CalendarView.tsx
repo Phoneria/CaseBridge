@@ -1,284 +1,260 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getCalendarEvents } from "@/lib/api";
-import { parseCalendarQuery, type CalendarQuery } from "@/lib/filters";
-import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { CalendarEvent } from "@/types";
+import { getCalendarEvents, getCases, getMe, listUsers } from "@/lib/api";
+import {
+  MONTH_NAMES,
+  addDays,
+  agendaRange,
+  filterCalendarItems,
+  monthFromKey,
+  monthKey,
+  monthRange,
+  parseDateKey,
+  startOfWeek,
+  toDateKey,
+  weekRange,
+} from "@/lib/calendar";
+import { parseCalendarQuery, type CalendarViewSlug } from "@/lib/filters";
+import { useUrlParams } from "@/lib/urlState";
+import type { AppUser, CalendarEvent, Case } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
+import { CalendarAgendaView } from "@/components/calendar/CalendarAgendaView";
+import { CalendarEventDrawer } from "@/components/calendar/CalendarEventDrawer";
+import { CalendarEventForm, eventFormInitialFromItem, type EventFormInitial } from "@/components/calendar/CalendarEventForm";
+import { CalendarFilters } from "@/components/calendar/CalendarFilters";
+import { CalendarMonthView } from "@/components/calendar/CalendarMonthView";
+import { CalendarWeekView } from "@/components/calendar/CalendarWeekView";
 
-const MONTH_NAMES = [
-  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
-];
-const WEEKDAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-const MAX_EVENTS_PER_DAY = 3;
+type ParamUpdates = Record<string, string | null>;
 
-function dateKey(year: number, month: number, day: number) {
-  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
+const VIEW_LABELS: Record<CalendarViewSlug, string> = { ay: "Ay", hafta: "Hafta", ajanda: "Ajanda" };
+const NAV_BUTTON =
+  "grid h-9 w-9 place-items-center rounded-lg border border-surface-border text-lg text-navy-600 transition hover:bg-surface-muted";
 
-function monthKey(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function monthFromKey(key: string | undefined): Date | null {
-  if (!key) return null;
-  const [year, month] = key.split("-").map(Number);
-  return new Date(year, month - 1, 1);
-}
-
-function currentMonthStart() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
+function weekTitle(weekStart: Date): string {
+  const weekEnd = addDays(weekStart, 6);
+  const startMonth = weekStart.getMonth() === weekEnd.getMonth() ? "" : ` ${MONTH_NAMES[weekStart.getMonth()]}`;
+  return `${weekStart.getDate()}${startMonth} – ${weekEnd.getDate()} ${MONTH_NAMES[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
 }
 
 export function CalendarView() {
-  const { params, setParams } = useUrlParams();
-  const quickViewHref = useQuickViewHref();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [visibleMonth, setVisibleMonth] = useState(() => monthFromKey(parseCalendarQuery(params).ay) ?? currentMonthStart());
-  const [show, setShow] = useState<CalendarQuery["goster"]>(() => parseCalendarQuery(params).goster);
-  const [openDay, setOpenDay] = useState<string | null>(null);
+  const { params } = useUrlParams();
+  const router = useRouter();
+  const pathname = usePathname() ?? "/takvim";
+  // The URL is mirrored into local state so the page reacts immediately
+  // (and so tests with a static mocked URL can still navigate).
+  const urlSearch = params.toString();
+  const [search, setSearch] = useState(urlSearch);
+  const [syncedUrl, setSyncedUrl] = useState(urlSearch);
+  const searchRef = useRef(urlSearch);
+  if (syncedUrl !== urlSearch) {
+    // The URL changed from outside (sidebar link, back/forward, deep link): follow it.
+    setSyncedUrl(urlSearch);
+    setSearch(urlSearch);
+    searchRef.current = urlSearch;
+  }
+  const query = useMemo(() => parseCalendarQuery(new URLSearchParams(search)), [search]);
+  const view: CalendarViewSlug = query.gorunum ?? "ay";
+
+  const today = useMemo(() => new Date(), []);
+  const todayKey = toDateKey(today);
+  const visibleMonth = monthFromKey(query.ay) ?? new Date(today.getFullYear(), today.getMonth(), 1);
+  const weekStart = startOfWeek(query.hafta ? parseDateKey(query.hafta) : today);
+  const range = view === "ay" ? monthRange(visibleMonth) : view === "hafta" ? weekRange(weekStart) : agendaRange(today);
+
+  // The result is keyed to the range it was fetched for, so a different range never shows it.
+  const rangeKey = `${range.from}|${range.to}`;
+  const [result, setResult] = useState<{ key: string; items: CalendarEvent[]; error: string | null } | null>(null);
+  const loaded = result?.key === rangeKey;
+  const items = useMemo(() => (loaded ? result.items : []), [loaded, result]);
+  const error = loaded ? result.error : null;
+  const [reloadToken, setReloadToken] = useState(0);
+  const [me, setMe] = useState<AppUser | null>(null);
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [cases, setCases] = useState<Case[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [formInitial, setFormInitial] = useState<EventFormInitial | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    getCalendarEvents()
-      .then(setEvents)
-      .catch(() => setError("Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin."))
-      .finally(() => setLoading(false));
+    // Filters and the form still work (with empty lists) if these fail.
+    Promise.all([getMe(), listUsers(), getCases()])
+      .then(([meResult, usersResult, casesResult]) => {
+        setMe(meResult);
+        setUsers(usersResult);
+        setCases(casesResult);
+      })
+      .catch(() => undefined);
   }, []);
 
-  const year = visibleMonth.getFullYear();
-  const month = visibleMonth.getMonth();
-  const today = new Date();
-  const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+  useEffect(() => {
+    let cancelled = false;
+    getCalendarEvents({ from: range.from, to: range.to })
+      .then((result) => {
+        if (!cancelled) setResult({ key: rangeKey, items: result, error: null });
+      })
+      .catch(() => {
+        if (!cancelled) setResult({ key: rangeKey, items: [], error: "Takvim yüklenemedi. Lütfen daha sonra tekrar deneyin." });
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range.from, range.to, reloadToken]);
 
-  const shownEvents = useMemo(
-    () => events.filter((event) => !show || (show === "durusma" ? event.event_type === "hearing" : event.event_type === "task")),
-    [events, show],
-  );
+  const shown = useMemo(() => filterCalendarItems(items, query, me?.id ?? null), [items, query, me]);
+  const selected = items.find((item) => item.id === selectedId) ?? null;
 
-  const eventsByDate = useMemo(() => {
-    return shownEvents.reduce<Record<string, CalendarEvent[]>>((acc, event) => {
-      (acc[event.date] ??= []).push(event);
-      return acc;
-    }, {});
-  }, [shownEvents]);
-
-  const calendarCells = useMemo(() => {
-    const leadingEmptyCells = (new Date(year, month, 1).getDay() + 6) % 7;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const cells: Array<number | null> = [
-      ...Array.from({ length: leadingEmptyCells }, () => null),
-      ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-    ];
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  }, [month, year]);
-
-  const monthPrefix = monthKey(visibleMonth);
-  const monthEvents = events.filter((event) => event.date.startsWith(monthPrefix));
-  const hearingCount = monthEvents.filter((event) => event.event_type === "hearing").length;
-  const taskCount = monthEvents.filter((event) => event.event_type === "task").length;
-
-  function goToMonth(next: Date, writeToUrl: string | null) {
-    setVisibleMonth(next);
-    setOpenDay(null);
-    setParams({ ay: writeToUrl });
+  function update(updates: ParamUpdates) {
+    const next = new URLSearchParams(searchRef.current);
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    searchRef.current = next.toString();
+    setSearch(searchRef.current);
+    router.replace(searchRef.current ? `${pathname}?${searchRef.current}` : pathname, { scroll: false });
   }
 
-  function changeMonth(delta: number) {
-    const next = new Date(year, month + delta, 1);
-    goToMonth(next, monthKey(next));
+  const reload = () => setReloadToken((token) => token + 1);
+
+  function changePeriod(delta: number) {
+    if (view === "ay") {
+      update({ ay: monthKey(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + delta, 1)) });
+    } else {
+      update({ hafta: toDateKey(addDays(weekStart, delta * 7)) });
+    }
   }
 
   function goToToday() {
-    goToMonth(currentMonthStart(), null);
+    update(view === "ay" ? { ay: null } : { hafta: null });
   }
 
-  function toggleShow(kind: NonNullable<CalendarQuery["goster"]>) {
-    const next = show === kind ? undefined : kind;
-    setShow(next);
-    setParams({ goster: next ?? null });
+  function openCreate(date: string, time?: string) {
+    setFormInitial({ date, time: time ?? "09:00" });
   }
 
-  function eventHref(event: CalendarEvent) {
-    return quickViewHref(event.case_id, event.task_id ? { type: "gorev", id: event.task_id } : undefined);
-  }
-
-  function renderEvent(event: CalendarEvent, key: string) {
-    const hearing = event.event_type === "hearing";
-    return (
-      <Link
-        key={key}
-        href={eventHref(event)}
-        scroll={false}
-        title={`${event.title} — ${event.case_name}`}
-        className={`block rounded-md border-l-2 px-2 py-1.5 text-[11px] leading-4 transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 ${
-          hearing ? "border-red-500 bg-red-50 text-red-800" : "border-accent-500 bg-accent-50 text-accent-800"
-        }`}
-      >
-        <p className="font-semibold">{event.title}</p>
-        <p className="truncate opacity-70">{event.case_name}</p>
-      </Link>
-    );
-  }
-
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  const monthItems = items.filter((item) => item.date.startsWith(monthKey(visibleMonth)));
+  const periodTitle =
+    view === "ay" ? `${MONTH_NAMES[visibleMonth.getMonth()]} ${visibleMonth.getFullYear()}` : view === "hafta" ? weekTitle(weekStart) : "Önümüzdeki 30 gün";
+  const unit = view === "ay" ? "ay" : "hafta";
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
           <h1 className="text-xl font-semibold text-navy-900">Takvim</h1>
-          <p className="text-sm text-navy-500">Duruşma ve görev tarihlerinizi aylık görünümde takip edin.</p>
+          <p className="text-sm text-navy-500">Duruşma, görev ve etkinliklerinizi takip edin; e-posta hatırlatmalarını ayarlayın.</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-navy-600">
-          <button
-            type="button"
-            aria-pressed={show === "durusma"}
-            onClick={() => toggleShow("durusma")}
-            className={`flex items-center gap-2 rounded-full px-2.5 py-1 transition ${
-              show === "durusma" ? "bg-red-50 text-red-800 ring-1 ring-red-200" : "hover:bg-surface-muted"
-            } ${show === "gorev" ? "opacity-50" : ""}`}
-          >
-            <i className="h-2.5 w-2.5 rounded-full bg-red-500" /> Duruşma
-          </button>
-          <button
-            type="button"
-            aria-pressed={show === "gorev"}
-            onClick={() => toggleShow("gorev")}
-            className={`flex items-center gap-2 rounded-full px-2.5 py-1 transition ${
-              show === "gorev" ? "bg-accent-50 text-accent-800 ring-1 ring-accent-200" : "hover:bg-surface-muted"
-            } ${show === "durusma" ? "opacity-50" : ""}`}
-          >
-            <i className="h-2.5 w-2.5 rounded-full bg-accent-500" /> Görev
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => openCreate(todayKey)}
+          className="h-9 rounded-xl bg-accent-600 px-4 text-sm font-medium text-white transition hover:bg-accent-700"
+        >
+          Yeni etkinlik
+        </button>
       </div>
 
-      <section className="overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
-        <div className="flex flex-col justify-between gap-3 border-b border-surface-border px-5 py-4 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="font-semibold text-navy-900">
-              {MONTH_NAMES[month]} {year}
-            </h2>
-            <p className="mt-0.5 text-xs text-navy-500">
-              Bu ay {hearingCount} duruşma ve {taskCount} görev bulunuyor.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => changeMonth(-1)}
-              aria-label="Önceki ay"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-surface-border text-lg text-navy-600 transition hover:bg-surface-muted"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              onClick={goToToday}
-              className="h-9 rounded-lg border border-surface-border px-4 text-xs font-medium text-navy-700 transition hover:bg-surface-muted"
-            >
-              Bugün
-            </button>
-            <button
-              type="button"
-              onClick={() => changeMonth(1)}
-              aria-label="Sonraki ay"
-              className="grid h-9 w-9 place-items-center rounded-lg border border-surface-border text-lg text-navy-600 transition hover:bg-surface-muted"
-            >
-              ›
-            </button>
-          </div>
-        </div>
+      <CalendarFilters query={query} users={users} cases={cases} onChange={update} />
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[860px]">
-            <div className="grid grid-cols-7 border-b border-surface-border bg-surface-muted/60">
-              {WEEKDAYS.map((weekday) => (
-                <div key={weekday} className="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-navy-500">
-                  {weekday}
-                </div>
+      <section className="overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
+        <div className="flex flex-col justify-between gap-3 border-b border-surface-border px-5 py-4 lg:flex-row lg:items-center">
+          <div>
+            <h2 className="font-semibold text-navy-900">{periodTitle}</h2>
+            {view === "ay" && loaded && !error && (
+              <p className="mt-0.5 text-xs text-navy-500">
+                Bu ay {monthItems.filter((item) => item.event_type === "hearing").length} duruşma,{" "}
+                {monthItems.filter((item) => item.kind === "task").length} görev ve{" "}
+                {monthItems.filter((item) => item.kind === "event" && item.event_type !== "hearing").length} etkinlik bulunuyor.
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div role="group" aria-label="Görünüm" className="flex rounded-lg border border-surface-border p-0.5">
+              {(Object.keys(VIEW_LABELS) as CalendarViewSlug[]).map((slug) => (
+                <button
+                  key={slug}
+                  type="button"
+                  aria-pressed={view === slug}
+                  onClick={() => update({ gorunum: slug === "ay" ? null : slug })}
+                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                    view === slug ? "bg-accent-600 text-white" : "text-navy-600 hover:bg-surface-muted"
+                  }`}
+                >
+                  {VIEW_LABELS[slug]}
+                </button>
               ))}
             </div>
-
-            <div className="grid grid-cols-7">
-              {calendarCells.map((day, index) => {
-                const key = day ? dateKey(year, month, day) : `empty-${index}`;
-                const dayEvents = day ? eventsByDate[key] ?? [] : [];
-                const hiddenCount = dayEvents.length - MAX_EVENTS_PER_DAY;
-                const isToday = key === todayKey;
-                return (
-                  <div
-                    key={key}
-                    className={`relative min-h-32 border-b border-r border-surface-border p-2.5 ${day ? "bg-white" : "bg-surface-muted/35"}`}
-                  >
-                    {day && (
-                      <>
-                        <span
-                          className={`mb-2 grid h-7 w-7 place-items-center rounded-full text-xs font-medium ${
-                            isToday ? "bg-accent-600 text-white" : "text-navy-600"
-                          }`}
-                        >
-                          {day}
-                        </span>
-                        <div className="space-y-1.5">
-                          {dayEvents
-                            .slice(0, MAX_EVENTS_PER_DAY)
-                            .map((event, eventIndex) => renderEvent(event, `${event.event_type}-${event.task_id ?? event.case_id}-${eventIndex}`))}
-                          {hiddenCount > 0 && (
-                            <button
-                              type="button"
-                              aria-expanded={openDay === key}
-                              onClick={() => setOpenDay((current) => (current === key ? null : key))}
-                              className="w-full rounded-md px-2 py-1 text-left text-[11px] font-medium text-navy-600 hover:bg-surface-muted"
-                            >
-                              +{hiddenCount} daha
-                            </button>
-                          )}
-                        </div>
-                        {openDay === key && (
-                          <div
-                            role="dialog"
-                            aria-label={`${day} ${MONTH_NAMES[month]} olayları`}
-                            className="absolute left-1 top-10 z-20 w-64 space-y-1.5 rounded-xl border border-surface-border bg-white p-3 shadow-xl"
-                          >
-                            <div className="mb-1 flex items-center justify-between">
-                              <p className="text-xs font-semibold text-navy-800">
-                                {day} {MONTH_NAMES[month]}
-                              </p>
-                              <button type="button" aria-label="Kapat" onClick={() => setOpenDay(null)} className="text-navy-400 hover:text-navy-700">
-                                ✕
-                              </button>
-                            </div>
-                            {dayEvents.map((event, eventIndex) => renderEvent(event, `popover-${event.event_type}-${event.task_id ?? event.case_id}-${eventIndex}`))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            {view !== "ajanda" && (
+              <>
+                <button type="button" onClick={() => changePeriod(-1)} aria-label={`Önceki ${unit}`} className={NAV_BUTTON}>
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={goToToday}
+                  className="h-9 rounded-lg border border-surface-border px-4 text-xs font-medium text-navy-700 transition hover:bg-surface-muted"
+                >
+                  Bugün
+                </button>
+                <button type="button" onClick={() => changePeriod(1)} aria-label={`Sonraki ${unit}`} className={NAV_BUTTON}>
+                  ›
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {events.length === 0 && (
+        {!loaded ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState message={error} />
+        ) : (
+          <>
+        {view === "ay" && (
+          <CalendarMonthView month={visibleMonth} items={shown} todayKey={todayKey} onSelect={(item) => setSelectedId(item.id)} onCreate={openCreate} />
+        )}
+        {view === "hafta" && (
+          <CalendarWeekView weekStart={weekStart} items={shown} todayKey={todayKey} onSelect={(item) => setSelectedId(item.id)} onCreate={openCreate} />
+        )}
+        {view === "ajanda" && <CalendarAgendaView today={today} items={shown} onSelect={(item) => setSelectedId(item.id)} />}
+
+        {view !== "ajanda" && items.length === 0 && (
           <p className="border-t border-surface-border px-5 py-4 text-center text-sm text-navy-500">
-            Takvimde henüz yaklaşan tarih yok. Bir davaya duruşma veya görev tarihi ekleyebilirsiniz.
+            Takvimde bu dönem için kayıt yok. Yeni etkinlik ekleyebilir veya bir davaya duruşma ya da görev tarihi girebilirsiniz.
           </p>
         )}
+          </>
+        )}
       </section>
+
+      {selected && (
+        <CalendarEventDrawer
+          item={selected}
+          onClose={() => setSelectedId(null)}
+          onEdit={(item) => {
+            setSelectedId(null);
+            setFormInitial(eventFormInitialFromItem(item));
+          }}
+          onChanged={reload}
+        />
+      )}
+
+      {formInitial && (
+        <CalendarEventForm
+          initial={formInitial}
+          cases={cases}
+          users={users}
+          onClose={() => setFormInitial(null)}
+          onSaved={() => {
+            setFormInitial(null);
+            reload();
+          }}
+        />
+      )}
     </div>
   );
 }
