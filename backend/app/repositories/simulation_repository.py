@@ -61,7 +61,7 @@ class SimulationRepository:
             self.db.query(Simulation, Case.case_name, Case.case_number)
             .options(joinedload(Simulation.result))
             .join(Case, Simulation.case_id == Case.id)
-            .filter(Simulation.law_firm_id == law_firm_id)
+            .filter(Simulation.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
             .order_by(Simulation.started_at.desc())
             .all()
         )

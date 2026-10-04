@@ -12,6 +12,7 @@ export interface Case {
   case_type: CaseType;
   court: string | null;
   assigned_lawyer_id: string | null;
+  reviewer_lawyer_id: string | null;
   opening_date: string;
   next_hearing_date: string | null;
   status: CaseStatus;
@@ -19,6 +20,7 @@ export interface Case {
   case_value: number | null;
   description: string | null;
   is_archived: boolean;
+  is_precedent: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -80,6 +82,8 @@ export interface AppUser {
   id: string;
   email: string;
   full_name: string;
+  department: string | null;
+  gender: "male" | "female" | null;
   role: UserRole;
   law_firm_id: string;
   is_active: boolean;
@@ -245,6 +249,7 @@ export interface CourtroomSessionSummary {
   round_number: number;
   max_rounds: number;
   total_score: number | null;
+  is_demo?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -282,6 +287,16 @@ export interface StatusBreakdown {
   total: number;
 }
 
+export interface LawyerBreakdown {
+  lawyer_id: string | null;
+  full_name: string;
+  department: string | null;
+  total: number;
+  active: number;
+  won: number;
+  lost: number;
+}
+
 export interface AnalyticsOverview {
   total_cases: number;
   active_cases: number;
@@ -291,6 +306,7 @@ export interface AnalyticsOverview {
   average_case_duration_days: number;
   by_category: CategoryBreakdown[];
   by_status: StatusBreakdown[];
+  by_lawyer: LawyerBreakdown[];
 }
 
 export interface HandoverReport {

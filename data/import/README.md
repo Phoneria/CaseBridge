@@ -4,7 +4,7 @@ Put real data here. It is git-ignored and mounted read-only into the backend.
 
 ```
 data/import/
-  cases.json        {"cases": [ ... ]}
+  cases.json        {"record_kind": "precedent", "cases": [ ... ]}
   documents/        pdf / docx / txt files referenced by cases.json
 ```
 
@@ -25,3 +25,11 @@ docker compose exec backend python -m app.db.import_cases
 ```
 
 Set `SEED_DEMO_DATA=false` in `.env` to remove the demo cases.
+
+Use `record_kind: "precedent"` for published court decisions. They appear in
+**Emsal Kararlar**, not the firm's client cases, lawyer workloads, or win-rate
+calculation. Omit it (or set `firm_case`) only for actual firm case files.
+Existing records are matched by case number; the importer refuses to turn a
+non-anonymous firm case into a precedent. Keep the decision's official source
+URL and publication metadata when adding new material; the current 20-file
+sample does not yet contain verified source URLs.

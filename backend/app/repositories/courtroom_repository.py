@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.courtroom import (
@@ -19,16 +19,18 @@ class CourtroomRepository:
     def list_scenarios(self) -> list[CourtroomScenario]:
         return (
             self.db.query(CourtroomScenario)
-            .filter(CourtroomScenario.is_active.is_(True))
+            .filter(CourtroomScenario.is_active.is_(True), CourtroomScenario.law_firm_id.is_(None))
             .order_by(CourtroomScenario.difficulty.asc(), CourtroomScenario.title.asc())
             .all()
         )
 
-    def get_scenario(self, scenario_id: str) -> Optional[CourtroomScenario]:
+    def get_scenario(self, scenario_id: str, law_firm_id: str | None = None) -> Optional[CourtroomScenario]:
+        scope = (CourtroomScenario.law_firm_id.is_(None) if law_firm_id is None
+                 else or_(CourtroomScenario.law_firm_id.is_(None), CourtroomScenario.law_firm_id == law_firm_id))
         return (
             self.db.query(CourtroomScenario)
             .options(joinedload(CourtroomScenario.evidence))
-            .filter(CourtroomScenario.id == scenario_id, CourtroomScenario.is_active.is_(True))
+            .filter(CourtroomScenario.id == scenario_id, CourtroomScenario.is_active.is_(True), scope)
             .first()
         )
 

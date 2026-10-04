@@ -22,7 +22,7 @@ def test_missing_openai_key_is_tolerated(monkeypatch):
 
     from app.core.config import Settings
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
     assert settings.openai_api_key in (None, "")
     assert settings.ai_enabled is False
 

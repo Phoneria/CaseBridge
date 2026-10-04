@@ -38,6 +38,7 @@ describe("AnalyticsView", () => {
     render(<AnalyticsView />);
     await waitFor(() => expect(screen.getByText("108")).toBeInTheDocument());
     expect(screen.getByText("%69.77")).toBeInTheDocument();
+    expect(screen.getByText("60 ÷ (60 + 26) × 100 = %69.77")).toBeInTheDocument();
   });
 
   it("renders zeros (not an error) for an empty dataset", async () => {
@@ -74,14 +75,19 @@ describe("AnalyticsView", () => {
       by_category: [],
       by_status: [],
     });
-    getCases.mockResolvedValue([{ id: "c-lost-1", case_name: "Kaybedilen Dava", case_number: "2025/1", outcome: "lost" }]);
+    getCases.mockImplementation(({ outcome }: { outcome: string }) => Promise.resolve(outcome === "won"
+      ? [{ id: "c-won-1", case_name: "Kazanılan Dava", case_number: "2025/2", outcome: "won", description: "Alacak tahsil edildi." }]
+      : [{ id: "c-lost-1", case_name: "Kaybedilen Dava", case_number: "2025/1", outcome: "lost", description: "Talep reddedildi." }]));
 
     render(<AnalyticsView />);
     await waitFor(() => expect(screen.getByText("Kaybedilen Dava")).toBeInTheDocument());
     expect(getCases).toHaveBeenCalledWith({ outcome: "lost", include_archived: true });
+    expect(getCases).toHaveBeenCalledWith({ outcome: "won", include_archived: true });
 
     expect(screen.getByRole("link", { name: "Kaybedilen Dava" })).toHaveAttribute("href", "/davalar/c-lost-1");
     expect(screen.getByRole("link", { name: "Kaybedilen Dava önizle" })).toHaveAttribute("href", "/analitik?onizle=c-lost-1");
+    expect(screen.getByText("Alacak tahsil edildi.")).toBeInTheDocument();
+    expect(screen.getByText("Talep reddedildi.")).toBeInTheDocument();
   });
 
   it("links cards and category bars to filtered lists", async () => {

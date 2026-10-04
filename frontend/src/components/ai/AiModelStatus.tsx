@@ -13,7 +13,7 @@ export function AiModelStatus({ status, variant }: { status: AIStatus | null; va
         }`}
       >
         <i aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-400" />
-        Model: {status.provider} · Hazır
+        Yapay zekâ hizmeti hazır
       </p>
     );
   }
@@ -25,7 +25,7 @@ export function AiModelStatus({ status, variant }: { status: AIStatus | null; va
         variant === "dark" ? "bg-amber-400/15 text-amber-200" : "bg-amber-50 text-amber-800"
       }`}
     >
-      AI modeli yapılandırılmamış ·{" "}
+      Yapay zekâ hizmeti yapılandırılmamış ·{" "}
       <Link href="/ayarlar" className="font-semibold underline underline-offset-2">
         Ayarlar
       </Link>

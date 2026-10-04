@@ -27,7 +27,7 @@ def list_calendar_events(
 
     hearings = (
         db.query(Case)
-        .filter(Case.law_firm_id == law_firm_id, Case.next_hearing_date.isnot(None))
+        .filter(Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False), Case.next_hearing_date.isnot(None))
         .all()
     )
     for case in hearings:
@@ -46,6 +46,7 @@ def list_calendar_events(
         .join(Case, Task.case_id == Case.id)
         .filter(
             Task.law_firm_id == law_firm_id,
+            Case.is_precedent.is_(False),
             Task.due_date.isnot(None),
             Task.status == TaskStatus.PENDING,
         )

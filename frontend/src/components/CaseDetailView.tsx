@@ -28,6 +28,7 @@ import { AiMark } from "@/components/ai/AiMark";
 import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
 import { AI_PERSPECTIVES } from "@/lib/ai";
+import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -161,9 +162,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     }
   }
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function uploadFile(file: File) {
     setUploading(true);
     setUploadError(null);
     try {
@@ -174,7 +173,6 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       setUploadError("Belge yüklenemedi. Lütfen tekrar deneyin.");
     } finally {
       setUploading(false);
-      event.target.value = "";
     }
   }
 
@@ -247,6 +245,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   if (!caseDetail) return null;
 
   const notes = caseDetail.timeline.filter((e) => e.event_type === "note");
+  const pendingTasks = tasks.filter((task) => task.status === "pending").length;
+  const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
+  const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
+  const orderedTasks = [...tasks].sort((a, b) => {
+    if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
+    return (a.due_date ?? "9999-12-31").localeCompare(b.due_date ?? "9999-12-31");
+  });
 
   return (
     <div className="space-y-5">
@@ -290,23 +295,80 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
       {activeTab === "Genel Bakış" && (
         <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-4 rounded-2xl border border-surface-border bg-white p-5 text-sm shadow-card sm:grid-cols-4">
-            <div>
-              <p className="text-navy-500">Kategori</p>
-              <p className="font-medium text-navy-800">{CASE_TYPE_LABELS[caseDetail.case_type]}</p>
+          <section className="overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
+            <div className="grid gap-px bg-surface-border sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                ["Kategori", CASE_TYPE_LABELS[caseDetail.case_type]],
+                ["Mahkeme", caseDetail.court ?? "—"],
+                ["Durum", CASE_STATUS_LABELS[caseDetail.status]],
+                ["Açılış Tarihi", formatDate(caseDetail.opening_date)],
+                ["Sonraki Duruşma", caseDetail.next_hearing_date ? formatDate(caseDetail.next_hearing_date) : "Planlanmadı"],
+                ["Karşı Taraf", caseDetail.opposing_party ?? "—"],
+                ["Dava Değeri", caseDetail.case_value ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(caseDetail.case_value) : "Belirtilmedi"],
+                ["Dosya Numarası", caseDetail.case_number],
+              ].map(([label, value]) => <div key={label} className="bg-white p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">{label}</p>
+                <p className="mt-1 text-sm font-medium text-navy-800">{value}</p>
+              </div>)}
             </div>
-            <div>
-              <p className="text-navy-500">Mahkeme</p>
-              <p className="font-medium text-navy-800">{caseDetail.court ?? "-"}</p>
-            </div>
-            <div>
-              <p className="text-navy-500">Durum</p>
-              <p className="font-medium text-navy-800">{CASE_STATUS_LABELS[caseDetail.status]}</p>
-            </div>
-            <div>
-              <p className="text-navy-500">Açılış Tarihi</p>
-              <p className="font-medium text-navy-800">{formatDate(caseDetail.opening_date)}</p>
-            </div>
+            {caseDetail.description && <div className="border-t border-surface-border bg-surface-muted/60 px-5 py-4"><p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">Dava Özeti</p><p className="mt-1 text-sm leading-6 text-navy-700">{caseDetail.description}</p></div>}
+          </section>
+
+          <div className="grid grid-cols-3 gap-3">
+            <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "belgeler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">Belgeler</p><p className="mt-1 text-2xl font-bold text-navy-900">{documents.length}</p><p className="text-xs text-navy-500">dosya kayıtlı</p>
+            </button>
+            <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gelismeler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">Gelişmeler</p><p className="mt-1 text-2xl font-bold text-navy-900">{caseDetail.timeline.length}</p><p className="text-xs text-navy-500">zaman çizelgesi kaydı</p>
+            </button>
+            <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gorevler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">Açık Görevler</p><p className={`mt-1 text-2xl font-bold ${pendingTasks ? "text-amber-600" : "text-emerald-600"}`}>{pendingTasks}</p><p className="text-xs text-navy-500">{tasks.length} toplam görev</p>
+            </button>
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-3">
+            <section className="flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
+              <header className="flex items-center justify-between border-b border-surface-border bg-gradient-to-r from-white to-accent-50/60 px-4 py-3">
+                <div><h2 className="text-sm font-semibold text-navy-800">Belgeler</h2><p className="text-[11px] text-navy-500">Dosyadaki güncel evraklar</p></div>
+                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "belgeler")!)} className="text-xs font-semibold text-accent-700 hover:underline">Tümünü aç →</button>
+              </header>
+              {latestDocuments.length === 0 ? <div className="grid flex-1 place-items-center p-5"><EmptyState message="Henüz belge yok." hint="Belgeler sekmesinden yükleyebilirsiniz." /></div> : <ul className="max-h-[390px] divide-y divide-surface-border overflow-y-auto">
+                {latestDocuments.map((document) => <li key={document.id} className="p-4">
+                  <div className="flex items-start gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent-50 text-[9px] font-bold uppercase text-accent-700 ring-1 ring-accent-100">{document.file_type}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-navy-800">{document.filename}</p><p className="mt-0.5 text-[11px] text-navy-500">Yüklendi: {formatDate(document.uploaded_at)}</p></div></div>
+                  <p className="mt-2 line-clamp-3 text-xs leading-5 text-navy-500">{document.extracted_text?.trim() || "Belge metni henüz çıkarılmadı; orijinal dosya belge görüntüleyicisinden açılabilir."}</p>
+                </li>)}
+              </ul>}
+            </section>
+
+            <section className="flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
+              <header className="flex items-center justify-between border-b border-surface-border bg-gradient-to-r from-white to-accent-50/60 px-4 py-3">
+                <div><h2 className="text-sm font-semibold text-navy-800">Gelişmeler</h2><p className="text-[11px] text-navy-500">En yeniden eskiye dosya hareketleri</p></div>
+                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gelismeler")!)} className="text-xs font-semibold text-accent-700 hover:underline">Gelişme ekle →</button>
+              </header>
+              {latestEvents.length === 0 ? <div className="grid flex-1 place-items-center p-5"><EmptyState message="Henüz gelişme yok." /></div> : <ol className="max-h-[390px] overflow-y-auto p-4">
+                {latestEvents.map((event, index) => <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
+                  {index < latestEvents.length - 1 && <span className="absolute bottom-0 left-[7px] top-4 w-px bg-accent-100" />}
+                  <span className="relative mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full border-[3px] border-white bg-accent-500 ring-1 ring-accent-200" />
+                  <div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-wide text-accent-600">{formatDate(event.event_date)}</p><p className="mt-0.5 text-sm font-semibold text-navy-800">{event.title}</p>{event.description && <p className="mt-1 text-xs leading-5 text-navy-500">{event.description}</p>}</div>
+                </li>)}
+              </ol>}
+            </section>
+
+            <section className="flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
+              <header className="flex items-center justify-between border-b border-surface-border bg-gradient-to-r from-white to-accent-50/60 px-4 py-3">
+                <div><h2 className="text-sm font-semibold text-navy-800">Görevler</h2><p className="text-[11px] text-navy-500">Öncelikli işler ve son tarihler</p></div>
+                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gorevler")!)} className="text-xs font-semibold text-accent-700 hover:underline">Görev ekle →</button>
+              </header>
+              {orderedTasks.length === 0 ? <div className="grid flex-1 place-items-center p-5"><EmptyState message="Henüz görev yok." hint="Görevler sekmesinden ekleyebilirsiniz." /></div> : <ul className="max-h-[390px] divide-y divide-surface-border overflow-y-auto px-4">
+                {orderedTasks.map((task) => {
+                  const overdue = task.status === "pending" && Boolean(task.due_date) && task.due_date! < new Date().toISOString().slice(0, 10);
+                  return <li key={task.id} className="flex gap-3 py-3">
+                    <input type="checkbox" checked={task.status === "completed"} onChange={() => handleToggleTask(task)} className="mt-0.5 h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400" aria-label={`${task.title} tamamlandı olarak işaretle`} />
+                    <div className="min-w-0 flex-1"><p className={`text-sm font-medium ${task.status === "completed" ? "text-navy-400 line-through" : "text-navy-800"}`}>{task.title}</p>{task.description && <p className="mt-1 text-xs leading-5 text-navy-500">{task.description}</p>}<div className="mt-2 flex flex-wrap gap-1.5">{task.due_date && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${overdue ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-700"}`}>{overdue ? "Gecikti · " : "Son tarih · "}{formatDate(task.due_date)}</span>}<span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${task.status === "completed" ? "bg-emerald-50 text-emerald-700" : "bg-accent-50 text-accent-700"}`}>{task.status === "completed" ? "Tamamlandı" : "Devam ediyor"}</span></div></div>
+                  </li>;
+                })}
+              </ul>}
+            </section>
           </div>
 
           <CaseAiSummaryCard
@@ -320,38 +382,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       )}
 
       {activeTab === "Belgeler" && (
-        <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          <div>
-            <label
-              htmlFor="document-upload"
-              className="inline-block cursor-pointer rounded-xl border border-dashed border-accent-300 bg-accent-50 px-4 py-2 text-sm font-medium text-accent-700 hover:bg-accent-100"
-            >
-              {uploading ? "Yükleniyor..." : "Belge Yükle (PDF, DOCX, TXT)"}
-            </label>
-            <input
-              id="document-upload"
-              type="file"
-              accept=".pdf,.docx,.txt"
-              onChange={handleFileChange}
-              disabled={uploading}
-              className="hidden"
-            />
-            {uploadError && <div className="mt-2"><ErrorState message={uploadError} /></div>}
-          </div>
-
-          {documents.length === 0 ? (
-            <EmptyState message="Henüz belge yok." hint="Bu davaya PDF, DOCX veya TXT belge yükleyin." />
-          ) : (
-            <ul className="divide-y divide-surface-border text-sm">
-              {documents.map((doc) => (
-                <li key={doc.id} className="flex items-center justify-between py-2">
-                  <span className="text-navy-800">{doc.filename}</span>
-                  <span className="text-xs uppercase text-navy-500">{doc.file_type}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <CaseDocumentsPanel
+          documents={documents}
+          uploading={uploading}
+          uploadError={uploadError}
+          onUpload={uploadFile}
+          onDeleted={(id) => setDocuments((prev) => prev.filter((d) => d.id !== id))}
+        />
       )}
 
       {activeTab === "Gelişmeler" && (
@@ -519,7 +556,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                 >
                   <span>
                     Analiz durumu: {SIMULATION_STATUS_LABELS[sim.status] ?? sim.status}
-                    {sim.error_message ? ` — ${sim.error_message}` : ""}
+                    {sim.error_message ? " — Analiz tamamlanamadı." : ""}
                   </span>
                   {sim.status === "failed" && (
                     <button

@@ -23,11 +23,14 @@ def seeded(db_session):
     return firm
 
 
-def _write(folder, cases, files=None):
+def _write(folder, cases, files=None, record_kind=None):
     (folder / "documents").mkdir(parents=True, exist_ok=True)
     for name, content in (files or {}).items():
         (folder / "documents" / name).write_bytes(content)
-    (folder / "cases.json").write_text(json.dumps({"cases": cases}, ensure_ascii=False), encoding="utf-8")
+    manifest = {"cases": cases}
+    if record_kind:
+        manifest["record_kind"] = record_kind
+    (folder / "cases.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
 
 
 CASE = {
@@ -89,6 +92,39 @@ def test_missing_document_file_is_an_error(db_session, seeded, tmp_path):
     assert stats["created"] == 0 and "yok.pdf" in stats["errors"][0]
 
 
+def test_precedent_import_keeps_documents_but_has_no_firm_case_owner(db_session, seeded, tmp_path):
+    _write(tmp_path, [CASE], {"karar.txt": b"Karar metni"}, record_kind="precedent")
+    stats = import_folder(str(tmp_path), db=db_session)
+    assert stats["created"] == 1
+    precedent = db_session.query(Case).one()
+    assert precedent.is_precedent is True
+    assert precedent.assigned_lawyer_id is None
+    assert db_session.query(Document).count() == 2
+    assert import_folder(str(tmp_path), db=db_session)["updated"] == 1
+
+
+def test_precedent_import_does_not_overwrite_a_firm_case(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "client_name": "Gerçek Müvekkil", "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    _write(tmp_path, [{**CASE, "documents": []}], record_kind="precedent")
+    stats = import_folder(str(tmp_path), db=db_session)
+    assert stats["updated"] == 0
+    assert "different record kind" in stats["errors"][0]
+    assert db_session.query(Case).one().is_precedent is False
+
+
+def test_precedent_import_reclassifies_legacy_anonymous_row(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    assert db_session.query(Case).one().assigned_lawyer_id is not None
+    _write(tmp_path, [{**CASE, "documents": []}], record_kind="precedent")
+    assert import_folder(str(tmp_path), db=db_session)["updated"] == 1
+    db_session.expire_all()
+    case = db_session.query(Case).one()
+    assert case.is_precedent is True
+    assert case.assigned_lawyer_id is None
+
+
 def test_seed_real_data_mode_removes_demo_cases(db_session, monkeypatch):
     from sqlalchemy.orm import sessionmaker
 
@@ -98,6 +134,7 @@ def test_seed_real_data_mode_removes_demo_cases(db_session, monkeypatch):
     engine = db_session.get_bind()
     monkeypatch.setattr(seed_module, "engine", engine)
     monkeypatch.setattr(seed_module, "SessionLocal", sessionmaker(bind=engine))
+    monkeypatch.setattr(settings, "seed_demo_data", True)
 
     seed_module.seed()
     assert db_session.query(Case).count() == len(seed_module.DEMO_CASES)

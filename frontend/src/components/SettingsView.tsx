@@ -50,9 +50,8 @@ export function SettingsView() {
                 aiStatus.configured ? "bg-emerald-500" : "bg-amber-500"
               }`}
             />
-            <span className="uppercase text-navy-800">{aiStatus.provider}</span>
             <span className="text-navy-500">
-              {aiStatus.configured ? "yapılandırıldı" : aiStatus.error ?? "yapılandırılmadı"}
+              {aiStatus.configured ? "Hizmet hazır" : "Hizmet yapılandırılmadı"}
             </span>
           </div>
         )}

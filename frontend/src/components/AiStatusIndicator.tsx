@@ -2,24 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getAiConnectivity, getAiUsage } from "@/lib/api";
-import type { AIConnectivity, AIUsage } from "@/types";
+import { getAiConnectivity } from "@/lib/api";
+import type { AIConnectivity } from "@/types";
 
 const POLL_MS = 60_000;
 
 type State = "checking" | "online" | "offline";
 
-export function AiStatusIndicator() {
+export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" }) {
   const [data, setData] = useState<AIConnectivity | null>(null);
   const [state, setState] = useState<State>("checking");
   const [open, setOpen] = useState(false);
-  const [usage, setUsage] = useState<AIUsage | null>(null);
   const busy = useRef(false);
-
-  useEffect(() => {
-    if (!open) return;
-    getAiUsage().then(setUsage).catch(() => setUsage(null));
-  }, [open]);
 
   const check = useCallback(async (force = false) => {
     if (busy.current) return;
@@ -51,7 +45,7 @@ export function AiStatusIndicator() {
   const label = state === "online" ? "AI bağlı" : state === "offline" ? "AI bağlantısı yok" : "AI kontrol ediliyor";
   const dot = state === "online" ? "bg-emerald-500" : state === "offline" ? "bg-red-500" : "bg-navy-300";
   const ring = state === "online" ? "bg-emerald-400" : "bg-red-400";
-  const providers = data ? Array.from(new Set(data.checks.map((c) => c.provider))).join(" · ") : "Sunucuya ulaşılamadı";
+  const summary = state === "online" ? "Hizmetler hazır" : state === "offline" ? "Hizmetler kontrol edilmeli" : "Durum sorgulanıyor";
 
   return (
     <div
@@ -68,7 +62,9 @@ export function AiStatusIndicator() {
         aria-expanded={open}
         aria-label={`${label}. Ayrıntılar`}
         data-state={state}
-        className="flex w-full items-center gap-3 rounded-xl border border-surface-border px-3 py-2 text-left transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300"
+        className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
+          tone === "dark" ? "border-white/15 bg-white/[0.04] hover:bg-white/[0.09]" : "border-surface-border hover:bg-surface-muted"
+        }`}
       >
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {state !== "checking" && (
@@ -77,8 +73,8 @@ export function AiStatusIndicator() {
           <span aria-hidden="true" className={`relative inline-flex h-2.5 w-2.5 rounded-full ${dot}`} />
         </span>
         <span className="min-w-0 leading-tight">
-          <span className="block text-xs font-semibold text-navy-900">{label}</span>
-          <span className="block truncate text-[11px] text-navy-500">{providers}</span>
+          <span className={`block text-xs font-semibold ${tone === "dark" ? "text-white" : "text-navy-900"}`}>{label}</span>
+          <span className={`block truncate text-[11px] ${tone === "dark" ? "text-[#AEBBD2]" : "text-navy-500"}`}>{summary}</span>
         </span>
       </button>
 
@@ -89,7 +85,6 @@ export function AiStatusIndicator() {
           aria-label="AI bağlantı ayrıntıları"
           className="rounded-xl border border-surface-border bg-white p-3 shadow-lg"
         >
-          <UsageBar usage={usage} />
           {data ? (
             <ul className="flex flex-col gap-2">
               {data.checks.map((c) => (
@@ -97,16 +92,15 @@ export function AiStatusIndicator() {
                   <span aria-hidden="true" className={`mt-1 h-2 w-2 shrink-0 rounded-full ${c.reachable ? "bg-emerald-500" : "bg-red-500"}`} />
                   <span className="min-w-0">
                     <span className="block font-semibold text-navy-900">
-                      {c.name} · {c.provider}
+                      {c.name}
                     </span>
-                    <span className="block truncate text-navy-500">{c.model}</span>
-                    {c.detail && <span className="block text-red-600">{c.detail}</span>}
+                    {!c.reachable && <span className="block text-red-600">Hizmete şu anda ulaşılamıyor.</span>}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-red-600">Backend sunucusuna ulaşılamadı.</p>
+            <p className="text-xs text-red-600">Hizmet durumuna ulaşılamadı.</p>
           )}
           <button
             type="button"
@@ -119,37 +113,6 @@ export function AiStatusIndicator() {
         </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function formatTokens(n: number): string {
-  return new Intl.NumberFormat("tr-TR", { notation: "compact", maximumFractionDigits: 1 }).format(n);
-}
-
-function UsageBar({ usage }: { usage: AIUsage | null }) {
-  if (!usage) return null;
-  const pct = usage.remaining_percent;
-  const bar = pct === null ? "" : pct > 50 ? "bg-emerald-500" : pct > 20 ? "bg-amber-500" : "bg-red-500";
-
-  return (
-    <div className="mb-3 border-b border-surface-border pb-3">
-      <div className="flex items-baseline justify-between text-xs">
-        <span className="font-semibold text-navy-900">Kalan token</span>
-        <span className="font-semibold text-navy-900" data-testid="ai-remaining">
-          {usage.unlimited ? "Sınırsız" : pct !== null ? `%${pct}` : "Bütçe yok"}
-        </span>
-      </div>
-      {pct !== null && !usage.unlimited && (
-        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
-          <div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} />
-        </div>
-      )}
-      <p className="mt-1 text-[11px] text-navy-500">
-        Bu ay: {formatTokens(usage.used_tokens)}
-        {usage.budget_tokens ? ` / ${formatTokens(usage.budget_tokens)}` : ""} token
-        {usage.unlimited ? " · lokal model" : ""}
-      </p>
     </div>
   );
 }

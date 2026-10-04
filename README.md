@@ -100,7 +100,15 @@ Created by `python -m app.db.seed` (idempotent - safe to re-run):
 - `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
 - `avukat@demo.casebridge.dev` / `demo1234` (Lawyer, Demo Hukuk Bürosu)
 
-The seed also creates demo cases and five fictional courtroom scenarios. Open **CaseBridge AI → Canlı Duruşma**, choose a case and then choose **Davacı ol** or **Davalı ol**.
+The demo firm has three lawyers: Emre Yılmaz (Ticaret Hukuku, login above),
+Kerem Demir (İş Hukuku, `kerem@demo.casebridge.dev`) and Zeynep Arslan
+(Kira ve Gayrimenkul Hukuku, `zeynep@demo.casebridge.dev`). All demo lawyer
+accounts use `demo1234`. Admin login opens the admin panel, where each case's
+responsible lawyer can be reviewed and changed. New cases are always assigned
+to an active lawyer; the dashboard shows cases and outcomes by lawyer.
+
+The seed also creates demo cases and six fictional courtroom scenarios, plus six completed training hearings per demo user. Open **CaseBridge AI → Canlı Duruşma** to inspect a completed example, start a fictional scenario, or use **Duruşma ekle** to start a training session from a case in the firm's database. Case-derived sessions use recorded fields and flag unverified evidence; they are not real hearings or outcome predictions.
+In a courtroom session, a user may dictate a move and play AI turns aloud. These optional voice actions send audio or turn text to OpenAI and require `OPENAI_API_KEY`; the written courtroom flow remains available without it.
 
 ## Test commands
 
@@ -129,6 +137,9 @@ The seed also creates demo cases and five fictional courtroom scenarios. Open **
 - CORS allow-list defaults to `localhost:3000`/`127.0.0.1:3000`; extra origins (e.g. for E2E) are added via the `EXTRA_CORS_ORIGINS` env var, not hardcoded.
 - No user-registration endpoint yet — accounts are created via the seed script (`python -m app.db.seed`) only.
 - `logout` does not revoke the JWT (stateless, short-lived tokens) — acceptable for MVP, no server-side session store.
-- `assigned_lawyer_id` on a case is not validated against real users in the same firm.
+- Existing unassigned cases remain visible to admins for manual assignment; new cases require an active lawyer in the same firm.
+- The admin's client overview groups case records by client name. It is not yet a canonical client registry, so people with identical names are not distinguishable there.
+- The local `data/import` sample contains anonymized court-decision summaries; these must not be treated as the firm's own client outcomes without provenance and an explicit import decision.
+- Imported decisions marked as precedents appear in **Emsal Kararlar** and are excluded from firm case lists, client-case workloads, documents/tasks dashboards, reports and win-rate analytics. A separate admin-only precedent review assignment distributes the twenty known anonymous demo-firm decisions across the three demo lawyers (7/7/6); admins can reassign reviewers without implying representation of a client or changing case outcomes. The migrations preserve the decisions and their documents.
 - Pagination added to `GET /cases` (`limit`/`offset`, opt-in); `/analytics`, `/tasks`, `/documents`, `/simulations` still unpaginated — will matter once large demo datasets (section 25) are seeded.
 - npm dependency audit flags several dev-tooling-only CVEs (Next.js dev server, Vite, Vitest) — run `npm audit` and address before any production deployment; not chased here as they don't affect the built/shipped app.

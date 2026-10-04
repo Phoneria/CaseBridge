@@ -124,7 +124,7 @@ describe("AnalysisView", () => {
   it("warns when the AI model is not configured", async () => {
     getAiStatus.mockResolvedValue({ provider: "ollama", configured: false, error: "x" });
     render(<AnalysisView />);
-    expect(await screen.findByText(/AI modeli yapılandırılmamış/)).toBeInTheDocument();
+    expect(await screen.findByText(/Yapay zekâ hizmeti yapılandırılmamış/)).toBeInTheDocument();
   });
 
   it("lists reports with preview links", async () => {

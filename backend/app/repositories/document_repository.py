@@ -36,7 +36,7 @@ class DocumentRepository:
         return (
             self.db.query(Document, Case.case_name, Case.case_number)
             .join(Case, Document.case_id == Case.id)
-            .filter(Document.law_firm_id == law_firm_id)
+            .filter(Document.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
             .order_by(Document.uploaded_at.desc())
             .all()
         )

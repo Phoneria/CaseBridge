@@ -71,6 +71,8 @@ class CourtroomScenario(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    law_firm_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("law_firms.id"), nullable=True, index=True)
+    source_case_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("cases.id", ondelete="SET NULL"), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
     category: Mapped[str] = mapped_column(String(80), nullable=False)

@@ -3,11 +3,12 @@
 Run with: python -m app.db.seed
 
 Idempotent: safe to run multiple times (looks up by email/case_number
-before inserting). Creates one demo law firm, an admin and a lawyer
+before inserting). Creates one demo law firm, an admin and three lawyers
 user with known credentials, and a handful of demo cases so the app
 is not empty on first login (used by E2E tests and local/demo use).
 """
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 from app.core.security import hash_password
 from app.db.base import Base
@@ -20,11 +21,18 @@ from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
 from app.core.config import settings
 from app.db.courtroom_seed import seed_courtroom_scenarios
+from app.db.courtroom_showcase_seed import seed_courtroom_showcases
+from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
 
 DEMO_FIRM_NAME = "Demo Hukuk Bürosu"
 ADMIN_EMAIL = "admin@demo.casebridge.dev"
 LAWYER_EMAIL = "avukat@demo.casebridge.dev"
+DEMO_LAWYERS = (
+    (LAWYER_EMAIL, "Emre Yılmaz", "Ticaret Hukuku", "male"),
+    ("kerem@demo.casebridge.dev", "Kerem Demir", "İş Hukuku", "male"),
+    ("zeynep@demo.casebridge.dev", "Zeynep Arslan", "Kira ve Gayrimenkul Hukuku", "female"),
+)
 DEMO_PASSWORD = "demo1234"
 
 
@@ -38,15 +46,23 @@ def _get_or_create_firm(db) -> LawFirm:
     return firm
 
 
-def _get_or_create_user(db, firm: LawFirm, email: str, full_name: str, role: UserRole) -> User:
+def _get_or_create_user(db, firm: LawFirm, email: str, full_name: str, role: UserRole, department: str | None = None, gender: str | None = None) -> User:
     user = db.query(User).filter(User.email == email).first()
     if user:
+        if email == LAWYER_EMAIL and user.full_name == "Demo Avukat":
+            user.full_name = full_name
+        if department and not user.department:
+            user.department = department
+        if gender and not user.gender:
+            user.gender = gender
         return user
     user = User(
         law_firm_id=firm.id,
         email=email,
         hashed_password=hash_password(DEMO_PASSWORD),
         full_name=full_name,
+        department=department,
+        gender=gender,
         role=role,
     )
     db.add(user)
@@ -98,6 +114,28 @@ def _get_or_create_document(db, case: Case, lawyer: User, **kwargs) -> Document:
         uploaded_by=lawyer.id,
         storage_path=f"demo://{case.case_number}/{kwargs['filename']}",
         **kwargs,
+    )
+    db.add(document)
+    db.flush()
+    return document
+
+
+def _get_or_create_demo_note(db, case: Case, lawyer: User, filename: str, content: str) -> Document:
+    """Persist a downloadable, labelled internal note without replacing user edits."""
+    existing = db.query(Document).filter(Document.case_id == case.id, Document.filename == filename).first()
+    if existing:
+        return existing
+    path = Path(settings.storage_dir) / case.law_firm_id / case.id / f"seed_{filename}"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    document = Document(
+        case_id=case.id,
+        law_firm_id=case.law_firm_id,
+        uploaded_by=lawyer.id,
+        filename=filename,
+        file_type=DocumentType.TXT,
+        storage_path=str(path),
+        extracted_text=content,
     )
     db.add(document)
     db.flush()
@@ -413,6 +451,17 @@ DEMO_TASKS = [
 ]
 
 
+TICARI_KIRA_TASKS = [
+    ("Kira sözleşmesi ve tüm eklerini müvekkilden temin et", "Başlangıç tarihi, artış hükmü, kullanım amacı ve uyarlama şartlarının denetlenebilmesi için imzalı sözleşme ile eklerini dosyaya yükle.", 1, TaskStatus.PENDING),
+    ("Taşınmazın açık adresi ve nitelik fişini tamamla", "İlçe, mahalle, cadde/sokak, brüt-net m², kat, cephe, bina yaşı, kullanım türü ve mevcut kira bedelini doğrula. Bu bilgiler olmadan aynı bölge emsali seçilemez.", 1, TaskStatus.PENDING),
+    ("Üç doğrulanabilir emsal için dayanak belge topla", "Aynı kullanım türü ve yakın çevreden en az üç taşınmaz için ilan tarihi, adres, alan, aylık bedel, TL/m² ve kaynak bağlantısını kaydet; mümkünse imzalı kira kontratı veya ekspertiz doğrulaması iste.", 2, TaskStatus.PENDING),
+    ("TCMB 2026/2Ç piyasa verisini hesaplamaya işle", "İstanbul ticari gayrimenkul endeksindeki çeyreklik ve yıllık değişimi yalnızca piyasa eğilimi olarak değerlendir; doğrudan kira emsali yerine kullanma.", 2, TaskStatus.PENDING),
+    ("Bilirkişi keşfi için teknik soru listesini hazırla", "Emsallerin konum, alan, cephe, kullanım niteliği ve boş-dolu kiralama farklarının karşılaştırılması için bilirkişiye yöneltilecek soruları hazırla.", 3, TaskStatus.PENDING),
+    ("10 Ekim duruşması delil klasörünü tamamla", "Sözleşme, ödeme geçmişi, resmi piyasa verisi, UYAP karar notları ve doğrulanmış emsal tablosunu duruşma klasöründe birleştir.", 5, TaskStatus.PENDING),
+    ("UYAP kira bedeli içtihat taramasını dosyala", "TBK 344 ölçütleri ve hakkaniyet indirimiyle ilgili resmi karar özetleri kaynak adresleriyle dosyaya eklendi.", -1, TaskStatus.COMPLETED),
+]
+
+
 DEMO_DOCUMENTS = [
     ("2026/101", "kira-sozlesmesi-ozeti.txt", "Kira başlangıcı: 01.01.2024\nAylık kira bedeli: 15.000 TL."),
     ("2026/088", "fesih-bildirimi.txt", "İş sözleşmesinin fesih bildirimine ilişkin kısa demo metni."),
@@ -420,8 +469,98 @@ DEMO_DOCUMENTS = [
     ("2026/119", "lisans-maddeleri.txt", "Marka kullanım süresi ve bölgesine ilişkin sözleşme maddeleri özeti."),
     ("2026/124", "bordro-notlari.txt", "Fazla çalışma iddiasına konu bordro dönemleri: Ocak-Haziran 2026."),
     ("2026/138", "arabuluculuk-tutanagi.txt", "Tarafların anlaşamaması üzerine düzenlenen son tutanak özeti."),
-    ("2026/153", "emsal-kira-listesi.txt", "Aynı bölgede bulunan üç ticari taşınmaza ait örnek kira bedelleri."),
     ("2026/161", "saglik-kaydi-ozeti.txt", "Tedavi tarihleri ve geçici iş göremezlik süresine ilişkin kısa özet."),
+]
+
+
+TICARI_KIRA_DOCUMENTS = [
+    (
+        "emsal-kira-arastirma-durumu.txt",
+        """EMSAL KİRA ARAŞTIRMASI — DOĞRULAMA DURUMU
+
+Dosya: İstanbul 14. Sulh Hukuk Mahkemesi, 2026/153
+Taraflar: Arma Tasarım Ltd. Şti. / Merkez Gayrimenkul A.Ş.
+Uyuşmazlık: Değişen ekonomik koşullar nedeniyle ticari kira bedelinin uyarlanması
+
+SONUÇ
+Dosyada kiralananın ilçe, mahalle, açık adres, brüt/net alan, kat, cephe, bina yaşı ve kullanım türü bilgileri bulunmamaktadır. Bu nedenle “aynı bölgede bulunan üç ticari taşınmaz” için doğrulanabilir emsal bedel üretilememiştir. Önceki tek cümlelik emsal kaydı delil niteliğinde değildi ve bu doğrulama notuyla değiştirilmiştir.
+
+GERÇEK EMSAL İÇİN ZORUNLU ALANLAR
+1. Açık adres ve taşınmazın kullanım türü
+2. Brüt ve net m²
+3. Kat, cephe, erişim, bina yaşı ve fiziksel durum
+4. İlan veya sözleşme tarihi
+5. Aylık brüt/net kira ve TL/m²
+6. Kaynak URL, ilan numarası veya imzalı sözleşme
+7. Dava konusu taşınmazla farklılıkların düzeltme gerekçesi
+
+UYARI
+İstanbul geneli endeksler, belirli bir mahalledeki üç emsal kira yerine geçmez. Adres ve nitelik bilgileri tamamlandıktan sonra aynı alt pazardan karşılaştırılabilir üç kayıt seçilmelidir.
+
+Hazırlanma tarihi: 04.10.2026""",
+    ),
+    (
+        "tcmb-ticari-gayrimenkul-2026-2c.txt",
+        """TCMB TİCARİ GAYRİMENKUL PİYASA NOTU — 2026 2. ÇEYREK
+
+Kaynak: Türkiye Cumhuriyet Merkez Bankası, Ticari Gayrimenkul Fiyat Endeksi.
+
+RESMİ VERİ ÖZETİ
+- Türkiye TGFE: çeyreklik %5,5 artış; yıllık nominal %29,4 artış; yıllık reel %2,2 azalış.
+- Türkiye Dükkan Fiyat Endeksi: çeyreklik %5,4; yıllık nominal %29,2; yıllık reel %2,4 azalış.
+- Türkiye Ofis Fiyat Endeksi: çeyreklik %6,0; yıllık nominal %30,6; yıllık reel %1,3 azalış.
+- İstanbul TGFE: çeyreklik %5,3; yıllık nominal %27,8 artış.
+
+DOSYA BAKIMINDAN KULLANIM
+Bu veriler İstanbul ticari gayrimenkul piyasasındaki genel fiyat yönünü gösterir. Kira bedeli veya belirli bir taşınmazın rayici değildir; bilirkişi tarafından seçilecek aynı bölge ve nitelikteki kira emsallerinin yerine kullanılamaz.
+
+Kaynak sayfası: https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Istatistikler/Reel+Sektor+Istatistikleri/TGFE/
+Rapor: https://www.tcmb.gov.tr/wps/wcm/connect/1d317a23-f499-461e-8963-bf954ff20a41/TGFE-Rapor.pdf
+Erişim tarihi: 04.10.2026""",
+    ),
+    (
+        "uyap-kira-bedeli-emsal-kriterleri.txt",
+        """UYAP RESMİ İÇTİHAT NOTU — KİRA BEDELİ VE EMSAL KRİTERLERİ
+
+1. TBK 344/3 ölçütleri
+UYAP'ta yayımlanan kararda, beş yıldan uzun veya beş yıldan sonra yenilenen kiralarda hâkimin TÜFE on iki aylık ortalaması, kiralananın durumu ve emsal kira bedellerini birlikte değerlendirerek hakkaniyete uygun bedel belirlemesi gerektiği açıklanmaktadır.
+Kaynak: https://mevzuat.adalet.gov.tr/ictihat/1225412500
+
+2. Ticari taşınmaz ve hakkaniyet indirimi örneği
+Başka bir resmi UYAP kararında çatılı işyeri için bilirkişi aylık brüt rayici 581.250 TL olarak belirlemiş; eski kiracılık nedeniyle %10 hakkaniyet indirimi uygulanarak 523.125 TL sonucuna ulaşılmıştır. Bu rakamlar bu dosyanın emsali değildir; değerlendirme yöntemini gösteren karar verisidir.
+Kaynak: https://mevzuat.adalet.gov.tr/ictihat/1219367600
+
+3. Dosyaya etkisi
+Taşınmazın açık adresi ve fiziksel nitelikleri tamamlanmadan seçilen ilanlar karşılaştırılabilir kabul edilmemelidir. Emsallerin gerçekten kiraya verilmiş olup olmadığı, tarihleri, yüzölçümleri ve boş/dolu kiralama koşulları doğrulanmalıdır.
+
+Erişim tarihi: 04.10.2026
+Not: Bu çalışma hukuki görüş yerine kaynaklı dosya araştırma notudur.""",
+    ),
+    (
+        "delil-eksikligi-ve-belge-talep-listesi.txt",
+        """DOSYA DELİL DENETİMİ — 2026/153
+
+MEVCUT DOĞRULANMIŞ KAYITLAR
+- Mahkeme: İstanbul 14. Sulh Hukuk Mahkemesi
+- Dava türü: Ticari kira bedelinin uyarlanması
+- Dava değeri: 420.000 TL
+- Açılış tarihi: 14.07.2026
+- Sonraki duruşma: 10.10.2026
+
+DOSYADA BULUNMAYAN TEMEL BELGELER
+- İmzalı kira sözleşmesi ve ekleri
+- Taşınmazın açık adresi, tapu veya bağımsız bölüm bilgisi
+- Brüt/net alan ile fiziksel nitelik dökümü
+- Mevcut kira ödeme dekontları ve artış geçmişi
+- Uyarlama talebine esas hesap tablosu
+- Aynı alt pazardan doğrulanmış en az üç kira emsali
+- Varsa ekspertiz veya bilirkişi ön değerlendirmesi
+
+ÖNCELİK
+Bu eksikler tamamlanmadan emsal kira tablosu kesin delil olarak sunulmamalıdır. İlk iş, müvekkilden sözleşme ve taşınmaz niteliklerini istemek; ardından aynı mahalle ve kullanım türünde kaynaklı emsal toplamaktır.
+
+Hazırlanma tarihi: 04.10.2026""",
+    ),
 ]
 
 
@@ -437,13 +576,93 @@ DEMO_EVENTS = [
 ]
 
 
+TICARI_KIRA_EVENTS = [
+    ("Dava kaydı açıldı", "Ticari kira bedelinin değişen ekonomik koşullara göre uyarlanması talebi 2026/153 numarasıyla kayda alındı.", CaseEventType.FILING, 82),
+    ("Duruşma tarihi dosyaya işlendi", "İstanbul 14. Sulh Hukuk Mahkemesindeki duruşma 10.10.2026 olarak takvime kaydedildi.", CaseEventType.HEARING, 78),
+    ("Ön emsal kaydının yetersiz olduğu tespit edildi", "Önceki kayıtta adres, m², ilan tarihi ve kaynak bulunmadığı için üç taşınmazın doğrulanabilir emsal sayılamayacağı not edildi.", CaseEventType.NOTE, 2),
+    ("TCMB 2026/2Ç ticari gayrimenkul verisi eklendi", "İstanbul için çeyreklik %5,3 ve yıllık nominal %27,8 TGFE değişimini içeren resmi TCMB piyasa notu dosyalandı.", CaseEventType.SUBMISSION, 0),
+    ("UYAP kira bedeli içtihat notu eklendi", "TBK 344 ölçütleri, emsal incelemesi ve hakkaniyet indirimiyle ilgili iki resmi UYAP kararının kaynaklı özeti dosyaya eklendi.", CaseEventType.LEGAL_UPDATE, 0),
+    ("Delil eksikliği ve belge talep listesi hazırlandı", "Sözleşme, açık adres, taşınmaz nitelikleri, ödeme geçmişi ve doğrulanmış emsaller için tamamlanması gerekenler listelendi.", CaseEventType.NOTE, 0),
+]
+
+
+def _seed_case_detail(db, case: Case, lawyer: User) -> None:
+    """Make every fictional demo case useful without inventing court evidence."""
+    evidence = CASE_EVIDENCE[case.case_number]
+    closed = case.status == CaseStatus.KAPALI
+    result = {CaseOutcome.WON: "Kabul", CaseOutcome.LOST: "Ret"}.get(case.outcome, "Devam ediyor")
+    fact_lines = [
+        "DEMO DOSYA KAYDI — İÇ ÇALIŞMA NOTU",
+        "Bu metin mevcut veri tabanı alanlarından üretilmiştir; mahkeme evrakı veya müvekkil belgesi değildir.",
+        "",
+        f"Dosya: {case.case_number} — {case.case_name}",
+        f"Müvekkil: {case.client_name}",
+        f"Karşı taraf: {case.opposing_party or 'Kayıt yok'}",
+        f"Mahkeme: {case.court or 'Kayıt yok'}",
+        f"Açılış tarihi: {case.opening_date:%d.%m.%Y}",
+        f"Durum / kayıtlı sonuç: {case.status.value} / {result}",
+        f"Dava değeri: {case.case_value:,.0f} TL" if case.case_value is not None else "Dava değeri: Kayıt yok",
+        f"Sonraki duruşma: {case.next_hearing_date:%d.%m.%Y}" if case.next_hearing_date else "Sonraki duruşma: Kayıt yok",
+        f"Veri tabanındaki açıklama: {case.description or 'Kayıt yok'}",
+        "",
+        "Doğrulama sınırı: Dilekçe, karar ve diğer asıl evraklar bu nottan çıkarılamaz; ayrıca temin edilmelidir.",
+    ]
+    _get_or_create_demo_note(db, case, lawyer, "demo-dosya-kaydi.txt", "\n".join(fact_lines))
+    evidence_lines = [
+        "DELİL VE EVRAK KONTROL LİSTESİ — DEMO İÇ NOT",
+        f"Dosya: {case.case_number} — {case.case_name}",
+        "Aşağıdaki evrakın mevcut olduğu varsayılmıyor. Her biri asıl kaynaktan istenmeli ve doğrulanmalıdır.",
+        "",
+        *(f"[DOĞRULANMADI] {item}" for item in evidence),
+        "",
+        "Kontrol: belge tarihi, tarafları, imza/tebliğ bilgisi ve dosya numarası asıl evrakla eşleştirilmeli.",
+        "Kamuya açık internet kaynakları bu özel davanın gerçek dilekçesi veya kararı yerine geçmez.",
+    ]
+    _get_or_create_demo_note(db, case, lawyer, "demo-delil-kontrol-listesi.txt", "\n".join(evidence_lines))
+
+    today = date.today()
+    actions = [
+        ("Asıl dava evrakını doğrula", f"{case.case_number} dosyasının dilekçe, ara karar ve varsa gerekçeli kararını yetkili dosya kaynağından temin edip taraf/dosya numarasıyla eşleştir.", 3),
+        ("Birincil delilleri temin et", f"Öncelikle şu belgeyi iste ve dosyala: {evidence[0]}. Ardından {evidence[1]} için kaynak ve tarih kontrolü yap.", 5),
+        ("Dosya sonucunu ve takibi kontrol et" if closed else "Duruşma ve süre takibini güncelle",
+         ("Kayıtlı sonuç " + result.lower() + "; gerekçeli karar, kesinleşme, olası kanun yolu ve tahsilat durumunu asıl dosyadan doğrula."
+          if closed else f"Sonraki duruşma {case.next_hearing_date:%d.%m.%Y} olarak kayıtlı. Tebliğleri, süreleri ve delil sunma durumunu asıl dosyadan teyit et."), 7),
+    ]
+    for title, description, due_in_days in actions:
+        _get_or_create_task(db, case, lawyer, title=title, description=description,
+                            due_date=today + timedelta(days=due_in_days), status=TaskStatus.PENDING)
+
+    event_rows = [
+        ("Demo dava kaydı açıldı", f"{case.case_number} numaralı {case.case_name} kaydının açılış tarihi veri tabanında {case.opening_date:%d.%m.%Y} olarak yer alıyor; bu bir mahkeme tevzi belgesi değildir.", case.opening_date),
+        ("Dosya bilgileri iç not olarak derlendi", f"{case.client_name} ile {case.opposing_party or 'karşı taraf'} arasındaki uyuşmazlığın mevcut veri tabanı özeti oluşturuldu. Asıl dilekçe ve karar ayrıca doğrulanmalıdır.", today),
+        ("Eksik delil ve takip listesi hazırlandı", f"{evidence[0]}; {evidence[1]}; {evidence[2]} için kaynak kontrolü ve takip görevleri açıldı. Bu belgelerin dosyada bulunduğu iddia edilmiyor.", today),
+    ]
+    for title, description, event_date in event_rows:
+        _get_or_create_event(db, case, lawyer, title=title, description=description,
+                             event_type=CaseEventType.NOTE, event_date=event_date)
+
+
 def seed() -> None:
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         firm = _get_or_create_firm(db)
-        _get_or_create_user(db, firm, ADMIN_EMAIL, "Demo Yönetici", UserRole.ADMIN)
-        lawyer = _get_or_create_user(db, firm, LAWYER_EMAIL, "Demo Avukat", UserRole.LAWYER)
+        admin = _get_or_create_user(db, firm, ADMIN_EMAIL, "Demo Yönetici", UserRole.ADMIN)
+        legacy_lawyer = db.query(User).filter(User.email == LAWYER_EMAIL, User.full_name == "Demo Avukat").first()
+        lawyers = [
+            _get_or_create_user(db, firm, email, name, UserRole.LAWYER, department, gender)
+            for email, name, department, gender in DEMO_LAWYERS
+        ]
+        lawyer = lawyers[0]
+
+        # Preserve legacy case records while ensuring every existing case in
+        # the demo firm has an owner, including when demo data is disabled.
+        unassigned = db.query(Case).filter(
+            Case.law_firm_id == firm.id, Case.assigned_lawyer_id.is_(None),
+            Case.is_precedent.is_(False),
+        ).order_by(Case.case_number).all()
+        for index, case in enumerate(unassigned):
+            case.assigned_lawyer_id = lawyers[index % len(lawyers)].id
 
         if not settings.seed_demo_data:
             demo_numbers = [c["case_number"] for c in DEMO_CASES]
@@ -458,10 +677,20 @@ def seed() -> None:
             print(f"  Courtroom scenarios: {scenario_count}")
             return
 
-        demo_cases = {
-            case_kwargs["case_number"]: _get_or_create_case(db, firm, lawyer, **case_kwargs)
-            for case_kwargs in DEMO_CASES
-        }
+        demo_cases = {}
+        for index, case_kwargs in enumerate(DEMO_CASES):
+            case_type = case_kwargs["case_type"]
+            assigned = (
+                lawyers[0] if case_type == CaseType.TICARET_HUKUKU
+                else lawyers[1] if case_type == CaseType.IS_HUKUKU
+                else lawyers[2] if case_type == CaseType.KIRA
+                else lawyers[index % len(lawyers)]
+            )
+            case = _get_or_create_case(db, firm, assigned, **case_kwargs)
+            if legacy_lawyer and case.assigned_lawyer_id == lawyer.id:
+                case.assigned_lawyer_id = assigned.id
+            demo_cases[case_kwargs["case_number"]] = case
+
 
         for case_number, title, due_in_days, status in DEMO_TASKS:
             _get_or_create_task(
@@ -502,17 +731,91 @@ def seed() -> None:
                 created_at=datetime.now(timezone.utc) - timedelta(hours=days_ago),
             )
 
+        # The commercial rent case is intentionally richer than the other
+        # demo records.  It uses sourced public data and explicitly records
+        # the evidence gaps instead of presenting invented listings as
+        # same-neighbourhood comparables.
+        commercial_rent_case = demo_cases["2026/153"]
+        legacy_document = (
+            db.query(Document)
+            .filter(Document.case_id == commercial_rent_case.id, Document.filename == "emsal-kira-listesi.txt")
+            .first()
+        )
+        if legacy_document and legacy_document.extracted_text == "Aynı bölgede bulunan üç ticari taşınmaza ait örnek kira bedelleri.":
+            legacy_document.filename = TICARI_KIRA_DOCUMENTS[0][0]
+            legacy_document.extracted_text = TICARI_KIRA_DOCUMENTS[0][1]
+
+        legacy_task = (
+            db.query(Task)
+            .filter(Task.case_id == commercial_rent_case.id, Task.title == "Emsal kira araştırmasını güncelle")
+            .first()
+        )
+        if legacy_task and legacy_task.description == "Demo görev kaydı":
+            legacy_task.description = "Taşınmazın açık adresi ve nitelikleri tamamlandıktan sonra aynı alt pazardan kaynaklı üç emsali TL/m² karşılaştırmasıyla güncelle."
+
+        legacy_event = (
+            db.query(CaseEvent)
+            .filter(CaseEvent.case_id == commercial_rent_case.id, CaseEvent.title == "Emsal kira araştırması dosyaya eklendi")
+            .first()
+        )
+        if legacy_event and legacy_event.description == "Demo dava gelişmesi":
+            legacy_event.description = "İlk emsal notu incelendi; adres, alan ve kaynak bilgisi içermediği için doğrulama bekleyen çalışma olarak işaretlendi."
+
+        for title, description, due_in_days, status in TICARI_KIRA_TASKS:
+            _get_or_create_task(
+                db,
+                commercial_rent_case,
+                lawyer,
+                title=title,
+                description=description,
+                due_date=date.today() + timedelta(days=due_in_days),
+                status=status,
+                completed_at=(datetime.now(timezone.utc) - timedelta(days=1) if status == TaskStatus.COMPLETED else None),
+            )
+
+        for index, (filename, extracted_text) in enumerate(TICARI_KIRA_DOCUMENTS):
+            _get_or_create_document(
+                db,
+                commercial_rent_case,
+                lawyer,
+                filename=filename,
+                file_type=DocumentType.TXT,
+                extracted_text=extracted_text,
+                uploaded_at=datetime.now(timezone.utc) - timedelta(hours=index),
+            )
+
+        for title, description, event_type, days_ago in TICARI_KIRA_EVENTS:
+            _get_or_create_event(
+                db,
+                commercial_rent_case,
+                lawyer,
+                title=title,
+                description=description,
+                event_type=event_type,
+                event_date=date.today() - timedelta(days=days_ago),
+                created_at=datetime.now(timezone.utc) - timedelta(hours=days_ago),
+            )
+
+        # The detailed overview must not be populated for just one showcase case.
+        # These notes are derived only from each case's existing demo fields.
+        for case_number, case in demo_cases.items():
+            if case_number != "2026/153":
+                assigned_lawyer = next((user for user in lawyers if user.id == case.assigned_lawyer_id), lawyer)
+                _seed_case_detail(db, case, assigned_lawyer)
+
         scenario_count = seed_courtroom_scenarios(db)
+        showcase_count = sum(seed_courtroom_showcases(db, user) for user in (admin, *lawyers))
 
         db.commit()
         print(f"Seed complete. Firm: {DEMO_FIRM_NAME}")
         print(f"  Admin login:  {ADMIN_EMAIL} / {DEMO_PASSWORD}")
         print(f"  Lawyer login: {LAWYER_EMAIL} / {DEMO_PASSWORD}")
         print(f"  Demo cases: {len(DEMO_CASES)}")
-        print(f"  Demo tasks: {len(DEMO_TASKS)}")
-        print(f"  Demo documents: {len(DEMO_DOCUMENTS)}")
-        print(f"  Demo activities: {len(DEMO_EVENTS)}")
+        print(f"  Demo tasks: {len(DEMO_TASKS) + len(TICARI_KIRA_TASKS) + 3 * len(CASE_EVIDENCE)}")
+        print(f"  Demo documents: {len(DEMO_DOCUMENTS) + len(TICARI_KIRA_DOCUMENTS) + 2 * len(CASE_EVIDENCE)}")
+        print(f"  Demo activities: {len(DEMO_EVENTS) + len(TICARI_KIRA_EVENTS) + 3 * len(CASE_EVIDENCE)}")
         print(f"  Courtroom scenarios: {scenario_count}")
+        print(f"  Completed training hearings: {showcase_count} newly added")
     finally:
         db.close()
 

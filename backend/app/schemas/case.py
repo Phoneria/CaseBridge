@@ -53,6 +53,14 @@ class CaseUpdate(BaseModel):
     description: Optional[str] = None
 
 
+class CaseAssignment(BaseModel):
+    assigned_lawyer_id: str
+
+
+class PrecedentReviewAssignment(BaseModel):
+    reviewer_lawyer_id: str
+
+
 class CaseOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -65,6 +73,7 @@ class CaseOut(BaseModel):
     case_type: CaseType
     court: Optional[str] = None
     assigned_lawyer_id: Optional[str] = None
+    reviewer_lawyer_id: Optional[str] = None
     opening_date: date
     next_hearing_date: Optional[date] = None
     status: CaseStatus
@@ -72,6 +81,7 @@ class CaseOut(BaseModel):
     case_value: Optional[float] = None
     description: Optional[str] = None
     is_archived: bool
+    is_precedent: bool
     created_at: datetime
     updated_at: datetime
 

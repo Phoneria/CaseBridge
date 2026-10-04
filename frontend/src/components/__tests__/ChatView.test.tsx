@@ -164,7 +164,7 @@ describe("ChatView", () => {
 
     await userEvent.type(screen.getByLabelText("Mesajınız"), "Soru{Enter}");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Model zaman aşımına uğradı.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Yanıt alınamadı. Lütfen tekrar deneyin.");
   });
 
   it("rates complete answers and toggles the vote off", async () => {
@@ -230,7 +230,7 @@ describe("ChatView", () => {
     render(<ChatView />);
 
     await waitFor(() => expect(screen.getByLabelText("Mesajınız")).toBeDisabled());
-    expect(screen.getByText(/AI modeli yapılandırılmamış/)).toBeInTheDocument();
+    expect(screen.getByText(/Yapay zekâ hizmeti yapılandırılmamış/)).toBeInTheDocument();
   });
 
   it("always shows the disclaimer and warns only for external providers", async () => {
@@ -241,7 +241,7 @@ describe("ChatView", () => {
 
     api.getChatStatus.mockResolvedValue({ ...STATUS, provider: "ollama", external: false });
     render(<ChatView />);
-    expect(await screen.findByText(/Model: ollama/)).toBeInTheDocument();
+    expect(await screen.findByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
     expect(screen.queryByText(/harici bir AI sağlayıcısına/)).not.toBeInTheDocument();
     expect(screen.getByText("CaseBridge AI hukuki danışmanlık yerine geçmez; yanıtları doğrulayın.")).toBeInTheDocument();
   });
@@ -318,7 +318,7 @@ describe("ChatView", () => {
     await waitFor(() => expect(streamSignal!.aborted).toBe(true));
   });
 
-  it("labels answers with their level and model", async () => {
+  it("labels answers with their level but hides the model", async () => {
     api.getChatConversation.mockResolvedValue({
       ...CONVERSATION,
       messages: [
@@ -328,7 +328,8 @@ describe("ChatView", () => {
     });
     setUrl("/ai/sohbet?sohbet=c1");
     render(<ChatView />);
-    expect(await screen.findByText("Basit · gpt-4o-mini")).toBeInTheDocument();
+    expect(await screen.findByText("Basit")).toBeInTheDocument();
+    expect(screen.queryByText(/gpt-4o-mini/)).not.toBeInTheDocument();
   });
 
   it("notes answers cut off by the length limit and still allows rating them", async () => {

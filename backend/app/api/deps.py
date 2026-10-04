@@ -12,7 +12,7 @@ from app.ai.provider_factory import get_llm_provider
 from app.ai.providers.base import LLMProvider
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal, get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 
 _bearer_scheme = HTTPBearer(auto_error=False)
@@ -49,6 +49,12 @@ def get_current_law_firm_id(current_user: User = Depends(get_current_user)) -> s
     """The single source of truth for tenant scoping on every protected
     route. Never accept law_firm_id from the client / path / query."""
     return current_user.law_firm_id
+
+
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user
 
 
 def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:

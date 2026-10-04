@@ -2,6 +2,7 @@
 from app.ai.courtroom import CourtroomMockProvider
 from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.services.courtroom_worker import process_one_pending_courtroom_turn
+from app.services import voice_service
 
 
 def _headers(client, fixtures, who="user_a"):
@@ -26,10 +27,39 @@ def test_scenarios_expose_public_information_only(client, two_firms_two_users, d
         "/courtroom-scenarios", headers=_headers(client, two_firms_two_users)
     ).json()
 
-    assert len(body) == 5
+    assert len(body) == 6
     assert body[0]["public_facts"]
     assert "plaintiff_private_brief" not in body[0]
     assert "judge_instructions" not in body[0]
+
+
+def test_start_hearing_from_owned_case_without_exposing_it_to_other_firm(client, two_firms_two_users, db_session):
+    from app.models.case import Case, CaseType
+    from app.models.courtroom import CourtroomScenario
+
+    case = Case(
+        law_firm_id=two_firms_two_users["firm_a"].id,
+        case_number="2026/777", case_name="Örnek Alacak Davası",
+        client_name="Müvekkil A", opposing_party="Şirket B",
+        case_type=CaseType.TICARET_HUKUKU,
+        description="Ödenmeyen hizmet bedeli iddiası.",
+    )
+    db_session.add(case)
+    db_session.commit()
+    owner = _headers(client, two_firms_two_users, "user_a")
+    outsider = _headers(client, two_firms_two_users, "user_b")
+    created = client.post("/courtroom-sessions/from-case", headers=owner, json={
+        "case_id": case.id, "chosen_role": "defendant",
+    })
+    assert created.status_code == 201
+    body = created.json()
+    assert body["status"] == "active"
+    assert body["scenario"]["defendant_name"] == "Müvekkil A"
+    assert "Ödenmeyen hizmet bedeli" in " ".join(body["scenario"]["public_facts"])
+    scenario = db_session.query(CourtroomScenario).filter_by(source_case_id=case.id).one()
+    assert client.get(f"/courtroom-scenarios/{scenario.id}", headers=outsider).status_code == 404
+    assert client.post("/courtroom-sessions", headers=outsider, json={"scenario_id": scenario.id, "chosen_role": "plaintiff"}).status_code == 404
+    assert client.post("/courtroom-sessions/from-case", headers=outsider, json={"case_id": case.id, "chosen_role": "plaintiff"}).status_code == 404
 
 
 def test_create_session_reveals_only_chosen_role_material(
@@ -51,6 +81,41 @@ def test_create_session_reveals_only_chosen_role_material(
     assert "BORC_DEKONT" in codes
     assert "BORC_IS_PLANI" not in codes
     assert all("defendant_private_brief" not in str(turn) for turn in body["turns"])
+
+
+def test_voice_uses_owned_session_and_persisted_ai_turn(client, two_firms_two_users, db_session, monkeypatch):
+    scenario = _seed_and_pick(db_session)
+    owner = _headers(client, two_firms_two_users, "user_a")
+    outsider = _headers(client, two_firms_two_users, "user_b")
+    created = client.post("/courtroom-sessions", headers=owner, json={
+        "scenario_id": scenario.id, "chosen_role": "plaintiff",
+    }).json()
+    path = f"/courtroom-sessions/{created['id']}/voice"
+
+    monkeypatch.setattr(voice_service, "transcribe", lambda filename, content_type, data: "Sayın hâkim, delilim budur.")
+    audio = {"file": ("move.webm", b"audio", "audio/webm")}
+    assert client.post(f"{path}/transcribe", headers=outsider, files=audio).status_code == 404
+    transcript = client.post(f"{path}/transcribe", headers=owner, files=audio)
+    assert transcript.status_code == 200
+    assert transcript.json() == {"text": "Sayın hâkim, delilim budur."}
+    assert client.post(f"{path}/transcribe", headers=owner, files={"file": ("x.txt", b"audio", "text/plain")}).status_code == 422
+
+    client.post(f"/courtroom-sessions/{created['id']}/moves", headers=owner, json={
+        "action_type": "opening", "content": "Sayın hâkim, borç ödenmemiştir.",
+        "client_request_id": "voice-turn-1",
+    })
+    assert client.post(f"{path}/transcribe", headers=owner, files=audio).status_code == 409
+    process_one_pending_courtroom_turn(db_session, CourtroomMockProvider())
+    state = client.get(f"/courtroom-sessions/{created['id']}", headers=owner).json()
+    opponent = next(turn for turn in state["turns"] if turn["actor"] == "opponent")
+    own_turn = next(turn for turn in state["turns"] if turn["actor"] == "user")
+    monkeypatch.setattr(voice_service, "synthesize", lambda text, actor: b"mp3-bytes")
+    assert client.get(f"{path}/turns/{opponent['id']}", headers=outsider).status_code == 404
+    assert client.get(f"{path}/turns/{own_turn['id']}", headers=owner).status_code == 404
+    spoken = client.get(f"{path}/turns/{opponent['id']}", headers=owner)
+    assert spoken.status_code == 200
+    assert spoken.headers["content-type"] == "audio/mpeg"
+    assert spoken.content == b"mp3-bytes"
 
 
 def test_full_six_phase_session_completes_and_scores_user(

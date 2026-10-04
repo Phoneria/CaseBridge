@@ -8,6 +8,8 @@ class UserOut(BaseModel):
     id: str
     email: str
     full_name: str
+    department: str | None = None
+    gender: str | None = None
     role: UserRole
     law_firm_id: str
     is_active: bool

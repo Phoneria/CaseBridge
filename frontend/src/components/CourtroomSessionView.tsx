@@ -8,6 +8,8 @@ import {
   getCourtroomSession,
   retryCourtroomSession,
   sendCourtroomMove,
+  transcribeCourtroomAudio,
+  getCourtroomTurnAudio,
 } from "@/lib/api";
 import { AI_ROUTES } from "@/lib/ai";
 import type {
@@ -72,7 +74,7 @@ function ScoreCard({ session }: { session: CourtroomSession }) {
   ] as const;
 
   return (
-    <section className="rounded-2xl border border-accent-200 bg-white p-6 shadow-card">
+    <section id="durusma-sonucu" className="scroll-mt-6 rounded-2xl border border-accent-200 bg-white p-6 shadow-card">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-accent-600">Kurgusal karar</p>
@@ -117,7 +119,17 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
   const [content, setContent] = useState("");
   const [action, setAction] = useState<CourtroomAction>("opening");
   const [evidenceCode, setEvidenceCode] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [speakingTurnId, setSpeakingTurnId] = useState<string | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const microphoneRef = useRef<MediaStream | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const heardCountRef = useRef(0);
   const transcriptEnd = useRef<HTMLDivElement>(null);
+  const transcriptScroller = useRef<HTMLDivElement>(null);
+  const previousTurnCount = useRef(0);
 
   async function refresh() {
     const next = await getCourtroomSession(sessionId);
@@ -129,7 +141,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     let cancelled = false;
     getCourtroomSession(sessionId)
       .then((next) => { if (!cancelled) setSession(next); })
-      .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : "Oturum yüklenemedi."); })
+      .catch(() => { if (!cancelled) setError("Oturum yüklenemedi."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [sessionId]);
@@ -149,8 +161,97 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
   }, [session?.phase]);
 
   useEffect(() => {
-    transcriptEnd.current?.scrollIntoView?.({ behavior: "smooth" });
+    const count = session?.turns.length ?? 0;
+    if (session?.status === "active" && previousTurnCount.current > 0 && count > previousTurnCount.current && transcriptScroller.current) {
+      transcriptScroller.current.scrollTo?.({ top: transcriptScroller.current.scrollHeight, behavior: "smooth" });
+    }
+    previousTurnCount.current = count;
   }, [session?.turns.length]);
+
+  useEffect(() => () => {
+    recorderRef.current?.stop();
+    microphoneRef.current?.getTracks().forEach((track) => track.stop());
+    audioRef.current?.pause();
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const previous = heardCountRef.current;
+    heardCountRef.current = session.turns.length;
+    if (!voiceEnabled) return;
+    const newTurns = session.turns.slice(previous).filter((turn) => turn.actor === "opponent" || turn.actor === "judge");
+    if (newTurns.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const turn of newTurns) {
+        if (cancelled) break;
+        try { await playTurn(turn.id); }
+        catch { if (!cancelled) setError("AI sesi oynatılamadı. Metin tutanakta duruyor."); }
+      }
+    })();
+    return () => { cancelled = true; };
+    // playTurn uses the stable session id; voice mode changes are the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.turns.length, voiceEnabled]);
+
+  async function playTurn(turnId: string) {
+    if (!session) return;
+    audioRef.current?.pause();
+    setSpeakingTurnId(turnId);
+    try {
+      const blob = await getCourtroomTurnAudio(session.id, turnId);
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      try {
+        const finished = new Promise<void>((resolve) => { audio.onended = () => resolve(); audio.onerror = () => resolve(); });
+        await audio.play();
+        await finished;
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    } finally {
+      setSpeakingTurnId(null);
+    }
+  }
+
+  async function startRecording() {
+    if (!session || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setError("Bu tarayıcı mikrofon kaydını desteklemiyor.");
+      return;
+    }
+    const mimeType = ["audio/webm", "audio/mp4"].find((type) => MediaRecorder.isTypeSupported(type));
+    if (!mimeType) { setError("Bu tarayıcı desteklenen ses biçiminde kayıt yapamıyor."); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      microphoneRef.current = stream;
+      const chunks: BlobPart[] = [];
+      const recorder = new MediaRecorder(stream, { mimeType });
+      recorderRef.current = recorder;
+      recorder.ondataavailable = (event) => { if (event.data.size) chunks.push(event.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        microphoneRef.current = null;
+        recorderRef.current = null;
+        setRecording(false);
+        if (chunks.length === 0) return;
+        setTranscribing(true);
+        try {
+          const result = await transcribeCourtroomAudio(session.id, new Blob(chunks, { type: mimeType }));
+          setContent((current) => `${current} ${result.text}`.trim().slice(0, 4000));
+        } catch {
+          setError("Ses metne çevrilemedi. Beyanınızı yazarak devam edebilirsiniz.");
+        } finally { setTranscribing(false); }
+      };
+      recorder.start();
+      setError(null);
+      setRecording(true);
+    } catch {
+      setError("Mikrofona erişilemedi.");
+    }
+  }
+
+  function stopRecording() { recorderRef.current?.stop(); }
 
   const currentPhase = useMemo(
     () => PHASES.find((phase) => phase.key === session?.phase),
@@ -160,7 +261,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
   async function submit() {
     if (!session || content.trim().length < 2) return;
     if (action === "evidence" && !evidenceCode) {
-      setError("Delil sunmak için soldaki dosyadan bir delil seçin.");
+      setError("Delil sunmak için üstteki 'Dosya notu ve deliller' alanından bir delil seçin.");
       return;
     }
     setSending(true);
@@ -177,8 +278,8 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
       setSession(next);
       setContent("");
       setEvidenceCode("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Hamle gönderilemedi.");
+    } catch {
+      setError("Hamle gönderilemedi.");
     } finally {
       setSending(false);
     }
@@ -189,7 +290,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     setSending(true);
     setError(null);
     try { setSession(await retryCourtroomSession(session.id)); }
-    catch (err) { setError(err instanceof Error ? err.message : "Tekrar denenemedi."); }
+    catch { setError("Tekrar denenemedi."); }
     finally { setSending(false); }
   }
 
@@ -197,7 +298,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     if (!session) return;
     setSending(true);
     try { setSession(await abandonCourtroomSession(session.id)); }
-    catch (err) { setError(err instanceof Error ? err.message : "Oturum kapatılamadı."); }
+    catch { setError("Oturum kapatılamadı."); }
     finally { setSending(false); }
   }
 
@@ -224,13 +325,13 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
             ←
           </Link>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-600">{session.scenario.category} · {session.model}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-600">{session.scenario.category}</p>
             <h1 className="mt-1 text-xl font-semibold text-navy-900">{session.scenario.title}</h1>
             <p className="mt-1 text-sm text-navy-500">Rolünüz: <strong>{session.chosen_role === "plaintiff" ? "Davacı vekili" : "Davalı vekili"}</strong></p>
             <p className="mt-0.5 text-xs text-navy-500">{session.scenario.plaintiff_name} (davacı) / {session.scenario.defendant_name} (davalı)</p>
           </div>
         </div>
-        {session.status === "active" && <button type="button" disabled={sending} onClick={abandon} className="self-start text-xs font-medium text-navy-500 hover:text-rose-600">Oturumu terk et</button>}
+        {session.status === "active" ? <button type="button" disabled={sending} onClick={abandon} className="self-start text-xs font-medium text-navy-500 hover:text-rose-600">Oturumu terk et</button> : session.evaluation ? <a href="#durusma-sonucu" className="self-start rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700 hover:bg-accent-50">Sonuca git ↓</a> : null}
       </header>
 
       <div className="flex gap-1 overflow-x-auto rounded-2xl border border-surface-border bg-white p-2">
@@ -245,13 +346,16 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
       {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</div>}
       {session.status === "failed" && (
         <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          <span>{session.error_message ?? "Yerel model bu turu tamamlayamadı."}</span>
+          <span>Yanıt bu turda tamamlanamadı. Yeniden deneyebilirsiniz.</span>
           <button type="button" disabled={sending} onClick={retry} className="rounded-lg bg-amber-700 px-3 py-2 font-semibold text-white">Yeniden dene</button>
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[280px_minmax(0,1fr)_280px]">
-        <aside className="space-y-4">
+      <div className="flex flex-col gap-4">
+        <div className="grid gap-3 lg:grid-cols-2">
+        <details className="rounded-2xl border border-surface-border bg-white shadow-card">
+          <summary className="cursor-pointer px-5 py-3 text-sm font-semibold text-navy-900">Dosya notu ve deliller <span className="ml-2 text-xs font-normal text-navy-500">· {session.available_evidence.length} kayıt</span></summary>
+          <div className="grid gap-3 border-t border-surface-border p-3 md:grid-cols-2">
           <section className="rounded-2xl border border-surface-border bg-white p-4 shadow-card">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent-600">Size özel dosya notu</p>
             <p className="mt-2 text-sm font-semibold leading-5 text-navy-900">{session.role_brief.objective}</p>
@@ -272,19 +376,38 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
               })}
             </div>
           </section>
-        </aside>
+          </div>
+        </details>
 
-        <main className="flex min-h-[620px] flex-col rounded-2xl border border-surface-border bg-white shadow-card">
+        <details className="rounded-2xl border border-surface-border bg-white shadow-card">
+          <summary className="cursor-pointer px-5 py-3 text-sm font-semibold text-navy-900">Ortak olaylar ve hâkimin soruları</summary>
+          <div className="grid gap-3 border-t border-surface-border p-3 md:grid-cols-2">
+          <section className="rounded-2xl border border-surface-border bg-white p-4 shadow-card">
+            <p className="text-sm font-semibold text-navy-900">Ortak olaylar</p>
+            <ol className="mt-3 space-y-2 text-xs leading-5 text-navy-600">{session.scenario.public_facts.map((fact, index) => <li key={fact} className="flex gap-2"><span className="font-bold text-accent-600">{index + 1}.</span><span>{fact}</span></li>)}</ol>
+          </section>
+          <section className="rounded-2xl border border-surface-border bg-white p-4 shadow-card">
+            <p className="text-sm font-semibold text-navy-900">Hâkimin arayacağı cevaplar</p>
+            <ul className="mt-3 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{session.scenario.disputed_issues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
+          </section>
+          </div>
+        </details>
+        </div>
+
+        <main className="flex min-h-[720px] flex-col rounded-2xl border border-surface-border bg-white shadow-card">
           <div className="border-b border-surface-border px-5 py-4">
-            <div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-navy-900">Duruşma tutanağı</p><span className="text-xs text-navy-500">Tur {session.round_number}/{session.max_rounds}</span></div>
+            <div className="flex items-center justify-between gap-3"><div><p className="text-base font-semibold text-navy-900">Duruşma tutanağı ve yazışmalar</p><p className="mt-1 text-xs text-navy-500">{session.is_demo ? "Tamamlanmış kurgusal eğitim örneği · gerçek mahkeme tutanağı değildir" : "Avukat, karşı avukat ve hâkim beyanları"}</p></div><span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">Tur {session.round_number}/{session.max_rounds}</span></div>
             {currentPhase && <p className="mt-1 text-xs leading-5 text-navy-500">{currentPhase.hint}</p>}
           </div>
-          <div className="max-h-[540px] flex-1 space-y-3 overflow-y-auto p-5">
+          <div ref={transcriptScroller} className="min-h-[450px] max-h-[70vh] flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
             {session.turns.map((turn) => {
               const meta = ACTOR_META[turn.actor];
-              return <div key={turn.id} className={`rounded-xl border p-4 ${meta.bubble}`}>
+              return <div key={turn.id} className={`rounded-xl border p-4 sm:p-5 ${meta.bubble}`}>
                 <div className="mb-2 flex items-center justify-between gap-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${meta.badge}`}>{meta.label}</span><span className="text-[10px] text-navy-500">{turn.turn_type.replace("_", " ")}</span></div>
-                <p className="whitespace-pre-wrap text-sm leading-6 text-navy-800">{turn.content}</p>
+                <p className="whitespace-pre-wrap text-[15px] leading-7 text-navy-800">{turn.content}</p>
+                {(turn.actor === "opponent" || turn.actor === "judge") && (
+                  <button type="button" onClick={() => playTurn(turn.id).catch(() => setError("AI sesi oynatılamadı."))} disabled={speakingTurnId === turn.id} className="mt-2 text-xs font-medium text-accent-700 hover:underline disabled:opacity-50">{speakingTurnId === turn.id ? "Ses oynatılıyor…" : "🔊 Dinle"}</button>
+                )}
                 {turn.evidence_title && <p className="mt-2 rounded-lg bg-white/80 p-2 text-xs font-medium text-navy-600">📎 {turn.evidence_title}</p>}
               </div>;
             })}
@@ -295,24 +418,22 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
             <div className="border-t border-surface-border p-4">
               <div className="mb-2 flex flex-wrap gap-2">{activeActions.map((item) => <button key={item.value} type="button" onClick={() => { setAction(item.value); if (item.value !== "evidence") setEvidenceCode(""); }} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${action === item.value ? "bg-navy-900 text-white" : "bg-surface-muted text-navy-600"}`}>{item.label}</button>)}</div>
               {session.pending_judge_question && <p className="mb-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800">Hâkimin sorusu: {session.pending_judge_question}</p>}
-              {action === "evidence" && <p className="mb-2 text-xs text-accent-700">{evidenceCode ? `Seçili delil: ${session.available_evidence.find((item) => item.code === evidenceCode)?.title}` : "Soldaki dosyadan sunacağınız delili seçin."}</p>}
+              {action === "evidence" && <p className="mb-2 text-xs text-accent-700">{evidenceCode ? `Seçili delil: ${session.available_evidence.find((item) => item.code === evidenceCode)?.title}` : "Üstteki dosya alanından sunacağınız delili seçin."}</p>}
               <textarea value={content} onChange={(event) => setContent(event.target.value)} onKeyDown={(event) => { if ((event.metaKey || event.ctrlKey) && event.key === "Enter") submit(); }} rows={4} maxLength={4000} placeholder="Hâkime hitaben beyanınızı yazın. İddianızı somut olay ve delille bağlantılandırın…" className="w-full resize-none rounded-xl border border-surface-border p-3 text-sm text-navy-800 outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100" />
-              <div className="mt-2 flex items-center justify-between"><span className="text-[11px] text-navy-500">⌘/CTRL + Enter · {content.length}/4000</span><button type="button" onClick={submit} disabled={sending || content.trim().length < 2 || (action === "evidence" && !evidenceCode)} className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-700 disabled:opacity-50">Beyanı gönder</button></div>
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] text-navy-500">⌘/CTRL + Enter · {content.length}/4000</span>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={recording ? stopRecording : startRecording} disabled={transcribing || sending} className="rounded-xl border border-accent-300 px-3 py-2 text-xs font-semibold text-accent-700 disabled:opacity-50">{recording ? "Kaydı bitir" : transcribing ? "Çözümleniyor…" : "🎙️ Sesli beyan"}</button>
+                  <button type="button" onClick={() => { heardCountRef.current = session.turns.length; setVoiceEnabled((value) => !value); }} className="rounded-xl border border-surface-border px-3 py-2 text-xs font-medium text-navy-600">{voiceEnabled ? "Otomatik sesi kapat" : "Otomatik sesi aç"}</button>
+                  <button type="button" onClick={submit} disabled={sending || recording || transcribing || content.trim().length < 2 || (action === "evidence" && !evidenceCode)} className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-700 disabled:opacity-50">Beyanı gönder</button>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-navy-500">Mikrofon kaydı ve seslendirilecek yanıt, işlenmek üzere harici bir yapay zekâ hizmetine gönderilir. Sesli yanıtlar yapay zekâ tarafından üretilir; metne çevrilen beyanı göndermeden önce kontrol edin.</p>
             </div>
           )}
         </main>
 
-        <aside className="space-y-4">
-          <section className="rounded-2xl border border-surface-border bg-white p-4 shadow-card">
-            <p className="text-sm font-semibold text-navy-900">Ortak olaylar</p>
-            <ol className="mt-3 space-y-2 text-xs leading-5 text-navy-600">{session.scenario.public_facts.map((fact, index) => <li key={fact} className="flex gap-2"><span className="font-bold text-accent-600">{index + 1}.</span><span>{fact}</span></li>)}</ol>
-          </section>
-          <section className="rounded-2xl border border-surface-border bg-white p-4 shadow-card">
-            <p className="text-sm font-semibold text-navy-900">Hâkimin arayacağı cevaplar</p>
-            <ul className="mt-3 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{session.scenario.disputed_issues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
-          </section>
-          <section className="rounded-xl bg-navy-900 p-4 text-xs leading-5 text-white/70"><strong className="text-white">Eğitim modu</strong><br />Taraflar ve hâkim aynı yerel modeli farklı, birbirinden ayrı talimatlarla kullanır. Sonuç hukuki danışmanlık değildir.</section>
-        </aside>
+        <p className="rounded-xl bg-navy-900 px-4 py-3 text-xs leading-5 text-white/70"><strong className="text-white">Eğitim modu · </strong>Taraflar ve hâkim canlandırılır. Sonuç hukuki danışmanlık veya gerçek karar değildir.</p>
       </div>
 
       <ScoreCard session={session} />

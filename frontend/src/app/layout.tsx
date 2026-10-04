@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CaseBridge — AI-Powered Legal Case Intelligence",
+  title: "CaseBridge — Hukuk Bürosu Çalışma Alanı",
   description: "Hukuk büroları için yapay zeka destekli dava yönetimi ve simülasyon platformu.",
 };
 

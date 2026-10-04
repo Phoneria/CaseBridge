@@ -49,7 +49,7 @@ class TaskRepository:
         query = (
             self.db.query(Task, Case.case_name, Case.case_number)
             .join(Case, Task.case_id == Case.id)
-            .filter(Task.law_firm_id == law_firm_id)
+            .filter(Task.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
         )
         if status is not None:
             query = query.filter(Task.status == status)

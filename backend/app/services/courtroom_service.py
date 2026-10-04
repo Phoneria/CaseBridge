@@ -534,6 +534,7 @@ class CourtroomService:
             round_number=session.round_number,
             max_rounds=session.max_rounds,
             total_score=session.evaluation.total_score if session.evaluation else None,
+            is_demo=session.prompt_version == "showcase-v1",
             created_at=session.created_at,
             updated_at=session.updated_at,
         )

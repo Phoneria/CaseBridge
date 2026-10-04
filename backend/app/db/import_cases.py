@@ -13,8 +13,8 @@ are optional. A document is {"file": "x.pdf"} (pdf/docx/txt in
 documents/) or {"filename": "x.txt", "text": "..."}.
 
 Idempotent: existing case numbers are updated, not duplicated; documents
-and events are matched by filename/title. Imports go to the seeded firm
-and are assigned to the seeded lawyer.
+and events are matched by filename/title. A manifest marked
+``record_kind: precedent`` is kept out of the firm's case metrics.
 """
 import json
 import os
@@ -69,7 +69,7 @@ def _store(firm_id: str, case_id: str, filename: str, raw: bytes) -> str:
     return path
 
 
-def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str) -> tuple[bool, int]:
+def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_precedent: bool) -> tuple[bool, int]:
     for key in ("case_number", "case_name", "client_name", "case_type"):
         if not item.get(key):
             raise ImportError_(f"Missing required field '{key}'")
@@ -77,8 +77,18 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str) -> 
     case = db.query(Case).filter(Case.law_firm_id == firm.id, Case.case_number == item["case_number"]).first()
     created = case is None
     if created:
-        case = Case(law_firm_id=firm.id, case_number=item["case_number"], assigned_lawyer_id=lawyer.id)
+        case = Case(
+            law_firm_id=firm.id, case_number=item["case_number"],
+            assigned_lawyer_id=None if is_precedent else lawyer.id,
+            is_precedent=is_precedent,
+        )
         db.add(case)
+    elif case.is_precedent != is_precedent:
+        if not (is_precedent and case.client_name == "Davacı (anonim)"):
+            raise ImportError_("Existing case has a different record kind; refusing to overwrite it")
+        case.is_precedent = True
+    if is_precedent:
+        case.assigned_lawyer_id = None
 
     for field in _CASE_FIELDS:
         if field in item:
@@ -152,6 +162,9 @@ def import_folder(folder: str, db=None) -> dict:
     with open(manifest, encoding="utf-8") as f:
         data = json.load(f)
     items = data["cases"] if isinstance(data, dict) else data
+    record_kind = data.get("record_kind", "firm_case") if isinstance(data, dict) else "firm_case"
+    if record_kind not in {"firm_case", "precedent"}:
+        raise ImportError_("record_kind must be firm_case or precedent")
 
     own_session = db is None
     db = db or SessionLocal()
@@ -165,7 +178,7 @@ def import_folder(folder: str, db=None) -> dict:
         for index, item in enumerate(items):
             try:
                 with db.begin_nested():
-                    created, docs = _import_case(db, firm, lawyer, item, docs_dir)
+                    created, docs = _import_case(db, firm, lawyer, item, docs_dir, record_kind == "precedent")
                 stats["created" if created else "updated"] += 1
                 stats["documents"] += docs
             except (ImportError_, KeyError, ValueError) as exc:

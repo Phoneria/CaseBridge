@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     # OpenAI (optional at startup - MVP can run entirely on mocks)
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
+    voice_transcription_model: str = "gpt-4o-mini-transcribe"
+    voice_speech_model: str = "gpt-4o-mini-tts"
 
     # Qwen3-32B via the OpenAI-compatible Alibaba Model Studio API.
     # QWEN_BASE_URL is required (never hardcoded) because Model Studio

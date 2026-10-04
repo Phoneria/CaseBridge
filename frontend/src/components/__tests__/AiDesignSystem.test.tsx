@@ -48,10 +48,10 @@ describe("AI design system", () => {
 
   it("shows model readiness or a settings warning", () => {
     const { rerender } = render(<AiModelStatus status={{ provider: "ollama", configured: true, error: null }} variant="dark" />);
-    expect(screen.getByText("Model: ollama · Hazır")).toBeInTheDocument();
+    expect(screen.getByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
 
     rerender(<AiModelStatus status={{ provider: "ollama", configured: false, error: "x" }} variant="light" />);
-    expect(screen.getByText(/AI modeli yapılandırılmamış/)).toBeInTheDocument();
+    expect(screen.getByText(/Yapay zekâ hizmeti yapılandırılmamış/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ayarlar" })).toHaveAttribute("href", "/ayarlar");
 
     rerender(<AiModelStatus status={null} variant="light" />);
