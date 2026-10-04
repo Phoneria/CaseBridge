@@ -191,6 +191,15 @@ def test_case_hearing_without_lawyer_or_archived_is_skipped(world):
     assert ReminderService(world["db"]).collect_due(NOW) == []
 
 
+def test_precedent_case_hearings_and_tasks_are_skipped(world):
+    world["case"].next_hearing_date = date(2026, 10, 5)
+    world["case"].is_precedent = True
+    world["db"].commit()
+    add_task(world, date(2026, 10, 3))
+
+    assert ReminderService(world["db"]).collect_due(NOW) == []
+
+
 def test_case_hearing_is_skipped_when_a_hearing_event_exists_that_day(world):
     from app.models.calendar import CalendarEventType
 

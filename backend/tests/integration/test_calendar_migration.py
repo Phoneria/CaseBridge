@@ -4,6 +4,7 @@ from pathlib import Path
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from app.core.config import settings
 
@@ -47,3 +48,16 @@ def test_migration_adds_reminder_deliveries(tmp_path, monkeypatch):
 
     command.downgrade(config, "e2a4c6b8d0f1")
     assert "reminder_deliveries" not in sa.inspect(sa.create_engine(url)).get_table_names()
+
+
+def test_migration_chain_has_a_single_head():
+    assert len(ScriptDirectory.from_config(_alembic_config()).get_heads()) == 1
+
+
+def test_upgrade_head_runs_on_a_fresh_database(tmp_path, monkeypatch):
+    url = f"sqlite:///{tmp_path / 'migrations.db'}"
+    monkeypatch.setattr(settings, "database_url", url)
+
+    command.upgrade(_alembic_config(), "head")
+
+    assert {"calendar_events", "reminder_deliveries"} <= set(sa.inspect(sa.create_engine(url)).get_table_names())

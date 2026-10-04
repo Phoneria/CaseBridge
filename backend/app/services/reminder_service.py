@@ -206,7 +206,12 @@ class ReminderService:
         rows = (
             self.db.query(Task, Case.case_name)
             .join(Case, and_(Task.case_id == Case.id, Case.law_firm_id == Task.law_firm_id))
-            .filter(Task.status == TaskStatus.PENDING, Task.due_date >= today, Task.due_date <= last_day)
+            .filter(
+                Case.is_precedent.is_(False),
+                Task.status == TaskStatus.PENDING,
+                Task.due_date >= today,
+                Task.due_date <= last_day,
+            )
             .all()
         )
         return [
@@ -245,6 +250,7 @@ class ReminderService:
             self.db.query(Case)
             .filter(
                 Case.is_archived.is_(False),
+                Case.is_precedent.is_(False),
                 Case.next_hearing_date >= today,
                 Case.next_hearing_date <= last_day,
             )

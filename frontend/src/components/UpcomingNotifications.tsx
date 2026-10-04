@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getCalendarEvents } from "@/lib/api";
-import { caseDetailHref, daysUntil } from "@/lib/filters";
+import { getCalendarEvents, listAllTasks } from "@/lib/api";
+import { addDays, EVENT_TYPE_LABELS } from "@/lib/calendar";
+import { caseDetailHref, daysUntil, toDateKey } from "@/lib/filters";
 import { formatDate } from "@/lib/labels";
-import type { CalendarEvent } from "@/types";
+import type { CalendarEvent, TaskWithCase } from "@/types";
 
 const POLL_MS = 60_000;
 const UPCOMING_DAYS = 7;
@@ -17,6 +18,34 @@ export function relevantNotifications(events: CalendarEvent[], today = new Date(
     const days = daysUntil(event.date, today);
     return (days >= 0 && days <= UPCOMING_DAYS) || (event.event_type === "task" && days < 0);
   }).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** A pending task as a calendar row, so overdue tasks older than any calendar range still show up. */
+export function taskToCalendarItem(task: TaskWithCase & { due_date: string }): CalendarEvent {
+  return {
+    id: `task:${task.id}`, kind: "task", event_type: "task", title: task.title, date: task.due_date,
+    start: null, end: null, all_day: true, case_id: task.case_id, case_name: task.case_name,
+    task_id: task.id, event_id: null, assignee_id: task.assigned_to ?? null, assignee_name: null,
+    location: null, notes: null, reminder_days: task.reminder_days ?? [1], editable: false,
+  };
+}
+
+/** Next-seven-day calendar rows plus every overdue pending task, deduplicated by row id. */
+async function loadNotificationItems(today = new Date()): Promise<CalendarEvent[]> {
+  const [upcoming, pending] = await Promise.all([
+    getCalendarEvents({ from: toDateKey(today), to: toDateKey(addDays(today, UPCOMING_DAYS)) }),
+    listAllTasks("pending"),
+  ]);
+  const overdue = pending
+    .filter((task): task is TaskWithCase & { due_date: string } => !!task.due_date && daysUntil(task.due_date, today) < 0)
+    .map(taskToCalendarItem);
+  const byId = new Map([...overdue, ...upcoming].map((item) => [item.id, item]));
+  return [...byId.values()];
+}
+
+function notificationHref(event: CalendarEvent): string {
+  if (!event.case_id) return "/takvim";
+  return caseDetailHref(event.case_id, event.event_type === "task" ? "gorevler" : undefined);
 }
 
 export function UpcomingNotifications() {
@@ -30,7 +59,7 @@ export function UpcomingNotifications() {
   useEffect(() => {
     let cancelled = false;
     function refresh() {
-      getCalendarEvents().then((rows) => {
+      loadNotificationItems().then((rows) => {
         if (!cancelled) { setEvents(rows); setError(false); }
       }).catch(() => { if (!cancelled) setError(true); })
         .finally(() => { if (!cancelled) setLoading(false); });
@@ -56,11 +85,11 @@ export function UpcomingNotifications() {
           : relevant.length === 0 ? <p className="p-2 text-sm text-navy-500">Yaklaşan duruşma veya görev yok.</p>
           : <ul className="space-y-1">{relevant.slice(0, 6).map((event) => {
               const overdue = event.event_type === "task" && daysUntil(event.date) < 0;
-              return <li key={`${event.event_type}-${event.case_id}-${event.task_id ?? event.date}`}>
-                <Link href={caseDetailHref(event.case_id, event.event_type === "task" ? "gorevler" : undefined)} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 hover:bg-surface-muted">
-                  <span className={`text-[11px] font-medium ${overdue ? "text-red-600" : "text-accent-700"}`}>{overdue ? "Gecikmiş görev" : event.event_type === "hearing" ? "Duruşma" : "Görev"} · {formatDate(event.date)}</span>
+              return <li key={event.id}>
+                <Link href={notificationHref(event)} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 hover:bg-surface-muted">
+                  <span className={`text-[11px] font-medium ${overdue ? "text-red-600" : "text-accent-700"}`}>{overdue ? "Gecikmiş görev" : EVENT_TYPE_LABELS[event.event_type]} · {formatDate(event.date)}</span>
                   <span className="block truncate text-sm font-medium text-navy-900">{event.title}</span>
-                  <span className="block truncate text-xs text-navy-500">{event.case_name}</span>
+                  {event.case_name && <span className="block truncate text-xs text-navy-500">{event.case_name}</span>}
                 </Link>
               </li>;
             })}</ul>}

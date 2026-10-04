@@ -16,6 +16,7 @@ vi.mock("@/lib/api", () => ({
 
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { relevantNotifications } from "@/components/UpcomingNotifications";
+import type { CalendarEvent } from "@/types";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -57,16 +58,27 @@ describe("WorkspaceHeader", () => {
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     };
     getCalendarEvents.mockResolvedValue([
-      { event_type: "hearing", date: day(2), title: "Duruşma", case_id: "c1", case_name: "Kira Davası", task_id: null },
-      { event_type: "hearing", date: day(-4), title: "Geçmiş Duruşma", case_id: "c2", case_name: "Eski Dava", task_id: null },
-      { event_type: "task", date: day(-1), title: "Dilekçe", case_id: "c1", case_name: "Kira Davası", task_id: "t1" },
+      { id: "hearing:c1", event_type: "hearing", date: day(2), title: "Duruşma", case_id: "c1", case_name: "Kira Davası", task_id: null },
+      { id: "hearing:c2", event_type: "hearing", date: day(-4), title: "Geçmiş Duruşma", case_id: "c2", case_name: "Eski Dava", task_id: null },
+      { id: "event:e1", event_type: "meeting", date: day(3), title: "Ekip toplantısı", case_id: null, case_name: null, task_id: null },
+    ]);
+    listAllTasks.mockResolvedValue([
+      { id: "t1", case_id: "c1", title: "Dilekçe", due_date: day(-1), status: "pending", case_name: "Kira Davası", case_number: "2026/1" },
+      { id: "t2", case_id: "c1", title: "Çok eski görev", due_date: day(-120), status: "pending", case_name: "Kira Davası", case_number: "2026/1" },
+      { id: "t3", case_id: "c1", title: "Tarihsiz", due_date: null, status: "pending", case_name: "Kira Davası", case_number: "2026/1" },
     ]);
     render(<WorkspaceHeader user={null} />);
-    await waitFor(() => expect(screen.getByRole("button", { name: /2 yaklaşan kayıt/ })).toBeInTheDocument());
-    await userEvent.click(screen.getByRole("button", { name: /2 yaklaşan kayıt/ }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /4 yaklaşan kayıt/ })).toBeInTheDocument());
+    expect(getCalendarEvents).toHaveBeenCalledWith({ from: day(0), to: day(7) });
+    expect(listAllTasks).toHaveBeenCalledWith("pending");
+    await userEvent.click(screen.getByRole("button", { name: /4 yaklaşan kayıt/ }));
     expect(screen.getByRole("link", { name: /Dilekçe/ })).toHaveAttribute("href", "/davalar/c1?sekme=gorevler");
-    expect(screen.getByRole("link", { name: /Duruşma/ })).toHaveAttribute("href", "/davalar/c1");
+    expect(screen.getByRole("link", { name: /Çok eski görev/ })).toHaveAttribute("href", "/davalar/c1?sekme=gorevler");
+    expect(screen.getByRole("link", { name: /Duruşma ·.*Duruşma/ })).toHaveAttribute("href", "/davalar/c1");
+    expect(screen.getByRole("link", { name: /Ekip toplantısı/ })).toHaveAttribute("href", "/takvim");
+    expect(screen.getByRole("link", { name: /Ekip toplantısı/ })).toHaveTextContent("Toplantı");
     expect(screen.queryByText("Geçmiş Duruşma")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tarihsiz")).not.toBeInTheDocument();
   });
 });
 
@@ -74,11 +86,11 @@ describe("relevantNotifications", () => {
   it("includes next-seven-day events and overdue tasks, not past hearings", () => {
     const base = { title: "İş", case_id: "c1", case_name: "Dava", task_id: null };
     const events = [
-      { ...base, event_type: "hearing" as const, date: "2026-10-11" },
-      { ...base, event_type: "hearing" as const, date: "2026-10-12" },
-      { ...base, event_type: "hearing" as const, date: "2026-10-03" },
-      { ...base, event_type: "task" as const, date: "2026-10-03", task_id: "t1" },
-    ];
+      { ...base, id: "a", event_type: "hearing" as const, date: "2026-10-11" },
+      { ...base, id: "b", event_type: "hearing" as const, date: "2026-10-12" },
+      { ...base, id: "c", event_type: "hearing" as const, date: "2026-10-03" },
+      { ...base, id: "d", event_type: "task" as const, date: "2026-10-03", task_id: "t1" },
+    ] as CalendarEvent[];
     expect(relevantNotifications(events, new Date(2026, 9, 4)).map((row) => `${row.event_type}:${row.date}`)).toEqual([
       "task:2026-10-03", "hearing:2026-10-11",
     ]);
