@@ -79,9 +79,10 @@ export interface CaseListQuery {
   sonuc?: OutcomeSlug;
   durusma?: "yaklasan";
   arsiv?: "dahil";
+  avukat?: string;
 }
 
-export const CASE_LIST_PARAM_KEYS = ["ara", "kategori", "durum", "sonuc", "durusma", "arsiv"] as const;
+export const CASE_LIST_PARAM_KEYS = ["ara", "kategori", "durum", "sonuc", "durusma", "arsiv", "avukat"] as const;
 const DURUM_VALUES: ReadonlyArray<CaseStatus | "aktif"> = [...CASE_STATUSES, "aktif"];
 
 export function parseCaseListQuery(params: ParamSource): CaseListQuery {
@@ -93,6 +94,7 @@ export function parseCaseListQuery(params: ParamSource): CaseListQuery {
     sonuc: pick(params.get("sonuc"), OUTCOME_SLUG_VALUES),
     durusma: pick(params.get("durusma"), ["yaklasan"] as const),
     arsiv: pick(params.get("arsiv"), ["dahil"] as const),
+    avukat: params.get("avukat")?.trim() || undefined,
   });
 }
 
@@ -104,6 +106,7 @@ export function caseListHref(query: CaseListQuery = {}): string {
     sonuc: query.sonuc,
     durusma: query.durusma,
     arsiv: query.arsiv,
+    avukat: query.avukat,
   });
 }
 
@@ -121,6 +124,7 @@ export function toCaseListFilters(query: CaseListQuery): CaseListFilters {
   if (query.sonuc) filters.outcome = OUTCOME_SLUGS[query.sonuc];
   if (query.durusma === "yaklasan") filters.hearing_within_days = UPCOMING_HEARING_DAYS;
   if (query.arsiv === "dahil") filters.include_archived = true;
+  if (query.avukat) filters.assigned_lawyer_id = query.avukat;
   return filters;
 }
 
@@ -139,6 +143,7 @@ export function describeCaseListQuery(query: CaseListQuery): FilterChip[] {
   if (query.sonuc) chips.push({ key: "sonuc", label: `Sonuç: ${OUTCOME_SLUG_LABELS[query.sonuc]}` });
   if (query.durusma) chips.push({ key: "durusma", label: `Duruşma: önümüzdeki ${UPCOMING_HEARING_DAYS} gün` });
   if (query.arsiv) chips.push({ key: "arsiv", label: "Arşiv dahil" });
+  if (query.avukat) chips.push({ key: "avukat", label: "Avukat filtresi" });
   return chips;
 }
 

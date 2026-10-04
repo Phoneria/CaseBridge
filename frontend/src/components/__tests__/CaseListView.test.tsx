@@ -4,10 +4,14 @@ import userEvent from "@testing-library/user-event";
 
 const getCases = vi.fn();
 const createCase = vi.fn();
+const getMe = vi.fn();
+const listAdminLawyers = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCases: (...args: unknown[]) => getCases(...args),
   createCase: (...args: unknown[]) => createCase(...args),
+  getMe: (...args: unknown[]) => getMe(...args),
+  listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
 }));
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -30,6 +34,9 @@ const icraCase = {
 beforeEach(() => {
   getCases.mockReset();
   createCase.mockReset();
+  getMe.mockReset();
+  listAdminLawyers.mockReset();
+  getMe.mockResolvedValue({ id: "lawyer-1", role: "lawyer" });
   resetNav();
   setUrl("/davalar");
 });

@@ -1,5 +1,8 @@
 """Institutional Memory (section 17, 22 - Institutional Memory)."""
 
+from app.core.security import hash_password
+from app.models.user import User, UserRole
+
 
 def _login(client, email, password):
     response = client.post("/auth/login", json={"email": email, "password": password})
@@ -45,10 +48,18 @@ def test_search_cases_by_keyword_in_description(client, two_firms_two_users):
     assert results[0]["case_name"] == "Genel Dava"
 
 
-def test_search_cases_by_assigned_lawyer(client, two_firms_two_users):
+def test_search_cases_by_assigned_lawyer(client, db_session, two_firms_two_users):
     fixtures = two_firms_two_users
     headers = _auth_headers(client, fixtures)
     lawyer_id = fixtures["user_a"].id
+    other_lawyer = User(
+        law_firm_id=fixtures["firm_a"].id, email="other@demo.casebridge.dev",
+        hashed_password=hash_password(fixtures["password"]), full_name="Diğer Avukat",
+        role=UserRole.LAWYER, is_active=True,
+    )
+    db_session.add(other_lawyer)
+    db_session.commit()
+    other_headers = _auth_headers(client, {**fixtures, "other_lawyer": other_lawyer}, "other_lawyer")
 
     client.post(
         "/cases",
@@ -64,8 +75,8 @@ def test_search_cases_by_assigned_lawyer(client, two_firms_two_users):
     )
     client.post(
         "/cases",
-        json={"case_number": "2", "case_name": "Atanmamis Dava", "client_name": "M", "case_type": "diger", "status": "devam_eden"},
-        headers=headers,
+        json={"case_number": "2", "case_name": "Diğer Avukatın Davası", "client_name": "M", "case_type": "diger", "status": "devam_eden"},
+        headers=other_headers,
     )
 
     response = client.get("/cases", params={"assigned_lawyer_id": lawyer_id}, headers=headers)

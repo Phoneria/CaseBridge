@@ -9,7 +9,8 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseOutcome, CaseStatus, CaseType
-from app.schemas.analytics import AnalyticsOverview, CategoryBreakdown, StatusBreakdown
+from app.models.user import User, UserRole
+from app.schemas.analytics import AnalyticsOverview, CategoryBreakdown, LawyerBreakdown, StatusBreakdown
 
 _CLOSED_OUTCOMES = (CaseOutcome.WON, CaseOutcome.LOST, CaseOutcome.SETTLED)
 
@@ -26,7 +27,7 @@ class AnalyticsService:
         self.db = db
 
     def _base_query(self, law_firm_id: str, months: Optional[int], case_type: Optional[CaseType]):
-        query = self.db.query(Case).filter(Case.law_firm_id == law_firm_id)
+        query = self.db.query(Case).filter(Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
         if months is not None:
             cutoff = (datetime.now(timezone.utc) - timedelta(days=months * 30)).date()
             query = query.filter(Case.opening_date >= cutoff)
@@ -80,6 +81,31 @@ class AnalyticsService:
             status_counts[c.status] = status_counts.get(c.status, 0) + 1
         by_status = [StatusBreakdown(status=s, total=status_counts[s]) for s in CaseStatus if s in status_counts]
 
+        lawyers = self.db.query(User).filter(
+            User.law_firm_id == law_firm_id, User.role == UserRole.LAWYER
+        ).order_by(User.full_name).all()
+        by_lawyer = []
+        for lawyer in lawyers:
+            owned = [case for case in cases if case.assigned_lawyer_id == lawyer.id]
+            by_lawyer.append(LawyerBreakdown(
+                lawyer_id=lawyer.id,
+                full_name=lawyer.full_name,
+                department=lawyer.department,
+                total=len(owned),
+                active=sum(1 for case in owned if case.status != CaseStatus.KAPALI),
+                won=sum(1 for case in owned if case.outcome == CaseOutcome.WON),
+                lost=sum(1 for case in owned if case.outcome == CaseOutcome.LOST),
+            ))
+        unassigned = [case for case in cases if case.assigned_lawyer_id is None]
+        if unassigned:
+            by_lawyer.append(LawyerBreakdown(
+                lawyer_id=None, full_name="Atanmamış", department=None,
+                total=len(unassigned),
+                active=sum(1 for case in unassigned if case.status != CaseStatus.KAPALI),
+                won=sum(1 for case in unassigned if case.outcome == CaseOutcome.WON),
+                lost=sum(1 for case in unassigned if case.outcome == CaseOutcome.LOST),
+            ))
+
         return AnalyticsOverview(
             total_cases=total_cases,
             active_cases=active_cases,
@@ -89,4 +115,5 @@ class AnalyticsService:
             average_case_duration_days=average_duration,
             by_category=by_category,
             by_status=by_status,
+            by_lawyer=by_lawyer,
         )

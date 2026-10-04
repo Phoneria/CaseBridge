@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     # OpenAI (optional at startup - MVP can run entirely on mocks)
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
+    voice_transcription_model: str = "gpt-4o-mini-transcribe"
+    voice_speech_model: str = "gpt-4o-mini-tts"
 
     # Qwen3-32B via the OpenAI-compatible Alibaba Model Studio API.
     # QWEN_BASE_URL is required (never hardcoded) because Model Studio
@@ -83,6 +85,9 @@ class Settings(BaseSettings):
     chat_auto_level: bool = True
     chat_classifier_timeout_seconds: PositiveFloat = 8
 
+    # Monthly token budget for the sidebar AI usage box. 0 = no budget set.
+    ai_monthly_token_budget: int = 0
+
     # Outgoing e-mail (calendar reminders, test e-mail). "console" only logs
     # the recipient and subject; "smtp" sends with the stdlib smtplib.
     # SMTP_PASSWORD is never logged or returned by any endpoint.
@@ -105,6 +110,9 @@ class Settings(BaseSettings):
     reminder_max_attempts: PositiveInt = 3
 
     storage_dir: str = "storage"
+    # Demo cases/tasks/documents. false = seed only the firm and login users
+    # and remove previously seeded demo cases (real data mode).
+    seed_demo_data: bool = True
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB
 
     # Comma-separated list of extra allowed CORS origins (e.g. for E2E test

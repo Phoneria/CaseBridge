@@ -23,6 +23,8 @@ import type {
   NotificationStatus,
   TestEmailResult,
   AIStatus,
+  AIConnectivity,
+  AIUsage,
   AppUser,
   DocumentWithCase,
   Task,
@@ -105,8 +107,34 @@ export async function listUsers(): Promise<AppUser[]> {
   return request("/users");
 }
 
+export async function listAdminLawyers(): Promise<AppUser[]> {
+  return request("/admin/lawyers");
+}
+
+export async function assignCaseLawyer(caseId: string, lawyerId: string): Promise<Case> {
+  return request(`/admin/cases/${caseId}/lawyer`, {
+    method: "PATCH",
+    body: JSON.stringify({ assigned_lawyer_id: lawyerId }),
+  });
+}
+
+export async function assignPrecedentReviewer(precedentId: string, lawyerId: string): Promise<Case> {
+  return request(`/admin/precedents/${precedentId}/reviewer`, {
+    method: "PATCH",
+    body: JSON.stringify({ reviewer_lawyer_id: lawyerId }),
+  });
+}
+
 export async function getAiStatus(): Promise<AIStatus> {
   return request("/system/ai-status");
+}
+
+export async function getAiUsage(): Promise<AIUsage> {
+  return request("/system/ai-usage");
+}
+
+export async function getAiConnectivity(force = false): Promise<AIConnectivity> {
+  return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
 export interface CaseListFilters {
@@ -117,6 +145,7 @@ export interface CaseListFilters {
   outcome?: CaseOutcome;
   active?: boolean;
   hearing_within_days?: number;
+  assigned_lawyer_id?: string;
 }
 
 export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
@@ -128,8 +157,17 @@ export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
   if (filters.outcome) params.set("outcome", filters.outcome);
   if (filters.active !== undefined) params.set("active", String(filters.active));
   if (filters.hearing_within_days) params.set("hearing_within_days", String(filters.hearing_within_days));
+  if (filters.assigned_lawyer_id) params.set("assigned_lawyer_id", filters.assigned_lawyer_id);
   const query = params.toString();
   return request(`/cases${query ? `?${query}` : ""}`);
+}
+
+export async function getPrecedents(): Promise<Case[]> {
+  return request("/precedents");
+}
+
+export async function getPrecedentDocuments(precedentId: string): Promise<DocumentItem[]> {
+  return request(`/precedents/${precedentId}/documents`);
 }
 
 export async function createCase(payload: Record<string, unknown>): Promise<Case> {
@@ -231,8 +269,28 @@ export async function createCourtroomSession(
   });
 }
 
+export async function createCourtroomSessionFromCase(
+  caseId: string,
+  chosenRole: CourtroomRole
+): Promise<CourtroomSession> {
+  return request("/courtroom-sessions/from-case", {
+    method: "POST",
+    body: JSON.stringify({ case_id: caseId, chosen_role: chosenRole }),
+  });
+}
+
 export async function getCourtroomSession(sessionId: string): Promise<CourtroomSession> {
   return request(`/courtroom-sessions/${sessionId}`);
+}
+
+export async function transcribeCourtroomAudio(sessionId: string, audio: Blob): Promise<{ text: string }> {
+  const form = new FormData();
+  form.append("file", audio, audio.type === "audio/mp4" ? "move.mp4" : "move.webm");
+  return request(`/courtroom-sessions/${sessionId}/voice/transcribe`, { method: "POST", body: form });
+}
+
+export async function getCourtroomTurnAudio(sessionId: string, turnId: string): Promise<Blob> {
+  return fetchBlob(`/courtroom-sessions/${sessionId}/voice/turns/${turnId}`, "Ses oluşturulamadı");
 }
 
 export async function sendCourtroomMove(

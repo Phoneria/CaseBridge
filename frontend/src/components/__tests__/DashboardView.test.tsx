@@ -35,6 +35,10 @@ const overview = {
     { status: "devam_eden", total: 7 },
     { status: "kapali", total: 3 },
   ],
+  by_lawyer: [
+    { lawyer_id: "u1", full_name: "Emre Yılmaz", department: "Ticaret Hukuku", total: 25, active: 6, won: 12, lost: 3 },
+    { lawyer_id: "u2", full_name: "Zeynep Arslan", department: "Kira Hukuku", total: 17, active: 4, won: 8, lost: 2 },
+  ],
 };
 
 beforeEach(() => {
@@ -169,6 +173,7 @@ describe("DashboardView", () => {
     expect(await screen.findByRole("link", { name: "İş Hukuku · 20" })).toHaveAttribute("href", "/davalar?kategori=is_hukuku&arsiv=dahil");
     expect(screen.getByRole("link", { name: "Devam Eden · 7" })).toHaveAttribute("href", "/davalar?durum=devam_eden&arsiv=dahil");
     expect(screen.getByRole("list", { name: "Dava dağılımı kategorileri" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Emre Yılmaz · Ticaret Hukuku · 25" })).toHaveAttribute("href", "/davalar?arsiv=dahil&avukat=u1");
   });
 
   it("opens the preview from hearings and activity", async () => {

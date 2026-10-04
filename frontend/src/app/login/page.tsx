@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { login, setToken } from "@/lib/api";
+import { getMe, login, setToken } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,7 +19,8 @@ export default function LoginPage() {
     try {
       const { access_token } = await login(email, password);
       setToken(access_token);
-      router.push("/dashboard");
+      const user = await getMe();
+      router.push(user.role === "admin" ? "/admin" : "/dashboard");
     } catch {
       setError("E-posta veya şifre hatalı.");
     } finally {
@@ -36,7 +37,7 @@ export default function LoginPage() {
           </span>
           <div>
             <p className="text-base font-semibold text-navy-900">CaseBridge</p>
-            <p className="text-[11px] text-navy-500">AI-Powered Legal Intelligence</p>
+            <p className="text-[11px] text-navy-500">Hukuk bürosu çalışma alanı</p>
           </div>
         </div>
 

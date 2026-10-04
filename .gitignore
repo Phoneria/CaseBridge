@@ -43,3 +43,7 @@ _write_test.txt
 # OS
 .DS_Store
 .next/
+
+# Real case data - never commit (KVKK)
+data/import/*
+!data/import/README.md

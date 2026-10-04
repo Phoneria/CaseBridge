@@ -5,12 +5,16 @@ const getCourtroomSession = vi.fn();
 const sendCourtroomMove = vi.fn();
 const retryCourtroomSession = vi.fn();
 const abandonCourtroomSession = vi.fn();
+const transcribeCourtroomAudio = vi.fn();
+const getCourtroomTurnAudio = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCourtroomSession: (...args: unknown[]) => getCourtroomSession(...args),
   sendCourtroomMove: (...args: unknown[]) => sendCourtroomMove(...args),
   retryCourtroomSession: (...args: unknown[]) => retryCourtroomSession(...args),
   abandonCourtroomSession: (...args: unknown[]) => abandonCourtroomSession(...args),
+  transcribeCourtroomAudio: (...args: unknown[]) => transcribeCourtroomAudio(...args),
+  getCourtroomTurnAudio: (...args: unknown[]) => getCourtroomTurnAudio(...args),
 }));
 
 import { CourtroomSessionView } from "@/components/CourtroomSessionView";
@@ -85,6 +89,8 @@ beforeEach(() => {
   sendCourtroomMove.mockReset().mockResolvedValue({ ...activeSession, current_actor: "opponent" });
   retryCourtroomSession.mockReset();
   abandonCourtroomSession.mockReset();
+  transcribeCourtroomAudio.mockReset();
+  getCourtroomTurnAudio.mockReset();
 });
 
 describe("CourtroomSessionView", () => {
@@ -107,5 +113,16 @@ describe("CourtroomSessionView", () => {
     expect(sendCourtroomMove.mock.calls[0][0]).toBe("session-1");
     expect(sendCourtroomMove.mock.calls[0][1]).toMatchObject({ action_type: "opening" });
     expect(await screen.findByText(/yanıt hazırlıyor/i)).toBeInTheDocument();
+  });
+
+  it("offers voice input and audio playback without changing the stored turn", async () => {
+    getCourtroomSession.mockResolvedValue({ ...activeSession, turns: [
+      ...activeSession.turns,
+      { ...activeSession.turns[0], id: "t2", actor: "judge", content: "Delilinizi sunun." },
+    ] });
+    render(<CourtroomSessionView sessionId="session-1" />);
+    expect(await screen.findByRole("button", { name: /Sesli beyan/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Dinle/ })).toBeInTheDocument();
+    expect(screen.getByText(/yapay zekâ tarafından üretilir/)).toBeInTheDocument();
   });
 });

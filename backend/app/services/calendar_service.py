@@ -111,6 +111,7 @@ class CalendarService:
             .join(Case, Task.case_id == Case.id)
             .filter(
                 Task.law_firm_id == law_firm_id,
+                Case.is_precedent.is_(False),
                 Task.status == TaskStatus.PENDING,
                 Task.due_date >= start,
                 Task.due_date <= end,
@@ -119,7 +120,12 @@ class CalendarService:
         )
         cases = (
             self.db.query(Case)
-            .filter(Case.law_firm_id == law_firm_id, Case.next_hearing_date >= start, Case.next_hearing_date <= end)
+            .filter(
+                Case.law_firm_id == law_firm_id,
+                Case.is_precedent.is_(False),
+                Case.next_hearing_date >= start,
+                Case.next_hearing_date <= end,
+            )
             .all()
         )
 
@@ -176,7 +182,11 @@ class CalendarService:
         case.next_hearing_date = earliest[0].date() if earliest else None
 
     def _case_in_firm(self, case_id: str, law_firm_id: str) -> Optional[Case]:
-        return self.db.query(Case).filter(Case.id == case_id, Case.law_firm_id == law_firm_id).first()
+        return (
+            self.db.query(Case)
+            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
+            .first()
+        )
 
     def _check_references(
         self, law_firm_id: str, case_id: Optional[str], assignee_id: Optional[str]

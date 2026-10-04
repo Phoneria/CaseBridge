@@ -131,7 +131,7 @@ export function AnalysisView() {
               ) : (
                 <div className="rounded-2xl border border-surface-border bg-white p-4 text-sm text-navy-600 shadow-card">
                   {SIMULATION_STATUS_LABELS[sim.status] ?? sim.status}
-                  {sim.error_message ? ` — ${sim.error_message}` : ""}
+                  {sim.error_message ? " — Analiz tamamlanamadı." : ""}
                 </div>
               )}
             </div>

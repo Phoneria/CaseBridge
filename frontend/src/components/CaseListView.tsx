@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { createCase, getCases } from "@/lib/api";
+import { createCase, getCases, getMe, listAdminLawyers } from "@/lib/api";
 import {
   CASE_LIST_PARAM_KEYS,
   CASE_STATUSES,
@@ -18,7 +18,7 @@ import {
 } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { Case, CaseType } from "@/types";
+import type { AppUser, Case, CaseType } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
@@ -31,6 +31,7 @@ const EMPTY_FORM = {
   opposing_party: "",
   case_type: "diger" as CaseType,
   court: "",
+  assigned_lawyer_id: "",
 };
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
@@ -58,6 +59,9 @@ export function CaseListView() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [adminLawyers, setAdminLawyers] = useState<AppUser[] | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [formAccessReady, setFormAccessReady] = useState(false);
   const latestRequestId = useRef<number>(0);
 
   function load() {
@@ -92,6 +96,18 @@ export function CaseListView() {
     setSearch(query.ara ?? "");
   }, [query.ara]);
 
+  useEffect(() => {
+    if (!formOpen) return;
+    setFormAccessReady(false);
+    getMe().then(async (me) => {
+      if (me.role === "admin") {
+        setIsAdmin(true);
+        setAdminLawyers((await listAdminLawyers()).filter((user) => user.is_active));
+      }
+      setFormAccessReady(true);
+    }).catch(() => setCreateError("Avukat listesi yüklenemedi."));
+  }, [formOpen]);
+
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault();
     setParams({ ara: search.trim() || null });
@@ -109,10 +125,15 @@ export function CaseListView() {
 
   async function handleCreateSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!formAccessReady) return;
     setCreating(true);
     setCreateError(null);
     try {
-      await createCase(form);
+      if (isAdmin && !form.assigned_lawyer_id) {
+        setCreateError("Sorumlu avukat seçin.");
+        return;
+      }
+      await createCase({ ...form, assigned_lawyer_id: form.assigned_lawyer_id || undefined });
       setForm(EMPTY_FORM);
       setFormOpen(false);
       load();
@@ -266,6 +287,22 @@ export function CaseListView() {
             />
           </div>
 
+          {isAdmin && (
+            <div>
+              <label htmlFor="assigned_lawyer_id" className="mb-1 block text-xs font-medium text-navy-600">Sorumlu Avukat</label>
+              <select
+                id="assigned_lawyer_id"
+                required
+                value={form.assigned_lawyer_id}
+                onChange={(event) => setForm({ ...form, assigned_lawyer_id: event.target.value })}
+                className="w-full rounded-lg border border-surface-border bg-white px-3 py-2 text-sm"
+              >
+                <option value="">Avukat seçin</option>
+                {(adminLawyers ?? []).map((lawyer) => <option key={lawyer.id} value={lawyer.id}>{lawyer.full_name} · {lawyer.department}</option>)}
+              </select>
+            </div>
+          )}
+
           {createError && (
             <div className="sm:col-span-2">
               <ErrorState message={createError} />
@@ -275,7 +312,7 @@ export function CaseListView() {
           <div className="sm:col-span-2">
             <button
               type="submit"
-              disabled={creating}
+              disabled={creating || !formAccessReady}
               className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
             >
               {creating ? "Kaydediliyor..." : "Kaydet"}

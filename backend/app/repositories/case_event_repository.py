@@ -31,7 +31,7 @@ class CaseEventRepository:
         return (
             self.db.query(CaseEvent, Case.case_name, Case.id)
             .join(Case, CaseEvent.case_id == Case.id)
-            .filter(CaseEvent.law_firm_id == law_firm_id)
+            .filter(CaseEvent.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
             .order_by(CaseEvent.created_at.desc())
             .limit(limit)
             .all()

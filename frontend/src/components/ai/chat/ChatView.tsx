@@ -198,15 +198,14 @@ export function ChatView() {
               }
               break;
             case "error":
-              updateAssistant((message) => ({ ...message, status: "error", errorText: event.message }));
+              updateAssistant((message) => ({ ...message, status: "error", errorText: "Yanıt alınamadı. Lütfen tekrar deneyin." }));
               break;
           }
         },
       });
     } catch (err) {
       if (!isAbortError(err)) {
-        const text = err instanceof Error ? err.message : "Yanıt alınamadı.";
-        updateAssistant((message) => ({ ...message, status: "error", errorText: text }));
+        updateAssistant((message) => ({ ...message, status: "error", errorText: "Yanıt alınamadı. Lütfen tekrar deneyin." }));
       }
     } finally {
       // Aborted, or the connection ended without done/error: the backend

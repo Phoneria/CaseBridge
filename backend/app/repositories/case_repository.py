@@ -26,7 +26,7 @@ class CaseRepository:
     def get_by_id_in_firm(self, case_id: str, law_firm_id: str) -> Optional[Case]:
         return (
             self.db.query(Case)
-            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id)
+            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
             .first()
         )
 
@@ -52,7 +52,7 @@ class CaseRepository:
         `active` and `outcome` use exactly the definitions in
         AnalyticsService so a dashboard number and the list it links to
         always agree."""
-        query = self.db.query(Case).filter(Case.law_firm_id == law_firm_id)
+        query = self.db.query(Case).filter(Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
 
         if not include_archived:
             query = query.filter(Case.is_archived.is_(False))

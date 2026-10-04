@@ -80,6 +80,16 @@ export function DashboardView() {
     color: CHART_COLORS[index % CHART_COLORS.length],
   }));
 
+  const lawyerData = (overview.by_lawyer ?? []).filter((row) => row.lawyer_id).map((row) => ({
+    key: row.lawyer_id!,
+    name: row.full_name,
+    department: row.department,
+    total: row.total,
+    won: row.won,
+    lost: row.lost,
+    href: analyticsCaseListHref({ avukat: row.lawyer_id! }),
+  }));
+
   function openFromChart(data: unknown) {
     const href = hrefFromChartEvent(data);
     if (href) router.push(href);
@@ -101,6 +111,27 @@ export function DashboardView() {
       </div>
 
       <DashboardAiCard />
+
+      {lawyerData.length > 0 && (
+        <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          <p className="mb-4 text-sm font-medium text-navy-700">Avukata Göre Davalar</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={lawyerData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
+              <Tooltip />
+              <Bar dataKey="total" name="Toplam" fill="#6d43f5" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="won" name="Kazanılan" fill="#10b981" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="lost" name="Kaybedilen" fill="#f97373" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+            </BarChart>
+          </ResponsiveContainer>
+          <ChartLegendLinks
+            ariaLabel="Avukata göre dava dağılımı"
+            items={lawyerData.map((row) => ({ key: row.key, label: `${row.name}${row.department ? ` · ${row.department}` : ""}`, value: row.total, href: row.href }))}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">

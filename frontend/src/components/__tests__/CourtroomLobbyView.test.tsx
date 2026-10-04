@@ -8,11 +8,15 @@ import { nav, resetNav, setUrl } from "@/test/navigation";
 const listCourtroomScenarios = vi.fn();
 const listCourtroomSessions = vi.fn();
 const createCourtroomSession = vi.fn();
+const createCourtroomSessionFromCase = vi.fn();
+const getCases = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   listCourtroomScenarios: (...args: unknown[]) => listCourtroomScenarios(...args),
   listCourtroomSessions: (...args: unknown[]) => listCourtroomSessions(...args),
   createCourtroomSession: (...args: unknown[]) => createCourtroomSession(...args),
+  createCourtroomSessionFromCase: (...args: unknown[]) => createCourtroomSessionFromCase(...args),
+  getCases: (...args: unknown[]) => getCases(...args),
 }));
 
 import { CourtroomLobbyView } from "@/components/ai/CourtroomLobbyView";
@@ -56,6 +60,8 @@ beforeEach(() => {
   listCourtroomScenarios.mockReset().mockResolvedValue([scenario]);
   listCourtroomSessions.mockReset().mockResolvedValue([]);
   createCourtroomSession.mockReset();
+  createCourtroomSessionFromCase.mockReset();
+  getCases.mockReset().mockResolvedValue([]);
 });
 
 describe("CourtroomLobbyView", () => {
@@ -64,7 +70,7 @@ describe("CourtroomLobbyView", () => {
     render(<CourtroomLobbyView />);
 
     expect(await screen.findByRole("heading", { level: 1, name: "Canlı Duruşma" })).toBeInTheDocument();
-    expect(screen.getByText("Oturum")).toBeInTheDocument();
+    expect(screen.getAllByText("Oturumlarım").length).toBeGreaterThan(0);
     expect(screen.getByText("81")).toBeInTheDocument();
   });
 
@@ -90,6 +96,27 @@ describe("CourtroomLobbyView", () => {
 
     expect(createCourtroomSession).toHaveBeenCalledWith("sc1", "plaintiff");
     expect(nav.push).toHaveBeenCalledWith("/ai/durusma/oturum/new1");
+  });
+
+  it("starts a hearing from a selected database case", async () => {
+    getCases.mockResolvedValue([{ id: "case1", case_number: "2026/153", case_name: "Kira Davası", client_name: "Arma", opposing_party: "Merkez", is_precedent: false }]);
+    createCourtroomSessionFromCase.mockResolvedValue({ id: "from-case" });
+    render(<CourtroomLobbyView />);
+    await userEvent.click(await screen.findByRole("button", { name: /Duruşma ekle/ }));
+    expect(await screen.findByText(/2026\/153 · Kira Davası/)).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText("Müvekkilin tarafı"), "defendant");
+    await userEvent.click(screen.getByRole("button", { name: "Duruşmayı başlat" }));
+    expect(createCourtroomSessionFromCase).toHaveBeenCalledWith("case1", "defendant");
+    expect(nav.push).toHaveBeenCalledWith("/ai/durusma/oturum/from-case");
+  });
+
+  it("keeps completed examples separate from personal sessions", async () => {
+    listCourtroomSessions.mockResolvedValue([{ ...session("demo", "completed", "2026-09-03", 73), is_demo: true }, session("mine", "active", "2026-09-04", null)]);
+    render(<CourtroomLobbyView />);
+    const examples = await screen.findByRole("list", { name: "Tamamlanmış örnek duruşmalar" });
+    expect(within(examples).getByRole("link")).toHaveAttribute("href", "/ai/durusma/oturum/demo");
+    const personal = screen.getByRole("list", { name: "Oturumlarım" });
+    expect(within(personal).getByRole("link")).toHaveAttribute("href", "/ai/durusma/oturum/mine");
   });
 
   it("shows an empty state without scenarios", async () => {

@@ -86,6 +86,7 @@ class CourtroomSessionSummaryOut(BaseModel):
     round_number: int
     max_rounds: int
     total_score: int | None = None
+    is_demo: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -108,6 +109,11 @@ class CourtroomSessionOut(CourtroomSessionSummaryOut):
 
 class CourtroomSessionCreate(BaseModel):
     scenario_id: str
+    chosen_role: CourtroomRole
+
+
+class CourtroomCaseSessionCreate(BaseModel):
+    case_id: str
     chosen_role: CourtroomRole
 
 

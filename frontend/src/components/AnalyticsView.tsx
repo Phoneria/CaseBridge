@@ -20,16 +20,21 @@ export function AnalyticsView() {
   const router = useRouter();
   const quickViewHref = useQuickViewHref();
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
+  const [wonCases, setWonCases] = useState<Case[]>([]);
   const [lostCases, setLostCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getAnalyticsOverview(), getCases({ outcome: "lost", include_archived: true })])
-      .then(([overviewResult, lostResult]) => {
+    Promise.all([
+      getAnalyticsOverview(),
+      getCases({ outcome: "won", include_archived: true }),
+      getCases({ outcome: "lost", include_archived: true }),
+    ]).then(([overviewResult, wonResult, lostResult]) => {
         if (cancelled) return;
         setOverview(overviewResult);
+        setWonCases(wonResult);
         setLostCases(lostResult);
       })
       .catch(() => {
@@ -60,6 +65,13 @@ export function AnalyticsView() {
         <h1 className="text-xl font-semibold text-navy-900">Analitik</h1>
         <p className="text-sm text-navy-500">Büronuzun tarihsel performansı.</p>
       </div>
+
+      <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+        <h2 className="text-sm font-semibold text-navy-800">Kazanma oranı nasıl hesaplanır?</h2>
+        <p className="mt-2 text-sm text-navy-700">Kazanılan dava sayısı ÷ (kazanılan + kaybedilen dava sayısı) × 100. Devam eden ve uzlaşmayla kapanan davalar paydaya girmez. Arşivdeki davalar dahildir; bu oran bir tahmin veya hukuki başarı garantisi değildir.</p>
+        <p className="mt-2 text-sm font-medium text-navy-900">{overview.won_cases} ÷ ({overview.won_cases} + {overview.lost_cases}) × 100 = %{overview.win_rate}</p>
+        {overview.won_cases + overview.lost_cases === 0 && <p className="mt-1 text-xs text-navy-500">Henüz karara bağlanmış kazanılan veya kaybedilen dava yok; oran %0 olarak gösterilir.</p>}
+      </section>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
         <StatCard label="Toplam Dava" value={overview.total_cases} href={analyticsCaseListHref()} />
@@ -102,17 +114,20 @@ export function AnalyticsView() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-        <p className="mb-4 text-sm font-medium text-navy-700">Kaybedilen Davalar</p>
-        {lostCases.length === 0 ? (
-          <EmptyState message="Kaybedilen dava bulunmuyor." />
+      {([{ title: "Kazanılan Davalar", rows: wonCases, empty: "Kazanılan dava bulunmuyor." }, { title: "Kaybedilen Davalar", rows: lostCases, empty: "Kaybedilen dava bulunmuyor." }]).map((group) => (
+      <section key={group.title} className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+        <h2 className="mb-2 text-sm font-medium text-navy-700">{group.title}</h2>
+        <p className="mb-3 text-xs text-navy-500">Hesaplamaya giren dava kayıtları ve mevcut özetleri.</p>
+        {group.rows.length === 0 ? (
+          <EmptyState message={group.empty} />
         ) : (
           <ul className="divide-y divide-surface-border text-sm">
-            {lostCases.map((c) => (
+            {group.rows.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 py-2">
-                <Link href={caseDetailHref(c.id)} className="font-medium text-navy-900 hover:text-accent-600">
-                  {c.case_name}
-                </Link>
+                <div>
+                  <Link href={caseDetailHref(c.id)} className="font-medium text-navy-900 hover:text-accent-600">{c.case_name}</Link>
+                  <p className="mt-1 line-clamp-2 text-xs text-navy-500">{c.description?.trim() || "Bu dava için özet girilmemiş."}</p>
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-navy-500">{c.case_number}</span>
                   <Link
@@ -128,7 +143,7 @@ export function AnalyticsView() {
             ))}
           </ul>
         )}
-      </div>
+      </section>))}
     </div>
   );
 }

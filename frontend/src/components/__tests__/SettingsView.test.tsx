@@ -49,7 +49,8 @@ describe("SettingsView", () => {
     render(<SettingsView />);
 
     await waitFor(() => expect(screen.getByText("Avukat Kullanici")).toBeInTheDocument());
-    expect(screen.getByText(/mock/i)).toBeInTheDocument();
+    expect(screen.getByText("Hizmet hazır")).toBeInTheDocument();
+    expect(screen.queryByText("mock")).not.toBeInTheDocument();
   });
 
   it("hides user management for a non-admin user", async () => {

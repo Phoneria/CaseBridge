@@ -8,6 +8,11 @@ class ResizeObserverStub {
 }
 global.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
+// jsdom also omits element scrolling used by the document viewer.
+if (!HTMLElement.prototype.scrollTo) {
+  HTMLElement.prototype.scrollTo = () => {};
+}
+
 // Node 26 exposes an experimental, file-backed localStorage getter that
 // evaluates to undefined unless a CLI flag is supplied. Keep browser API
 // tests deterministic by installing a tiny in-memory Storage implementation.

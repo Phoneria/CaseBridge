@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AiMark } from "@/components/ai/AiMark";
+import { AiStatusIndicator } from "@/components/AiStatusIndicator";
 import { AI_ROUTES } from "@/lib/ai";
 
 interface NavItem {
@@ -24,6 +25,7 @@ function Icon({ d }: { d: string }) {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <Icon d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
   { label: "Davalar", href: "/davalar", icon: <Icon d="M4 6h16M4 6v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /> },
+  { label: "Emsal Kararlar", href: "/emsaller", icon: <Icon d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /> },
   { label: "Takvim", href: "/takvim", icon: <Icon d="M7 3v3M17 3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" /> },
   { label: "Görevler", href: "/gorevler", icon: <Icon d="M9 11.5 11 13.5 15.5 9M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" /> },
   { label: "Belgeler", href: "/belgeler", icon: <Icon d="M8 3h6l5 5v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM14 3v5h5" /> },
@@ -54,7 +56,9 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-        active ? "bg-accent-50 text-accent-700" : "text-navy-600 hover:bg-surface-muted hover:text-navy-900"
+        active
+          ? "bg-[#6941E8] text-white shadow-[0_6px_18px_rgba(59,31,140,0.28)]"
+          : "text-[#C2CCE0] hover:bg-white/[0.08] hover:text-white"
       }`}
     >
       {item.icon}
@@ -63,22 +67,25 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
   const pathname = usePathname();
   const inAi = isActive(pathname, AI_ROUTES.hub);
   const hubActive = pathname === AI_ROUTES.hub;
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-surface-border bg-white px-4 py-6">
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#273450] bg-[#17213A] px-4 py-6">
       <div className="mb-8 flex items-center gap-2 px-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white">CB</span>
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6941E8] text-sm font-bold text-white shadow-[0_4px_14px_rgba(105,65,232,0.3)]">CB</span>
         <div className="leading-tight">
-          <p className="text-base font-semibold text-navy-900">CaseBridge</p>
-          <p className="text-[11px] text-navy-500">AI-Powered Legal Intelligence</p>
+          <p className="text-base font-semibold text-white">CaseBridge</p>
+          <p className="text-[11px] text-[#9EACC7]">Hukuk bürosu çalışma alanı</p>
         </div>
       </div>
 
       <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+        {role === "admin" && (
+          <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
+        )}
         {NAV_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
@@ -86,7 +93,7 @@ export function Sidebar() {
         <div
           role="group"
           aria-label="CaseBridge AI"
-          className={`relative mt-4 overflow-hidden rounded-2xl bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
+          className={`relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link
@@ -116,8 +123,9 @@ export function Sidebar() {
           })}
         </div>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto flex flex-col gap-2 pt-4">
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
+          <AiStatusIndicator tone="dark" />
         </div>
       </nav>
     </aside>

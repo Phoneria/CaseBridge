@@ -71,7 +71,7 @@ describe("AiHubView", () => {
     render(<AiHubView />);
 
     expect(await screen.findByRole("heading", { level: 1, name: "CaseBridge AI" })).toBeInTheDocument();
-    expect(await screen.findByText("Model: ollama · Hazır")).toBeInTheDocument();
+    expect(await screen.findByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
     const stats = screen.getByText("Tamamlanan analiz").closest("dl")!;
     await waitFor(() => expect(within(stats).getByText("Tamamlanan analiz").nextSibling).toHaveTextContent("1"));
     expect(within(stats).getByText("Duruşma oturumu").nextSibling).toHaveTextContent("1");
@@ -107,7 +107,7 @@ describe("AiHubView", () => {
     getAiStatus.mockResolvedValue({ provider: "ollama", configured: false, error: "x" });
     render(<AiHubView />);
     expect(await screen.findByText("Henüz AI aktivitesi yok.")).toBeInTheDocument();
-    expect(await screen.findByText(/AI modeli yapılandırılmamış/)).toBeInTheDocument();
+    expect(await screen.findByText(/Yapay zekâ hizmeti yapılandırılmamış/)).toBeInTheDocument();
   });
 
   it("shows an error when AI data cannot be loaded", async () => {

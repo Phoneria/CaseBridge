@@ -202,6 +202,40 @@ SCENARIOS = [
             ("INS_TEDARIK", "Tedarikçi termin yazısı", "Özel malzeme için 35 gün", "ticari_yazi", "Revize malzemenin üretim ve teslim süresi 35 gün olarak bildirilmiş.", "defendant", "admitted"),
         ],
     },
+    {
+        "slug": "ticari-kira-uyarlama",
+        "title": "Ticari Kira Uyarlama Provası",
+        "summary": "Ekonomik değişim iddiasını, sözleşme ve karşılaştırılabilir emsal eksikleriyle birlikte tartışın.",
+        "category": "Kira Hukuku",
+        "plaintiff_name": "Arma Tasarım Ltd. Şti.",
+        "defendant_name": "Merkez Gayrimenkul A.Ş.",
+        "difficulty": ScenarioDifficulty.ADVANCED,
+        "learning_objectives": ["Somut veri ile genel piyasa eğilimini ayırmak", "Eksik delili açıkça belirtmek", "Bilirkişi sorularını hazırlamak"],
+        "public_facts": [
+            "Taraflar arasında ticari taşınmaz kirasına ilişkin bir uyarlama uyuşmazlığı bulunuyor.",
+            "Kiracı değişen ekonomik koşullara dayanıyor; kiraya veren sözleşmeye bağlı kalınmasını istiyor.",
+            "Dosya özetinde taşınmazın açık adresi ve fiziksel nitelikleri yer almıyor.",
+            "Aynı alt pazardan doğrulanmış üç kira emsali henüz dosyada bulunmuyor.",
+        ],
+        "disputed_issues": ["Uyarlama talebinin somut dayanağı nedir?", "Hangi kira emsalleri gerçekten karşılaştırılabilir?", "Eksik belgeler tamamlanmadan miktar belirlenebilir mi?"],
+        "plaintiff_private_brief": {
+            "objective": "Uyarlama talebini somut dosya verisiyle desteklemek.",
+            "known_facts": ["Genel piyasa göstergeleri mevcut olsa da dava konusu taşınmazın nitelikleri eksik."],
+            "strategy_notes": ["Doğrulanmamış üç emsal varmış gibi konuşma; bilirkişi incelemesi için eksikleri belirt."],
+        },
+        "defendant_private_brief": {
+            "objective": "Uyarlama miktarının yeterli karşılaştırılabilir veri olmadan belirlenemeyeceğini göstermek.",
+            "known_facts": ["Sözleşmenin imzalı nüshası ve kira ödeme geçmişi bu eğitim dosyasında sunulmamış."],
+            "strategy_notes": ["Genel endeks ile somut taşınmazın kira rayicini birbirinden ayır."],
+        },
+        "judge_instructions": {"focus": ["sözleşme", "taşınmaz nitelikleri", "karşılaştırılabilir emsal", "ispat boşlukları"]},
+        "legal_context": ["Bu kurgu, belirli bir kira bedeli tahmini değildir; gerçek uyuşmazlıkta asıl belgeler ayrıca doğrulanmalıdır."],
+        "evidence": [
+            ("UYARLAMA_OZET", "Dava özeti", "Kayıtlı talep", "dosya_notu", "Ticari kira bedelinin ekonomik koşullara göre uyarlanması isteniyor; miktar gerekçesi bu özette ayrıntılı değil.", "both", "undisputed"),
+            ("UYARLAMA_PIYASA", "Genel piyasa notu", "Piyasa yönü", "arastirma", "İstanbul geneli ticari gayrimenkul eğilimi; belirli taşınmaz için kira emsali değildir.", "plaintiff", "undisputed"),
+            ("UYARLAMA_EKSIK", "Belge eksikliği listesi", "Doğrulanacak alanlar", "kontrol_listesi", "İmzalı sözleşme, açık adres, m², ödeme geçmişi ve kaynaklı emsaller talep edilmelidir.", "defendant", "undisputed"),
+        ],
+    },
 ]
 
 

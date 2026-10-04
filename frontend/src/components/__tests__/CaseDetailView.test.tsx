@@ -31,6 +31,8 @@ vi.mock("@/lib/api", () => ({
   listCaseTasks: (...args: unknown[]) => listCaseTasks(...args),
   createTask: (...args: unknown[]) => createTask(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
+  deleteDocument: vi.fn(),
+  downloadDocument: vi.fn(),
 }));
 
 import { CaseDetailView } from "@/components/CaseDetailView";
@@ -84,6 +86,21 @@ describe("CaseDetailView", () => {
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Analizi başlat" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toBeInTheDocument();
+  });
+
+  it("shows documents, developments and tasks together in the overview", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([{ id: "d1", case_id: "c1", filename: "sozlesme.pdf", file_type: "pdf", extracted_text: "Taraflar arasındaki sözleşme ve fesih bildirimi.", uploaded_at: "2026-01-15" }]);
+    listCaseTasks.mockResolvedValue([{ id: "t1", case_id: "c1", title: "Bilirkişi raporunu incele", description: "Tazminat hesabını kontrol et.", due_date: "2026-09-01", status: "pending", assigned_to: null, created_at: "2026-01-01", completed_at: null }]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
+    expect(screen.getByText("sozlesme.pdf")).toBeInTheDocument();
+    expect(screen.getByText("Dava açıldı")).toBeInTheDocument();
+    expect(screen.getByText("Bilirkişi raporunu incele")).toBeInTheDocument();
+    expect(screen.getByText("Tazminat hesabını kontrol et.")).toBeInTheDocument();
   });
 
   it("renders the chronological timeline in the Gelişmeler tab", async () => {
@@ -199,7 +216,7 @@ describe("CaseDetailView", () => {
     await waitFor(() => expect(screen.getByText("Sözleşmenin Feshi Davası")).toBeInTheDocument());
 
     await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
-    expect(screen.getByText(/sağlayıcı zaman aşımına uğradı/i)).toBeInTheDocument();
+    expect(screen.getByText(/Analiz tamamlanamadı/i)).toBeInTheDocument();
     expect(screen.getByText(/Analiz durumu: Başarısız/)).toBeInTheDocument();
     expect(screen.queryByText(/failed|Simülasyon/)).not.toBeInTheDocument();
 
@@ -240,7 +257,7 @@ describe("CaseDetailView", () => {
     await userEvent.upload(input, file);
 
     await waitFor(() => expect(uploadDocument).toHaveBeenCalledWith("c1", file));
-    await waitFor(() => expect(screen.getByText("sozlesme.pdf")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText("sozlesme.pdf").length).toBeGreaterThan(0));
   });
 
   it("adds a development event to the timeline", async () => {

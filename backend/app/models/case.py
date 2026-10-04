@@ -48,6 +48,7 @@ class Case(Base):
     case_type: Mapped[CaseType] = mapped_column(str_enum(CaseType), nullable=False)
     court: Mapped[str] = mapped_column(String(255), nullable=True)
     assigned_lawyer_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
+    reviewer_lawyer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
 
     opening_date: Mapped[date] = mapped_column(Date, default=lambda: datetime.now(timezone.utc).date())
     next_hearing_date: Mapped[date] = mapped_column(Date, nullable=True)
@@ -59,6 +60,7 @@ class Case(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
 
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_precedent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
