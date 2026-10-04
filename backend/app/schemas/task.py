@@ -4,14 +4,16 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from app.models.task import TaskStatus
-from app.schemas.calendar import ReminderDays
+from app.schemas.calendar import EventTitle, ReminderDays
 
 
 class TaskCreate(BaseModel):
-    title: str
+    title: EventTitle
     description: Optional[str] = None
     due_date: Optional[date] = None
     assigned_to: Optional[str] = None
+    #: Omitted/null -> default [1]; [] -> no reminders.
+    reminder_days: Optional[ReminderDays] = None
 
 
 _REQUIRED_ON_UPDATE = ("title", "status")
