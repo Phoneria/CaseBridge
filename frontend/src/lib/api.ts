@@ -161,7 +161,7 @@ export async function listCaseTasks(caseId: string): Promise<Task[]> {
 
 export async function createTask(
   caseId: string,
-  payload: { title: string; description?: string; due_date?: string }
+  payload: { title: string; description?: string; due_date?: string; assigned_to?: string; reminder_days?: number[] }
 ): Promise<Task> {
   return request(`/cases/${caseId}/tasks`, { method: "POST", body: JSON.stringify(payload) });
 }

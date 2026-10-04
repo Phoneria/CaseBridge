@@ -7,11 +7,18 @@ import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const listAllTasks = vi.fn();
 const updateTaskStatus = vi.fn();
+const createTask = vi.fn();
+const getCases = vi.fn();
+const listUsers = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   listAllTasks: (...args: unknown[]) => listAllTasks(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
+  createTask: (...args: unknown[]) => createTask(...args),
+  getCases: (...args: unknown[]) => getCases(...args),
+  listUsers: (...args: unknown[]) => listUsers(...args),
 }));
+import { ApiError } from "@/lib/apiError";
 
 import { TasksView } from "@/components/TasksView";
 
@@ -33,11 +40,19 @@ const overdueTask = { ...pendingTask, id: "t-old", title: "Gecikmiş dilekçe", 
 const futureTask = { ...pendingTask, id: "t-new", title: "Uzak görev", due_date: "2999-01-01" };
 const doneTask = { ...pendingTask, id: "t-done", title: "Biten görev", status: "completed", due_date: "2000-01-02" };
 
+const caseOne = { id: "c1", case_number: "2026/1", case_name: "Sözleşmenin Feshi Davası", client_name: "Ayşe Kaya" };
+const caseTwo = { id: "c2", case_number: "2026/2", case_name: "Kira Tahliye Davası", client_name: "Mehmet Can" };
+
 beforeEach(() => {
   resetNav();
   setUrl("/gorevler");
   listAllTasks.mockReset();
   updateTaskStatus.mockReset();
+  createTask.mockReset();
+  getCases.mockReset();
+  listUsers.mockReset();
+  getCases.mockResolvedValue([caseOne, caseTwo]);
+  listUsers.mockResolvedValue([{ id: "u1", full_name: "Av. Ayşe Demir", email: "a@x.dev", role: "lawyer", law_firm_id: "f1", is_active: true }]);
 });
 
 describe("TasksView", () => {
@@ -56,6 +71,8 @@ describe("TasksView", () => {
     render(<TasksView />);
 
     await waitFor(() => expect(screen.getByText(/henüz görev yok/i)).toBeInTheDocument());
+    expect(screen.getByText("İlk görevi 'Yeni görev' ile ekleyin.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Yeni görev" })).toBeInTheDocument();
   });
 
   it("marks a task completed when its checkbox is toggled", async () => {
@@ -153,5 +170,183 @@ describe("TasksView", () => {
       expect(screen.queryAllByTestId("task-title")).toHaveLength(shown);
       cleanup();
     }
+  });
+  describe("Yeni görev", () => {
+    async function openForm() {
+      await userEvent.click(await screen.findByRole("button", { name: "Yeni görev" }));
+      return screen.findByRole("dialog", { name: "Yeni görev" });
+    }
+
+    it("shows the button with tasks present and opens the modal, loading cases and users", async () => {
+      listAllTasks.mockResolvedValue([pendingTask]);
+      render(<TasksView />);
+
+      const dialog = await openForm();
+
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+      expect(await within(dialog).findByText("Kira Tahliye Davası")).toBeInTheDocument();
+      expect(within(dialog).getByRole("option", { name: "Av. Ayşe Demir" })).toBeInTheDocument();
+      expect(within(dialog).getByRole("option", { name: "Atanmadı" })).toBeInTheDocument();
+      expect(within(dialog).getByLabelText("Başlık")).toHaveFocus();
+    });
+
+    it("shows Turkish validation messages and does not call the API", async () => {
+      listAllTasks.mockResolvedValue([]);
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+      const alert = within(dialog).getByRole("alert");
+      expect(alert).toHaveTextContent("Başlık gerekli.");
+      expect(alert).toHaveTextContent("Dava seçin.");
+
+      expect(within(dialog).getByLabelText("Başlık")).toHaveAttribute("maxlength", "200");
+      expect(createTask).not.toHaveBeenCalled();
+    });
+
+    it("rejects a title over 200 characters", async () => {
+      listAllTasks.mockResolvedValue([]);
+      render(<TasksView />);
+      const dialog = await openForm();
+      const input = within(dialog).getByLabelText("Başlık") as HTMLInputElement;
+      input.removeAttribute("maxlength");
+      await userEvent.click(input);
+      await userEvent.paste("x".repeat(201));
+      await userEvent.click(within(dialog).getByRole("button", { name: /Kira Tahliye/ }));
+
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      expect(within(dialog).getByRole("alert")).toHaveTextContent("Başlık en fazla 200 karakter olabilir.");
+      expect(createTask).not.toHaveBeenCalled();
+    });
+
+    it("creates the task with the full payload, closes the modal and lists the new task", async () => {
+      listAllTasks.mockResolvedValue([pendingTask]);
+      createTask.mockResolvedValue({
+        ...pendingTask,
+        id: "t-new1",
+        case_id: "c2",
+        title: "Yeni dilekçe",
+        due_date: "2999-02-03",
+        assigned_to: "u1",
+        reminder_days: [7, 1],
+      });
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      await userEvent.type(within(dialog).getByLabelText("Başlık"), "  Yeni dilekçe ");
+      await userEvent.click(await within(dialog).findByRole("button", { name: /Kira Tahliye/ }));
+      await userEvent.type(within(dialog).getByLabelText("Açıklama"), "Detay");
+      await userEvent.type(within(dialog).getByLabelText("Son tarih"), "2999-02-03");
+      await userEvent.selectOptions(within(dialog).getByLabelText("Atanan kişi"), "u1");
+      await userEvent.click(within(dialog).getByLabelText("7 gün önce"));
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      await waitFor(() =>
+        expect(createTask).toHaveBeenCalledWith("c2", {
+          title: "Yeni dilekçe",
+          description: "Detay",
+          due_date: "2999-02-03",
+          assigned_to: "u1",
+          reminder_days: [7, 1],
+        }),
+      );
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(screen.getByText("Yeni dilekçe")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "2026/2 - Kira Tahliye Davası" })).toBeInTheDocument();
+    });
+
+    it("omits optional fields and reminder_days when there is no due date, and disables the reminders", async () => {
+      listAllTasks.mockResolvedValue([]);
+      createTask.mockResolvedValue({ ...pendingTask, id: "t2", title: "Basit", due_date: null });
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      expect(within(dialog).getByLabelText("1 gün önce")).toBeDisabled();
+      await userEvent.type(within(dialog).getByLabelText("Başlık"), "Basit");
+      await userEvent.click(await within(dialog).findByRole("button", { name: /Sözleşmenin Feshi/ }));
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      await waitFor(() => expect(createTask).toHaveBeenCalledWith("c1", { title: "Basit" }));
+    });
+
+    it("sends the default reminder [1] once a due date is set", async () => {
+      listAllTasks.mockResolvedValue([]);
+      createTask.mockResolvedValue({ ...pendingTask, id: "t3" });
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      await userEvent.type(within(dialog).getByLabelText("Başlık"), "Tarihli");
+      await userEvent.click(await within(dialog).findByRole("button", { name: /Sözleşmenin Feshi/ }));
+      await userEvent.type(within(dialog).getByLabelText("Son tarih"), "2999-01-01");
+      expect(within(dialog).getByLabelText("1 gün önce")).toBeChecked();
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      await waitFor(() =>
+        expect(createTask).toHaveBeenCalledWith("c1", { title: "Tarihli", due_date: "2999-01-01", reminder_days: [1] }),
+      );
+    });
+
+    it("shows the backend error, keeps the modal open and the list unchanged", async () => {
+      listAllTasks.mockResolvedValue([pendingTask]);
+      createTask.mockRejectedValue(new ApiError("Kullanıcı bulunamadı", 404));
+      render(<TasksView />);
+      const dialog = await openForm();
+      await userEvent.type(within(dialog).getByLabelText("Başlık"), "Hatalı");
+      await userEvent.click(await within(dialog).findByRole("button", { name: /Sözleşmenin Feshi/ }));
+
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      expect(await within(dialog).findByRole("alert")).toHaveTextContent("Görev eklenemedi: Kullanıcı bulunamadı");
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.queryByText("Hatalı")).not.toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: "Kaydet" })).toBeEnabled();
+    });
+
+    it("shows an error inside the form when cases or users fail to load", async () => {
+      listAllTasks.mockResolvedValue([]);
+      getCases.mockRejectedValue(new Error("boom"));
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      expect(await within(dialog).findByRole("alert")).toHaveTextContent("Davalar veya kullanıcılar yüklenemedi.");
+    });
+
+    it("preselects the case from ?dava=", async () => {
+      setUrl("/gorevler?dava=c2");
+      listAllTasks.mockResolvedValue([pendingTask]);
+      render(<TasksView />);
+      const dialog = await openForm();
+
+      expect(await within(dialog).findByText("Kira Tahliye Davası", { selector: "strong" })).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: /Kira Tahliye/ })).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("closes with Escape, restores focus to the button, and ignores Escape and close controls while saving", async () => {
+      listAllTasks.mockResolvedValue([]);
+      let resolve!: (value: unknown) => void;
+      createTask.mockReturnValue(new Promise((r) => (resolve = r)));
+      render(<TasksView />);
+      const button = await screen.findByRole("button", { name: "Yeni görev" });
+      button.focus();
+      await userEvent.click(button);
+      await screen.findByRole("dialog");
+      await userEvent.keyboard("{Escape}");
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(button).toHaveFocus();
+
+      await userEvent.click(button);
+      const dialog = await screen.findByRole("dialog");
+      await userEvent.type(within(dialog).getByLabelText("Başlık"), "Bekleyen");
+      await userEvent.click(await within(dialog).findByRole("button", { name: /Sözleşmenin Feshi/ }));
+      await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+      await userEvent.keyboard("{Escape}");
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: "Formu kapat" })).toBeDisabled();
+      expect(within(dialog).getByRole("button", { name: "Vazgeç" })).toBeDisabled();
+      resolve({ ...pendingTask, id: "t9", title: "Bekleyen" });
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    });
   });
 });
