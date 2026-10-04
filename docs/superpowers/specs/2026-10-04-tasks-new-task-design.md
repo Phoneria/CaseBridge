@@ -31,7 +31,7 @@ Görevler sayfasında görev oluşturulamıyor; görevler yalnızca dava detayı
   - Doğrulama mesajları (Türkçe): "Başlık gerekli.", "Başlık en fazla 200 karakter olabilir.", "Dava seçin."
   - Kaydet → `createTask(caseId, payload)`; başarıda `onCreated(task)`; hata → `role="alert"` "Görev eklenemedi: <detay>" (backend detayı varsa).
   - Erişilebilirlik: açılınca başlık alanına odak, kapanınca önceki odağa dönüş; kaydederken Escape, "Vazgeç" ve ✕ devre dışı.
-  - Davalar (`listCases`) ve kullanıcılar (`listUsers`) modal açılınca yüklenir; yüklenemezse form içinde hata gösterilir.
+  - Davalar (`getCases()`) ve kullanıcılar (`listUsers`) modal açılınca yüklenir; yüklenemezse form içinde hata gösterilir.
 - `TasksView`:
   - Başlık satırına "Yeni görev" butonu (her durumda görünür, boş listede de).
   - Görev oluşunca listeye eklenir (dava adı/numarası seçilen davadan doldurulur) — ya da liste yeniden yüklenir; filtreler korunur.
