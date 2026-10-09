@@ -73,8 +73,9 @@ async function fillFromPastedText() {
 }
 
 describe("NewCaseView", () => {
-  it("renders the four sections with a section menu", () => {
+  it("renders the four sections with a section menu", async () => {
     render(<NewCaseView />);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Davayı oluştur" })).toHaveAttribute("aria-disabled", "false"));
     expect(screen.getByRole("heading", { name: "Yeni dava" })).toBeInTheDocument();
     const menu = screen.getByRole("navigation", { name: "Bölümler" });
     const links = within(menu).getAllByRole("link");
@@ -426,5 +427,69 @@ describe("NewCaseView create flow", () => {
     const event = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
+  });
+});
+
+describe("NewCaseView create flow safeguards", () => {
+  it("shows a Turkish fallback instead of a raw network error", async () => {
+    createCase.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Dava oluşturulamadı: Bilinmeyen hata.");
+  });
+
+  it("does nothing when submitted before the current user is known", async () => {
+    getMe.mockReturnValue(new Promise(() => {}));
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+    expect(createCase).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Davayı oluştur" })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("blocks an admin whose lawyer list failed and keeps the error visible", async () => {
+    getMe.mockResolvedValue({ id: "a1", role: "admin" });
+    listAdminLawyers.mockRejectedValue(new Error("boom"));
+    render(<NewCaseView />);
+    expect(await screen.findByText("Avukat listesi yüklenemedi.")).toBeInTheDocument();
+    await fillRequired();
+    await submit();
+    await submit();
+    expect(createCase).not.toHaveBeenCalled();
+    expect(screen.getByText("Avukat listesi yüklenemedi.")).toBeInTheDocument();
+  });
+
+  it("blocks submit with a persistent error when the user cannot be loaded", async () => {
+    getMe.mockRejectedValue(new Error("boom"));
+    render(<NewCaseView />);
+    expect(await screen.findByText("Kullanıcı bilgisi yüklenemedi.")).toBeInTheDocument();
+    expect(screen.queryByText("Avukat listesi yüklenemedi.")).toBeNull();
+    await fillRequired();
+    await submit();
+    expect(createCase).not.toHaveBeenCalled();
+    expect(screen.getByText("Kullanıcı bilgisi yüklenemedi.")).toBeInTheDocument();
+  });
+
+  it("does not show a lawyer-list error to a lawyer", async () => {
+    render(<NewCaseView />);
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+    expect(screen.queryByText("Avukat listesi yüklenemedi.")).toBeNull();
+  });
+
+  it("sends only one request for two rapid submits", async () => {
+    createCase.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ id: "x1" }), 50)));
+    render(<NewCaseView />);
+    await fillRequired();
+    const button = screen.getByRole("button", { name: "Davayı oluştur" });
+    await userEvent.dblClick(button);
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/x1"));
+    expect(createCase).toHaveBeenCalledTimes(1);
+  });
+
+  it("moves focus to the first section with an error", async () => {
+    render(<NewCaseView />);
+    await submit();
+    expect(screen.getByRole("heading", { name: "Temel bilgiler ve mahkeme" })).toHaveFocus();
   });
 });

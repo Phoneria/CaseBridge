@@ -51,7 +51,7 @@ export function FormSection({ id, title, children }: { id: string; title: string
       aria-labelledby={`bolum-${id}-baslik`}
       className="scroll-mt-24 space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card"
     >
-      <h2 id={`bolum-${id}-baslik`} className="text-base font-semibold text-navy-900">
+      <h2 id={`bolum-${id}-baslik`} tabIndex={-1} className="text-base font-semibold text-navy-900">
         {title}
       </h2>
       {children}

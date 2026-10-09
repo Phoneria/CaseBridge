@@ -39,7 +39,7 @@ const SECTIONS: { id: SectionId; title: string }[] = [
 const NO_ERRORS: FormErrors = { partyNames: {} };
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : "Bilinmeyen hata.";
+  return error instanceof ApiError && error.message ? error.message : "Bilinmeyen hata.";
 }
 
 /** The "Yeni dava" page: a sectioned form that can be pre-filled from a document. */
@@ -53,27 +53,39 @@ export function NewCaseView() {
   const [includeSource, setIncludeSource] = useState(true);
   const [errors, setErrors] = useState<FormErrors>(NO_ERRORS);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "user-error" | "lawyers-error">("loading");
   const [lawyers, setLawyers] = useState<Pick<AppUser, "id" | "full_name" | "department">[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const allowLeave = useRef(false);
+  const inFlight = useRef(false);
   // The draft may arrive after the user kept typing; apply it to the latest form.
   const formRef = useRef(form);
   formRef.current = form;
 
   useEffect(() => {
     let cancelled = false;
-    getMe()
-      .then(async (me) => {
-        if (me.role !== "admin") return;
-        const all = await listAdminLawyers();
+    getMe().then(
+      async (me) => {
         if (cancelled) return;
+        if (me.role !== "admin") {
+          setLoadState("ready");
+          return;
+        }
         setIsAdmin(true);
-        setLawyers(all.filter((lawyer) => lawyer.is_active));
-      })
-      .catch(() => {
-        if (!cancelled) setSubmitError("Avukat listesi yüklenemedi.");
-      });
+        try {
+          const all = await listAdminLawyers();
+          if (cancelled) return;
+          setLawyers(all.filter((lawyer) => lawyer.is_active));
+          setLoadState("ready");
+        } catch {
+          if (!cancelled) setLoadState("lawyers-error");
+        }
+      },
+      () => {
+        if (!cancelled) setLoadState("user-error");
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -135,20 +147,28 @@ export function NewCaseView() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (submitting) return;
+    if (inFlight.current || loadState !== "ready") return;
     setSubmitError(null);
     const found = validateCaseForm(form, { requireLawyer: isAdmin });
     setErrors(found);
     if (hasErrors(found)) {
       const section = firstErrorSection(found);
-      if (section) document.getElementById(`bolum-${section}`)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      if (section) {
+        document.getElementById(`bolum-${section}`)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+        document.getElementById(`bolum-${section}-baslik`)?.focus();
+      }
       return;
     }
 
+    inFlight.current = true;
     setSubmitting(true);
+    // Snapshot what to send now; the form stays editable while requests run.
+    const payload = buildCasePayload(form);
+    const chosenEvents = events.filter((item) => item.checked);
+    const documents = [...(source && includeSource ? [source.file] : []), ...files];
     let created;
     try {
-      created = await createCase(buildCasePayload(form));
+      created = await createCase(payload);
     } catch (error) {
       setSubmitError(
         error instanceof ApiError && error.status === 409
@@ -156,11 +176,12 @@ export function NewCaseView() {
           : `Dava oluşturulamadı: ${errorMessage(error)}`,
       );
       setSubmitting(false);
+      inFlight.current = false;
       return;
     }
 
     let failed = 0;
-    for (const suggestion of events.filter((item) => item.checked)) {
+    for (const suggestion of chosenEvents) {
       try {
         await addCaseEvent(created.id, {
           event_date: suggestion.event_date,
@@ -172,7 +193,6 @@ export function NewCaseView() {
         failed += 1;
       }
     }
-    const documents = [...(source && includeSource ? [source.file] : []), ...files];
     for (const document_ of documents) {
       try {
         await uploadDocument(created.id, document_);
@@ -184,6 +204,10 @@ export function NewCaseView() {
     allowLeave.current = true;
     router.push(failed ? `/davalar/${created.id}?eklenemeyen=${failed}` : `/davalar/${created.id}`);
   }
+
+  const loadError =
+    loadState === "user-error" ? "Kullanıcı bilgisi yüklenemedi." : loadState === "lawyers-error" ? "Avukat listesi yüklenemedi." : null;
+  const submitBlocked = submitting || loadState !== "ready";
 
   const clientMarked = form.parties.some((party) => party.is_client);
   const showClientHint = !clientMarked && [...ai].some((key) => key.startsWith("party:"));
@@ -260,11 +284,16 @@ export function NewCaseView() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              disabled={submitting}
-              className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50"
+              aria-disabled={submitBlocked}
+              className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-accent-700 aria-disabled:opacity-50"
             >
               {submitting ? "Oluşturuluyor…" : "Davayı oluştur"}
             </button>
+            {loadError && (
+              <p role="alert" className="text-sm text-red-600">
+                {loadError}
+              </p>
+            )}
             {submitError && (
               <p role="alert" className="text-sm text-red-600">
                 {submitError}
