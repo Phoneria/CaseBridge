@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { INPUT_CLASS } from "@/components/case-form/Field";
 import { extractCaseIntake } from "@/lib/api";
+import { ApiError } from "@/lib/apiError";
 import { DOCUMENT_EXTENSIONS, checkDocumentFile, pastedTextFile } from "@/lib/caseIntake";
 import type { CaseIntakeResult } from "@/types";
 
@@ -34,20 +35,33 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
   const [notice, setNotice] = useState<{ truncated: boolean } | null>(null);
   const [pending, setPending] = useState<{ result: CaseIntakeResult; source: IntakeSource } | null>(null);
 
+  const headingId = useId();
+  const questionId = useId();
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  // The answer can arrive after the user kept typing, so read the latest props then.
+  const latest = useRef({ hasContent, onDraft });
+  latest.current = { hasContent, onDraft };
+
+  useEffect(() => {
+    if (pending) confirmRef.current?.focus();
+  }, [pending]);
+
   const ready = mode === "dosya" ? file !== null : text.trim().length > 0;
 
   function switchMode(next: Mode) {
     setMode(next);
     setError(null);
+    if (next === "metin") setFile(null);
   }
 
   function accept(result: CaseIntakeResult, source: IntakeSource) {
-    onDraft(result, source);
+    latest.current.onDraft(result, source);
     setPending(null);
     setNotice({ truncated: result.truncated });
   }
 
   async function fill() {
+    if (busy) return;
     setError(null);
     setNotice(null);
     setPending(null);
@@ -56,19 +70,19 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
       const source: IntakeSource =
         mode === "dosya" && file ? { label: file.name, file } : { label: PASTED_LABEL, file: pastedTextFile(text) };
       const result = await extractCaseIntake(mode === "dosya" && file ? { file } : { text });
-      if (hasContent) setPending({ result, source });
+      if (latest.current.hasContent) setPending({ result, source });
       else accept(result, source);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : FALLBACK_ERROR);
+      setError(err instanceof ApiError && err.message ? err.message : FALLBACK_ERROR);
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section aria-labelledby="belgeden-doldur-baslik" className="space-y-3 rounded-2xl border border-accent-200 bg-accent-50/40 p-5">
+    <section aria-labelledby={headingId} className="space-y-3 rounded-2xl border border-accent-200 bg-accent-50/40 p-5">
       <div>
-        <h2 id="belgeden-doldur-baslik" className="text-base font-semibold text-navy-900">
+        <h2 id={headingId} className="text-base font-semibold text-navy-900">
           Belgeden doldur
         </h2>
         <p className="text-sm text-navy-500">Bir dilekçe veya karar yükleyin ya da metnini yapıştırın; alanlar taslak olarak doldurulur.</p>
@@ -123,7 +137,8 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
       <div className="flex items-center gap-3">
         <button
           type="button"
-          disabled={!ready || busy}
+          disabled={!ready && !busy}
+          aria-disabled={busy || undefined}
           onClick={fill}
           className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50"
         >
@@ -138,10 +153,15 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
       )}
 
       {pending && (
-        <div className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-navy-800">
-          <p>Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?</p>
+        <div
+          role="alertdialog"
+          aria-labelledby={questionId}
+          className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-navy-800"
+        >
+          <p id={questionId}>Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?</p>
           <div className="flex gap-2">
             <button
+              ref={confirmRef}
               type="button"
               onClick={() => accept(pending.result, pending.source)}
               className="rounded-lg bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
@@ -160,7 +180,7 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
       )}
 
       {notice && (
-        <div className="space-y-1 text-sm text-navy-700">
+        <div role="status" className="space-y-1 text-sm text-navy-700">
           <p>AI taslağıdır; kaydetmeden önce kontrol edin.</p>
           {notice.truncated && <p>Belge uzun olduğu için yalnızca ilk kısmı okundu.</p>}
         </div>

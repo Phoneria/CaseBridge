@@ -58,7 +58,7 @@ describe("IntakeFillBox", () => {
 
     await pasteAndFill();
     expect(extractCaseIntake).toHaveBeenCalledWith({ text: "Davacı vekili dilekçesi" });
-    expect(screen.getByRole("button", { name: "Belge okunuyor…" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Belge okunuyor…" })).toHaveAttribute("aria-disabled", "true");
 
     resolve(RESULT);
     await waitFor(() => expect(onDraft).toHaveBeenCalledTimes(1));
@@ -128,5 +128,56 @@ describe("IntakeFillBox", () => {
     expect(onDraft).not.toHaveBeenCalled();
     expect(screen.queryByText("Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?")).toBeNull();
     expect(screen.queryByText("AI taslağıdır; kaydetmeden önce kontrol edin.")).toBeNull();
+  });
+
+  it("shows the Turkish fallback for non-API errors", async () => {
+    extractCaseIntake.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await pasteAndFill();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Belge okunamadı. Lütfen tekrar deneyin veya alanları elle doldurun.",
+    );
+  });
+
+  it("keeps focus on Doldur while loading", async () => {
+    let resolve!: (value: CaseIntakeResult) => void;
+    extractCaseIntake.mockReturnValue(new Promise<CaseIntakeResult>((r) => (resolve = r)));
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await pasteAndFill();
+    const button = screen.getByRole("button", { name: "Belge okunuyor…" });
+    expect(document.activeElement === button).toBe(true);
+    await userEvent.click(button);
+    expect(extractCaseIntake).toHaveBeenCalledTimes(1);
+    resolve(RESULT);
+    await screen.findByRole("status");
+  });
+
+  it("renders the overwrite question as an alertdialog and focuses Değiştir", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<IntakeFillBox hasContent onDraft={vi.fn()} />);
+    await pasteAndFill();
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?",
+    });
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Değiştir" })).toHaveFocus();
+  });
+
+  it("announces the draft notice and truncation warning as status", async () => {
+    extractCaseIntake.mockResolvedValue({ ...RESULT, truncated: true });
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await pasteAndFill();
+    const status = await screen.findByRole("status");
+    expect(status).toHaveTextContent("AI taslağıdır; kaydetmeden önce kontrol edin.");
+    expect(status).toHaveTextContent("Belge uzun olduğu için yalnızca ilk kısmı okundu.");
+  });
+
+  it("forgets the chosen file when switching to pasted text", async () => {
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await userEvent.upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "a.pdf", { type: "application/pdf" }));
+    expect(screen.getByRole("button", { name: "Doldur" })).toBeEnabled();
+    await userEvent.click(screen.getByRole("tab", { name: "Metni yapıştır" }));
+    await userEvent.click(screen.getByRole("tab", { name: "Dosya yükle" }));
+    expect(screen.getByRole("button", { name: "Doldur" })).toBeDisabled();
   });
 });

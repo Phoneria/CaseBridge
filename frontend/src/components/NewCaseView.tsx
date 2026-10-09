@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { BasicInfoFields, type SetField } from "@/components/case-form/BasicInfoFields";
 import { DisputeFields } from "@/components/case-form/DisputeFields";
@@ -40,6 +40,9 @@ export function NewCaseView() {
   const [source, setSource] = useState<IntakeSource | null>(null);
   const [includeSource, setIncludeSource] = useState(true);
   const errors = NO_ERRORS;
+  // The draft may arrive after the user kept typing; apply it to the latest form.
+  const formRef = useRef(form);
+  formRef.current = form;
 
   function unmark(key: string) {
     setAi((previous) => {
@@ -65,9 +68,12 @@ export function NewCaseView() {
   }
 
   function handleDraft(result: CaseIntakeResult, from: IntakeSource) {
-    const applied = applyDraft(form, result.draft);
+    const applied = applyDraft(formRef.current, result.draft);
     setForm(applied.form);
-    setAi((previous) => new Set([...previous, ...applied.marks]));
+    setAi((previous) => {
+      const kept = applied.form.parties === formRef.current.parties ? previous : [...previous].filter((key) => !key.startsWith("party:"));
+      return new Set([...kept, ...applied.marks]);
+    });
     setEvents(applied.events);
     setSource(from);
     setIncludeSource(true);
@@ -112,9 +118,10 @@ export function NewCaseView() {
               showClientHint={showClientHint}
               onUpdate={updateParty}
               onAdd={() => setForm((current) => ({ ...current, parties: [...current.parties, newPartyRow("other")] }))}
-              onRemove={(key) =>
-                setForm((current) => ({ ...current, parties: current.parties.filter((party) => party.key !== key) }))
-              }
+              onRemove={(key) => {
+                setForm((current) => ({ ...current, parties: current.parties.filter((party) => party.key !== key) }));
+                unmark(`party:${key}`);
+              }}
             />
           </FormSection>
 

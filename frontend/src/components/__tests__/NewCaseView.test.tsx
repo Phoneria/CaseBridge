@@ -154,4 +154,39 @@ describe("NewCaseView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Taraf 3 satırını kaldır" }));
     expect(screen.getAllByRole("group", { name: /^Taraf \d$/ })).toHaveLength(2);
   });
+
+  it("asks first and keeps typed values the draft leaves null when typing happened during the request", async () => {
+    let resolve!: (value: CaseIntakeResult) => void;
+    extractCaseIntake.mockReturnValue(new Promise<CaseIntakeResult>((r) => (resolve = r)));
+    render(<NewCaseView />);
+    await userEvent.click(screen.getByRole("tab", { name: "Metni yapıştır" }));
+    await userEvent.type(screen.getByLabelText("Belge metni"), "dilekçe metni");
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+    await userEvent.type(screen.getByLabelText("Esas no"), "9/9");
+    await userEvent.type(screen.getByLabelText("Mahkeme"), "Elle mahkeme");
+
+    resolve({ ...RESULT, draft: { ...RESULT.draft, court: null } });
+    expect(await screen.findByText("Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Değiştir" }));
+    expect(screen.getByLabelText("Mahkeme")).toHaveValue("Elle mahkeme");
+    expect(screen.getByLabelText(/^Dava adı/)).toHaveValue("Alacak Davası");
+  });
+
+  it("drops stale party badges when a second draft replaces the parties", async () => {
+    extractCaseIntake.mockResolvedValueOnce(RESULT);
+    render(<NewCaseView />);
+    await fillFromPastedText();
+
+    extractCaseIntake.mockResolvedValueOnce({
+      ...RESULT,
+      draft: { ...RESULT.draft, parties: [{ name: "Gama A.Ş.", role: "plaintiff", counsel_name: null }] },
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Değiştir" }));
+    expect(screen.getAllByRole("group", { name: /^Taraf \d$/ })).toHaveLength(1);
+    expect(screen.getByText("Müvekkilinizi işaretleyin.")).toBeInTheDocument();
+
+    await userEvent.type(screen.getByLabelText(/^Ad/), "x");
+    expect(screen.queryByText("Müvekkilinizi işaretleyin.")).toBeNull();
+  });
 });
