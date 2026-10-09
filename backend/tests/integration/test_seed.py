@@ -14,7 +14,7 @@ from app.db.seed import (
     seed,
 )
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
-from app.models.case import Case, CaseEvent
+from app.models.case import Case, CaseEvent, CaseParty
 from app.models.courtroom import CourtroomActor, CourtroomSession
 from app.models.document import Document
 from app.models.law_firm import LawFirm
@@ -82,3 +82,40 @@ def test_seed_is_idempotent(db_session, monkeypatch, tmp_path):
     assert db_session.query(Document).count() == len(DEMO_DOCUMENTS) + len(TICARI_KIRA_DOCUMENTS) + 2 * len(CASE_EVIDENCE)
     assert db_session.query(CaseEvent).count() == len(DEMO_EVENTS) + len(TICARI_KIRA_EVENTS) + 3 * len(CASE_EVIDENCE)
     assert db_session.query(CourtroomSession).filter_by(prompt_version="showcase-v1").count() == 24
+
+
+def test_seed_gives_every_demo_case_its_client_and_opposing_party(db_session, monkeypatch, tmp_path):
+    import app.db.seed as seed_module
+
+    monkeypatch.setattr(seed_module, "SessionLocal", lambda: db_session)
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)
+    monkeypatch.setattr(seed_module.settings, "storage_dir", str(tmp_path))
+
+    seed()
+    seed()
+
+    cases = db_session.query(Case).all()
+    assert len(cases) == 20
+    for case in cases:
+        parties = [(p.name, p.role, p.is_client) for p in case.parties]
+        expected = [(case.client_name, "other", True)]
+        if case.opposing_party:
+            expected.append((case.opposing_party, "other", False))
+        assert parties == expected
+    assert db_session.query(CaseParty).count() == sum(2 if c.opposing_party else 1 for c in cases)
+
+
+def test_seed_without_demo_data_removes_the_demo_parties_too(db_session, monkeypatch, tmp_path):
+    import app.db.seed as seed_module
+
+    monkeypatch.setattr(seed_module, "SessionLocal", lambda: db_session)
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)
+    monkeypatch.setattr(seed_module.settings, "storage_dir", str(tmp_path))
+    seed()
+    assert db_session.query(CaseParty).count() > 0
+
+    monkeypatch.setattr(seed_module.settings, "seed_demo_data", False)
+    seed()
+
+    assert db_session.query(Case).count() == 0
+    assert db_session.query(CaseParty).count() == 0

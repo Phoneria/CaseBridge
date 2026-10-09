@@ -8,6 +8,7 @@ from app.db.session import get_db
 from app.models.case import CaseOutcome, CaseStatus, CaseType
 from app.models.user import User, UserRole
 from app.schemas.case import CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseOut, CaseUpdate
+from app.services.case_parties import InvalidPartiesError
 from app.services.case_service import CaseService, DuplicateCaseNumberError
 
 router = APIRouter(prefix="/cases", tags=["cases"])
@@ -45,6 +46,8 @@ def create_case(
         return CaseService(db).create_case(current_user.law_firm_id, payload)
     except DuplicateCaseNumberError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
+    except InvalidPartiesError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
 @router.get("", response_model=list[CaseOut])
@@ -102,7 +105,10 @@ def update_case(
         raise HTTPException(status_code=403, detail="Use admin case assignment to change the lawyer")
     service = CaseService(db)
     case = _get_owned_case_or_404(service, case_id, law_firm_id)
-    return service.update_case(case, payload)
+    try:
+        return service.update_case(case, payload)
+    except InvalidPartiesError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
 @router.post("/{case_id}/archive", response_model=CaseOut)

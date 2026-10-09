@@ -6,7 +6,16 @@ from sqlalchemy.orm import Session
 from app.models.case import Case, CaseEvent, CaseOutcome, CaseStatus, CaseType
 from app.repositories.case_event_repository import CaseEventRepository
 from app.repositories.case_repository import CaseRepository
-from app.schemas.case import CaseCreate, CaseEventCreate, CaseUpdate
+from app.schemas.case import CaseCreate, CaseEventCreate, CasePartyIn, CaseUpdate
+from app.services.case_parties import (
+    PartyData,
+    derive_client_name,
+    derive_client_role,
+    derive_opposing_party,
+    legacy_parties,
+    party_models,
+    require_client,
+)
 
 
 class DuplicateCaseNumberError(Exception):
@@ -22,8 +31,30 @@ class CaseService:
         self.cases = CaseRepository(db)
         self.events = CaseEventRepository(db)
 
+    @staticmethod
+    def _party_data(parties: list[CasePartyIn]) -> list[PartyData]:
+        data = [
+            PartyData(name=p.name, role=p.role.value, is_client=p.is_client, counsel_name=p.counsel_name)
+            for p in parties
+        ]
+        require_client(data)
+        return data
+
     def create_case(self, law_firm_id: str, payload: CaseCreate) -> Case:
-        case = Case(law_firm_id=law_firm_id, **payload.model_dump(exclude_unset=True))
+        """With `parties` the legacy client_name / opposing_party / client_role
+        are derived from them; without (old clients) the parties are built from
+        client_name / opposing_party."""
+        fields = payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"})
+        client_role = payload.client_role.value if payload.client_role else None
+        if payload.parties is not None:
+            parties = self._party_data(payload.parties)
+            client_role = client_role or derive_client_role(parties)
+            fields["client_name"] = derive_client_name(parties)
+            fields["opposing_party"] = derive_opposing_party(parties, client_role)
+        else:
+            parties = legacy_parties(fields["client_name"], fields.get("opposing_party"))
+        case = Case(law_firm_id=law_firm_id, client_role=client_role, **fields)
+        case.parties = party_models(parties, law_firm_id)
         try:
             return self.cases.create(case)
         except IntegrityError as exc:
@@ -64,8 +95,20 @@ class CaseService:
         )
 
     def update_case(self, case: Case, payload: CaseUpdate) -> Case:
-        for field, value in payload.model_dump(exclude_unset=True).items():
+        """`parties`, when given, replaces the whole list and re-derives the
+        legacy names and (unless sent explicitly) client_role; when omitted the
+        parties stay as they are."""
+        for field, value in payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"}).items():
             setattr(case, field, value)
+        if "client_role" in payload.model_fields_set:
+            case.client_role = payload.client_role.value if payload.client_role else None
+        if payload.parties is not None:
+            parties = self._party_data(payload.parties)
+            if payload.client_role is None:
+                case.client_role = derive_client_role(parties)
+            case.client_name = derive_client_name(parties)
+            case.opposing_party = derive_opposing_party(parties, case.client_role)
+            case.parties = party_models(parties, case.law_firm_id)
         return self.cases.save(case)
 
     def archive_case(self, case: Case) -> Case:
