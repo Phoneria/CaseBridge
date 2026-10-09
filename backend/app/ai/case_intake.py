@@ -107,20 +107,21 @@ def _clean_date(value: Any) -> Optional[date]:
 
 def _parse_number(value: Any) -> Optional[float]:
     """Numbers, or strings in Turkish ("1.250.000,50") or plain ("1250000.5") notation."""
-    if isinstance(value, (int, float)):
-        return float(value)
-    if not isinstance(value, str):
-        return None
-    text = value.strip()
-    if "," in text:
-        if text.count(",") > 1:
-            return None
-        text = text.replace(".", "").replace(",", ".")
-    elif text.count(".") > 1 or re.fullmatch(r"\d{1,3}\.\d{3}", text):
-        text = text.replace(".", "")
     try:
+        if isinstance(value, (int, float)):
+            return float(value)
+        if not isinstance(value, str):
+            return None
+        text = value.strip()
+        if "," in text:
+            # English grouping ("1,250.50") has its last dot after the comma: ambiguous, so null.
+            if text.count(",") > 1 or text.rfind(".") > text.rfind(","):
+                return None
+            text = text.replace(".", "").replace(",", ".")
+        elif text.count(".") > 1 or re.fullmatch(r"\d{1,3}\.\d{3}", text):
+            text = text.replace(".", "")
         return float(text)
-    except ValueError:
+    except (ValueError, OverflowError):
         return None
 
 

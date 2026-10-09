@@ -199,6 +199,9 @@ def test_nested_lowercase_and_spaced_tags_cannot_close_the_untrusted_block(attac
         ("1,2,3", None),
         ("", None),
         (150000, 150000),
+        ("1,250.50", None),
+        ("1,250.5", None),
+        ("1" + "0" * 400, None),
     ],
 )
 def test_turkish_formatted_case_values(raw, expected):
@@ -215,3 +218,8 @@ def test_the_mock_provider_returns_a_deterministic_valid_draft():
     assert len(draft.events) == 2
     assert all(event.event_date for event in draft.events)
     assert provider.calls and provider.calls[0]["user_prompt"] == "u"
+
+
+def test_a_huge_integer_case_value_becomes_null_instead_of_overflowing():
+    draft = parse_structured_output('{"case_value": 1' + "0" * 400 + "}", CaseIntakeDraft)
+    assert draft.case_value is None
