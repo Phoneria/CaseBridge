@@ -32,7 +32,13 @@ from app.models.document import Document, DocumentType
 from app.models.law_firm import LawFirm
 from app.models.task import Task, TaskStatus
 from app.models.user import User
-from app.services.case_parties import legacy_parties, party_models
+from app.services.case_parties import (
+    PartyData,
+    derive_client_name,
+    derive_opposing_party,
+    legacy_parties,
+    party_models,
+)
 from app.services.text_extraction import extract_text
 
 _EXT = {".pdf": DocumentType.PDF, ".docx": DocumentType.DOCX, ".txt": DocumentType.TXT}
@@ -99,7 +105,7 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
         case.assigned_lawyer_id = None
 
     names_before = (case.client_name, case.opposing_party)
-    untouched = created or _is_untouched_legacy(case)
+    untouched = False if created else _is_untouched_legacy(case)
     for field in _CASE_FIELDS:
         if field in item:
             setattr(case, field, item[field])
@@ -108,6 +114,10 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
         # the app survive a re-import, only untouched legacy parties follow
         # a change of those names.
         case.parties = party_models(legacy_parties(case.client_name, case.opposing_party), firm.id)
+    else:
+        kept = [PartyData(p.name, p.role, p.is_client, p.counsel_name) for p in case.parties]
+        case.client_name = derive_client_name(kept) or case.client_name
+        case.opposing_party = derive_opposing_party(kept, case.client_role)
     case.case_type = _enum(CaseType, item.get("case_type"), CaseType.DIGER)
     case.status = _enum(CaseStatus, item.get("status"), CaseStatus.DEVAM_EDEN)
     case.outcome = _enum(CaseOutcome, item.get("outcome"), CaseOutcome.ONGOING)

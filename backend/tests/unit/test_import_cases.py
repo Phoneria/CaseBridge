@@ -204,6 +204,9 @@ def test_reimport_keeps_parties_edited_through_the_api(db_session, seeded, tmp_p
         ("Davalı Şirket", "defendant", False, 1),
         ("İkinci Davalı", "defendant", False, 2),
     ]
+    db_session.refresh(case)
+    assert case.client_name == "Davacı (anonim)"
+    assert case.opposing_party == "Davalı Şirket, İkinci Davalı"
 
 
 def test_reimport_with_changed_names_rewrites_untouched_legacy_parties(db_session, seeded, tmp_path):
