@@ -8,10 +8,22 @@ from app.models.courtroom import CourtroomRole, CourtroomScenario, ScenarioDiffi
 from app.models.document import Document
 
 
+_MAX_RECORDED_TEXT = 2000
+
+
+def _party_names(case: Case, role: str) -> str:
+    return ", ".join(party.name for party in case.parties if party.role == role)[:255]
+
+
 def scenario_from_case(db: Session, case: Case, chosen_role: CourtroomRole) -> CourtroomScenario:
-    """Use recorded fields only; a training snapshot is not a claim about the real hearing."""
-    plaintiff = case.client_name if chosen_role == CourtroomRole.PLAINTIFF else (case.opposing_party or "Karşı taraf")
-    defendant = (case.opposing_party or "Karşı taraf") if chosen_role == CourtroomRole.PLAINTIFF else case.client_name
+    """Use recorded fields only; a training snapshot is not a claim about the real hearing.
+
+    Plaintiff/defendant names come from the case parties; a side without any
+    party falls back to client_name / opposing_party as before."""
+    legacy_plaintiff = case.client_name if chosen_role == CourtroomRole.PLAINTIFF else (case.opposing_party or "Karşı taraf")
+    legacy_defendant = (case.opposing_party or "Karşı taraf") if chosen_role == CourtroomRole.PLAINTIFF else case.client_name
+    plaintiff = _party_names(case, "plaintiff") or legacy_plaintiff
+    defendant = _party_names(case, "defendant") or legacy_defendant
     recorded = [
         f"Uygulamadaki dosya numarası {case.case_number}; dava adı {case.case_name}.",
         f"Kayıtlı mahkeme: {case.court or 'belirtilmemiş'}.",
@@ -20,6 +32,18 @@ def scenario_from_case(db: Session, case: Case, chosen_role: CourtroomRole) -> C
     ]
     if case.next_hearing_date:
         recorded.append(f"Uygulamadaki sonraki duruşma tarihi: {case.next_hearing_date:%d.%m.%Y}.")
+    if case.court_file_number:
+        recorded.append(f"Esas numarası: {case.court_file_number}.")
+    if case.claim:
+        recorded.append(f"Kayıtlı talep / dava konusu: {case.claim[:_MAX_RECORDED_TEXT]}")
+    if case.facts_summary:
+        recorded.append(f"Kayıtlı olay özeti: {case.facts_summary[:_MAX_RECORDED_TEXT]}")
+    plaintiff_facts = list(recorded)
+    defendant_facts = list(recorded)
+    if case.plaintiff_position:
+        plaintiff_facts.append(f"Davacı tarafın kayıtlı iddiası: {case.plaintiff_position[:_MAX_RECORDED_TEXT]}")
+    if case.defendant_position:
+        defendant_facts.append(f"Davalı tarafın kayıtlı savunması: {case.defendant_position[:_MAX_RECORDED_TEXT]}")
     scenario = CourtroomScenario(
         slug=f"case-hearing-{uuid4().hex}",
         law_firm_id=case.law_firm_id,
@@ -34,8 +58,8 @@ def scenario_from_case(db: Session, case: Case, chosen_role: CourtroomRole) -> C
         learning_objectives=["Kayıtlı bilgileri doğrulamak", "Delil boşluklarını ayırmak", "Karşı savunmaya somut yanıt vermek"],
         public_facts=recorded,
         disputed_issues=["Tarafların iddia ve savunmaları hangi asıl belgelere dayanıyor?", "Kayıttaki açıklamanın doğrulanmamış kısımları neler?", "Hangi deliller karşı tarafça tartışılabilir?"],
-        plaintiff_private_brief={"objective": "Davacı tarafı adına kayıtlı talebi somut, doğrulanmış delille savunmak.", "known_facts": recorded, "strategy_notes": ["Eksik belgeleri mevcutmuş gibi sunma."]},
-        defendant_private_brief={"objective": "Davalı tarafı adına kayıtlı iddiayı ve delillerin yeterliliğini sorgulamak.", "known_facts": recorded, "strategy_notes": ["Kayıtta olmayan vakıaları gerçekmiş gibi ileri sürme."]},
+        plaintiff_private_brief={"objective": "Davacı tarafı adına kayıtlı talebi somut, doğrulanmış delille savunmak.", "known_facts": plaintiff_facts, "strategy_notes": ["Eksik belgeleri mevcutmuş gibi sunma."]},
+        defendant_private_brief={"objective": "Davalı tarafı adına kayıtlı iddiayı ve delillerin yeterliliğini sorgulamak.", "known_facts": defendant_facts, "strategy_notes": ["Kayıtta olmayan vakıaları gerçekmiş gibi ileri sürme."]},
         judge_instructions={"focus": ["kayıtlı vakıa ve varsayım ayrımı", "delil yeterliliği", "tutarlı karşı cevap"], "simulation_only": True},
         legal_context=["Bu dosya provası eğitim amaçlıdır. Kayıtlı sonuç bile gerçek mahkeme evrakıyla ayrıca doğrulanmalıdır."],
     )

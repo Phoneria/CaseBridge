@@ -323,3 +323,109 @@ def test_context_version_is_present_and_stable():
 
     assert isinstance(CONTEXT_BUILDER_VERSION, str)
     assert CONTEXT_BUILDER_VERSION
+
+
+
+def _add_parties(db_session, firm, case):
+    from app.models.case import CaseParty
+
+    case.parties = [
+        CaseParty(law_firm_id=firm.id, name="Ahmet Yılmaz", role="plaintiff", is_client=True, counsel_name="Av. Ece Kaya", sort_order=0),
+        CaseParty(law_firm_id=firm.id, name="Zeynep Kaya", role="defendant", is_client=False, sort_order=1),
+    ]
+    db_session.flush()
+
+
+def test_context_version_is_bumped_for_the_intake_fields():
+    from app.ai.context_builder import CONTEXT_BUILDER_VERSION
+
+    assert CONTEXT_BUILDER_VERSION == "2"
+
+
+def test_includes_the_case_intake_fields(db_session):
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(
+        db_session,
+        firm,
+        client_role="plaintiff",
+        court_file_number="2026/45 Esas",
+        claim="Tahliye talebi",
+        facts_summary="Kira üç aydır ödenmedi.",
+        plaintiff_position="İhtar çekildi.",
+        defendant_position="Ödeme yapıldı.",
+    )
+
+    context = CaseContextBuilder(db_session).build(case)
+
+    assert context["client_role"] == "Davacı"
+    assert context["court_file_number"] == "2026/45 Esas"
+    assert context["claim"] == "Tahliye talebi"
+    assert context["facts_summary"] == "Kira üç aydır ödenmedi."
+    assert context["plaintiff_position"] == "İhtar çekildi."
+    assert context["defendant_position"] == "Ödeme yapıldı."
+
+
+def test_intake_fields_are_empty_strings_when_unknown(db_session):
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(db_session, firm)
+
+    context = CaseContextBuilder(db_session).build(case)
+
+    for key in ("client_role", "court_file_number", "claim", "facts_summary", "plaintiff_position", "defendant_position"):
+        assert context[key] == ""
+
+
+def test_renders_every_party_with_role_counsel_and_client_flag(db_session):
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(db_session, firm)
+    _add_parties(db_session, firm, case)
+
+    parties = CaseContextBuilder(db_session).build(case)["parties"].splitlines()
+
+    assert parties == [
+        "Ahmet Yılmaz · Davacı · vekil: Av. Ece Kaya · müvekkilimiz: evet",
+        "Zeynep Kaya · Davalı · vekil: yok · müvekkilimiz: hayır",
+    ]
+
+
+def test_a_case_without_parties_says_so(db_session):
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(db_session, firm)
+
+    assert CaseContextBuilder(db_session).build(case)["parties"] == "(kayıtlı taraf yok)"
+
+
+def test_long_intake_texts_are_truncated_with_a_marker(db_session):
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(db_session, firm, claim="x" * 5000, plaintiff_position="y" * 5000)
+
+    context = CaseContextBuilder(db_session, max_chars=1000).build(case)
+
+    assert len(context["claim"]) <= 1000
+    assert len(context["plaintiff_position"]) <= 1000
+    assert "truncated" in context["claim"].lower()
+
+
+def test_intake_fields_reach_the_analysis_prompt_context(db_session):
+    from app.ai.agents.common import format_case_context
+    from app.ai.context_builder import CaseContextBuilder
+
+    firm, _ = _make_firm_and_user(db_session)
+    case = _make_case(db_session, firm, claim="Tahliye talebi", defendant_position="Ödeme yapıldı.")
+    _add_parties(db_session, firm, case)
+
+    text = format_case_context(CaseContextBuilder(db_session).build(case))
+
+    assert "claim: Tahliye talebi" in text
+    assert "defendant_position: Ödeme yapıldı." in text
+    assert "Ahmet Yılmaz · Davacı" in text
