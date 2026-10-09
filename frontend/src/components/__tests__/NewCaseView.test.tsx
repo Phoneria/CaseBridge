@@ -4,11 +4,23 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const extractCaseIntake = vi.fn();
+const createCase = vi.fn();
+const addCaseEvent = vi.fn();
+const uploadDocument = vi.fn();
+const getMe = vi.fn();
+const listAdminLawyers = vi.fn();
 vi.mock("@/lib/api", () => ({
   extractCaseIntake: (...args: unknown[]) => extractCaseIntake(...args),
+  createCase: (...args: unknown[]) => createCase(...args),
+  addCaseEvent: (...args: unknown[]) => addCaseEvent(...args),
+  uploadDocument: (...args: unknown[]) => uploadDocument(...args),
+  getMe: (...args: unknown[]) => getMe(...args),
+  listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
 }));
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
-import { resetNav } from "@/test/navigation";
+import { nav, resetNav } from "@/test/navigation";
+
+import { ApiError } from "@/lib/apiError";
 
 import { NewCaseView } from "@/components/NewCaseView";
 import type { CaseIntakeResult } from "@/types";
@@ -39,8 +51,17 @@ const RESULT: CaseIntakeResult = {
   },
 };
 
+const scrollIntoView = vi.fn();
+
 beforeEach(() => {
-  extractCaseIntake.mockReset();
+  for (const mock of [extractCaseIntake, createCase, addCaseEvent, uploadDocument, getMe, listAdminLawyers, scrollIntoView]) {
+    mock.mockReset();
+  }
+  getMe.mockResolvedValue({ id: "u1", role: "lawyer" });
+  createCase.mockResolvedValue({ id: "new-1" });
+  addCaseEvent.mockResolvedValue({});
+  uploadDocument.mockResolvedValue({});
+  Element.prototype.scrollIntoView = scrollIntoView;
   resetNav();
 });
 
@@ -204,5 +225,206 @@ describe("NewCaseView", () => {
     await userEvent.keyboard(" 3.");
     expect(screen.getByLabelText("Mahkeme")).toHaveValue("Ankara 3.");
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+  });
+});
+
+async function fillRequired() {
+  await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/9 E.");
+  await userEvent.type(screen.getByLabelText(/^Dava adı/), "Kira Alacağı");
+  const first = screen.getByRole("group", { name: "Taraf 1" });
+  await userEvent.type(within(first).getByLabelText(/^Ad/), "Alfa Ticaret A.Ş.");
+  await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+}
+
+const submit = () => userEvent.click(screen.getByRole("button", { name: "Davayı oluştur" }));
+
+describe("NewCaseView create flow", () => {
+  it("blocks an incomplete form, shows each error and scrolls to the first section with one", async () => {
+    render(<NewCaseView />);
+    await submit();
+
+    expect(createCase).not.toHaveBeenCalled();
+    expect(screen.getByText("Dava no gerekli.")).toBeInTheDocument();
+    expect(screen.getByText("Dava adı gerekli.")).toBeInTheDocument();
+    expect(screen.getByText("En az bir taraf müvekkil olarak işaretlenmeli.")).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect((scrollIntoView.mock.instances[0] as HTMLElement).id).toBe("bolum-temel");
+  });
+
+  it("scrolls to the parties section when only the client mark is missing", async () => {
+    render(<NewCaseView />);
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/9");
+    await userEvent.type(screen.getByLabelText(/^Dava adı/), "Kira");
+    await userEvent.type(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/), "Alfa");
+    await submit();
+    expect(createCase).not.toHaveBeenCalled();
+    expect((scrollIntoView.mock.instances[0] as HTMLElement).id).toBe("bolum-taraflar");
+  });
+
+  it("creates a manually entered case with parties only and opens it", async () => {
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/new-1"));
+    expect(createCase).toHaveBeenCalledWith({
+      case_number: "2026/9 E.",
+      case_name: "Kira Alacağı",
+      case_type: "diger",
+      status: "devam_eden",
+      parties: [{ name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, counsel_name: null }],
+    });
+    expect(addCaseEvent).not.toHaveBeenCalled();
+    expect(uploadDocument).not.toHaveBeenCalled();
+  });
+
+  it("creates the case, then the chosen events, then the source text and extra documents in order", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    const calls: string[] = [];
+    createCase.mockImplementation(async () => {
+      calls.push("case");
+      return { id: "c9" };
+    });
+    addCaseEvent.mockImplementation(async (_id: string, payload: { title: string }) => {
+      calls.push(`event:${payload.title}`);
+    });
+    uploadDocument.mockImplementation(async (_id: string, file: File) => {
+      calls.push(`doc:${file.name}`);
+    });
+
+    render(<NewCaseView />);
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
+    await fillFromPastedText();
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await userEvent.upload(screen.getByLabelText("Belge ekle"), new File(["ek"], "ek-belge.pdf", { type: "application/pdf" }));
+    await submit();
+
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/c9"));
+    expect(calls).toEqual(["case", "event:Dava açıldı", "event:İlk duruşma", "doc:yapistirilan-metin.txt", "doc:ek-belge.pdf"]);
+    expect(createCase.mock.calls[0][0]).toMatchObject({
+      case_number: "2026/145",
+      case_name: "Alacak Davası",
+      case_type: "ticaret_hukuku",
+      court: "İstanbul 3. Asliye Ticaret Mahkemesi",
+      court_file_number: "2026/145 E.",
+      case_value: 150000,
+      opening_date: "2026-03-02",
+      next_hearing_date: "2026-05-12",
+      claim: "150.000 TL alacağın tahsili",
+      facts_summary: "Fatura bedeli ödenmedi.",
+      plaintiff_position: "Mal teslim edildi.",
+      defendant_position: "Mal ayıplıydı.",
+      parties: [
+        { name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, counsel_name: "Av. Ece Kaya" },
+        { name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, counsel_name: null },
+      ],
+    });
+    expect(addCaseEvent).toHaveBeenCalledWith("c9", {
+      event_date: "2026-03-02",
+      title: "Dava açıldı",
+      event_type: "filing",
+    });
+  });
+
+  it("skips unchecked events and the source document when they are switched off", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<NewCaseView />);
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
+    await fillFromPastedText();
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await userEvent.click(screen.getByLabelText(/İlk duruşma/));
+    await userEvent.click(screen.getByLabelText("Kaynak belgeyi davaya ekle"));
+    await submit();
+
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/new-1"));
+    expect(addCaseEvent).toHaveBeenCalledTimes(1);
+    expect(addCaseEvent.mock.calls[0][1].title).toBe("Dava açıldı");
+    expect(uploadDocument).not.toHaveBeenCalled();
+  });
+
+  it("still opens the case and reports how many events and documents could not be added", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    addCaseEvent.mockRejectedValueOnce(new Error("boom")).mockResolvedValueOnce({});
+    uploadDocument.mockRejectedValueOnce(new Error("boom"));
+    render(<NewCaseView />);
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
+    await fillFromPastedText();
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await submit();
+
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/new-1?eklenemeyen=2"));
+    expect(addCaseEvent).toHaveBeenCalledTimes(2);
+    expect(uploadDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it("explains a duplicate case number and stays on the page", async () => {
+    createCase.mockRejectedValueOnce(new ApiError("Case number already exists", 409));
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Bu dava numarası zaten kayıtlı.");
+    expect(nav.push).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Davayı oluştur" })).toBeEnabled();
+  });
+
+  it("shows other creation errors with their detail", async () => {
+    createCase.mockRejectedValueOnce(new ApiError("Sunucu hatası", 500));
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Dava oluşturulamadı: Sunucu hatası");
+    expect(addCaseEvent).not.toHaveBeenCalled();
+  });
+
+  it("hides the lawyer select from lawyers", async () => {
+    render(<NewCaseView />);
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+    expect(screen.queryByLabelText(/^Sorumlu avukat/)).toBeNull();
+    expect(listAdminLawyers).not.toHaveBeenCalled();
+  });
+
+  it("requires an admin to pick an active lawyer and sends the choice", async () => {
+    getMe.mockResolvedValue({ id: "a1", role: "admin" });
+    listAdminLawyers.mockResolvedValue([
+      { id: "l1", full_name: "Av. Ece Kaya", department: "Ticaret", is_active: true },
+      { id: "l2", full_name: "Av. Eski", department: "Ceza", is_active: false },
+    ]);
+    render(<NewCaseView />);
+    const select = await screen.findByLabelText(/^Sorumlu avukat/);
+    expect(within(select).queryByText(/Av. Eski/)).toBeNull();
+
+    await fillRequired();
+    await submit();
+    expect(screen.getByText("Sorumlu avukat seçin.")).toBeInTheDocument();
+    expect(createCase).not.toHaveBeenCalled();
+    expect((scrollIntoView.mock.instances[0] as HTMLElement).id).toBe("bolum-belgeler");
+
+    await userEvent.selectOptions(select, "l1");
+    await submit();
+    await waitFor(() => expect(createCase).toHaveBeenCalled());
+    expect(createCase.mock.calls[0][0].assigned_lawyer_id).toBe("l1");
+  });
+
+  it("warns before leaving with unsaved input but not from a pristine form", async () => {
+    render(<NewCaseView />);
+    const pristine = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(pristine);
+    expect(pristine.defaultPrevented).toBe(false);
+
+    await userEvent.type(screen.getByLabelText(/^Dava adı/), "Kira");
+    const dirty = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(dirty);
+    expect(dirty.defaultPrevented).toBe(true);
+  });
+
+  it("does not warn after the case was created", async () => {
+    render(<NewCaseView />);
+    await fillRequired();
+    await submit();
+    await waitFor(() => expect(nav.push).toHaveBeenCalled());
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
   });
 });

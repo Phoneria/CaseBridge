@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { BasicInfoFields, type SetField } from "@/components/case-form/BasicInfoFields";
 import { DisputeFields } from "@/components/case-form/DisputeFields";
@@ -10,17 +11,23 @@ import { IntakeFillBox, type IntakeSource } from "@/components/case-form/IntakeF
 import { PartiesFields } from "@/components/case-form/PartiesFields";
 import {
   applyDraft,
+  buildCasePayload,
   clientRoleOf,
   emptyCaseForm,
+  firstErrorSection,
+  hasErrors,
   hasFillableContent,
   newPartyRow,
+  validateCaseForm,
   type CaseFormState,
   type FormErrors,
   type PartyRow,
   type SectionId,
   type SuggestedEvent,
 } from "@/lib/caseIntake";
-import type { CaseIntakeResult } from "@/types";
+import { addCaseEvent, createCase, getMe, listAdminLawyers, uploadDocument } from "@/lib/api";
+import { ApiError } from "@/lib/apiError";
+import type { AppUser, CaseIntakeResult } from "@/types";
 
 const SECTIONS: { id: SectionId; title: string }[] = [
   { id: "temel", title: "Temel bilgiler ve mahkeme" },
@@ -31,18 +38,64 @@ const SECTIONS: { id: SectionId; title: string }[] = [
 
 const NO_ERRORS: FormErrors = { partyNames: {} };
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error && error.message ? error.message : "Bilinmeyen hata.";
+}
+
 /** The "Yeni dava" page: a sectioned form that can be pre-filled from a document. */
 export function NewCaseView() {
+  const router = useRouter();
   const [form, setForm] = useState<CaseFormState>(emptyCaseForm);
   const [ai, setAi] = useState<ReadonlySet<string>>(new Set());
   const [events, setEvents] = useState<SuggestedEvent[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [source, setSource] = useState<IntakeSource | null>(null);
   const [includeSource, setIncludeSource] = useState(true);
-  const errors = NO_ERRORS;
+  const [errors, setErrors] = useState<FormErrors>(NO_ERRORS);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [lawyers, setLawyers] = useState<Pick<AppUser, "id" | "full_name" | "department">[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const allowLeave = useRef(false);
   // The draft may arrive after the user kept typing; apply it to the latest form.
   const formRef = useRef(form);
   formRef.current = form;
+
+  useEffect(() => {
+    let cancelled = false;
+    getMe()
+      .then(async (me) => {
+        if (me.role !== "admin") return;
+        const all = await listAdminLawyers();
+        if (cancelled) return;
+        setIsAdmin(true);
+        setLawyers(all.filter((lawyer) => lawyer.is_active));
+      })
+      .catch(() => {
+        if (!cancelled) setSubmitError("Avukat listesi yüklenemedi.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const dirty =
+    hasFillableContent(form) ||
+    form.case_number.trim() !== "" ||
+    form.description.trim() !== "" ||
+    files.length > 0 ||
+    source !== null;
+
+  useEffect(() => {
+    if (!dirty) return;
+    function warn(event: BeforeUnloadEvent) {
+      if (allowLeave.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   function unmark(key: string) {
     setAi((previous) => {
@@ -80,6 +133,58 @@ export function NewCaseView() {
     setIncludeSource(true);
   }
 
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (submitting) return;
+    setSubmitError(null);
+    const found = validateCaseForm(form, { requireLawyer: isAdmin });
+    setErrors(found);
+    if (hasErrors(found)) {
+      const section = firstErrorSection(found);
+      if (section) document.getElementById(`bolum-${section}`)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    setSubmitting(true);
+    let created;
+    try {
+      created = await createCase(buildCasePayload(form));
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError && error.status === 409
+          ? "Bu dava numarası zaten kayıtlı."
+          : `Dava oluşturulamadı: ${errorMessage(error)}`,
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    let failed = 0;
+    for (const suggestion of events.filter((item) => item.checked)) {
+      try {
+        await addCaseEvent(created.id, {
+          event_date: suggestion.event_date,
+          title: suggestion.title,
+          event_type: suggestion.event_type,
+          ...(suggestion.description ? { description: suggestion.description } : {}),
+        });
+      } catch {
+        failed += 1;
+      }
+    }
+    const documents = [...(source && includeSource ? [source.file] : []), ...files];
+    for (const document_ of documents) {
+      try {
+        await uploadDocument(created.id, document_);
+      } catch {
+        failed += 1;
+      }
+    }
+
+    allowLeave.current = true;
+    router.push(failed ? `/davalar/${created.id}?eklenemeyen=${failed}` : `/davalar/${created.id}`);
+  }
+
   const clientMarked = form.parties.some((party) => party.is_client);
   const showClientHint = !clientMarked && [...ai].some((key) => key.startsWith("party:"));
 
@@ -92,7 +197,7 @@ export function NewCaseView() {
 
       <IntakeFillBox hasContent={hasFillableContent(form)} onDraft={handleDraft} />
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[13rem_minmax(0,1fr)]">
+      <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 gap-5 lg:grid-cols-[13rem_minmax(0,1fr)]">
         <nav aria-label="Bölümler" className="flex flex-wrap gap-2 lg:sticky lg:top-4 lg:flex-col lg:self-start">
           {SECTIONS.map((section) => (
             <a
@@ -135,8 +240,9 @@ export function NewCaseView() {
               nextHearingDate={form.next_hearing_date}
               ai={ai}
               onNextHearingDate={(value) => setField("next_hearing_date", value)}
-              lawyers={null}
+              lawyers={isAdmin ? lawyers : null}
               lawyerId={form.assigned_lawyer_id}
+              lawyerError={errors.assigned_lawyer_id}
               onLawyer={(id) => setField("assigned_lawyer_id", id)}
               files={files}
               onAddFiles={(added) => setFiles((current) => [...current, ...added])}
@@ -150,8 +256,23 @@ export function NewCaseView() {
               }
             />
           </FormSection>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50"
+            >
+              {submitting ? "Oluşturuluyor…" : "Davayı oluştur"}
+            </button>
+            {submitError && (
+              <p role="alert" className="text-sm text-red-600">
+                {submitError}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
