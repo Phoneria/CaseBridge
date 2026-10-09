@@ -70,6 +70,13 @@ def _store(firm_id: str, case_id: str, filename: str, raw: bytes) -> str:
     return path
 
 
+def _is_untouched_legacy(case: Case) -> bool:
+    current = [(p.name, p.role, p.is_client, p.counsel_name) for p in case.parties]
+    legacy = [(p.name, p.role, p.is_client, p.counsel_name)
+              for p in legacy_parties(case.client_name, case.opposing_party)]
+    return current == legacy
+
+
 def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_precedent: bool) -> tuple[bool, int]:
     for key in ("case_number", "case_name", "client_name", "case_type"):
         if not item.get(key):
@@ -92,12 +99,14 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
         case.assigned_lawyer_id = None
 
     names_before = (case.client_name, case.opposing_party)
+    untouched = created or _is_untouched_legacy(case)
     for field in _CASE_FIELDS:
         if field in item:
             setattr(case, field, item[field])
-    if created or names_before != (case.client_name, case.opposing_party):
+    if created or (untouched and names_before != (case.client_name, case.opposing_party)):
         # Manifests only know client_name / opposing_party; parties edited in
-        # the app survive a re-import until those names change.
+        # the app survive a re-import, only untouched legacy parties follow
+        # a change of those names.
         case.parties = party_models(legacy_parties(case.client_name, case.opposing_party), firm.id)
     case.case_type = _enum(CaseType, item.get("case_type"), CaseType.DIGER)
     case.status = _enum(CaseStatus, item.get("status"), CaseStatus.DEVAM_EDEN)

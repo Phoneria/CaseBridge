@@ -98,13 +98,14 @@ class CaseService:
         """`parties`, when given, replaces the whole list and re-derives the
         legacy names and (unless sent explicitly) client_role; when omitted the
         parties stay as they are."""
+        parties = self._party_data(payload.parties) if payload.parties is not None else None
         for field, value in payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"}).items():
             setattr(case, field, value)
-        if "client_role" in payload.model_fields_set:
+        explicit_role = "client_role" in payload.model_fields_set
+        if explicit_role:
             case.client_role = payload.client_role.value if payload.client_role else None
-        if payload.parties is not None:
-            parties = self._party_data(payload.parties)
-            if payload.client_role is None:
+        if parties is not None:
+            if not explicit_role:
                 case.client_role = derive_client_role(parties)
             case.client_name = derive_client_name(parties)
             case.opposing_party = derive_opposing_party(parties, case.client_role)

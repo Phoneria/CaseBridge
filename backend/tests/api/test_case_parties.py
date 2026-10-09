@@ -264,3 +264,37 @@ def test_precedents_expose_their_parties(client, db_session, two_firms_two_users
     body = client.get(f"/precedents/{precedent.id}", headers=headers).json()
 
     assert [p["name"] for p in body["parties"]] == ["Davacı (anonim)", "Davalı Şirket"]
+
+
+def test_patch_explicit_null_client_role_with_parties_clears_it(client, two_firms_two_users):
+    headers = _headers(client, two_firms_two_users)
+    created = _post(client, headers, parties=[_party("A", "plaintiff", True)]).json()
+    assert created["client_role"] == "plaintiff"
+    body = client.patch(
+        f"/cases/{created['id']}",
+        json={"client_role": None, "parties": [_party("A", "plaintiff", True), _party("B", "defendant")]},
+        headers=headers,
+    ).json()
+    assert body["client_role"] is None
+    assert body["opposing_party"] == "B"
+
+
+def test_rejected_patch_does_not_mutate_the_case_object(db_session, two_firms_two_users):
+    import pytest
+    from app.schemas.case import CasePartyIn, CaseUpdate
+    from app.services.case_parties import InvalidPartiesError
+    from app.services.case_service import CaseService
+
+    firm = two_firms_two_users["firm_a"]
+    case = Case(law_firm_id=firm.id, case_number="Z/1", case_name="Ad", client_name="A", case_type="diger")
+    db_session.add(case)
+    db_session.commit()
+
+    with pytest.raises(InvalidPartiesError):
+        CaseService(db_session).update_case(
+            case, CaseUpdate(case_name="Değişti", claim="x", parties=[CasePartyIn(name="C", role="plaintiff")])
+        )
+
+    assert case.case_name == "Ad"
+    assert case.claim is None
+    assert not db_session.dirty

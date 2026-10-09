@@ -182,3 +182,35 @@ def test_reimport_with_changed_names_resets_the_parties(db_session, seeded, tmp_
     import_folder(str(tmp_path), db=db_session)
 
     assert _party_rows(db_session) == [("Yeni Müvekkil", "other", True, 0)]
+
+
+def test_reimport_keeps_parties_edited_through_the_api(db_session, seeded, tmp_path):
+    from app.schemas.case import CasePartyIn, CaseUpdate
+    from app.services.case_service import CaseService
+
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    CaseService(db_session).update_case(case, CaseUpdate(parties=[
+        CasePartyIn(name="Davacı (anonim)", role="plaintiff", is_client=True),
+        CasePartyIn(name="Davalı Şirket", role="defendant"),
+        CasePartyIn(name="İkinci Davalı", role="defendant", counsel_name="Av. Can"),
+    ]))
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [
+        ("Davacı (anonim)", "plaintiff", True, 0),
+        ("Davalı Şirket", "defendant", False, 1),
+        ("İkinci Davalı", "defendant", False, 2),
+    ]
+
+
+def test_reimport_with_changed_names_rewrites_untouched_legacy_parties(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    _write(tmp_path, [{**CASE, "opposing_party": "Başka Şirket", "documents": []}])
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [("Davacı (anonim)", "other", True, 0), ("Başka Şirket", "other", False, 1)]
