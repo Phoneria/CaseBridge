@@ -22,6 +22,7 @@ MAX_EVENTS = 20
 _SHORT_TEXT = 255
 _FILE_NUMBER = 100
 _LONG_TEXT = 4000
+_BLOCK_TAG = re.compile(r"<\s*/?\s*UNTRUSTED_DOCUMENT\s*>", re.IGNORECASE)
 _TURKISH_DATE = re.compile(r"^(\d{1,2})[./](\d{1,2})[./](\d{4})$")
 
 UNCONFIGURED_MESSAGE = "AI hizmeti şu anda yapılandırılmamış. Alanları elle doldurabilirsiniz."
@@ -64,7 +65,13 @@ parties en çok {MAX_PARTIES}, events en çok {MAX_EVENTS} öğe içersin. Yaln�
 
 def build_extraction_prompts(document_text: str) -> tuple[str, str]:
     # The document must not be able to close its own untrusted block.
-    safe_text = document_text.replace("<UNTRUSTED_DOCUMENT>", "").replace("</UNTRUSTED_DOCUMENT>", "")
+    # Repeat until stable so nested tags ("</UNTRUSTED_</UNTRUSTED_DOCUMENT>DOCUMENT>") cannot re-form.
+    safe_text = document_text
+    while True:
+        stripped = _BLOCK_TAG.sub("", safe_text)
+        if stripped == safe_text:
+            break
+        safe_text = stripped
     user_prompt = (
         f"{UNTRUSTED_DOCUMENT_GUARD}\n\n{_SCHEMA_DESCRIPTION}\n\n"
         f"<UNTRUSTED_DOCUMENT>\n{safe_text}\n</UNTRUSTED_DOCUMENT>"
@@ -94,6 +101,25 @@ def _clean_date(value: Any) -> Optional[date]:
             day, month, year = (int(part) for part in turkish.groups())
             return date(year, month, day)
         return date.fromisoformat(text[:10])
+    except ValueError:
+        return None
+
+
+def _parse_number(value: Any) -> Optional[float]:
+    """Numbers, or strings in Turkish ("1.250.000,50") or plain ("1250000.5") notation."""
+    if isinstance(value, (int, float)):
+        return float(value)
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if "," in text:
+        if text.count(",") > 1:
+            return None
+        text = text.replace(".", "").replace(",", ".")
+    elif text.count(".") > 1 or re.fullmatch(r"\d{1,3}\.\d{3}", text):
+        text = text.replace(".", "")
+    try:
+        return float(text)
     except ValueError:
         return None
 
@@ -169,11 +195,8 @@ class CaseIntakeDraft(BaseModel):
     def _case_value(cls, value: Any) -> Optional[float]:
         if isinstance(value, bool):
             return None
-        try:
-            number = float(value)
-        except (TypeError, ValueError):
-            return None
-        return number if math.isfinite(number) and number >= 0 else None
+        number = _parse_number(value)
+        return number if number is not None and math.isfinite(number) and number >= 0 else None
 
     @field_validator("parties", mode="before")
     @classmethod
