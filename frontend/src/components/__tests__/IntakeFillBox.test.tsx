@@ -152,7 +152,7 @@ describe("IntakeFillBox", () => {
     await screen.findByRole("status");
   });
 
-  it("renders the overwrite question as an alertdialog and focuses Değiştir", async () => {
+  it("renders the overwrite question as an alertdialog and focuses the dialog, not Değiştir", async () => {
     extractCaseIntake.mockResolvedValue(RESULT);
     render(<IntakeFillBox hasContent onDraft={vi.fn()} />);
     await pasteAndFill();
@@ -160,7 +160,7 @@ describe("IntakeFillBox", () => {
       name: "Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?",
     });
     expect(dialog).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Değiştir" })).toHaveFocus();
+    expect(dialog).toHaveFocus();
   });
 
   it("announces the draft notice and truncation warning as status", async () => {
@@ -179,5 +179,45 @@ describe("IntakeFillBox", () => {
     await userEvent.click(screen.getByRole("tab", { name: "Metni yapıştır" }));
     await userEvent.click(screen.getByRole("tab", { name: "Dosya yükle" }));
     expect(screen.getByRole("button", { name: "Doldur" })).toBeDisabled();
+  });
+
+  it("does not steal focus from a field being typed in and keeps the prompt open", async () => {
+    let resolve!: (value: CaseIntakeResult) => void;
+    extractCaseIntake.mockReturnValue(new Promise<CaseIntakeResult>((r) => (resolve = r)));
+    const onDraft = vi.fn();
+    render(
+      <>
+        <input aria-label="Dışarıdaki alan" />
+        <IntakeFillBox hasContent onDraft={onDraft} />
+      </>,
+    );
+    await pasteAndFill();
+    const outside = screen.getByLabelText("Dışarıdaki alan");
+    await userEvent.click(outside);
+    resolve(RESULT);
+    await screen.findByRole("alertdialog");
+    expect(outside).toHaveFocus();
+    await userEvent.keyboard(" 3.");
+    expect(outside).toHaveValue(" 3.");
+    expect(onDraft).not.toHaveBeenCalled();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+  });
+
+  it("returns focus to Doldur when the prompt closes", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<IntakeFillBox hasContent onDraft={vi.fn()} />);
+    await pasteAndFill();
+    await userEvent.click(await screen.findByRole("button", { name: "Vazgeç" }));
+    expect(screen.getByRole("button", { name: "Doldur" })).toHaveFocus();
+  });
+
+  it("keeps one status container mounted before and after a fill", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    const status = screen.getByRole("status");
+    expect(status).toBeEmptyDOMElement();
+    await pasteAndFill();
+    await screen.findByText("AI taslağıdır; kaydetmeden önce kontrol edin.");
+    expect(screen.getByRole("status")).toBe(status);
   });
 });

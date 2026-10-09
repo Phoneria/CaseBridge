@@ -37,13 +37,21 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
 
   const headingId = useId();
   const questionId = useId();
-  const confirmRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLButtonElement>(null);
   // The answer can arrive after the user kept typing, so read the latest props then.
   const latest = useRef({ hasContent, onDraft });
   latest.current = { hasContent, onDraft };
 
   useEffect(() => {
-    if (pending) confirmRef.current?.focus();
+    if (!pending) return;
+    // Never pull focus away from a field the user is typing in, and never land on "Değiştir".
+    const active = document.activeElement;
+    const typing =
+      active instanceof HTMLElement &&
+      !dialogRef.current?.contains(active) &&
+      (active.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName));
+    if (!typing) dialogRef.current?.focus();
   }, [pending]);
 
   const ready = mode === "dosya" ? file !== null : text.trim().length > 0;
@@ -54,9 +62,14 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
     if (next === "metin") setFile(null);
   }
 
+  function closePending() {
+    if (dialogRef.current?.contains(document.activeElement)) fillRef.current?.focus();
+    setPending(null);
+  }
+
   function accept(result: CaseIntakeResult, source: IntakeSource) {
     latest.current.onDraft(result, source);
-    setPending(null);
+    closePending();
     setNotice({ truncated: result.truncated });
   }
 
@@ -136,11 +149,12 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
 
       <div className="flex items-center gap-3">
         <button
+          ref={fillRef}
           type="button"
           disabled={!ready && !busy}
           aria-disabled={busy || undefined}
           onClick={fill}
-          className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50"
+          className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
         >
           {busy ? "Belge okunuyor…" : "Doldur"}
         </button>
@@ -154,6 +168,8 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
 
       {pending && (
         <div
+          ref={dialogRef}
+          tabIndex={-1}
           role="alertdialog"
           aria-labelledby={questionId}
           className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-navy-800"
@@ -161,7 +177,6 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
           <p id={questionId}>Formdaki mevcut bilgiler AI taslağıyla değiştirilsin mi?</p>
           <div className="flex gap-2">
             <button
-              ref={confirmRef}
               type="button"
               onClick={() => accept(pending.result, pending.source)}
               className="rounded-lg bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
@@ -170,7 +185,7 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => setPending(null)}
+              onClick={closePending}
               className="rounded-lg border border-surface-border px-3 py-1.5 text-xs font-medium text-navy-700 hover:bg-white"
             >
               Vazgeç
@@ -179,12 +194,10 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
         </div>
       )}
 
-      {notice && (
-        <div role="status" className="space-y-1 text-sm text-navy-700">
-          <p>AI taslağıdır; kaydetmeden önce kontrol edin.</p>
-          {notice.truncated && <p>Belge uzun olduğu için yalnızca ilk kısmı okundu.</p>}
-        </div>
-      )}
+      <div role="status" className="space-y-1 text-sm text-navy-700">
+        {notice && <p>AI taslağıdır; kaydetmeden önce kontrol edin.</p>}
+        {notice?.truncated && <p>Belge uzun olduğu için yalnızca ilk kısmı okundu.</p>}
+      </div>
     </section>
   );
 }

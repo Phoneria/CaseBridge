@@ -70,8 +70,9 @@ export function NewCaseView() {
   function handleDraft(result: CaseIntakeResult, from: IntakeSource) {
     const applied = applyDraft(formRef.current, result.draft);
     setForm(applied.form);
+    const replacesParties = result.draft.parties.length > 0;
     setAi((previous) => {
-      const kept = applied.form.parties === formRef.current.parties ? previous : [...previous].filter((key) => !key.startsWith("party:"));
+      const kept = replacesParties ? [...previous].filter((key) => !key.startsWith("party:")) : [...previous];
       return new Set([...kept, ...applied.marks]);
     });
     setEvents(applied.events);

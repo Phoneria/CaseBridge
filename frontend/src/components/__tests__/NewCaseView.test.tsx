@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -174,7 +175,7 @@ describe("NewCaseView", () => {
 
   it("drops stale party badges when a second draft replaces the parties", async () => {
     extractCaseIntake.mockResolvedValueOnce(RESULT);
-    render(<NewCaseView />);
+    render(<NewCaseView />, { wrapper: StrictMode });
     await fillFromPastedText();
 
     extractCaseIntake.mockResolvedValueOnce({
@@ -188,5 +189,20 @@ describe("NewCaseView", () => {
 
     await userEvent.type(screen.getByLabelText(/^Ad/), "x");
     expect(screen.queryByText("Müvekkilinizi işaretleyin.")).toBeNull();
+  });
+
+  it("keeps text typed in a form field while the prompt is open", async () => {
+    let resolve!: (value: CaseIntakeResult) => void;
+    extractCaseIntake.mockReturnValue(new Promise<CaseIntakeResult>((r) => (resolve = r)));
+    render(<NewCaseView />);
+    await userEvent.click(screen.getByRole("tab", { name: "Metni yapıştır" }));
+    await userEvent.type(screen.getByLabelText("Belge metni"), "dilekçe metni");
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+    await userEvent.type(screen.getByLabelText("Mahkeme"), "Ankara");
+    resolve(RESULT);
+    await screen.findByRole("alertdialog");
+    await userEvent.keyboard(" 3.");
+    expect(screen.getByLabelText("Mahkeme")).toHaveValue("Ankara 3.");
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
   });
 });
