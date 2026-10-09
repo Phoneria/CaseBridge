@@ -1,0 +1,274 @@
+/** Form state and pure rules for the new-case page and the case detail editors. */
+import type {
+  CaseIntakeDraft,
+  CaseIntakeEvent,
+  CasePayload,
+  CaseStatus,
+  CaseType,
+  ClientRole,
+  PartyRole,
+} from "@/types";
+
+export const PARTY_ROLES: PartyRole[] = ["plaintiff", "defendant", "intervener", "other"];
+export const PARTY_ROLE_LABELS: Record<PartyRole, string> = {
+  plaintiff: "Davacı",
+  defendant: "Davalı",
+  intervener: "Fer'i müdahil",
+  other: "Diğer",
+};
+export const EVENT_TYPE_LABELS: Record<string, string> = {
+  filing: "Dilekçe/Başvuru",
+  hearing: "Duruşma",
+  submission: "Sunum",
+  expert_report: "Bilirkişi Raporu",
+  legal_update: "Mevzuat Güncellemesi",
+  note: "Not",
+  other: "Diğer",
+};
+
+export const NO_CLIENT_MESSAGE = "En az bir taraf müvekkil olarak işaretlenmeli.";
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+export const DOCUMENT_EXTENSIONS = [".pdf", ".docx", ".txt"];
+
+export type SectionId = "temel" | "taraflar" | "uyusmazlik" | "belgeler";
+
+export interface PartyRow {
+  key: string;
+  name: string;
+  role: PartyRole;
+  counsel_name: string;
+  is_client: boolean;
+}
+
+export interface CaseFormState {
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  court: string;
+  court_file_number: string;
+  opening_date: string;
+  case_value: string;
+  status: CaseStatus;
+  parties: PartyRow[];
+  claim: string;
+  facts_summary: string;
+  plaintiff_position: string;
+  defendant_position: string;
+  description: string;
+  next_hearing_date: string;
+  assigned_lawyer_id: string;
+}
+
+export interface SuggestedEvent extends CaseIntakeEvent {
+  key: string;
+  checked: boolean;
+}
+
+let rowCounter = 0;
+function nextKey(prefix: string): string {
+  rowCounter += 1;
+  return `${prefix}-${rowCounter}`;
+}
+
+export function newPartyRow(role: PartyRole = "other", init: Partial<Omit<PartyRow, "key" | "role">> = {}): PartyRow {
+  return { key: nextKey("party"), name: "", role, counsel_name: "", is_client: false, ...init };
+}
+
+export function emptyCaseForm(): CaseFormState {
+  return {
+    case_number: "",
+    case_name: "",
+    case_type: "diger",
+    court: "",
+    court_file_number: "",
+    opening_date: "",
+    case_value: "",
+    status: "devam_eden",
+    parties: [newPartyRow("plaintiff"), newPartyRow("defendant")],
+    claim: "",
+    facts_summary: "",
+    plaintiff_position: "",
+    defendant_position: "",
+    description: "",
+    next_hearing_date: "",
+    assigned_lawyer_id: "",
+  };
+}
+
+/** The client's side: the first client row's role (an intervener counts as "other"). */
+export function clientRoleOf(parties: PartyRow[]): ClientRole | null {
+  const client = parties.find((party) => party.is_client);
+  if (!client) return null;
+  return client.role === "plaintiff" || client.role === "defendant" ? client.role : "other";
+}
+
+export function positionLabels(role: ClientRole | null): { plaintiff: string; defendant: string } {
+  if (role === "plaintiff") return { plaintiff: "İddiamız (davacı)", defendant: "Karşı tarafın savunması (davalı)" };
+  if (role === "defendant") return { plaintiff: "Davacının iddiası", defendant: "Savunmamız (davalı)" };
+  return { plaintiff: "Davacının iddiası", defendant: "Davalının savunması" };
+}
+
+export interface FormErrors {
+  case_number?: string;
+  case_name?: string;
+  case_value?: string;
+  parties?: string;
+  partyNames: Record<string, string>;
+  assigned_lawyer_id?: string;
+}
+
+export function validateCaseForm(form: CaseFormState, options: { requireLawyer: boolean }): FormErrors {
+  const errors: FormErrors = { partyNames: {} };
+  if (!form.case_number.trim()) errors.case_number = "Dava no gerekli.";
+  if (!form.case_name.trim()) errors.case_name = "Dava adı gerekli.";
+  if (form.case_value.trim()) {
+    const value = Number(form.case_value);
+    if (!Number.isFinite(value) || value < 0) errors.case_value = "Dava değeri geçerli bir sayı olmalı.";
+  }
+  for (const party of form.parties) {
+    if (!party.name.trim() && party.counsel_name.trim()) errors.partyNames[party.key] = "Taraf adı gerekli.";
+  }
+  if (!form.parties.some((party) => party.is_client && party.name.trim())) errors.parties = NO_CLIENT_MESSAGE;
+  if (options.requireLawyer && !form.assigned_lawyer_id) errors.assigned_lawyer_id = "Sorumlu avukat seçin.";
+  return errors;
+}
+
+export function hasErrors(errors: FormErrors): boolean {
+  return Boolean(
+    errors.case_number ||
+      errors.case_name ||
+      errors.case_value ||
+      errors.parties ||
+      errors.assigned_lawyer_id ||
+      Object.keys(errors.partyNames).length,
+  );
+}
+
+/** Sections in page order; the first one holding an error is scrolled to. */
+export function firstErrorSection(errors: FormErrors): SectionId | null {
+  if (errors.case_number || errors.case_name || errors.case_value) return "temel";
+  if (errors.parties || Object.keys(errors.partyNames).length) return "taraflar";
+  if (errors.assigned_lawyer_id) return "belgeler";
+  return null;
+}
+
+const trimmed = (value: string) => value.trim();
+
+export function buildCasePayload(form: CaseFormState): CasePayload {
+  const payload: CasePayload = {
+    case_number: trimmed(form.case_number),
+    case_name: trimmed(form.case_name),
+    case_type: form.case_type,
+    status: form.status,
+    parties: form.parties
+      .filter((party) => party.name.trim())
+      .map((party) => ({
+        name: trimmed(party.name),
+        role: party.role,
+        is_client: party.is_client,
+        counsel_name: trimmed(party.counsel_name) || null,
+      })),
+  };
+  const optionalText = [
+    "court",
+    "court_file_number",
+    "opening_date",
+    "next_hearing_date",
+    "claim",
+    "facts_summary",
+    "plaintiff_position",
+    "defendant_position",
+    "description",
+    "assigned_lawyer_id",
+  ] as const;
+  for (const field of optionalText) {
+    if (trimmed(form[field])) payload[field] = trimmed(form[field]);
+  }
+  if (trimmed(form.case_value)) payload.case_value = Number(form.case_value);
+  return payload;
+}
+
+/** True when the lawyer already typed something the AI would overwrite. */
+export function hasFillableContent(form: CaseFormState): boolean {
+  const texts = [
+    form.case_name,
+    form.court,
+    form.court_file_number,
+    form.opening_date,
+    form.next_hearing_date,
+    form.case_value,
+    form.claim,
+    form.facts_summary,
+    form.plaintiff_position,
+    form.defendant_position,
+  ];
+  return (
+    texts.some((value) => value.trim()) ||
+    form.case_type !== "diger" ||
+    form.parties.some((party) => party.name.trim() || party.counsel_name.trim())
+  );
+}
+
+const DRAFT_TEXT_FIELDS = [
+  "case_name",
+  "court",
+  "court_file_number",
+  "opening_date",
+  "next_hearing_date",
+  "claim",
+  "facts_summary",
+  "plaintiff_position",
+  "defendant_position",
+] as const;
+
+export interface AppliedDraft {
+  form: CaseFormState;
+  /** "case_name" style field keys and "party:<row key>" for AI-filled party rows. */
+  marks: Set<string>;
+  events: SuggestedEvent[];
+}
+
+/** Draft values replace the form's; fields the draft left null keep their current value. */
+export function applyDraft(form: CaseFormState, draft: CaseIntakeDraft): AppliedDraft {
+  const next: CaseFormState = { ...form };
+  const marks = new Set<string>();
+
+  for (const field of DRAFT_TEXT_FIELDS) {
+    const value = draft[field];
+    if (value) {
+      next[field] = value;
+      marks.add(field);
+    }
+  }
+  if (draft.case_type) {
+    next.case_type = draft.case_type;
+    marks.add("case_type");
+  }
+  if (draft.case_value !== null) {
+    next.case_value = String(draft.case_value);
+    marks.add("case_value");
+  }
+  if (draft.parties.length) {
+    next.parties = draft.parties.map((party) =>
+      newPartyRow(party.role, { name: party.name, counsel_name: party.counsel_name ?? "" }),
+    );
+    next.parties.forEach((row) => marks.add(`party:${row.key}`));
+  }
+
+  const events = draft.events.map((event) => ({ ...event, key: nextKey("event"), checked: true }));
+  return { form: next, marks, events };
+}
+
+/** A user-facing message when the file cannot be attached, otherwise null. */
+export function checkDocumentFile(file: File): string | null {
+  const name = file.name.toLowerCase();
+  if (!DOCUMENT_EXTENSIONS.some((extension) => name.endsWith(extension))) {
+    return `${file.name} desteklenmeyen bir dosya türü (pdf, docx, txt).`;
+  }
+  if (file.size > MAX_DOCUMENT_BYTES) return `${file.name} 10 MB sınırını aşıyor.`;
+  return null;
+}
+
+export function pastedTextFile(text: string): File {
+  return new File([text], "yapistirilan-metin.txt", { type: "text/plain" });
+}

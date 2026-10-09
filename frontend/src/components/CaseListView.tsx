@@ -133,7 +133,18 @@ export function CaseListView() {
         setCreateError("Sorumlu avukat seçin.");
         return;
       }
-      await createCase({ ...form, assigned_lawyer_id: form.assigned_lawyer_id || undefined });
+      await createCase({
+        case_number: form.case_number,
+        case_name: form.case_name,
+        case_type: form.case_type,
+        status: "devam_eden",
+        court: form.court || undefined,
+        assigned_lawyer_id: form.assigned_lawyer_id || undefined,
+        parties: [
+          { name: form.client_name, role: "other", is_client: true },
+          ...(form.opposing_party ? [{ name: form.opposing_party, role: "other" as const, is_client: false }] : []),
+        ],
+      });
       setForm(EMPTY_FORM);
       setFormOpen(false);
       load();
