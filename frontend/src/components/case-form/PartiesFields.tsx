@@ -24,7 +24,11 @@ export function PartiesFields({ parties, ai, error, partyErrors, showClientHint,
   return (
     <div className="space-y-3">
       {showClientHint && <p className="text-sm text-accent-700">Müvekkilinizi işaretleyin.</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       {parties.map((party, index) => {
         const number = index + 1;
         const nameError = partyErrors[party.key];
@@ -51,9 +55,15 @@ export function PartiesFields({ parties, ai, error, partyErrors, showClientHint,
                 className={INPUT_CLASS}
                 value={party.name}
                 aria-invalid={Boolean(nameError)}
+                aria-required="true"
+                aria-describedby={nameError ? `party-name-${party.key}-hata` : undefined}
                 onChange={(e) => onUpdate(party.key, { name: e.target.value })}
               />
-              {nameError && <p className="mt-1 text-xs text-red-600">{nameError}</p>}
+              {nameError && (
+                <p id={`party-name-${party.key}-hata`} className="mt-1 text-xs text-red-600">
+                  {nameError}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor={`party-role-${party.key}`} className="mb-1 block text-xs font-medium text-navy-600">

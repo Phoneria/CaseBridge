@@ -291,3 +291,36 @@ describe("FollowUpFields", () => {
     expect(onLawyer).toHaveBeenCalledWith("u2");
   });
 });
+
+describe("accessibility details", () => {
+  it("exposes required state on required fields and the party name", () => {
+    render(<BasicHarness />);
+    for (const label of [/^Dava no/, /^Dava adı/, /^Dava türü/]) {
+      expect(screen.getByLabelText(label)).toHaveAttribute("aria-required", "true");
+    }
+    expect(screen.getByLabelText("Mahkeme")).not.toHaveAttribute("aria-required");
+    render(<PartiesHarness />);
+    expect(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/)).toHaveAttribute("aria-required", "true");
+  });
+
+  it("associates the party name error and announces the list error", () => {
+    const rows = [newPartyRow("plaintiff"), newPartyRow("defendant")];
+    render(<PartiesHarness initial={rows} error="En az bir taraf müvekkil olarak işaretlenmeli." partyErrors={{ [rows[1].key]: "Taraf adı gerekli." }} />);
+    const input = within(screen.getByRole("group", { name: "Taraf 2" })).getByLabelText(/^Ad/);
+    const describedBy = input.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy!)).toHaveTextContent("Taraf adı gerekli.");
+    expect(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/)).not.toHaveAttribute("aria-describedby");
+    expect(screen.getByRole("alert")).toHaveTextContent("En az bir taraf müvekkil olarak işaretlenmeli.");
+  });
+
+  it("renders a message per rejected file even when the same file is rejected twice, without key warnings", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<FollowUpHarness />);
+    const bad = () => new File(["b"], "gorsel.png", { type: "image/png" });
+    await userEvent.setup({ applyAccept: false }).upload(screen.getByLabelText("Belge ekle"), [bad(), bad()]);
+    expect(screen.getAllByText("gorsel.png desteklenmeyen bir dosya türü (pdf, docx, txt).")).toHaveLength(2);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+});

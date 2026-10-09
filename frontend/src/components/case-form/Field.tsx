@@ -13,7 +13,7 @@ interface FieldProps {
   ai?: boolean;
   error?: string;
   className?: string;
-  children: (props: { id: string; "aria-invalid": boolean; "aria-describedby"?: string }) => ReactNode;
+  children: (props: { id: string; "aria-invalid": boolean; "aria-required"?: true; "aria-describedby"?: string }) => ReactNode;
 }
 
 /** Label (+ required marker + AI badge), the control and its error message. */
@@ -33,7 +33,7 @@ export function Field({ id, label, required, ai, error, className, children }: F
         </label>
         {ai && <AiBadge />}
       </div>
-      {children({ id, "aria-invalid": Boolean(error), "aria-describedby": error ? errorId : undefined })}
+      {children({ id, "aria-invalid": Boolean(error), "aria-required": required || undefined, "aria-describedby": error ? errorId : undefined })}
       {error && (
         <p id={errorId} className="mt-1 text-xs text-red-600">
           {error}

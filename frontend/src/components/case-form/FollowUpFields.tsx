@@ -81,8 +81,8 @@ export function FollowUpFields(props: Props) {
         </div>
         {rejections.length > 0 && (
           <div role="alert" className="mt-2 space-y-1 text-xs text-red-600">
-            {rejections.map((message) => (
-              <p key={message}>{message}</p>
+            {rejections.map((message, index) => (
+              <p key={`${message}-${index}`}>{message}</p>
             ))}
           </div>
         )}
