@@ -17,6 +17,7 @@ const generateHandover = vi.fn();
 const listCaseTasks = vi.fn();
 const createTask = vi.fn();
 const updateTaskStatus = vi.fn();
+const updateCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCase: (...args: unknown[]) => getCase(...args),
@@ -31,6 +32,7 @@ vi.mock("@/lib/api", () => ({
   listCaseTasks: (...args: unknown[]) => listCaseTasks(...args),
   createTask: (...args: unknown[]) => createTask(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
+  updateCase: (...args: unknown[]) => updateCase(...args),
   deleteDocument: vi.fn(),
   downloadDocument: vi.fn(),
 }));
@@ -68,6 +70,7 @@ beforeEach(() => {
   listCaseTasks.mockReset();
   createTask.mockReset();
   updateTaskStatus.mockReset();
+  updateCase.mockReset();
   listCaseTasks.mockResolvedValue([]);
 });
 
@@ -462,5 +465,73 @@ describe("CaseDetailView", () => {
 
     await userEvent.click(screen.getByRole("tab", { name: "Genel Bakış" }));
     expect(nav.replace).toHaveBeenLastCalledWith("/davalar/c1", { scroll: false });
+  });
+  describe("intake data", () => {
+    const withIntake = {
+      ...caseDetail,
+      client_role: "defendant",
+      court_file_number: "2026/9 E.",
+      claim: "Tazminat",
+      facts_summary: "Fesih ihbarsız yapıldı.",
+      plaintiff_position: "Fesih haksız.",
+      defendant_position: "Fesih haklı.",
+      parties: [
+        { id: "p1", name: "Deniz Arslan", role: "defendant", is_client: true, counsel_name: null, sort_order: 0 },
+        { id: "p2", name: "Mavi Yapı A.Ş.", role: "plaintiff", is_client: false, counsel_name: "Av. Can", sort_order: 1 },
+      ],
+    };
+
+    beforeEach(() => {
+      listSimulations.mockResolvedValue([]);
+      listDocuments.mockResolvedValue([]);
+    });
+
+    it("shows the Taraflar and Uyuşmazlık cards and the general notes instead of Dava Özeti", async () => {
+      getCase.mockResolvedValue(withIntake);
+      render(<CaseDetailView caseId="c1" />);
+
+      expect(await screen.findByRole("heading", { name: "Taraflar" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Uyuşmazlık" })).toBeInTheDocument();
+      expect(screen.getByText("Av. Can", { exact: false })).toBeInTheDocument();
+      expect(screen.getByText("Savunmamız (davalı)")).toBeInTheDocument();
+      expect(screen.getByText("Sözleşme feshi nedeniyle tazminat talebi.")).toBeInTheDocument();
+      expect(screen.queryByText("Dava Özeti")).toBeNull();
+    });
+
+    it("merges a saved party edit into the case without losing the timeline", async () => {
+      getCase.mockResolvedValue(withIntake);
+      updateCase.mockResolvedValue({ ...withIntake, client_name: "Deniz Arslan Yeni", opposing_party: "Mavi Yapı A.Ş.", timeline: undefined });
+      render(<CaseDetailView caseId="c1" />);
+
+      await userEvent.click(await screen.findByRole("button", { name: "Tarafları düzenle" }));
+      await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+
+      await waitFor(() => expect(screen.getByText(/Deniz Arslan Yeni vs\. Mavi Yapı A\.Ş\./)).toBeInTheDocument());
+      expect(updateCase).toHaveBeenCalledWith("c1", expect.objectContaining({ parties: expect.any(Array) }));
+      expect(screen.getByText("Dava açıldı")).toBeInTheDocument();
+    });
+
+    it("tells the lawyer how many events or documents could not be added and lets them dismiss it", async () => {
+      getCase.mockResolvedValue(withIntake);
+      setUrl("/davalar/c1?eklenemeyen=3");
+      render(<CaseDetailView caseId="c1" />);
+
+      expect(
+        await screen.findByText("Dava oluşturuldu ancak 3 belge/olay eklenemedi. Dava sayfasından tekrar ekleyebilirsiniz."),
+      ).toBeInTheDocument();
+      await userEvent.click(screen.getByRole("button", { name: "Uyarıyı kapat" }));
+      expect(
+        screen.queryByText("Dava oluşturuldu ancak 3 belge/olay eklenemedi. Dava sayfasından tekrar ekleyebilirsiniz."),
+      ).toBeNull();
+      expect(nav.replace).toHaveBeenCalled();
+    });
+
+    it("ignores a missing or invalid eklenemeyen value", async () => {
+      getCase.mockResolvedValue(withIntake);
+      setUrl("/davalar/c1?eklenemeyen=abc");
+      render(<CaseDetailView caseId="c1" />);
+      await screen.findByRole("heading", { name: "Taraflar" });
+      expect(screen.queryByText(/belge\/olay eklenemedi/)).toBeNull();
+    });
   });
 });

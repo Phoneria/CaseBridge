@@ -1,8 +1,12 @@
 /** Form state and pure rules for the new-case page and the case detail editors. */
 import type {
+  Case,
   CaseIntakeDraft,
   CaseIntakeEvent,
+  CaseParty,
+  CasePartyPayload,
   CasePayload,
+  CaseUpdatePayload,
   CaseStatus,
   CaseType,
   ClientRole,
@@ -154,20 +158,24 @@ export function firstErrorSection(errors: FormErrors): SectionId | null {
 
 const trimmed = (value: string) => value.trim();
 
+export function buildPartiesPayload(parties: PartyRow[]): CasePartyPayload[] {
+  return parties
+    .filter((party) => party.name.trim())
+    .map((party) => ({
+      name: trimmed(party.name),
+      role: party.role,
+      is_client: party.is_client,
+      counsel_name: trimmed(party.counsel_name) || null,
+    }));
+}
+
 export function buildCasePayload(form: CaseFormState): CasePayload {
   const payload: CasePayload = {
     case_number: trimmed(form.case_number),
     case_name: trimmed(form.case_name),
     case_type: form.case_type,
     status: form.status,
-    parties: form.parties
-      .filter((party) => party.name.trim())
-      .map((party) => ({
-        name: trimmed(party.name),
-        role: party.role,
-        is_client: party.is_client,
-        counsel_name: trimmed(party.counsel_name) || null,
-      })),
+    parties: buildPartiesPayload(form.parties),
   };
   const optionalText = [
     "court",
@@ -271,4 +279,40 @@ export function checkDocumentFile(file: File): string | null {
 
 export function pastedTextFile(text: string): File {
   return new File([text], "yapistirilan-metin.txt", { type: "text/plain" });
+}
+
+export function partyRowFromParty(party: CaseParty): PartyRow {
+  return newPartyRow(party.role, {
+    name: party.name,
+    counsel_name: party.counsel_name ?? "",
+    is_client: party.is_client,
+  });
+}
+
+/** The case detail editors reuse the new-case form state; fields they do not edit keep their defaults. */
+export function formFromCase(item: Case): CaseFormState {
+  const parties = [...(item.parties ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  return {
+    ...emptyCaseForm(),
+    court_file_number: item.court_file_number ?? "",
+    claim: item.claim ?? "",
+    facts_summary: item.facts_summary ?? "",
+    plaintiff_position: item.plaintiff_position ?? "",
+    defendant_position: item.defendant_position ?? "",
+    description: item.description ?? "",
+    parties: parties.map(partyRowFromParty),
+  };
+}
+
+/** PATCH body of the "Uyuşmazlık" card: an emptied field becomes null, which clears it on the server. */
+export function buildDisputePayload(form: CaseFormState): CaseUpdatePayload {
+  const orNull = (value: string) => trimmed(value) || null;
+  return {
+    court_file_number: orNull(form.court_file_number),
+    claim: orNull(form.claim),
+    facts_summary: orNull(form.facts_summary),
+    plaintiff_position: orNull(form.plaintiff_position),
+    defendant_position: orNull(form.defendant_position),
+    description: orNull(form.description),
+  };
 }

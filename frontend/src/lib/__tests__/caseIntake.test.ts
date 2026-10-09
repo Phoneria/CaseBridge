@@ -10,14 +10,18 @@ import {
   emptyCaseForm,
   firstErrorSection,
   hasErrors,
+  buildDisputePayload,
+  buildPartiesPayload,
+  formFromCase,
   hasFillableContent,
   newPartyRow,
+  partyRowFromParty,
   pastedTextFile,
   positionLabels,
   validateCaseForm,
   type CaseFormState,
 } from "@/lib/caseIntake";
-import type { CaseIntakeDraft } from "@/types";
+import type { Case, CaseIntakeDraft } from "@/types";
 
 const EMPTY_DRAFT: CaseIntakeDraft = {
   case_name: null,
@@ -280,5 +284,71 @@ describe("document files", () => {
       reader.readAsText(file);
     });
     expect(content).toBe("Dilekçe metni");
+  });
+});
+
+describe("case detail editors", () => {
+  const storedCase = {
+    id: "c1",
+    case_type: "kira",
+    status: "durusma_bekleyen",
+    case_number: "2026/7",
+    case_name: "Tahliye",
+    court_file_number: "2026/7 E.",
+    claim: "Tahliye",
+    facts_summary: null,
+    plaintiff_position: "Kira ödenmedi",
+    defendant_position: null,
+    description: "Not",
+    client_role: "plaintiff",
+    parties: [
+      { id: "p2", name: "Kiracı", role: "defendant", is_client: false, counsel_name: null, sort_order: 1 },
+      { id: "p1", name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece", sort_order: 0 },
+    ],
+  } as unknown as Case;
+
+  it("turns a stored party into an editable row", () => {
+    const row = partyRowFromParty(storedCase.parties[1]);
+    expect(row).toMatchObject({ name: "Ev Sahibi", role: "plaintiff", counsel_name: "Av. Ece", is_client: true });
+    expect(row.key).toBeTruthy();
+    expect(partyRowFromParty(storedCase.parties[0]).counsel_name).toBe("");
+  });
+
+  it("builds the editable form from a case, parties in stored order", () => {
+    const form = formFromCase(storedCase);
+    expect(form.parties.map((party) => party.name)).toEqual(["Ev Sahibi", "Kiracı"]);
+    expect(form).toMatchObject({
+      court_file_number: "2026/7 E.",
+      claim: "Tahliye",
+      facts_summary: "",
+      plaintiff_position: "Kira ödenmedi",
+      description: "Not",
+    });
+  });
+
+  it("falls back to no parties when the case has none", () => {
+    expect(formFromCase({ ...storedCase, parties: undefined } as unknown as Case).parties).toEqual([]);
+  });
+
+  it("sends blank dispute texts as null so the PATCH clears them", () => {
+    const form = { ...formFromCase(storedCase), claim: "  Yeni talep ", plaintiff_position: "   " };
+    expect(buildDisputePayload(form)).toEqual({
+      court_file_number: "2026/7 E.",
+      claim: "Yeni talep",
+      facts_summary: null,
+      plaintiff_position: null,
+      defendant_position: null,
+      description: "Not",
+    });
+  });
+
+  it("builds the parties payload without blank rows", () => {
+    const rows = [
+      newPartyRow("plaintiff", { name: " Ev Sahibi ", is_client: true, counsel_name: " Av. Ece " }),
+      newPartyRow("defendant", { name: "  " }),
+    ];
+    expect(buildPartiesPayload(rows)).toEqual([
+      { name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece" },
+    ]);
   });
 });

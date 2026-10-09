@@ -19,7 +19,7 @@ import {
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, SIMULATION_STATUS_LABELS, formatDate } from "@/lib/labels";
 import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
 import { useUrlParams } from "@/lib/urlState";
-import type { CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import type { Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
@@ -29,6 +29,8 @@ import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
 import { AI_PERSPECTIVES } from "@/lib/ai";
 import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
+import { CaseDisputeCard } from "@/components/CaseDisputeCard";
+import { CasePartiesCard } from "@/components/CasePartiesCard";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -76,6 +78,10 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [taskForm, setTaskForm] = useState({ title: "", due_date: "" });
   const [addingTask, setAddingTask] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
+  const [skippedDismissed, setSkippedDismissed] = useState(false);
+  // Set by the new-case page when some events or documents could not be added after the case was created.
+  const skippedParam = Number(params.get("eklenemeyen"));
+  const skippedCount = Number.isInteger(skippedParam) && skippedParam > 0 ? skippedParam : 0;
 
   function load() {
     setLoading(true);
@@ -222,6 +228,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     }
   }
 
+  /** A PATCH result replaces the case fields but never the timeline, which the PATCH response does not carry. */
+  function handleCaseSaved(updated: Case) {
+    setCaseDetail((prev) => (prev ? { ...prev, ...updated, timeline: prev.timeline } : prev));
+  }
+
+  function dismissSkippedNotice() {
+    setSkippedDismissed(true);
+    setParams({ eklenemeyen: null });
+  }
+
   function selectTab(tab: (typeof TABS)[number]) {
     setActiveTab(tab.label);
     setParams({ sekme: tab.slug === "genel" ? null : tab.slug });
@@ -265,6 +281,15 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           {caseDetail.opposing_party ? ` vs. ${caseDetail.opposing_party}` : ""}
         </p>
       </div>
+
+      {skippedCount > 0 && !skippedDismissed && (
+        <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p>{`Dava oluşturuldu ancak ${skippedCount} belge/olay eklenemedi. Dava sayfasından tekrar ekleyebilirsiniz.`}</p>
+          <button type="button" aria-label="Uyarıyı kapat" onClick={dismissSkippedNotice} className="text-xs font-semibold hover:underline">
+            Kapat
+          </button>
+        </div>
+      )}
 
       <div role="tablist" className="flex gap-1 border-b border-surface-border">
         {TABS.map((tab) => (
@@ -311,8 +336,12 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                 <p className="mt-1 text-sm font-medium text-navy-800">{value}</p>
               </div>)}
             </div>
-            {caseDetail.description && <div className="border-t border-surface-border bg-surface-muted/60 px-5 py-4"><p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">Dava Özeti</p><p className="mt-1 text-sm leading-6 text-navy-700">{caseDetail.description}</p></div>}
           </section>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} />
+            <CaseDisputeCard caseDetail={caseDetail} onSaved={handleCaseSaved} />
+          </div>
 
           <div className="grid grid-cols-3 gap-3">
             <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "belgeler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">
