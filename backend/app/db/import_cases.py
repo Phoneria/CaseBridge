@@ -114,7 +114,7 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
         # the app survive a re-import, only untouched legacy parties follow
         # a change of those names.
         case.parties = party_models(legacy_parties(case.client_name, case.opposing_party), firm.id)
-    else:
+    elif not untouched:
         kept = [PartyData(p.name, p.role, p.is_client, p.counsel_name) for p in case.parties]
         case.client_name = derive_client_name(kept) or case.client_name
         case.opposing_party = derive_opposing_party(kept, case.client_role)

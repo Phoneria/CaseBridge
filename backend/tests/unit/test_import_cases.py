@@ -217,3 +217,19 @@ def test_reimport_with_changed_names_rewrites_untouched_legacy_parties(db_sessio
     import_folder(str(tmp_path), db=db_session)
 
     assert _party_rows(db_session) == [("Davacı (anonim)", "other", True, 0), ("Başka Şirket", "other", False, 1)]
+
+
+def test_reimport_after_only_a_client_role_patch_keeps_the_opposing_party(db_session, seeded, tmp_path):
+    from app.schemas.case import CaseUpdate
+    from app.services.case_service import CaseService
+
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    CaseService(db_session).update_case(case, CaseUpdate(client_role="plaintiff"))
+
+    import_folder(str(tmp_path), db=db_session)
+
+    db_session.refresh(case)
+    assert case.client_name == "Davacı (anonim)"
+    assert case.opposing_party == "Davalı Şirket"
