@@ -175,3 +175,19 @@ def test_invalid_email_and_reminder_settings_fail(monkeypatch, name, value):
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_case_intake_max_chars_defaults_to_30000_and_must_be_positive(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET", "some-secret")
+    monkeypatch.delenv("CASE_INTAKE_MAX_CHARS", raising=False)
+
+    from pydantic import ValidationError
+
+    from app.core.config import Settings
+
+    assert Settings(_env_file=None).case_intake_max_chars == 30000
+    monkeypatch.setenv("CASE_INTAKE_MAX_CHARS", "5000")
+    assert Settings(_env_file=None).case_intake_max_chars == 5000
+    monkeypatch.setenv("CASE_INTAKE_MAX_CHARS", "0")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
