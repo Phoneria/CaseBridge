@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { createCase, getCases, getMe, listAdminLawyers } from "@/lib/api";
+import { getCases } from "@/lib/api";
 import {
   CASE_LIST_PARAM_KEYS,
   CASE_STATUSES,
@@ -18,21 +18,11 @@ import {
 } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { AppUser, Case, CaseType } from "@/types";
+import type { Case } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterChips, NoFilterResults } from "@/components/FilterChips";
-
-const EMPTY_FORM = {
-  case_number: "",
-  case_name: "",
-  client_name: "",
-  opposing_party: "",
-  case_type: "diger" as CaseType,
-  court: "",
-  assigned_lawyer_id: "",
-};
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
   devam_eden: "bg-accent-50 text-accent-700",
@@ -55,13 +45,6 @@ export function CaseListView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(query.ara ?? "");
-  const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [adminLawyers, setAdminLawyers] = useState<AppUser[] | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [formAccessReady, setFormAccessReady] = useState(false);
   const latestRequestId = useRef<number>(0);
 
   function load() {
@@ -96,18 +79,6 @@ export function CaseListView() {
     setSearch(query.ara ?? "");
   }, [query.ara]);
 
-  useEffect(() => {
-    if (!formOpen) return;
-    setFormAccessReady(false);
-    getMe().then(async (me) => {
-      if (me.role === "admin") {
-        setIsAdmin(true);
-        setAdminLawyers((await listAdminLawyers()).filter((user) => user.is_active));
-      }
-      setFormAccessReady(true);
-    }).catch(() => setCreateError("Avukat listesi yüklenemedi."));
-  }, [formOpen]);
-
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault();
     setParams({ ara: search.trim() || null });
@@ -123,38 +94,6 @@ export function CaseListView() {
     setParams(Object.fromEntries(CASE_LIST_PARAM_KEYS.map((key) => [key, null])));
   }
 
-  async function handleCreateSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!formAccessReady) return;
-    setCreating(true);
-    setCreateError(null);
-    try {
-      if (isAdmin && !form.assigned_lawyer_id) {
-        setCreateError("Sorumlu avukat seçin.");
-        return;
-      }
-      await createCase({
-        case_number: form.case_number,
-        case_name: form.case_name,
-        case_type: form.case_type,
-        status: "devam_eden",
-        court: form.court || undefined,
-        assigned_lawyer_id: form.assigned_lawyer_id || undefined,
-        parties: [
-          { name: form.client_name, role: "other", is_client: true },
-          ...(form.opposing_party ? [{ name: form.opposing_party, role: "other" as const, is_client: false }] : []),
-        ],
-      });
-      setForm(EMPTY_FORM);
-      setFormOpen(false);
-      load();
-    } catch {
-      setCreateError("Dava oluşturulamadı. Lütfen tekrar deneyin.");
-    } finally {
-      setCreating(false);
-    }
-  }
-
   function handleRowClick(event: React.MouseEvent, caseId: string) {
     if ((event.target as HTMLElement).closest("a, button, input, select")) return;
     router.push(quickViewHref(caseId), { scroll: false });
@@ -167,12 +106,12 @@ export function CaseListView() {
           <h1 className="text-xl font-semibold text-navy-900">Davalar</h1>
           <p className="text-sm text-navy-500">Tüm aktif ve geçmiş davalarınızı yönetin.</p>
         </div>
-        <button
-          onClick={() => setFormOpen((open) => !open)}
+        <Link
+          href="/davalar/yeni"
           className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
         >
           + Yeni Dava
-        </button>
+        </Link>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -216,121 +155,6 @@ export function CaseListView() {
       </div>
 
       <FilterChips chips={chips} onRemove={removeFilter} onClear={clearFilters} resultCount={loading || error ? undefined : cases.length} />
-
-      {formOpen && (
-        <form
-          onSubmit={handleCreateSubmit}
-          className="grid grid-cols-1 gap-3 rounded-2xl border border-surface-border bg-white p-5 shadow-card sm:grid-cols-2"
-        >
-          <div>
-            <label htmlFor="case_number" className="mb-1 block text-xs font-medium text-navy-600">
-              Dava No
-            </label>
-            <input
-              id="case_number"
-              required
-              value={form.case_number}
-              onChange={(event) => setForm({ ...form, case_number: event.target.value })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            />
-          </div>
-          <div>
-            <label htmlFor="case_name" className="mb-1 block text-xs font-medium text-navy-600">
-              Dava Adı
-            </label>
-            <input
-              id="case_name"
-              required
-              value={form.case_name}
-              onChange={(event) => setForm({ ...form, case_name: event.target.value })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            />
-          </div>
-          <div>
-            <label htmlFor="client_name" className="mb-1 block text-xs font-medium text-navy-600">
-              Müvekkil
-            </label>
-            <input
-              id="client_name"
-              required
-              value={form.client_name}
-              onChange={(event) => setForm({ ...form, client_name: event.target.value })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            />
-          </div>
-          <div>
-            <label htmlFor="opposing_party" className="mb-1 block text-xs font-medium text-navy-600">
-              Karşı Taraf
-            </label>
-            <input
-              id="opposing_party"
-              value={form.opposing_party}
-              onChange={(event) => setForm({ ...form, opposing_party: event.target.value })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            />
-          </div>
-          <div>
-            <label htmlFor="case_type" className="mb-1 block text-xs font-medium text-navy-600">
-              Kategori
-            </label>
-            <select
-              id="case_type"
-              value={form.case_type}
-              onChange={(event) => setForm({ ...form, case_type: event.target.value as CaseType })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            >
-              {CASE_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {CASE_TYPE_LABELS[type]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="court" className="mb-1 block text-xs font-medium text-navy-600">
-              Mahkeme
-            </label>
-            <input
-              id="court"
-              value={form.court}
-              onChange={(event) => setForm({ ...form, court: event.target.value })}
-              className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-            />
-          </div>
-
-          {isAdmin && (
-            <div>
-              <label htmlFor="assigned_lawyer_id" className="mb-1 block text-xs font-medium text-navy-600">Sorumlu Avukat</label>
-              <select
-                id="assigned_lawyer_id"
-                required
-                value={form.assigned_lawyer_id}
-                onChange={(event) => setForm({ ...form, assigned_lawyer_id: event.target.value })}
-                className="w-full rounded-lg border border-surface-border bg-white px-3 py-2 text-sm"
-              >
-                <option value="">Avukat seçin</option>
-                {(adminLawyers ?? []).map((lawyer) => <option key={lawyer.id} value={lawyer.id}>{lawyer.full_name} · {lawyer.department}</option>)}
-              </select>
-            </div>
-          )}
-
-          {createError && (
-            <div className="sm:col-span-2">
-              <ErrorState message={createError} />
-            </div>
-          )}
-
-          <div className="sm:col-span-2">
-            <button
-              type="submit"
-              disabled={creating || !formAccessReady}
-              className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
-            >
-              {creating ? "Kaydediliyor..." : "Kaydet"}
-            </button>
-          </div>
-        </form>
-      )}
 
       {loading && <LoadingState label="Davalar yükleniyor..." />}
       {!loading && error && <ErrorState message={error} />}
