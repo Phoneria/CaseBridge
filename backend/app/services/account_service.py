@@ -41,6 +41,9 @@ def deliver(message: EmailMessage) -> bool:
     except EmailSendError as exc:
         logger.warning("Hesap e-postası gönderilemedi: %s", exc)
         return False
+    except Exception as exc:
+        logger.warning("Hesap e-postası gönderilemedi: %s", type(exc).__name__)
+        return False
     return True
 
 

@@ -76,8 +76,8 @@ def forgot_password(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    """Always answers the same, whether or not the address is registered. The
-    e-mail is sent after the response so timing does not give it away either."""
+    """Always answers with the same status and body, whether or not the address
+    is registered. The e-mail is sent after the response (deferred)."""
     client_ip = request.client.host if request.client else "unknown"
     limiter_key = f"forgot:{client_ip}:{payload.email.lower()}"
     if is_rate_limited(limiter_key, FORGOT_PASSWORD_LIMIT):

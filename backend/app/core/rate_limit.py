@@ -28,8 +28,11 @@ def is_rate_limited(key: str, max_attempts: int = _MAX_ATTEMPTS) -> bool:
     endpoints must differ (e.g. a "forgot:" prefix)."""
     now = time.monotonic()
     with _lock:
-        recent = [t for t in _attempts[key] if now - t < _WINDOW_SECONDS]
-        _attempts[key] = recent
+        recent = [t for t in _attempts.get(key, ()) if now - t < _WINDOW_SECONDS]
+        if recent:
+            _attempts[key] = recent
+        else:
+            _attempts.pop(key, None)
         return len(recent) >= max_attempts
 
 

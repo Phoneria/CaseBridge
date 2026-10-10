@@ -288,3 +288,45 @@ def test_change_password_requires_login_and_limits_wrong_guesses(client, two_fir
     )
     assert limited.status_code == 429
     assert limited.json()["detail"] == "Çok fazla deneme. Lütfen bir dakika sonra tekrar deneyin."
+
+
+# --- follow-ups --------------------------------------------------------------
+
+def test_set_password_is_410_when_the_link_is_consumed_concurrently(client, db_session, pending_user, monkeypatch):
+    raw = issue_token(db_session, pending_user, TokenPurpose.INVITE)
+    db_session.commit()
+    monkeypatch.setattr("app.api.routes.auth.consume_token", lambda db, row: False)
+
+    response = client.post("/auth/set-password", json={"token": raw, "password": NEW_PASSWORD})
+    assert response.status_code == 410
+    assert response.json()["detail"] == LINK_GONE
+    db_session.refresh(pending_user)
+    assert pending_user.password_set_at is None
+
+
+def test_deliver_never_raises_and_logs_only_the_error_type(monkeypatch, caplog):
+    from app.services import account_service
+    from app.services.email import EmailMessage
+
+    def boom(message):
+        raise TypeError("secret-link-token-123")
+
+    monkeypatch.setattr(account_service, "send_email", boom)
+    message = EmailMessage(to="a@example.com", subject="s", text="t")
+    with caplog.at_level("WARNING", logger="casebridge"):
+        assert account_service.deliver(message) is False
+    assert "TypeError" in caplog.text
+    assert "secret-link-token-123" not in caplog.text
+
+
+def test_rate_limiter_drops_keys_without_recent_attempts(monkeypatch):
+    from app.core import rate_limit
+
+    reset_all()
+    rate_limit.record_attempt("forgot:x")
+    assert "forgot:x" in rate_limit._attempts
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: 10_000_000.0)
+    assert rate_limit.is_rate_limited("forgot:x", 3) is False
+    assert "forgot:x" not in rate_limit._attempts
+    assert rate_limit.is_rate_limited("never-seen", 3) is False
+    assert "never-seen" not in rate_limit._attempts
