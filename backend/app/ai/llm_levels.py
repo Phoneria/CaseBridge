@@ -1,5 +1,5 @@
-"""Task-based levels for the single-turn LLM calls of Dosya Analizi and Canlı
-Duruşma. The level of every call is fixed by what the call does; a
+"""Task-based levels for the single-turn LLM calls of Dosya Analizi, Canlı
+Duruşma and Belgeden doldur. The level of every call is fixed by what the call does; a
 LevelRoutedProvider (app.ai.provider_factory) maps the level to a model."""
 from typing import Literal
 
@@ -16,6 +16,8 @@ TASK_LEVELS: dict[str, str] = {
     "courtroom.judge_interim": "basic",
     "courtroom.judge_final": "deep",
     "courtroom.json_repair": "basic",
+    "case_intake.extract": "standard",
+    "case_intake.json_repair": "basic",
 }
 
 

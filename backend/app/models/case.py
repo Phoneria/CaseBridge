@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -32,6 +32,19 @@ class CaseOutcome(str, enum.Enum):
     SETTLED = "settled"
 
 
+class PartyRole(str, enum.Enum):
+    PLAINTIFF = "plaintiff"
+    DEFENDANT = "defendant"
+    INTERVENER = "intervener"
+    OTHER = "other"
+
+
+class ClientRole(str, enum.Enum):
+    PLAINTIFF = "plaintiff"
+    DEFENDANT = "defendant"
+    OTHER = "other"
+
+
 class Case(Base):
     __tablename__ = "cases"
     __table_args__ = (
@@ -59,6 +72,15 @@ class Case(Base):
     case_value: Mapped[float] = mapped_column(Float, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
 
+    # Case intake: structured description of the dispute. client_role is
+    # validated by the API (ClientRole), stored as plain text.
+    client_role: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    court_file_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    claim: Mapped[str | None] = mapped_column(Text, nullable=True)
+    facts_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    plaintiff_position: Mapped[str | None] = mapped_column(Text, nullable=True)
+    defendant_position: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_precedent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
 
@@ -70,6 +92,30 @@ class Case(Base):
     events: Mapped[list["CaseEvent"]] = relationship(
         back_populates="case", cascade="all, delete-orphan", order_by="CaseEvent.event_date"
     )
+    parties: Mapped[list["CaseParty"]] = relationship(
+        back_populates="case",
+        cascade="all, delete-orphan",
+        order_by="CaseParty.sort_order",
+        lazy="selectin",
+    )
+
+
+class CaseParty(Base):
+    __tablename__ = "case_parties"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    case_id: Mapped[str] = mapped_column(String(36), ForeignKey("cases.id"), nullable=False, index=True)
+    law_firm_id: Mapped[str] = mapped_column(String(36), ForeignKey("law_firms.id"), nullable=False, index=True)
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(String(20), nullable=False)
+    is_client: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    counsel_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    case: Mapped["Case"] = relationship(back_populates="parties")
 
 
 class CaseEventType(str, enum.Enum):

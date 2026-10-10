@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, status
@@ -8,12 +9,16 @@ from sqlalchemy.orm import Session
 from app.ai.chat.base import ChatProvider
 from app.ai.chat.classifier import classify_chat_level
 from app.ai.chat.factory import get_chat_provider
-from app.ai.provider_factory import get_llm_provider
+from app.ai.case_intake import UNCONFIGURED_MESSAGE
+from app.ai.errors import AIProviderConfigError
+from app.ai.provider_factory import get_case_intake_provider, get_llm_provider
 from app.ai.providers.base import LLMProvider
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
+
+logger = logging.getLogger("casebridge")
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -66,6 +71,16 @@ def get_llm_provider_dep() -> LLMProvider:
     tests via app.dependency_overrides so no test ever needs a real
     OPENAI_API_KEY or hits the network."""
     return get_llm_provider()
+
+
+def get_case_intake_provider_dep() -> LLMProvider:
+    """Provider for "Belgeden doldur". A misconfigured real provider is a 503
+    with a generic message (the configuration error text is never exposed)."""
+    try:
+        return get_case_intake_provider()
+    except AIProviderConfigError as exc:
+        logger.warning("Case intake provider is misconfigured: %s", type(exc).__name__)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=UNCONFIGURED_MESSAGE)
 
 
 def get_chat_provider_resolver() -> Callable[[str], ChatProvider]:

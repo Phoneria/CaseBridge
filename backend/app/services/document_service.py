@@ -17,19 +17,24 @@ _EXTENSION_TO_TYPE = {
 }
 
 
+def resolve_document_type(filename: str) -> DocumentType:
+    """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt."""
+    _, ext = os.path.splitext(filename.lower())
+    if ext not in _EXTENSION_TO_TYPE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt.",
+        )
+    return _EXTENSION_TO_TYPE[ext]
+
+
 class DocumentService:
     def __init__(self, db: Session):
         self.db = db
         self.documents = DocumentRepository(db)
 
     def _resolve_type(self, filename: str) -> DocumentType:
-        _, ext = os.path.splitext(filename.lower())
-        if ext not in _EXTENSION_TO_TYPE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt.",
-            )
-        return _EXTENSION_TO_TYPE[ext]
+        return resolve_document_type(filename)
 
     def upload(
         self,
