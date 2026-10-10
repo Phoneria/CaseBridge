@@ -49,11 +49,17 @@ def derive_client_role(parties: Sequence[PartyData]) -> Optional[str]:
 
 def derive_opposing_party(parties: Sequence[PartyData], client_role: Optional[str]) -> Optional[str]:
     """Non-client parties on the opposite side of the client; every non-client
-    party when the client's side is "other" or unknown."""
+    party when the client's side is "other" or unknown. When the client is a
+    plaintiff/defendant but nobody holds the opposite role, the non-client
+    parties with role "other" stand in (an intervener alone yields None)."""
+    others = [party for party in parties if not party.is_client]
     opposite = _OPPOSITE_ROLE.get(client_role or "")
-    return _join(
-        [party.name for party in parties if not party.is_client and (opposite is None or party.role == opposite)]
-    )
+    if opposite is None:
+        return _join([party.name for party in others])
+    opposing = [party for party in others if party.role == opposite]
+    if not opposing:
+        opposing = [party for party in others if party.role == "other"]
+    return _join([party.name for party in opposing])
 
 
 def legacy_parties(client_name: str, opposing_party: Optional[str]) -> list[PartyData]:

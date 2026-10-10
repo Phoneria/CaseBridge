@@ -56,6 +56,20 @@ def test_opposing_party_is_none_without_opposing_parties():
     assert derive_opposing_party([_p("A", "plaintiff", True), _p("D", "intervener")], "plaintiff") is None
 
 
+def test_opposing_party_falls_back_to_other_role_parties():
+    parties = [_p("A", "plaintiff", True), _p("B", "other"), _p("C", "intervener")]
+    assert derive_opposing_party(parties, "plaintiff") == "B"
+
+
+def test_opposite_role_parties_take_precedence_over_other_role_parties():
+    parties = [_p("A", "plaintiff", True), _p("B", "other"), _p("C", "defendant")]
+    assert derive_opposing_party(parties, "plaintiff") == "C"
+
+
+def test_opposing_party_is_none_with_only_an_intervener():
+    assert derive_opposing_party([_p("A", "plaintiff", True), _p("D", "intervener")], "plaintiff") is None
+
+
 def test_opposing_party_is_cut_to_255_characters():
     parties = [_p("A", "plaintiff", True), _p("B" * 200, "defendant"), _p("C" * 200, "defendant")]
     assert len(derive_opposing_party(parties, "plaintiff")) == 255

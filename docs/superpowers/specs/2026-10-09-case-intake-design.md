@@ -42,7 +42,8 @@ Hedef: ayrı, bölümlü bir "Yeni dava" sayfası ve isteğe bağlı "Belgeden d
 - `client_name` ve `opposing_party` kalır (liste, arama, emsaller, analitik ve "davadan duruşma" kullanıyor).
 - Taraflar gönderildiğinde backend bunları taraflardan türetir:
   - `client_name` = müvekkil taraf adları, `", "` ile birleştirilmiş, 255 karaktere kırpılmış.
-  - `opposing_party` = müvekkil olmayan ve rolü müvekkilin rolünün karşıtı olan taraflar (müvekkil rolü `other` ise müvekkil olmayan tüm taraflar), aynı kuralla; yoksa `NULL`.
+  - `opposing_party` = müvekkil olmayan ve rolü müvekkilin rolünün karşıtı olan taraflar (müvekkil rolü `other` ise müvekkil olmayan tüm taraflar), aynı kuralla; müvekkil `plaintiff`/`defendant` iken karşıt rolde taraf yoksa, rolü `other` olan müvekkil olmayan taraflar kullanılır (karşıt rol varsa o önceliklidir; fer'i müdahil tek başına yeterli değildir); hiçbiri yoksa `NULL`.
+  - Yeni eklenen taraf satırı, müvekkilin rolünün karşıt rolüyle başlar (müvekkil davacı → davalı, müvekkil davalı → davacı; müvekkil yok / `other` → davalı). Yeni dava formunun ilk satırları değişmez.
 - `client_role`, taraflar gönderildiğinde ve açıkça verilmediğinde ilk müvekkil tarafın rolünden türetilir (`intervener` → `other`).
 
 ### 3.4 Migration
