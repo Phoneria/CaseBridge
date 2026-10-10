@@ -7,10 +7,12 @@ import { updateCase } from "@/lib/api";
 import { ApiError } from "@/lib/apiError";
 import {
   NO_CLIENT_MESSAGE,
+  addedPartyRole,
   PARTY_ROLE_LABELS,
   buildPartiesPayload,
   formFromCase,
   newPartyRow,
+  validateParties,
   type PartyRow,
 } from "@/lib/caseIntake";
 import type { Case } from "@/types";
@@ -28,6 +30,7 @@ export function CasePartiesCard({ caseDetail, onSaved }: Props) {
   const [rows, setRows] = useState<PartyRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
+  const [counselErrors, setCounselErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const parties = [...(caseDetail.parties ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -35,19 +38,18 @@ export function CasePartiesCard({ caseDetail, onSaved }: Props) {
     setRows(formFromCase(caseDetail).parties);
     setError(null);
     setRowErrors({});
+    setCounselErrors({});
     setEditing(true);
   }
 
   async function save() {
     if (saving) return;
-    const nameErrors: Record<string, string> = {};
-    for (const row of rows) {
-      if (!row.name.trim() && row.counsel_name.trim()) nameErrors[row.key] = "Taraf adı gerekli.";
-    }
+    const { partyNames: nameErrors, partyCounsel } = validateParties(rows);
     const hasClient = rows.some((row) => row.is_client && row.name.trim());
     setRowErrors(nameErrors);
+    setCounselErrors(partyCounsel);
     setError(hasClient ? null : NO_CLIENT_MESSAGE);
-    if (!hasClient || Object.keys(nameErrors).length) return;
+    if (!hasClient || Object.keys(nameErrors).length || Object.keys(partyCounsel).length) return;
 
     setSaving(true);
     try {
@@ -84,9 +86,10 @@ export function CasePartiesCard({ caseDetail, onSaved }: Props) {
             ai={NO_AI}
             error={undefined}
             partyErrors={rowErrors}
+            counselErrors={counselErrors}
             showClientHint={false}
             onUpdate={(key, patch) => setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)))}
-            onAdd={() => setRows((current) => [...current, newPartyRow("other")])}
+            onAdd={() => setRows((current) => [...current, newPartyRow(addedPartyRole(current))])}
             onRemove={(key) => setRows((current) => current.filter((row) => row.key !== key))}
           />
           {error && (

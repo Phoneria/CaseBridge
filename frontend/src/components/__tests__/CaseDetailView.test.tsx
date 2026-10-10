@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -523,15 +523,51 @@ describe("CaseDetailView", () => {
       expect(
         screen.queryByText("Dava oluşturuldu ancak 3 belge/olay eklenemedi. Dava sayfasından tekrar ekleyebilirsiniz."),
       ).toBeNull();
-      expect(nav.replace).toHaveBeenCalled();
+      expect(nav.replace).toHaveBeenLastCalledWith("/davalar/c1", { scroll: false });
     });
 
-    it("ignores a missing or invalid eklenemeyen value", async () => {
+    it("keeps the other URL parameters when dismissing", async () => {
       getCase.mockResolvedValue(withIntake);
-      setUrl("/davalar/c1?eklenemeyen=abc");
+      setUrl("/davalar/c1?sekme=belgeler&eklenemeyen=3");
+      render(<CaseDetailView caseId="c1" />);
+      await userEvent.click(await screen.findByRole("button", { name: "Uyarıyı kapat" }));
+      expect(nav.replace).toHaveBeenLastCalledWith("/davalar/c1?sekme=belgeler", { scroll: false });
+    });
+
+    it.each(["abc", "0", "-2", "2.5", "1e1", "0x10", "%203%20", ""])("ignores the invalid eklenemeyen value %j", async (value) => {
+      getCase.mockResolvedValue(withIntake);
+      setUrl(`/davalar/c1?eklenemeyen=${value}`);
       render(<CaseDetailView caseId="c1" />);
       await screen.findByRole("heading", { name: "Taraflar" });
       expect(screen.queryByText(/belge\/olay eklenemedi/)).toBeNull();
+    });
+
+    it("accepts a plain positive integer", async () => {
+      getCase.mockResolvedValue(withIntake);
+      setUrl("/davalar/c1?eklenemeyen=12");
+      render(<CaseDetailView caseId="c1" />);
+      expect(await screen.findByText(/12 belge\/olay eklenemedi/)).toBeInTheDocument();
+    });
+
+    it("refuses to save a party name over 255 characters", async () => {
+      getCase.mockResolvedValue(withIntake);
+      render(<CaseDetailView caseId="c1" />);
+      await userEvent.click(await screen.findByRole("button", { name: "Tarafları düzenle" }));
+      const nameInput = within(screen.getByRole("group", { name: "Taraf 2" })).getByLabelText(/^Ad/);
+      expect(nameInput).toHaveAttribute("maxlength", "255");
+      fireEvent.change(nameInput, { target: { value: "x".repeat(256) } });
+      await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+      expect(await screen.findByText("En fazla 255 karakter olabilir.")).toBeInTheDocument();
+      expect(updateCase).not.toHaveBeenCalled();
+    });
+
+    it("adds a party row opposite the client's in the editor", async () => {
+      getCase.mockResolvedValue(withIntake);
+      render(<CaseDetailView caseId="c1" />);
+      await userEvent.click(await screen.findByRole("button", { name: "Tarafları düzenle" }));
+      await userEvent.click(screen.getByRole("button", { name: "Taraf ekle" }));
+      // the client (Deniz Arslan) is a defendant, so the new row is a plaintiff
+      expect(within(screen.getByRole("group", { name: "Taraf 3" })).getByLabelText("Rol")).toHaveValue("plaintiff");
     });
   });
 });

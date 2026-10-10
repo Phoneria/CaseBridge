@@ -2,7 +2,7 @@
 
 import { CASE_STATUSES, CASE_TYPES } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS } from "@/lib/labels";
-import type { CaseFormState } from "@/lib/caseIntake";
+import { FIELD_LIMITS, type CaseFormState } from "@/lib/caseIntake";
 import type { CaseStatus, CaseType } from "@/types";
 import { Field, INPUT_CLASS } from "@/components/case-form/Field";
 
@@ -13,7 +13,7 @@ export interface SetField {
 interface Props {
   form: CaseFormState;
   ai: ReadonlySet<string>;
-  errors: { case_number?: string; case_name?: string; case_value?: string };
+  errors: { case_number?: string; case_name?: string; case_value?: string; court?: string; court_file_number?: string };
   setField: SetField;
 }
 
@@ -22,10 +22,10 @@ export function BasicInfoFields({ form, ai, errors, setField }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Field id="case_number" label="Dava no" required error={errors.case_number}>
-        {(a11y) => <input {...a11y} className={INPUT_CLASS} value={form.case_number} onChange={(e) => setField("case_number", e.target.value)} />}
+        {(a11y) => <input {...a11y} maxLength={FIELD_LIMITS.case_number} className={INPUT_CLASS} value={form.case_number} onChange={(e) => setField("case_number", e.target.value)} />}
       </Field>
       <Field id="case_name" label="Dava adı" required ai={ai.has("case_name")} error={errors.case_name}>
-        {(a11y) => <input {...a11y} className={INPUT_CLASS} value={form.case_name} onChange={(e) => setField("case_name", e.target.value)} />}
+        {(a11y) => <input {...a11y} maxLength={FIELD_LIMITS.case_name} className={INPUT_CLASS} value={form.case_name} onChange={(e) => setField("case_name", e.target.value)} />}
       </Field>
       <Field id="case_type" label="Dava türü" required ai={ai.has("case_type")}>
         {(a11y) => (
@@ -38,12 +38,12 @@ export function BasicInfoFields({ form, ai, errors, setField }: Props) {
           </select>
         )}
       </Field>
-      <Field id="court" label="Mahkeme" ai={ai.has("court")}>
-        {(a11y) => <input {...a11y} className={INPUT_CLASS} value={form.court} onChange={(e) => setField("court", e.target.value)} />}
+      <Field id="court" label="Mahkeme" ai={ai.has("court")} error={errors.court}>
+        {(a11y) => <input {...a11y} maxLength={FIELD_LIMITS.court} className={INPUT_CLASS} value={form.court} onChange={(e) => setField("court", e.target.value)} />}
       </Field>
-      <Field id="court_file_number" label="Esas no" ai={ai.has("court_file_number")}>
+      <Field id="court_file_number" label="Esas no" ai={ai.has("court_file_number")} error={errors.court_file_number}>
         {(a11y) => (
-          <input {...a11y} className={INPUT_CLASS} value={form.court_file_number} onChange={(e) => setField("court_file_number", e.target.value)} />
+          <input {...a11y} maxLength={FIELD_LIMITS.court_file_number} className={INPUT_CLASS} value={form.court_file_number} onChange={(e) => setField("court_file_number", e.target.value)} />
         )}
       </Field>
       <Field id="opening_date" label="Dava tarihi" ai={ai.has("opening_date")}>

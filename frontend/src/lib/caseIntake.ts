@@ -63,6 +63,19 @@ export interface CaseFormState {
   assigned_lawyer_id: string;
 }
 
+/** Column limits of the backend; the same numbers cap the inputs and drive the validation messages. */
+export const FIELD_LIMITS = {
+  case_number: 50,
+  case_name: 255,
+  court: 255,
+  court_file_number: 100,
+  party_name: 255,
+  counsel_name: 255,
+} as const;
+
+const tooLong = (value: string, limit: number): string | undefined =>
+  value.trim().length > limit ? `En fazla ${limit} karakter olabilir.` : undefined;
+
 export interface SuggestedEvent extends CaseIntakeEvent {
   key: string;
   checked: boolean;
@@ -72,6 +85,11 @@ let rowCounter = 0;
 function nextKey(prefix: string): string {
   rowCounter += 1;
   return `${prefix}-${rowCounter}`;
+}
+
+/** Role of a row added with "Taraf ekle": the side opposite the client's (defendant without a client or on "other"). */
+export function addedPartyRole(parties: PartyRow[]): PartyRole {
+  return clientRoleOf(parties) === "defendant" ? "plaintiff" : "defendant";
 }
 
 export function newPartyRow(role: PartyRole = "other", init: Partial<Omit<PartyRow, "key" | "role">> = {}): PartyRow {
@@ -116,21 +134,38 @@ export interface FormErrors {
   case_number?: string;
   case_name?: string;
   case_value?: string;
+  court?: string;
+  court_file_number?: string;
   parties?: string;
   partyNames: Record<string, string>;
+  partyCounsel: Record<string, string>;
   assigned_lawyer_id?: string;
 }
 
+/** Row errors by row key: a missing name (when only a counsel is given) and over-long name / counsel. */
+export function validateParties(parties: PartyRow[]): { partyNames: Record<string, string>; partyCounsel: Record<string, string> } {
+  const partyNames: Record<string, string> = {};
+  const partyCounsel: Record<string, string> = {};
+  for (const party of parties) {
+    const nameError = !party.name.trim() && party.counsel_name.trim() ? "Taraf adı gerekli." : tooLong(party.name, FIELD_LIMITS.party_name);
+    if (nameError) partyNames[party.key] = nameError;
+    const counselError = tooLong(party.counsel_name, FIELD_LIMITS.counsel_name);
+    if (counselError) partyCounsel[party.key] = counselError;
+  }
+  return { partyNames, partyCounsel };
+}
+
 export function validateCaseForm(form: CaseFormState, options: { requireLawyer: boolean }): FormErrors {
-  const errors: FormErrors = { partyNames: {} };
+  const errors: FormErrors = { ...validateParties(form.parties) };
   if (!form.case_number.trim()) errors.case_number = "Dava no gerekli.";
+  else errors.case_number = tooLong(form.case_number, FIELD_LIMITS.case_number);
   if (!form.case_name.trim()) errors.case_name = "Dava adı gerekli.";
+  else errors.case_name = tooLong(form.case_name, FIELD_LIMITS.case_name);
+  errors.court = tooLong(form.court, FIELD_LIMITS.court);
+  errors.court_file_number = tooLong(form.court_file_number, FIELD_LIMITS.court_file_number);
   if (form.case_value.trim()) {
     const value = Number(form.case_value);
     if (!Number.isFinite(value) || value < 0) errors.case_value = "Dava değeri geçerli bir sayı olmalı.";
-  }
-  for (const party of form.parties) {
-    if (!party.name.trim() && party.counsel_name.trim()) errors.partyNames[party.key] = "Taraf adı gerekli.";
   }
   if (!form.parties.some((party) => party.is_client && party.name.trim())) errors.parties = NO_CLIENT_MESSAGE;
   if (options.requireLawyer && !form.assigned_lawyer_id) errors.assigned_lawyer_id = "Sorumlu avukat seçin.";
@@ -142,16 +177,19 @@ export function hasErrors(errors: FormErrors): boolean {
     errors.case_number ||
       errors.case_name ||
       errors.case_value ||
+      errors.court ||
+      errors.court_file_number ||
       errors.parties ||
       errors.assigned_lawyer_id ||
-      Object.keys(errors.partyNames).length,
+      Object.keys(errors.partyNames).length ||
+      Object.keys(errors.partyCounsel).length,
   );
 }
 
 /** Sections in page order; the first one holding an error is scrolled to. */
 export function firstErrorSection(errors: FormErrors): SectionId | null {
-  if (errors.case_number || errors.case_name || errors.case_value) return "temel";
-  if (errors.parties || Object.keys(errors.partyNames).length) return "taraflar";
+  if (errors.case_number || errors.case_name || errors.case_value || errors.court || errors.court_file_number) return "temel";
+  if (errors.parties || Object.keys(errors.partyNames).length || Object.keys(errors.partyCounsel).length) return "taraflar";
   if (errors.assigned_lawyer_id) return "belgeler";
   return null;
 }

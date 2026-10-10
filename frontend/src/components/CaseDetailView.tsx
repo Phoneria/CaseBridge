@@ -80,8 +80,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [taskError, setTaskError] = useState<string | null>(null);
   const [skippedDismissed, setSkippedDismissed] = useState(false);
   // Set by the new-case page when some events or documents could not be added after the case was created.
-  const skippedParam = Number(params.get("eklenemeyen"));
-  const skippedCount = Number.isInteger(skippedParam) && skippedParam > 0 ? skippedParam : 0;
+  const skippedParam = params.get("eklenemeyen") ?? "";
+  const skippedCount = /^[1-9]\d*$/.test(skippedParam) ? Number(skippedParam) : 0;
 
   function load() {
     setLoading(true);

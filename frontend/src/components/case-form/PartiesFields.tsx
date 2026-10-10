@@ -2,7 +2,7 @@
 
 import { AiBadge } from "@/components/ai/AiBadge";
 import { INPUT_CLASS } from "@/components/case-form/Field";
-import { PARTY_ROLES, PARTY_ROLE_LABELS, type PartyRow } from "@/lib/caseIntake";
+import { FIELD_LIMITS, PARTY_ROLES, PARTY_ROLE_LABELS, type PartyRow } from "@/lib/caseIntake";
 import type { PartyRole } from "@/types";
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   error?: string;
   /** Row errors by row key. */
   partyErrors: Record<string, string>;
+  /** Counsel errors by row key. */
+  counselErrors?: Record<string, string>;
   /** "Müvekkilinizi işaretleyin." after the AI brought parties but no client is marked. */
   showClientHint: boolean;
   onUpdate: (key: string, patch: Partial<Omit<PartyRow, "key">>) => void;
@@ -20,7 +22,7 @@ interface Props {
 }
 
 /** "Taraflar" fields: a row per party with name, role, counsel and the client checkbox. */
-export function PartiesFields({ parties, ai, error, partyErrors, showClientHint, onUpdate, onAdd, onRemove }: Props) {
+export function PartiesFields({ parties, ai, error, partyErrors, counselErrors = {}, showClientHint, onUpdate, onAdd, onRemove }: Props) {
   return (
     <div className="space-y-3">
       {showClientHint && <p className="text-sm text-accent-700">Müvekkilinizi işaretleyin.</p>}
@@ -32,6 +34,7 @@ export function PartiesFields({ parties, ai, error, partyErrors, showClientHint,
       {parties.map((party, index) => {
         const number = index + 1;
         const nameError = partyErrors[party.key];
+        const counselError = counselErrors[party.key];
         return (
           <div
             key={party.key}
@@ -52,6 +55,7 @@ export function PartiesFields({ parties, ai, error, partyErrors, showClientHint,
               </div>
               <input
                 id={`party-name-${party.key}`}
+                maxLength={FIELD_LIMITS.party_name}
                 className={INPUT_CLASS}
                 value={party.name}
                 aria-invalid={Boolean(nameError)}
@@ -88,10 +92,18 @@ export function PartiesFields({ parties, ai, error, partyErrors, showClientHint,
               </label>
               <input
                 id={`party-counsel-${party.key}`}
+                maxLength={FIELD_LIMITS.counsel_name}
                 className={INPUT_CLASS}
                 value={party.counsel_name}
+                aria-invalid={Boolean(counselError)}
+                aria-describedby={counselError ? `party-counsel-${party.key}-hata` : undefined}
                 onChange={(e) => onUpdate(party.key, { counsel_name: e.target.value })}
               />
+              {counselError && (
+                <p id={`party-counsel-${party.key}-hata`} className="mt-1 text-xs text-red-600">
+                  {counselError}
+                </p>
+              )}
             </div>
             <div className="flex items-end gap-3 pb-2">
               <label className="flex items-center gap-2 text-sm text-navy-700">

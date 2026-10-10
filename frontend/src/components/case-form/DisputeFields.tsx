@@ -2,7 +2,7 @@
 
 import { Field, INPUT_CLASS } from "@/components/case-form/Field";
 import type { SetField } from "@/components/case-form/BasicInfoFields";
-import { positionLabels, type CaseFormState } from "@/lib/caseIntake";
+import { FIELD_LIMITS, positionLabels, type CaseFormState } from "@/lib/caseIntake";
 import type { ClientRole } from "@/types";
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 export function CourtFileNumberField({ value, ai, onChange }: { value: string; ai: boolean; onChange: (value: string) => void }) {
   return (
     <Field id="court_file_number" label="Esas no" ai={ai}>
-      {(a11y) => <input {...a11y} className={INPUT_CLASS} value={value} onChange={(e) => onChange(e.target.value)} />}
+      {(a11y) => <input {...a11y} maxLength={FIELD_LIMITS.court_file_number} className={INPUT_CLASS} value={value} onChange={(e) => onChange(e.target.value)} />}
     </Field>
   );
 }

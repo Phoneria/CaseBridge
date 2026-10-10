@@ -17,6 +17,7 @@ import {
   firstErrorSection,
   hasErrors,
   hasFillableContent,
+  addedPartyRole,
   newPartyRow,
   validateCaseForm,
   type CaseFormState,
@@ -36,7 +37,7 @@ const SECTIONS: { id: SectionId; title: string }[] = [
   { id: "belgeler", title: "Belgeler ve takip" },
 ];
 
-const NO_ERRORS: FormErrors = { partyNames: {} };
+const NO_ERRORS: FormErrors = { partyNames: {}, partyCounsel: {} };
 
 function errorMessage(error: unknown): string {
   return error instanceof ApiError && error.message ? error.message : "Bilinmeyen hata.";
@@ -245,9 +246,10 @@ export function NewCaseView() {
               ai={ai}
               error={errors.parties}
               partyErrors={errors.partyNames}
+              counselErrors={errors.partyCounsel}
               showClientHint={showClientHint}
               onUpdate={updateParty}
-              onAdd={() => setForm((current) => ({ ...current, parties: [...current.parties, newPartyRow("other")] }))}
+              onAdd={() => setForm((current) => ({ ...current, parties: [...current.parties, newPartyRow(addedPartyRole(current.parties))] }))}
               onRemove={(key) => {
                 setForm((current) => ({ ...current, parties: current.parties.filter((party) => party.key !== key) }));
                 unmark(`party:${key}`);

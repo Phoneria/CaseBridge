@@ -178,6 +178,19 @@ describe("NewCaseView", () => {
     expect(screen.getAllByRole("group", { name: /^Taraf \d$/ })).toHaveLength(2);
   });
 
+  it("adds a party row with the role opposite the client's", async () => {
+    render(<NewCaseView />);
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 2" })).getByLabelText("Müvekkilimiz"));
+    await userEvent.click(screen.getByRole("button", { name: "Taraf ekle" }));
+    expect(within(screen.getByRole("group", { name: "Taraf 3" })).getByLabelText("Rol")).toHaveValue("plaintiff");
+  });
+
+  it("adds a defendant row when no client is marked yet", async () => {
+    render(<NewCaseView />);
+    await userEvent.click(screen.getByRole("button", { name: "Taraf ekle" }));
+    expect(within(screen.getByRole("group", { name: "Taraf 3" })).getByLabelText("Rol")).toHaveValue("defendant");
+  });
+
   it("asks first and keeps typed values the draft leaves null when typing happened during the request", async () => {
     let resolve!: (value: CaseIntakeResult) => void;
     extractCaseIntake.mockReturnValue(new Promise<CaseIntakeResult>((r) => (resolve = r)));

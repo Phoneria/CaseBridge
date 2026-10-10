@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_DOCUMENT_BYTES,
   NO_CLIENT_MESSAGE,
+  addedPartyRole,
   applyDraft,
   buildCasePayload,
   checkDocumentFile,
@@ -46,6 +47,58 @@ function validForm(): CaseFormState {
   form.parties = [newPartyRow("plaintiff", { name: "A Ltd.", is_client: true }), newPartyRow("defendant", { name: "B A.Ş." })];
   return form;
 }
+
+describe("validateCaseForm length limits", () => {
+  const TOO_LONG = (n: number) => `En fazla ${n} karakter olabilir.`;
+
+  it("accepts values exactly at the limits", () => {
+    const form = validForm();
+    form.case_number = "n".repeat(50);
+    form.case_name = "a".repeat(255);
+    form.court = "c".repeat(255);
+    form.court_file_number = "e".repeat(100);
+    form.parties[1] = newPartyRow("defendant", { name: "p".repeat(255), counsel_name: "v".repeat(255) });
+    expect(hasErrors(validateCaseForm(form, { requireLawyer: false }))).toBe(false);
+  });
+
+  it("flags values over the limits with a Turkish message", () => {
+    const form = validForm();
+    form.case_number = "n".repeat(51);
+    form.case_name = "a".repeat(256);
+    form.court = "c".repeat(256);
+    form.court_file_number = "e".repeat(101);
+    const long = newPartyRow("defendant", { name: "p".repeat(256), counsel_name: "v".repeat(256) });
+    form.parties.push(long);
+    const errors = validateCaseForm(form, { requireLawyer: false });
+    expect(errors.case_number).toBe(TOO_LONG(50));
+    expect(errors.case_name).toBe(TOO_LONG(255));
+    expect(errors.court).toBe(TOO_LONG(255));
+    expect(errors.court_file_number).toBe(TOO_LONG(100));
+    expect(errors.partyNames[long.key]).toBe(TOO_LONG(255));
+    expect(errors.partyCounsel[long.key]).toBe(TOO_LONG(255));
+    expect(hasErrors(errors)).toBe(true);
+    expect(firstErrorSection({ partyNames: {}, partyCounsel: {}, court: "x" })).toBe("temel");
+  });
+
+  it("measures the trimmed value, which is what is sent", () => {
+    const form = validForm();
+    form.case_number = ` ${"n".repeat(50)} `;
+    expect(validateCaseForm(form, { requireLawyer: false }).case_number).toBeUndefined();
+  });
+});
+
+describe("addedPartyRole", () => {
+  it("is the side opposite the client's", () => {
+    expect(addedPartyRole([newPartyRow("plaintiff", { is_client: true })])).toBe("defendant");
+    expect(addedPartyRole([newPartyRow("defendant", { is_client: true })])).toBe("plaintiff");
+  });
+
+  it("is defendant without a client or when the client's side is other", () => {
+    expect(addedPartyRole([newPartyRow("plaintiff")])).toBe("defendant");
+    expect(addedPartyRole([newPartyRow("intervener", { is_client: true })])).toBe("defendant");
+    expect(addedPartyRole([newPartyRow("other", { is_client: true })])).toBe("defendant");
+  });
+});
 
 describe("emptyCaseForm", () => {
   it("starts with a plaintiff row and a defendant row and sensible defaults", () => {

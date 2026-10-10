@@ -96,6 +96,26 @@ function PartiesHarness({
   );
 }
 
+describe("length limits", () => {
+  it("caps the basic-info inputs", () => {
+    render(<BasicHarness />);
+    expect(screen.getByLabelText(/^Dava no/)).toHaveAttribute("maxlength", "50");
+    expect(screen.getByLabelText(/^Dava adı/)).toHaveAttribute("maxlength", "255");
+    expect(screen.getByLabelText("Mahkeme")).toHaveAttribute("maxlength", "255");
+    expect(screen.getByLabelText("Esas no")).toHaveAttribute("maxlength", "100");
+  });
+
+  it("caps party name and counsel and shows a counsel error", () => {
+    const row = newPartyRow("plaintiff");
+    render(<PartiesFields parties={[row]} ai={new Set()} partyErrors={{}} counselErrors={{ [row.key]: "En fazla 255 karakter olabilir." }} showClientHint={false} onUpdate={() => {}} onAdd={() => {}} onRemove={() => {}} />);
+    const group = screen.getByRole("group", { name: "Taraf 1" });
+    expect(within(group).getByLabelText(/^Ad/)).toHaveAttribute("maxlength", "255");
+    expect(within(group).getByLabelText("Vekili")).toHaveAttribute("maxlength", "255");
+    expect(within(group).getByLabelText("Vekili")).toHaveAttribute("aria-invalid", "true");
+    expect(within(group).getByText("En fazla 255 karakter olabilir.")).toBeInTheDocument();
+  });
+});
+
 describe("PartiesFields", () => {
   it("renders a labelled group per party with the four roles", () => {
     render(<PartiesHarness />);
