@@ -3,7 +3,7 @@
 Calendar event times are stored as naive datetimes in this zone, and
 "today" for the calendar and reminders is the date in this zone.
 """
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 
 from app.core.config import settings
@@ -28,3 +28,9 @@ def to_local_naive(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value
     return value.astimezone(app_zone()).replace(tzinfo=None)
+
+
+def utc_now() -> datetime:
+    """Current UTC time as a naive datetime - how every DateTime column of
+    the app is stored (the database holds UTC, never local time)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
