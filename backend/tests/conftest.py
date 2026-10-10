@@ -125,3 +125,42 @@ def two_firms_two_users(db_session):
         "user_b": user_b,
         "password": "password123",
     }
+
+
+class MailOutbox:
+    """The .eml files written by EMAIL_BACKEND=file during a test."""
+
+    def __init__(self, directory):
+        self.directory = directory
+
+    def messages(self, to=None):
+        from email import policy
+        from email.parser import BytesParser
+
+        parsed = [
+            BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+            for path in sorted(self.directory.glob("*.eml"))
+        ] if self.directory.exists() else []
+        return [m for m in parsed if to is None or m["To"] == to]
+
+    def latest_token(self, to):
+        """The token in the newest link e-mailed to `to`."""
+        import re
+
+        messages = self.messages(to)
+        assert messages, f"no e-mail was sent to {to}"
+        body = messages[-1].get_body(preferencelist=("plain",)).get_content()
+        match = re.search(r"/sifre-belirle\?token=([A-Za-z0-9_-]+)", body)
+        assert match, body
+        return match.group(1)
+
+
+@pytest.fixture()
+def mail_outbox(tmp_path, monkeypatch):
+    """Switches the e-mail backend to files in a temp directory."""
+    from app.core.config import settings
+
+    directory = tmp_path / "outbox"
+    monkeypatch.setattr(settings, "email_backend", "file")
+    monkeypatch.setattr(settings, "email_file_dir", str(directory))
+    return MailOutbox(directory)
