@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.core.rate_limit import is_rate_limited, record_attempt
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import AuthConfigOut, LoginRequest, TokenResponse
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,7 +20,7 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     if is_rate_limited(limiter_key):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Too many login attempts. Please wait a minute and try again.",
+            detail="Çok fazla giriş denemesi. Lütfen bir dakika sonra tekrar deneyin.",
         )
 
     record_attempt(limiter_key)
@@ -29,10 +30,16 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="E-posta veya şifre hatalı.",
         )
     token = service.issue_token_for(user)
     return TokenResponse(access_token=token)
+
+
+@router.get("/config", response_model=AuthConfigOut)
+def get_auth_config():
+    """Public: lets the login page show the demo accounts hint."""
+    return AuthConfigOut(demo_mode=settings.seed_demo_data)
 
 
 @router.post("/logout")

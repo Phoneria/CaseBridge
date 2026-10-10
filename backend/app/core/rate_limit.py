@@ -20,16 +20,17 @@ _attempts: dict[str, list[float]] = defaultdict(list)
 _lock = Lock()
 
 
-def is_rate_limited(key: str) -> bool:
-    """Returns True if `key` has already made >= _MAX_ATTEMPTS login
-    attempts within the current sliding window. Does NOT record this
-    call as an attempt - call record_attempt() separately once the
-    request is actually being processed."""
+def is_rate_limited(key: str, max_attempts: int = _MAX_ATTEMPTS) -> bool:
+    """Returns True if `key` has already made >= max_attempts attempts
+    (default 5, the login limit) within the current sliding window. Does
+    NOT record this call as an attempt - call record_attempt() separately
+    once the request is actually being processed. Keys of different
+    endpoints must differ (e.g. a "forgot:" prefix)."""
     now = time.monotonic()
     with _lock:
         recent = [t for t in _attempts[key] if now - t < _WINDOW_SECONDS]
         _attempts[key] = recent
-        return len(recent) >= _MAX_ATTEMPTS
+        return len(recent) >= max_attempts
 
 
 def record_attempt(key: str) -> None:
