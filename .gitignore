@@ -47,3 +47,6 @@ _write_test.txt
 # Real case data - never commit (KVKK)
 data/import/*
 !data/import/README.md
+
+# Mail files written by EMAIL_BACKEND=file
+backend/var/

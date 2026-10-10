@@ -93,10 +93,13 @@ class Settings(BaseSettings):
     # Monthly token budget for the sidebar AI usage box. 0 = no budget set.
     ai_monthly_token_budget: int = 0
 
-    # Outgoing e-mail (calendar reminders, test e-mail). "console" only logs
-    # the recipient and subject; "smtp" sends with the stdlib smtplib.
-    # SMTP_PASSWORD is never logged or returned by any endpoint.
-    email_backend: Literal["console", "smtp"] = "console"
+    # Outgoing e-mail (calendar reminders, test e-mail, invitations). "console"
+    # only logs the recipient and subject (invite / reset e-mails also log
+    # their body, so a developer can click the link); "smtp" sends with the
+    # stdlib smtplib; "file" writes every message as an .eml file into
+    # EMAIL_FILE_DIR (used by the E2E tests). SMTP_PASSWORD is never logged or
+    # returned by any endpoint.
+    email_backend: Literal["console", "smtp", "file"] = "console"
     smtp_host: str = ""
     smtp_port: PositiveInt = 587
     smtp_username: str = ""
@@ -104,6 +107,13 @@ class Settings(BaseSettings):
     smtp_use_tls: bool = True
     smtp_from: str = "CaseBridge <no-reply@casebridge.local>"
     smtp_timeout_seconds: PositiveFloat = 10
+    email_file_dir: str = "./var/mail"
+
+    # User management: lifetime of the one-time invite / password reset links
+    # and the frontend address those links point to.
+    invite_token_hours: PositiveInt = 72
+    reset_token_minutes: PositiveInt = 60
+    frontend_base_url: str = "http://localhost:3000"
 
     # Calendar and reminders. Event times are stored as naive local times
     # in APP_TIMEZONE; the reminder worker computes "now" in this zone.

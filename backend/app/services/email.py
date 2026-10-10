@@ -1,16 +1,22 @@
 """Outgoing e-mail.
 
 EMAIL_BACKEND=console only logs the recipient and subject (never the
-body); EMAIL_BACKEND=smtp sends with the stdlib smtplib (STARTTLS when
-SMTP_USE_TLS, login when SMTP_USERNAME is set). SMTP_PASSWORD is never
-logged. Failures raise EmailSendError whose message is only the
-exception type name, so it is safe to store and log.
+body, except for messages that set show_body_in_dev_console - the invite
+and password reset e-mails, whose link a developer needs); EMAIL_BACKEND=smtp
+sends with the stdlib smtplib (STARTTLS when SMTP_USE_TLS, login when
+SMTP_USERNAME is set); EMAIL_BACKEND=file writes each message as its own .eml
+file into EMAIL_FILE_DIR (E2E tests read their links from there).
+SMTP_PASSWORD is never logged. Failures raise EmailSendError whose message is
+only the exception type name, so it is safe to store and log.
 """
 import logging
 import smtplib
 import ssl
+import time
+import uuid
 from dataclasses import dataclass
 from email.message import EmailMessage as MimeMessage
+from pathlib import Path
 from typing import Optional
 
 from app.core.config import settings
@@ -24,6 +30,8 @@ class EmailMessage:
     subject: str
     text: str
     html: Optional[str] = None
+    #: Console backend only: also log the body (invite / reset e-mails).
+    show_body_in_dev_console: bool = False
 
 
 class EmailSendError(Exception):
@@ -41,9 +49,31 @@ def _build_mime(message: EmailMessage) -> MimeMessage:
     return mime
 
 
+def _write_eml(message: EmailMessage) -> None:
+    logger.info("E-posta (file): alıcı=%r konu=%r", message.to, message.subject)
+    try:
+        mime = _build_mime(message)
+        directory = Path(settings.email_file_dir)
+        directory.mkdir(parents=True, exist_ok=True)
+        # Nanosecond timestamp first so the newest message sorts last.
+        path = directory / f"{time.time_ns():020d}-{uuid.uuid4().hex[:8]}.eml"
+        path.write_bytes(bytes(mime))
+    except ValueError as exc:
+        logger.warning("E-posta gönderilemedi: InvalidHeader")
+        raise EmailSendError("InvalidHeader") from exc
+    except OSError as exc:
+        logger.warning("E-posta gönderilemedi: %s", type(exc).__name__)
+        raise EmailSendError(type(exc).__name__) from exc
+
+
 def send_email(message: EmailMessage) -> None:
     if settings.email_backend == "console":
         logger.info("E-posta (console): alıcı=%r konu=%r", message.to, message.subject)
+        if message.show_body_in_dev_console:
+            logger.info("E-posta içeriği (yalnızca konsol modu):\n%s", message.text)
+        return
+    if settings.email_backend == "file":
+        _write_eml(message)
         return
     if not settings.smtp_host:
         raise EmailSendError("SMTPHostMissing")
