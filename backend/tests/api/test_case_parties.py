@@ -118,6 +118,12 @@ def test_client_role_and_file_number_are_validated(client, two_firms_two_users):
     assert _post(client, headers, client_name="A", court_file_number="x" * 101).status_code == 422
 
 
+def test_overlong_case_number_is_a_422_not_a_500(client, two_firms_two_users):
+    headers = _headers(client, two_firms_two_users)
+    assert _post(client, headers, client_name="A", case_number="x" * 51).status_code == 422
+    assert _post(client, headers, client_name="A", case_number="y" * 50).status_code == 201
+
+
 def test_legacy_post_without_parties_creates_the_client_and_opposing_party(client, two_firms_two_users):
     headers = _headers(client, two_firms_two_users)
     body = _post(client, headers, client_name="Ahmet Yılmaz", opposing_party="Zeynep Kaya").json()

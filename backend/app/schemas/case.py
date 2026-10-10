@@ -51,7 +51,7 @@ class CasePartyOut(BaseModel):
 
 
 class CaseCreate(BaseModel):
-    case_number: str
+    case_number: str = Field(max_length=50)
     case_name: str
     client_name: Optional[str] = None
     opposing_party: Optional[str] = None
