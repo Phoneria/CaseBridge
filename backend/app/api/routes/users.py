@@ -20,6 +20,8 @@ def list_users(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
 ):
+    """Colleagues who can be picked as assignee or attendee: active and past
+    the invitation. The admin user list is GET /admin/users."""
     return UserRepository(db).list_in_firm(law_firm_id)
 
 

@@ -34,6 +34,7 @@ def create_case(
         lawyer = db.query(User).filter(
             User.id == lawyer_id, User.law_firm_id == current_user.law_firm_id,
             User.role == UserRole.LAWYER, User.is_active.is_(True),
+            User.password_set_at.isnot(None),
         ).first()
         if lawyer is None:
             raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")

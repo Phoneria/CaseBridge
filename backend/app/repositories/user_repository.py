@@ -29,4 +29,13 @@ class UserRepository:
         )
 
     def list_in_firm(self, law_firm_id: str) -> list[User]:
-        return self.db.query(User).filter(User.law_firm_id == law_firm_id).all()
+        """Active users who have chosen a password."""
+        return (
+            self.db.query(User)
+            .filter(
+                User.law_firm_id == law_firm_id,
+                User.is_active.is_(True),
+                User.password_set_at.isnot(None),
+            )
+            .all()
+        )

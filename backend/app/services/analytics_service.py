@@ -81,8 +81,10 @@ class AnalyticsService:
             status_counts[c.status] = status_counts.get(c.status, 0) + 1
         by_status = [StatusBreakdown(status=s, total=status_counts[s]) for s in CaseStatus if s in status_counts]
 
+        # Lawyers who have not chosen a password yet have no work to show.
         lawyers = self.db.query(User).filter(
-            User.law_firm_id == law_firm_id, User.role == UserRole.LAWYER
+            User.law_firm_id == law_firm_id, User.role == UserRole.LAWYER,
+            User.password_set_at.isnot(None),
         ).order_by(User.full_name).all()
         by_lawyer = []
         for lawyer in lawyers:

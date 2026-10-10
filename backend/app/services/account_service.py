@@ -10,7 +10,7 @@ from app.core.timeutil import utc_now
 from app.models.user import User
 from app.models.user_token import TokenPurpose
 from app.services.email import EmailMessage, EmailSendError, send_email
-from app.services.notification_content import build_reset_email
+from app.services.notification_content import build_invite_email, build_reset_email
 from app.services.user_token_service import invalidate_unused_tokens, issue_token
 
 logger = logging.getLogger("casebridge")
@@ -52,3 +52,18 @@ def prepare_reset_email(db: Session, user: User, created_by: str | None) -> Emai
     token = issue_token(db, user, TokenPurpose.RESET, created_by=created_by)
     db.commit()
     return build_reset_email(user=user, token=token)
+
+
+def prepare_invite_email(db: Session, user: User, inviter: User | None) -> EmailMessage:
+    """Issues an invite token, stamps invited_at (both committed) and returns
+    the e-mail to send."""
+    token = issue_token(db, user, TokenPurpose.INVITE, created_by=inviter.id if inviter else None)
+    user.invited_at = utc_now()
+    firm_name = user.law_firm.name
+    db.commit()
+    return build_invite_email(
+        user=user,
+        firm_name=" ".join(firm_name.split()),
+        inviter_name=inviter.full_name if inviter else None,
+        token=token,
+    )
