@@ -1,6 +1,8 @@
 """EMAIL_BACKEND=file writes one .eml per message; the console backend shows
 the body only for messages that ask for it."""
 import logging
+import os
+import stat
 import time
 from email import policy
 from email.parser import BytesParser
@@ -71,3 +73,11 @@ def test_console_backend_logs_the_body_only_when_the_message_asks_for_it(monkeyp
         assert "PLAIN-GOVDE" not in caplog.text
         send_email(EmailMessage(to="a@example.com", subject="Davet", text="LINK-GOVDE", show_body_in_dev_console=True))
         assert "LINK-GOVDE" in caplog.text
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permissions only")
+def test_file_backend_uses_owner_only_permissions(mail_dir):
+    send_email(_message())
+    assert stat.S_IMODE(mail_dir.stat().st_mode) == 0o700
+    (eml,) = mail_dir.glob("*.eml")
+    assert stat.S_IMODE(eml.stat().st_mode) == 0o600

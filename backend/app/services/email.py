@@ -10,6 +10,7 @@ SMTP_PASSWORD is never logged. Failures raise EmailSendError whose message is
 only the exception type name, so it is safe to store and log.
 """
 import logging
+import os
 import smtplib
 import ssl
 import time
@@ -54,10 +55,14 @@ def _write_eml(message: EmailMessage) -> None:
     try:
         mime = _build_mime(message)
         directory = Path(settings.email_file_dir)
-        directory.mkdir(parents=True, exist_ok=True)
+        # Each file holds a live invite / reset link: owner-only access, and
+        # O_EXCL so a pre-planted file or symlink is never followed.
+        directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         # Nanosecond timestamp first so the newest message sorts last.
         path = directory / f"{time.time_ns():020d}-{uuid.uuid4().hex[:8]}.eml"
-        path.write_bytes(bytes(mime))
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(bytes(mime))
     except ValueError as exc:
         logger.warning("E-posta gönderilemedi: InvalidHeader")
         raise EmailSendError("InvalidHeader") from exc
