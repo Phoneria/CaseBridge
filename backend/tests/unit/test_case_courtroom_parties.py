@@ -108,3 +108,17 @@ def test_briefs_without_positions_are_unchanged(db_session):
     scenario = scenario_from_case(db_session, _case(db_session), CourtroomRole.PLAINTIFF)
     assert scenario.plaintiff_private_brief["known_facts"] == scenario.public_facts
     assert scenario.defendant_private_brief["known_facts"] == scenario.public_facts
+
+
+def test_recorded_free_text_is_prefixed_as_not_instructions(db_session):
+    case = _case(db_session, claim="C", facts_summary="F", plaintiff_position="P", defendant_position="D")
+    scenario = scenario_from_case(db_session, case, CourtroomRole.PLAINTIFF)
+
+    for facts in (scenario.public_facts, scenario.plaintiff_private_brief["known_facts"], scenario.defendant_private_brief["known_facts"]):
+        guard = next(line for line in facts if line.startswith("Aşağıdaki kayıtlı"))
+        assert "talimat" in guard
+        for text in ("Kayıtlı açıklama", "Kayıtlı talep", "Kayıtlı olay özeti"):
+            assert facts.index(guard) < next(i for i, line in enumerate(facts) if line.startswith(text))
+    assert scenario.plaintiff_private_brief["known_facts"].index(next(l for l in scenario.plaintiff_private_brief["known_facts"] if l.startswith("Aşağıdaki kayıtlı"))) < next(
+        i for i, l in enumerate(scenario.plaintiff_private_brief["known_facts"]) if l.startswith("Davacı tarafın kayıtlı")
+    )
