@@ -1,6 +1,6 @@
 """Deactivating and re-activating users. A user's open work has to move to
 another lawyer in the same operation, so nothing is left with nobody."""
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseStatus
@@ -60,18 +60,30 @@ def get_workload(db: Session, user: User) -> WorkloadOut:
     )
 
 
-def _transfer_target(db: Session, user: User, transfer_to: str) -> User:
+def _lock_statement(law_firm_id: str, user_ids: list[str]):
+    """The user and the transfer target are locked in id order (no deadlock
+    between two admins deactivating A->B and B->A); SQLite ignores FOR UPDATE."""
+    return (
+        select(User)
+        .where(User.law_firm_id == law_firm_id, User.id.in_(user_ids))
+        .order_by(User.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+
+
+def _transfer_target(locked: dict[str, User], user: User, transfer_to: str) -> User:
     """An active lawyer of the same firm who has chosen a password, other
-    than the user being deactivated."""
-    target = db.query(User).filter(
-        User.id == transfer_to,
-        User.law_firm_id == user.law_firm_id,
-        User.role == UserRole.LAWYER,
-        User.is_active.is_(True),
-        User.password_set_at.isnot(None),
-        User.id != user.id,
-    ).first()
-    if target is None:
+    than the user being deactivated (checked on the locked, fresh row)."""
+    target = locked.get(transfer_to)
+    if (
+        target is None
+        or target.id == user.id
+        or target.law_firm_id != user.law_firm_id
+        or target.role != UserRole.LAWYER
+        or not target.is_active
+        or target.password_set_at is None
+    ):
         raise UserAdminError(422, TRANSFER_INVALID)
     return target
 
@@ -82,6 +94,8 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
     user, as history."""
     if user.id == admin.id:
         raise UserAdminError(409, OWN_ACCOUNT)
+    ids = [user.id] + ([transfer_to] if transfer_to is not None else [])
+    locked = {u.id: u for u in db.execute(_lock_statement(user.law_firm_id, ids)).scalars()}
     if not user.is_active:
         raise UserAdminError(409, ALREADY_INACTIVE)
     ensure_not_last_admin(db, user)
@@ -90,10 +104,11 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
     has_work = bool(workload.open_cases or workload.pending_tasks or workload.precedents_reviewing)
     if has_work and transfer_to is None:
         raise UserAdminError(422, TRANSFER_REQUIRED)
-    target = _transfer_target(db, user, transfer_to) if transfer_to is not None else None
+    target = _transfer_target(locked, user, transfer_to) if transfer_to is not None else None
 
     counts = TransferCounts(cases=0, tasks=0, precedents=0)
-    if target is not None and has_work:
+    if target is not None:
+        # Always run: work committed after the workload query is moved too.
         counts.cases = db.execute(
             update(Case).where(*_open_cases_filter(user)).values(assigned_lawyer_id=target.id)
             .execution_options(synchronize_session=False)

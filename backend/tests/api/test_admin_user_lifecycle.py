@@ -1,5 +1,5 @@
 """Workload, deactivation with transfer, and re-activation."""
-from datetime import date
+from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import null
@@ -50,7 +50,6 @@ def busy(db_session, office):
     done = _task(db_session, open1, ayse, "Eski görev", TaskStatus.COMPLETED)
     others = _task(db_session, mehmets, mehmet, "Mehmet'in görevi")
     db_session.commit()
-    from types import SimpleNamespace
     return SimpleNamespace(
         open1=open1, open2=open2, closed=closed, archived=archived, mehmets=mehmets, precedent=precedent,
         foreign=foreign, pending1=pending1, pending2=pending2, done=done, others=others,
@@ -249,3 +248,47 @@ def test_activation_restores_login_and_keeps_pending_users_pending(client, db_se
     ).json()
     client.post(f"/admin/users/{created['id']}/deactivate", json={}, headers=headers)
     assert client.post(f"/admin/users/{created['id']}/activate", headers=headers).json()["status"] == "pending"
+
+
+# --- review fix 1 ----------------------------------------------------------------------------
+
+def test_deactivation_locks_the_user_and_the_target_in_id_order(db_session, office):
+    from sqlalchemy.dialects import postgresql
+
+    from app.services.user_lifecycle_service import _lock_statement
+
+    statement = _lock_statement(office.firm_a.id, [office.lawyer_a1.id, office.lawyer_a2.id])
+    sql = str(statement.compile(dialect=postgresql.dialect()))
+    assert "FOR UPDATE" in sql and "ORDER BY users.id" in sql
+
+
+def test_deactivation_executes_the_lock_statement(db_session, office, monkeypatch):
+    from app.services import user_lifecycle_service as service
+
+    seen = []
+    original = service._lock_statement
+    monkeypatch.setattr(service, "_lock_statement", lambda firm, ids: seen.append(ids) or original(firm, ids))
+    service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
+    assert seen == [[office.lawyer_a1.id, office.lawyer_a2.id]]
+
+
+def test_the_target_is_revalidated_on_the_locked_row(db_session, office):
+    from app.services.user_admin_service import UserAdminError
+    from app.services.user_lifecycle_service import deactivate_user
+
+    office.lawyer_a2.is_active = False
+    db_session.commit()
+    with pytest.raises(UserAdminError) as error:
+        deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
+    assert (error.value.status_code, error.value.detail) == (422, INVALID_TARGET)
+
+
+def test_work_that_appears_after_the_workload_check_is_still_moved(db_session, office, busy, monkeypatch):
+    from app.schemas.admin_user_lifecycle import WorkloadOut
+    from app.services import user_lifecycle_service as service
+
+    monkeypatch.setattr(
+        service, "get_workload", lambda db, user: WorkloadOut(open_cases=[], pending_tasks=[], precedents_reviewing=0)
+    )
+    counts = service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
+    assert counts.model_dump() == {"cases": 2, "tasks": 2, "precedents": 1}
