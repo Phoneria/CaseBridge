@@ -2,7 +2,7 @@
 firm: a user of another firm does not exist (404)."""
 import secrets
 
-from sqlalchemy import null
+from sqlalchemy import null, select
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
@@ -37,15 +37,27 @@ def list_firm_users(db: Session, law_firm_id: str) -> list[User]:
     return db.query(User).filter(User.law_firm_id == law_firm_id).order_by(User.full_name, User.email).all()
 
 
+def _active_admin_ids_query(law_firm_id: str):
+    """Admins who can act: active and past the invitation (password set).
+    FOR UPDATE: the rows stay locked until the transaction ends, so two admins
+    demoting or deactivating each other at the same time are serialised and the
+    second one sees the first one's result (SQLite ignores FOR UPDATE)."""
+    return (
+        select(User.id)
+        .where(
+            User.law_firm_id == law_firm_id,
+            User.role == UserRole.ADMIN,
+            User.is_active.is_(True),
+            User.password_set_at.isnot(None),
+        )
+        .with_for_update()
+    )
+
+
 def count_other_active_admins(db: Session, law_firm_id: str, excluding_user_id: str) -> int:
-    """Admins who can act: active and past the invitation (password set)."""
-    return db.query(User).filter(
-        User.law_firm_id == law_firm_id,
-        User.role == UserRole.ADMIN,
-        User.is_active.is_(True),
-        User.password_set_at.isnot(None),
-        User.id != excluding_user_id,
-    ).count()
+    """Number of other actable admins; locks the firm's admin rows (see above)."""
+    ids = db.execute(_active_admin_ids_query(law_firm_id)).scalars().all()
+    return len([user_id for user_id in ids if user_id != excluding_user_id])
 
 
 def ensure_not_last_admin(db: Session, user: User) -> None:

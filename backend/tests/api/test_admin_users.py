@@ -193,10 +193,10 @@ def test_changing_a_pending_users_email_invalidates_the_old_link(client, db_sess
     created = client.post("/admin/users", json=NEW_USER, headers=headers).json()
     old_token = mail_outbox.latest_token("yeni.avukat@example.com")
 
-    client.patch(f"/admin/users/{created['id']}", json={"email": "baska@example.com"}, headers=headers)
+    assert client.patch(f"/admin/users/{created['id']}", json={"email": "baska@example.com"}, headers=headers).status_code == 200
 
     assert client.get("/auth/token-info", params={"token": old_token}).status_code == 410
-    client.post(f"/admin/users/{created['id']}/invite", headers=headers)
+    assert client.post(f"/admin/users/{created['id']}/invite", headers=headers).status_code == 200
     new_token = mail_outbox.latest_token("baska@example.com")
     assert client.get("/auth/token-info", params={"token": new_token}).json()["email"] == "baska@example.com"
 
@@ -226,7 +226,9 @@ def test_resend_invite_is_only_for_pending_active_users(client, db_session, offi
     inactive = _pending(db_session, office.firm_a)
     inactive.is_active = False
     db_session.commit()
-    assert client.post(f"/admin/users/{inactive.id}/invite", headers=headers).status_code == 409
+    refused = client.post(f"/admin/users/{inactive.id}/invite", headers=headers)
+    assert refused.status_code == 409
+    assert refused.json()["detail"] == "Pasif kullanıcıya davet gönderilemez. Önce kullanıcıyı aktifleştirin."
 
 
 # --- password reset ----------------------------------------------------------------------
@@ -290,3 +292,77 @@ def test_pending_and_inactive_users_are_not_offered_or_accepted_as_assignees(cli
 
     overview = client.get("/analytics/overview", headers=admin).json()
     assert pending.id not in {row["lawyer_id"] for row in overview["by_lawyer"]}
+
+
+# --- review fixes --------------------------------------------------------------------------
+
+def test_the_admin_count_locks_the_admin_rows(db_session, office):
+    from sqlalchemy.dialects import postgresql
+
+    from app.services.user_admin_service import _active_admin_ids_query
+
+    sql = str(_active_admin_ids_query(office.firm_a.id).compile(dialect=postgresql.dialect()))
+    assert "FOR UPDATE" in sql
+
+
+def test_changing_an_active_users_email_invalidates_an_outstanding_reset_link(client, office, auth_headers, mail_outbox):
+    headers = auth_headers(office.admin_a)
+    assert client.post(f"/admin/users/{office.lawyer_a1.id}/password-reset", headers=headers).status_code == 200
+    token = mail_outbox.latest_token(office.lawyer_a1.email)
+    assert client.get("/auth/token-info", params={"token": token}).status_code == 200
+
+    assert client.patch(f"/admin/users/{office.lawyer_a1.id}", json={"email": "yeni.adres@example.com"}, headers=headers).status_code == 200
+
+    assert client.get("/auth/token-info", params={"token": token}).status_code == 410
+
+
+def test_failed_e_mails_are_reported_for_resend_invite_and_password_reset(
+    client, db_session, office, auth_headers, monkeypatch, tmp_path
+):
+    headers = auth_headers(office.admin_a)
+    pending = _pending(db_session, office.firm_a)
+    blocker = tmp_path / "blocked"
+    blocker.write_text("not a directory")
+    monkeypatch.setattr(settings, "email_backend", "file")
+    monkeypatch.setattr(settings, "email_file_dir", str(blocker))
+
+    invite = client.post(f"/admin/users/{pending.id}/invite", headers=headers)
+    assert invite.status_code == 200 and invite.json()["email_sent"] is False
+    reset = client.post(f"/admin/users/{office.lawyer_a1.id}/password-reset", headers=headers)
+    assert reset.status_code == 200 and reset.json() == {"email_sent": False}
+
+
+def test_a_lost_email_race_answers_409_on_create_and_patch(client, office, auth_headers, monkeypatch):
+    from app.repositories.user_repository import UserRepository
+
+    headers = auth_headers(office.admin_a)
+    monkeypatch.setattr(UserRepository, "get_by_email", lambda self, email: None)
+
+    created = client.post("/admin/users", json={**NEW_USER, "email": office.lawyer_b.email}, headers=headers)
+    assert created.status_code == 409 and created.json()["detail"] == "Bu e-posta adresi zaten kayıtlı."
+
+    patched = client.patch(f"/admin/users/{office.lawyer_a1.id}", json={"email": office.lawyer_a2.email}, headers=headers)
+    assert patched.status_code == 409 and patched.json()["detail"] == "Bu e-posta adresi zaten kayıtlı."
+    assert client.get("/admin/users", headers=headers).status_code == 200  # session usable after rollback
+
+
+def test_pending_and_inactive_users_cannot_review_precedents(client, db_session, office, auth_headers):
+    admin = auth_headers(office.admin_a)
+    pending = _pending(db_session, office.firm_a)
+    office.lawyer_a2.is_active = False
+    precedent = Case(
+        law_firm_id=office.firm_a.id, case_number="E-1", case_name="Emsal", client_name="M",
+        case_type=CaseType.KIRA, is_precedent=True,
+    )
+    db_session.add(precedent)
+    db_session.commit()
+
+    for reviewer in (pending, office.lawyer_a2):
+        response = client.patch(
+            f"/admin/precedents/{precedent.id}/reviewer", json={"reviewer_lawyer_id": reviewer.id}, headers=admin
+        )
+        assert response.status_code == 422
+    ok = client.patch(
+        f"/admin/precedents/{precedent.id}/reviewer", json={"reviewer_lawyer_id": office.lawyer_a1.id}, headers=admin
+    )
+    assert ok.status_code == 200

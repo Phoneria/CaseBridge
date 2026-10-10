@@ -1,5 +1,6 @@
 """Firm-scoped user administration (admins only)."""
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
@@ -14,6 +15,7 @@ from app.schemas.admin_user import (
 )
 from app.services.account_service import deliver, prepare_invite_email, prepare_reset_email
 from app.services.user_admin_service import (
+    EMAIL_TAKEN,
     UserAdminError,
     create_pending_user,
     get_user_in_firm,
@@ -52,9 +54,14 @@ def list_users(admin: User = Depends(get_current_admin), db: Session = Depends(g
 def create_user(payload: AdminUserCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     try:
         user = create_pending_user(db, admin.law_firm_id, payload)
+        db.commit()
     except UserAdminError as error:
+        db.rollback()
         raise _http(error)
-    db.commit()
+    except IntegrityError:
+        # Lost a race against another request using the same e-mail address.
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=EMAIL_TAKEN)
     return _invite(db, user, admin)
 
 
@@ -68,10 +75,13 @@ def patch_user(
     try:
         user = get_user_in_firm(db, admin.law_firm_id, user_id)
         update_user(db, admin, user, payload)
+        db.commit()
     except UserAdminError as error:
         db.rollback()
         raise _http(error)
-    db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=EMAIL_TAKEN)
     db.refresh(user)
     return user
 
