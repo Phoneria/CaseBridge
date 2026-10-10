@@ -13,6 +13,7 @@ from app.schemas.admin_user import (
     AdminUserWithEmailOut,
     EmailSentOut,
 )
+from app.schemas.admin_user_lifecycle import DeactivateOut, DeactivateRequest, WorkloadOut
 from app.services.account_service import deliver, prepare_invite_email, prepare_reset_email
 from app.services.user_admin_service import (
     EMAIL_TAKEN,
@@ -22,6 +23,7 @@ from app.services.user_admin_service import (
     list_firm_users,
     update_user,
 )
+from app.services.user_lifecycle_service import activate_user, deactivate_user, get_workload
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
@@ -109,3 +111,42 @@ def send_password_reset(user_id: str, admin: User = Depends(get_current_admin), 
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=RESET_NOT_POSSIBLE)
     message = prepare_reset_email(db, user, created_by=admin.id)
     return EmailSentOut(email_sent=deliver(message))
+
+
+@router.get("/{user_id}/workload", response_model=WorkloadOut)
+def user_workload(user_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    try:
+        user = get_user_in_firm(db, admin.law_firm_id, user_id)
+    except UserAdminError as error:
+        raise _http(error)
+    return get_workload(db, user)
+
+
+@router.post("/{user_id}/deactivate", response_model=DeactivateOut)
+def deactivate(
+    user_id: str,
+    payload: DeactivateRequest,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        user = get_user_in_firm(db, admin.law_firm_id, user_id)
+        counts = deactivate_user(db, admin, user, payload.transfer_to)
+    except UserAdminError as error:
+        db.rollback()
+        raise _http(error)
+    db.commit()
+    db.refresh(user)
+    return DeactivateOut(user=AdminUserOut.model_validate(user), transferred=counts)
+
+
+@router.post("/{user_id}/activate", response_model=AdminUserOut)
+def activate(user_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    try:
+        user = get_user_in_firm(db, admin.law_firm_id, user_id)
+    except UserAdminError as error:
+        raise _http(error)
+    activate_user(db, user)
+    db.commit()
+    db.refresh(user)
+    return user
