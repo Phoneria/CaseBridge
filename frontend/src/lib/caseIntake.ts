@@ -7,9 +7,9 @@ import type {
   CasePartyPayload,
   CasePayload,
   CaseUpdatePayload,
-  CaseStatus,
   CaseType,
   ClientRole,
+  OpenCaseStatus,
   PartyRole,
 } from "@/types";
 
@@ -52,7 +52,7 @@ export interface CaseFormState {
   court_file_number: string;
   opening_date: string;
   case_value: string;
-  status: CaseStatus;
+  status: OpenCaseStatus;
   parties: PartyRow[];
   claim: string;
   facts_summary: string;
@@ -332,7 +332,14 @@ export function formFromCase(item: Case): CaseFormState {
   const parties = [...(item.parties ?? [])].sort((a, b) => a.sort_order - b.sort_order);
   return {
     ...emptyCaseForm(),
+    case_number: item.case_number ?? "",
+    case_name: item.case_name ?? "",
+    case_type: item.case_type ?? "diger",
+    court: item.court ?? "",
     court_file_number: item.court_file_number ?? "",
+    opening_date: item.opening_date ?? "",
+    case_value: item.case_value === null || item.case_value === undefined ? "" : String(item.case_value),
+    status: item.status === "kapali" ? "devam_eden" : (item.status ?? "devam_eden"),
     claim: item.claim ?? "",
     facts_summary: item.facts_summary ?? "",
     plaintiff_position: item.plaintiff_position ?? "",
@@ -353,4 +360,45 @@ export function buildDisputePayload(form: CaseFormState): CaseUpdatePayload {
     defendant_position: orNull(form.defendant_position),
     description: orNull(form.description),
   };
+}
+
+export interface BasicInfoErrors {
+  case_name?: string;
+  case_value?: string;
+  court?: string;
+  court_file_number?: string;
+  opening_date?: string;
+}
+
+/** Rules of the "Bilgileri düzenle" dialog: the case number is not editable there, the case date is required. */
+export function validateBasicInfo(form: CaseFormState): BasicInfoErrors {
+  const errors: BasicInfoErrors = {};
+  if (!form.case_name.trim()) errors.case_name = "Dava adı gerekli.";
+  else errors.case_name = tooLong(form.case_name, FIELD_LIMITS.case_name);
+  if (!form.opening_date.trim()) errors.opening_date = "Dava tarihi gerekli.";
+  errors.court = tooLong(form.court, FIELD_LIMITS.court);
+  errors.court_file_number = tooLong(form.court_file_number, FIELD_LIMITS.court_file_number);
+  if (form.case_value.trim()) {
+    const value = Number(form.case_value);
+    if (!Number.isFinite(value) || value < 0) errors.case_value = "Dava değeri geçerli bir sayı olmalı.";
+  }
+  return errors;
+}
+
+export function hasBasicInfoErrors(errors: BasicInfoErrors): boolean {
+  return Object.values(errors).some(Boolean);
+}
+
+/** PATCH body of "Bilgileri düzenle": emptied court / file number / value become null (cleared); status only for an open case. */
+export function buildBasicInfoPayload(form: CaseFormState, options: { includeStatus: boolean }): CaseUpdatePayload {
+  const payload: CaseUpdatePayload = {
+    case_name: trimmed(form.case_name),
+    case_type: form.case_type,
+    court: trimmed(form.court) || null,
+    court_file_number: trimmed(form.court_file_number) || null,
+    case_value: trimmed(form.case_value) ? Number(form.case_value) : null,
+  };
+  if (trimmed(form.opening_date)) payload.opening_date = trimmed(form.opening_date);
+  if (options.includeStatus) payload.status = form.status;
+  return payload;
 }

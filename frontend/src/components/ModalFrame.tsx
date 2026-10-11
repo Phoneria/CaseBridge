@@ -7,11 +7,13 @@ export function ModalFrame({
   title,
   onClose,
   busy = false,
+  wide = false,
   children,
 }: {
   title: string;
   onClose: () => void;
   busy?: boolean;
+  wide?: boolean;
   children: ReactNode;
 }) {
   const titleId = useId();
@@ -23,7 +25,9 @@ export function ModalFrame({
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    const first = dialogRef.current?.querySelector<HTMLElement>("input, select, textarea, button");
+    const first =
+      dialogRef.current?.querySelector<HTMLElement>("[data-autofocus]") ??
+      dialogRef.current?.querySelector<HTMLElement>("input, select, textarea, button");
     (first ?? dialogRef.current)?.focus();
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && !busyRef.current) closeRef.current();
@@ -63,7 +67,7 @@ export function ModalFrame({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-card outline-none"
+        className={`max-h-[90vh] w-full ${wide ? "max-w-2xl" : "max-w-lg"} overflow-y-auto rounded-2xl bg-white p-6 shadow-card outline-none`}
       >
         <h2 id={titleId} className="mb-4 text-lg font-semibold text-navy-900">
           {title}

@@ -1,25 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   addCaseEvent,
   createTask,
   generateHandover,
   getCase,
+  getMe,
   getSimulation,
   listCaseTasks,
   listDocuments,
   listSimulations,
   retrySimulation,
   startSimulation,
+  unarchiveCase,
   updateTaskStatus,
   uploadDocument,
 } from "@/lib/api";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, SIMULATION_STATUS_LABELS, formatDate } from "@/lib/labels";
 import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
 import { useUrlParams } from "@/lib/urlState";
-import type { Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import type { AppUser, Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import { caseActions, type CaseAction } from "@/lib/caseAccess";
+import { userMessage } from "@/lib/userMessages";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
@@ -31,6 +35,8 @@ import { AI_PERSPECTIVES } from "@/lib/ai";
 import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
 import { CaseDisputeCard } from "@/components/CaseDisputeCard";
 import { CasePartiesCard } from "@/components/CasePartiesCard";
+import { CaseHeader } from "@/components/CaseHeader";
+import { CaseEditModal } from "@/components/CaseEditModal";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -79,6 +85,12 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [addingTask, setAddingTask] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [skippedDismissed, setSkippedDismissed] = useState(false);
+  // The signed-in user decides which lifecycle actions are offered; the server stays the authority (403/409).
+  const [me, setMe] = useState<AppUser | null>(null);
+  const [dialog, setDialog] = useState<"edit" | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const actionInFlight = useRef(false);
   // Set by the new-case page when some events or documents could not be added after the case was created.
   const skippedParam = params.get("eklenemeyen") ?? "";
   const skippedCount = /^[1-9]\d*$/.test(skippedParam) ? Number(skippedParam) : 0;
@@ -110,6 +122,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
+
+  useEffect(() => {
+    let active = true;
+    getMe()
+      .then((user) => active && setMe(user))
+      .catch(() => active && setMe(null));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Follow external URL changes (e.g. a quick-view shortcut to another tab of this case).
   useEffect(() => {
@@ -233,6 +255,26 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     setCaseDetail((prev) => (prev ? { ...prev, ...updated, timeline: prev.timeline } : prev));
   }
 
+  async function runCaseAction(request: () => Promise<Case>, fallback: string) {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
+    setActionBusy(true);
+    setActionError(null);
+    try {
+      handleCaseSaved(await request());
+    } catch (err) {
+      setActionError(userMessage(err, fallback));
+    } finally {
+      actionInFlight.current = false;
+      setActionBusy(false);
+    }
+  }
+
+  function pickAction(action: CaseAction) {
+    if (action === "edit") setDialog("edit");
+    else if (action === "unarchive") void runCaseAction(() => unarchiveCase(caseId), "Dava arşivden çıkarılamadı. Lütfen tekrar deneyin.");
+  }
+
   function dismissSkippedNotice() {
     setSkippedDismissed(true);
     setParams({ eklenemeyen: null });
@@ -260,6 +302,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   if (error) return <ErrorState message={error} />;
   if (!caseDetail) return null;
 
+  const actions = caseActions(me, caseDetail);
   const notes = caseDetail.timeline.filter((e) => e.event_type === "note");
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
@@ -271,16 +314,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-accent-600">
-          {caseDetail.case_number}
-        </p>
-        <h1 className="text-xl font-semibold text-navy-900">{caseDetail.case_name}</h1>
-        <p className="text-sm text-navy-500">
-          {caseDetail.client_name}
-          {caseDetail.opposing_party ? ` vs. ${caseDetail.opposing_party}` : ""}
-        </p>
-      </div>
+      <CaseHeader caseDetail={caseDetail} actions={actions} busy={actionBusy} actionError={actionError} onPick={pickAction} />
 
       {skippedCount > 0 && !skippedDismissed && (
         <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -684,6 +718,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             </ul>
           )}
         </div>
+      )}
+      {dialog === "edit" && (
+        <CaseEditModal
+          caseDetail={caseDetail}
+          onClose={() => setDialog(null)}
+          onSaved={(updated) => {
+            handleCaseSaved(updated);
+            setDialog(null);
+          }}
+        />
       )}
     </div>
   );
