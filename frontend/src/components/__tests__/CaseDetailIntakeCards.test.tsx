@@ -31,7 +31,7 @@ beforeEach(() => updateCase.mockReset());
 
 describe("CasePartiesCard", () => {
   it("lists the parties with role, counsel and the client badge", () => {
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     expect(screen.getByRole("heading", { name: "Taraflar" })).toBeInTheDocument();
     const rows = screen.getAllByRole("listitem");
     expect(rows).toHaveLength(2);
@@ -44,7 +44,7 @@ describe("CasePartiesCard", () => {
   });
 
   it("says so when no party is recorded", () => {
-    render(<CasePartiesCard caseDetail={{ ...baseCase, parties: [] }} onSaved={vi.fn()} />);
+    render(<CasePartiesCard canEdit caseDetail={{ ...baseCase, parties: [] }} onSaved={vi.fn()} />);
     expect(screen.getByText("Kayıtlı taraf yok.")).toBeInTheDocument();
   });
 
@@ -52,7 +52,7 @@ describe("CasePartiesCard", () => {
     const updated = { ...baseCase, client_name: "Alfa Ticaret A.Ş. Yeni" } as Case;
     updateCase.mockResolvedValue(updated);
     const onSaved = vi.fn();
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={onSaved} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={onSaved} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     const first = screen.getByRole("group", { name: "Taraf 1" });
@@ -72,7 +72,7 @@ describe("CasePartiesCard", () => {
   });
 
   it("requires a client before saving", async () => {
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
@@ -83,7 +83,7 @@ describe("CasePartiesCard", () => {
   it("shows the server error in an alert and stays in edit mode", async () => {
     updateCase.mockRejectedValueOnce(new ApiError("Sunucu hatası", 500));
     const onSaved = vi.fn();
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={onSaved} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={onSaved} />);
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Sunucu hatası");
@@ -93,14 +93,14 @@ describe("CasePartiesCard", () => {
 
   it("shows a Turkish fallback for a non-ApiError failure", async () => {
     updateCase.mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Taraflar kaydedilemedi.");
   });
 
   it("discards edits on Vazgeç", async () => {
-    render(<CasePartiesCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     await userEvent.type(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/), "xyz");
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
@@ -113,7 +113,7 @@ describe("CasePartiesCard", () => {
 
 describe("CaseDisputeCard", () => {
   it("shows the dispute fields with labels for the client's side", () => {
-    render(<CaseDisputeCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CaseDisputeCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     expect(screen.getByRole("heading", { name: "Uyuşmazlık" })).toBeInTheDocument();
     expect(screen.getByText("2026/145 E.")).toBeInTheDocument();
     expect(screen.getByText("150.000 TL alacak")).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe("CaseDisputeCard", () => {
   });
 
   it("uses neutral labels when the client's side is unknown", () => {
-    render(<CaseDisputeCard caseDetail={{ ...baseCase, client_role: null }} onSaved={vi.fn()} />);
+    render(<CaseDisputeCard canEdit caseDetail={{ ...baseCase, client_role: null }} onSaved={vi.fn()} />);
     expect(screen.getByText("Davacının iddiası")).toBeInTheDocument();
     expect(screen.getByText("Davalının savunması")).toBeInTheDocument();
   });
@@ -136,7 +136,7 @@ describe("CaseDisputeCard", () => {
     const updated = { ...baseCase, claim: "Yeni talep" } as Case;
     updateCase.mockResolvedValue(updated);
     const onSaved = vi.fn();
-    render(<CaseDisputeCard caseDetail={baseCase} onSaved={onSaved} />);
+    render(<CaseDisputeCard canEdit caseDetail={baseCase} onSaved={onSaved} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Uyuşmazlığı düzenle" }));
     const claim = screen.getByLabelText("Talep / dava konusu");
@@ -160,7 +160,7 @@ describe("CaseDisputeCard", () => {
 
   it("shows the server error in an alert", async () => {
     updateCase.mockRejectedValueOnce(new ApiError("Sunucu hatası", 500));
-    render(<CaseDisputeCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CaseDisputeCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Uyuşmazlığı düzenle" }));
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Sunucu hatası");
@@ -168,18 +168,32 @@ describe("CaseDisputeCard", () => {
 
   it("shows a Turkish fallback for a non-ApiError failure", async () => {
     updateCase.mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    render(<CaseDisputeCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CaseDisputeCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Uyuşmazlığı düzenle" }));
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Uyuşmazlık bilgileri kaydedilemedi.");
   });
 
   it("discards edits on Vazgeç", async () => {
-    render(<CaseDisputeCard caseDetail={baseCase} onSaved={vi.fn()} />);
+    render(<CaseDisputeCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Uyuşmazlığı düzenle" }));
     await userEvent.type(screen.getByLabelText("Talep / dava konusu"), " ekle");
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
     expect(screen.getByText("150.000 TL alacak")).toBeInTheDocument();
     expect(updateCase).not.toHaveBeenCalled();
+  });
+});
+
+describe("canEdit", () => {
+  it("hides the edit buttons of both cards when false", () => {
+    render(
+      <>
+        <CasePartiesCard canEdit={false} caseDetail={baseCase} onSaved={vi.fn()} />
+        <CaseDisputeCard canEdit={false} caseDetail={baseCase} onSaved={vi.fn()} />
+      </>,
+    );
+    expect(screen.getByText("Alfa Ticaret A.Ş.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Tarafları düzenle" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Uyuşmazlığı düzenle" })).toBeNull();
   });
 });

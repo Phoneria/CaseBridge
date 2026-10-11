@@ -47,6 +47,23 @@ export function CaseHeader({ caseDetail, actions, busy, actionError, onPick }: P
         <CaseActionsMenu actions={actions} busy={busy} onPick={onPick} />
       </div>
       <CaseBadges item={caseDetail} />
+      {caseDetail.is_archived && (
+        <div role="note" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p>Bu dava arşivlendi; salt okunur.</p>
+          {actions.includes("unarchive") && (
+            <button
+              type="button"
+              aria-disabled={busy}
+              onClick={() => {
+                if (!busy) onPick("unarchive");
+              }}
+              className="rounded-lg border border-amber-400 bg-white px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+            >
+              Arşivden çıkar
+            </button>
+          )}
+        </div>
+      )}
       {actionError && (
         <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {actionError}

@@ -12,6 +12,8 @@ import type { Case } from "@/types";
 interface Props {
   caseDetail: Case;
   onSaved: (updated: Case) => void;
+  /** False for an archived case or a user who may not change it: the edit button is not shown. */
+  canEdit: boolean;
 }
 
 const NO_AI: ReadonlySet<string> = new Set();
@@ -26,7 +28,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string | null }
 }
 
 /** "Uyuşmazlık" card of the case detail: file number, claim, facts, both sides' positions and general notes. */
-export function CaseDisputeCard({ caseDetail, onSaved }: Props) {
+export function CaseDisputeCard({ caseDetail, onSaved, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<CaseFormState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export function CaseDisputeCard({ caseDetail, onSaved }: Props) {
     <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-navy-800">Uyuşmazlık</h2>
-        {!editing && (
+        {canEdit && !editing && (
           <button
             type="button"
             aria-label="Uyuşmazlığı düzenle"

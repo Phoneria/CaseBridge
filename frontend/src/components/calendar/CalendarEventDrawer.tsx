@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { deleteCalendarEvent, updateCalendarEvent, updateTaskReminders, updateTaskStatus } from "@/lib/api";
 import { EVENT_TYPE_LABELS, describeReminders, formatDayLong, isTimed, timeLabel } from "@/lib/calendar";
 import { caseDetailHref } from "@/lib/filters";
+import { userMessage } from "@/lib/userMessages";
 import type { CalendarEvent } from "@/types";
 import { TYPE_DOTS } from "@/components/calendar/CalendarItemButton";
 import { ReminderPicker } from "@/components/calendar/ReminderPicker";
@@ -69,8 +70,8 @@ export function CalendarEventDrawer({
     try {
       await action();
       after();
-    } catch {
-      setError(failure);
+    } catch (err) {
+      setError(userMessage(err, failure));
     } finally {
       setBusy(false);
     }
