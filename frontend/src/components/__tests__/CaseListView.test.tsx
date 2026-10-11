@@ -181,4 +181,39 @@ describe("CaseListView", () => {
     expect(screen.getByText("Case A")).toBeInTheDocument();
     expect(screen.queryByText("Case B")).not.toBeInTheDocument();
   });
+
+  it("has an Arşivi göster checkbox that follows and writes the arsiv URL parameter", async () => {
+    getCases.mockResolvedValue([icraCase]);
+    render(<CaseListView />);
+    await screen.findByText("Kat Mülkiyeti Aidat Alacağı");
+    const box = screen.getByRole("checkbox", { name: "Arşivi göster" });
+    expect(box).not.toBeChecked();
+
+    await userEvent.click(box);
+    expect(nav.replace).toHaveBeenLastCalledWith("/davalar?arsiv=dahil", { scroll: false });
+  });
+
+  it("shows the checkbox checked for ?arsiv=dahil and clears the parameter when unchecked", async () => {
+    setUrl("/davalar?arsiv=dahil");
+    getCases.mockResolvedValue([icraCase]);
+    render(<CaseListView />);
+    await screen.findByText("Kat Mülkiyeti Aidat Alacağı");
+    const box = screen.getByRole("checkbox", { name: "Arşivi göster" });
+    expect(box).toBeChecked();
+
+    await userEvent.click(box);
+    expect(nav.replace).toHaveBeenLastCalledWith("/davalar", { scroll: false });
+  });
+
+  it("marks archived cases with an Arşivli badge and no other case", async () => {
+    getCases.mockResolvedValue([
+      { ...icraCase, id: "c2", case_name: "Eski Dava", status: "kapali", is_archived: true },
+      icraCase,
+    ]);
+    render(<CaseListView />);
+    await screen.findByText("Eski Dava");
+    expect(screen.getAllByText("Arşivli")).toHaveLength(1);
+    const row = screen.getByText("Eski Dava").closest("tr")!;
+    expect(row).toHaveTextContent("Arşivli");
+  });
 });
