@@ -112,6 +112,9 @@ class CaseService:
             case.parties = party_models(parties, case.law_firm_id)
         return self.cases.save(case)
 
+    def get_case_for_update(self, case_id: str, law_firm_id: str) -> Optional[Case]:
+        return self.cases.get_by_id_in_firm_for_update(case_id, law_firm_id)
+
     def get_timeline(self, case_id: str, law_firm_id: str) -> list[CaseEvent]:
         return self.events.list_for_case(case_id, law_firm_id)
 

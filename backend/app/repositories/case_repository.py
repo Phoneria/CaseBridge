@@ -30,6 +30,18 @@ class CaseRepository:
             .first()
         )
 
+    def get_by_id_in_firm_for_update(self, case_id: str, law_firm_id: str) -> Optional[Case]:
+        """Same lookup, but the row is locked until the transaction ends, so a state
+        check and the update that follows cannot interleave with another request
+        (a no-op on SQLite). populate_existing re-reads the row after the lock."""
+        return (
+            self.db.query(Case)
+            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
+            .populate_existing()
+            .with_for_update()
+            .first()
+        )
+
     def list_in_firm(
         self,
         law_firm_id: str,

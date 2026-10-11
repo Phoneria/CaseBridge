@@ -17,8 +17,8 @@ from app.services.case_service import CaseService, DuplicateCaseNumberError
 router = APIRouter(prefix="/cases", tags=["cases"])
 
 
-def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str):
-    case = service.get_case(case_id, law_firm_id)
+def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str, lock: bool = False):
+    case = (service.get_case_for_update if lock else service.get_case)(case_id, law_firm_id)
     if case is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     return case
@@ -26,7 +26,7 @@ def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str)
 
 def _managed_case(db: Session, case_id: str, current_user: User):
     """The firm's case (404 otherwise) that the user may change (403 otherwise)."""
-    case = _get_owned_case_or_404(CaseService(db), case_id, current_user.law_firm_id)
+    case = _get_owned_case_or_404(CaseService(db), case_id, current_user.law_firm_id, lock=True)
     require_case_manager(current_user, case)
     return case
 
@@ -36,7 +36,7 @@ def _lifecycle(action):
     try:
         return action()
     except CaseStateError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
 
 @router.post("", response_model=CaseOut, status_code=status.HTTP_201_CREATED)

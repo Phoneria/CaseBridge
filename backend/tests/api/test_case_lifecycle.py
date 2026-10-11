@@ -1,14 +1,19 @@
 """POST /cases/{id}/close, /reopen, /archive and /unarchive: rules, timeline events,
 permissions (responsible lawyer or admin), firm isolation and the effect on analytics."""
-from datetime import date
+from datetime import timedelta
 
 import pytest
 
+from app.core.timeutil import local_today
 from app.models.case import Case, CaseEvent, CaseStatus, CaseType
 
 NOT_MANAGER = "Bu davayı yalnızca sorumlu avukat veya yönetici değiştirebilir."
 ARCHIVED = "Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın."
-TODAY = date(2026, 10, 11)
+TODAY = local_today()
+PAST = (TODAY - timedelta(days=10)).isoformat()
+PAST_LATER = (TODAY - timedelta(days=6)).isoformat()
+TOMORROW = (TODAY + timedelta(days=1)).isoformat()
+TODAY_ISO = TODAY.isoformat()
 
 
 @pytest.fixture(autouse=True)
@@ -25,7 +30,7 @@ def _new_case(client, headers, number="2026/1", **overrides):
 
 
 def _close_payload(**overrides):
-    return {"outcome": "won", "decision_date": "2026-10-01", **overrides}
+    return {"outcome": "won", "decision_date": PAST, **overrides}
 
 
 def _timeline(client, headers, case_id):
@@ -52,11 +57,11 @@ def test_close_writes_the_decision_and_a_timeline_event(client, db_session, offi
     assert response.status_code == 200
     body = response.json()
     assert (body["status"], body["outcome"]) == ("kapali", outcome)
-    assert (body["decision_date"], body["closing_note"]) == ("2026-10-01", "Karar tebliğ edildi.")
+    assert (body["decision_date"], body["closing_note"]) == (PAST, "Karar tebliğ edildi.")
     assert body["is_archived"] is False
     timeline = _timeline(client, lawyer, case["id"])
     assert [(e["event_date"], e["title"], e["description"], e["event_type"]) for e in timeline] == [
-        ("2026-10-01", f"Dava kapatıldı — {label}", "Karar tebliğ edildi.", "other"),
+        (PAST, f"Dava kapatıldı — {label}", "Karar tebliğ edildi.", "other"),
     ]
     event = db_session.query(CaseEvent).filter(CaseEvent.case_id == case["id"]).one()
     assert event.created_by == office.lawyer_a1.id and event.law_firm_id == office.firm_a.id
@@ -104,29 +109,30 @@ def test_close_requires_a_decision_date(client, lawyer):
 def test_close_rejects_a_decision_date_after_today_but_accepts_today(client, db_session, lawyer):
     case = _new_case(client, lawyer)
 
-    future = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date="2026-10-12"), headers=lawyer)
+    future = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=TOMORROW), headers=lawyer)
     assert future.status_code == 422
     assert future.json()["detail"] == "Karar tarihi ileri bir tarih olamaz."
     assert client.get(f"/cases/{case['id']}", headers=lawyer).json()["status"] == "devam_eden"
     assert db_session.query(CaseEvent).filter(CaseEvent.case_id == case["id"]).count() == 0
 
-    today = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date="2026-10-11"), headers=lawyer)
-    assert today.status_code == 200 and today.json()["decision_date"] == "2026-10-11"
+    today = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=TODAY_ISO), headers=lawyer)
+    assert today.status_code == 200 and today.json()["decision_date"] == TODAY_ISO
 
 
 def test_today_is_the_application_local_date(client, lawyer, monkeypatch):
     """The route compares with local_today() (APP_TIMEZONE), not with the UTC date."""
     case = _new_case(client, lawyer)
-    monkeypatch.setattr("app.api.routes.cases.local_today", lambda: date(2026, 10, 13))
+    later = TODAY + timedelta(days=2)
+    monkeypatch.setattr("app.api.routes.cases.local_today", lambda: later)
 
-    response = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date="2026-10-13"), headers=lawyer)
+    response = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=later.isoformat()), headers=lawyer)
 
     assert response.status_code == 200
 
 
 def test_closing_a_closed_case_is_a_409_and_changes_nothing(client, lawyer, close_case):
     case = _new_case(client, lawyer)
-    close_case(lawyer, case["id"], outcome="won", decision_date="2026-10-01")
+    close_case(lawyer, case["id"], outcome="won", decision_date=PAST)
 
     response = client.post(f"/cases/{case['id']}/close", json=_close_payload(outcome="lost"), headers=lawyer)
 
@@ -140,7 +146,7 @@ def test_closing_a_closed_case_is_a_409_and_changes_nothing(client, lawyer, clos
 
 def test_reopen_clears_the_decision_and_adds_an_event_dated_today(client, lawyer, close_case):
     case = _new_case(client, lawyer, status="karar_bekleyen")
-    close_case(lawyer, case["id"], outcome="lost", decision_date="2026-10-01", note="Ret")
+    close_case(lawyer, case["id"], outcome="lost", decision_date=PAST, note="Ret")
 
     response = client.post(f"/cases/{case['id']}/reopen", headers=lawyer)
 
@@ -150,8 +156,8 @@ def test_reopen_clears_the_decision_and_adds_an_event_dated_today(client, lawyer
     assert (body["decision_date"], body["closing_note"]) == (None, None)
     timeline = _timeline(client, lawyer, case["id"])
     assert [(e["event_date"], e["title"], e["description"], e["event_type"]) for e in timeline] == [
-        ("2026-10-01", "Dava kapatıldı — Kaybedildi", "Ret", "other"),
-        ("2026-10-11", "Dava yeniden açıldı", None, "other"),
+        (PAST, "Dava kapatıldı — Kaybedildi", "Ret", "other"),
+        (TODAY_ISO, "Dava yeniden açıldı", None, "other"),
     ]
 
 
@@ -168,9 +174,9 @@ def test_a_reopened_case_can_be_closed_again(client, lawyer, close_case):
     close_case(lawyer, case["id"])
     client.post(f"/cases/{case['id']}/reopen", headers=lawyer)
 
-    again = close_case(lawyer, case["id"], outcome="settled", decision_date="2026-10-05")
+    again = close_case(lawyer, case["id"], outcome="settled", decision_date=PAST_LATER)
 
-    assert (again["outcome"], again["decision_date"]) == ("settled", "2026-10-05")
+    assert (again["outcome"], again["decision_date"]) == ("settled", PAST_LATER)
     assert len(_timeline(client, lawyer, case["id"])) == 3
 
 
@@ -333,3 +339,41 @@ def test_closing_cases_moves_the_analytics_counts(client, office, auth_headers, 
     client.post(f"/cases/{won['id']}/reopen", headers=lawyer)
     reopened = client.get("/analytics/overview", headers=admin).json()
     assert (reopened["active_cases"], reopened["won_cases"]) == (2, 0)
+
+
+# --- ordering and concurrency ---------------------------------------------------------------
+
+def test_body_validation_comes_before_the_permission_check(client, office, auth_headers, lawyer):
+    """FastAPI validates the body before the route runs: a non-manager sending an invalid
+    /close body gets the 422, not the 403 (a valid body gets the 403, see above)."""
+    case = _new_case(client, lawyer)
+    other = auth_headers(office.lawyer_a2)
+
+    invalid = client.post(f"/cases/{case['id']}/close", json={"outcome": "ongoing"}, headers=other)
+    valid = client.post(f"/cases/{case['id']}/close", json=_close_payload(), headers=other)
+
+    assert invalid.status_code == 422
+    assert (valid.status_code, valid.json()["detail"]) == (403, NOT_MANAGER)
+
+
+def test_lifecycle_routes_load_the_case_with_a_row_lock(client, lawyer, monkeypatch):
+    """Close and reopen read the state and then write it: the lookup must lock the row
+    so two concurrent requests are serialized (SQLite cannot show the race itself)."""
+    from app.repositories.case_repository import CaseRepository
+
+    case = _new_case(client, lawyer)
+    locked, plain = [], []
+    original_locked = CaseRepository.get_by_id_in_firm_for_update
+    original_plain = CaseRepository.get_by_id_in_firm
+    monkeypatch.setattr(CaseRepository, "get_by_id_in_firm_for_update",
+                        lambda self, *a: locked.append(a) or original_locked(self, *a))
+    monkeypatch.setattr(CaseRepository, "get_by_id_in_firm",
+                        lambda self, *a: plain.append(a) or original_plain(self, *a))
+
+    client.post(f"/cases/{case['id']}/close", json=_close_payload(), headers=lawyer)
+    client.post(f"/cases/{case['id']}/reopen", headers=lawyer)
+    client.post(f"/cases/{case['id']}/close", json=_close_payload(), headers=lawyer)
+    client.post(f"/cases/{case['id']}/archive", headers=lawyer)
+    client.post(f"/cases/{case['id']}/unarchive", headers=lawyer)
+
+    assert len(locked) == 5 and plain == []
