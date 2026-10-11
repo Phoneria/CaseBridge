@@ -292,3 +292,25 @@ def test_work_that_appears_after_the_workload_check_is_still_moved(db_session, o
     )
     counts = service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
     assert counts.model_dump() == {"cases": 2, "tasks": 2, "precedents": 1}
+
+
+# --- review fix 2 ----------------------------------------------------------------------------
+
+def test_the_admin_row_lock_is_ordered_by_id(office):
+    from sqlalchemy.dialects import postgresql
+
+    from app.services.user_admin_service import _active_admin_ids_query
+
+    sql = str(_active_admin_ids_query(office.firm_a.id).compile(dialect=postgresql.dialect()))
+    assert "FOR UPDATE" in sql and "ORDER BY users.id" in sql
+
+
+def test_admin_rows_are_locked_before_the_user_and_target_rows(db_session, office, monkeypatch):
+    from app.services import user_lifecycle_service as service
+
+    calls = []
+    original_admin, original_lock = service.ensure_not_last_admin, service._lock_statement
+    monkeypatch.setattr(service, "ensure_not_last_admin", lambda db, user: calls.append("admins") or original_admin(db, user))
+    monkeypatch.setattr(service, "_lock_statement", lambda firm, ids: calls.append("users") or original_lock(firm, ids))
+    service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
+    assert calls == ["admins", "users"]

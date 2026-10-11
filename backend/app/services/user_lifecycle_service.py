@@ -94,11 +94,14 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
     user, as history."""
     if user.id == admin.id:
         raise UserAdminError(409, OWN_ACCOUNT)
+    if not user.is_active:
+        raise UserAdminError(409, ALREADY_INACTIVE)
+    # One global lock order: admin rows (by id) first, then user + target (by id).
+    ensure_not_last_admin(db, user)
     ids = [user.id] + ([transfer_to] if transfer_to is not None else [])
     locked = {u.id: u for u in db.execute(_lock_statement(user.law_firm_id, ids)).scalars()}
     if not user.is_active:
         raise UserAdminError(409, ALREADY_INACTIVE)
-    ensure_not_last_admin(db, user)
 
     workload = get_workload(db, user)
     has_work = bool(workload.open_cases or workload.pending_tasks or workload.precedents_reviewing)

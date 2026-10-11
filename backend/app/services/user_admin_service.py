@@ -50,6 +50,7 @@ def _active_admin_ids_query(law_firm_id: str):
             User.is_active.is_(True),
             User.password_set_at.isnot(None),
         )
+        .order_by(User.id)
         .with_for_update()
     )
 
