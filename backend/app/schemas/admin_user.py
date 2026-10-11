@@ -3,12 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.models.user import UserRole, UserStatus
-
-
-def _single_line(value: str) -> str:
-    """Trims and collapses whitespace (also newlines, so a name can never
-    inject a header into an e-mail)."""
-    return " ".join(value.split())
+from app.schemas.text_rules import clean_department, clean_full_name
 
 
 class AdminUserOut(BaseModel):
@@ -46,15 +41,12 @@ class AdminUserCreate(BaseModel):
     @field_validator("full_name")
     @classmethod
     def _full_name(cls, value: str) -> str:
-        value = _single_line(value)
-        if not value or len(value) > 255:
-            raise ValueError("Ad soyad 1-255 karakter olmalı.")
-        return value
+        return clean_full_name(value)
 
     @field_validator("department")
     @classmethod
     def _department(cls, value: str | None) -> str | None:
-        return _clean_department(value)
+        return clean_department(value)
 
 
 class AdminUserUpdate(BaseModel):
@@ -65,18 +57,13 @@ class AdminUserUpdate(BaseModel):
 
     @field_validator("full_name")
     @classmethod
-    def _full_name(cls, value: str | None) -> str | None:
-        if value is None:
-            raise ValueError("Ad soyad boş olamaz.")
-        value = _single_line(value)
-        if not value or len(value) > 255:
-            raise ValueError("Ad soyad 1-255 karakter olmalı.")
-        return value
+    def _full_name(cls, value: str | None) -> str:
+        return clean_full_name(value)
 
     @field_validator("department")
     @classmethod
     def _department(cls, value: str | None) -> str | None:
-        return _clean_department(value)
+        return clean_department(value)
 
     @field_validator("role", "email")
     @classmethod
@@ -85,11 +72,3 @@ class AdminUserUpdate(BaseModel):
             raise ValueError("Bu alan boş olamaz.")
         return value
 
-
-def _clean_department(value: str | None) -> str | None:
-    if value is None:
-        return None
-    value = _single_line(value)
-    if len(value) > 100:
-        raise ValueError("Departman en fazla 100 karakter olabilir.")
-    return value or None

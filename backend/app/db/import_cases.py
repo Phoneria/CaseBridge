@@ -1,6 +1,7 @@
 """Import real cases and documents from a folder.
 
 Run with: python -m app.db.import_cases /data/import
+(after SEED_DEMO_DATA=false: python -m app.db.import_cases /data/import --firm "<büro adı>" --lawyer <e-posta>)
 
 Folder layout:
     cases.json            {"cases": [ {...}, ... ]}
@@ -16,12 +17,15 @@ Idempotent: existing case numbers are updated, not duplicated; documents
 and events are matched by filename/title. A manifest marked
 ``record_kind: precedent`` is kept out of the firm's case metrics.
 """
+import argparse
 import json
 import os
 import sys
 import uuid
 from datetime import date, datetime, timezone
 from typing import Optional
+
+from sqlalchemy import func
 
 from app.core.config import settings
 from app.db.seed import DEMO_FIRM_NAME, LAWYER_EMAIL
@@ -180,7 +184,7 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
     return created, doc_count
 
 
-def import_folder(folder: str, db=None) -> dict:
+def import_folder(folder: str, db=None, firm_name: str = DEMO_FIRM_NAME, lawyer_email: str = LAWYER_EMAIL) -> dict:
     manifest = os.path.join(folder, "cases.json")
     if not os.path.isfile(manifest):
         raise ImportError_(f"{manifest} not found")
@@ -194,10 +198,17 @@ def import_folder(folder: str, db=None) -> dict:
     own_session = db is None
     db = db or SessionLocal()
     try:
-        firm = db.query(LawFirm).filter(LawFirm.name == DEMO_FIRM_NAME).first()
-        lawyer = db.query(User).filter(User.email == LAWYER_EMAIL).first()
+        firm = db.query(LawFirm).filter(LawFirm.name == firm_name).first()
+        lawyer = None
+        if firm:
+            lawyer = db.query(User).filter(
+                User.law_firm_id == firm.id, func.lower(User.email) == lawyer_email.lower()
+            ).first()
         if not firm or not lawyer:
-            raise ImportError_("Run the seed first (python -m app.db.seed)")
+            raise ImportError_(
+                "Firm or lawyer not found. Run the seed (python -m app.db.seed) for the demo firm, "
+                "or pass --firm and --lawyer for a real one."
+            )
         stats = {"created": 0, "updated": 0, "documents": 0, "errors": []}
         docs_dir = os.path.join(folder, "documents")
         for index, item in enumerate(items):
@@ -216,8 +227,12 @@ def import_folder(folder: str, db=None) -> dict:
 
 
 if __name__ == "__main__":
-    target = sys.argv[1] if len(sys.argv) > 1 else "/data/import"
-    result = import_folder(target)
+    parser = argparse.ArgumentParser(description="Import cases and documents from a folder.")
+    parser.add_argument("folder", nargs="?", default="/data/import")
+    parser.add_argument("--firm", default=DEMO_FIRM_NAME, help="Firm to import into (default: the demo firm)")
+    parser.add_argument("--lawyer", default=LAWYER_EMAIL, help="E-mail of the lawyer who will own the cases")
+    args = parser.parse_args()
+    result = import_folder(args.folder, firm_name=args.firm, lawyer_email=args.lawyer)
     print(f"Imported: {result['created']} new, {result['updated']} updated, {result['documents']} documents")
     for err in result["errors"]:
         print(f"  ERROR {err}")

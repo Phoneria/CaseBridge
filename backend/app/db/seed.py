@@ -22,6 +22,7 @@ from app.models.user import User, UserRole
 from app.core.config import settings
 from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.db.courtroom_showcase_seed import seed_courtroom_showcases
+from app.db.demo_cleanup import remove_demo_data
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
 from app.services.case_parties import legacy_parties, party_models
@@ -648,6 +649,27 @@ def seed() -> None:
     upgrade_to_head(engine)
     db = SessionLocal()
     try:
+        if not settings.seed_demo_data:
+            # Real data mode: no demo firm or users are created, and a
+            # previously seeded demo is removed (see app/db/demo_cleanup.py).
+            removed = remove_demo_data(
+                db,
+                firm_name=DEMO_FIRM_NAME,
+                case_numbers=[c["case_number"] for c in DEMO_CASES],
+                emails=[ADMIN_EMAIL, *(email for email, *_ in DEMO_LAWYERS)],
+            )
+            scenario_count = seed_courtroom_scenarios(db)
+            db.commit()
+            print("Seed complete (real data mode). No demo firm or users are created.")
+            print(f"  Demo cases removed: {removed.cases}")
+            print(f"  Demo hearings removed: {removed.hearings}")
+            print(f"  Demo users removed: {len(removed.users_removed)}")
+            if removed.users_kept:
+                print(f"  Demo users kept (they own records): {', '.join(removed.users_kept)}")
+            print(f"  Courtroom scenarios: {scenario_count}")
+            print('  Create the first administrator with: python -m app.db.create_admin --firm "<büro adı>" --email <e-posta> --name "<ad soyad>"')
+            return
+
         firm = _get_or_create_firm(db)
         admin = _get_or_create_user(db, firm, ADMIN_EMAIL, "Demo Yönetici", UserRole.ADMIN)
         legacy_lawyer = db.query(User).filter(User.email == LAWYER_EMAIL, User.full_name == "Demo Avukat").first()
@@ -658,26 +680,13 @@ def seed() -> None:
         lawyer = lawyers[0]
 
         # Preserve legacy case records while ensuring every existing case in
-        # the demo firm has an owner, including when demo data is disabled.
+        # the demo firm has an owner.
         unassigned = db.query(Case).filter(
             Case.law_firm_id == firm.id, Case.assigned_lawyer_id.is_(None),
             Case.is_precedent.is_(False),
         ).order_by(Case.case_number).all()
         for index, case in enumerate(unassigned):
             case.assigned_lawyer_id = lawyers[index % len(lawyers)].id
-
-        if not settings.seed_demo_data:
-            demo_numbers = [c["case_number"] for c in DEMO_CASES]
-            stale = db.query(Case).filter(Case.law_firm_id == firm.id, Case.case_number.in_(demo_numbers)).all()
-            removed = delete_cases(db, stale)
-            scenario_count = seed_courtroom_scenarios(db)
-            db.commit()
-            print(f"Seed complete (real data mode). Firm: {DEMO_FIRM_NAME}")
-            print(f"  Admin login:  {ADMIN_EMAIL} / {DEMO_PASSWORD}")
-            print(f"  Lawyer login: {LAWYER_EMAIL} / {DEMO_PASSWORD}")
-            print(f"  Demo cases removed: {removed}")
-            print(f"  Courtroom scenarios: {scenario_count}")
-            return
 
         demo_cases = {}
         for index, case_kwargs in enumerate(DEMO_CASES):
