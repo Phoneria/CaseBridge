@@ -11,6 +11,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from app.api.case_access import require_case_id_writable
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
@@ -63,6 +64,7 @@ def create_calendar_event(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    require_case_id_writable(db, payload.case_id, current_user.law_firm_id)
     try:
         return CalendarService(db).create_event(
             current_user.law_firm_id, current_user.id, payload, today=local_today()
@@ -91,6 +93,9 @@ def update_calendar_event(
 ):
     service = CalendarService(db)
     event = _owned_event_or_404(service, event_id, law_firm_id)
+    # Both the case the event belongs to and the case it is being moved to must be writable.
+    require_case_id_writable(db, event.case_id, law_firm_id)
+    require_case_id_writable(db, payload.case_id, law_firm_id)
     try:
         return service.update_event(event, payload, today=local_today())
     except CalendarReferenceNotFound as exc:
@@ -106,5 +111,7 @@ def delete_calendar_event(
     db: Session = Depends(get_db),
 ):
     service = CalendarService(db)
-    service.delete_event(_owned_event_or_404(service, event_id, law_firm_id), today=local_today())
+    event = _owned_event_or_404(service, event_id, law_firm_id)
+    require_case_id_writable(db, event.case_id, law_firm_id)
+    service.delete_event(event, today=local_today())
     return Response(status_code=status.HTTP_204_NO_CONTENT)

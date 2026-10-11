@@ -184,4 +184,5 @@ def add_case_event(
 ):
     service = CaseService(db)
     case = _get_owned_case_or_404(service, case_id, law_firm_id)
+    require_case_writable(case)
     return service.add_event(case, payload, created_by=current_user.id)
