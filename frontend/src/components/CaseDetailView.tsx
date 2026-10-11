@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   addCaseEvent,
+  archiveCase,
   createTask,
   generateHandover,
   getCase,
@@ -12,6 +13,7 @@ import {
   listCaseTasks,
   listDocuments,
   listSimulations,
+  reopenCase,
   retrySimulation,
   startSimulation,
   unarchiveCase,
@@ -37,6 +39,8 @@ import { CaseDisputeCard } from "@/components/CaseDisputeCard";
 import { CasePartiesCard } from "@/components/CasePartiesCard";
 import { CaseHeader } from "@/components/CaseHeader";
 import { CaseEditModal } from "@/components/CaseEditModal";
+import { CaseCloseModal, type CloseResult } from "@/components/CaseCloseModal";
+import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -87,9 +91,10 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [skippedDismissed, setSkippedDismissed] = useState(false);
   // The signed-in user decides which lifecycle actions are offered; the server stays the authority (403/409).
   const [me, setMe] = useState<AppUser | null>(null);
-  const [dialog, setDialog] = useState<"edit" | null>(null);
+  const [dialog, setDialog] = useState<"edit" | "close" | "reopen" | "archive" | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
   const actionInFlight = useRef(false);
   // Set by the new-case page when some events or documents could not be added after the case was created.
   const skippedParam = params.get("eklenemeyen") ?? "";
@@ -270,8 +275,27 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     }
   }
 
+  /** Reload the case after an action that adds a timeline event; the merged state stays if the reload fails. */
+  async function refreshCaseAndDocuments() {
+    try {
+      const [fresh, freshDocuments] = await Promise.all([getCase(caseId), listDocuments(caseId)]);
+      setCaseDetail(fresh);
+      setDocuments(freshDocuments);
+    } catch {
+      // Keep what the action already returned.
+    }
+  }
+
+  function handleClosed({ updated, documentFailed }: CloseResult) {
+    handleCaseSaved(updated);
+    setDialog(null);
+    if (documentFailed) setActionNotice("Dava kapatıldı ancak karar belgesi yüklenemedi.");
+    void refreshCaseAndDocuments();
+  }
+
   function pickAction(action: CaseAction) {
-    if (action === "edit") setDialog("edit");
+    setActionNotice(null);
+    if (action === "edit" || action === "close" || action === "reopen" || action === "archive") setDialog(action);
     else if (action === "unarchive") void runCaseAction(() => unarchiveCase(caseId), "Dava arşivden çıkarılamadı. Lütfen tekrar deneyin.");
   }
 
@@ -315,6 +339,15 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   return (
     <div className="space-y-5">
       <CaseHeader caseDetail={caseDetail} actions={actions} busy={actionBusy} actionError={actionError} onPick={pickAction} />
+
+      {actionNotice && (
+        <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p>{actionNotice}</p>
+          <button type="button" aria-label="Uyarıyı kapat" onClick={() => setActionNotice(null)} className="text-xs font-semibold hover:underline">
+            Kapat
+          </button>
+        </div>
+      )}
 
       {skippedCount > 0 && !skippedDismissed && (
         <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -718,6 +751,36 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             </ul>
           )}
         </div>
+      )}
+      {dialog === "close" && (
+        <CaseCloseModal caseId={caseId} pendingTaskCount={pendingTasks} onClose={() => setDialog(null)} onClosed={handleClosed} />
+      )}
+      {dialog === "reopen" && (
+        <CaseConfirmModal
+          title="Dava yeniden açılsın mı?"
+          message="Sonuç ve karar bilgisi temizlenecek; kapanış kaydı zaman çizelgesinde kalır."
+          confirmLabel="Yeniden aç"
+          fallbackError="Dava yeniden açılamadı. Lütfen tekrar deneyin."
+          onClose={() => setDialog(null)}
+          onConfirm={async () => {
+            handleCaseSaved(await reopenCase(caseId));
+            setDialog(null);
+            void refreshCaseAndDocuments();
+          }}
+        />
+      )}
+      {dialog === "archive" && (
+        <CaseConfirmModal
+          title="Dava arşivlensin mi?"
+          message="Arşivli dava salt okunur olur."
+          confirmLabel="Arşivle"
+          fallbackError="Dava arşivlenemedi. Lütfen tekrar deneyin."
+          onClose={() => setDialog(null)}
+          onConfirm={async () => {
+            handleCaseSaved(await archiveCase(caseId));
+            setDialog(null);
+          }}
+        />
       )}
       {dialog === "edit" && (
         <CaseEditModal
