@@ -35,6 +35,8 @@ def test_create_case_success(client, two_firms_two_users):
     assert body["case_number"] == "2026/101"
     assert body["status"] == "devam_eden"
     assert body["is_archived"] is False
+    assert body["decision_date"] is None
+    assert body["closing_note"] is None
 
 
 def test_create_case_missing_required_field_fails(client, two_firms_two_users):

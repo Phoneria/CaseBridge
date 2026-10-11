@@ -68,6 +68,10 @@ class Case(Base):
 
     status: Mapped[CaseStatus] = mapped_column(str_enum(CaseStatus), default=CaseStatus.DEVAM_EDEN, nullable=False)
     outcome: Mapped[CaseOutcome] = mapped_column(str_enum(CaseOutcome), default=CaseOutcome.ONGOING, nullable=False)
+    # Set by POST /cases/{id}/close, cleared by /reopen. Cases closed before
+    # the close endpoint existed keep both empty.
+    decision_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    closing_note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     case_value: Mapped[float] = mapped_column(Float, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)

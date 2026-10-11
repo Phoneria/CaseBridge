@@ -124,6 +124,8 @@ class CaseOut(BaseModel):
     next_hearing_date: Optional[date] = None
     status: CaseStatus
     outcome: CaseOutcome
+    decision_date: Optional[date] = None
+    closing_note: Optional[str] = None
     case_value: Optional[float] = None
     description: Optional[str] = None
     client_role: Optional[str] = None
