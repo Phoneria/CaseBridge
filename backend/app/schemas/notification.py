@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class NotificationStatusOut(BaseModel):
-    email_backend: Literal["console", "smtp"]
+    email_backend: Literal["console", "smtp", "file"]
     reminders_enabled: bool
     reminder_send_hour: int
     timezone: str
@@ -13,4 +13,4 @@ class NotificationStatusOut(BaseModel):
 
 class EmailTestOut(BaseModel):
     sent: bool
-    backend: Literal["console", "smtp"]
+    backend: Literal["console", "smtp", "file"]

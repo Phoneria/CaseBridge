@@ -6,6 +6,8 @@ import { login } from "./helpers";
 
 test("drill down from a dashboard category to a case's tasks tab", async ({ page }) => {
   await login(page);
+  // Admins land on /admin after login; this flow starts on the dashboard.
+  await page.goto("/dashboard");
 
   const legend = page.getByRole("list", { name: "Dava dağılımı kategorileri" });
   const firstCategory = legend.getByRole("link").first();

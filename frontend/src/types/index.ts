@@ -213,7 +213,7 @@ export interface CalendarEventPayload {
   reminder_days: number[];
 }
 
-export type EmailBackend = "console" | "smtp";
+export type EmailBackend = "console" | "smtp" | "file";
 
 export interface NotificationStatus {
   email_backend: EmailBackend;

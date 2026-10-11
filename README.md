@@ -94,6 +94,9 @@ SQLite file created automatically on backend startup at `backend/casebridge.db` 
 python -m app.db.seed
 ```
 
+### User management
+Administrators manage the firm's users in **Ayarlar > Kullanıcılar**: invite (the new user gets an e-mail with a link to set a password, valid `INVITE_TOKEN_HOURS`), edit, resend an invite, send a password-reset link, and deactivate with a hand-over of open cases, pending tasks and reviewed precedents to another active lawyer. Everyone can use **Şifremi unuttum** on the login page and change their name or password under **Hesabım** (user menu, top right). In development the console e-mail backend prints the link in the backend log; set `EMAIL_BACKEND=file` to get `.eml` files instead.
+
 ### Demo credentials
 Created by `python -m app.db.seed` (idempotent - safe to re-run):
 - `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
@@ -131,11 +134,12 @@ In a courtroom session, a user may dictate a move and play AI turns aloud. These
 - Courtroom results are fictional training feedback, not legal advice or a prediction of a real case. Local models may still misstate facts; the prompts constrain fabrication and every final result remains marked for verification.
 - Both in-process AI workers are single-instance MVP queues. Do not horizontally scale the backend without moving them to a durable queue/row-locking design.
 - Task assignment (`assigned_to`) is accepted by the API but not yet surfaced in either Görevler UI (case-level or firm-wide) — assignment by lawyer, and per-lawyer task filtering, are not built yet.
-- `/system/ai-status` and the Ayarlar user list are firm-scoped but not role-gated server-side; only the frontend hides the user list from non-admins.
+- `/system/ai-status` is firm-scoped but not role-gated server-side. User management (`/admin/users`) is admin-only and firm-scoped on the server.
 - Reports CSV export has no pagination/streaming; fine at MVP scale.
 - CORS allow-list defaults to `localhost:3000`/`127.0.0.1:3000`; extra origins (e.g. for E2E) are added via the `EXTRA_CORS_ORIGINS` env var, not hardcoded.
-- No user-registration endpoint yet — accounts are created via the seed script (`python -m app.db.seed`) only.
-- `logout` does not revoke the JWT (stateless, short-lived tokens) — acceptable for MVP, no server-side session store.
+- There is no self-registration. In real-data mode (`SEED_DEMO_DATA=false`) the first administrator is created with `python -m app.db.create_admin`; after that, administrators add users in **Ayarlar > Kullanıcılar** and each person sets their own password from an e-mailed link.
+- Passwords bind sessions: changing or resetting a password signs out every older session (JWT `pwd` claim). Existing tokens without it are rejected once, so everyone signs in again after this update.
+- `logout` only clears the token in the browser; the JWT itself stays valid until it expires or the user's password changes (no server-side session store).
 - Existing unassigned cases remain visible to admins for manual assignment; new cases require an active lawyer in the same firm.
 - The admin's client overview groups case records by client name. It is not yet a canonical client registry, so people with identical names are not distinguishable there.
 - The local `data/import` sample contains anonymized court-decision summaries; these must not be treated as the firm's own client outcomes without provenance and an explicit import decision.

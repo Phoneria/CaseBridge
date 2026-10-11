@@ -11,6 +11,7 @@ import { UsersPanel } from "@/components/users/UsersPanel";
 const EMAIL_BACKEND_LABELS: Record<NotificationStatus["email_backend"], string> = {
   smtp: "SMTP",
   console: "Konsol (yalnızca sunucu logu)",
+  file: "Dosya (.eml, yalnızca geliştirme)",
 };
 
 type TestEmailState = { kind: "idle" } | { kind: "sending" } | { kind: "done"; message: string } | { kind: "error"; message: string };
@@ -45,7 +46,9 @@ export function SettingsView() {
         message:
           result.backend === "console"
             ? "Test e-postası sunucu loguna yazıldı (konsol modu)."
-            : `Test e-postası ${me?.email ?? "hesabınıza"} adresine gönderildi.`,
+            : result.backend === "file"
+              ? "Test e-postası dosyaya yazıldı (dosya modu)."
+              : `Test e-postası ${me?.email ?? "hesabınıza"} adresine gönderildi.`,
       });
     } catch (err) {
       setTestEmail({ kind: "error", message: err instanceof Error ? err.message : "E-posta gönderilemedi." });

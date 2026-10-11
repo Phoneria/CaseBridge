@@ -100,4 +100,17 @@ describe("SettingsView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Test e-postası gönder" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("E-posta gönderilemedi. SMTP ayarlarını kontrol edin.");
   });
+
+  it("explains file mode", async () => {
+    getMe.mockResolvedValue(lawyerUser);
+    getNotificationStatus.mockResolvedValue({ email_backend: "file", reminders_enabled: true, reminder_send_hour: 9, timezone: "Europe/Istanbul" });
+    sendTestEmail.mockResolvedValue({ sent: true, backend: "file" });
+
+    render(<SettingsView />);
+
+    const section = await screen.findByRole("region", { name: "Bildirimler" });
+    expect(section).toHaveTextContent("Dosya (.eml, yalnızca geliştirme)");
+    await userEvent.click(screen.getByRole("button", { name: "Test e-postası gönder" }));
+    expect(await screen.findByText("Test e-postası dosyaya yazıldı (dosya modu).")).toBeInTheDocument();
+  });
 });

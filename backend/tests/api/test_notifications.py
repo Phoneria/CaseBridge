@@ -60,3 +60,12 @@ def test_test_email_failure_returns_502_with_turkish_message(client, two_firms_t
 
 def test_test_email_requires_login(client):
     assert client.post("/notifications/test-email").status_code == 401
+
+
+def test_status_and_test_email_report_the_file_backend(client, two_firms_two_users, monkeypatch):
+    monkeypatch.setattr(settings, "email_backend", "file")
+    monkeypatch.setattr("app.api.routes.notifications.send_email", lambda message: None)
+    headers = _auth_headers(client, two_firms_two_users)
+
+    assert client.get("/notifications/status", headers=headers).json()["email_backend"] == "file"
+    assert client.post("/notifications/test-email", headers=headers).json() == {"sent": True, "backend": "file"}

@@ -33,6 +33,7 @@ test-results/
 TEST_REPORT.md.bak
 tests/e2e/node_modules/
 tests/e2e/e2e.db
+tests/e2e/mail/
 backend/storage_e2e/
 
 # Local scratch / transfer artifacts
