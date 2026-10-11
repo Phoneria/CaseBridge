@@ -47,6 +47,31 @@ def test_login_is_rate_limited_after_repeated_failures(client, two_firms_two_use
     assert response.status_code == 429
 
 
+def test_login_rate_limit_follows_the_setting(client, two_firms_two_users, monkeypatch):
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "login_rate_limit_per_minute", 2)
+    fixtures = two_firms_two_users
+    body = {"email": fixtures["user_a"].email, "password": fixtures["password"]}
+
+    assert client.post("/auth/login", json=body).status_code == 200
+    assert client.post("/auth/login", json=body).status_code == 200
+    third = client.post("/auth/login", json=body)
+    assert third.status_code == 429
+    assert third.json()["detail"] == "Çok fazla giriş denemesi. Lütfen bir dakika sonra tekrar deneyin."
+
+
+def test_login_rate_limit_setting_defaults_to_five_and_must_be_positive():
+    import pytest
+    from pydantic import ValidationError
+
+    from app.core.config import Settings
+
+    assert Settings.model_fields["login_rate_limit_per_minute"].default == 5
+    with pytest.raises(ValidationError):
+        Settings(login_rate_limit_per_minute=0)
+
+
 def test_login_with_unknown_email_fails(client):
     response = client.post(
         "/auth/login",

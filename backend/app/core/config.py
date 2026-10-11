@@ -126,6 +126,10 @@ class Settings(BaseSettings):
     reminder_poll_seconds: PositiveInt = 900
     reminder_max_attempts: PositiveInt = 3
 
+    # Login attempts allowed per client IP and e-mail address in one minute
+    # (brute-force protection). The forgot-password limit is separate.
+    login_rate_limit_per_minute: PositiveInt = 5
+
     storage_dir: str = "storage"
     # Demo cases/tasks/documents. false = seed only the firm and login users
     # and remove previously seeded demo cases (real data mode).
