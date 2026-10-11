@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ModalFrame } from "@/components/ModalFrame";
 import { deactivateUser, getUserWorkload } from "@/lib/api";
+import { ApiError } from "@/lib/apiError";
 import { userMessage } from "@/lib/userMessages";
 import type { DeactivateResult, ManagedUser, UserWorkload } from "@/types";
 
@@ -27,13 +28,17 @@ export function DeactivateUserModal({
   const [saving, setSaving] = useState(false);
   const inFlight = useRef(false);
 
+  const mounted = useRef(true);
+
   useEffect(() => {
+    mounted.current = true;
     let active = true;
     getUserWorkload(user.id)
       .then((result) => active && setWorkload(result))
       .catch((err) => active && setLoadError(userMessage(err, "İş yükü yüklenemedi. Lütfen tekrar deneyin.")));
     return () => {
       active = false;
+      mounted.current = false;
     };
   }, [user.id]);
 
@@ -50,6 +55,15 @@ export function DeactivateUserModal({
       onDone(await deactivateUser(user.id, hasWork ? targetId : undefined));
     } catch (err) {
       setError(userMessage(err, "Kullanıcı pasifleştirilemedi. Lütfen tekrar deneyin."));
+      if (err instanceof ApiError && err.status === 422) {
+        // Work may have appeared since the workload loaded: refresh so the hand-over select can be shown.
+        try {
+          const fresh = await getUserWorkload(user.id);
+          if (mounted.current) setWorkload(fresh);
+        } catch {
+          /* keep the current view; the error above is already shown */
+        }
+      }
     } finally {
       inFlight.current = false;
       setSaving(false);

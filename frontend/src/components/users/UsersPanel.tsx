@@ -26,9 +26,10 @@ function replaceUser(list: ManagedUser[], next: ManagedUser): ManagedUser[] {
   return list.map((item) => (item.id === next.id ? next : item));
 }
 
-function RowMenu({ user, isSelf, onPick }: { user: ManagedUser; isSelf: boolean; onPick: (action: string) => void }) {
+function RowMenu({ user, isSelf, busy, onPick }: { user: ManagedUser; isSelf: boolean; busy: boolean; onPick: (action: string) => void }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -55,6 +56,7 @@ function RowMenu({ user, isSelf, onPick }: { user: ManagedUser; isSelf: boolean;
   return (
     <div ref={rootRef} className="relative inline-block text-left">
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -71,8 +73,11 @@ function RowMenu({ user, isSelf, onPick }: { user: ManagedUser; isSelf: boolean;
               key={item.id}
               type="button"
               role="menuitem"
+              aria-disabled={busy}
               onClick={() => {
+                if (busy) return;
                 setOpen(false);
+                triggerRef.current?.focus();
                 onPick(item.id);
               }}
               className="block w-full px-3 py-2 text-left text-sm text-navy-700 hover:bg-surface-muted"
@@ -93,6 +98,7 @@ export function UsersPanel({ currentUser }: { currentUser: AppUser }) {
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const busy = useRef(false);
+  const [actionBusy, setActionBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -125,6 +131,7 @@ export function UsersPanel({ currentUser }: { currentUser: AppUser }) {
   async function runAction(user: ManagedUser, action: string) {
     if (busy.current) return;
     busy.current = true;
+    setActionBusy(true);
     setNotice(null);
     try {
       if (action === "invite") {
@@ -147,10 +154,12 @@ export function UsersPanel({ currentUser }: { currentUser: AppUser }) {
       setNotice({ tone: "error", text: userMessage(err, "İşlem tamamlanamadı. Lütfen tekrar deneyin.") });
     } finally {
       busy.current = false;
+      setActionBusy(false);
     }
   }
 
   function pick(user: ManagedUser, action: string) {
+    if (action === "edit" || action === "deactivate") setNotice(null);
     if (action === "edit") setDialog({ kind: "edit", user });
     else if (action === "deactivate") setDialog({ kind: "deactivate", user });
     else void runAction(user, action);
@@ -167,7 +176,10 @@ export function UsersPanel({ currentUser }: { currentUser: AppUser }) {
         </h2>
         <button
           type="button"
-          onClick={() => setDialog({ kind: "create" })}
+          onClick={() => {
+            setNotice(null);
+            setDialog({ kind: "create" });
+          }}
           className="rounded-xl bg-navy-900 px-4 py-2 text-sm font-medium text-white"
         >
           Kullanıcı ekle
@@ -208,7 +220,7 @@ export function UsersPanel({ currentUser }: { currentUser: AppUser }) {
                   <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[user.status]}`}>{STATUS_LABELS[user.status]}</span>
                 </td>
                 <td className="py-2 text-right">
-                  <RowMenu user={user} isSelf={user.id === currentUser.id} onPick={(action) => pick(user, action)} />
+                  <RowMenu user={user} isSelf={user.id === currentUser.id} busy={actionBusy} onPick={(action) => pick(user, action)} />
                 </td>
               </tr>
             ))}

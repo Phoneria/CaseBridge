@@ -274,4 +274,104 @@ describe("UsersPanel", () => {
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("returns focus to the row's İşlemler button when a row-opened dialog is dismissed", async () => {
+    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await openMenu("Mehmet Kaya", "Düzenle");
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Vazgeç" }));
+    expect(screen.getByRole("button", { name: "İşlemler, Mehmet Kaya" })).toHaveFocus();
+
+    await openMenu("Zeynep Çelik", "Pasifleştir");
+    await userEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Vazgeç" }));
+    expect(screen.getByRole("button", { name: "İşlemler, Zeynep Çelik" })).toHaveFocus();
+  });
+
+  it("keeps Tab and Shift+Tab inside the dialog", async () => {
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await userEvent.click(screen.getByRole("button", { name: "Kullanıcı ekle" }));
+    const dialog = screen.getByRole("dialog");
+    const save = within(dialog).getByRole("button", { name: "Kaydet" });
+    const name = within(dialog).getByLabelText("Ad soyad *");
+    save.focus();
+    await userEvent.tab();
+    expect(name).toHaveFocus();
+    await userEvent.tab({ shift: true });
+    expect(save).toHaveFocus();
+  });
+
+  it("ignores Escape while a save is in flight", async () => {
+    let finish: (value: unknown) => void = () => undefined;
+    api.createManagedUser.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await userEvent.click(screen.getByRole("button", { name: "Kullanıcı ekle" }));
+    await userEvent.type(screen.getByLabelText("Ad soyad *"), "Yeni Kişi");
+    await userEvent.type(screen.getByLabelText("E-posta *"), "yeni@firma.test");
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await userEvent.keyboard("{Escape}");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    finish({ ...managed("n1", "Yeni Kişi"), status: "pending", email_sent: true });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("shows a Turkish message when the user list cannot be loaded", async () => {
+    api.listManagedUsers.mockRejectedValue(new Error("boom"));
+    render(<UsersPanel currentUser={ME} />);
+    expect(await screen.findByText("Kullanıcılar yüklenemedi. Lütfen daha sonra tekrar deneyin.")).toBeInTheDocument();
+    expect(screen.queryByText("boom")).not.toBeInTheDocument();
+  });
+
+  it("lets the admin pick a receiving lawyer when work appeared after the workload loaded empty", async () => {
+    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
+    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [{ id: "c1", case_number: "2026/10", case_name: "Kaya - Demir" }], pending_tasks: [], precedents_reviewing: 0 });
+    api.deactivateUser.mockRejectedValueOnce(new ApiError("Açık davaları ve görevleri devretmek için bir avukat seçin.", 422));
+    api.deactivateUser.mockResolvedValueOnce({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 1, tasks: 0, precedents: 0 } });
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await openMenu("Mehmet Kaya", "Pasifleştir");
+    const dialog = await screen.findByRole("dialog");
+    await userEvent.click(await within(dialog).findByRole("button", { name: "Pasifleştir" }));
+    expect(await within(dialog).findByLabelText("Devredilecek avukat")).toBeInTheDocument();
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("Açık davaları ve görevleri devretmek için bir avukat seçin.");
+
+    await userEvent.selectOptions(within(dialog).getByLabelText("Devredilecek avukat"), "l2");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Devret ve pasifleştir" }));
+    expect(api.deactivateUser).toHaveBeenLastCalledWith("l1", "l2");
+    expect(await screen.findByRole("status")).toHaveTextContent("Kullanıcı pasifleştirildi.");
+  });
+
+  it("marks row menu items aria-disabled while an action is in flight", async () => {
+    let finish: (value: unknown) => void = () => undefined;
+    api.activateUser.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await openMenu("Pasif Kişi", "Aktifleştir");
+    await userEvent.click(screen.getByRole("button", { name: "İşlemler, Mehmet Kaya" }));
+    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(screen.getByRole("menuitem", { name: "Şifre sıfırlama bağlantısı gönder" }));
+    expect(api.sendUserPasswordReset).not.toHaveBeenCalled();
+
+    finish({ ...INACTIVE, status: "active", is_active: true });
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Kullanıcı aktifleştirildi."));
+  });
+
+  it("clears the notice when a dialog opens", async () => {
+    api.activateUser.mockResolvedValue({ ...INACTIVE, status: "active", is_active: true });
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await openMenu("Pasif Kişi", "Aktifleştir");
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Kullanıcı ekle" }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
 });
