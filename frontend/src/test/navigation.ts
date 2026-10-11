@@ -30,8 +30,11 @@ export function resetNav() {
   nav.back.mockReset();
 }
 
+// Like the real Next router, one stable object: effects that depend on it must not re-run on every render.
+const router = { push: nav.push, replace: nav.replace, back: nav.back, refresh: vi.fn(), prefetch: vi.fn() };
+
 export const navigationModule = {
   usePathname: () => nav.pathname,
   useSearchParams: () => nav.searchParams,
-  useRouter: () => ({ push: nav.push, replace: nav.replace, back: nav.back, refresh: vi.fn(), prefetch: vi.fn() }),
+  useRouter: () => router,
 };

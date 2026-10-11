@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { getMe } from "@/lib/api";
+import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       setReady(true);
     }).catch(() => router.replace("/login"));
   }, [router]);
+
+  // The account page announces profile changes so the header stays current.
+  useEffect(() => subscribeUserUpdated(setUser), []);
 
   if (!ready) return null;
 

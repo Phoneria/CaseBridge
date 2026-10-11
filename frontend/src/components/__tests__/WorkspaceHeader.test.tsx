@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/admin" }));
+vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
+import { resetNav, setUrl } from "@/test/navigation";
 const getCases = vi.fn();
 const getPrecedents = vi.fn();
 const listAllTasks = vi.fn();
@@ -20,6 +21,8 @@ import type { CalendarEvent } from "@/types";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  resetNav();
+  setUrl("/admin");
   getCases.mockResolvedValue([]);
   getPrecedents.mockResolvedValue([]);
   listAllTasks.mockResolvedValue([]);
@@ -38,6 +41,7 @@ describe("WorkspaceHeader", () => {
     expect(screen.getByRole("link", { name: "Görevler" })).toHaveAttribute("href", "/gorevler");
     expect(screen.getByText("Ayşe Demir")).toBeInTheDocument();
     expect(screen.getByText("Yönetici")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kullanıcı menüsü, Ayşe Demir" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("button", { name: "Bildirimler" })).toBeInTheDocument());
   });
 
