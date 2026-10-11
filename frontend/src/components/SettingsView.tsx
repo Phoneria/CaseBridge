@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { getAiStatus, getMe, getNotificationStatus, listUsers, sendTestEmail } from "@/lib/api";
+import { getAiStatus, getMe, getNotificationStatus, sendTestEmail } from "@/lib/api";
 import type { AIStatus, AppUser, NotificationStatus } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
+import { UsersPanel } from "@/components/users/UsersPanel";
 
-const ROLE_LABELS: Record<string, string> = { admin: "Yönetici", lawyer: "Avukat" };
 const EMAIL_BACKEND_LABELS: Record<NotificationStatus["email_backend"], string> = {
   smtp: "SMTP",
   console: "Konsol (yalnızca sunucu logu)",
@@ -17,7 +17,6 @@ type TestEmailState = { kind: "idle" } | { kind: "sending" } | { kind: "done"; m
 
 export function SettingsView() {
   const [me, setMe] = useState<AppUser | null>(null);
-  const [users, setUsers] = useState<AppUser[]>([]);
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
   const [notifications, setNotifications] = useState<NotificationStatus | null>(null);
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
@@ -27,10 +26,9 @@ export function SettingsView() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    Promise.all([getMe(), listUsers(), getAiStatus(), getNotificationStatus()])
-      .then(([meResult, usersResult, aiStatusResult, notificationResult]) => {
+    Promise.all([getMe(), getAiStatus(), getNotificationStatus()])
+      .then(([meResult, aiStatusResult, notificationResult]) => {
         setMe(meResult);
-        setUsers(usersResult);
         setAiStatus(aiStatusResult);
         setNotifications(notificationResult);
       })
@@ -120,24 +118,14 @@ export function SettingsView() {
         </section>
       )}
 
-      <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-        <p className="mb-3 text-sm font-medium text-navy-700">Kullanıcı Yönetimi</p>
-        {isAdmin ? (
-          <ul className="divide-y divide-surface-border text-sm">
-            {users.map((user) => (
-              <li key={user.id} className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-medium text-navy-800">{user.full_name}</p>
-                  <p className="text-xs text-navy-500">{user.email}</p>
-                </div>
-                <span className="text-xs text-navy-500">{ROLE_LABELS[user.role] ?? user.role}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
+      {isAdmin && me ? (
+        <UsersPanel currentUser={me} />
+      ) : (
+        <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          <p className="mb-3 text-sm font-medium text-navy-700">Kullanıcı Yönetimi</p>
           <p className="text-sm text-navy-500">Kullanıcı yönetimi sadece yöneticiler içindir.</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
