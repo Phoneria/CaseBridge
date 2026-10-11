@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.timeutil import to_local_naive
 from app.domain.calendar import HEARING_REMINDER_DAYS, default_event_reminder_days, task_reminder_days
 from app.models.calendar import CalendarEvent, CalendarEventType
-from app.models.case import Case
+from app.models.case import Case, case_is_active
 from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.assignees import find_assignable_in_firm
@@ -100,7 +100,7 @@ class CalendarService:
         [start, end]. A case hearing is hidden when a hearing event of the
         same case exists on the same day."""
         events = (
-            self.db.query(CalendarEvent, Case.case_name)
+            self.db.query(CalendarEvent, Case.case_name, Case.is_archived)
             .outerjoin(Case, CalendarEvent.case_id == Case.id)
             .filter(
                 CalendarEvent.law_firm_id == law_firm_id,
@@ -126,6 +126,7 @@ class CalendarService:
             .filter(
                 Case.law_firm_id == law_firm_id,
                 Case.is_precedent.is_(False),
+                case_is_active(),
                 Case.next_hearing_date >= start,
                 Case.next_hearing_date <= end,
             )
@@ -134,17 +135,19 @@ class CalendarService:
 
         hearing_event_days = {
             (event.case_id, event.starts_at.date())
-            for event, _ in events
+            for event, _, _ in events
             if event.event_type == CalendarEventType.HEARING and event.case_id
         }
         names = self._user_names(
             law_firm_id,
-            {event.assignee_id for event, _ in events}
+            {event.assignee_id for event, _, _ in events}
             | {task.assigned_to for task, _ in tasks}
             | {case.assigned_lawyer_id for case in cases},
         )
 
-        items = [_event_item(event, case_name, names) for event, case_name in events]
+        # An event of an archived case is read-only (its writes answer 409);
+        # task items are never editable here.
+        items = [_event_item(event, case_name, names, not archived) for event, case_name, archived in events]
         items += [_task_item(task, case_name, names) for task, case_name in tasks]
         items += [
             _hearing_item(case, names)
@@ -205,7 +208,9 @@ class CalendarService:
         return case
 
 
-def _event_item(event: CalendarEvent, case_name: Optional[str], names: dict[str, str]) -> CalendarItemOut:
+def _event_item(
+    event: CalendarEvent, case_name: Optional[str], names: dict[str, str], editable: bool = True
+) -> CalendarItemOut:
     timed = not event.all_day
     return CalendarItemOut(
         id=f"event:{event.id}",
@@ -224,7 +229,7 @@ def _event_item(event: CalendarEvent, case_name: Optional[str], names: dict[str,
         location=event.location,
         notes=event.notes,
         reminder_days=list(event.reminder_days or []),
-        editable=True,
+        editable=editable,
     )
 
 

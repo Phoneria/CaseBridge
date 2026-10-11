@@ -60,7 +60,8 @@ def test_open_statuses_can_be_changed_freely(client, lawyer, case):
 
 
 def test_a_closed_case_rejects_a_status_but_accepts_other_edits(client, lawyer, case, close_case):
-    close_case(lawyer, case["id"], outcome="lost", decision_date="2026-10-01", note="Ret")
+    decided = case["opening_date"]  # never after today, never before the opening date
+    close_case(lawyer, case["id"], outcome="lost", decision_date=decided, note="Ret")
 
     for status in ("devam_eden", "durusma_bekleyen", "kapali"):
         response = _patch(client, lawyer, case["id"], status=status)
@@ -72,7 +73,7 @@ def test_a_closed_case_rejects_a_status_but_accepts_other_edits(client, lawyer, 
     body = edited.json()
     assert (body["case_name"], body["court"]) == ("Düzeltilmiş ad", "Ankara 3. Asliye Hukuk")
     assert (body["status"], body["outcome"], body["decision_date"], body["closing_note"]) == (
-        "kapali", "lost", "2026-10-01", "Ret",
+        "kapali", "lost", decided, "Ret",
     )
 
 
@@ -113,6 +114,9 @@ def test_a_blank_court_is_stored_as_none(client, lawyer, case):
         {"opening_date": "dün"},
         {"court": "a" * 256},
         {"case_value": -1},
+        {"client_name": None},
+        {"client_name": ""},
+        {"client_name": "   "},
     ],
 )
 def test_invalid_edits_are_rejected_and_change_nothing(client, lawyer, case, body):

@@ -187,3 +187,30 @@ def test_analytics_scoped_to_law_firm(db_session):
     assert overview_a.total_cases == 1
     assert overview_a.won_cases == 1
     assert overview_a.lost_cases == 0
+
+
+def test_average_case_duration_prefers_the_decision_date_and_is_never_negative(db_session):
+    from app.models.case import CaseOutcome, CaseStatus
+    from app.models.law_firm import LawFirm
+    from app.services.analytics_service import AnalyticsService
+
+    firm = LawFirm(name="Firm D")
+    db_session.add(firm)
+    db_session.flush()
+    decided = _make_case(firm.id, case_number="1", status=CaseStatus.KAPALI, outcome=CaseOutcome.WON,
+                         opening_date=dt.date(2025, 1, 1), decision_date=dt.date(2025, 1, 11))
+    legacy = _make_case(firm.id, case_number="2", status=CaseStatus.KAPALI, outcome=CaseOutcome.LOST,
+                        opening_date=dt.date(2025, 1, 1))
+    # Opening date edited after closing to a day after the decision: must not pull the average below zero.
+    inverted = _make_case(firm.id, case_number="3", status=CaseStatus.KAPALI, outcome=CaseOutcome.SETTLED,
+                          opening_date=dt.date(2025, 3, 1), decision_date=dt.date(2025, 2, 1))
+    db_session.add_all([decided, legacy, inverted])
+    db_session.commit()
+    for case in (decided, legacy, inverted):
+        case.updated_at = dt.datetime(2025, 1, 31, tzinfo=dt.timezone.utc)  # edited long after the decision
+    db_session.commit()
+
+    overview = AnalyticsService(db_session).compute_overview(firm.id)
+
+    # decided: 10 days (decision date, not updated_at), legacy: 30 days (updated_at), inverted: 0 (clamped)
+    assert overview.average_case_duration_days == round((10 + 30 + 0) / 3, 2)

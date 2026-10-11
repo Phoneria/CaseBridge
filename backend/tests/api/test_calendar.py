@@ -264,3 +264,60 @@ def test_calendar_events_are_isolated_by_firm(client, two_firms_two_users):
     body = client.get("/calendar", params=RANGE_2026, headers=_auth_headers(client, fixtures, "user_b")).json()
 
     assert body == []
+
+
+# --- closed and archived cases (final review) ---------------------------------------------
+
+def _window():
+    from datetime import timedelta
+
+    from app.core.timeutil import local_today
+
+    today = local_today()
+    return today, {"from": (today - timedelta(days=10)).isoformat(), "to": (today + timedelta(days=30)).isoformat()}
+
+
+def test_closed_and_archived_cases_produce_no_hearing_items(client, two_firms_two_users, close_case):
+    from datetime import timedelta
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today, window = _window()
+    opened = (today - timedelta(days=30)).isoformat()
+    hearing = (today + timedelta(days=5)).isoformat()
+    open_case = _create_case(client, headers, case_number="2026/861", case_name="Açık Dava",
+                             opening_date=opened, next_hearing_date=hearing)
+    closed = _create_case(client, headers, case_number="2026/862", case_name="Kapalı Dava",
+                          opening_date=opened, next_hearing_date=hearing)
+    archived = _create_case(client, headers, case_number="2026/863", case_name="Arşivli Dava",
+                            opening_date=opened, next_hearing_date=hearing)
+    close_case(headers, closed["id"])
+    close_case(headers, archived["id"])
+    assert client.post(f"/cases/{archived['id']}/archive", headers=headers).status_code == 200
+
+    body = client.get("/calendar", params=window, headers=headers).json()
+
+    hearings = [item["case_id"] for item in body if item["kind"] == "case_hearing"]
+    assert hearings == [open_case["id"]]
+    # The data is kept: closing does not clear the hearing date.
+    assert client.get(f"/cases/{closed['id']}", headers=headers).json()["next_hearing_date"] == hearing
+
+
+def test_events_of_an_archived_case_are_not_editable(client, two_firms_two_users, close_case):
+    from datetime import timedelta
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today, window = _window()
+    opened = (today - timedelta(days=30)).isoformat()
+    starts = f"{(today + timedelta(days=3)).isoformat()}T10:00:00"
+    archived = _create_case(client, headers, case_number="2026/864", opening_date=opened)
+    active = _create_case(client, headers, case_number="2026/865", opening_date=opened)
+    archived_event = _create_event(client, headers, case_id=archived["id"], starts_at=starts, title="Arşivli toplantı")
+    active_event = _create_event(client, headers, case_id=active["id"], starts_at=starts, title="Açık toplantı")
+    free_event = _create_event(client, headers, starts_at=starts, title="Davasız toplantı")
+    close_case(headers, archived["id"])
+    assert client.post(f"/cases/{archived['id']}/archive", headers=headers).status_code == 200
+
+    body = client.get("/calendar", params=window, headers=headers).json()
+
+    editable = {item["event_id"]: item["editable"] for item in body if item["kind"] == "event"}
+    assert editable == {archived_event["id"]: False, active_event["id"]: True, free_event["id"]: True}

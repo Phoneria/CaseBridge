@@ -74,6 +74,21 @@ def test_hearings_csv_lists_only_the_30_day_window(client, two_firms_two_users):
     assert not any("Uzak Durusma" in line for line in lines)
 
 
+def test_hearings_csv_leaves_out_closed_cases(client, two_firms_two_users, close_case):
+    headers = _auth_headers(client, two_firms_two_users)
+    today = date.today()
+    _create_case(client, headers, case_number="2026/913", case_name="Acik Durusma",
+                 next_hearing_date=(today + timedelta(days=5)).isoformat())
+    closed = _create_case(client, headers, case_number="2026/914", case_name="Kapali Durusma",
+                          next_hearing_date=(today + timedelta(days=5)).isoformat())
+    close_case(headers, closed["id"])
+
+    lines = _csv_lines(client.get("/reports/hearings.csv", headers=headers))
+
+    assert any("Acik Durusma" in line for line in lines)
+    assert not any("Kapali Durusma" in line for line in lines)
+
+
 def test_tasks_csv_has_turkish_status_labels(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
     case = _create_case(client, headers, case_number="2026/921")
@@ -105,8 +120,9 @@ def test_summary_matches_the_lists_it_links_to(client, two_firms_two_users, clos
     today = date.today()
     soon = _create_case(client, headers, case_number="2026/941",
                         next_hearing_date=(today + timedelta(days=3)).isoformat())
-    _create_case(client, headers, case_number="2026/942")
-    close_case(headers, soon["id"], "won")
+    _create_case(client, headers, case_number="2026/942",
+                 next_hearing_date=(today + timedelta(days=4)).isoformat())
+    close_case(headers, soon["id"], "won")  # a closed case's hearing no longer counts
     client.post(f"/cases/{soon['id']}/tasks", json={"title": "Acik"}, headers=headers)
     done = client.post(f"/cases/{soon['id']}/tasks", json={"title": "Bitti"}, headers=headers).json()
     client.patch(f"/cases/{soon['id']}/tasks/{done['id']}", json={"status": "completed"}, headers=headers)

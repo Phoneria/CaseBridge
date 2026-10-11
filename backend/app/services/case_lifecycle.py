@@ -56,6 +56,8 @@ class CaseLifecycleService:
             raise CaseStateError(409, "Dava zaten kapalı.")
         if payload.decision_date > today:
             raise CaseStateError(422, "Karar tarihi ileri bir tarih olamaz.")
+        if case.opening_date is not None and payload.decision_date < case.opening_date:
+            raise CaseStateError(422, "Karar tarihi dava tarihinden önce olamaz.")
         outcome = CaseOutcome(payload.outcome)
         case.status = CaseStatus.KAPALI
         case.outcome = outcome

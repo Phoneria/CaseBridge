@@ -404,3 +404,40 @@ def test_deactivating_a_pending_user_keeps_them_pending(client, db_session, offi
     pending = db_session.get(User, created["id"])
     db_session.refresh(pending)
     assert pending.password_set_at is None
+
+
+# --- archived cases (final review) -------------------------------------------------------
+
+@pytest.fixture()
+def archived_work(db_session, office):
+    """Ayşe's only work is a pending task and an upcoming event on an archived (closed) case."""
+    from datetime import datetime, time, timedelta
+
+    from app.core.timeutil import local_today
+
+    ayse = office.lawyer_a1
+    archived = _case(db_session, office.firm_a, "2026/7", ayse, status=CaseStatus.KAPALI, is_archived=True)
+    task = _task(db_session, archived, ayse, "Arşivli görev")
+    event = _event(db_session, office.firm_a, ayse, office.admin_a, "Arşivli toplantı",
+                   datetime.combine(local_today() + timedelta(days=7), time(10, 0)))
+    event.case_id = archived.id
+    db_session.commit()
+    return SimpleNamespace(case=archived, task=task, event=event)
+
+
+def test_work_on_archived_cases_is_not_counted(client, office, archived_work, auth_headers):
+    body = client.get(f"/admin/users/{office.lawyer_a1.id}/workload", headers=auth_headers(office.admin_a)).json()
+
+    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
+
+
+def test_work_on_archived_cases_stays_with_the_user(client, db_session, office, busy, archived_work, auth_headers):
+    from app.models.calendar import CalendarEvent
+
+    response = _deactivate(client, auth_headers(office.admin_a), office.lawyer_a1, office.lawyer_a2.id)
+
+    assert response.status_code == 200
+    assert response.json()["transferred"] == {"cases": 2, "tasks": 2, "precedents": 1, "events": 0}
+    db_session.expire_all()
+    assert db_session.get(Task, archived_work.task.id).assigned_to == office.lawyer_a1.id
+    assert db_session.get(CalendarEvent, archived_work.event.id).assignee_id == office.lawyer_a1.id

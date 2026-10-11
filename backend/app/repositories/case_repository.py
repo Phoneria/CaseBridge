@@ -10,7 +10,7 @@ from typing import Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.models.case import Case, CaseOutcome, CaseStatus, CaseType
+from app.models.case import Case, CaseOutcome, CaseStatus, CaseType, case_is_active
 
 
 class CaseRepository:
@@ -88,7 +88,9 @@ class CaseRepository:
 
         if hearing_within_days is not None:
             today = date.today()
+            # Closed and archived cases keep the date but have no upcoming hearing.
             query = query.filter(
+                case_is_active(),
                 Case.next_hearing_date.isnot(None),
                 Case.next_hearing_date >= today,
                 Case.next_hearing_date <= today + timedelta(days=hearing_within_days),

@@ -49,8 +49,10 @@ class AnalyticsService:
         lost_cases = sum(1 for c in cases if c.outcome == CaseOutcome.LOST)
         win_rate = _win_rate(won_cases, lost_cases)
 
+        # Decision date when known (cases closed before it existed fall back to
+        # the last update); an opening date edited past it counts as 0, never negative.
         closed_durations = [
-            (c.updated_at.date() - c.opening_date).days
+            max(0, ((c.decision_date or c.updated_at.date()) - c.opening_date).days)
             for c in cases
             if c.outcome in _CLOSED_OUTCOMES
         ]

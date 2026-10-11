@@ -7,6 +7,7 @@ from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType, Cl
 
 PartyName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
 CaseName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+ClientName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
 ClosingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=4000)]
 
 
@@ -80,7 +81,7 @@ class CaseCreate(BaseModel):
         return self
 
 
-_REQUIRED_ON_UPDATE = ("case_name", "case_type", "status", "opening_date")
+_REQUIRED_ON_UPDATE = ("case_name", "client_name", "case_type", "status", "opening_date")
 
 
 class CaseUpdate(BaseModel):
@@ -90,7 +91,7 @@ class CaseUpdate(BaseModel):
     sending it can be told apart from leaving it out."""
 
     case_name: Optional[CaseName] = None
-    client_name: Optional[str] = None
+    client_name: Optional[ClientName] = None
     opposing_party: Optional[str] = None
     case_type: Optional[CaseType] = None
     court: Optional[str] = Field(default=None, max_length=255)

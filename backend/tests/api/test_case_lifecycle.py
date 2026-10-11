@@ -14,6 +14,7 @@ PAST = (TODAY - timedelta(days=10)).isoformat()
 PAST_LATER = (TODAY - timedelta(days=6)).isoformat()
 TOMORROW = (TODAY + timedelta(days=1)).isoformat()
 TODAY_ISO = TODAY.isoformat()
+OPENED = (TODAY - timedelta(days=30)).isoformat()
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +24,10 @@ def _fixed_today(monkeypatch):
 
 
 def _new_case(client, headers, number="2026/1", **overrides):
-    payload = {"case_number": number, "case_name": "Alacak Davası", "client_name": "Müvekkil", "case_type": "kira", **overrides}
+    payload = {
+        "case_number": number, "case_name": "Alacak Davası", "client_name": "Müvekkil", "case_type": "kira",
+        "opening_date": OPENED, **overrides,
+    }
     response = client.post("/cases", json=payload, headers=headers)
     assert response.status_code == 201, response.text
     return response.json()
@@ -117,6 +121,19 @@ def test_close_rejects_a_decision_date_after_today_but_accepts_today(client, db_
 
     today = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=TODAY_ISO), headers=lawyer)
     assert today.status_code == 200 and today.json()["decision_date"] == TODAY_ISO
+
+
+def test_close_rejects_a_decision_date_before_the_opening_date(client, db_session, lawyer):
+    case = _new_case(client, lawyer)
+    day_before = (TODAY - timedelta(days=31)).isoformat()
+
+    early = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=day_before), headers=lawyer)
+    assert (early.status_code, early.json()["detail"]) == (422, "Karar tarihi dava tarihinden önce olamaz.")
+    assert client.get(f"/cases/{case['id']}", headers=lawyer).json()["status"] == "devam_eden"
+    assert db_session.query(CaseEvent).filter(CaseEvent.case_id == case["id"]).count() == 0
+
+    same_day = client.post(f"/cases/{case['id']}/close", json=_close_payload(decision_date=OPENED), headers=lawyer)
+    assert same_day.status_code == 200 and same_day.json()["decision_date"] == OPENED
 
 
 def test_today_is_the_application_local_date(client, lawyer, monkeypatch):
@@ -279,6 +296,7 @@ def test_a_case_without_a_responsible_lawyer_is_only_managed_by_an_admin(client,
     orphan = Case(
         law_firm_id=office.firm_a.id, case_number="2026/77", case_name="Sahipsiz", client_name="M",
         case_type=CaseType.KIRA, status=CaseStatus.DEVAM_EDEN, assigned_lawyer_id=None,
+        opening_date=TODAY - timedelta(days=30),
     )
     db_session.add(orphan)
     db_session.commit()
