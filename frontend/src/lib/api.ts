@@ -30,6 +30,15 @@ import type {
   AIConnectivity,
   AIUsage,
   AppUser,
+  AuthConfig,
+  DeactivateResult,
+  ManagedUser,
+  ManagedUserInvite,
+  ManagedUserPayload,
+  ManagedUserUpdate,
+  ProfileUpdate,
+  TokenInfo,
+  UserWorkload,
   DocumentWithCase,
   Task,
   TaskStatus,
@@ -58,8 +67,12 @@ export function clearToken() {
   window.localStorage.removeItem("casebridge_token");
 }
 
+/** A 401 from these means "wrong credentials", not "session expired": the
+ * page shows the message instead of being reloaded. */
+const NO_SESSION_REDIRECT_PATHS = ["/auth/login"];
+
 /** Turns a non-2xx response into an ApiError (and handles 401 logout). */
-async function throwApiError(response: Response): Promise<never> {
+async function throwApiError(response: Response, path: string): Promise<never> {
   let detail = `İstek başarısız oldu (${response.status}).`;
   try {
     const body = await response.json();
@@ -68,7 +81,7 @@ async function throwApiError(response: Response): Promise<never> {
     // response had no JSON body - keep the generic message
   }
 
-  if (response.status === 401) {
+  if (response.status === 401 && !NO_SESSION_REDIRECT_PATHS.includes(path)) {
     // Session expired or token invalid/revoked - clear it and send
     // the user back to login instead of leaving them stuck on a
     // page that will keep failing every request. A hard redirect
@@ -93,7 +106,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
-  if (!response.ok) await throwApiError(response);
+  if (!response.ok) await throwApiError(response, path);
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
@@ -105,6 +118,91 @@ export async function login(email: string, password: string): Promise<{ access_t
 
 export async function getMe(): Promise<AppUser> {
   return request("/users/me");
+}
+
+/** Public: tells the login page whether to show the demo accounts hint. */
+export async function getAuthConfig(): Promise<AuthConfig> {
+  return request("/auth/config");
+}
+
+/** Ends the session. The token is discarded even when the call fails. */
+export async function logout(): Promise<void> {
+  try {
+    await request("/auth/logout", { method: "POST" });
+  } catch {
+    // Nothing to do: the local token goes away either way.
+  } finally {
+    clearToken();
+  }
+}
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return request("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+}
+
+export async function getTokenInfo(token: string): Promise<TokenInfo> {
+  return request(`/auth/token-info?token=${encodeURIComponent(token)}`);
+}
+
+/** Chooses the password with an invite / reset link. The answer logs the user
+ * in, so the new token is stored here, before anything else can run. */
+export async function setPassword(token: string, password: string): Promise<{ access_token: string }> {
+  const result = await request<{ access_token: string }>("/auth/set-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+  setToken(result.access_token);
+  return result;
+}
+
+/** Changing the password ends every other session; the new token is stored
+ * here so this browser stays logged in. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ access_token: string }> {
+  const result = await request<{ access_token: string }>("/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+  setToken(result.access_token);
+  return result;
+}
+
+export async function updateProfile(payload: ProfileUpdate): Promise<AppUser> {
+  return request("/users/me", { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function listManagedUsers(): Promise<ManagedUser[]> {
+  return request("/admin/users");
+}
+
+export async function createManagedUser(payload: ManagedUserPayload): Promise<ManagedUserInvite> {
+  return request("/admin/users", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateManagedUser(id: string, payload: ManagedUserUpdate): Promise<ManagedUser> {
+  return request(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function resendUserInvite(id: string): Promise<ManagedUserInvite> {
+  return request(`/admin/users/${id}/invite`, { method: "POST" });
+}
+
+export async function sendUserPasswordReset(id: string): Promise<{ email_sent: boolean }> {
+  return request(`/admin/users/${id}/password-reset`, { method: "POST" });
+}
+
+export async function getUserWorkload(id: string): Promise<UserWorkload> {
+  return request(`/admin/users/${id}/workload`);
+}
+
+export async function deactivateUser(id: string, transferTo?: string): Promise<DeactivateResult> {
+  return request(`/admin/users/${id}/deactivate`, {
+    method: "POST",
+    body: JSON.stringify(transferTo ? { transfer_to: transferTo } : {}),
+  });
+}
+
+export async function activateUser(id: string): Promise<ManagedUser> {
+  return request(`/admin/users/${id}/activate`, { method: "POST" });
 }
 
 export async function listUsers(): Promise<AppUser[]> {
@@ -459,6 +557,6 @@ export async function openChatStream(
     body: JSON.stringify({ content }),
     signal,
   });
-  if (!response.ok) await throwApiError(response);
+  if (!response.ok) await throwApiError(response, `/chat/conversations/${conversationId}/messages`);
   return response;
 }

@@ -240,6 +240,62 @@ export interface AppUser {
   is_active: boolean;
 }
 
+export type UserStatus = "pending" | "active" | "inactive";
+
+/** A firm user as the admin user list shows them (GET /admin/users). */
+export interface ManagedUser {
+  id: string;
+  email: string;
+  full_name: string;
+  department: string | null;
+  role: UserRole;
+  is_active: boolean;
+  status: UserStatus;
+  invited_at: string | null;
+  password_set_at: string | null;
+  created_at: string | null;
+}
+
+/** Create / re-invite answer: email_sent is false when the e-mail could not be sent. */
+export interface ManagedUserInvite extends ManagedUser {
+  email_sent: boolean;
+}
+
+export interface ManagedUserPayload {
+  email: string;
+  full_name: string;
+  department?: string | null;
+  role: UserRole;
+}
+
+export type ManagedUserUpdate = Partial<ManagedUserPayload>;
+
+export interface UserWorkload {
+  open_cases: { id: string; case_number: string; case_name: string }[];
+  pending_tasks: { id: string; title: string; case_name: string }[];
+  precedents_reviewing: number;
+}
+
+export interface DeactivateResult {
+  user: ManagedUser;
+  transferred: { cases: number; tasks: number; precedents: number };
+}
+
+export interface AuthConfig {
+  demo_mode: boolean;
+}
+
+export interface TokenInfo {
+  purpose: "invite" | "reset";
+  email: string;
+  full_name: string;
+}
+
+export interface ProfileUpdate {
+  full_name?: string;
+  department?: string | null;
+}
+
 export interface AIStatus {
   provider: string;
   configured: boolean;
