@@ -9,12 +9,14 @@ from app.core.security_headers import SecurityHeadersMiddleware
 from app.api.routes import activity, admin, admin_users, analytics, auth, calendar, case_intake, cases, chat, courtroom, documents, handover, health, notifications, precedents, reports, simulations, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
+from app.core.log_redaction import install_access_log_redaction
 from app.services.simulation_worker import start_worker_thread
 from app.services.courtroom_worker import start_courtroom_worker_thread
 from app.services.reminder_worker import should_start_reminder_worker, start_reminder_worker_thread
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("casebridge")
+install_access_log_redaction()
 
 
 @asynccontextmanager

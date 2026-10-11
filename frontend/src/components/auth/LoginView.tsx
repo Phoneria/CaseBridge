@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AUTH_BUTTON, AUTH_INPUT, AUTH_LABEL, AuthCard } from "@/components/auth/AuthCard";
-import { getAuthConfig, getMe, login, setToken } from "@/lib/api";
+import { clearToken, getAuthConfig, getMe, login, setToken } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 
 export function LoginView() {
@@ -36,14 +36,18 @@ export function LoginView() {
     inFlight.current = true;
     setSubmitting(true);
     setError(null);
+    let stored = false;
     try {
       const { access_token } = await login(email, password);
       setToken(access_token);
+      stored = true;
       const user = await getMe();
+      // Stay locked on success: the page is navigating away.
       router.push(user.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
+      // A token stored for a profile we could not read must not stay behind.
+      if (stored) clearToken();
       setError(userMessage(err, "Giriş yapılamadı. Lütfen tekrar deneyin."));
-    } finally {
       inFlight.current = false;
       setSubmitting(false);
     }

@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 const login = vi.fn();
 const getMe = vi.fn();
 const setToken = vi.fn();
+const clearToken = vi.fn();
 const getAuthConfig = vi.fn();
 const forgotPassword = vi.fn();
 const getTokenInfo = vi.fn();
@@ -13,6 +14,7 @@ vi.mock("@/lib/api", () => ({
   login: (...args: unknown[]) => login(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   setToken: (...args: unknown[]) => setToken(...args),
+  clearToken: (...args: unknown[]) => clearToken(...args),
   getAuthConfig: (...args: unknown[]) => getAuthConfig(...args),
   forgotPassword: (...args: unknown[]) => forgotPassword(...args),
   getTokenInfo: (...args: unknown[]) => getTokenInfo(...args),
@@ -29,7 +31,7 @@ import { SetPasswordView } from "@/components/auth/SetPasswordView";
 const LINK_INVALID = "Bağlantının süresi dolmuş veya bağlantı daha önce kullanılmış.";
 
 beforeEach(() => {
-  for (const mock of [login, getMe, setToken, getAuthConfig, forgotPassword, getTokenInfo, setPassword]) mock.mockReset();
+  for (const mock of [login, getMe, setToken, clearToken, getAuthConfig, forgotPassword, getTokenInfo, setPassword]) mock.mockReset();
   resetNav();
   getAuthConfig.mockResolvedValue({ demo_mode: false });
 });
@@ -286,5 +288,39 @@ describe("SetPasswordView", () => {
     await fill(user, "yeni-guclu-sifre", "yeni-guclu-sifre");
 
     await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/login"));
+  });
+});
+
+describe("LoginView session handling (fix 1)", () => {
+  it("stays locked after a successful login while navigating", async () => {
+    login.mockResolvedValue({ access_token: "tok" });
+    getMe.mockResolvedValue({ id: "u1", role: "lawyer" });
+    const user = userEvent.setup();
+    render(<LoginView />);
+
+    await user.type(screen.getByLabelText("E-posta"), "a@example.com");
+    await user.type(screen.getByLabelText("Şifre"), "gizli-sifre-1");
+    await user.click(screen.getByRole("button", { name: "Giriş Yap" }));
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/dashboard"));
+
+    const busy = screen.getByRole("button", { name: "Giriş yapılıyor..." });
+    expect(busy).toHaveAttribute("aria-disabled", "true");
+    await user.click(busy);
+    expect(login).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears the stored token when the profile cannot be read after login", async () => {
+    login.mockResolvedValue({ access_token: "tok" });
+    getMe.mockRejectedValue(new Error("down"));
+    const user = userEvent.setup();
+    render(<LoginView />);
+
+    await user.type(screen.getByLabelText("E-posta"), "a@example.com");
+    await user.type(screen.getByLabelText("Şifre"), "gizli-sifre-1");
+    await user.click(screen.getByRole("button", { name: "Giriş Yap" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Giriş yapılamadı. Lütfen tekrar deneyin.");
+    expect(clearToken).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Giriş Yap" })).toHaveAttribute("aria-disabled", "false");
   });
 });
