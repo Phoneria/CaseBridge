@@ -28,11 +28,13 @@ export function todayLocalISO(now: Date = new Date()): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-export function validateClose(form: CloseFormState, today: string): CloseErrors {
+/** `openingDate` is the case's "Dava tarihi" (YYYY-MM-DD); the decision cannot precede it. */
+export function validateClose(form: CloseFormState, today: string, openingDate?: string | null): CloseErrors {
   const errors: CloseErrors = {};
   if (!form.outcome) errors.outcome = "Sonuç seçin.";
   if (!form.decision_date) errors.decision_date = "Karar tarihi gerekli.";
   else if (form.decision_date > today) errors.decision_date = "Karar tarihi ileri bir tarih olamaz.";
+  else if (openingDate && form.decision_date < openingDate) errors.decision_date = "Karar tarihi dava tarihinden önce olamaz.";
   if (form.note.trim().length > MAX_CLOSING_NOTE) errors.note = `En fazla ${MAX_CLOSING_NOTE} karakter olabilir.`;
   return errors;
 }

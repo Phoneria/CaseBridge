@@ -35,6 +35,15 @@ describe("closing rules", () => {
     expect(validateClose({ ...valid, note: "x".repeat(4000) }, today).note).toBeUndefined();
   });
 
+  it("rejects a decision date before the case's opening date, accepts the same day", () => {
+    const opened = "2026-09-01";
+    expect(validateClose({ ...valid, decision_date: "2026-08-31" }, today, opened).decision_date).toBe(
+      "Karar tarihi dava tarihinden önce olamaz.",
+    );
+    expect(validateClose({ ...valid, decision_date: opened }, today, opened).decision_date).toBeUndefined();
+    expect(validateClose({ ...valid, decision_date: "2026-08-31" }, today, null).decision_date).toBeUndefined();
+  });
+
   it("builds the close payload with a trimmed note, left out when blank", () => {
     expect(buildClosePayload({ ...valid, note: "  Karar tebliğ edildi.  " })).toEqual({
       outcome: "won",

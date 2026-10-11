@@ -25,13 +25,15 @@ export interface CloseResult {
 
 interface Props {
   caseId: string;
+  /** The case's opening date: the earliest decision date accepted (the server checks it too). */
+  openingDate: string | null;
   pendingTaskCount: number;
   onClose: () => void;
   onClosed: (result: CloseResult) => void;
 }
 
 /** "Davayı kapat": outcome, decision date, note and an optional decision document. */
-export function CaseCloseModal({ caseId, pendingTaskCount, onClose, onClosed }: Props) {
+export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose, onClosed }: Props) {
   const today = todayLocalISO();
   const [form, setForm] = useState<CloseFormState>({ outcome: "", decision_date: today, note: "" });
   const [file, setFile] = useState<File | null>(null);
@@ -40,7 +42,7 @@ export function CaseCloseModal({ caseId, pendingTaskCount, onClose, onClosed }: 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
-  const errors = validateClose(form, today);
+  const errors = validateClose(form, today, openingDate);
 
   function pickFile(picked: File | undefined) {
     if (!picked) {
@@ -122,6 +124,7 @@ export function CaseCloseModal({ caseId, pendingTaskCount, onClose, onClosed }: 
             <input
               {...a11y}
               type="date"
+              min={openingDate ?? undefined}
               max={today}
               className={INPUT_CLASS}
               value={form.decision_date}

@@ -67,7 +67,17 @@ export function BasicInfoFields({ form, ai, errors, setField, caseNumberReadOnly
       </Field>
       <Field id="case_value" label="Dava değeri" ai={ai.has("case_value")} error={errors.case_value}>
         {(a11y) => (
-          <input {...a11y} type="number" min="0" step="any" className={INPUT_CLASS} value={form.case_value} onChange={(e) => setField("case_value", e.target.value)} />
+          <input
+            {...a11y}
+            type="number"
+            min="0"
+            step="any"
+            className={INPUT_CLASS}
+            value={form.case_value}
+            onChange={(e) => setField("case_value", e.target.value)}
+            // onInput also fires when unparseable text keeps the value at "" (no onChange then).
+            onInput={(e) => setField("case_value_bad_input", e.currentTarget.validity.badInput)}
+          />
         )}
       </Field>
       {statuses && (

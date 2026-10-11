@@ -16,10 +16,20 @@ import type { Case } from "@/types";
 
 const closed = { id: "c1", status: "kapali", outcome: "won" } as unknown as Case;
 
-function renderModal(props: { pendingTaskCount?: number; onClose?: () => void; onClosed?: (result: unknown) => void } = {}) {
+function renderModal(
+  props: { pendingTaskCount?: number; openingDate?: string | null; onClose?: () => void; onClosed?: (result: unknown) => void } = {},
+) {
   const onClose = props.onClose ?? vi.fn();
   const onClosed = props.onClosed ?? vi.fn();
-  render(<CaseCloseModal caseId="c1" pendingTaskCount={props.pendingTaskCount ?? 0} onClose={onClose} onClosed={onClosed} />);
+  render(
+    <CaseCloseModal
+      caseId="c1"
+      openingDate={props.openingDate ?? null}
+      pendingTaskCount={props.pendingTaskCount ?? 0}
+      onClose={onClose}
+      onClosed={onClosed}
+    />,
+  );
   return { onClose, onClosed };
 }
 
@@ -166,6 +176,23 @@ describe("CaseCloseModal", () => {
     const { onClose } = renderModal();
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
     expect(onClose).toHaveBeenCalledTimes(1);
+    expect(closeCase).not.toHaveBeenCalled();
+  });
+
+  it("does not accept a decision date before the case's opening date", async () => {
+    const today = todayLocalISO();
+    const [y, m, d] = today.split("-").map(Number);
+    const yesterday = todayLocalISO(new Date(y, m - 1, d - 1));
+    renderModal({ openingDate: today });
+    const date = screen.getByLabelText("Karar tarihi");
+    expect(date).toHaveAttribute("min", today);
+
+    await userEvent.click(screen.getByRole("radio", { name: "Kazanıldı" }));
+    await userEvent.clear(date);
+    await userEvent.type(date, yesterday);
+    await userEvent.click(screen.getByRole("button", { name: "Davayı kapat" }));
+
+    expect(screen.getByText("Karar tarihi dava tarihinden önce olamaz.")).toBeInTheDocument();
     expect(closeCase).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const updateCase = vi.fn();
@@ -158,5 +158,26 @@ describe("CaseEditModal", () => {
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(updateCase).not.toHaveBeenCalled();
+  });
+
+  it("blocks saving while the browser cannot read the typed value, and sends null only once the field is really cleared", async () => {
+    updateCase.mockResolvedValue(openCase);
+    renderModal();
+    const value = screen.getByLabelText("Dava değeri") as HTMLInputElement;
+    // A number input that holds e.g. "12-" reports value "" and validity.badInput (jsdom never sets it).
+    const badInput = (bad: boolean) => {
+      Object.defineProperty(value, "validity", { configurable: true, value: { badInput: bad, valid: !bad } });
+      fireEvent.input(value, { target: { value: "" } });
+    };
+
+    badInput(true);
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    expect(screen.getByText("Geçerli bir tutar girin.")).toBeInTheDocument();
+    expect(updateCase).not.toHaveBeenCalled();
+
+    badInput(false);
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(updateCase).toHaveBeenCalledTimes(1));
+    expect(updateCase.mock.calls[0][1]).toMatchObject({ case_value: null });
   });
 });

@@ -97,6 +97,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const actionInFlight = useRef(false);
+  // Reloads after an action may answer out of order; only the latest one is applied.
+  const reloadSeq = useRef(0);
   // Set by the new-case page when some events or documents could not be added after the case was created.
   const skippedParam = params.get("eklenemeyen") ?? "";
   const skippedCount = /^[1-9]\d*$/.test(skippedParam) ? Number(skippedParam) : 0;
@@ -278,8 +280,10 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   /** Reload the case after an action that adds a timeline event; the merged state stays if the reload fails. */
   async function refreshCaseAndDocuments() {
+    const seq = ++reloadSeq.current;
     try {
       const [fresh, freshDocuments] = await Promise.all([getCase(caseId), listDocuments(caseId)]);
+      if (seq !== reloadSeq.current) return; // a later reload started meanwhile
       setCaseDetail(fresh);
       setDocuments(freshDocuments);
     } catch {
@@ -296,6 +300,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   function pickAction(action: CaseAction) {
     setActionNotice(null);
+    setActionError(null);
     if (action === "edit" || action === "close" || action === "reopen" || action === "archive") setDialog(action);
     else if (action === "unarchive") void runCaseAction(() => unarchiveCase(caseId), "Dava arşivden çıkarılamadı. Lütfen tekrar deneyin.");
   }
@@ -764,7 +769,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
       {dialog === "close" && (
-        <CaseCloseModal caseId={caseId} pendingTaskCount={pendingTasks} onClose={() => setDialog(null)} onClosed={handleClosed} />
+        <CaseCloseModal
+          caseId={caseId}
+          openingDate={caseDetail.opening_date ?? null}
+          pendingTaskCount={pendingTasks}
+          onClose={() => setDialog(null)}
+          onClosed={handleClosed}
+        />
       )}
       {dialog === "reopen" && (
         <CaseConfirmModal

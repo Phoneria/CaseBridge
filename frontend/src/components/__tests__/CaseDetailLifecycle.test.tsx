@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -14,6 +14,7 @@ const closeCase = vi.fn();
 const reopenCase = vi.fn();
 const archiveCase = vi.fn();
 const uploadDocument = vi.fn();
+const unarchiveCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCase: (...args: unknown[]) => getCase(...args),
@@ -26,7 +27,7 @@ vi.mock("@/lib/api", () => ({
   archiveCase: (...args: unknown[]) => archiveCase(...args),
   uploadDocument: (...args: unknown[]) => uploadDocument(...args),
   updateCase: vi.fn(),
-  unarchiveCase: vi.fn(),
+  unarchiveCase: (...args: unknown[]) => unarchiveCase(...args),
   startSimulation: vi.fn(),
   getSimulation: vi.fn(),
   retrySimulation: vi.fn(),
@@ -90,7 +91,7 @@ async function pick(name: string) {
 beforeEach(() => {
   resetNav();
   setUrl("/davalar/c1");
-  for (const mock of [getCase, getMe, listSimulations, listDocuments, listCaseTasks, closeCase, reopenCase, archiveCase, uploadDocument]) mock.mockReset();
+  for (const mock of [getCase, getMe, listSimulations, listDocuments, listCaseTasks, closeCase, reopenCase, archiveCase, uploadDocument, unarchiveCase]) mock.mockReset();
   listSimulations.mockResolvedValue([]);
   listDocuments.mockResolvedValue([]);
   listCaseTasks.mockResolvedValue([
@@ -232,3 +233,75 @@ describe("Arşivle", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Dava arşivlenemedi. Lütfen tekrar deneyin.");
   });
 });
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((r) => (resolve = r));
+  return { promise, resolve };
+}
+
+async function closeAsWon() {
+  await pick("Davayı kapat");
+  await userEvent.click(screen.getByRole("radio", { name: "Kazanıldı" }));
+  await userEvent.click(screen.getByRole("button", { name: "Davayı kapat" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+}
+
+async function confirmIn(dialogName: string, button: string) {
+  await userEvent.click(within(screen.getByRole("dialog", { name: dialogName })).getByRole("button", { name: button }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+}
+
+describe("final review fixes", () => {
+  it("limits the decision date to the case's opening date", async () => {
+    await renderCase(openCase);
+    await pick("Davayı kapat");
+    expect(screen.getByLabelText("Karar tarihi")).toHaveAttribute("min", openCase.opening_date);
+  });
+
+  it("applies only the latest reload: close then reopen, the first reload resolving last", async () => {
+    await renderCase(openCase);
+    const afterClose = deferred<object>();
+    const afterReopen = deferred<object>();
+    getCase.mockReturnValueOnce(afterClose.promise).mockReturnValueOnce(afterReopen.promise);
+    closeCase.mockResolvedValue(closedCase);
+    reopenCase.mockResolvedValue({ ...openCase });
+
+    await closeAsWon();
+    await pick("Yeniden aç");
+    await confirmIn("Dava yeniden açılsın mı?", "Yeniden aç");
+
+    const reopenEvent = { ...closeEvent, id: "e3", title: "Dava yeniden açıldı" };
+    await act(async () => afterReopen.resolve({ ...openCase, timeline: [...closedDetail.timeline, reopenEvent] }));
+    await act(async () => afterClose.resolve(closedDetail));
+
+    const badges = screen.getByRole("group", { name: "Dava durumu" });
+    expect(within(badges).getByText("Devam Eden")).toBeInTheDocument();
+    expect(within(badges).queryByText("Kazanıldı")).toBeNull();
+    await userEvent.click(screen.getByRole("tab", { name: "Gelişmeler" }));
+    expect(await screen.findByText("Dava yeniden açıldı")).toBeInTheDocument();
+  });
+
+  it("clears the previous action error when a new action is picked", async () => {
+    await renderCase(openCase);
+    const afterClose = deferred<object>();
+    getCase.mockReturnValueOnce(afterClose.promise);
+    closeCase.mockResolvedValue(closedCase);
+    archiveCase.mockResolvedValue({ ...closedCase, is_archived: true });
+    unarchiveCase.mockRejectedValueOnce(new ApiError("Dava arşivden çıkarılamadı: sunucu meşgul.", 503));
+
+    await closeAsWon();
+    await pick("Arşivle");
+    await confirmIn("Dava arşivlensin mi?", "Arşivle");
+    await pick("Arşivden çıkar");
+    expect(await screen.findByText("Dava arşivden çıkarılamadı: sunucu meşgul.")).toBeInTheDocument();
+
+    // The reload started after closing answers now: the menu offers the closed-case actions again.
+    await act(async () => afterClose.resolve(closedDetail));
+    await pick("Bilgileri düzenle");
+
+    expect(screen.getByRole("dialog", { name: "Bilgileri düzenle" })).toBeInTheDocument();
+    expect(screen.queryByText("Dava arşivden çıkarılamadı: sunucu meşgul.")).toBeNull();
+  });
+});
+

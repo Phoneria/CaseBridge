@@ -473,3 +473,34 @@ describe("Bilgileri düzenle rules", () => {
     expect(payload.case_value).toBe(125000.5);
   });
 });
+
+describe("unparseable case value (validity.badInput)", () => {
+  const BAD = "Geçerli bir tutar girin.";
+
+  it("is an error in both forms, even though the browser reports an empty value", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "", case_value_bad_input: true };
+    expect(validateBasicInfo(form).case_value).toBe(BAD);
+    expect(hasBasicInfoErrors(validateBasicInfo(form))).toBe(true);
+    expect(validateCaseForm(form, { requireLawyer: false }).case_value).toBe(BAD);
+    expect(firstErrorSection(validateCaseForm(form, { requireLawyer: false }))).toBe("temel");
+  });
+
+  it("is not reported for a field the user really cleared", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "" };
+    expect(form.case_value_bad_input).toBe(false);
+    expect(validateBasicInfo(form).case_value).toBeUndefined();
+    expect(buildBasicInfoPayload(form, { includeStatus: false }).case_value).toBeNull();
+  });
+
+  it("never turns into a null case value in the PATCH body", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "", case_value_bad_input: true };
+    expect(buildBasicInfoPayload(form, { includeStatus: false })).not.toHaveProperty("case_value");
+    expect(buildCasePayload(form)).not.toHaveProperty("case_value");
+  });
+
+  it("is reset by a draft value", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_value_bad_input: true };
+    const { form: next } = applyDraft(form, { ...EMPTY_DRAFT, case_value: 1000 });
+    expect(next).toMatchObject({ case_value: "1000", case_value_bad_input: false });
+  });
+});
