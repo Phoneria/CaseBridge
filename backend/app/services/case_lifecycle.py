@@ -10,7 +10,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseEvent, CaseEventType, CaseOutcome, CaseStatus
-from app.schemas.case import CaseClose
+from app.schemas.case import CaseClose, CaseUpdate
 
 OUTCOME_LABELS = {
     CaseOutcome.WON: "Kazanıldı",
@@ -40,6 +40,16 @@ class CaseLifecycleService:
         self.db.commit()
         self.db.refresh(case)
         return case
+
+    @staticmethod
+    def ensure_patch_allowed(case: Case, payload: CaseUpdate) -> None:
+        """PATCH edits the case; it neither closes nor reopens it and never sets the outcome."""
+        if payload.status == CaseStatus.KAPALI:
+            raise CaseStateError(422, "Davayı kapatmak için 'Davayı kapat' işlemini kullanın.")
+        if "outcome" in payload.model_fields_set:
+            raise CaseStateError(422, "Sonuç yalnızca dava kapatılırken girilebilir.")
+        if "status" in payload.model_fields_set and case.status == CaseStatus.KAPALI:
+            raise CaseStateError(422, "Kapalı davayı açmak için 'Yeniden aç' işlemini kullanın.")
 
     def close(self, case: Case, payload: CaseClose, closed_by: str, today: date) -> Case:
         if case.status == CaseStatus.KAPALI:

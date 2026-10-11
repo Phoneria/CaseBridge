@@ -206,11 +206,11 @@ def _create(client, headers, **overrides):
     return response.json()
 
 
-def test_filter_cases_by_outcome(client, two_firms_two_users):
+def test_filter_cases_by_outcome(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     won = _create(client, headers, case_number="2026/701")
     _create(client, headers, case_number="2026/702")
-    client.patch(f"/cases/{won['id']}", json={"outcome": "won", "status": "kapali"}, headers=headers)
+    close_case(headers, won["id"], "won")
 
     response = client.get("/cases?outcome=won", headers=headers)
 

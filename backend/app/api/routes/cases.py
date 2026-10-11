@@ -117,15 +117,16 @@ def get_case(
 def update_case(
     case_id: str,
     payload: CaseUpdate,
-    law_firm_id: str = Depends(get_current_law_firm_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if "assigned_lawyer_id" in payload.model_fields_set:
         raise HTTPException(status_code=403, detail="Use admin case assignment to change the lawyer")
-    service = CaseService(db)
-    case = _get_owned_case_or_404(service, case_id, law_firm_id)
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    _lifecycle(lambda: CaseLifecycleService.ensure_patch_allowed(case, payload))
     try:
-        return service.update_case(case, payload)
+        return CaseService(db).update_case(case, payload)
     except InvalidPartiesError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
