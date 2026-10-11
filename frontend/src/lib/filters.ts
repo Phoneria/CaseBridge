@@ -6,12 +6,14 @@
  */
 import type { CaseListFilters } from "@/lib/api";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS } from "@/lib/labels";
-import type { CaseOutcome, CaseStatus, CaseType, DocumentItem, DocumentWithCase, TaskWithCase } from "@/types";
+import type { CaseOutcome, CaseStatus, CaseType, DocumentItem, DocumentWithCase, OpenCaseStatus, TaskWithCase } from "@/types";
 
 type ParamSource = { get(name: string): string | null };
 
 export const CASE_TYPES: CaseType[] = ["is_hukuku", "ticaret_hukuku", "sozlesme", "kira", "icra", "diger"];
 export const CASE_STATUSES: CaseStatus[] = ["devam_eden", "durusma_bekleyen", "karar_bekleyen", "kapali"];
+/** The statuses a case can be created with and edited between ("kapali" only through the close action). */
+export const OPEN_CASE_STATUSES: OpenCaseStatus[] = ["devam_eden", "durusma_bekleyen", "karar_bekleyen"];
 
 export const OUTCOME_SLUGS = {
   kazanilan: "won",
@@ -25,7 +27,7 @@ const OUTCOME_SLUG_VALUES = Object.keys(OUTCOME_SLUGS) as OutcomeSlug[];
 export const OUTCOME_SLUG_LABELS: Record<OutcomeSlug, string> = {
   kazanilan: "Kazanılan",
   kaybedilen: "Kaybedilen",
-  sulh: "Uzlaşma",
+  sulh: "Sulh",
   devam: "Devam Eden",
 };
 

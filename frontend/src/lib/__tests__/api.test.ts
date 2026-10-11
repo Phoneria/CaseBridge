@@ -203,4 +203,29 @@ describe("case intake API", () => {
     expect(fetchMock.mock.calls[1][1].method).toBe("PATCH");
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ parties });
   });
+  it("closes, reopens, archives and unarchives a case with the lifecycle endpoints", async () => {
+    window.localStorage.setItem("casebridge_token", "t");
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ id: "c1" }) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { archiveCase, closeCase, reopenCase, unarchiveCase } = await import("@/lib/api");
+    await closeCase("c1", { outcome: "settled", decision_date: "2026-10-01", note: "Sulh protokolü" });
+    await reopenCase("c1");
+    await archiveCase("c1");
+    await unarchiveCase("c1");
+
+    const calls = fetchMock.mock.calls.map(([url, init]) => [String(url), init.method]);
+    expect(calls).toEqual([
+      ["http://localhost:8000/cases/c1/close", "POST"],
+      ["http://localhost:8000/cases/c1/reopen", "POST"],
+      ["http://localhost:8000/cases/c1/archive", "POST"],
+      ["http://localhost:8000/cases/c1/unarchive", "POST"],
+    ]);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      outcome: "settled",
+      decision_date: "2026-10-01",
+      note: "Sulh protokolü",
+    });
+    expect(fetchMock.mock.calls[1][1].body).toBeUndefined();
+  });
 });
