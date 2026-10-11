@@ -35,7 +35,8 @@ from app.models.case import Case, CaseEvent, CaseEventType, CaseOutcome, CaseSta
 from app.models.document import Document, DocumentType
 from app.models.law_firm import LawFirm
 from app.models.task import Task, TaskStatus
-from app.models.user import User
+from app.models.user import User, UserRole
+from app.services.assignees import is_assignable
 from app.services.case_parties import (
     PartyData,
     derive_client_name,
@@ -208,6 +209,13 @@ def import_folder(folder: str, db=None, firm_name: str = DEMO_FIRM_NAME, lawyer_
             raise ImportError_(
                 "Firm or lawyer not found. Run the seed (python -m app.db.seed) for the demo firm, "
                 "or pass --firm and --lawyer for a real one."
+            )
+        # Same rule as case assignment: only an active lawyer who has chosen a
+        # password can own cases (an invitee or a deactivated user cannot).
+        if lawyer.role != UserRole.LAWYER or not is_assignable(lawyer):
+            raise ImportError_(
+                "The --lawyer must be an active lawyer of the firm who has set a password "
+                "(not an administrator, an invitee or a deactivated user)."
             )
         stats = {"created": 0, "updated": 0, "documents": 0, "errors": []}
         docs_dir = os.path.join(folder, "documents")

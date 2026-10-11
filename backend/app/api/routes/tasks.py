@@ -14,6 +14,7 @@ from app.db.session import get_db
 from app.models.task import TaskStatus
 from app.models.user import User
 from app.schemas.task import TaskCreate, TaskOut, TaskUpdate, TaskWithCaseOut
+from app.services.assignees import AssigneeNotAssignable
 from app.services.case_service import CaseService
 from app.services.task_service import AssigneeNotFound, TaskService
 
@@ -41,6 +42,8 @@ def create_task(
         return TaskService(db).create_task(case, payload, created_by=current_user.id)
     except AssigneeNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except AssigneeNotAssignable as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
 
 @cases_router.get("/{case_id}/tasks", response_model=list[TaskOut])
@@ -70,6 +73,8 @@ def update_case_task(
         return service.update_task(task, payload)
     except AssigneeNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except AssigneeNotAssignable as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
 
 @tasks_router.get("", response_model=list[TaskWithCaseOut])
@@ -105,3 +110,5 @@ def update_task(
         return service.update_task(task, payload)
     except AssigneeNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except AssigneeNotAssignable as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)

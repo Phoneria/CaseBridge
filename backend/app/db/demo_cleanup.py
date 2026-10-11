@@ -3,12 +3,16 @@
 Only the demo firm is looked at; every other firm and its users are never
 touched. A demo user (or the firm) that real work still points at - a case
 somebody created, a task, a chat - is kept, so switching the flag never
-destroys an office that kept using the demo accounts."""
+destroys an office that kept using the demo accounts. A kept account loses
+the published demo password: it becomes "Davet bekliyor" (pending) and an
+administrator can send it an invite or a reset link."""
+import secrets
 from dataclasses import dataclass, field
 
-from sqlalchemy import func, select
+from sqlalchemy import func, null, select
 from sqlalchemy.orm import Session
 
+from app.core.security import hash_password, verify_password
 from app.db.base import Base
 from app.db.purge import delete_cases
 from app.models.case import Case
@@ -16,6 +20,7 @@ from app.models.courtroom import CourtroomSession
 from app.models.law_firm import LawFirm
 from app.models.user import User
 from app.models.user_token import UserToken
+from app.services.user_token_service import invalidate_unused_tokens
 
 SHOWCASE_PROMPT_VERSION = "showcase-v1"
 
@@ -26,6 +31,8 @@ class DemoCleanup:
     hearings: int = 0
     users_removed: list[str] = field(default_factory=list)
     users_kept: list[str] = field(default_factory=list)
+    # Kept accounts whose demo password was revoked in this run.
+    passwords_revoked: list[str] = field(default_factory=list)
     firm_removed: bool = False
 
 
@@ -43,8 +50,23 @@ def count_references(db: Session, table_name: str, row_id: str, ignore: tuple[st
     return total
 
 
+def _revoke_demo_password(db: Session, user: User, demo_password: str) -> bool:
+    """A kept demo account that still signs in with the published demo
+    password becomes pending: no password (password_set_at NULL, which also
+    ends its sessions), an unusable random hash and no usable link. is_active
+    is left as it is. An account whose password somebody chose afterwards
+    (through an invite or reset link) is left alone, so running the seed again
+    never takes a real password away. True when something was revoked."""
+    if user.password_set_at is None or not verify_password(demo_password, user.hashed_password):
+        return False
+    user.hashed_password = hash_password(secrets.token_urlsafe(32))
+    user.password_set_at = null()
+    invalidate_unused_tokens(db, user.id)
+    return True
+
+
 def remove_demo_data(
-    db: Session, *, firm_name: str, case_numbers: list[str], emails: list[str]
+    db: Session, *, firm_name: str, case_numbers: list[str], emails: list[str], demo_password: str
 ) -> DemoCleanup:
     result = DemoCleanup()
     firm = db.query(LawFirm).filter(LawFirm.name == firm_name).first()
@@ -69,6 +91,8 @@ def remove_demo_data(
     for user in users:
         if count_references(db, "users", user.id, ignore=("user_tokens",)) > 0:
             result.users_kept.append(user.email)
+            if _revoke_demo_password(db, user, demo_password):
+                result.passwords_revoked.append(user.email)
             continue
         db.query(UserToken).filter(UserToken.user_id == user.id).delete(synchronize_session=False)
         db.query(UserToken).filter(UserToken.created_by == user.id).update(

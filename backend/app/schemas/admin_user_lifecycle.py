@@ -19,6 +19,8 @@ class WorkloadOut(BaseModel):
     open_cases: list[WorkloadCase]
     pending_tasks: list[WorkloadTask]
     precedents_reviewing: int
+    # Calendar events assigned to the user that start today or later.
+    upcoming_events: int
 
 
 class DeactivateRequest(BaseModel):
@@ -29,6 +31,7 @@ class TransferCounts(BaseModel):
     cases: int
     tasks: int
     precedents: int
+    events: int
 
 
 class DeactivateOut(BaseModel):

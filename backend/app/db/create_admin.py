@@ -8,6 +8,10 @@ password" e-mail. With EMAIL_BACKEND=console the e-mail, link included, is
 printed to the console. Exit code 0 on success, 1 on any error (message in
 Turkish). If the e-mail cannot be sent nothing is created, so the command can
 simply be run again once the mail settings are fixed.
+
+Run again for an administrator of the same firm who has not chosen a password
+yet, it sends a new invite (the older links stop working) and prints
+"Davet yeniden gönderildi."; any other registered e-mail is an error.
 """
 import argparse
 import logging
@@ -22,6 +26,7 @@ from app.db.session import SessionLocal, engine
 import app.models  # noqa: F401  (registers all models on Base.metadata)
 from app.models.law_firm import LawFirm
 from app.models.user import User, UserRole
+from app.repositories.user_repository import UserRepository
 from app.models.user_token import TokenPurpose
 from app.schemas.admin_user import AdminUserCreate
 from app.schemas.text_rules import clean_single_line
@@ -43,9 +48,28 @@ class _Parser(argparse.ArgumentParser):
         raise SystemExit(1)
 
 
-def create_admin(db: Session, firm_name: str, email: str, full_name: str) -> User:
+RESENT = "Davet yeniden gönderildi."
+
+
+def _pending_admin_of_firm(db: Session, firm_name: str, email: str) -> User | None:
+    """The existing, active administrator of the firm with this e-mail who has
+    not chosen a password yet (the invite can be sent again), else None."""
+    user = UserRepository(db).get_by_email(email)
+    if (
+        user is None
+        or user.role != UserRole.ADMIN
+        or not user.is_active
+        or user.password_set_at is not None
+        or user.law_firm.name != firm_name
+    ):
+        return None
+    return user
+
+
+def create_admin(db: Session, firm_name: str, email: str, full_name: str) -> tuple[User, bool]:
     """Creates (or reuses by name) the firm, the invited admin and sends the
-    invite. Commits only after the e-mail went out."""
+    invite; for a pending admin of the same firm only a new invite is sent.
+    Commits only after the e-mail went out. Returns (user, resent)."""
     firm_name = clean_single_line(firm_name)
     if not firm_name or len(firm_name) > 255:
         raise CreateAdminError("Büro adı 1-255 karakter olmalı.")
@@ -58,15 +82,21 @@ def create_admin(db: Session, firm_name: str, email: str, full_name: str) -> Use
         raise CreateAdminError("Ad soyad 1-255 karakter olmalı.") from exc
 
     try:
-        firm = db.query(LawFirm).filter(LawFirm.name == firm_name).first()
-        if firm is None:
-            firm = LawFirm(name=firm_name)
-            db.add(firm)
-            db.flush()
-        try:
-            user = create_pending_user(db, firm.id, data)
-        except UserAdminError as exc:
-            raise CreateAdminError(exc.detail) from exc
+        user = _pending_admin_of_firm(db, firm_name, str(data.email))
+        resent = user is not None
+        if user is not None:
+            firm = user.law_firm
+        else:
+            firm = db.query(LawFirm).filter(LawFirm.name == firm_name).first()
+            if firm is None:
+                firm = LawFirm(name=firm_name)
+                db.add(firm)
+                db.flush()
+            try:
+                user = create_pending_user(db, firm.id, data)
+            except UserAdminError as exc:
+                raise CreateAdminError(exc.detail) from exc
+        # Issuing invalidates the earlier unused invites of the user.
         token = issue_token(db, user, TokenPurpose.INVITE, created_by=None)
         user.invited_at = utc_now()
         try:
@@ -79,7 +109,7 @@ def create_admin(db: Session, firm_name: str, email: str, full_name: str) -> Use
     except Exception:
         db.rollback()
         raise
-    return user
+    return user, resent
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -94,8 +124,11 @@ def main(argv: list[str] | None = None) -> int:
     upgrade_to_head(engine)
     db = SessionLocal()
     try:
-        user = create_admin(db, args.firm, args.email, args.name)
-        print(f"Yönetici oluşturuldu: {user.email}. Davet e-postası gönderildi.")
+        user, resent = create_admin(db, args.firm, args.email, args.name)
+        if resent:
+            print(RESENT)
+        else:
+            print(f"Yönetici oluşturuldu: {user.email}. Davet e-postası gönderildi.")
         return 0
     except CreateAdminError as exc:
         print(f"Hata: {exc}", file=sys.stderr)

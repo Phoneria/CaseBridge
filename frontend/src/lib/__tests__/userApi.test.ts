@@ -133,10 +133,18 @@ describe("user management API", () => {
   });
 });
 
+const TOO_LONG = "Şifre en fazla 72 bayt olabilir (Türkçe karakterler 2 bayt sayılır).";
+
 describe("validateNewPassword", () => {
+  it("limits the password to 72 bytes in UTF-8 (bcrypt's limit)", () => {
+    expect(validateNewPassword("x".repeat(72), "x".repeat(72))).toBeNull();
+    expect(validateNewPassword("ş".repeat(36), "ş".repeat(36))).toBeNull();
+    expect(validateNewPassword("ş".repeat(36) + "a", "ş".repeat(36) + "a")).toBe(TOO_LONG);
+  });
+
   it("returns the first problem in the order length, e-mail, confirmation", () => {
     expect(validateNewPassword("kisa", "kisa")).toBe("Şifre en az 10 karakter olmalı.");
-    expect(validateNewPassword("x".repeat(129), "x".repeat(129))).toBe("Şifre en fazla 128 karakter olabilir.");
+    expect(validateNewPassword("x".repeat(73), "x".repeat(73))).toBe(TOO_LONG);
     expect(validateNewPassword("Avukat@Example.com", "Avukat@Example.com", "avukat@example.com")).toBe(
       "Şifre e-posta adresinizle aynı olamaz.",
     );

@@ -43,7 +43,12 @@ export function DeactivateUserModal({
   }, [user.id]);
 
   const targets = candidates.filter((item) => item.id !== user.id && item.role === "lawyer" && item.status === "active");
-  const hasWork = workload !== null && (workload.open_cases.length > 0 || workload.pending_tasks.length > 0 || workload.precedents_reviewing > 0);
+  const hasWork =
+    workload !== null &&
+    (workload.open_cases.length > 0 ||
+      workload.pending_tasks.length > 0 ||
+      workload.precedents_reviewing > 0 ||
+      workload.upcoming_events > 0);
 
   async function confirm() {
     if (inFlight.current) return;
@@ -109,6 +114,7 @@ export function DeactivateUserModal({
             </div>
           )}
           {workload.precedents_reviewing > 0 && <p>İncelediği emsaller: {workload.precedents_reviewing}</p>}
+          {workload.upcoming_events > 0 && <p>{`${workload.upcoming_events} yaklaşan takvim etkinliği`}</p>}
           <label className="block">
             <span className="text-xs font-medium text-navy-600">Devredilecek avukat</span>
             <select

@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 from app.models.case import Case
 from app.models.task import Task, TaskStatus
 from app.repositories.task_repository import TaskRepository
-from app.repositories.user_repository import UserRepository
 from app.schemas.task import TaskCreate, TaskUpdate
+from app.services.assignees import find_assignable_in_firm
 
 
 class AssigneeNotFound(Exception):
@@ -26,7 +26,9 @@ class TaskService:
         self.tasks = TaskRepository(db)
 
     def _check_assignee(self, assigned_to: Optional[str], law_firm_id: str) -> None:
-        if assigned_to is not None and UserRepository(self.db).get_by_id_in_firm(assigned_to, law_firm_id) is None:
+        """Raises AssigneeNotFound (other firm / unknown) or
+        AssigneeNotAssignable (pending or inactive user)."""
+        if assigned_to is not None and find_assignable_in_firm(self.db, assigned_to, law_firm_id) is None:
             raise AssigneeNotFound()
 
     def create_task(self, case: Case, payload: TaskCreate, created_by: Optional[str]) -> Task:
@@ -47,7 +49,10 @@ class TaskService:
 
     def update_task(self, task: Task, payload: TaskUpdate) -> Task:
         updates = payload.model_dump(exclude_unset=True)
-        self._check_assignee(updates.get("assigned_to"), task.law_firm_id)
+        # Only a new assignee is checked: a task whose assignee was deactivated
+        # since can still be edited (or handed to someone else).
+        if updates.get("assigned_to") != task.assigned_to:
+            self._check_assignee(updates.get("assigned_to"), task.law_firm_id)
         was_pending = task.status == TaskStatus.PENDING
         for field, value in updates.items():
             setattr(task, field, value)

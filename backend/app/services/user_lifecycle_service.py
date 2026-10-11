@@ -1,12 +1,17 @@
 """Deactivating and re-activating users. A user's open work has to move to
 another lawyer in the same operation, so nothing is left with nobody."""
+from datetime import datetime, time
+
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from app.core.timeutil import local_today
+from app.models.calendar import CalendarEvent
 from app.models.case import Case, CaseStatus
 from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
 from app.schemas.admin_user_lifecycle import TransferCounts, WorkloadCase, WorkloadOut, WorkloadTask
+from app.services.account_service import next_password_set_at
 from app.services.user_admin_service import UserAdminError, ensure_not_last_admin
 from app.services.user_token_service import invalidate_unused_tokens
 
@@ -43,6 +48,18 @@ def _reviewed_precedents_filter(user: User):
     )
 
 
+def _upcoming_events_filter(user: User):
+    """Calendar events assigned to the user that start today or later.
+    starts_at is a naive local time in APP_TIMEZONE, so "today" is the local
+    date (as for the calendar and the reminders); past events stay, as history."""
+    start_of_today = datetime.combine(local_today(), time.min)
+    return (
+        CalendarEvent.law_firm_id == user.law_firm_id,
+        CalendarEvent.assignee_id == user.id,
+        CalendarEvent.starts_at >= start_of_today,
+    )
+
+
 def get_workload(db: Session, user: User) -> WorkloadOut:
     cases = db.query(Case).filter(*_open_cases_filter(user)).order_by(Case.case_number).all()
     tasks = (
@@ -53,10 +70,12 @@ def get_workload(db: Session, user: User) -> WorkloadOut:
         .all()
     )
     precedents = db.query(Case).filter(*_reviewed_precedents_filter(user)).count()
+    events = db.query(CalendarEvent).filter(*_upcoming_events_filter(user)).count()
     return WorkloadOut(
         open_cases=[WorkloadCase(id=c.id, case_number=c.case_number, case_name=c.case_name) for c in cases],
         pending_tasks=[WorkloadTask(id=t.id, title=t.title, case_name=name) for t, name in tasks],
         precedents_reviewing=precedents,
+        upcoming_events=events,
     )
 
 
@@ -104,12 +123,14 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
         raise UserAdminError(409, ALREADY_INACTIVE)
 
     workload = get_workload(db, user)
-    has_work = bool(workload.open_cases or workload.pending_tasks or workload.precedents_reviewing)
+    has_work = bool(
+        workload.open_cases or workload.pending_tasks or workload.precedents_reviewing or workload.upcoming_events
+    )
     if has_work and transfer_to is None:
         raise UserAdminError(422, TRANSFER_REQUIRED)
     target = _transfer_target(locked, user, transfer_to) if transfer_to is not None else None
 
-    counts = TransferCounts(cases=0, tasks=0, precedents=0)
+    counts = TransferCounts(cases=0, tasks=0, precedents=0, events=0)
     if target is not None:
         # Always run: work committed after the workload query is moved too.
         counts.cases = db.execute(
@@ -124,8 +145,17 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
             update(Case).where(*_reviewed_precedents_filter(user)).values(reviewer_lawyer_id=target.id)
             .execution_options(synchronize_session=False)
         ).rowcount
+        counts.events = db.execute(
+            update(CalendarEvent).where(*_upcoming_events_filter(user)).values(assignee_id=target.id)
+            .execution_options(synchronize_session=False)
+        ).rowcount
 
     user.is_active = False
+    # Moving password_set_at ends every session issued so far for good: a
+    # later re-activation must not bring the old tokens back. A pending user
+    # stays pending (no password_set_at to move).
+    if user.password_set_at is not None:
+        user.password_set_at = next_password_set_at(user.password_set_at)
     invalidate_unused_tokens(db, user.id)
     db.flush()
     return counts

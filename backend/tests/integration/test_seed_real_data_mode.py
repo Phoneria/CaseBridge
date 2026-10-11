@@ -95,3 +95,30 @@ def test_demo_mode_still_creates_the_demo_accounts(run_seed, db_session):
         seed_module.ADMIN_EMAIL, *(email for email, *_ in seed_module.DEMO_LAWYERS),
     }
     assert all(u.password_set_at is not None for u in db_session.query(User).all())
+
+
+def test_kept_demo_accounts_lose_the_demo_password_and_become_pending(run_seed, db_session, client, capsys):
+    from app.models.user import UserStatus
+    from app.models.user_token import TokenPurpose, UserToken
+    from app.services.user_token_service import issue_token
+
+    run_seed(True)
+    admin = db_session.query(User).filter_by(email=seed_module.ADMIN_EMAIL).one()
+    assert client.post("/auth/login", json={"email": admin.email, "password": seed_module.DEMO_PASSWORD}).status_code == 200
+    old_hash = admin.hashed_password
+    db_session.add(Case(law_firm_id=admin.law_firm_id, case_number="GERCEK/2", case_name="Gerçek", client_name="M",
+                        case_type=CaseType.KIRA, assigned_lawyer_id=admin.id))
+    issue_token(db_session, admin, TokenPurpose.RESET)
+    db_session.commit()
+    capsys.readouterr()
+
+    run_seed(False)
+
+    kept = db_session.query(User).filter_by(email=seed_module.ADMIN_EMAIL).one()
+    assert kept.is_active is True
+    assert kept.password_set_at is None and kept.status == UserStatus.PENDING
+    assert kept.hashed_password != old_hash
+    assert db_session.query(UserToken).filter(UserToken.user_id == kept.id, UserToken.used_at.is_(None)).count() == 0
+    response = client.post("/auth/login", json={"email": kept.email, "password": seed_module.DEMO_PASSWORD})
+    assert response.status_code == 401
+    assert f"Şifresi geçersiz kılınan demo hesabı: {seed_module.ADMIN_EMAIL}" in capsys.readouterr().out

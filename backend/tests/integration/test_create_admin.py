@@ -123,3 +123,51 @@ def test_create_admin_function_rolls_back_on_failure(db_session, monkeypatch):
     with pytest.raises(CreateAdminError):
         create_admin(db_session, "Büro", "a@example.com", "Ad Soyad")
     assert db_session.query(LawFirm).count() == 0
+
+
+# --- resend for a pending administrator -------------------------------------------------
+
+def test_running_again_for_a_pending_admin_of_the_same_firm_resends_the_invite(run, client, db_session, mail_outbox, capsys):
+    assert run(ARGS) == 0
+    first = mail_outbox.latest_token("yonetici@example.com")
+    capsys.readouterr()
+
+    assert run(["--firm", "Demir Hukuk", "--email", "YONETICI@example.com", "--name", "Ayşe Demir"]) == 0
+
+    assert capsys.readouterr().out.strip() == "Davet yeniden gönderildi."
+    assert db_session.query(LawFirm).count() == 1 and db_session.query(User).count() == 1
+    assert len(mail_outbox.messages("yonetici@example.com")) == 2
+    second = mail_outbox.latest_token("yonetici@example.com")
+    assert second != first
+    assert client.get("/auth/token-info", params={"token": first}).status_code == 410
+    assert client.get("/auth/token-info", params={"token": second}).status_code == 200
+
+
+def test_an_admin_who_already_set_a_password_is_not_re_invited(run, db_session, mail_outbox, capsys):
+    from app.core.timeutil import utc_now
+
+    assert run(ARGS) == 0
+    db_session.query(User).one().password_set_at = utc_now().replace(microsecond=0)
+    db_session.commit()
+    capsys.readouterr()
+
+    assert run(ARGS) == 1
+    assert capsys.readouterr().err.strip() == "Hata: Bu e-posta adresi zaten kayıtlı."
+    assert len(mail_outbox.messages()) == 1
+
+
+def test_a_pending_lawyer_with_that_email_is_not_re_invited_as_admin(run, db_session, mail_outbox, capsys):
+    from sqlalchemy import null
+
+    from app.core.security import hash_password
+
+    firm = LawFirm(name="Demir Hukuk")
+    db_session.add(firm)
+    db_session.flush()
+    db_session.add(User(law_firm_id=firm.id, email="yonetici@example.com", hashed_password=hash_password("x" * 12),
+                        full_name="Avukat", role=UserRole.LAWYER, password_set_at=null()))
+    db_session.commit()
+
+    assert run(ARGS) == 1
+    assert capsys.readouterr().err.strip() == "Hata: Bu e-posta adresi zaten kayıtlı."
+    assert mail_outbox.messages() == []

@@ -1,10 +1,16 @@
+import secrets
 from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.security import create_access_token, password_epoch, verify_password
+from app.core.security import create_access_token, hash_password, password_epoch, verify_password
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
+
+# A bcrypt digest (default cost) of a random string nobody knows. Checked
+# when the account cannot sign in, so an unknown, inactive or invited address
+# costs as much time as a wrong password and timing reveals nothing.
+DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))
 
 
 class AuthService:
@@ -17,6 +23,7 @@ class AuthService:
         # Invited users have no password yet (password_set_at is NULL): their
         # placeholder hash must never be usable, whatever is typed.
         if user is None or not user.is_active or user.password_set_at is None:
+            verify_password(password, DUMMY_PASSWORD_HASH)
             return None
         if not verify_password(password, user.hashed_password):
             return None

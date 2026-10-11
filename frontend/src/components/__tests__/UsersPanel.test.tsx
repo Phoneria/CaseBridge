@@ -194,8 +194,8 @@ describe("UsersPanel", () => {
   });
 
   it("deactivates a user without work after a plain confirmation", async () => {
-    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
-    api.deactivateUser.mockResolvedValue({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 0, tasks: 0, precedents: 0 } });
+    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 0 });
+    api.deactivateUser.mockResolvedValue({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 0, tasks: 0, precedents: 0, events: 0 } });
     render(<UsersPanel currentUser={ME} />);
     await screen.findByRole("table");
 
@@ -209,13 +209,31 @@ describe("UsersPanel", () => {
     expect(screen.getByText("Mehmet Kaya").closest("tr")).toHaveTextContent("Pasif");
   });
 
+  it("counts upcoming calendar events as work that needs a receiving lawyer", async () => {
+    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 3 });
+    api.deactivateUser.mockResolvedValue({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 0, tasks: 0, precedents: 0, events: 3 } });
+    render(<UsersPanel currentUser={ME} />);
+    await screen.findByRole("table");
+
+    await openMenu("Mehmet Kaya", "Pasifleştir");
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText("3 yaklaşan takvim etkinliği")).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole("button", { name: "Devret ve pasifleştir" }));
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("Devredilecek avukatı seçin.");
+
+    await userEvent.selectOptions(within(dialog).getByLabelText("Devredilecek avukat"), "l2");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Devret ve pasifleştir" }));
+    expect(api.deactivateUser).toHaveBeenCalledWith("l1", "l2");
+  });
+
   it("requires a receiving lawyer when the user has work, and lists only eligible lawyers", async () => {
     api.getUserWorkload.mockResolvedValue({
       open_cases: [{ id: "c1", case_number: "2026/10", case_name: "Kaya - Demir" }],
       pending_tasks: [{ id: "t1", title: "Dilekçe hazırla", case_name: "Kaya - Demir" }],
       precedents_reviewing: 2,
+      upcoming_events: 0,
     });
-    api.deactivateUser.mockResolvedValue({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 1, tasks: 1, precedents: 2 } });
+    api.deactivateUser.mockResolvedValue({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 1, tasks: 1, precedents: 2, events: 0 } });
     render(<UsersPanel currentUser={ME} />);
     await screen.findByRole("table");
 
@@ -240,7 +258,7 @@ describe("UsersPanel", () => {
   });
 
   it("does not send the same request twice while one is in flight", async () => {
-    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
+    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 0 });
     let finish: (value: unknown) => void = () => undefined;
     api.deactivateUser.mockReturnValue(new Promise((resolve) => (finish = resolve)));
     render(<UsersPanel currentUser={ME} />);
@@ -252,7 +270,7 @@ describe("UsersPanel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Pasifleştiriliyor..." }));
     expect(api.deactivateUser).toHaveBeenCalledTimes(1);
 
-    finish({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 0, tasks: 0, precedents: 0 } });
+    finish({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 0, tasks: 0, precedents: 0, events: 0 } });
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
@@ -276,7 +294,7 @@ describe("UsersPanel", () => {
   });
 
   it("returns focus to the row's İşlemler button when a row-opened dialog is dismissed", async () => {
-    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
+    api.getUserWorkload.mockResolvedValue({ open_cases: [], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 0 });
     render(<UsersPanel currentUser={ME} />);
     await screen.findByRole("table");
 
@@ -329,10 +347,10 @@ describe("UsersPanel", () => {
   });
 
   it("lets the admin pick a receiving lawyer when work appeared after the workload loaded empty", async () => {
-    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [], pending_tasks: [], precedents_reviewing: 0 });
-    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [{ id: "c1", case_number: "2026/10", case_name: "Kaya - Demir" }], pending_tasks: [], precedents_reviewing: 0 });
+    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 0 });
+    api.getUserWorkload.mockResolvedValueOnce({ open_cases: [{ id: "c1", case_number: "2026/10", case_name: "Kaya - Demir" }], pending_tasks: [], precedents_reviewing: 0, upcoming_events: 0 });
     api.deactivateUser.mockRejectedValueOnce(new ApiError("Açık davaları ve görevleri devretmek için bir avukat seçin.", 422));
-    api.deactivateUser.mockResolvedValueOnce({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 1, tasks: 0, precedents: 0 } });
+    api.deactivateUser.mockResolvedValueOnce({ user: { ...LAWYER, status: "inactive", is_active: false }, transferred: { cases: 1, tasks: 0, precedents: 0, events: 0 } });
     render(<UsersPanel currentUser={ME} />);
     await screen.findByRole("table");
 

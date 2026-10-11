@@ -274,11 +274,13 @@ export interface UserWorkload {
   open_cases: { id: string; case_number: string; case_name: string }[];
   pending_tasks: { id: string; title: string; case_name: string }[];
   precedents_reviewing: number;
+  /** Calendar events assigned to the user that start today or later. */
+  upcoming_events: number;
 }
 
 export interface DeactivateResult {
   user: ManagedUser;
-  transferred: { cases: number; tasks: number; precedents: number };
+  transferred: { cases: number; tasks: number; precedents: number; events: number };
 }
 
 export interface AuthConfig {

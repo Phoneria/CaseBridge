@@ -81,7 +81,7 @@ def test_workload_lists_open_cases_pending_tasks_and_precedents(client, office, 
 
 def test_workload_is_empty_for_a_user_without_work(client, office, auth_headers):
     body = client.get(f"/admin/users/{office.lawyer_a2.id}/workload", headers=auth_headers(office.admin_a)).json()
-    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0}
+    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
 
 
 def test_workload_is_admin_only_and_firm_scoped(client, office, busy, auth_headers):
@@ -98,7 +98,7 @@ def test_deactivating_a_user_without_work_needs_no_transfer(client, db_session, 
     assert response.status_code == 200
     body = response.json()
     assert body["user"]["is_active"] is False and body["user"]["status"] == "inactive"
-    assert body["transferred"] == {"cases": 0, "tasks": 0, "precedents": 0}
+    assert body["transferred"] == {"cases": 0, "tasks": 0, "precedents": 0, "events": 0}
     assert client.post("/auth/login", json={"email": office.lawyer_a2.email, "password": office.password}).status_code == 401
 
 
@@ -190,7 +190,7 @@ def test_deactivation_moves_open_cases_pending_tasks_and_precedents_in_one_step(
 
     assert response.status_code == 200
     body = response.json()
-    assert body["transferred"] == {"cases": 2, "tasks": 2, "precedents": 1}
+    assert body["transferred"] == {"cases": 2, "tasks": 2, "precedents": 1, "events": 0}
     assert body["user"]["status"] == "inactive"
 
     mehmet = office.lawyer_a2.id
@@ -207,7 +207,7 @@ def test_deactivation_moves_open_cases_pending_tasks_and_precedents_in_one_step(
     assert tasks["Mehmet'in görevi"] == mehmet
 
     workload = client.get(f"/admin/users/{office.lawyer_a1.id}/workload", headers=auth_headers(office.admin_a)).json()
-    assert workload == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0}
+    assert workload == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
 
 
 def test_deactivation_ends_the_session_and_invalidates_unused_links(client, db_session, office, auth_headers):
@@ -288,10 +288,10 @@ def test_work_that_appears_after_the_workload_check_is_still_moved(db_session, o
     from app.services import user_lifecycle_service as service
 
     monkeypatch.setattr(
-        service, "get_workload", lambda db, user: WorkloadOut(open_cases=[], pending_tasks=[], precedents_reviewing=0)
+        service, "get_workload", lambda db, user: WorkloadOut(open_cases=[], pending_tasks=[], precedents_reviewing=0, upcoming_events=0)
     )
     counts = service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
-    assert counts.model_dump() == {"cases": 2, "tasks": 2, "precedents": 1}
+    assert counts.model_dump() == {"cases": 2, "tasks": 2, "precedents": 1, "events": 0}
 
 
 # --- review fix 2 ----------------------------------------------------------------------------
@@ -314,3 +314,93 @@ def test_admin_rows_are_locked_before_the_user_and_target_rows(db_session, offic
     monkeypatch.setattr(service, "_lock_statement", lambda firm, ids: calls.append("users") or original_lock(firm, ids))
     service.deactivate_user(db_session, office.admin_a, office.lawyer_a1, office.lawyer_a2.id)
     assert calls == ["admins", "users"]
+
+
+# --- final review: upcoming calendar events move, sessions stay ended --------------------
+
+def _event(db_session, firm, assignee, creator, title, starts_at):
+    from app.models.calendar import CalendarEvent, CalendarEventType
+
+    event = CalendarEvent(
+        law_firm_id=firm.id, title=title, event_type=CalendarEventType.MEETING, starts_at=starts_at,
+        assignee_id=assignee.id, created_by=creator.id, reminder_days=[],
+    )
+    db_session.add(event)
+    db_session.flush()
+    return event
+
+
+@pytest.fixture()
+def events(db_session, office):
+    """Ayşe has an event earlier today, one next week and one yesterday (local
+    time, APP_TIMEZONE); Mehmet has one next week; firm B has one too."""
+    from datetime import datetime, time, timedelta
+
+    from app.core.timeutil import local_today
+
+    today = local_today()
+    ayse, mehmet = office.lawyer_a1, office.lawyer_a2
+    rows = SimpleNamespace(
+        today=_event(db_session, office.firm_a, ayse, office.admin_a, "Bugün", datetime.combine(today, time(0, 0))),
+        next_week=_event(db_session, office.firm_a, ayse, office.admin_a, "Gelecek hafta",
+                         datetime.combine(today + timedelta(days=7), time(10, 0))),
+        yesterday=_event(db_session, office.firm_a, ayse, office.admin_a, "Dün",
+                         datetime.combine(today - timedelta(days=1), time(23, 30))),
+        mehmets=_event(db_session, office.firm_a, mehmet, office.admin_a, "Mehmet'in",
+                       datetime.combine(today + timedelta(days=7), time(9, 0))),
+        foreign=_event(db_session, office.firm_b, office.lawyer_b, office.admin_b, "B bürosu",
+                       datetime.combine(today + timedelta(days=7), time(9, 0))),
+    )
+    db_session.commit()
+    return rows
+
+
+def test_workload_counts_upcoming_events_from_today_on(client, office, events, auth_headers):
+    body = client.get(f"/admin/users/{office.lawyer_a1.id}/workload", headers=auth_headers(office.admin_a)).json()
+
+    assert body["upcoming_events"] == 2
+    assert body["open_cases"] == [] and body["pending_tasks"] == []
+
+
+def test_upcoming_events_alone_require_a_transfer_target(client, office, events, auth_headers):
+    response = _deactivate(client, auth_headers(office.admin_a), office.lawyer_a1)
+
+    assert response.status_code == 422 and response.json()["detail"] == CONFLICT_TRANSFER
+
+
+def test_deactivation_moves_upcoming_events_and_leaves_past_ones(client, db_session, office, events, auth_headers):
+    from app.models.calendar import CalendarEvent
+
+    response = _deactivate(client, auth_headers(office.admin_a), office.lawyer_a1, office.lawyer_a2.id)
+
+    assert response.status_code == 200
+    assert response.json()["transferred"] == {"cases": 0, "tasks": 0, "precedents": 0, "events": 2}
+    owners = {e.title: e.assignee_id for e in db_session.query(CalendarEvent).all()}
+    assert owners["Bugün"] == office.lawyer_a2.id and owners["Gelecek hafta"] == office.lawyer_a2.id
+    assert owners["Dün"] == office.lawyer_a1.id          # past: history stays
+    assert owners["Mehmet'in"] == office.lawyer_a2.id
+    assert owners["B bürosu"] == office.lawyer_b.id      # other firm untouched
+
+
+def test_a_session_from_before_deactivation_stays_ended_after_activation(client, db_session, office, auth_headers):
+    headers = auth_headers(office.admin_a)
+    old_session = auth_headers(office.lawyer_a2)
+    assert client.get("/users/me", headers=old_session).status_code == 200
+
+    assert _deactivate(client, headers, office.lawyer_a2).status_code == 200
+    assert client.post(f"/admin/users/{office.lawyer_a2.id}/activate", headers=headers).status_code == 200
+
+    assert client.get("/users/me", headers=old_session).status_code == 401
+    new_session = auth_headers(office.lawyer_a2)
+    assert client.get("/users/me", headers=new_session).status_code == 200
+
+
+def test_deactivating_a_pending_user_keeps_them_pending(client, db_session, office, auth_headers):
+    headers = auth_headers(office.admin_a)
+    created = client.post(
+        "/admin/users", headers=headers, json={"email": "bekleyen@example.com", "full_name": "Bekleyen", "role": "lawyer"},
+    ).json()
+    client.post(f"/admin/users/{created['id']}/deactivate", json={}, headers=headers)
+    pending = db_session.get(User, created["id"])
+    db_session.refresh(pending)
+    assert pending.password_set_at is None

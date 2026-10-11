@@ -33,17 +33,18 @@ Gerçek bir büronun uygulamayı kullanmaya başlayabilmesi: büro ve ilk yönet
 - Süreler: davet 72 saat, sıfırlama 1 saat (`INVITE_TOKEN_HOURS`, `RESET_TOKEN_MINUTES` ayarları; varsayılan 72 ve 60).
 
 ### 3.3 Oturum geçersizleştirme
-- JWT'ye `pwd` iddiası eklenir: `password_set_at` zaman damgası (saniye). Her istekte kullanıcının güncel `password_set_at` değeriyle karşılaştırılır; uyuşmazsa 401. Şifre değişince/sıfırlanınca eski oturumlar kapanır. Pasif kullanıcı zaten her istekte reddediliyor.
+- JWT'ye `pwd` iddiası eklenir: `password_set_at` zaman damgası (saniye). Her istekte kullanıcının güncel `password_set_at` değeriyle karşılaştırılır; uyuşmazsa 401. Şifre değişince/sıfırlanınca eski oturumlar kapanır. Pasif kullanıcı zaten her istekte reddediliyor; pasifleştirme ayrıca `password_set_at`'i ileri alır, böylece kullanıcı yeniden aktifleştirildiğinde pasifleştirmeden önceki oturumlar geri gelmez.
 
 ### 3.4 Şifre kuralı
-- En az 10, en fazla 128 karakter; e-posta adresiyle (büyük/küçük harf duyarsız) aynı olamaz. Hata: "Şifre en az 10 karakter olmalı." / "Şifre e-posta adresinizle aynı olamaz."
+- En az 10 karakter, en fazla 72 bayt (UTF-8; bcrypt 72 bayttan sonrasını yok saydığı için daha uzun şifre reddedilir — eski 128 karakter sınırının yerini alır); e-posta adresiyle (büyük/küçük harf duyarsız) aynı olamaz. Hata: "Şifre en az 10 karakter olmalı." / "Şifre en fazla 72 bayt olabilir (Türkçe karakterler 2 bayt sayılır)." / "Şifre e-posta adresinizle aynı olamaz."
 
 ## 4. İlk kurulum ve demo verisi
 - `python -m app.db.create_admin --firm "<büro adı>" --email <e-posta> --name "<ad soyad>"`:
   - Büro yoksa oluşturur (aynı adlı büro varsa onu kullanır); e-posta zaten kayıtlıysa hata verip çıkar.
+  - İstisna: e-posta aynı büronun, henüz şifresini belirlememiş (davet bekleyen) aktif yöneticisine aitse yeni bir davet gönderilir (eski davet bağlantıları geçersizleşir), "Davet yeniden gönderildi." yazılır ve çıkış kodu 0 olur.
   - Yöneticiyi davet bekleyen durumda oluşturur ve davet e-postasını gönderir (`EMAIL_BACKEND=console` ise e-posta, bağlantıyla birlikte konsola yazılır).
   - Çıkış kodu: başarı 0, hata 1; hata mesajı Türkçe.
-- `SEED_DEMO_DATA=false`: seed demo büroyu ve demo kullanıcıları oluşturmaz (mevcut "demo verisini temizle" davranışı korunur; demo kullanıcılar da temizlenir, ancak başka büroların kullanıcılarına dokunulmaz).
+- `SEED_DEMO_DATA=false`: seed demo büroyu ve demo kullanıcıları oluşturmaz (mevcut "demo verisini temizle" davranışı korunur; demo kullanıcılar da temizlenir, ancak başka büroların kullanıcılarına dokunulmaz). Bir kayda bağlı olduğu için tutulan demo hesabı hâlâ demo şifresini kullanıyorsa şifresi geçersiz kılınır: `password_set_at` boşaltılır, rastgele kullanılamaz bir özet yazılır, kullanılmamış bağlantıları geçersizleşir (`is_active` değişmez); hesap "Davet bekliyor" olur ve `demo1234` artık çalışmaz. Seed çıktısında "Şifresi geçersiz kılınan demo hesabı: <e-posta>" yazılır.
 - Giriş formu boş gelir. Yeni `GET /auth/config` (giriş gerektirmez) → `{ demo_mode: bool }` (`SEED_DEMO_DATA` değeri); `true` ise formun altında "Demo hesapları" ipucu (demo e-postaları ve şifresi) gösterilir.
 
 ## 5. API
@@ -56,19 +57,20 @@ Tüm uçlar büroya göre kapsamlıdır; başka büronun kullanıcısı her yerd
 - `PATCH /admin/users/{id}` `{ full_name?, department?, role?, email? }` → kendi rolünü düşüremez (409 "Kendi rolünüzü değiştiremezsiniz."), son aktif yöneticinin rolü düşürülemez (409 "Büroda en az bir aktif yönetici kalmalı."), e-posta çakışması 409.
 - `POST /admin/users/{id}/invite` → davet bekleyen kullanıcıya daveti yeniden gönderir (şifresi belirlenmişse 409 "Kullanıcı şifresini zaten belirlemiş.").
 - `POST /admin/users/{id}/password-reset` → aktif ve şifresi belirlenmiş kullanıcıya sıfırlama bağlantısı gönderir.
-- `GET /admin/users/{id}/workload` → `{ open_cases: [{id, case_number, case_name}], pending_tasks: [{id, title, case_name}], precedents_reviewing: n }` (açık dava: `status != kapali` ve arşivlenmemiş; bekleyen görev: `status == pending` ve kullanıcıya atanmış).
+- `GET /admin/users/{id}/workload` → `{ open_cases: [{id, case_number, case_name}], pending_tasks: [{id, title, case_name}], precedents_reviewing: n, upcoming_events: n }` (açık dava: `status != kapali` ve arşivlenmemiş; bekleyen görev: `status == pending` ve kullanıcıya atanmış; yaklaşan etkinlik: kullanıcıya atanmış ve başlangıcı bugün (uygulama saat dilimi `APP_TIMEZONE`'a göre) ya da sonra olan takvim etkinliği).
 - `POST /admin/users/{id}/deactivate` `{ transfer_to?: user_id }`:
   - Kendini pasifleştiremez (409 "Kendi hesabınızı pasifleştiremezsiniz."); son aktif yönetici pasifleştirilemez (409, yukarıdaki mesaj).
   - İş yükü varsa `transfer_to` zorunlu (422 "Açık davaları ve görevleri devretmek için bir avukat seçin."); hedef aynı büroda aktif ve şifresini belirlemiş bir avukat olmalı, kendisi olamaz (422 "Devredilecek avukat geçersiz.").
-  - Tek işlemde: açık davaların `assigned_lawyer_id`'si, bekleyen görevlerin `assigned_to`'su ve emsallerin `reviewer_lawyer_id`'si hedefe geçer; kullanıcı `is_active=false`; kullanılmamış token'ları geçersizleşir. Yanıt: güncellenmiş kullanıcı + devredilen sayılar.
+  - Tek işlemde: açık davaların `assigned_lawyer_id`'si, bekleyen görevlerin `assigned_to`'su, emsallerin `reviewer_lawyer_id`'si ve yaklaşan takvim etkinliklerinin (bugün ya da sonra başlayan) `assignee_id`'si hedefe geçer; geçmiş etkinlikler kullanıcıda kalır. Kullanıcı `is_active=false`; `password_set_at` ileri alınır (eski oturumlar yeniden aktifleştirmede geri gelmez; davet bekleyen kullanıcıda boş kalır); kullanılmamış token'ları geçersizleşir. Yanıt: güncellenmiş kullanıcı + devredilen sayılar `{ cases, tasks, precedents, events }`. Pasifleştirme penceresi yaklaşan etkinlikleri "<n> yaklaşan takvim etkinliği" olarak listeler.
 - `POST /admin/users/{id}/activate` → tekrar aktif.
+- Atama kuralı: dava, görev (`assigned_to`) ve takvim etkinliği (`assignee_id`) yalnızca büronun aktif ve şifresini belirlemiş kullanıcısına atanabilir; davet bekleyen ya da pasif kullanıcı → 422 "Seçilen kullanıcı atanamaz." (başka büronun kullanıcısı 404). Görev ve etkinlikte yalnızca atanan kişi değiştiğinde denetlenir; atananı sonradan pasifleşmiş bir kaydın diğer alanları düzenlenebilir. `import_cases --lawyer` için de aynı kural (aktif, şifresini belirlemiş avukat) geçerlidir.
 
 ### 5.2 Kimlik (`/auth`)
 - `POST /auth/forgot-password` `{ email }` → her durumda 202 ve aynı mesaj; kullanıcı aktif ve şifresi belirlenmişse sıfırlama e-postası gider. Hız sınırı: aynı e-posta + IP için dakikada 3, aşılırsa 429 (Türkçe).
 - `GET /auth/token-info?token=…` → `{ purpose, email, full_name }` ya da 410 "Bağlantının süresi dolmuş veya bağlantı daha önce kullanılmış.".
 - `POST /auth/set-password` `{ token, password }` → token geçerliyse şifreyi belirler, `password_set_at`'i günceller, token'ı kullanılmış yapar, yeni erişim token'ı döndürür (otomatik giriş). Geçersiz/süresi dolmuş/kullanılmış → 410 (aynı mesaj). Pasif kullanıcı → 410.
 - `POST /auth/change-password` `{ current_password, new_password }` (giriş yapmış kullanıcı) → mevcut şifre yanlışsa 400 "Mevcut şifre hatalı."; başarıda yeni erişim token'ı döner (diğer oturumlar kapanır).
-- `POST /auth/login`: davet bekleyen kullanıcı → 401 (genel mesaj). Mevcut İngilizce mesajlar Türkçeleştirilir: "E-posta veya şifre hatalı.", "Çok fazla giriş denemesi. Lütfen bir dakika sonra tekrar deneyin.".
+- `POST /auth/login`: davet bekleyen kullanıcı → 401 (genel mesaj). Bilinmeyen, pasif ya da davet bekleyen hesapta da sabit bir bcrypt özetine karşı şifre doğrulaması yapılır; yanıt süresi hangi e-postaların kayıtlı olduğunu ele vermez. Mevcut İngilizce mesajlar Türkçeleştirilir: "E-posta veya şifre hatalı.", "Çok fazla giriş denemesi. Lütfen bir dakika sonra tekrar deneyin.".
 - `POST /auth/logout` mevcut kalır.
 
 ### 5.3 Profil
@@ -78,7 +80,7 @@ Tüm uçlar büroya göre kapsamlıdır; başka büronun kullanıcısı her yerd
 - Mevcut e-posta katmanı (console/SMTP, Mailpit). Türkçe, düz metin + basit HTML.
   - Davet: konu "CaseBridge davetiniz — <büro adı>"; gövde: davet eden, büro, "Şifrenizi belirleyin" bağlantısı, geçerlilik (72 saat).
   - Sıfırlama: konu "CaseBridge şifre sıfırlama"; bağlantı, geçerlilik (1 saat), "Bu isteği siz yapmadıysanız dikkate almayın."
-- Bağlantı: `{FRONTEND_BASE_URL}/sifre-belirle?token=<token>` (yeni ayar `FRONTEND_BASE_URL`, varsayılan `http://localhost:3000`).
+- Bağlantı: `{FRONTEND_BASE_URL}/sifre-belirle?token=<token>` (yeni ayar `FRONTEND_BASE_URL`; verilmezse `APP_BASE_URL`, o da verilmezse `http://localhost:3000`).
 - E-posta gönderilemezse işlem başarısız sayılmaz: kullanıcı/token oluşur, yanıtta `email_sent: false` döner ve yönetici "Davet e-postası gönderilemedi; daveti yeniden gönderebilirsiniz." uyarısı görür.
 - Token'lar, şifreler ve bağlantılar loglanmaz (console backend'in e-postayı yazdırması hariç — bu yalnızca geliştirme modudur ve mevcut davranıştır).
 

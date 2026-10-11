@@ -50,3 +50,21 @@ def test_the_lawyer_must_belong_to_the_named_firm(db_session, folder, real_offic
     db_session.commit()
     with pytest.raises(ImportError_):
         import_folder(folder, db=db_session, firm_name="Kaya Hukuk", lawyer_email="ayse@example.com")
+
+
+@pytest.mark.parametrize("change", ["inactive", "pending", "admin"])
+def test_the_lawyer_must_be_an_active_lawyer_with_a_password(db_session, folder, real_office, change):
+    from sqlalchemy import null
+
+    _, lawyer = real_office
+    if change == "inactive":
+        lawyer.is_active = False
+    elif change == "pending":
+        lawyer.password_set_at = null()
+    else:
+        lawyer.role = UserRole.ADMIN
+    db_session.commit()
+
+    with pytest.raises(ImportError_):
+        import_folder(folder, db=db_session, firm_name="Demir Hukuk", lawyer_email="ayse@example.com")
+    assert db_session.query(Case).count() == 0

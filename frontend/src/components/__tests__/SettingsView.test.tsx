@@ -113,4 +113,34 @@ describe("SettingsView", () => {
     await userEvent.click(screen.getByRole("button", { name: "Test e-postası gönder" }));
     expect(await screen.findByText("Test e-postası dosyaya yazıldı (dosya modu).")).toBeInTheDocument();
   });
+
+  it("never shows the text of a non-API error from the test e-mail", async () => {
+    getMe.mockResolvedValue(lawyerUser);
+    sendTestEmail.mockRejectedValue(new Error("TypeError: Failed to fetch http://internal:8000"));
+
+    render(<SettingsView />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Test e-postası gönder" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Test e-postası gönderilemedi. Lütfen tekrar deneyin.");
+    expect(alert).not.toHaveTextContent("Failed to fetch");
+  });
+
+  it("ignores a second click while the test e-mail is being sent", async () => {
+    getMe.mockResolvedValue(lawyerUser);
+    let resolve: (value: unknown) => void = () => {};
+    sendTestEmail.mockReturnValue(new Promise((r) => { resolve = r; }));
+
+    render(<SettingsView />);
+
+    const button = await screen.findByRole("button", { name: "Test e-postası gönder" });
+    await userEvent.click(button);
+    const busy = screen.getByRole("button", { name: "Gönderiliyor..." });
+    expect(busy).toHaveAttribute("aria-disabled", "true");
+    expect(busy).not.toBeDisabled();
+    await userEvent.click(busy);
+    expect(sendTestEmail).toHaveBeenCalledTimes(1);
+    resolve({ sent: true, backend: "smtp" });
+    expect(await screen.findByText(`Test e-postası ${lawyerUser.email} adresine gönderildi.`)).toBeInTheDocument();
+  });
 });

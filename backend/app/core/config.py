@@ -7,7 +7,7 @@ this module must never log secret values.
 from typing import Literal, Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, PositiveFloat, PositiveInt, field_validator
+from pydantic import Field, PositiveFloat, PositiveInt, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -110,10 +110,12 @@ class Settings(BaseSettings):
     email_file_dir: str = "./var/mail"
 
     # User management: lifetime of the one-time invite / password reset links
-    # and the frontend address those links point to.
+    # and the frontend address those links point to. FRONTEND_BASE_URL falls
+    # back to APP_BASE_URL (the address the reminder e-mails link to) when it
+    # is not set, so one setting is enough for a deployment.
     invite_token_hours: PositiveInt = 72
     reset_token_minutes: PositiveInt = 60
-    frontend_base_url: str = "http://localhost:3000"
+    frontend_base_url: str = ""
 
     # Calendar and reminders. Event times are stored as naive local times
     # in APP_TIMEZONE; the reminder worker computes "now" in this zone.
@@ -156,6 +158,12 @@ class Settings(BaseSettings):
         except (ZoneInfoNotFoundError, ValueError, OSError) as exc:
             raise ValueError(f"APP_TIMEZONE is not a known time zone: {value}") from exc
         return value
+
+    @model_validator(mode="after")
+    def frontend_base_url_defaults_to_app_base_url(self) -> "Settings":
+        if not self.frontend_base_url.strip():
+            self.frontend_base_url = self.app_base_url
+        return self
 
     @property
     def ai_enabled(self) -> bool:

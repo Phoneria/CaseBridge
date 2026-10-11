@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getAiStatus, getMe, getNotificationStatus, sendTestEmail } from "@/lib/api";
+import { userMessage } from "@/lib/userMessages";
 import type { AIStatus, AppUser, NotificationStatus } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
@@ -23,6 +24,7 @@ export function SettingsView() {
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sendingTest = useRef(false);
 
   useEffect(() => {
     setLoading(true);
@@ -38,6 +40,10 @@ export function SettingsView() {
   }, []);
 
   async function sendTest() {
+    if (sendingTest.current) return;
+    sendingTest.current = true;
+    // Read before the await: the address the server sends to is this user's.
+    const recipient = me?.email ?? "hesabınıza";
     setTestEmail({ kind: "sending" });
     try {
       const result = await sendTestEmail();
@@ -48,10 +54,12 @@ export function SettingsView() {
             ? "Test e-postası sunucu loguna yazıldı (konsol modu)."
             : result.backend === "file"
               ? "Test e-postası dosyaya yazıldı (dosya modu)."
-              : `Test e-postası ${me?.email ?? "hesabınıza"} adresine gönderildi.`,
+              : `Test e-postası ${recipient} adresine gönderildi.`,
       });
     } catch (err) {
-      setTestEmail({ kind: "error", message: err instanceof Error ? err.message : "E-posta gönderilemedi." });
+      setTestEmail({ kind: "error", message: userMessage(err, "Test e-postası gönderilemedi. Lütfen tekrar deneyin.") });
+    } finally {
+      sendingTest.current = false;
     }
   }
 
@@ -102,8 +110,8 @@ export function SettingsView() {
             <button
               type="button"
               onClick={sendTest}
-              disabled={testEmail.kind === "sending"}
-              className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted disabled:opacity-60"
+              aria-disabled={testEmail.kind === "sending"}
+              className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted aria-disabled:opacity-60"
             >
               {testEmail.kind === "sending" ? "Gönderiliyor..." : "Test e-postası gönder"}
             </button>

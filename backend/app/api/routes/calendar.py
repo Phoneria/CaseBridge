@@ -16,6 +16,7 @@ from app.core.timeutil import local_today
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.calendar import CalendarEventCreate, CalendarEventOut, CalendarEventUpdate, CalendarItemOut
+from app.services.assignees import AssigneeNotAssignable
 from app.services.calendar_service import CalendarReferenceNotFound, CalendarService
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
@@ -68,6 +69,8 @@ def create_calendar_event(
         )
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except AssigneeNotAssignable as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
 
 @router.get("/events/{event_id}", response_model=CalendarEventOut)
@@ -92,6 +95,8 @@ def update_calendar_event(
         return service.update_event(event, payload, today=local_today())
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except AssigneeNotAssignable as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
 
 @router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)

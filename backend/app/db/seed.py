@@ -657,6 +657,7 @@ def seed() -> None:
                 firm_name=DEMO_FIRM_NAME,
                 case_numbers=[c["case_number"] for c in DEMO_CASES],
                 emails=[ADMIN_EMAIL, *(email for email, *_ in DEMO_LAWYERS)],
+                demo_password=DEMO_PASSWORD,
             )
             scenario_count = seed_courtroom_scenarios(db)
             db.commit()
@@ -666,6 +667,8 @@ def seed() -> None:
             print(f"  Demo users removed: {len(removed.users_removed)}")
             if removed.users_kept:
                 print(f"  Demo users kept (they own records): {', '.join(removed.users_kept)}")
+            for email in removed.passwords_revoked:
+                print(f"  Şifresi geçersiz kılınan demo hesabı: {email}")
             print(f"  Courtroom scenarios: {scenario_count}")
             print('  Create the first administrator with: python -m app.db.create_admin --firm "<büro adı>" --email <e-posta> --name "<ad soyad>"')
             return
