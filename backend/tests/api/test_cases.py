@@ -68,9 +68,10 @@ def test_update_case(client, two_firms_two_users):
     assert response.json()["status"] == "karar_bekleyen"
 
 
-def test_archive_case(client, two_firms_two_users):
+def test_archive_case(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     created = client.post("/cases", json=VALID_CASE_PAYLOAD, headers=headers).json()
+    close_case(headers, created["id"])
 
     response = client.post(f"/cases/{created['id']}/archive", headers=headers)
     assert response.status_code == 200

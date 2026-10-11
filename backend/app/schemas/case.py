@@ -1,11 +1,12 @@
 from datetime import date, datetime
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole, PartyRole
 
 PartyName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+ClosingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=4000)]
 
 
 class CaseEventCreate(BaseModel):
@@ -97,6 +98,20 @@ class CaseUpdate(BaseModel):
     plaintiff_position: Optional[str] = None
     defendant_position: Optional[str] = None
     parties: Optional[list[CasePartyIn]] = Field(default=None, min_length=1, max_length=20)
+
+
+class CaseClose(BaseModel):
+    """POST /cases/{id}/close. The outcome is one of the three closing outcomes
+    ("ongoing" is not a way to close); the note is trimmed, a blank note is none."""
+
+    outcome: Literal["won", "lost", "settled"]
+    decision_date: date
+    note: Optional[ClosingNote] = None
+
+    @field_validator("note")
+    @classmethod
+    def _blank_note_is_none(cls, value: Optional[str]) -> Optional[str]:
+        return value or None
 
 
 class CaseAssignment(BaseModel):

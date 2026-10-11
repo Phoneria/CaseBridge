@@ -3,11 +3,14 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.case_access import require_case_manager, require_case_writable
 from app.api.deps import get_current_law_firm_id, get_current_user
+from app.core.timeutil import local_today
 from app.db.session import get_db
 from app.models.case import CaseOutcome, CaseStatus, CaseType
 from app.models.user import User, UserRole
-from app.schemas.case import CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseOut, CaseUpdate
+from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseOut, CaseUpdate
+from app.services.case_lifecycle import CaseLifecycleService, CaseStateError
 from app.services.case_parties import InvalidPartiesError
 from app.services.case_service import CaseService, DuplicateCaseNumberError
 
@@ -19,6 +22,21 @@ def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str)
     if case is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     return case
+
+
+def _managed_case(db: Session, case_id: str, current_user: User):
+    """The firm's case (404 otherwise) that the user may change (403 otherwise)."""
+    case = _get_owned_case_or_404(CaseService(db), case_id, current_user.law_firm_id)
+    require_case_manager(current_user, case)
+    return case
+
+
+def _lifecycle(action):
+    """Runs a lifecycle action and turns a broken rule into its HTTP response."""
+    try:
+        return action()
+    except CaseStateError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
 
 
 @router.post("", response_model=CaseOut, status_code=status.HTTP_201_CREATED)
@@ -112,15 +130,47 @@ def update_case(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 
 
+@router.post("/{case_id}/close", response_model=CaseOut)
+def close_case(
+    case_id: str,
+    payload: CaseClose,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    return _lifecycle(lambda: CaseLifecycleService(db).close(case, payload, current_user.id, local_today()))
+
+
+@router.post("/{case_id}/reopen", response_model=CaseOut)
+def reopen_case(
+    case_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    return _lifecycle(lambda: CaseLifecycleService(db).reopen(case, current_user.id, local_today()))
+
+
 @router.post("/{case_id}/archive", response_model=CaseOut)
 def archive_case(
     case_id: str,
-    law_firm_id: str = Depends(get_current_law_firm_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    service = CaseService(db)
-    case = _get_owned_case_or_404(service, case_id, law_firm_id)
-    return service.archive_case(case)
+    case = _managed_case(db, case_id, current_user)
+    return _lifecycle(lambda: CaseLifecycleService(db).archive(case))
+
+
+@router.post("/{case_id}/unarchive", response_model=CaseOut)
+def unarchive_case(
+    case_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    case = _managed_case(db, case_id, current_user)
+    return CaseLifecycleService(db).unarchive(case)
 
 
 @router.post("/{case_id}/events", response_model=CaseEventOut, status_code=status.HTTP_201_CREATED)

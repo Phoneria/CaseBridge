@@ -112,10 +112,6 @@ class CaseService:
             case.parties = party_models(parties, case.law_firm_id)
         return self.cases.save(case)
 
-    def archive_case(self, case: Case) -> Case:
-        case.is_archived = True
-        return self.cases.save(case)
-
     def get_timeline(self, case_id: str, law_firm_id: str) -> list[CaseEvent]:
         return self.events.list_for_case(case_id, law_firm_id)
 

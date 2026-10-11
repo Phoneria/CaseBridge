@@ -212,3 +212,20 @@ def auth_headers(client, office):
         return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
     return _headers
+
+
+@pytest.fixture()
+def close_case(client):
+    """close_case(headers, case_id, outcome="won", decision_date=None, note=None) -> the closed
+    case (JSON). decision_date is an ISO string and defaults to today in the app's time zone."""
+    from app.core.timeutil import local_today
+
+    def _close(headers, case_id, outcome="won", decision_date=None, note=None):
+        payload = {"outcome": outcome, "decision_date": decision_date or local_today().isoformat()}
+        if note is not None:
+            payload["note"] = note
+        response = client.post(f"/cases/{case_id}/close", json=payload, headers=headers)
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    return _close
