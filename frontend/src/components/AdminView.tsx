@@ -42,7 +42,7 @@ function MetricCard({ label, value, detail, tone = "violet" }: { label: string; 
   return <div className="relative overflow-hidden rounded-2xl border border-surface-border bg-white p-4 shadow-card">
     <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tones[tone]}`} />
     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-navy-400">{label}</p>
-    <p className="mt-2 text-3xl font-bold tracking-tight text-navy-900">{value}</p>
+    <p className={`mt-2 break-words font-bold tracking-tight text-navy-900 ${typeof value === "string" && value.length > 12 ? "text-xl leading-snug" : "text-3xl"}`}>{value}</p>
     <p className="mt-1 text-xs text-navy-500">{detail}</p>
   </div>;
 }
@@ -92,8 +92,10 @@ export function AdminView() {
   const assignmentRate = cases.length ? Math.round((assignedCases / cases.length) * 100) : 0;
   const workloadData = lawyers.map((lawyer) => {
     const rows = cases.filter((item) => item.assigned_lawyer_id === lawyer.id);
-    return { name: lawyer.full_name.split(" ")[0], fullName: lawyer.full_name, aktif: rows.filter((item) => item.status !== "kapali").length, kapali: rows.filter((item) => item.status === "kapali").length };
+    return { name: lawyer.full_name, aktif: rows.filter((item) => item.status !== "kapali").length, kapali: rows.filter((item) => item.status === "kapali").length };
   });
+  // Fit the full names on the workload chart's axis (about 7px per character at 11px).
+  const workloadAxisWidth = Math.min(180, Math.max(80, Math.max(0, ...workloadData.map((row) => row.name.length)) * 7));
   const busiest = [...workloadData].sort((a, b) => (b.aktif + b.kapali) - (a.aktif + a.kapali))[0];
   const statusData = [
     { name: "Aktif", value: cases.filter((item) => item.status === "devam_eden").length, color: "#10b981" },
@@ -170,7 +172,7 @@ export function AdminView() {
             <BarChart data={workloadData} layout="vertical" margin={{ top: 0, right: 18, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" horizontal={false} />
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={74} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#f7f8fb" }} />
               <Bar dataKey="aktif" name="Aktif" stackId="cases" fill="#6d43f5" radius={[6, 0, 0, 6]} />
               <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#e7e3ff" radius={[0, 6, 6, 0]} />

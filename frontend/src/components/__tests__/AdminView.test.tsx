@@ -64,6 +64,13 @@ describe("AdminView", () => {
     await waitFor(() => expect(assignCaseLawyer).toHaveBeenCalledWith("c1", "u2"));
   });
 
+  it("shows the busiest lawyer's full name", async () => {
+    render(<AdminView />);
+    const label = await screen.findByText("En yoğun avukat");
+    const card = label.parentElement as HTMLElement;
+    await waitFor(() => expect(card).toHaveTextContent("Emre Yılmaz"));
+  });
+
   it("does not load admin data for a lawyer", async () => {
     getMe.mockResolvedValue({ role: "lawyer" });
     render(<AdminView />);
