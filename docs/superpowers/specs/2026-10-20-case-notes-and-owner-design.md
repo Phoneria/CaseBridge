@@ -31,7 +31,7 @@ Kullanıcı akışı eksiklerinden iki madde:
 - `CaseEventOut`'a `created_by` (str | null) ve `created_by_name` (str | null) eklenir. Yazar silinmiş/bulunamıyorsa `null`.
 
 ### 3.2 API
-- **Ekleme:** mevcut `POST /cases/{id}/events`. Not için `event_type: "note"`, `description` (zorunlu, kırpıldıktan sonra 1–4000 karakter), notlarda `title` gönderilse bile yok sayılır ve metinden türetilir. Not dışı türlerde `title` zorunlu kalır (1–255). Kurallar `CaseEventCreate` doğrulayıcısında; ihlal 422 (Türkçe mesaj: "Not metni boş olamaz." / "Not en fazla 4000 karakter olabilir.").
+- **Ekleme:** mevcut `POST /cases/{id}/events`. Not için `event_type: "note"`, `description` (zorunlu, kırpıldıktan sonra 1–4000 karakter), notlarda `title` gönderilse bile yok sayılır ve metinden türetilir. Not dışı türlerde `title` zorunlu kalır (1–255). Kurallar serviste uygulanır (pydantic doğrulayıcısı değil; arayüz yalnızca metin `detail` gösterebilir); ihlal 422 ve Türkçe metin: "Not metni boş olamaz." / "Not en fazla 4000 karakter olabilir." / "Gelişme başlığı boş olamaz." / "Gelişme başlığı en fazla 255 karakter olabilir." / "Açıklama en fazla 4000 karakter olabilir.". Kontrol sırası: 404 (dava), 409 (arşiv), 422.
 - **Düzenleme:** `PATCH /cases/{id}/events/{event_id}` `{ description?: str, event_date?: date }`.
 - **Silme:** `DELETE /cases/{id}/events/{event_id}` → 204.
 - Düzenleme/silme kuralları (sırayla):
@@ -85,7 +85,7 @@ Kullanıcı akışı eksiklerinden iki madde:
 - **Liste:** "Durum"dan önce "Sorumlu" sütunu; atanmamışsa "—".
 - **Hızlı önizleme:** "Sorumlu avukat" alanı.
 - **Filtre:** listede "Sorumlu" seçimi: "Tümü", "Benim davalarım" (`avukat=<me.id>`), avukatlar (`GET /users`, ada göre sıralı), "Atanmamış" (`avukat=yok` → API'ye `none`). Mevcut `avukat` URL parametresi kullanılır; tanınmayan id ile gelen URL'de seçimde "Diğer avukat" gösterilir ve filtre uygulanır.
-- **Bilgileri düzenle:** yalnız yöneticide "Sorumlu avukat" seçimi (`GET /admin/lawyers`). Mevcut sorumlu listede değilse (pasif vb.) seçenek olarak eklenir ve "(pasif)" ibaresi taşır. Kaydedince önce `PATCH /cases/{id}` (değişen alanlar varsa), sonra avukat değiştiyse `PATCH /admin/cases/{id}/lawyer`. İkincisi başarısız olursa pencere açık kalır, hata gösterilir ve ilk kayıt geri alınmaz (mesaj: "Bilgiler kaydedildi ancak sorumlu avukat değiştirilemedi.").
+- **Bilgileri düzenle:** yalnız yöneticide "Sorumlu avukat" seçimi (`GET /admin/lawyers`). Mevcut sorumlu listede değilse (pasif vb.) seçenek olarak eklenir ve "(pasif)" ibaresi taşır. Kaydedince önce `PATCH /cases/{id}` (bugünkü gibi), sonra avukat değiştiyse `PATCH /admin/cases/{id}/lawyer`. İkincisi başarısız olursa pencere açık kalır, hata gösterilir ve ilk kayıt geri alınmaz (mesaj: "Bilgiler kaydedildi ancak sorumlu avukat değiştirilemedi.").
 - Sorumlu değişince başlıktaki ad ve yetkiye bağlı menüler (`canManageCase`) yeni değere göre güncellenir.
 
 ## 7. Test
