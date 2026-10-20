@@ -1,11 +1,15 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const getCases = vi.fn();
+const getMe = vi.fn();
+const listUsers = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCases: (...args: unknown[]) => getCases(...args),
+  getMe: (...args: unknown[]) => getMe(...args),
+  listUsers: (...args: unknown[]) => listUsers(...args),
 }));
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -27,15 +31,20 @@ const icraCase = {
 
 beforeEach(() => {
   getCases.mockReset();
+  getMe.mockReset();
+  listUsers.mockReset();
+  getMe.mockResolvedValue({ id: "u-me", role: "lawyer", full_name: "Ben" });
+  listUsers.mockResolvedValue([]);
   resetNav();
   setUrl("/davalar");
 });
 
 describe("CaseListView", () => {
-  it("shows a loading state before cases arrive", () => {
+  it("shows a loading state before cases arrive", async () => {
     getCases.mockReturnValue(new Promise(() => {}));
     render(<CaseListView />);
     expect(screen.getByText(/yükleniyor/i)).toBeInTheDocument();
+    await act(async () => {}); // let the me/lawyers lookups settle
   });
 
   it("renders case rows once loaded", async () => {
@@ -215,5 +224,59 @@ describe("CaseListView", () => {
     expect(screen.getAllByText("Arşivli")).toHaveLength(1);
     const row = screen.getByText("Eski Dava").closest("tr")!;
     expect(row).toHaveTextContent("Arşivli");
+  });
+});
+
+describe("responsible lawyer", () => {
+  const colleagues = [
+    { id: "u-me", full_name: "Ben Avukat", role: "lawyer" },
+    { id: "u-2", full_name: "Zeynep Arslan", role: "lawyer" },
+    { id: "u-admin", full_name: "Yönetici", role: "admin" },
+  ];
+
+  beforeEach(() => {
+    listUsers.mockResolvedValue(colleagues);
+    getMe.mockResolvedValue({ id: "u-me", role: "lawyer", full_name: "Ben Avukat" });
+  });
+
+  it("shows a Sorumlu column with the name or a dash", async () => {
+    getCases.mockResolvedValue([
+      { ...icraCase, id: "c1", assigned_lawyer_id: "u-2", assigned_lawyer_name: "Zeynep Arslan" },
+      { ...icraCase, id: "c2", case_number: "2026/2", assigned_lawyer_id: null, assigned_lawyer_name: null },
+    ]);
+    render(<CaseListView />);
+    expect(await screen.findByRole("columnheader", { name: "Sorumlu" })).toBeInTheDocument();
+    const rows = screen.getAllByRole("row").slice(1);
+    expect(rows[0]).toHaveTextContent("Zeynep Arslan");
+    expect(rows[1]).toHaveTextContent("—");
+  });
+
+  it("offers my cases, the lawyers and unassigned, and writes the choice to the URL", async () => {
+    getCases.mockResolvedValue([]);
+    render(<CaseListView />);
+    const select = await screen.findByLabelText("Sorumlu filtresi");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "Zeynep Arslan" })).toBeInTheDocument());
+    expect(within(select).getAllByRole("option").map((o) => o.textContent)).toEqual([
+      "Tüm sorumlular", "Benim davalarım", "Zeynep Arslan", "Atanmamış",
+    ]);
+    await userEvent.selectOptions(select, "yok");
+    expect(nav.replace).toHaveBeenCalledWith(expect.stringContaining("avukat=yok"), expect.anything());
+  });
+
+  it("asks the API for unassigned cases and names the chip", async () => {
+    setUrl("/davalar?avukat=yok");
+    getCases.mockResolvedValue([]);
+    render(<CaseListView />);
+    await waitFor(() => expect(getCases).toHaveBeenCalledWith(expect.objectContaining({ assigned_lawyer_id: "none" })));
+    expect(await screen.findByText("Sorumlu: Atanmamış")).toBeInTheDocument();
+  });
+
+  it("keeps an unknown lawyer id selectable as Diğer avukat", async () => {
+    setUrl("/davalar?avukat=u-gone");
+    getCases.mockResolvedValue([]);
+    render(<CaseListView />);
+    const select = (await screen.findByLabelText("Sorumlu filtresi")) as HTMLSelectElement;
+    await waitFor(() => expect(select.value).toBe("u-gone"));
+    expect(within(select).getByRole("option", { name: "Diğer avukat" })).toBeInTheDocument();
   });
 });

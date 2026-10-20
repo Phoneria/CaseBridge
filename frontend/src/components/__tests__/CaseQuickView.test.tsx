@@ -76,6 +76,16 @@ describe("CaseQuickView", () => {
     expect(events[0]).toHaveTextContent("Bilirkişi atandı");
   });
 
+  it("shows the responsible lawyer", async () => {
+    setUrl("/dashboard?onizle=c1");
+    getCase.mockResolvedValue({ ...detail, assigned_lawyer_name: "Zeynep Arslan" });
+
+    render(<CaseQuickView />);
+
+    expect(await screen.findByText("Sorumlu avukat")).toBeInTheDocument();
+    expect(screen.getByText("Zeynep Arslan")).toBeInTheDocument();
+  });
+
   it("shows at most 3 open tasks and pins the focused one", async () => {
     setUrl("/gorevler?onizle=c1&odak=gorev%3At5");
     getCase.mockResolvedValue(detail);
