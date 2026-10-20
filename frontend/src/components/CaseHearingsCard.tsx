@@ -52,7 +52,7 @@ export function CaseHearingsCard({ caseDetail, hearings, readOnly, onChanged }: 
         </div>
         {hearing.location && <p className="text-xs text-navy-600">{hearing.location}</p>}
         {hearing.notes && <p className="whitespace-pre-wrap text-xs text-navy-500">{hearing.notes}</p>}
-        {hearing.is_past && (
+        {(hearing.result_open || hearing.result_note) && (
           <p className="whitespace-pre-wrap text-xs text-navy-700">
             {hearing.result_note ? `Sonuç: ${hearing.result_note}` : "Sonuç girilmedi"}
           </p>

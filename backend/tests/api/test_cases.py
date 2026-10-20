@@ -290,6 +290,20 @@ def test_create_case_with_a_past_hearing_date_keeps_the_event_as_history(client,
     assert [item["date"] for item in _hearing_events(client, headers, {"from": yesterday, "to": today.isoformat()})] == [yesterday]
 
 
+def test_create_closed_case_with_a_hearing_date_creates_no_hearing(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today = local_today()
+    day = (today + timedelta(days=9)).isoformat()
+
+    response = client.post("/cases", json={**VALID_CASE_PAYLOAD, "status": "kapali", "next_hearing_date": day}, headers=headers)
+
+    assert response.status_code == 201, response.text
+    assert response.json()["next_hearing_date"] is None
+    assert _hearing_events(client, headers, {"from": today.isoformat(), "to": (today + timedelta(days=30)).isoformat()}) == []
+
+
 def test_create_case_without_a_hearing_date_creates_no_event(client, two_firms_two_users):
     from app.core.timeutil import local_today
 

@@ -93,3 +93,68 @@ def test_admin_assignment_refuses_an_archived_case(client, office, auth_headers,
     assert client.post(f"/cases/{case['id']}/archive", headers=lawyer).status_code == 200
     response = client.patch(f"/admin/cases/{case['id']}/lawyer", json={"assigned_lawyer_id": office.lawyer_a2.id}, headers=admin)
     assert (response.status_code, response.json()["detail"]) == (409, "Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.")
+
+
+# ----- reassignment: upcoming hearings (and their reminders) follow the case -----
+
+
+def _hearing_event(client, headers, case_id, day, assignee_id=None, time_part="10:00:00"):
+    payload = {"title": "Duruşma", "event_type": "hearing", "case_id": case_id,
+               "starts_at": f"{day.isoformat()}T{time_part}"}
+    if assignee_id is not None:
+        payload["assignee_id"] = assignee_id
+    response = client.post("/calendar/events", json=payload, headers=headers)
+    assert response.status_code == 201, response.text
+    return response.json()["id"]
+
+
+def _reassign(client, office, auth_headers, case_id, lawyer):
+    response = client.patch(f"/admin/cases/{case_id}/lawyer", json={"assigned_lawyer_id": lawyer.id},
+                            headers=auth_headers(office.admin_a))
+    assert response.status_code == 200, response.text
+
+
+def _assignee(db_session, event_id):
+    from app.models.calendar import CalendarEvent
+
+    db_session.expire_all()
+    return db_session.get(CalendarEvent, event_id).assignee_id
+
+
+def test_reassigning_moves_upcoming_hearings_of_the_previous_lawyer_or_nobody(client, db_session, office, auth_headers):
+    lawyer = auth_headers(office.lawyer_a1)
+    case = _new_case(client, lawyer, "2026/R1")
+    today = local_today()
+    own = _hearing_event(client, lawyer, case["id"], today + timedelta(days=5), office.lawyer_a1.id)
+    unassigned = _hearing_event(client, lawyer, case["id"], today + timedelta(days=6))
+    third = _hearing_event(client, lawyer, case["id"], today + timedelta(days=7), office.admin_a.id)
+    past = _hearing_event(client, lawyer, case["id"], today - timedelta(days=5), office.lawyer_a1.id)
+    timed_today = _hearing_event(client, lawyer, case["id"], today, office.lawyer_a1.id, "00:05:00")
+
+    _reassign(client, office, auth_headers, case["id"], office.lawyer_a2)
+
+    b = office.lawyer_a2.id
+    assert _assignee(db_session, own) == b
+    assert _assignee(db_session, unassigned) == b
+    assert _assignee(db_session, timed_today) == b
+    assert _assignee(db_session, third) == office.admin_a.id
+    assert _assignee(db_session, past) == office.lawyer_a1.id
+
+
+def test_reassigning_makes_the_due_hearing_reminder_go_to_the_new_lawyer(client, db_session, office, auth_headers):
+    from datetime import datetime, time
+
+    from app.services.reminder_service import ReminderService
+
+    lawyer = auth_headers(office.lawyer_a1)
+    day = local_today() + timedelta(days=3)
+    case = client.post("/cases", json={
+        "case_number": "2026/R2", "case_name": "R2", "client_name": "Müvekkil", "case_type": "sozlesme",
+        "next_hearing_date": day.isoformat(),
+    }, headers=lawyer).json()
+
+    _reassign(client, office, auth_headers, case["id"], office.lawyer_a2)
+
+    db_session.expire_all()
+    due = ReminderService(db_session).collect_due(datetime.combine(local_today(), time(12, 0)))
+    assert [d.recipient_id for d in due] == [office.lawyer_a2.id]

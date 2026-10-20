@@ -4,11 +4,14 @@ from sqlalchemy.orm import Session
 
 from app.api.case_access import require_case_writable
 from app.api.deps import get_current_admin
+from app.core.timeutil import local_today
 from app.db.session import get_db
 from app.models.case import Case
 from app.models.user import User, UserRole
 from app.schemas.case import CaseAssignment, CaseOut, PrecedentReviewAssignment
+from app.repositories.case_repository import CaseRepository
 from app.schemas.user import UserOut
+from app.services.hearing_dates import move_upcoming_hearings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -32,10 +35,7 @@ def assign_case_lawyer(
     admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    case = db.query(Case).filter(
-        Case.id == case_id, Case.law_firm_id == admin.law_firm_id,
-        Case.is_precedent.is_(False),
-    ).first()
+    case = CaseRepository(db).get_by_id_in_firm_for_update(case_id, admin.law_firm_id)
     if case is None:
         raise HTTPException(status_code=404, detail="Dava bulunamadı.")
     require_case_writable(case)
@@ -48,7 +48,9 @@ def assign_case_lawyer(
     ).first()
     if lawyer is None:
         raise HTTPException(status_code=422, detail="Bu büroda aktif bir avukat seçin.")
+    previous = case.assigned_lawyer_id
     case.assigned_lawyer_id = lawyer.id
+    move_upcoming_hearings(db, case, previous, lawyer.id, local_today())
     db.commit()
     db.refresh(case)
     db.expire(case, ["assigned_lawyer"])  # the view-only relationship still points at the previous lawyer

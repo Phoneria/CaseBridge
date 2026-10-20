@@ -53,6 +53,14 @@ describe("CaseHearingsCard", () => {
     expect(card).toHaveTextContent("Sonuç: Bilirkişi atandı.");
   });
 
+  it("shows the result line on today's hearing too, once a result can be entered", () => {
+    renderCard({ hearings: [today, hearing({ id: "h5", starts_at: "2003-04-06T09:00:00", result_open: true, result_note: "Ertelendi." }), upcoming] });
+    const card = screen.getByRole("region", { name: "Duruşmalar" });
+    expect(card).toHaveTextContent("Sonuç girilmedi");
+    expect(card).toHaveTextContent("Sonuç: Ertelendi.");
+    expect(within(card).getAllByText(/Sonuç(:| girilmedi)/)).toHaveLength(2); // not on the upcoming row
+  });
+
   it("shows an empty state", () => {
     renderCard({ hearings: [] });
     expect(screen.getByText("Henüz duruşma yok.")).toBeInTheDocument();

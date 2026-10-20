@@ -327,6 +327,33 @@ def test_a_closed_case_takes_no_new_hearing_but_keeps_editing_its_old_ones(clien
     assert _next_hearing(client, headers, case["id"]) is None
 
 
+def test_unlinking_a_hearing_recomputes_the_old_cases_next_hearing(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    assert _next_hearing(client, headers, case["id"]) == "2099-05-10"
+
+    response = client.patch(f"/calendar/events/{event['id']}", json={"case_id": None}, headers=headers)
+
+    assert response.status_code == 200
+    assert _next_hearing(client, headers, case["id"]) is None
+
+
+def test_retyping_a_hearing_of_a_closed_case_to_a_meeting_is_allowed_and_recomputes(
+    client, two_firms_two_users, close_case
+):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    close_case(headers, case["id"])
+    assert _next_hearing(client, headers, case["id"]) == "2099-05-10"
+
+    response = client.patch(f"/calendar/events/{event['id']}", json={"event_type": "meeting"}, headers=headers)
+
+    assert response.status_code == 200
+    assert _next_hearing(client, headers, case["id"]) is None
+
+
 def test_patch_with_an_assignee_from_another_firm_is_404_and_changes_nothing(client, two_firms_two_users):
     fixtures = two_firms_two_users
     headers = _auth_headers(client, fixtures)

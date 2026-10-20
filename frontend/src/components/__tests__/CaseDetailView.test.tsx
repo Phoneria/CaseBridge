@@ -148,6 +148,19 @@ describe("CaseDetailView", () => {
     expect(screen.queryByText("Dava yüklenemedi. Lütfen daha sonra tekrar deneyin.")).not.toBeInTheDocument();
   });
 
+  it("shows Planlanmadı, not a stale cached date, when the hearings loaded and none is upcoming", async () => {
+    getCase.mockResolvedValue({ ...caseDetail, next_hearing_date: "2099-01-05" });
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getCaseHearings.mockResolvedValue([]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    expect(await screen.findByText("Planlanmadı")).toBeInTheDocument();
+    expect(screen.queryByText("05.01.2099")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Planlanmadı" })).not.toBeInTheDocument();
+  });
+
   it("reloads the hearings and the case after a hearing is added", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);

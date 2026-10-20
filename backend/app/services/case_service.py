@@ -71,7 +71,7 @@ class CaseService:
             raise DuplicateCaseNumberError(
                 f"Case number '{payload.case_number}' already exists for this firm."
             ) from exc
-        if hearing_day is not None:
+        if hearing_day is not None and case.status != CaseStatus.KAPALI:  # a closed case takes no new hearing
             add_all_day_hearing(self.db, case, hearing_day, created_by)
             recompute_next_hearing(self.db, case, today)
         self.db.commit()

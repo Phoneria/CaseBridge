@@ -84,26 +84,31 @@ class CalendarService:
 
     def update_event(self, event: CalendarEvent, payload: CalendarEventUpdate, today: date) -> CalendarEvent:
         updates = payload.model_dump(exclude_unset=True)
-        # Only a new assignee is checked: an event whose assignee was
-        # deactivated since can still be edited.
-        new_assignee = updates.get("assignee_id") if updates.get("assignee_id") != event.assignee_id else None
-        self._check_references(event.law_firm_id, updates.get("case_id"), new_assignee)
         new_type = updates.get("event_type", event.event_type)
         new_case_id = updates["case_id"] if "case_id" in updates else event.case_id
         held_hearing_of = event.case_id if event.event_type == CalendarEventType.HEARING else None
         becomes_hearing_of = new_case_id if new_type == CalendarEventType.HEARING else None
+        # Lock every case involved once, in id order (two requests moving hearings between
+        # the same two cases must not take the locks in opposite orders), and reuse the rows.
+        involved = {held_hearing_of, becomes_hearing_of, updates.get("case_id")} - {None}
+        cases = {case_id: self._case_in_firm(case_id, event.law_firm_id) for case_id in sorted(involved)}
+        if updates.get("case_id") is not None and cases[updates["case_id"]] is None:
+            raise CalendarReferenceNotFound("Dava bulunamadı")
+        # Only a new assignee is checked: an event whose assignee was
+        # deactivated since can still be edited.
+        new_assignee = updates.get("assignee_id") if updates.get("assignee_id") != event.assignee_id else None
+        self._check_assignee(event.law_firm_id, new_assignee)
         if becomes_hearing_of is not None and becomes_hearing_of != held_hearing_of:
             # A new hearing for this case (new link or new type): the case must still be open.
-            target = self._case_in_firm(becomes_hearing_of, event.law_firm_id)
+            target = cases[becomes_hearing_of]
             if target is not None:
                 require_case_open_for_hearing(target)
         for field, value in updates.items():
             setattr(event, field, value)
         event.starts_at = normalize_start(event.starts_at, event.all_day)
         # Both the case the hearing leaves and the one it now belongs to need a new cache value.
-        affected = {held_hearing_of, becomes_hearing_of} - {None}
-        for case_id in sorted(affected):
-            case = self._case_in_firm(case_id, event.law_firm_id)
+        for case_id in sorted({held_hearing_of, becomes_hearing_of} - {None}):
+            case = cases[case_id]
             if case is not None:
                 recompute_next_hearing(self.db, case, today)
         self.db.commit()
@@ -180,10 +185,13 @@ class CalendarService:
             case = self._case_in_firm(case_id, law_firm_id)
             if case is None:
                 raise CalendarReferenceNotFound("Dava bulunamadı")
+        self._check_assignee(law_firm_id, assignee_id)
+        return case
+
+    def _check_assignee(self, law_firm_id: str, assignee_id: Optional[str]) -> None:
         # AssigneeNotAssignable (422) for a pending or inactive user.
         if assignee_id is not None and find_assignable_in_firm(self.db, assignee_id, law_firm_id) is None:
             raise CalendarReferenceNotFound("Kullanıcı bulunamadı")
-        return case
 
 
 def _event_item(

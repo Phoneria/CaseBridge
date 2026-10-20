@@ -7,12 +7,13 @@ its time: the rule is about dates, in APP_TIMEZONE, like the rest of the
 calendar). Nothing writes the column except the functions of this module and
 the nightly job that calls recompute_open_cases.
 
-None of these functions commits; the caller owns the transaction.
+None of these functions commits, except recompute_open_cases (the nightly job's
+pass), which commits once; for the others the caller owns the transaction.
 """
 from datetime import date, datetime, time, timedelta
 from typing import Optional
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.domain.calendar import HEARING_REMINDER_DAYS
@@ -25,6 +26,30 @@ def _hearing_filter(today: date):
         CalendarEvent.event_type == CalendarEventType.HEARING,
         CalendarEvent.case_id.isnot(None),
         CalendarEvent.starts_at >= datetime.combine(today, time.min),
+    )
+
+
+def move_upcoming_hearings(
+    db: Session, case: Case, previous_lawyer_id: Optional[str], new_lawyer_id: Optional[str], today: date
+) -> int:
+    """On reassignment, the case's hearings from today on that were the previous lawyer's
+    (or nobody's) go to the new lawyer, so their reminders follow the case. Past hearings
+    and hearings assigned to someone else stay. Does not commit."""
+    if previous_lawyer_id == new_lawyer_id:
+        return 0
+    owner = CalendarEvent.assignee_id.is_(None)
+    if previous_lawyer_id is not None:
+        owner = or_(owner, CalendarEvent.assignee_id == previous_lawyer_id)
+    return (
+        db.query(CalendarEvent)
+        .filter(
+            CalendarEvent.law_firm_id == case.law_firm_id,
+            CalendarEvent.case_id == case.id,
+            CalendarEvent.event_type == CalendarEventType.HEARING,
+            CalendarEvent.starts_at >= datetime.combine(today, time.min),
+            owner,
+        )
+        .update({CalendarEvent.assignee_id: new_lawyer_id}, synchronize_session=False)
     )
 
 
