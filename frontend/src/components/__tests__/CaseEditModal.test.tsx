@@ -1,10 +1,15 @@
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const updateCase = vi.fn();
+const listAdminLawyers = vi.fn();
+const assignCaseLawyer = vi.fn();
 vi.mock("@/lib/api", () => ({
   updateCase: (...args: unknown[]) => updateCase(...args),
+  listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
+  assignCaseLawyer: (...args: unknown[]) => assignCaseLawyer(...args),
 }));
 
 import { CaseEditModal } from "@/components/CaseEditModal";
@@ -22,17 +27,23 @@ const openCase = {
   case_value: 125000,
   status: "durusma_bekleyen",
   outcome: "ongoing",
+  assigned_lawyer_id: "u-owner",
+  assigned_lawyer_name: "Ayşe Avukat",
 } as unknown as Case;
+const CASE = openCase;
 const closedCase = { ...openCase, status: "kapali", outcome: "won" } as unknown as Case;
 
-function renderModal(caseDetail: Case = openCase, props: { onClose?: () => void; onSaved?: (updated: Case) => void } = {}) {
-  const onClose = props.onClose ?? vi.fn();
-  const onSaved = props.onSaved ?? vi.fn();
-  render(<CaseEditModal caseDetail={caseDetail} onClose={onClose} onSaved={onSaved} />);
-  return { onClose, onSaved };
+function renderModal(overrides: Partial<ComponentProps<typeof CaseEditModal>> = {}) {
+  const onSaved = vi.fn();
+  const onUpdated = vi.fn();
+  render(<CaseEditModal caseDetail={CASE} isAdmin={false} onClose={vi.fn()} onSaved={onSaved} onUpdated={onUpdated} {...overrides} />);
+  return { onSaved, onUpdated, onClose: overrides.onClose as ReturnType<typeof vi.fn> };
 }
-
-beforeEach(() => updateCase.mockReset());
+beforeEach(() => {
+  updateCase.mockReset();
+  listAdminLawyers.mockReset();
+  assignCaseLawyer.mockReset();
+});
 
 describe("CaseEditModal", () => {
   it("is a modal dialog titled Bilgileri düzenle with the current values", () => {
@@ -65,7 +76,7 @@ describe("CaseEditModal", () => {
 
   it("has no status field for a closed case and does not send one", async () => {
     updateCase.mockResolvedValue(closedCase);
-    renderModal(closedCase);
+    renderModal({ caseDetail: closedCase });
     expect(screen.queryByLabelText("Durum")).toBeNull();
 
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
@@ -137,7 +148,8 @@ describe("CaseEditModal", () => {
   it("sends once when Kaydet is clicked twice and locks Vazgeç and Escape while saving", async () => {
     let resolve!: (value: Case) => void;
     updateCase.mockReturnValue(new Promise<Case>((r) => (resolve = r)));
-    const { onClose, onSaved } = renderModal();
+    const onClose = vi.fn();
+    const { onSaved } = renderModal({ onClose });
 
     const save = screen.getByRole("button", { name: "Kaydet" });
     await userEvent.click(save);
@@ -154,7 +166,8 @@ describe("CaseEditModal", () => {
   });
 
   it("closes on Vazgeç without saving", async () => {
-    const { onClose } = renderModal();
+    const onClose = vi.fn();
+    renderModal({ onClose });
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(updateCase).not.toHaveBeenCalled();
@@ -179,5 +192,88 @@ describe("CaseEditModal", () => {
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
     await waitFor(() => expect(updateCase).toHaveBeenCalledTimes(1));
     expect(updateCase.mock.calls[0][1]).toMatchObject({ case_value: null });
+  });
+});
+
+describe("responsible lawyer (admin)", () => {
+  const lawyers = [
+    { id: "u-owner", full_name: "Ayşe Avukat", role: "lawyer" },
+    { id: "u-2", full_name: "Zeynep Arslan", role: "lawyer" },
+  ];
+
+  it("is not shown to a lawyer", () => {
+    renderModal({ isAdmin: false });
+    expect(screen.queryByLabelText("Sorumlu avukat")).toBeNull();
+    expect(listAdminLawyers).not.toHaveBeenCalled();
+  });
+
+  it("saves the details, then the new lawyer, then closes", async () => {
+    listAdminLawyers.mockResolvedValue(lawyers);
+    updateCase.mockResolvedValue({ ...CASE, case_name: "Yeni ad" });
+    assignCaseLawyer.mockResolvedValue({ ...CASE, assigned_lawyer_id: "u-2", assigned_lawyer_name: "Zeynep Arslan" });
+    const { onSaved } = renderModal({ isAdmin: true });
+    const select = await screen.findByLabelText("Sorumlu avukat");
+    await waitFor(() => expect((select as HTMLSelectElement).value).toBe("u-owner"));
+    await userEvent.selectOptions(select, "u-2");
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ assigned_lawyer_name: "Zeynep Arslan" })));
+    expect(assignCaseLawyer).toHaveBeenCalledWith(CASE.id, "u-2");
+    expect(updateCase.mock.invocationCallOrder[0]).toBeLessThan(assignCaseLawyer.mock.invocationCallOrder[0]);
+  });
+
+  it("does not call the assignment when the lawyer did not change", async () => {
+    listAdminLawyers.mockResolvedValue(lawyers);
+    updateCase.mockResolvedValue(CASE);
+    const { onSaved } = renderModal({ isAdmin: true });
+    await screen.findByLabelText("Sorumlu avukat");
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(assignCaseLawyer).not.toHaveBeenCalled();
+  });
+
+  it("keeps the dialog open when only the assignment fails", async () => {
+    listAdminLawyers.mockResolvedValue(lawyers);
+    const saved = { ...CASE, case_name: "Yeni ad" };
+    updateCase.mockResolvedValue(saved);
+    assignCaseLawyer.mockRejectedValue(new Error("network"));
+    const { onSaved, onUpdated } = renderModal({ isAdmin: true });
+    await userEvent.selectOptions(await screen.findByLabelText("Sorumlu avukat"), "u-2");
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    expect(await screen.findByText("Bilgiler kaydedildi ancak sorumlu avukat değiştirilemedi.")).toBeInTheDocument();
+    expect(onUpdated).toHaveBeenCalledWith(saved);
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("shows a current lawyer who is no longer assignable as (pasif)", async () => {
+    listAdminLawyers.mockResolvedValue([lawyers[1]]);
+    renderModal({ isAdmin: true });
+    const select = await screen.findByLabelText("Sorumlu avukat");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "Ayşe Avukat (pasif)" })).toBeInTheDocument());
+  });
+
+  it("does not flash (pasif) while the list is loading, and shows the plain name if it fails", async () => {
+    listAdminLawyers.mockReturnValue(new Promise(() => {}));
+    renderModal({ isAdmin: true });
+    const select = await screen.findByLabelText("Sorumlu avukat");
+    expect(within(select).queryByRole("option", { name: /pasif/ })).toBeNull();
+  });
+
+  it("offers Avukat seçin for an unassigned case and keeps saving possible when the list fails", async () => {
+    listAdminLawyers.mockRejectedValue(new Error("network"));
+    updateCase.mockResolvedValue(CASE);
+    const { onSaved } = renderModal({ isAdmin: true, caseDetail: { ...CASE, assigned_lawyer_id: null, assigned_lawyer_name: null } });
+    expect(await screen.findByText("Avukat listesi yüklenemedi.")).toBeInTheDocument();
+    expect(within(screen.getByLabelText("Sorumlu avukat")).getByRole("option", { name: "Avukat seçin" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(assignCaseLawyer).not.toHaveBeenCalled();
+  });
+
+  it("shows the current lawyer as a plain option when the list fails", async () => {
+    listAdminLawyers.mockRejectedValue(new Error("network"));
+    renderModal({ isAdmin: true });
+    await screen.findByText("Avukat listesi yüklenemedi.");
+    expect(within(screen.getByLabelText("Sorumlu avukat")).getByRole("option", { name: "Ayşe Avukat" })).toBeInTheDocument();
   });
 });

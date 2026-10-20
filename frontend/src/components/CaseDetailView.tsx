@@ -737,11 +737,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       {dialog === "edit" && (
         <CaseEditModal
           caseDetail={caseDetail}
+          isAdmin={me?.role === "admin"}
           onClose={() => setDialog(null)}
           onSaved={(updated) => {
             handleCaseSaved(updated);
             setDialog(null);
           }}
+          onUpdated={handleCaseSaved}
         />
       )}
     </div>
