@@ -28,6 +28,8 @@ export interface Case {
   case_type: CaseType;
   court: string | null;
   assigned_lawyer_id: string | null;
+  /** The responsible lawyer's full name; null when nobody is responsible. */
+  assigned_lawyer_name: string | null;
   reviewer_lawyer_id: string | null;
   opening_date: string;
   next_hearing_date: string | null;
@@ -145,7 +147,10 @@ export interface CaseEvent {
   event_date: string;
   title: string;
   description: string | null;
-  event_type: string;
+  event_type: CaseEventType;
+  /** Who wrote it; null for imported or seeded entries. */
+  created_by: string | null;
+  created_by_name: string | null;
   created_at: string;
 }
 

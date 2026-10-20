@@ -1,3 +1,5 @@
+import type { CaseEventType } from "@/types";
+
 export const CASE_TYPE_LABELS: Record<string, string> = {
   is_hukuku: "İş Hukuku",
   ticaret_hukuku: "Ticaret Hukuku",
@@ -34,3 +36,16 @@ export function formatDate(value: string | null | undefined): string {
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("tr-TR");
 }
+
+export const CASE_EVENT_TYPE_LABELS: Record<CaseEventType, string> = {
+  filing: "Dava açılışı / dilekçe",
+  submission: "Beyan / cevap",
+  expert_report: "Bilirkişi raporu",
+  legal_update: "Mevzuat / içtihat gelişmesi",
+  other: "Diğer",
+  hearing: "Duruşma",
+  note: "Not",
+};
+
+/** Types offered in the Gelişmeler form. Notes come from the Notlar tab; hearings from the calendar. */
+export const TIMELINE_FORM_TYPES: CaseEventType[] = ["filing", "submission", "expert_report", "legal_update", "other"];

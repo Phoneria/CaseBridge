@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
-  addCaseEvent,
   archiveCase,
   createTask,
   generateHandover,
@@ -34,6 +33,7 @@ import { AiMark } from "@/components/ai/AiMark";
 import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
 import { AI_PERSPECTIVES } from "@/lib/ai";
+import { CaseTimelinePanel } from "@/components/CaseTimelinePanel";
 import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
 import { CaseDisputeCard } from "@/components/CaseDisputeCard";
 import { CasePartiesCard } from "@/components/CasePartiesCard";
@@ -79,9 +79,6 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [eventForm, setEventForm] = useState({ event_date: "", title: "" });
-  const [addingEvent, setAddingEvent] = useState(false);
-  const [eventError, setEventError] = useState<string | null>(null);
   const [handoverReport, setHandoverReport] = useState<HandoverReport | null>(null);
   const [handoverGenerating, setHandoverGenerating] = useState(false);
   const [handoverError, setHandoverError] = useState<string | null>(null);
@@ -209,24 +206,6 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       setUploadError(userMessage(err, "Belge yüklenemedi. Lütfen tekrar deneyin."));
     } finally {
       setUploading(false);
-    }
-  }
-
-  async function handleAddEvent(event: React.FormEvent) {
-    event.preventDefault();
-    setAddingEvent(true);
-    setEventError(null);
-    try {
-      const newEvent = await addCaseEvent(caseId, {
-        event_date: eventForm.event_date,
-        title: eventForm.title,
-      });
-      setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, newEvent] } : prev));
-      setEventForm({ event_date: "", title: "" });
-    } catch (err) {
-      setEventError(userMessage(err, "Gelişme eklenemedi. Lütfen tekrar deneyin."));
-    } finally {
-      setAddingEvent(false);
     }
   }
 
@@ -499,61 +478,12 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       )}
 
       {activeTab === "Gelişmeler" && (
-        <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          {!archived && (
-          <form onSubmit={handleAddEvent} className="flex flex-wrap items-end gap-3">
-              <div>
-                <label htmlFor="event_date" className="mb-1 block text-xs font-medium text-navy-600">
-                  Tarih
-                </label>
-                <input
-                  id="event_date"
-                  type="date"
-                  required
-                  value={eventForm.event_date}
-                  onChange={(event) => setEventForm({ ...eventForm, event_date: event.target.value })}
-                  className="rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-                />
-              </div>
-              <div className="flex-1 min-w-[200px]">
-                <label htmlFor="event_title" className="mb-1 block text-xs font-medium text-navy-600">
-                  Gelişme Başlığı
-                </label>
-                <input
-                  id="event_title"
-                  required
-                  value={eventForm.title}
-                  onChange={(event) => setEventForm({ ...eventForm, title: event.target.value })}
-                  className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={addingEvent}
-                className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
-              >
-                {addingEvent ? "Ekleniyor..." : "Ekle"}
-              </button>
-            </form>
-          )}
-          {eventError && <ErrorState message={eventError} />}
-
-          {caseDetail.timeline.length === 0 ? (
-            <EmptyState message="Henüz gelişme yok." />
-          ) : (
-            <ol className="space-y-4">
-              {caseDetail.timeline.map((event) => (
-                <li key={event.id} className="flex gap-4">
-                  <div className="w-24 shrink-0 text-xs text-navy-500">{formatDate(event.event_date)}</div>
-                  <div>
-                    <p className="text-sm font-medium text-navy-800">{event.title}</p>
-                    {event.description && <p className="text-xs text-navy-500">{event.description}</p>}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
-        </div>
+        <CaseTimelinePanel
+          caseId={caseId}
+          timeline={caseDetail.timeline}
+          readOnly={archived}
+          onAdded={(created) => setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, created] } : prev))}
+        />
       )}
 
       {activeTab === "Görevler" && (
