@@ -30,6 +30,17 @@ describe("CaseTimelinePanel", () => {
     expect(screen.getByText("Kusur oranı %70")).toBeInTheDocument();
   });
 
+  it("renders entries in date order even when given out of order", () => {
+    render(<CaseTimelinePanel caseId="c1" readOnly onAdded={vi.fn()} timeline={[
+      entry({ id: "e3", title: "Üçüncü", event_date: "2026-03-01" }),
+      entry({ id: "e1", title: "Birinci", event_date: "2026-01-01" }),
+      entry({ id: "e2b", title: "İkinci-b", event_date: "2026-02-01", created_at: "2026-02-01T12:00:00" }),
+      entry({ id: "e2a", title: "İkinci-a", event_date: "2026-02-01", created_at: "2026-02-01T09:00:00" }),
+    ]} />);
+    const titles = screen.getAllByRole("listitem").map((li) => li.querySelector("p")?.textContent);
+    expect(titles).toEqual(["Birinci", "İkinci-a", "İkinci-b", "Üçüncü"]);
+  });
+
   it("offers the five form types, defaulting to Diğer", () => {
     render(<CaseTimelinePanel caseId="c1" readOnly={false} onAdded={vi.fn()} timeline={[]} />);
     const select = screen.getByLabelText("Tür") as HTMLSelectElement;

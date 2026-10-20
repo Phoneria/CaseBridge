@@ -7,6 +7,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Res
 import { assignCaseLawyer, getCases, getMe, listAdminLawyers } from "@/lib/api";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
+import { userMessage } from "@/lib/userMessages";
 import type { AppUser, Case } from "@/types";
 
 const SELECT_CLASS = "w-full rounded-xl border border-surface-border bg-white px-3 py-2 text-xs font-medium text-navy-800 outline-none transition focus:border-accent-400 focus:ring-2 focus:ring-accent-100 disabled:opacity-60";
@@ -78,8 +79,8 @@ export function AdminView() {
     try {
       const updated = await assignCaseLawyer(caseId, lawyerId);
       setCases((current) => current.map((item) => item.id === caseId ? updated : item));
-    } catch {
-      setError("Dava avukata atanamadı. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setError(userMessage(err, "Dava avukata atanamadı. Lütfen tekrar deneyin."));
     } finally {
       setSavingId(null);
     }
@@ -198,10 +199,10 @@ export function AdminView() {
                     return <article key={item.id} className={`rounded-xl border border-surface-border border-l-4 ${status.edge} bg-white p-3 shadow-sm`}>
                       <div className="flex items-start justify-between gap-2"><Link href={`/davalar/${item.id}`} className="line-clamp-2 text-xs font-semibold leading-5 text-navy-800 hover:text-accent-700">{item.case_name}</Link><span className="shrink-0 text-[9px] text-navy-400">{item.case_number}</span></div>
                       <div className="my-2 flex items-center gap-1.5 text-[10px] font-medium text-navy-500"><span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />{status.label}</div>
-                      <select aria-label={`${item.case_name} sorumlu avukatı`} value={item.assigned_lawyer_id ?? ""} disabled={savingId === item.id} onChange={(event) => assign(item.id, event.target.value)} className={SELECT_CLASS}>
+                      {item.is_archived ? <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Arşivli</span> : <select aria-label={`${item.case_name} sorumlu avukatı`} value={item.assigned_lawyer_id ?? ""} disabled={savingId === item.id} onChange={(event) => assign(item.id, event.target.value)} className={SELECT_CLASS}>
                         {!item.assigned_lawyer_id && <option value="">Atanmamış</option>}
                         {lawyers.filter((row) => row.is_active || row.id === item.assigned_lawyer_id).map((row) => <option key={row.id} value={row.id}>{row.full_name}</option>)}
-                      </select>
+                      </select>}
                     </article>;
                   })}
                   {ownerCases.length === 0 && <div className="rounded-xl border border-dashed border-surface-border px-3 py-8 text-center text-[11px] text-navy-400">Bu sütunda dava yok</div>}

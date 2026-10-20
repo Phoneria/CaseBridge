@@ -19,7 +19,6 @@ test("notes, typed entries, responsible lawyer and the way back to the list", as
     data: { case_number: `E2E-NO-${STAMP}`, case_name: CASE_NAME, client_name: "E2E Müvekkil", case_type: "diger", opening_date: "2026-02-03" },
   });
   expect(created.ok()).toBeTruthy();
-  const caseId = (await created.json()).id as string;
 
   // --- List: Sorumlu column and "Benim davalarım" ---
   await page.goto("/davalar");
@@ -38,22 +37,22 @@ test("notes, typed entries, responsible lawyer and the way back to the list", as
   await page.getByLabel("Not", { exact: true }).fill("Müvekkil aradı.\nYarın dönülecek.");
   await page.getByRole("button", { name: "Not ekle" }).click();
   await expect(page.getByText(`— ${me.full_name}`)).toBeVisible();
-  await page.getByRole("button", { name: "Düzenle" }).click();
+  await page.getByRole("button", { name: "Düzenle", exact: true }).click();
   await page.getByLabel("Notu düzenle").fill("Müvekkil aradı, belgeler istendi.");
   await page.getByRole("button", { name: "Kaydet" }).click();
   await expect(page.getByText("Müvekkil aradı, belgeler istendi.")).toBeVisible();
-  await page.getByRole("button", { name: "Sil" }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
   await page.getByRole("dialog", { name: "Not silinsin mi?" }).getByRole("button", { name: "Sil" }).click();
   await expect(page.getByText("Henüz not eklenmedi.")).toBeVisible();
 
   // --- Gelişmeler: typed entry ---
   await page.getByRole("tab", { name: "Gelişmeler" }).click();
   await page.getByLabel("Tarih").fill("2026-03-01");
-  await page.getByLabel("Gelişme Başlığı").fill("Bilirkişi raporu tebliğ edildi");
+  await page.getByLabel("Gelişme Başlığı").fill("Rapor tebliğ edildi");
   await page.getByLabel("Tür").selectOption({ label: "Bilirkişi raporu" });
   await page.getByRole("button", { name: "Ekle" }).click();
-  const entry = page.getByRole("listitem").filter({ hasText: "Bilirkişi raporu tebliğ edildi" });
-  await expect(entry).toContainText("Bilirkişi raporu");
+  const entry = page.getByRole("listitem").filter({ hasText: "Rapor tebliğ edildi" });
+  await expect(entry.getByText("Bilirkişi raporu", { exact: true })).toBeVisible();
 
   // --- Back to the filtered list ---
   await page.getByRole("link", { name: "← Davalar" }).click();

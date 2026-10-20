@@ -51,6 +51,9 @@ export function CaseTimelinePanel({ caseId, timeline, readOnly, onAdded }: Props
     }
   }
 
+  // The API answers event_date then created_at ascending; appended or re-dated entries must land in the same order.
+  const ordered = [...timeline].sort((a, b) => a.event_date.localeCompare(b.event_date) || a.created_at.localeCompare(b.created_at));
+
   return (
     <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
       {!readOnly && (
@@ -95,7 +98,7 @@ export function CaseTimelinePanel({ caseId, timeline, readOnly, onAdded }: Props
         <EmptyState message="Henüz gelişme yok." />
       ) : (
         <ol className="space-y-4">
-          {timeline.map((entry) => (
+          {ordered.map((entry) => (
             <li key={entry.id} className="flex gap-4">
               <div className="w-24 shrink-0 text-xs text-navy-500">{formatDate(entry.event_date)}</div>
               <div className="min-w-0">

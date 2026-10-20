@@ -14,6 +14,7 @@ import { ModalFrame } from "@/components/ModalFrame";
 const INPUT = "rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400";
 const SAVE_FAILED = "Not kaydedilemedi. Lütfen tekrar deneyin.";
 const EMPTY_NOTE = "Not metni boş olamaz.";
+const EMPTY_DATE = "Tarih gerekli.";
 
 interface Props {
   caseId: string;
@@ -54,6 +55,10 @@ export function CaseNotesPanel({ caseId, notes, me, assignedLawyerId, readOnly, 
       setAddError(EMPTY_NOTE);
       return;
     }
+    if (!date) {
+      setAddError(EMPTY_DATE);
+      return;
+    }
     addInFlight.current = true;
     setAdding(true);
     setAddError(null);
@@ -81,6 +86,10 @@ export function CaseNotesPanel({ caseId, notes, me, assignedLawyerId, readOnly, 
     const trimmed = editText.trim();
     if (!trimmed) {
       setEditError(EMPTY_NOTE);
+      return;
+    }
+    if (!editDate) {
+      setEditError(EMPTY_DATE);
       return;
     }
     editInFlight.current = true;
@@ -156,7 +165,7 @@ export function CaseNotesPanel({ caseId, notes, me, assignedLawyerId, readOnly, 
                     {formatDate(note.event_date)}
                     {note.created_by_name ? ` — ${note.created_by_name}` : ""}
                   </p>
-                  {mayChange && !editing && (
+                  {mayChange && editingId === null && (
                     <div className="flex gap-2 text-xs font-semibold">
                       <button type="button" onClick={() => startEdit(note)} className="text-accent-700 hover:underline">Düzenle</button>
                       <button type="button" onClick={() => { setDeleteError(null); setDeleteTarget(note); }} className="text-red-700 hover:underline">Sil</button>

@@ -194,3 +194,14 @@ def test_archived_case_notes_are_read_only(client, lawyer, close_case):
     deleted = _delete(client, lawyer, case["id"], note["id"])
     assert (patched.status_code, patched.json()["detail"]) == (409, archived)
     assert (deleted.status_code, deleted.json()["detail"]) == (409, archived)
+
+
+def test_a_non_responsible_author_may_edit_and_delete_their_own_note(client, office, auth_headers, lawyer):
+    colleague = auth_headers(office.lawyer_a2)  # not responsible for the case
+    case = _new_case(client, lawyer)
+    note = _add_note(client, colleague, case["id"], text="Kendi notum")
+
+    patched = _patch(client, colleague, case["id"], note["id"], description="Kendi notum, düzeltildi")
+    assert patched.status_code == 200
+    assert patched.json()["description"] == "Kendi notum, düzeltildi"
+    assert _delete(client, colleague, case["id"], note["id"]).status_code == 204

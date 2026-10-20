@@ -121,4 +121,31 @@ describe("CaseNotesPanel", () => {
     expect(screen.queryByRole("button", { name: "Düzenle" })).toBeNull();
     expect(screen.getByText(/Yarın dönülecek/)).toBeInTheDocument();
   });
+
+  it("refuses an empty date on add without calling the API", async () => {
+    setup({ notes: [] });
+    await userEvent.type(screen.getByLabelText("Not"), "Bir not");
+    await userEvent.clear(screen.getByLabelText("Tarih"));
+    await userEvent.click(screen.getByRole("button", { name: "Not ekle" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Tarih gerekli.");
+    expect(addCaseEvent).not.toHaveBeenCalled();
+  });
+
+  it("refuses an empty date on edit save without calling the API", async () => {
+    setup();
+    await userEvent.click(screen.getByRole("button", { name: "Düzenle" }));
+    await userEvent.clear(screen.getByLabelText("Not tarihi"));
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Tarih gerekli.");
+    expect(updateCaseNote).not.toHaveBeenCalled();
+  });
+
+  it("hides Düzenle and Sil on every note while one is being edited", async () => {
+    setup({ notes: [note({}), note({ id: "n2", event_date: "2026-10-05", description: "Diğer", title: "Diğer" })] });
+    expect(screen.getAllByRole("button", { name: "Düzenle" })).toHaveLength(2);
+    await userEvent.click(screen.getAllByRole("button", { name: "Düzenle" })[0]);
+    expect(screen.queryByRole("button", { name: "Düzenle" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sil" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kaydet" })).toBeInTheDocument();
+  });
 });
