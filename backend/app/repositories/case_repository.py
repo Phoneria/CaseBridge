@@ -12,6 +12,9 @@ from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseOutcome, CaseStatus, CaseType, case_is_active
 
+# GET /cases?assigned_lawyer_id=none lists the cases nobody is responsible for.
+UNASSIGNED = "none"
+
 
 class CaseRepository:
     def __init__(self, db: Session):
@@ -75,7 +78,9 @@ class CaseRepository:
         if case_type is not None:
             query = query.filter(Case.case_type == case_type)
 
-        if assigned_lawyer_id is not None:
+        if assigned_lawyer_id == UNASSIGNED:
+            query = query.filter(Case.assigned_lawyer_id.is_(None))
+        elif assigned_lawyer_id is not None:
             query = query.filter(Case.assigned_lawyer_id == assigned_lawyer_id)
 
         if outcome is not None:

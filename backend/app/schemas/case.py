@@ -167,6 +167,7 @@ class CaseOut(BaseModel):
     case_type: CaseType
     court: Optional[str] = None
     assigned_lawyer_id: Optional[str] = None
+    assigned_lawyer_name: Optional[str] = None
     reviewer_lawyer_id: Optional[str] = None
     opening_date: date
     next_hearing_date: Optional[date] = None

@@ -64,6 +64,16 @@ class Case(Base):
     assigned_lawyer_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
     reviewer_lawyer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
 
+    # The responsible lawyer, for showing their name. viewonly: assignments keep writing
+    # assigned_lawyer_id; selectin: a case list loads every name in one extra query.
+    assigned_lawyer: Mapped[Optional["User"]] = relationship(
+        foreign_keys=[assigned_lawyer_id], lazy="selectin", viewonly=True,
+    )
+
+    @property
+    def assigned_lawyer_name(self) -> Optional[str]:
+        return self.assigned_lawyer.full_name if self.assigned_lawyer is not None else None
+
     opening_date: Mapped[date] = mapped_column(Date, default=lambda: datetime.now(timezone.utc).date())
     next_hearing_date: Mapped[date] = mapped_column(Date, nullable=True)
 
