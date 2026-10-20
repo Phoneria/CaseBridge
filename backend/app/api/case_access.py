@@ -16,7 +16,7 @@ from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.case import Case
+from app.models.case import Case, CaseEvent
 from app.models.user import User, UserRole
 from app.repositories.case_repository import CaseRepository
 
@@ -35,6 +35,14 @@ def can_manage_case(user: User, case: Case) -> bool:
 def require_case_manager(user: User, case: Case) -> None:
     if not can_manage_case(user, case):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=NOT_CASE_MANAGER)
+
+
+NOT_NOTE_CHANGER = "Bu notu yalnızca yazan kişi, sorumlu avukat veya yönetici değiştirebilir."
+
+
+def can_change_note(user: User, case: Case, event: CaseEvent) -> bool:
+    """A note may be changed by whoever wrote it, by the case's responsible lawyer and by admins."""
+    return (event.created_by is not None and event.created_by == user.id) or can_manage_case(user, case)
 
 
 def require_case_writable(case: Case) -> None:

@@ -31,6 +31,13 @@ class CaseEventOut(BaseModel):
     created_at: datetime
 
 
+class CaseNoteUpdate(BaseModel):
+    """PATCH /cases/{id}/events/{event_id}: a note's text and/or date. Missing or null keeps the value."""
+
+    description: Optional[str] = None
+    event_date: Optional[date] = None
+
+
 class CasePartyIn(BaseModel):
     name: PartyName
     role: PartyRole
