@@ -1,6 +1,7 @@
 import enum
 import uuid
 from datetime import date, datetime, timezone
+from typing import Optional
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -155,3 +156,10 @@ class CaseEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     case: Mapped["Case"] = relationship(back_populates="events")
+    # Who wrote the entry (None for imported or seeded rows). selectin: a timeline
+    # loads every author in one extra query.
+    author: Mapped[Optional["User"]] = relationship(foreign_keys=[created_by], lazy="selectin", viewonly=True)
+
+    @property
+    def created_by_name(self) -> Optional[str]:
+        return self.author.full_name if self.author is not None else None

@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.models.case import CaseOutcome, CaseStatus, CaseType
 from app.models.user import User, UserRole
 from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseOut, CaseUpdate
+from app.services.case_events import CaseEventInputError
 from app.services.case_lifecycle import CaseLifecycleService, CaseStateError
 from app.services.case_parties import InvalidPartiesError
 from app.services.case_service import CaseService, DuplicateCaseNumberError
@@ -185,4 +186,7 @@ def add_case_event(
     service = CaseService(db)
     case = _get_owned_case_or_404(service, case_id, law_firm_id)
     require_case_writable(case)
-    return service.add_event(case, payload, created_by=current_user.id)
+    try:
+        return service.add_event(case, payload, created_by=current_user.id)
+    except CaseEventInputError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail) from exc
