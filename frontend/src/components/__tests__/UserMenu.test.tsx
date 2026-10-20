@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const logout = vi.fn();
@@ -112,7 +112,8 @@ describe("UserMenu", () => {
     setUrl("/hesabim");
     render(<WorkspaceHeader user={ADMIN} />);
 
-    expect(screen.getByText("CaseBridge / Hesabım")).toBeInTheDocument();
+    const crumb = within(screen.getByRole("banner")).getAllByRole("link", { name: "Hesabım" })[0];
+    expect(crumb).toHaveAttribute("href", "/hesabim");
     expect(screen.getByRole("button", { name: /Kullanıcı menüsü/ })).toBeInTheDocument();
   });
 });

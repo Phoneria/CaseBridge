@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { lastCaseListHref } from "@/lib/caseListMemory";
 import { CASE_OUTCOME_LABELS, CASE_STATUS_LABELS } from "@/lib/labels";
 import type { CaseAction } from "@/lib/caseAccess";
 import type { Case } from "@/types";
@@ -33,8 +37,15 @@ interface Props {
 }
 
 export function CaseHeader({ caseDetail, actions, busy, actionError, onPick }: Props) {
+  // Read after mount: sessionStorage does not exist during the server render.
+  const [backHref, setBackHref] = useState("/davalar");
+  useEffect(() => setBackHref(lastCaseListHref()), []);
+
   return (
     <div className="space-y-2">
+      <Link href={backHref} className="inline-block text-xs font-semibold text-accent-700 hover:underline">
+        ← Davalar
+      </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-accent-600">{caseDetail.case_number}</p>
@@ -43,6 +54,7 @@ export function CaseHeader({ caseDetail, actions, busy, actionError, onPick }: P
             {caseDetail.client_name}
             {caseDetail.opposing_party ? ` vs. ${caseDetail.opposing_party}` : ""}
           </p>
+          <p className="text-sm text-navy-500">{`Sorumlu: ${caseDetail.assigned_lawyer_name ?? "Atanmamış"}`}</p>
         </div>
         <CaseActionsMenu actions={actions} busy={busy} onPick={onPick} />
       </div>

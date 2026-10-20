@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getCases } from "@/lib/api";
+import { rememberCaseListHref } from "@/lib/caseListMemory";
 import {
   CASE_LIST_PARAM_KEYS,
   CASE_STATUSES,
@@ -68,6 +69,10 @@ export function CaseListView() {
         }
       });
   }
+
+  useEffect(() => {
+    rememberCaseListHref(queryKey);
+  }, [queryKey]);
 
   useEffect(() => {
     load();

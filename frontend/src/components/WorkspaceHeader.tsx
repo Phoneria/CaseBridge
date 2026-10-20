@@ -26,21 +26,31 @@ const PAGE_TITLES: Record<string, string> = {
   "/ai/sohbet": "Hukuk Asistanı",
 };
 
-function titleForPath(pathname: string): string {
+function sectionForPath(pathname: string): { href: string; title: string } | null {
   const key = Object.keys(PAGE_TITLES)
     .filter((route) => pathname === route || pathname.startsWith(`${route}/`))
     .sort((a, b) => b.length - a.length)[0];
-  return key ? PAGE_TITLES[key] : "Çalışma Alanı";
+  return key ? { href: key, title: PAGE_TITLES[key] } : null;
 }
 
 export function WorkspaceHeader({ user }: { user: AppUser | null }) {
   const pathname = usePathname() ?? "";
+  const section = sectionForPath(pathname);
   const today = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
 
   return (
     <header className="flex min-h-20 flex-wrap items-center justify-between gap-4 border-b border-[#E6E8EF] bg-[#FAF9F7] px-6 py-4 lg:px-8">
       <div>
-        <p className="text-xs font-medium text-navy-500">CaseBridge / {titleForPath(pathname)}</p>
+        <p className="text-xs font-medium text-navy-500">
+          CaseBridge /{" "}
+          {section ? (
+            <Link href={section.href} aria-current={pathname === section.href ? "page" : undefined} className="hover:text-accent-700 hover:underline">
+              {section.title}
+            </Link>
+          ) : (
+            "Çalışma Alanı"
+          )}
+        </p>
         <p className="mt-1 text-sm text-navy-700">{today}</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
