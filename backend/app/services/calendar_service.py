@@ -58,7 +58,7 @@ class CalendarService:
             law_firm_id=law_firm_id,
             title=payload.title,
             event_type=payload.event_type,
-            starts_at=_normalize_start(payload.starts_at, payload.all_day),
+            starts_at=normalize_start(payload.starts_at, payload.all_day),
             all_day=payload.all_day,
             duration_minutes=payload.duration_minutes,
             location=payload.location,
@@ -99,7 +99,7 @@ class CalendarService:
                 require_case_open_for_hearing(target)
         for field, value in updates.items():
             setattr(event, field, value)
-        event.starts_at = _normalize_start(event.starts_at, event.all_day)
+        event.starts_at = normalize_start(event.starts_at, event.all_day)
         # Both the case the hearing leaves and the one it now belongs to need a new cache value.
         affected = {held_hearing_of, becomes_hearing_of} - {None}
         for case_id in sorted(affected):
@@ -231,7 +231,7 @@ def _task_item(task: Task, case_name: str, names: dict[str, str]) -> CalendarIte
     )
 
 
-def _normalize_start(starts_at: datetime, all_day: bool) -> datetime:
+def normalize_start(starts_at: datetime, all_day: bool) -> datetime:
     local = to_local_naive(starts_at).replace(second=0, microsecond=0)
     if all_day:
         local = local.replace(hour=0, minute=0)

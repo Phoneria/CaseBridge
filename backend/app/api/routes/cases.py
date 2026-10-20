@@ -9,12 +9,14 @@ from app.core.timeutil import local_today
 from app.db.session import get_db
 from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType
 from app.models.user import User, UserRole
+from app.schemas.calendar import CaseHearingOut
 from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseNoteUpdate, CaseOut, CaseUpdate
 from app.repositories.case_event_repository import CaseEventRepository
 from app.services.case_events import CaseEventInputError, clean_note_text, note_title
 from app.services.case_lifecycle import CaseLifecycleService, CaseStateError
 from app.services.case_parties import InvalidPartiesError
 from app.services.case_service import CaseService, DuplicateCaseNumberError
+from app.services.hearing_service import HearingService
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -113,6 +115,17 @@ def get_case(
     return CaseDetailOut.model_validate(case, from_attributes=True).model_copy(
         update={"timeline": [CaseEventOut.model_validate(e) for e in timeline]}
     )
+
+
+@router.get("/{case_id}/hearings", response_model=list[CaseHearingOut])
+def list_case_hearings(
+    case_id: str,
+    law_firm_id: str = Depends(get_current_law_firm_id),
+    db: Session = Depends(get_db),
+):
+    """Every hearing of the case, earliest first (the calendar events of type hearing)."""
+    case = _get_owned_case_or_404(CaseService(db), case_id, law_firm_id)
+    return HearingService(db).list_for_case(case, local_today())
 
 
 @router.patch("/{case_id}", response_model=CaseOut)

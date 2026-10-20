@@ -96,3 +96,45 @@ class CalendarEventOut(BaseModel):
     result_note: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+
+#: The note a lawyer writes after a hearing: trimmed, 1-4000 characters.
+ResultNote = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+
+
+class CaseHearingOut(BaseModel):
+    """One hearing of a case (GET /cases/{id}/hearings). `is_past`: the hearing's
+    local date is before today. `result_open`: it is today or earlier, so a result
+    may be entered (a hearing that is today is not past yet but may already be
+    recorded)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    starts_at: datetime
+    all_day: bool
+    duration_minutes: int
+    location: Optional[str] = None
+    notes: Optional[str] = None
+    assignee_id: Optional[str] = None
+    result_note: Optional[str] = None
+    is_past: bool
+    result_open: bool
+
+
+class NextHearingIn(BaseModel):
+    starts_at: datetime
+    all_day: bool = False
+    duration_minutes: DurationMinutes = 60
+    location: Optional[ShortText] = None
+    notes: Optional[NotesText] = None
+
+
+class HearingResultIn(BaseModel):
+    result_note: ResultNote
+    next_hearing: Optional[NextHearingIn] = None
+
+
+class HearingResultOut(BaseModel):
+    hearing: CaseHearingOut
+    next_hearing: Optional[CaseHearingOut] = None
