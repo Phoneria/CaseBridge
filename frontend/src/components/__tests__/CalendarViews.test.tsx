@@ -26,6 +26,7 @@ function item(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     assignee_name: null,
     location: "Büro",
     notes: null,
+    result_note: null,
     reminder_days: [1],
     editable: true,
     ...overrides,

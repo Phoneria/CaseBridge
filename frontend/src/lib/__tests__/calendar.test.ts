@@ -36,6 +36,7 @@ function item(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     assignee_name: null,
     location: null,
     notes: null,
+    result_note: null,
     reminder_days: [1],
     editable: true,
     ...overrides,
@@ -84,7 +85,7 @@ describe("calendar items", () => {
   });
 
   it("filters by type, assignee, case and 'only mine'", () => {
-    const hearing = item({ id: "h", kind: "case_hearing", event_type: "hearing", case_id: "c1", assignee_id: "u1" });
+    const hearing = item({ id: "h", event_type: "hearing", case_id: "c1", assignee_id: "u1" });
     const task = item({ id: "t", kind: "task", event_type: "task", case_id: "c2", assignee_id: "u2" });
     const meeting = item({ id: "m", assignee_id: null });
     const all = [hearing, task, meeting];

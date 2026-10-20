@@ -190,11 +190,11 @@ export interface ActivityItem {
 }
 
 export type CalendarEventType = "hearing" | "meeting" | "client_meeting" | "other";
-export type CalendarItemKind = "event" | "task" | "case_hearing";
+export type CalendarItemKind = "event" | "task";
 
-/** One row of GET /calendar: a calendar event, a pending task's due date or a case hearing. */
+/** One row of GET /calendar: a calendar event (a case hearing is one) or a pending task's due date. */
 export interface CalendarEvent {
-  id: string; // "event:<id>" | "task:<id>" | "hearing:<case_id>"
+  id: string; // "event:<id>" | "task:<id>"
   kind: CalendarItemKind;
   event_type: CalendarEventType | "task";
   title: string;
@@ -211,6 +211,8 @@ export interface CalendarEvent {
   location: string | null;
   notes: string | null;
   reminder_days: number[];
+  /** The note written after a hearing; null for every other item. */
+  result_note: string | null;
   editable: boolean;
 }
 
@@ -228,8 +230,49 @@ export interface CalendarEventRecord {
   assignee_id: string | null;
   created_by: string;
   reminder_days: number[];
+  result_note: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** One hearing of a case (GET /cases/{id}/hearings). `is_past`: before today's local date;
+ * `result_open`: today or earlier, so a result may be entered. */
+export interface CaseHearing {
+  id: string;
+  starts_at: string; // naive local "YYYY-MM-DDTHH:MM:SS"; midnight for an all-day hearing
+  all_day: boolean;
+  duration_minutes: number;
+  location: string | null;
+  notes: string | null;
+  assignee_id: string | null;
+  result_note: string | null;
+  is_past: boolean;
+  result_open: boolean;
+}
+
+/** What is stored when a hearing is added or edited from the case page. */
+export interface HearingFields {
+  starts_at: string;
+  all_day: boolean;
+  duration_minutes: number;
+  location: string | null;
+  notes: string | null;
+}
+
+export interface HearingResultPayload {
+  result_note: string;
+  next_hearing?: {
+    starts_at: string;
+    all_day: boolean;
+    duration_minutes?: number;
+    location?: string | null;
+    notes?: string | null;
+  };
+}
+
+export interface HearingResultResponse {
+  hearing: CaseHearing;
+  next_hearing: CaseHearing | null;
 }
 
 export interface CalendarEventPayload {

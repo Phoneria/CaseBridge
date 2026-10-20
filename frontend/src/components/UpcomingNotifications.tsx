@@ -26,7 +26,7 @@ export function taskToCalendarItem(task: TaskWithCase & { due_date: string }): C
     id: `task:${task.id}`, kind: "task", event_type: "task", title: task.title, date: task.due_date,
     start: null, end: null, all_day: true, case_id: task.case_id, case_name: task.case_name,
     task_id: task.id, event_id: null, assignee_id: task.assigned_to ?? null, assignee_name: null,
-    location: null, notes: null, reminder_days: task.reminder_days ?? [1], editable: false,
+    location: null, notes: null, result_note: null, reminder_days: task.reminder_days ?? [1], editable: false,
   };
 }
 

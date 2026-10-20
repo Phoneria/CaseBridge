@@ -139,6 +139,23 @@ describe("chat API", () => {
     ]);
   });
 
+  it("loads a case's hearings and records a hearing result", async () => {
+    window.localStorage.setItem("casebridge_token", "valid-token");
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const { getCaseHearings, recordHearingResult } = await import("@/lib/api");
+    const payload = { result_note: "Bilirkişi atandı.", next_hearing: { starts_at: "2099-01-05T10:00:00", all_day: false } };
+
+    await getCaseHearings("c1");
+    await recordHearingResult("h1", payload);
+
+    const calls = fetchMock.mock.calls.map(([url, init]) => [url, init?.method ?? "GET", init?.body ?? null]);
+    expect(calls).toEqual([
+      ["http://localhost:8000/cases/c1/hearings", "GET", null],
+      ["http://localhost:8000/calendar/events/h1/result", "POST", JSON.stringify(payload)],
+    ]);
+  });
+
   it("deleteCalendarEvent accepts a 204 response", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 204, json: async () => { throw new Error("no body"); } });
     global.fetch = fetchMock as unknown as typeof fetch;

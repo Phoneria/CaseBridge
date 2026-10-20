@@ -35,14 +35,14 @@ function item(overrides: Partial<CalendarEvent>): CalendarEvent {
     id: "event:e1", kind: "event", event_type: "meeting", title: "Müvekkil toplantısı", date: "2026-10-07",
     start: "2026-10-07T14:30:00", end: "2026-10-07T16:00:00", all_day: false, case_id: null, case_name: null,
     task_id: null, event_id: "e1", assignee_id: "u1", assignee_name: "Avukat A", location: null, notes: null,
-    reminder_days: [1], editable: true, ...overrides,
+    result_note: null, reminder_days: [1], editable: true, ...overrides,
   };
 }
 
 const hearing = item({
-  id: "hearing:c1", kind: "case_hearing", event_type: "hearing", title: "Duruşma - Sözleşmenin Feshi Davası",
+  id: "event:h1", event_type: "hearing", title: "Duruşma - Sözleşmenin Feshi Davası",
   date: "2026-10-05", start: null, end: null, all_day: true, case_id: "c1", case_name: "Sözleşmenin Feshi Davası",
-  event_id: null, assignee_id: "u2", assignee_name: "Avukat B", reminder_days: [3, 1], editable: false,
+  event_id: "h1", assignee_id: "u2", assignee_name: "Avukat B", reminder_days: [3, 1],
 });
 const task = item({
   id: "task:t9", kind: "task", event_type: "task", title: "Dilekçe hazırla", date: "2026-09-20", start: null, end: null,
