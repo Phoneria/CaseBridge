@@ -1,7 +1,7 @@
 # Duruşma Tarihleri (Dava ↔ Takvim) — Tasarım
 
 - **Tarih:** 2026-10-12
-- **Dal:** `feature/hearing-dates` (`feature/case-lifecycle` `bbe1c08` üzerinden)
+- **Dal:** `feature/hearing-dates` (`feature/case-notes-and-owner` `08abbab` üzerinden; ilk olarak `feature/case-lifecycle` `bbe1c08` üzerinde yazıldı)
 - **Durum:** Onaylandı
 
 ## 1. Amaç
