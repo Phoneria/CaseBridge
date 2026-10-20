@@ -40,6 +40,12 @@ class CalendarEvent(Base):
     assignee_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
     created_by: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     reminder_days: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
+    #: After-the-hearing note (hearing events only); see POST /calendar/events/{id}/result.
+    result_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    #: The timeline entry written for the result note. Deleting that entry only unlinks it.
+    result_case_event_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("case_events.id", ondelete="SET NULL"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now, nullable=False)
 
