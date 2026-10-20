@@ -99,7 +99,7 @@ export function DashboardView() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-navy-900">Dashboard</h1>
-        <p className="text-sm text-navy-500">Bürünüzün genel durumuna hızlı bir bakış.</p>
+        <p className="text-sm text-navy-500">Büronuzun genel durumuna hızlı bir bakış.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
