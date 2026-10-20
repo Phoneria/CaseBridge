@@ -183,16 +183,16 @@ def test_hearing_event_sets_an_empty_next_hearing_date(client, two_firms_two_use
     assert _next_hearing(client, headers, case["id"]) == "2099-05-10"
 
 
-def test_hearing_event_moves_a_later_next_hearing_date_earlier_only(client, two_firms_two_users):
+def test_the_earliest_upcoming_hearing_is_the_next_hearing(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
-    later = _create_case(client, headers, case_number="2026/902", next_hearing_date="2099-06-01")
-    earlier = _create_case(client, headers, case_number="2026/903", next_hearing_date="2099-05-01")
+    case = _create_case(client, headers)
 
-    _hearing(client, headers, later["id"], "2099-05-10T10:00:00")
-    _hearing(client, headers, earlier["id"], "2099-05-10T10:00:00")
-
-    assert _next_hearing(client, headers, later["id"]) == "2099-05-10"
-    assert _next_hearing(client, headers, earlier["id"]) == "2099-05-01"
+    _hearing(client, headers, case["id"], "2099-06-01T10:00:00")
+    assert _next_hearing(client, headers, case["id"]) == "2099-06-01"
+    _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    assert _next_hearing(client, headers, case["id"]) == "2099-05-10"
+    _hearing(client, headers, case["id"], "2099-07-01T10:00:00")
+    assert _next_hearing(client, headers, case["id"]) == "2099-05-10"
 
 
 def test_past_hearings_and_other_event_types_do_not_touch_the_case(client, two_firms_two_users):
@@ -280,16 +280,51 @@ def test_moving_a_hearing_event_to_another_case_recomputes_old_and_sets_new(clie
     assert _next_hearing(client, headers, new_case["id"]) == "2099-05-10"
 
 
-def test_a_case_date_that_differs_from_the_events_old_day_is_left_alone(client, two_firms_two_users):
-    headers = _auth_headers(client, two_firms_two_users)
-    case = _create_case(client, headers, next_hearing_date="2099-04-01")
-    event = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
-    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
+def test_a_hearing_today_counts_a_past_one_does_not_and_the_local_date_decides(client, two_firms_two_users):
+    from datetime import timedelta
 
-    client.patch(f"/calendar/events/{event['id']}", json={"starts_at": "2099-06-20T09:00:00"}, headers=headers)
-    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
-    client.delete(f"/calendar/events/{event['id']}", headers=headers)
-    assert _next_hearing(client, headers, case["id"]) == "2099-04-01"
+    from app.core.timeutil import local_today
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today = local_today()
+    case = _create_case(client, headers)
+
+    _hearing(client, headers, case["id"], f"{today - timedelta(days=1)}T23:30:00")
+    assert _next_hearing(client, headers, case["id"]) is None
+    # Today counts all day, even when the hearing's time has passed.
+    _hearing(client, headers, case["id"], f"{today}T00:05:00")
+    assert _next_hearing(client, headers, case["id"]) == today.isoformat()
+
+    other = _create_case(client, headers, case_number="2026/906")
+    # 22:30 UTC is already after midnight in Istanbul: the hearing belongs to the next local day.
+    _hearing(client, headers, other["id"], "2099-03-10T22:30:00Z")
+    assert _next_hearing(client, headers, other["id"]) == "2099-03-11"
+
+
+def test_a_closed_case_takes_no_new_hearing_but_keeps_editing_its_old_ones(client, two_firms_two_users, close_case):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    other = _create_case(client, headers, case_number="2026/907")
+    existing = _hearing(client, headers, case["id"], "2099-05-10T10:00:00")
+    meeting = _create_event(client, headers, case_id=case["id"], starts_at="2099-05-11T10:00:00").json()
+    loose = _hearing(client, headers, other["id"], "2099-06-10T10:00:00")
+    close_case(headers, case["id"])
+    refused = "Kapalı davaya duruşma eklenemez."
+
+    new_hearing = _create_event(client, headers, event_type="hearing", case_id=case["id"], starts_at="2099-05-12T10:00:00")
+    moved_in = client.patch(f"/calendar/events/{loose['id']}", json={"case_id": case["id"]}, headers=headers)
+    retyped = client.patch(f"/calendar/events/{meeting['id']}", json={"event_type": "hearing"}, headers=headers)
+
+    assert [(r.status_code, r.json()["detail"]) for r in (new_hearing, moved_in, retyped)] == [(409, refused)] * 3
+    assert _next_hearing(client, headers, other["id"]) == "2099-06-10"
+    assert client.get(f"/calendar/events/{meeting['id']}", headers=headers).json()["event_type"] == "meeting"
+    # A meeting may be added, the existing hearing edited and deleted.
+    assert _create_event(client, headers, case_id=case["id"], starts_at="2099-05-13T10:00:00").status_code == 201
+    edited = client.patch(f"/calendar/events/{existing['id']}", json={"starts_at": "2099-08-01T09:00:00"}, headers=headers)
+    assert edited.status_code == 200
+    assert _next_hearing(client, headers, case["id"]) == "2099-08-01"
+    assert client.delete(f"/calendar/events/{existing['id']}", headers=headers).status_code == 204
+    assert _next_hearing(client, headers, case["id"]) is None
 
 
 def test_patch_with_an_assignee_from_another_firm_is_404_and_changes_nothing(client, two_firms_two_users):

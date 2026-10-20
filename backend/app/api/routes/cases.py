@@ -64,7 +64,7 @@ def create_case(
         raise HTTPException(status_code=422, detail="Choose a responsible lawyer")
     payload = payload.model_copy(update={"assigned_lawyer_id": lawyer_id})
     try:
-        return CaseService(db).create_case(current_user.law_firm_id, payload)
+        return CaseService(db).create_case(current_user.law_firm_id, payload, current_user.id, local_today())
     except DuplicateCaseNumberError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except InvalidPartiesError as exc:

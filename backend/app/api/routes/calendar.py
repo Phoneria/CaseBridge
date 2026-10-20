@@ -18,7 +18,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.calendar import CalendarEventCreate, CalendarEventOut, CalendarEventUpdate, CalendarItemOut
 from app.services.assignees import AssigneeNotAssignable
-from app.services.calendar_service import CalendarReferenceNotFound, CalendarService
+from app.services.calendar_service import CalendarReferenceNotFound, CalendarService, ClosedCaseHearing
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
@@ -71,6 +71,8 @@ def create_calendar_event(
         )
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except ClosedCaseHearing as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail)
     except AssigneeNotAssignable as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
@@ -100,6 +102,8 @@ def update_calendar_event(
         return service.update_event(event, payload, today=local_today())
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except ClosedCaseHearing as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail)
     except AssigneeNotAssignable as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 

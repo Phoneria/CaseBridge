@@ -43,7 +43,10 @@ class CaseLifecycleService:
 
     @staticmethod
     def ensure_patch_allowed(case: Case, payload: CaseUpdate) -> None:
-        """PATCH edits the case; it neither closes nor reopens it and never sets the outcome."""
+        """PATCH edits the case; it neither closes nor reopens it, never sets the outcome
+        and never writes the hearing date (hearings are calendar events)."""
+        if "next_hearing_date" in payload.model_fields_set:
+            raise CaseStateError(422, "Duruşma tarihi Duruşmalar bölümünden eklenir.")
         if payload.status == CaseStatus.KAPALI:
             raise CaseStateError(422, "Davayı kapatmak için 'Davayı kapat' işlemini kullanın.")
         if "outcome" in payload.model_fields_set:

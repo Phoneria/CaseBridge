@@ -1,6 +1,6 @@
-"""Calendar API (Takvim): merges calendar events, task due dates and case
-hearing dates into one firm-wide chronological view."""
-from datetime import date
+"""Calendar API (Takvim): merges calendar events (hearings included) and task
+due dates into one firm-wide chronological view."""
+from datetime import date, timedelta
 
 RANGE_2026 = {"from": "2026-01-01", "to": "2026-12-31"}
 
@@ -31,18 +31,20 @@ def _create_case(client, headers, **overrides):
     return client.post("/cases", json=payload, headers=headers).json()
 
 
-def test_calendar_includes_case_hearing_date(client, two_firms_two_users):
+def test_calendar_includes_the_hearing_given_when_the_case_is_created(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
-    case = _create_case(client, headers)
-    client.patch(f"/cases/{case['id']}", json={"next_hearing_date": "2026-10-05"}, headers=headers)
+    today, window = _window()
+    hearing = (today + timedelta(days=5)).isoformat()
+    case = _create_case(client, headers, next_hearing_date=hearing)
 
-    response = client.get("/calendar", params=RANGE_2026, headers=headers)
-    assert response.status_code == 200
-    body = response.json()
-    hearing_events = [e for e in body if e["event_type"] == "hearing"]
-    assert len(hearing_events) == 1
-    assert hearing_events[0]["date"] == "2026-10-05"
-    assert hearing_events[0]["case_name"] == VALID_CASE_PAYLOAD["case_name"]
+    body = client.get("/calendar", params=window, headers=headers).json()
+
+    hearings = [e for e in body if e["event_type"] == "hearing"]
+    assert len(hearings) == 1
+    item = hearings[0]
+    assert (item["kind"], item["date"], item["all_day"], item["title"]) == ("event", hearing, True, "Duruşma")
+    assert (item["case_id"], item["case_name"], item["editable"]) == (case["id"], VALID_CASE_PAYLOAD["case_name"], True)
+    assert case["next_hearing_date"] == hearing
 
 
 def test_calendar_includes_task_due_date(client, two_firms_two_users):
@@ -65,41 +67,43 @@ def test_calendar_includes_task_due_date(client, two_firms_two_users):
 
 def test_calendar_sorted_chronologically(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
-    case = _create_case(client, headers, case_number="2026/803")
-    client.patch(f"/cases/{case['id']}", json={"next_hearing_date": "2026-12-01"}, headers=headers)
+    today, window = _window()
+    case = _create_case(client, headers, case_number="2026/803", next_hearing_date=(today + timedelta(days=20)).isoformat())
     client.post(
         f"/cases/{case['id']}/tasks",
-        json={"title": "Erken gorev", "due_date": "2026-09-01"},
+        json={"title": "Erken gorev", "due_date": (today + timedelta(days=2)).isoformat()},
         headers=headers,
     )
 
-    response = client.get("/calendar", params=RANGE_2026, headers=headers)
+    response = client.get("/calendar", params=window, headers=headers)
     dates = [e["date"] for e in response.json()]
-    assert dates == sorted(dates)
+    assert len(dates) == 2 and dates == sorted(dates)
 
 
 def test_calendar_isolated_by_law_firm(client, two_firms_two_users):
     fixtures = two_firms_two_users
     headers_a = _auth_headers(client, fixtures, "user_a")
     headers_b = _auth_headers(client, fixtures, "user_b")
-    case = _create_case(client, headers_a, case_number="2026/804")
-    client.patch(f"/cases/{case['id']}", json={"next_hearing_date": "2026-11-01"}, headers=headers_a)
+    today, window = _window()
+    _create_case(client, headers_a, case_number="2026/804", next_hearing_date=(today + timedelta(days=3)).isoformat())
 
-    response = client.get("/calendar", params=RANGE_2026, headers=headers_b)
+    assert len(client.get("/calendar", params=window, headers=headers_a).json()) == 1
+    response = client.get("/calendar", params=window, headers=headers_b)
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_calendar_task_events_carry_task_id(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
-    case = _create_case(client, headers, case_number="2026/803", next_hearing_date="2026-10-07")
+    today, window = _window()
+    case = _create_case(client, headers, case_number="2026/803", next_hearing_date=(today + timedelta(days=4)).isoformat())
     task = client.post(
         f"/cases/{case['id']}/tasks",
-        json={"title": "Delil listesi", "due_date": "2026-10-08"},
+        json={"title": "Delil listesi", "due_date": (today + timedelta(days=5)).isoformat()},
         headers=headers,
     ).json()
 
-    body = client.get("/calendar", params=RANGE_2026, headers=headers).json()
+    body = client.get("/calendar", params=window, headers=headers).json()
 
     task_event = next(e for e in body if e["event_type"] == "task")
     hearing_event = next(e for e in body if e["event_type"] == "hearing")
@@ -144,6 +148,7 @@ def test_calendar_lists_events_with_the_unified_fields(client, two_firms_two_use
             "location": "Büro",
             "notes": "Belgeleri getir",
             "reminder_days": [3],
+            "result_note": None,
             "editable": True,
         }
     ]
@@ -161,30 +166,31 @@ def test_all_day_events_have_no_start_or_end(client, two_firms_two_users):
 def test_task_and_hearing_items_carry_kind_assignee_and_default_reminders(client, two_firms_two_users):
     fixtures = two_firms_two_users
     headers = _auth_headers(client, fixtures)
+    today, window = _window()
+    hearing_day = (today + timedelta(days=6)).isoformat()
     case = _create_case(
-        client, headers, case_number="2026/811", next_hearing_date="2026-10-09",
+        client, headers, case_number="2026/811", next_hearing_date=hearing_day,
         assigned_lawyer_id=fixtures["user_a"].id,
     )
     task = client.post(
         f"/cases/{case['id']}/tasks",
-        json={"title": "Delil listesi", "due_date": "2026-10-08", "assigned_to": fixtures["user_a"].id},
+        json={"title": "Delil listesi", "due_date": (today + timedelta(days=5)).isoformat(), "assigned_to": fixtures["user_a"].id},
         headers=headers,
     ).json()
 
-    body = client.get("/calendar", params=RANGE_2026, headers=headers).json()
+    body = client.get("/calendar", params=window, headers=headers).json()
     task_item = next(item for item in body if item["kind"] == "task")
-    hearing_item = next(item for item in body if item["kind"] == "case_hearing")
+    hearing_item = next(item for item in body if item["event_type"] == "hearing")
 
     assert task_item["id"] == f"task:{task['id']}"
     assert (task_item["event_type"], task_item["all_day"], task_item["editable"]) == ("task", True, False)
     assert task_item["reminder_days"] == [1]
     assert task_item["assignee_name"] == "Avukat A"
-    assert hearing_item["id"] == f"hearing:{case['id']}"
-    assert hearing_item["event_type"] == "hearing"
-    assert hearing_item["title"] == f"Duruşma - {VALID_CASE_PAYLOAD['case_name']}"
+    assert hearing_item["id"].startswith("event:")
+    assert (hearing_item["kind"], hearing_item["title"], hearing_item["date"]) == ("event", "Duruşma", hearing_day)
     assert hearing_item["reminder_days"] == [3, 1]
-    assert hearing_item["assignee_id"] == fixtures["user_a"].id
-    assert hearing_item["location"] == VALID_CASE_PAYLOAD["court"]
+    assert (hearing_item["assignee_id"], hearing_item["assignee_name"]) == (fixtures["user_a"].id, "Avukat A")
+    assert [item["kind"] for item in body].count("case_hearing") == 0
 
 
 def test_task_items_show_their_own_reminder_days(client, two_firms_two_users):
@@ -200,19 +206,19 @@ def test_task_items_show_their_own_reminder_days(client, two_firms_two_users):
     assert item["reminder_days"] == []
 
 
-def test_case_hearing_is_hidden_when_a_hearing_event_exists_that_day(client, two_firms_two_users):
+def test_hearings_on_the_same_day_are_listed_as_separate_events(client, two_firms_two_users):
     headers = _auth_headers(client, two_firms_two_users)
-    case = _create_case(client, headers, case_number="2026/813", next_hearing_date="2026-10-09")
-    other_day = _create_case(client, headers, case_number="2026/814", next_hearing_date="2026-10-10")
-    _create_event(client, headers, title="Duruşma", event_type="hearing", case_id=case["id"], starts_at="2026-10-09T10:00:00")
-    _create_event(client, headers, title="Duruşma", event_type="hearing", case_id=other_day["id"], starts_at="2026-10-11T10:00:00")
+    today, window = _window()
+    day = (today + timedelta(days=3)).isoformat()
+    case = _create_case(client, headers, case_number="2026/813", next_hearing_date=day)
+    # The same day again, timed: a second hearing, not a duplicate of a derived row.
+    _create_event(client, headers, title="Duruşma", event_type="hearing", case_id=case["id"], starts_at=f"{day}T10:00:00")
 
-    body = client.get("/calendar", params=RANGE_2026, headers=headers).json()
+    body = client.get("/calendar", params=window, headers=headers).json()
 
-    assert [(item["kind"], item["case_id"], item["date"]) for item in body] == [
-        ("event", case["id"], "2026-10-09"),
-        ("case_hearing", other_day["id"], "2026-10-10"),
-        ("event", other_day["id"], "2026-10-11"),
+    assert [(item["kind"], item["case_id"], item["date"], item["all_day"]) for item in body] == [
+        ("event", case["id"], day, True),
+        ("event", case["id"], day, False),
     ]
 
 
@@ -277,15 +283,11 @@ def _window():
     return today, {"from": (today - timedelta(days=10)).isoformat(), "to": (today + timedelta(days=30)).isoformat()}
 
 
-def test_closed_and_archived_cases_produce_no_hearing_items(client, two_firms_two_users, close_case):
-    from datetime import timedelta
-
+def test_closed_and_archived_cases_keep_their_hearing_events_and_cached_date(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     today, window = _window()
     opened = (today - timedelta(days=30)).isoformat()
     hearing = (today + timedelta(days=5)).isoformat()
-    open_case = _create_case(client, headers, case_number="2026/861", case_name="Açık Dava",
-                             opening_date=opened, next_hearing_date=hearing)
     closed = _create_case(client, headers, case_number="2026/862", case_name="Kapalı Dava",
                           opening_date=opened, next_hearing_date=hearing)
     archived = _create_case(client, headers, case_number="2026/863", case_name="Arşivli Dava",
@@ -296,8 +298,11 @@ def test_closed_and_archived_cases_produce_no_hearing_items(client, two_firms_tw
 
     body = client.get("/calendar", params=window, headers=headers).json()
 
-    hearings = [item["case_id"] for item in body if item["kind"] == "case_hearing"]
-    assert hearings == [open_case["id"]]
+    # Hearings are real events now: they stay on the calendar as history (the archived one read-only).
+    assert {item["case_id"]: item["editable"] for item in body if item["event_type"] == "hearing"} == {
+        closed["id"]: True,
+        archived["id"]: False,
+    }
     # The data is kept: closing does not clear the hearing date.
     assert client.get(f"/cases/{closed['id']}", headers=headers).json()["next_hearing_date"] == hearing
 

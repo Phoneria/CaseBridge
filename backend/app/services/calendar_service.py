@@ -9,12 +9,14 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.core.timeutil import to_local_naive
-from app.domain.calendar import HEARING_REMINDER_DAYS, default_event_reminder_days, task_reminder_days
+from app.domain.calendar import default_event_reminder_days, task_reminder_days
 from app.models.calendar import CalendarEvent, CalendarEventType
-from app.models.case import Case, case_is_active
+from app.models.case import Case, CaseStatus
 from app.models.task import Task, TaskStatus
 from app.models.user import User
+from app.repositories.case_repository import CaseRepository
 from app.services.assignees import find_assignable_in_firm
+from app.services.hearing_dates import recompute_next_hearing
 from app.schemas.calendar import CalendarEventCreate, CalendarEventUpdate, CalendarItemOut
 
 
@@ -24,6 +26,15 @@ class CalendarReferenceNotFound(Exception):
     def __init__(self, detail: str):
         super().__init__(detail)
         self.detail = detail
+
+
+CLOSED_CASE_HEARING = "Kapalı davaya duruşma eklenemez."
+
+
+class ClosedCaseHearing(Exception):
+    """A hearing may not be added to (or moved onto) a closed case."""
+
+    detail = CLOSED_CASE_HEARING
 
 
 class CalendarService:
@@ -36,6 +47,8 @@ class CalendarService:
         self, law_firm_id: str, created_by: str, payload: CalendarEventCreate, today: date
     ) -> CalendarEvent:
         case = self._check_references(law_firm_id, payload.case_id, payload.assignee_id)
+        if case is not None and payload.event_type == CalendarEventType.HEARING:
+            require_case_open_for_hearing(case)
         reminder_days = (
             payload.reminder_days
             if payload.reminder_days is not None
@@ -56,7 +69,8 @@ class CalendarService:
             reminder_days=reminder_days,
         )
         self.db.add(event)
-        _sync_next_hearing(event, case, today)
+        if case is not None and event.event_type == CalendarEventType.HEARING:
+            recompute_next_hearing(self.db, case, today)
         self.db.commit()
         self.db.refresh(event)
         return event
@@ -74,31 +88,41 @@ class CalendarService:
         # deactivated since can still be edited.
         new_assignee = updates.get("assignee_id") if updates.get("assignee_id") != event.assignee_id else None
         self._check_references(event.law_firm_id, updates.get("case_id"), new_assignee)
-        old_hearing = _hearing_anchor(event)
+        new_type = updates.get("event_type", event.event_type)
+        new_case_id = updates["case_id"] if "case_id" in updates else event.case_id
+        held_hearing_of = event.case_id if event.event_type == CalendarEventType.HEARING else None
+        becomes_hearing_of = new_case_id if new_type == CalendarEventType.HEARING else None
+        if becomes_hearing_of is not None and becomes_hearing_of != held_hearing_of:
+            # A new hearing for this case (new link or new type): the case must still be open.
+            target = self._case_in_firm(becomes_hearing_of, event.law_firm_id)
+            if target is not None:
+                require_case_open_for_hearing(target)
         for field, value in updates.items():
             setattr(event, field, value)
         event.starts_at = _normalize_start(event.starts_at, event.all_day)
-        if old_hearing is not None:
-            self._release_hearing_day(event, *old_hearing, today)
-        case = self._case_in_firm(event.case_id, event.law_firm_id) if event.case_id else None
-        _sync_next_hearing(event, case, today)
+        # Both the case the hearing leaves and the one it now belongs to need a new cache value.
+        affected = {held_hearing_of, becomes_hearing_of} - {None}
+        for case_id in sorted(affected):
+            case = self._case_in_firm(case_id, event.law_firm_id)
+            if case is not None:
+                recompute_next_hearing(self.db, case, today)
         self.db.commit()
         self.db.refresh(event)
         return event
 
     def delete_event(self, event: CalendarEvent, today: date) -> None:
-        old_hearing = _hearing_anchor(event)
-        if old_hearing is not None:
-            self._release_hearing_day(event, *old_hearing, today)
+        held_hearing_of = event.case_id if event.event_type == CalendarEventType.HEARING else None
         self.db.delete(event)
+        if held_hearing_of is not None:
+            case = self._case_in_firm(held_hearing_of, event.law_firm_id)
+            if case is not None:
+                recompute_next_hearing(self.db, case, today)
         self.db.commit()
 
     # ----- calendar list -----
 
     def list_items(self, law_firm_id: str, start: date, end: date) -> list[CalendarItemOut]:
-        """Events, pending task due dates and case hearings with a date in
-        [start, end]. A case hearing is hidden when a hearing event of the
-        same case exists on the same day."""
+        """Events (hearings included) and pending task due dates with a date in [start, end]."""
         events = (
             self.db.query(CalendarEvent, Case.case_name, Case.is_archived)
             .outerjoin(Case, CalendarEvent.case_id == Case.id)
@@ -121,39 +145,16 @@ class CalendarService:
             )
             .all()
         )
-        cases = (
-            self.db.query(Case)
-            .filter(
-                Case.law_firm_id == law_firm_id,
-                Case.is_precedent.is_(False),
-                case_is_active(),
-                Case.next_hearing_date >= start,
-                Case.next_hearing_date <= end,
-            )
-            .all()
-        )
-
-        hearing_event_days = {
-            (event.case_id, event.starts_at.date())
-            for event, _, _ in events
-            if event.event_type == CalendarEventType.HEARING and event.case_id
-        }
         names = self._user_names(
             law_firm_id,
             {event.assignee_id for event, _, _ in events}
-            | {task.assigned_to for task, _ in tasks}
-            | {case.assigned_lawyer_id for case in cases},
+            | {task.assigned_to for task, _ in tasks},
         )
 
         # An event of an archived case is read-only (its writes answer 409);
         # task items are never editable here.
         items = [_event_item(event, case_name, names, not archived) for event, case_name, archived in events]
         items += [_task_item(task, case_name, names) for task, case_name in tasks]
-        items += [
-            _hearing_item(case, names)
-            for case in cases
-            if (case.id, case.next_hearing_date) not in hearing_event_days
-        ]
         items.sort(key=lambda item: (item.date, item.start is not None, item.start or datetime.min, item.title))
         return items
 
@@ -166,33 +167,10 @@ class CalendarService:
 
     # ----- helpers -----
 
-    def _release_hearing_day(self, event: CalendarEvent, case_id: str, day: date, today: date) -> None:
-        """The event no longer holds `day` for `case_id` (moved, retyped,
-        re-linked or deleted). If the case's next_hearing_date was that day,
-        recompute it from the case's other upcoming hearing events."""
-        case = self._case_in_firm(case_id, event.law_firm_id)
-        if case is None or case.next_hearing_date != day:
-            return
-        earliest = (
-            self.db.query(CalendarEvent.starts_at)
-            .filter(
-                CalendarEvent.law_firm_id == event.law_firm_id,
-                CalendarEvent.case_id == case_id,
-                CalendarEvent.event_type == CalendarEventType.HEARING,
-                CalendarEvent.id != event.id,
-                CalendarEvent.starts_at >= datetime.combine(today, time.min),
-            )
-            .order_by(CalendarEvent.starts_at)
-            .first()
-        )
-        case.next_hearing_date = earliest[0].date() if earliest else None
-
     def _case_in_firm(self, case_id: str, law_firm_id: str) -> Optional[Case]:
-        return (
-            self.db.query(Case)
-            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
-            .first()
-        )
+        """Row-locked (a no-op on SQLite): the closed check and the cache recompute that follow
+        must not interleave with closing the case or another hearing change."""
+        return CaseRepository(self.db).get_by_id_in_firm_for_update(case_id, law_firm_id)
 
     def _check_references(
         self, law_firm_id: str, case_id: Optional[str], assignee_id: Optional[str]
@@ -229,6 +207,7 @@ def _event_item(
         location=event.location,
         notes=event.notes,
         reminder_days=list(event.reminder_days or []),
+        result_note=event.result_note,
         editable=editable,
     )
 
@@ -252,24 +231,6 @@ def _task_item(task: Task, case_name: str, names: dict[str, str]) -> CalendarIte
     )
 
 
-def _hearing_item(case: Case, names: dict[str, str]) -> CalendarItemOut:
-    return CalendarItemOut(
-        id=f"hearing:{case.id}",
-        kind="case_hearing",
-        event_type="hearing",
-        title=f"Duruşma - {case.case_name}",
-        date=case.next_hearing_date,
-        all_day=True,
-        case_id=case.id,
-        case_name=case.case_name,
-        assignee_id=case.assigned_lawyer_id,
-        assignee_name=names.get(case.assigned_lawyer_id) if case.assigned_lawyer_id else None,
-        location=case.court,
-        reminder_days=list(HEARING_REMINDER_DAYS),
-        editable=False,
-    )
-
-
 def _normalize_start(starts_at: datetime, all_day: bool) -> datetime:
     local = to_local_naive(starts_at).replace(second=0, microsecond=0)
     if all_day:
@@ -277,20 +238,6 @@ def _normalize_start(starts_at: datetime, all_day: bool) -> datetime:
     return local
 
 
-def _sync_next_hearing(event: CalendarEvent, case: Optional[Case], today: date) -> None:
-    """A hearing event on or after today pulls the case's next_hearing_date
-    earlier (or sets it when empty); it never pushes it later."""
-    if case is None or event.event_type != CalendarEventType.HEARING:
-        return
-    day = event.starts_at.date()
-    if day < today:
-        return
-    if case.next_hearing_date is None or case.next_hearing_date > day:
-        case.next_hearing_date = day
-
-
-def _hearing_anchor(event: CalendarEvent) -> Optional[tuple[str, date]]:
-    """(case_id, day) the event currently pins as a case hearing, if any."""
-    if event.event_type != CalendarEventType.HEARING or not event.case_id:
-        return None
-    return event.case_id, event.starts_at.date()
+def require_case_open_for_hearing(case: Case) -> None:
+    if case.status == CaseStatus.KAPALI:
+        raise ClosedCaseHearing()

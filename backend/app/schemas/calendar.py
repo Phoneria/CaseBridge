@@ -16,12 +16,12 @@ NotesText = Annotated[str, StringConstraints(max_length=5000)]
 
 
 class CalendarItemOut(BaseModel):
-    """One row of GET /calendar: a calendar event, a pending task's due date
-    or a case's next hearing. The legacy fields (date, title, case_id,
-    case_name, task_id, event_type "hearing"/"task") keep their meaning."""
+    """One row of GET /calendar: a calendar event (a hearing is one) or a pending
+    task's due date. The legacy fields (date, title, case_id, case_name, task_id,
+    event_type "hearing"/"task") keep their meaning."""
 
-    id: str  # "event:<id>", "task:<id>" or "hearing:<case_id>"
-    kind: Literal["event", "task", "case_hearing"]
+    id: str  # "event:<id>" or "task:<id>"
+    kind: Literal["event", "task"]
     event_type: Literal["hearing", "meeting", "client_meeting", "other", "task"]
     title: str
     date: date
@@ -37,6 +37,7 @@ class CalendarItemOut(BaseModel):
     location: Optional[str] = None
     notes: Optional[str] = None
     reminder_days: list[int]
+    result_note: Optional[str] = None  # hearings only
     editable: bool
 
 
@@ -92,5 +93,6 @@ class CalendarEventOut(BaseModel):
     assignee_id: Optional[str] = None
     created_by: str
     reminder_days: list[int]
+    result_note: Optional[str] = None
     created_at: datetime
     updated_at: datetime
