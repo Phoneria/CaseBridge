@@ -1,6 +1,7 @@
 """Delete cases together with everything that references them."""
 import os
 
+from app.models.calendar import CalendarEvent
 from app.models.case import Case, CaseEvent, CaseParty
 from app.models.document import Document
 from app.models.simulation import AIAnalysis, Simulation
@@ -18,7 +19,8 @@ def delete_cases(db, cases: list[Case]) -> int:
                 os.remove(path)
             except OSError:
                 pass
-    for model in (AIAnalysis, Simulation, Task, Document, CaseEvent, CaseParty):
+    # Calendar events (hearings) point at the case and, through result_case_event_id, at its timeline.
+    for model in (CalendarEvent, AIAnalysis, Simulation, Task, Document, CaseEvent, CaseParty):
         db.query(model).filter(model.case_id.in_(ids)).delete(synchronize_session=False)
     db.query(Case).filter(Case.id.in_(ids)).delete(synchronize_session=False)
     db.flush()

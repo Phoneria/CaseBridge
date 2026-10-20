@@ -5,6 +5,7 @@ import pytest
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db import seed as seed_module
+from app.models.calendar import CalendarEvent
 from app.models.case import Case, CaseType
 from app.models.courtroom import CourtroomSession
 from app.models.law_firm import LawFirm
@@ -45,6 +46,7 @@ def test_real_data_mode_removes_an_earlier_demo_completely(run_seed, db_session)
     assert db_session.query(LawFirm).count() == 0
     assert db_session.query(User).count() == 0
     assert db_session.query(Case).count() == 0
+    assert db_session.query(CalendarEvent).count() == 0  # the demo hearings go with their cases
     assert db_session.query(CourtroomSession).count() == 0
     run_seed(False)  # idempotent
 

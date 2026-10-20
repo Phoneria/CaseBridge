@@ -8,7 +8,8 @@ Folder layout:
     documents/            files referenced by cases[].documents[].file
 
 Each case: case_number, case_name, client_name, case_type are required;
-opposing_party, court, opening_date, next_hearing_date (YYYY-MM-DD),
+opposing_party, court, opening_date, next_hearing_date (YYYY-MM-DD; becomes
+an all-day hearing event of the case unless it already has one that day),
 status, outcome, case_value, description, events[], tasks[], documents[]
 are optional. A document is {"file": "x.pdf"} (pdf/docx/txt in
 documents/) or {"filename": "x.txt", "text": "..."}.
@@ -28,6 +29,7 @@ from typing import Optional
 from sqlalchemy import func
 
 from app.core.config import settings
+from app.core.timeutil import local_today
 from app.db.seed import DEMO_FIRM_NAME, LAWYER_EMAIL
 from app.db.session import SessionLocal
 import app.models  # noqa: F401
@@ -44,6 +46,7 @@ from app.services.case_parties import (
     legacy_parties,
     party_models,
 )
+from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
 from app.services.text_extraction import extract_text
 
 _EXT = {".pdf": DocumentType.PDF, ".docx": DocumentType.DOCX, ".txt": DocumentType.TXT}
@@ -128,7 +131,16 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
     case.outcome = _enum(CaseOutcome, item.get("outcome"), CaseOutcome.ONGOING)
     if item.get("opening_date"):
         case.opening_date = _date(item["opening_date"])
-    case.next_hearing_date = _date(item.get("next_hearing_date"))
+    hearing_day = _date(item.get("next_hearing_date"))
+    if is_precedent:
+        # Precedents are not on the calendar: the date stays a plain value.
+        case.next_hearing_date = hearing_day
+    else:
+        # A hearing is a calendar event; a re-import never adds a second one on the same day.
+        db.flush()
+        if hearing_day is not None:
+            ensure_all_day_hearing(db, case, hearing_day, lawyer.id)
+        recompute_next_hearing(db, case, local_today())
     db.flush()
 
     for ev in item.get("events", []):

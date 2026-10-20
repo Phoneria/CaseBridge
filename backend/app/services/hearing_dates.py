@@ -9,7 +9,7 @@ the nightly job that calls recompute_open_cases.
 
 None of these functions commits; the caller owns the transaction.
 """
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from typing import Optional
 
 from sqlalchemy import func
@@ -80,6 +80,26 @@ def add_all_day_hearing(db: Session, case: Case, day: date, created_by: str) -> 
     )
     db.add(event)
     return event
+
+
+def ensure_all_day_hearing(db: Session, case: Case, day: date, created_by: str) -> Optional[CalendarEvent]:
+    """add_all_day_hearing unless the case already has a hearing event on `day` (any time);
+    returns the new event, or None when there was one. For the importer and the seed."""
+    db.flush()
+    taken = (
+        db.query(CalendarEvent.id)
+        .filter(
+            CalendarEvent.law_firm_id == case.law_firm_id,
+            CalendarEvent.case_id == case.id,
+            CalendarEvent.event_type == CalendarEventType.HEARING,
+            CalendarEvent.starts_at >= datetime.combine(day, time.min),
+            CalendarEvent.starts_at < datetime.combine(day + timedelta(days=1), time.min),
+        )
+        .first()
+    )
+    if taken is not None:
+        return None
+    return add_all_day_hearing(db, case, day, created_by)
 
 
 def _as_date(value: Optional[datetime]) -> Optional[date]:

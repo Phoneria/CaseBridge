@@ -20,12 +20,14 @@ from app.models.law_firm import LawFirm
 from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
 from app.core.config import settings
+from app.core.timeutil import local_today
 from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.db.courtroom_showcase_seed import seed_courtroom_showcases
 from app.db.demo_cleanup import remove_demo_data
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
 from app.services.case_parties import legacy_parties, party_models
+from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
 
 DEMO_FIRM_NAME = "Demo Hukuk Bürosu"
 ADMIN_EMAIL = "admin@demo.casebridge.dev"
@@ -84,6 +86,10 @@ def _get_or_create_case(db, firm: LawFirm, lawyer: User, **kwargs) -> Case:
     demo_case.parties = party_models(legacy_parties(kwargs["client_name"], kwargs.get("opposing_party")), firm.id)
     db.add(demo_case)
     db.flush()
+    if kwargs.get("next_hearing_date") is not None:
+        # The hearing date lives in the calendar: an all-day hearing event for the demo lawyer.
+        ensure_all_day_hearing(db, demo_case, kwargs["next_hearing_date"], lawyer.id)
+        recompute_next_hearing(db, demo_case, local_today())
     return demo_case
 
 

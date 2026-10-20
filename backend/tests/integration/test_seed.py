@@ -14,6 +14,7 @@ from app.db.seed import (
     seed,
 )
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
+from app.models.calendar import CalendarEvent
 from app.models.case import Case, CaseEvent, CaseParty
 from app.models.courtroom import CourtroomActor, CourtroomSession
 from app.models.document import Document
@@ -82,6 +83,28 @@ def test_seed_is_idempotent(db_session, monkeypatch, tmp_path):
     assert db_session.query(Document).count() == len(DEMO_DOCUMENTS) + len(TICARI_KIRA_DOCUMENTS) + 2 * len(CASE_EVIDENCE)
     assert db_session.query(CaseEvent).count() == len(DEMO_EVENTS) + len(TICARI_KIRA_EVENTS) + 3 * len(CASE_EVIDENCE)
     assert db_session.query(CourtroomSession).filter_by(prompt_version="showcase-v1").count() == 24
+    assert db_session.query(CalendarEvent).count() == db_session.query(Case).filter(Case.next_hearing_date.isnot(None)).count()
+
+
+def test_seed_turns_every_demo_hearing_date_into_a_calendar_hearing(db_session, monkeypatch, tmp_path):
+    from datetime import datetime
+
+    import app.db.seed as seed_module
+    from app.models.calendar import CalendarEvent, CalendarEventType
+
+    monkeypatch.setattr(seed_module, "SessionLocal", lambda: db_session)
+    monkeypatch.setattr(seed_module, "upgrade_to_head", lambda engine: None)
+    monkeypatch.setattr(seed_module.settings, "storage_dir", str(tmp_path))
+
+    seed()
+
+    dated = db_session.query(Case).filter(Case.next_hearing_date.isnot(None)).all()
+    assert len(dated) == 12
+    for case in dated:
+        [event] = db_session.query(CalendarEvent).filter_by(case_id=case.id).all()
+        assert event.event_type == CalendarEventType.HEARING
+        assert (event.all_day, event.starts_at) == (True, datetime.combine(case.next_hearing_date, datetime.min.time()))
+        assert event.assignee_id == case.assigned_lawyer_id == event.created_by
 
 
 def test_seed_gives_every_demo_case_its_client_and_opposing_party(db_session, monkeypatch, tmp_path):
