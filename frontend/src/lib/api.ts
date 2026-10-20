@@ -316,6 +316,18 @@ export async function addCaseEvent(
   return request(`/cases/${caseId}/events`, { method: "POST", body: JSON.stringify(payload) });
 }
 
+export async function updateCaseNote(
+  caseId: string,
+  eventId: string,
+  payload: { description?: string; event_date?: string }
+): Promise<CaseEvent> {
+  return request(`/cases/${caseId}/events/${eventId}`, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function deleteCaseNote(caseId: string, eventId: string): Promise<void> {
+  return request(`/cases/${caseId}/events/${eventId}`, { method: "DELETE" });
+}
+
 export async function listCaseTasks(caseId: string): Promise<Task[]> {
   return request(`/cases/${caseId}/tasks`);
 }

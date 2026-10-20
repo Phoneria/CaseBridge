@@ -33,6 +33,7 @@ import { AiMark } from "@/components/ai/AiMark";
 import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
 import { AI_PERSPECTIVES } from "@/lib/ai";
+import { CaseNotesPanel } from "@/components/CaseNotesPanel";
 import { CaseTimelinePanel } from "@/components/CaseTimelinePanel";
 import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
 import { CaseDisputeCard } from "@/components/CaseDisputeCard";
@@ -314,7 +315,6 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const actions = caseActions(me, caseDetail);
   const archived = caseDetail.is_archived;
   const canEditDetails = !archived && canManageCase(me, caseDetail);
-  const notes = caseDetail.timeline.filter((e) => e.event_type === "note");
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
   const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
@@ -683,20 +683,20 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       )}
 
       {activeTab === "Notlar" && (
-        <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          {notes.length === 0 ? (
-            <EmptyState message="Henüz not eklenmedi." />
-          ) : (
-            <ul className="space-y-3 text-sm">
-              {notes.map((note) => (
-                <li key={note.id}>
-                  <p className="text-xs text-navy-500">{formatDate(note.event_date)}</p>
-                  <p className="text-navy-800">{note.title}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <CaseNotesPanel
+          caseId={caseId}
+          notes={caseDetail.timeline.filter((entry) => entry.event_type === "note")}
+          me={me}
+          assignedLawyerId={caseDetail.assigned_lawyer_id}
+          readOnly={archived}
+          onAdded={(created) => setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, created] } : prev))}
+          onUpdated={(updated) =>
+            setCaseDetail((prev) => (prev ? { ...prev, timeline: prev.timeline.map((e) => (e.id === updated.id ? updated : e)) } : prev))
+          }
+          onDeleted={(noteId) =>
+            setCaseDetail((prev) => (prev ? { ...prev, timeline: prev.timeline.filter((e) => e.id !== noteId) } : prev))
+          }
+        />
       )}
       {dialog === "close" && (
         <CaseCloseModal
