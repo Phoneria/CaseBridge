@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseEvent, CaseEventType, CaseOutcome, CaseStatus
 from app.schemas.case import CaseClose, CaseUpdate
+from app.services.hearing_dates import recompute_next_hearing
 
 OUTCOME_LABELS = {
     CaseOutcome.WON: "Kazanıldı",
@@ -84,6 +85,8 @@ class CaseLifecycleService:
         case.outcome = CaseOutcome.ONGOING
         case.decision_date = None
         case.closing_note = None
+        # A closed case keeps a stale next_hearing_date; the reopened case is open again.
+        recompute_next_hearing(self.db, case, today)
         event = CaseEvent(
             case_id=case.id,
             law_firm_id=case.law_firm_id,
