@@ -4,10 +4,12 @@ from app.core.security import verify_password
 from app.db.seed import (
     ADMIN_EMAIL,
     DEMO_DOCUMENTS,
+    DEMO_FIRM_NAME,
     DEMO_EVENTS,
     DEMO_LAWYERS,
     DEMO_PASSWORD,
     DEMO_TASKS,
+    PLATFORM_DEMO_EMAIL,
     TICARI_KIRA_DOCUMENTS,
     TICARI_KIRA_EVENTS,
     TICARI_KIRA_TASKS,
@@ -32,7 +34,7 @@ def test_seed_creates_demo_firm_users_and_cases(db_session, monkeypatch, tmp_pat
 
     seed()
 
-    firm = db_session.query(LawFirm).one()
+    firm = db_session.query(LawFirm).filter_by(name=DEMO_FIRM_NAME).one()
     users = db_session.query(User).filter(User.law_firm_id == firm.id).all()
     emails = {u.email for u in users}
     assert emails == {ADMIN_EMAIL, *(email for email, *_ in DEMO_LAWYERS)}
@@ -65,6 +67,10 @@ def test_seed_creates_demo_firm_users_and_cases(db_session, monkeypatch, tmp_pat
     assert all(len(session.turns) == 19 for session in showcases)
     assert all({CourtroomActor.USER, CourtroomActor.OPPONENT, CourtroomActor.JUDGE}.issubset({turn.actor for turn in session.turns}) for session in showcases)
 
+    platform_user = db_session.query(User).filter_by(email=PLATFORM_DEMO_EMAIL).one()
+    assert platform_user.is_platform_admin is True and platform_user.law_firm.is_platform is True
+    assert verify_password(DEMO_PASSWORD, platform_user.hashed_password)
+
 
 def test_seed_is_idempotent(db_session, monkeypatch, tmp_path):
     import app.db.seed as seed_module
@@ -76,8 +82,8 @@ def test_seed_is_idempotent(db_session, monkeypatch, tmp_path):
     seed()
     seed()
 
-    assert db_session.query(LawFirm).count() == 1
-    assert db_session.query(User).count() == 4
+    assert db_session.query(LawFirm).count() == 2  # the demo firm and the platform firm
+    assert db_session.query(User).count() == 5
     assert db_session.query(Case).count() == 20
     assert db_session.query(Task).count() == len(DEMO_TASKS) + len(TICARI_KIRA_TASKS) + 3 * len(CASE_EVIDENCE)
     assert db_session.query(Document).count() == len(DEMO_DOCUMENTS) + len(TICARI_KIRA_DOCUMENTS) + 2 * len(CASE_EVIDENCE)

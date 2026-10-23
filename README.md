@@ -101,6 +101,7 @@ Administrators manage the firm's users in **Ayarlar > Kullanıcılar**: invite (
 Created by `python -m app.db.seed` (idempotent - safe to re-run):
 - `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
 - `avukat@demo.casebridge.dev` / `demo1234` (Lawyer, Demo Hukuk Bürosu)
+- `platform@demo.casebridge.dev` / `demo1234` (CaseBridge platform admin: opens and suspends firms at /platform)
 
 The demo firm has three lawyers: Emre Yılmaz (Ticaret Hukuku, login above),
 Kerem Demir (İş Hukuku, `kerem@demo.casebridge.dev`) and Zeynep Arslan
@@ -137,7 +138,7 @@ In a courtroom session, a user may dictate a move and play AI turns aloud. These
 - `/system/ai-status` is firm-scoped but not role-gated server-side. User management (`/admin/users`) is admin-only and firm-scoped on the server.
 - Reports CSV export has no pagination/streaming; fine at MVP scale.
 - CORS allow-list defaults to `localhost:3000`/`127.0.0.1:3000`; extra origins (e.g. for E2E) are added via the `EXTRA_CORS_ORIGINS` env var, not hardcoded.
-- There is no self-registration. In real-data mode (`SEED_DEMO_DATA=false`) the first administrator is created with `python -m app.db.create_admin`; after that, administrators add users in **Ayarlar > Kullanıcılar** and each person sets their own password from an e-mailed link.
+- There is no self-registration. CaseBridge runs as a cloud service for many firms: the CaseBridge team's platform administrators are listed in PLATFORM_ADMIN_EMAILS (created and invited on startup), open each customer firm and its first administrator in the platform panel (/platform) and can suspend a firm (its users cannot sign in; the data stays). Firm administrators then add users in **Ayarlar > Kullanıcılar** and each person sets their own password from an e-mailed link.
 - Passwords bind sessions: changing or resetting a password signs out every older session (JWT `pwd` claim). Existing tokens without it are rejected once, so everyone signs in again after this update.
 - `logout` only clears the token in the browser; the JWT itself stays valid until it expires or the user's password changes (no server-side session store).
 - Existing unassigned cases remain visible to admins for manual assignment; new cases require an active lawyer in the same firm.
