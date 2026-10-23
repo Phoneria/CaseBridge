@@ -95,8 +95,10 @@ def parse_structured_output(raw: str, schema: type[T]) -> T:
         ) from exc
 
 
-def repair_structured_output(provider: LLMProvider, raw: str, schema: type[T]) -> T:
-    repaired = provider_for(provider, "courtroom.json_repair").complete(
+def repair_structured_output(
+    provider: LLMProvider, raw: str, schema: type[T], repair_task: str = "courtroom.json_repair"
+) -> T:
+    repaired = provider_for(provider, repair_task).complete(
         system_prompt=(
             "COURTROOM_JSON_REPAIR\nSen yalnızca JSON düzelten bir doğrulayıcısın. "
             "Yeni olay veya içerik ekleme. Yalnızca verilen içeriği hedef şemaya dönüştür. "
@@ -113,11 +115,13 @@ def repair_structured_output(provider: LLMProvider, raw: str, schema: type[T]) -
     return parse_structured_output(repaired, schema)
 
 
-def parse_with_one_repair(provider: LLMProvider, raw: str, schema: type[T]) -> T:
+def parse_with_one_repair(
+    provider: LLMProvider, raw: str, schema: type[T], repair_task: str = "courtroom.json_repair"
+) -> T:
     try:
         return parse_structured_output(raw, schema)
     except AIResponseValidationError:
-        return repair_structured_output(provider, raw, schema)
+        return repair_structured_output(provider, raw, schema, repair_task)
 
 
 def _role_name(role: CourtroomRole) -> str:

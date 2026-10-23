@@ -2,6 +2,18 @@ export type CaseType = "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "i
 export type CaseStatus = "devam_eden" | "durusma_bekleyen" | "karar_bekleyen" | "kapali";
 export type CaseOutcome = "ongoing" | "won" | "lost" | "settled";
 
+export type PartyRole = "plaintiff" | "defendant" | "intervener" | "other";
+export type ClientRole = "plaintiff" | "defendant" | "other";
+
+export interface CaseParty {
+  id: string;
+  name: string;
+  role: PartyRole;
+  is_client: boolean;
+  counsel_name: string | null;
+  sort_order: number;
+}
+
 export interface Case {
   id: string;
   law_firm_id: string;
@@ -19,10 +31,86 @@ export interface Case {
   outcome: CaseOutcome;
   case_value: number | null;
   description: string | null;
+  client_role: ClientRole | null;
+  court_file_number: string | null;
+  claim: string | null;
+  facts_summary: string | null;
+  plaintiff_position: string | null;
+  defendant_position: string | null;
+  parties: CaseParty[];
   is_archived: boolean;
   is_precedent: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export type CaseEventType = "filing" | "hearing" | "submission" | "expert_report" | "legal_update" | "note" | "other";
+
+/** What the lawyer sends when creating a case (client_name / opposing_party are derived by the backend). */
+export interface CasePartyPayload {
+  name: string;
+  role: PartyRole;
+  is_client: boolean;
+  counsel_name?: string | null;
+}
+
+export interface CasePayload {
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  status: CaseStatus;
+  parties: CasePartyPayload[];
+  court?: string;
+  court_file_number?: string;
+  opening_date?: string;
+  next_hearing_date?: string;
+  case_value?: number;
+  claim?: string;
+  facts_summary?: string;
+  plaintiff_position?: string;
+  defendant_position?: string;
+  description?: string;
+  assigned_lawyer_id?: string;
+}
+
+/** PATCH /cases/{id}: any subset; null clears a text field. */
+export type CaseUpdatePayload = Partial<
+  Pick<Case, "court_file_number" | "claim" | "facts_summary" | "plaintiff_position" | "defendant_position" | "description">
+> & { parties?: CasePartyPayload[] };
+
+export interface CaseIntakeParty {
+  name: string;
+  role: PartyRole;
+  counsel_name: string | null;
+}
+
+export interface CaseIntakeEvent {
+  event_date: string;
+  title: string;
+  description: string | null;
+  event_type: CaseEventType;
+}
+
+export interface CaseIntakeDraft {
+  case_name: string | null;
+  case_type: CaseType | null;
+  court: string | null;
+  court_file_number: string | null;
+  case_value: number | null;
+  opening_date: string | null;
+  next_hearing_date: string | null;
+  claim: string | null;
+  facts_summary: string | null;
+  plaintiff_position: string | null;
+  defendant_position: string | null;
+  parties: CaseIntakeParty[];
+  events: CaseIntakeEvent[];
+}
+
+export interface CaseIntakeResult {
+  draft: CaseIntakeDraft;
+  truncated: boolean;
+  source_chars: number;
 }
 
 export interface CaseEvent {

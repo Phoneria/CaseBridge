@@ -24,6 +24,7 @@ from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.db.courtroom_showcase_seed import seed_courtroom_showcases
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
+from app.services.case_parties import legacy_parties, party_models
 
 DEMO_FIRM_NAME = "Demo Hukuk Bürosu"
 ADMIN_EMAIL = "admin@demo.casebridge.dev"
@@ -79,6 +80,7 @@ def _get_or_create_case(db, firm: LawFirm, lawyer: User, **kwargs) -> Case:
     if existing:
         return existing
     demo_case = Case(law_firm_id=firm.id, assigned_lawyer_id=lawyer.id, **kwargs)
+    demo_case.parties = party_models(legacy_parties(kwargs["client_name"], kwargs.get("opposing_party")), firm.id)
     db.add(demo_case)
     db.flush()
     return demo_case

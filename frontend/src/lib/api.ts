@@ -7,6 +7,10 @@ import type {
   Case,
   CaseDetail,
   CaseEvent,
+  CaseEventType,
+  CaseIntakeResult,
+  CasePayload,
+  CaseUpdatePayload,
   CaseOutcome,
   CaseStatus,
   CaseType,
@@ -170,15 +174,23 @@ export async function getPrecedentDocuments(precedentId: string): Promise<Docume
   return request(`/precedents/${precedentId}/documents`);
 }
 
-export async function createCase(payload: Record<string, unknown>): Promise<Case> {
+export async function createCase(payload: CasePayload): Promise<Case> {
   return request("/cases", { method: "POST", body: JSON.stringify(payload) });
+}
+
+/** Fill-from-document: nothing is saved; the draft is only a proposal for the form. */
+export async function extractCaseIntake(input: { file: File } | { text: string }): Promise<CaseIntakeResult> {
+  const formData = new FormData();
+  if ("file" in input) formData.append("file", input.file);
+  else formData.append("text", input.text);
+  return request("/case-intake/extract", { method: "POST", body: formData });
 }
 
 export async function getCase(id: string): Promise<CaseDetail> {
   return request(`/cases/${id}`);
 }
 
-export async function updateCase(id: string, payload: Record<string, unknown>): Promise<Case> {
+export async function updateCase(id: string, payload: CaseUpdatePayload): Promise<Case> {
   return request(`/cases/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
 }
 
@@ -188,7 +200,7 @@ export async function archiveCase(id: string): Promise<Case> {
 
 export async function addCaseEvent(
   caseId: string,
-  payload: { event_date: string; title: string; description?: string; event_type?: string }
+  payload: { event_date: string; title: string; description?: string; event_type?: CaseEventType | string }
 ): Promise<CaseEvent> {
   return request(`/cases/${caseId}/events`, { method: "POST", body: JSON.stringify(payload) });
 }

@@ -149,3 +149,58 @@ describe("chat API", () => {
     expect(fetchMock.mock.calls[0][1].method).toBe("DELETE");
   });
 });
+
+
+describe("case intake API", () => {
+  it("posts the file or the pasted text as multipart form data without a JSON content type", async () => {
+    window.localStorage.setItem("casebridge_token", "valid-token");
+    const result = { draft: {}, truncated: false, source_chars: 12 };
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => result });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const { extractCaseIntake } = await import("@/lib/api");
+
+    const file = new File(["metin"], "dilekce.txt", { type: "text/plain" });
+    await expect(extractCaseIntake({ file })).resolves.toEqual(result);
+    await extractCaseIntake({ text: "yapıştırılan" });
+
+    const [fileUrl, fileInit] = fetchMock.mock.calls[0];
+    expect(String(fileUrl)).toMatch(/\/case-intake\/extract$/);
+    expect(fileInit.method).toBe("POST");
+    expect(fileInit.body).toBeInstanceOf(FormData);
+    expect((fileInit.body as FormData).get("file")).toBe(file);
+    expect((fileInit.body as FormData).has("text")).toBe(false);
+    expect(new Headers(fileInit.headers).has("Content-Type")).toBe(false);
+    expect(new Headers(fileInit.headers).get("Authorization")).toBe("Bearer valid-token");
+    const textBody = fetchMock.mock.calls[1][1].body as FormData;
+    expect(textBody.get("text")).toBe("yapıştırılan");
+    expect(textBody.has("file")).toBe(false);
+  });
+
+  it("surfaces the backend detail as the error message", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ detail: "Bu belgeden metin çıkarılamadı (taranmış olabilir). Metni yapıştırabilirsiniz." }),
+    }) as unknown as typeof fetch;
+    const { extractCaseIntake } = await import("@/lib/api");
+
+    await expect(extractCaseIntake({ text: "x" })).rejects.toMatchObject({
+      status: 422,
+      message: "Bu belgeden metin çıkarılamadı (taranmış olabilir). Metni yapıştırabilirsiniz.",
+    });
+  });
+
+  it("sends and updates cases with parties", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const { createCase, updateCase } = await import("@/lib/api");
+    const parties = [{ name: "A", role: "plaintiff" as const, is_client: true, counsel_name: null }];
+
+    await createCase({ case_number: "1", case_name: "Dava", case_type: "diger", status: "devam_eden", parties });
+    await updateCase("c1", { parties });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).parties).toEqual(parties);
+    expect(fetchMock.mock.calls[1][1].method).toBe("PATCH");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ parties });
+  });
+});

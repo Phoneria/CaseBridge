@@ -3,7 +3,7 @@ import json
 import pytest
 
 from app.db.import_cases import import_folder
-from app.models.case import Case, CaseEvent, CaseStatus, CaseType
+from app.models.case import Case, CaseEvent, CaseParty, CaseStatus, CaseType
 from app.models.document import Document
 from app.models.task import Task
 
@@ -150,3 +150,86 @@ def test_seed_real_data_mode_removes_demo_cases(db_session, monkeypatch):
     db_session.expire_all()
     assert [c.case_number for c in db_session.query(Case).all()] == ["GERCEK/1"]
     assert db_session.query(Document).count() == 0
+
+
+def _party_rows(db_session):
+    return [(p.name, p.role, p.is_client, p.sort_order) for p in db_session.query(CaseParty).order_by(CaseParty.sort_order).all()]
+
+
+def test_import_creates_client_and_opposing_parties(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    assert _party_rows(db_session) == [("Davacı (anonim)", "other", True, 0), ("Davalı Şirket", "other", False, 1)]
+
+
+def test_reimport_keeps_edited_parties_while_the_names_are_unchanged(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    case.parties = [CaseParty(law_firm_id=case.law_firm_id, name="Davacı (anonim)", role="plaintiff", is_client=True, sort_order=0)]
+    db_session.commit()
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [("Davacı (anonim)", "plaintiff", True, 0)]
+
+
+def test_reimport_with_changed_names_resets_the_parties(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    _write(tmp_path, [{**CASE, "client_name": "Yeni Müvekkil", "opposing_party": None, "documents": []}])
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [("Yeni Müvekkil", "other", True, 0)]
+
+
+def test_reimport_keeps_parties_edited_through_the_api(db_session, seeded, tmp_path):
+    from app.schemas.case import CasePartyIn, CaseUpdate
+    from app.services.case_service import CaseService
+
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    CaseService(db_session).update_case(case, CaseUpdate(parties=[
+        CasePartyIn(name="Davacı (anonim)", role="plaintiff", is_client=True),
+        CasePartyIn(name="Davalı Şirket", role="defendant"),
+        CasePartyIn(name="İkinci Davalı", role="defendant", counsel_name="Av. Can"),
+    ]))
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [
+        ("Davacı (anonim)", "plaintiff", True, 0),
+        ("Davalı Şirket", "defendant", False, 1),
+        ("İkinci Davalı", "defendant", False, 2),
+    ]
+    db_session.refresh(case)
+    assert case.client_name == "Davacı (anonim)"
+    assert case.opposing_party == "Davalı Şirket, İkinci Davalı"
+
+
+def test_reimport_with_changed_names_rewrites_untouched_legacy_parties(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    _write(tmp_path, [{**CASE, "opposing_party": "Başka Şirket", "documents": []}])
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _party_rows(db_session) == [("Davacı (anonim)", "other", True, 0), ("Başka Şirket", "other", False, 1)]
+
+
+def test_reimport_after_only_a_client_role_patch_keeps_the_opposing_party(db_session, seeded, tmp_path):
+    from app.schemas.case import CaseUpdate
+    from app.services.case_service import CaseService
+
+    _write(tmp_path, [{**CASE, "documents": []}])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    CaseService(db_session).update_case(case, CaseUpdate(client_role="plaintiff"))
+
+    import_folder(str(tmp_path), db=db_session)
+
+    db_session.refresh(case)
+    assert case.client_name == "Davacı (anonim)"
+    assert case.opposing_party == "Davalı Şirket"

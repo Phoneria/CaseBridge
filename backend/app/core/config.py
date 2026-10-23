@@ -85,6 +85,11 @@ class Settings(BaseSettings):
     chat_auto_level: bool = True
     chat_classifier_timeout_seconds: PositiveFloat = 8
 
+    # "Belgeden doldur" (new case page): at most this many characters of the
+    # uploaded or pasted document are sent to the model; the rest is cut and
+    # the response says so (truncated). Positive so 0 can't disable the cap.
+    case_intake_max_chars: PositiveInt = 30000
+
     # Monthly token budget for the sidebar AI usage box. 0 = no budget set.
     ai_monthly_token_budget: int = 0
 

@@ -73,10 +73,16 @@ export function CourtroomLobbyView() {
     try {
       const rows = (await getCases({ include_archived: true })).filter((item) => !item.is_precedent);
       setCases(rows);
-      setCaseId(rows[0]?.id || "");
+      if (rows[0]) selectCase(rows[0]);
     } catch {
       setStartError("Dava listesi yüklenemedi.");
     }
+  }
+
+  /** Selecting a case defaults the side to the client's recorded side; other cases keep the current choice. */
+  function selectCase(item: Case) {
+    setCaseId(item.id);
+    if (item.client_role === "plaintiff" || item.client_role === "defendant") setCaseRole(item.client_role);
   }
 
   async function startFromCase() {
@@ -132,7 +138,7 @@ export function CourtroomLobbyView() {
             <div><label htmlFor="courtroom-role" className="text-xs font-semibold text-navy-700">Müvekkilin tarafı</label><select id="courtroom-role" value={caseRole} onChange={(event) => setCaseRole(event.target.value as CourtroomRole)} className="mt-1 w-full rounded-xl border border-surface-border px-3 py-2 text-sm"><option value="plaintiff">Davacı</option><option value="defendant">Davalı</option></select></div>
           </div>
           <div className="mt-3 max-h-56 space-y-2 overflow-y-auto" role="radiogroup" aria-label="Dava seç">
-            {filteredCases.map((item) => <label key={item.id} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm ${caseId === item.id ? "border-accent-400 bg-accent-50" : "border-surface-border"}`}><input type="radio" name="courtroom-case" checked={caseId === item.id} onChange={() => setCaseId(item.id)} /><span><strong className="block text-navy-900">{item.case_number} · {item.case_name}</strong><span className="text-xs text-navy-500">{item.client_name} / {item.opposing_party || "Karşı taraf belirtilmemiş"}</span></span></label>)}
+            {filteredCases.map((item) => <label key={item.id} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 text-sm ${caseId === item.id ? "border-accent-400 bg-accent-50" : "border-surface-border"}`}><input type="radio" name="courtroom-case" checked={caseId === item.id} onChange={() => selectCase(item)} /><span><strong className="block text-navy-900">{item.case_number} · {item.case_name}</strong><span className="text-xs text-navy-500">{item.client_name} / {item.opposing_party || "Karşı taraf belirtilmemiş"}</span></span></label>)}
             {filteredCases.length === 0 && <p className="py-4 text-sm text-navy-500">Eşleşen dava yok.</p>}
           </div>
           <div className="mt-4 flex justify-end"><button type="button" onClick={startFromCase} disabled={!filteredCases.some((item) => item.id === caseId) || Boolean(creatingId)} className="rounded-xl bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{creatingId === caseId ? "Başlatılıyor…" : "Duruşmayı başlat"}</button></div>

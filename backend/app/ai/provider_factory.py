@@ -181,6 +181,15 @@ def get_courtroom_provider() -> LLMProvider:
     return get_llm_provider()
 
 
+def get_case_intake_provider() -> LLMProvider:
+    """"Belgeden doldur" needs a draft-shaped answer in offline mock mode."""
+    if settings.llm_provider == "mock":
+        from app.ai.case_intake import CaseIntakeMockProvider
+
+        return CaseIntakeMockProvider()
+    return get_llm_provider()
+
+
 def get_ai_provider_status() -> dict:
     """Safe (no secret values), user-facing status of the configured AI
     provider - for the AI health/status surface (Settings page, /health

@@ -16,6 +16,8 @@ def test_task_table_is_exact():
         "courtroom.judge_interim": "basic",
         "courtroom.judge_final": "deep",
         "courtroom.json_repair": "basic",
+        "case_intake.extract": "standard",
+        "case_intake.json_repair": "basic",
     }
 
 

@@ -3,15 +3,9 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const getCases = vi.fn();
-const createCase = vi.fn();
-const getMe = vi.fn();
-const listAdminLawyers = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCases: (...args: unknown[]) => getCases(...args),
-  createCase: (...args: unknown[]) => createCase(...args),
-  getMe: (...args: unknown[]) => getMe(...args),
-  listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
 }));
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
@@ -33,10 +27,6 @@ const icraCase = {
 
 beforeEach(() => {
   getCases.mockReset();
-  createCase.mockReset();
-  getMe.mockReset();
-  listAdminLawyers.mockReset();
-  getMe.mockResolvedValue({ id: "lawyer-1", role: "lawyer" });
   resetNav();
   setUrl("/davalar");
 });
@@ -78,31 +68,19 @@ describe("CaseListView", () => {
     await waitFor(() => expect(screen.getByText(/davalar yüklenemedi/i)).toBeInTheDocument());
   });
 
-  it("creates a new case through the form and refreshes the list", async () => {
-    getCases.mockResolvedValueOnce([]).mockResolvedValueOnce([
-      {
-        id: "c2",
-        case_number: "2026/9",
-        case_name: "Yeni Oluşturulan Dava",
-        client_name: "Yeni Müvekkil",
-        case_type: "diger",
-        status: "devam_eden",
-        is_archived: false,
-      },
-    ]);
-    createCase.mockResolvedValue({ id: "c2" });
-
+  it("sends Yeni Dava to the new case page instead of opening an inline form", async () => {
+    getCases.mockResolvedValue([]);
     render(<CaseListView />);
     await waitFor(() => expect(screen.getByText(/henüz dava bulunmuyor/i)).toBeInTheDocument());
 
-    await userEvent.click(screen.getByRole("button", { name: /yeni dava/i }));
-    await userEvent.type(screen.getByLabelText("Dava No"), "2026/9");
-    await userEvent.type(screen.getByLabelText("Dava Adı"), "Yeni Oluşturulan Dava");
-    await userEvent.type(screen.getByLabelText("Müvekkil"), "Yeni Müvekkil");
-    await userEvent.click(screen.getByRole("button", { name: /kaydet/i }));
+    const link = screen.getByRole("link", { name: /yeni dava/i });
+    expect(link).toHaveAttribute("href", "/davalar/yeni");
+    expect(screen.queryByRole("button", { name: /yeni dava/i })).toBeNull();
 
-    await waitFor(() => expect(createCase).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText("Yeni Oluşturulan Dava")).toBeInTheDocument());
+    link.addEventListener("click", (event) => event.preventDefault());
+    await userEvent.click(link);
+    expect(screen.queryByLabelText("Müvekkil")).toBeNull();
+    expect(screen.queryByRole("button", { name: /kaydet/i })).toBeNull();
   });
 
   it("loads with filters read from the URL and shows them as chips", async () => {

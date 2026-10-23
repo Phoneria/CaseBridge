@@ -110,6 +110,29 @@ describe("CourtroomLobbyView", () => {
     expect(nav.push).toHaveBeenCalledWith("/ai/durusma/oturum/from-case");
   });
 
+  it("preselects the client's side when the case records it", async () => {
+    getCases.mockResolvedValue([
+      { id: "case1", case_number: "2026/1", case_name: "Birinci", client_name: "A", opposing_party: "B", client_role: "defendant", is_precedent: false },
+      { id: "case2", case_number: "2026/2", case_name: "İkinci", client_name: "C", opposing_party: "D", client_role: "plaintiff", is_precedent: false },
+      { id: "case3", case_number: "2026/3", case_name: "Üçüncü", client_name: "E", opposing_party: "F", client_role: "other", is_precedent: false },
+    ]);
+    createCourtroomSessionFromCase.mockResolvedValue({ id: "s1" });
+    render(<CourtroomLobbyView />);
+    await userEvent.click(await screen.findByRole("button", { name: /Duruşma ekle/ }));
+    const role = await screen.findByLabelText("Müvekkilin tarafı");
+    expect(role).toHaveValue("defendant");
+
+    await userEvent.click(screen.getByRole("radio", { name: /2026\/2 · İkinci/ }));
+    expect(role).toHaveValue("plaintiff");
+
+    await userEvent.click(screen.getByRole("radio", { name: /2026\/3 · Üçüncü/ }));
+    expect(role).toHaveValue("plaintiff");
+
+    await userEvent.click(screen.getByRole("radio", { name: /2026\/1 · Birinci/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Duruşmayı başlat" }));
+    expect(createCourtroomSessionFromCase).toHaveBeenCalledWith("case1", "defendant");
+  });
+
   it("keeps completed examples separate from personal sessions", async () => {
     listCourtroomSessions.mockResolvedValue([{ ...session("demo", "completed", "2026-09-03", 73), is_demo: true }, session("mine", "active", "2026-09-04", null)]);
     render(<CourtroomLobbyView />);
