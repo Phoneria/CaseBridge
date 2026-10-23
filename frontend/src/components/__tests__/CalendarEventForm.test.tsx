@@ -110,7 +110,7 @@ describe("CalendarEventForm", () => {
       id: "event:e1", kind: "event", event_type: "client_meeting", title: "Müvekkil görüşmesi", date: "2026-10-07",
       start: "2026-10-07T10:30:00", end: "2026-10-07T11:15:00", all_day: false, case_id: null, case_name: null,
       task_id: null, event_id: "e1", assignee_id: "u1", assignee_name: "Avukat A", location: null, notes: "Not",
-      reminder_days: [7], editable: true,
+      result_note: null, reminder_days: [7], editable: true,
     };
     render(<CalendarEventForm initial={eventFormInitialFromItem(item)} cases={cases} users={users} onClose={vi.fn()} onSaved={vi.fn()} />);
 

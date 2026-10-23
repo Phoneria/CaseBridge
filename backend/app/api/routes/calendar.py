@@ -16,9 +16,17 @@ from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.calendar import CalendarEventCreate, CalendarEventOut, CalendarEventUpdate, CalendarItemOut
+from app.schemas.calendar import (
+    CalendarEventCreate,
+    CalendarEventOut,
+    CalendarEventUpdate,
+    CalendarItemOut,
+    HearingResultIn,
+    HearingResultOut,
+)
 from app.services.assignees import AssigneeNotAssignable
-from app.services.calendar_service import CalendarReferenceNotFound, CalendarService
+from app.services.calendar_service import CalendarReferenceNotFound, CalendarService, ClosedCaseHearing
+from app.services.hearing_service import HearingRuleError, HearingService
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
@@ -71,6 +79,8 @@ def create_calendar_event(
         )
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except ClosedCaseHearing as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail)
     except AssigneeNotAssignable as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
@@ -100,6 +110,8 @@ def update_calendar_event(
         return service.update_event(event, payload, today=local_today())
     except CalendarReferenceNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.detail)
+    except ClosedCaseHearing as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.detail)
     except AssigneeNotAssignable as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail)
 
@@ -115,3 +127,20 @@ def delete_calendar_event(
     require_case_id_writable(db, event.case_id, law_firm_id)
     service.delete_event(event, today=local_today())
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/events/{event_id}/result", response_model=HearingResultOut)
+def record_hearing_result(
+    event_id: str,
+    payload: HearingResultIn,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """The note after a hearing, with an optional next hearing. 404 for another firm's
+    event, 409 for an archived case, then the hearing rules (422, 409 for a closed case)."""
+    event = _owned_event_or_404(CalendarService(db), event_id, current_user.law_firm_id)
+    require_case_id_writable(db, event.case_id, current_user.law_firm_id)
+    try:
+        return HearingService(db).record_result(event, payload, current_user.id, today=local_today())
+    except HearingRuleError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)

@@ -16,6 +16,8 @@ const uploadDocument = vi.fn();
 const addCaseEvent = vi.fn();
 const generateHandover = vi.fn();
 const listCaseTasks = vi.fn();
+const getCaseHearings = vi.fn().mockResolvedValue([]);
+const createCalendarEvent = vi.fn();
 const createTask = vi.fn();
 const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
@@ -32,6 +34,11 @@ vi.mock("@/lib/api", () => ({
   addCaseEvent: (...args: unknown[]) => addCaseEvent(...args),
   generateHandover: (...args: unknown[]) => generateHandover(...args),
   listCaseTasks: (...args: unknown[]) => listCaseTasks(...args),
+  getCaseHearings: (...args: unknown[]) => getCaseHearings(...args),
+  createCalendarEvent: (...args: unknown[]) => createCalendarEvent(...args),
+  deleteCalendarEvent: vi.fn(),
+  updateCalendarEvent: vi.fn(),
+  recordHearingResult: vi.fn(),
   createTask: (...args: unknown[]) => createTask(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
   updateCase: (...args: unknown[]) => updateCase(...args),
@@ -76,6 +83,9 @@ beforeEach(() => {
   updateTaskStatus.mockReset();
   updateCase.mockReset();
   listCaseTasks.mockResolvedValue([]);
+  getCaseHearings.mockReset();
+  getCaseHearings.mockResolvedValue([]);
+  createCalendarEvent.mockReset();
 });
 
 afterEach(() => {
@@ -108,6 +118,67 @@ describe("CaseDetailView", () => {
     expect(screen.getByText("Dava açıldı")).toBeInTheDocument();
     expect(screen.getByText("Bilirkişi raporunu incele")).toBeInTheDocument();
     expect(screen.getByText("Tazminat hesabını kontrol et.")).toBeInTheDocument();
+  });
+
+  it("shows the next hearing with its time in the overview, linked to the Duruşmalar card", async () => {
+    getCase.mockResolvedValue({ ...caseDetail, next_hearing_date: "2099-01-05" });
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getCaseHearings.mockResolvedValue([
+      { id: "h1", starts_at: "2099-01-05T10:30:00", all_day: false, duration_minutes: 60, location: "Salon 3", notes: null, assignee_id: null, result_note: null, is_past: false, result_open: false },
+    ]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    const link = await screen.findByRole("link", { name: "05.01.2099 · 10:30" });
+    expect(link).toHaveAttribute("href", "#durusmalar");
+    expect(screen.getByRole("region", { name: "Duruşmalar" })).toHaveTextContent("Salon 3");
+  });
+
+  it("falls back to the case's next hearing date when the hearings cannot be loaded", async () => {
+    getCase.mockResolvedValue({ ...caseDetail, next_hearing_date: "2099-01-05" });
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getCaseHearings.mockRejectedValue(new Error("x"));
+
+    render(<CaseDetailView caseId="c1" />);
+
+    expect(await screen.findByText("05.01.2099")).toBeInTheDocument();
+    expect(screen.getByText("Henüz duruşma yok.")).toBeInTheDocument();
+    expect(screen.queryByText("Dava yüklenemedi. Lütfen daha sonra tekrar deneyin.")).not.toBeInTheDocument();
+  });
+
+  it("shows Planlanmadı, not a stale cached date, when the hearings loaded and none is upcoming", async () => {
+    getCase.mockResolvedValue({ ...caseDetail, next_hearing_date: "2099-01-05" });
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getCaseHearings.mockResolvedValue([]);
+
+    render(<CaseDetailView caseId="c1" />);
+
+    expect(await screen.findByText("Planlanmadı")).toBeInTheDocument();
+    expect(screen.queryByText("05.01.2099")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Planlanmadı" })).not.toBeInTheDocument();
+  });
+
+  it("reloads the hearings and the case after a hearing is added", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    createCalendarEvent.mockResolvedValue({ id: "new" });
+
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "Duruşma ekle" }));
+    const dialog = screen.getByRole("dialog", { name: "Duruşma ekle" });
+    await userEvent.type(within(dialog).getByLabelText("Tarih"), "2099-03-04");
+    getCaseHearings.mockResolvedValue([
+      { id: "h9", starts_at: "2099-03-04T09:00:00", all_day: false, duration_minutes: 60, location: null, notes: null, assignee_id: null, result_note: null, is_past: false, result_open: false },
+    ]);
+    await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }));
+
+    expect(await screen.findByRole("link", { name: "04.03.2099 · 09:00" })).toBeInTheDocument();
+    expect(createCalendarEvent).toHaveBeenCalledWith(expect.objectContaining({ case_id: "c1", event_type: "hearing" }));
+    await waitFor(() => expect(getCase).toHaveBeenCalledTimes(2));
   });
 
   it("renders the chronological timeline in the Gelişmeler tab", async () => {

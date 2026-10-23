@@ -1,5 +1,11 @@
 """Case Handover (section 18, 22 - Case Handover)."""
 import json
+from datetime import timedelta
+
+from app.core.timeutil import local_today
+
+# The hearing date is only kept while it is today or later (it is a cache of the calendar).
+HEARING_DAY = (local_today() + timedelta(days=20)).isoformat()
 
 VALID_JUDGE_JSON = json.dumps(
     {
@@ -36,7 +42,7 @@ def _create_case(client, headers):
         "case_type": "sozlesme",
         "court": "Istanbul 1. Asliye Hukuk Mahkemesi",
         "status": "devam_eden",
-        "next_hearing_date": "2026-09-15",
+        "next_hearing_date": HEARING_DAY,
     }
     return client.post("/cases", json=payload, headers=headers).json()
 
@@ -128,7 +134,7 @@ def test_handover_includes_upcoming_dates(client, two_firms_two_users):
     case = _create_case(client, headers)
 
     response = client.post(f"/cases/{case['id']}/handover", headers=headers)
-    assert response.json()["upcoming_dates"] == ["2026-09-15"]
+    assert response.json()["upcoming_dates"] == [HEARING_DAY]
 
 
 def test_handover_uses_latest_simulation_for_arguments_and_risks(client, two_firms_two_users, db_session):

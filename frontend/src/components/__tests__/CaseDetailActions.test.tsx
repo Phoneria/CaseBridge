@@ -10,6 +10,7 @@ const getMe = vi.fn();
 const listSimulations = vi.fn();
 const listDocuments = vi.fn();
 const listCaseTasks = vi.fn();
+const getCaseHearings = vi.fn().mockResolvedValue([]);
 const updateCase = vi.fn();
 const unarchiveCase = vi.fn();
 
@@ -19,6 +20,7 @@ vi.mock("@/lib/api", () => ({
   listSimulations: (...args: unknown[]) => listSimulations(...args),
   listDocuments: (...args: unknown[]) => listDocuments(...args),
   listCaseTasks: (...args: unknown[]) => listCaseTasks(...args),
+  getCaseHearings: (...args: unknown[]) => getCaseHearings(...args),
   updateCase: (...args: unknown[]) => updateCase(...args),
   unarchiveCase: (...args: unknown[]) => unarchiveCase(...args),
   startSimulation: vi.fn(),

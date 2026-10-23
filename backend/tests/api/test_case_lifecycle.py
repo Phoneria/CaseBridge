@@ -186,6 +186,20 @@ def test_reopening_an_open_case_is_a_409(client, lawyer):
     assert _timeline(client, lawyer, case["id"]) == []
 
 
+def test_reopening_recomputes_the_hearing_date_a_closed_case_left_stale(client, lawyer, close_case, db_session):
+    hearing = (TODAY + timedelta(days=4)).isoformat()
+    case = _new_case(client, lawyer, next_hearing_date=hearing)
+    close_case(lawyer, case["id"])
+    # A closed case is not recomputed overnight, so its date can be left behind.
+    row = db_session.get(Case, case["id"])
+    row.next_hearing_date = TODAY - timedelta(days=2)
+    db_session.commit()
+
+    reopened = client.post(f"/cases/{case['id']}/reopen", headers=lawyer).json()
+
+    assert reopened["next_hearing_date"] == hearing
+
+
 def test_a_reopened_case_can_be_closed_again(client, lawyer, close_case):
     case = _new_case(client, lawyer)
     close_case(lawyer, case["id"])

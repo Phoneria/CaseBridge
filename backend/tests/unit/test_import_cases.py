@@ -233,3 +233,83 @@ def test_reimport_after_only_a_client_role_patch_keeps_the_opposing_party(db_ses
     db_session.refresh(case)
     assert case.client_name == "Davacı (anonim)"
     assert case.opposing_party == "Davalı Şirket"
+
+
+# --- next_hearing_date is a hearing event ---------------------------------------------------
+
+def _hearings(db):
+    from app.models.calendar import CalendarEvent, CalendarEventType
+
+    return db.query(CalendarEvent).filter(CalendarEvent.event_type == CalendarEventType.HEARING).order_by(CalendarEvent.starts_at).all()
+
+
+def test_next_hearing_date_becomes_an_all_day_hearing_event(db_session, seeded, tmp_path):
+    from datetime import datetime, timedelta
+
+    from app.core.timeutil import local_today
+
+    day = local_today() + timedelta(days=12)
+    _write(tmp_path, [{**CASE, "status": "devam_eden", "outcome": "ongoing", "next_hearing_date": day.isoformat(), "documents": []}])
+
+    import_folder(str(tmp_path), db=db_session)
+
+    case = db_session.query(Case).one()
+    [event] = _hearings(db_session)
+    assert case.next_hearing_date == day
+    assert (event.case_id, event.title, event.all_day, event.starts_at) == (case.id, "Duruşma", True, datetime.combine(day, datetime.min.time()))
+    assert (event.assignee_id, event.created_by, event.law_firm_id) == (case.assigned_lawyer_id, case.assigned_lawyer_id, case.law_firm_id)
+    assert event.reminder_days == [3, 1]
+
+
+def test_reimport_never_adds_a_second_hearing_on_the_same_day(db_session, seeded, tmp_path):
+    from datetime import datetime, timedelta
+
+    from app.core.timeutil import local_today
+    from app.models.calendar import CalendarEvent, CalendarEventType
+
+    day = local_today() + timedelta(days=12)
+    item = {**CASE, "status": "devam_eden", "outcome": "ongoing", "next_hearing_date": day.isoformat(), "documents": []}
+    _write(tmp_path, [item])
+    import_folder(str(tmp_path), db=db_session)
+    import_folder(str(tmp_path), db=db_session)
+    assert len(_hearings(db_session)) == 1
+
+    # A timed hearing the lawyer set up in the calendar counts as the hearing of that day.
+    case = db_session.query(Case).one()
+    other_day = day + timedelta(days=3)
+    db_session.add(CalendarEvent(law_firm_id=case.law_firm_id, title="Duruşma", event_type=CalendarEventType.HEARING,
+                                 starts_at=datetime.combine(other_day, datetime.min.time()).replace(hour=14), all_day=False,
+                                 duration_minutes=60, case_id=case.id, created_by=case.assigned_lawyer_id, reminder_days=[]))
+    db_session.commit()
+    _write(tmp_path, [{**item, "next_hearing_date": other_day.isoformat()}])
+    import_folder(str(tmp_path), db=db_session)
+
+    assert len(_hearings(db_session)) == 2
+    db_session.refresh(case)
+    assert case.next_hearing_date == day  # the earliest upcoming one, not the last imported
+
+
+def test_a_past_hearing_date_stays_as_history_and_a_reimport_without_one_keeps_the_events(db_session, seeded, tmp_path):
+    from datetime import timedelta
+
+    from app.core.timeutil import local_today
+
+    past = local_today() - timedelta(days=3)
+    item = {**CASE, "next_hearing_date": past.isoformat(), "documents": []}
+    _write(tmp_path, [item])
+    import_folder(str(tmp_path), db=db_session)
+    case = db_session.query(Case).one()
+    assert case.next_hearing_date is None and len(_hearings(db_session)) == 1
+
+    _write(tmp_path, [{key: value for key, value in item.items() if key != "next_hearing_date"}])
+    import_folder(str(tmp_path), db=db_session)
+
+    assert len(_hearings(db_session)) == 1
+
+
+def test_precedent_hearing_dates_are_not_turned_into_events(db_session, seeded, tmp_path):
+    _write(tmp_path, [{**CASE, "next_hearing_date": "2099-01-05", "documents": []}], record_kind="precedent")
+
+    import_folder(str(tmp_path), db=db_session)
+
+    assert _hearings(db_session) == []

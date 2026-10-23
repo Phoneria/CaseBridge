@@ -4,12 +4,13 @@ Every method takes law_firm_id as a mandatory filter, mirroring
 UserRepository. This is the pattern all future tenant-scoped
 repositories (Document, Simulation, ...) must follow.
 """
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Optional
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.core.timeutil import local_today
 from app.models.case import Case, CaseOutcome, CaseStatus, CaseType, case_is_active
 
 # GET /cases?assigned_lawyer_id=none lists the cases nobody is responsible for.
@@ -92,7 +93,7 @@ class CaseRepository:
             query = query.filter(Case.status == CaseStatus.KAPALI)
 
         if hearing_within_days is not None:
-            today = date.today()
+            today = local_today()
             # Closed and archived cases keep the date but have no upcoming hearing.
             query = query.filter(
                 case_is_active(),

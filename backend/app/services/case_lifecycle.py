@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.models.case import Case, CaseEvent, CaseEventType, CaseOutcome, CaseStatus
 from app.schemas.case import CaseClose, CaseUpdate
+from app.services.hearing_dates import recompute_next_hearing
 
 OUTCOME_LABELS = {
     CaseOutcome.WON: "Kazanıldı",
@@ -43,7 +44,10 @@ class CaseLifecycleService:
 
     @staticmethod
     def ensure_patch_allowed(case: Case, payload: CaseUpdate) -> None:
-        """PATCH edits the case; it neither closes nor reopens it and never sets the outcome."""
+        """PATCH edits the case; it neither closes nor reopens it, never sets the outcome
+        and never writes the hearing date (hearings are calendar events)."""
+        if "next_hearing_date" in payload.model_fields_set:
+            raise CaseStateError(422, "Duruşma tarihi Duruşmalar bölümünden eklenir.")
         if payload.status == CaseStatus.KAPALI:
             raise CaseStateError(422, "Davayı kapatmak için 'Davayı kapat' işlemini kullanın.")
         if "outcome" in payload.model_fields_set:
@@ -81,6 +85,8 @@ class CaseLifecycleService:
         case.outcome = CaseOutcome.ONGOING
         case.decision_date = None
         case.closing_note = None
+        # A closed case keeps a stale next_hearing_date; the reopened case is open again.
+        recompute_next_hearing(self.db, case, today)
         event = CaseEvent(
             case_id=case.id,
             law_firm_id=case.law_firm_id,

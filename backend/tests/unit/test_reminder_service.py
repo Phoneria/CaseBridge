@@ -168,31 +168,37 @@ def test_unassigned_task_reminds_its_creator(world):
     assert due.recipient_id == world["creator"].id
 
 
-def test_case_hearing_reminds_the_assigned_lawyer_three_days_before(world):
-    world["case"].next_hearing_date = date(2026, 10, 5)
-    world["db"].commit()
+def test_a_hearing_event_reminds_the_assigned_lawyer_three_days_before(world):
+    from app.models.calendar import CalendarEventType
+
+    event = add_event(world, datetime(2026, 10, 5, 0, 0), [3, 1], event_type=CalendarEventType.HEARING, title="Duruşma",
+                      all_day=True, case_id=world["case"].id, assignee_id=world["lawyer"].id)
 
     [due] = ReminderService(world["db"]).collect_due(NOW)
 
-    assert (due.source_type.value, due.source_id, due.days_before) == ("case_hearing", world["case"].id, (3,))
-    assert (due.type_label, due.title, due.location) == ("Duruşma", "Ticari Kira Uyarlama Davası", "İstanbul 3. Asliye Ticaret")
+    assert (due.source_type.value, due.source_id, due.days_before) == ("event", event.id, (3,))
+    assert (due.type_label, due.title, due.case_name) == ("Duruşma", "Duruşma", "Ticari Kira Uyarlama Davası")
     assert due.recipient_id == world["lawyer"].id
 
 
-def test_case_hearing_without_lawyer_or_archived_is_skipped(world):
+def test_a_next_hearing_date_without_a_hearing_event_sends_nothing(world):
+    """The date is only a cache of the events; the old per-case reminder is gone."""
     world["case"].next_hearing_date = date(2026, 10, 5)
-    world["case"].assigned_lawyer_id = None
     world["db"].commit()
     assert ReminderService(world["db"]).collect_due(NOW) == []
 
-    world["case"].assigned_lawyer_id = world["lawyer"].id
+
+def test_a_hearing_of_an_archived_case_is_skipped(world):
+    from app.models.calendar import CalendarEventType
+
+    add_event(world, datetime(2026, 10, 5, 0, 0), [3, 1], event_type=CalendarEventType.HEARING, all_day=True,
+              case_id=world["case"].id, assignee_id=world["lawyer"].id)
     world["case"].is_archived = True
     world["db"].commit()
     assert ReminderService(world["db"]).collect_due(NOW) == []
 
 
-def test_precedent_case_hearings_and_tasks_are_skipped(world):
-    world["case"].next_hearing_date = date(2026, 10, 5)
+def test_precedent_case_tasks_are_skipped(world):
     world["case"].is_precedent = True
     world["db"].commit()
     add_task(world, date(2026, 10, 3))
@@ -200,17 +206,15 @@ def test_precedent_case_hearings_and_tasks_are_skipped(world):
     assert ReminderService(world["db"]).collect_due(NOW) == []
 
 
-def test_case_hearing_is_skipped_when_a_hearing_event_exists_that_day(world):
+def test_two_hearings_of_one_case_on_one_day_each_get_a_reminder(world):
     from app.models.calendar import CalendarEventType
 
-    world["case"].next_hearing_date = date(2026, 10, 5)
-    world["db"].commit()
-    event = add_event(world, datetime(2026, 10, 5, 10, 0), [3, 1], event_type=CalendarEventType.HEARING,
-                      title="Duruşma", case_id=world["case"].id, assignee_id=world["lawyer"].id)
+    add_event(world, datetime(2026, 10, 5, 0, 0), [3], event_type=CalendarEventType.HEARING, all_day=True,
+              case_id=world["case"].id, assignee_id=world["lawyer"].id)
+    add_event(world, datetime(2026, 10, 5, 14, 0), [3], event_type=CalendarEventType.HEARING,
+              case_id=world["case"].id, assignee_id=world["lawyer"].id)
 
-    [due] = ReminderService(world["db"]).collect_due(NOW)
-
-    assert (due.source_type.value, due.source_id, due.type_label) == ("event", event.id, "Duruşma")
+    assert len(ReminderService(world["db"]).collect_due(NOW)) == 2
 
 
 def test_sources_of_every_firm_are_collected_but_recipients_must_match_the_firm(world):
@@ -423,14 +427,19 @@ def test_moving_a_hearing_event_later_sends_no_reminder_for_the_old_day(world):
 # ----- closed and archived cases (final review) -----
 
 
-def test_a_closed_case_sends_no_hearing_reminder(world):
+def test_a_closed_case_sends_no_hearing_reminder_but_its_other_events_still_do(world):
+    from app.models.calendar import CalendarEventType
     from app.models.case import CaseStatus
 
-    world["case"].next_hearing_date = date(2026, 10, 5)
+    add_event(world, datetime(2026, 10, 5, 0, 0), [3], event_type=CalendarEventType.HEARING, all_day=True,
+              case_id=world["case"].id, assignee_id=world["lawyer"].id)
+    meeting = add_event(world, datetime(2026, 10, 3, 10, 0), [1], case_id=world["case"].id, assignee_id=world["lawyer"].id)
     world["case"].status = CaseStatus.KAPALI
     world["db"].commit()
 
-    assert ReminderService(world["db"]).collect_due(NOW) == []
+    [due] = ReminderService(world["db"]).collect_due(NOW)
+
+    assert (due.source_type.value, due.source_id) == ("event", meeting.id)
 
 
 def test_tasks_and_events_of_an_archived_case_send_no_reminder(world):

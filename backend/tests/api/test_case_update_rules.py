@@ -32,6 +32,16 @@ def _patch(client, headers, case_id, **body):
     return client.patch(f"/cases/{case_id}", json=body, headers=headers)
 
 
+# --- the hearing date is not edited here ---
+
+def test_patch_rejects_next_hearing_date(client, lawyer, case):
+    for body in ({"next_hearing_date": "2099-01-05"}, {"next_hearing_date": None}, {"next_hearing_date": "2099-01-05", "case_name": "X"}):
+        response = client.patch(f"/cases/{case['id']}", json=body, headers=lawyer)
+        assert (response.status_code, response.json()["detail"]) == (422, "Duruşma tarihi Duruşmalar bölümünden eklenir."), body
+    detail = client.get(f"/cases/{case['id']}", headers=lawyer).json()
+    assert (detail["next_hearing_date"], detail["case_name"]) == (None, "Alacak Davası")
+
+
 # --- status and outcome ------------------------------------------------------------------
 
 def test_patch_cannot_close_a_case(client, lawyer, case):

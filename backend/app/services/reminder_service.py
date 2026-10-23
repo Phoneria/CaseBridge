@@ -1,4 +1,4 @@
-"""E-mail reminders for calendar events, pending tasks and case hearings.
+"""E-mail reminders for calendar events (hearings included) and pending tasks.
 
 collect_due(now_local) decides what is due; send_due(now_local) sends it
 and records one ReminderDelivery per offset. `now_local` is a naive
@@ -20,10 +20,13 @@ Rules (occurrence day D, offset d in reminder_days, today = now_local.date()):
   - an offset already `sent` is skipped; a `failed` one is retried while
     attempts < REMINDER_MAX_ATTEMPTS;
   - recipient: event assignee, else its creator; task assignee, else its
-    creator; case hearing: the case's assigned lawyer. Inactive users and
-    users without an e-mail address are skipped;
+    creator. Inactive users and users without an e-mail address are skipped;
   - a closed or archived case sends no hearing reminder, and tasks and events
     of an archived case send none either.
+
+A hearing is a calendar event; the old per-case "case_hearing" reminder (built
+from cases.next_hearing_date) is gone, and ReminderSourceType.CASE_HEARING stays
+only so that ledger rows written by earlier versions remain readable.
 """
 import logging
 from dataclasses import dataclass
@@ -35,7 +38,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.domain.calendar import HEARING_REMINDER_DAYS, MAX_REMINDER_DAYS, TYPE_LABELS, task_reminder_days
+from app.domain.calendar import MAX_REMINDER_DAYS, TYPE_LABELS, task_reminder_days
 from app.models.calendar import (
     CalendarEvent,
     CalendarEventType,
@@ -43,7 +46,7 @@ from app.models.calendar import (
     ReminderDeliveryStatus,
     ReminderSourceType,
 )
-from app.models.case import Case, case_is_active
+from app.models.case import Case, CaseStatus
 from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.email import EmailMessage, EmailSendError, send_email
@@ -116,7 +119,6 @@ class ReminderService:
         candidates = (
             self._event_candidates(today, last_day)
             + self._task_candidates(today, last_day)
-            + self._hearing_candidates(today, last_day)
         )
         users = self._users({c.recipient_id for c in candidates if c.recipient_id})
 
@@ -181,7 +183,14 @@ class ReminderService:
             self.db.query(CalendarEvent, Case.case_name)
             .outerjoin(Case, and_(CalendarEvent.case_id == Case.id, Case.law_firm_id == CalendarEvent.law_firm_id))
             .filter(
-                or_(Case.id.is_(None), Case.is_archived.is_(False)),  # no reminder for an archived case
+                or_(
+                    Case.id.is_(None),
+                    and_(
+                        Case.is_archived.is_(False),  # no reminder for an archived case
+                        # a closed case has no upcoming hearing: its hearing events send nothing
+                        or_(CalendarEvent.event_type != CalendarEventType.HEARING, Case.status != CaseStatus.KAPALI),
+                    ),
+                ),
                 CalendarEvent.starts_at >= datetime.combine(today, time.min),
                 CalendarEvent.starts_at < datetime.combine(last_day + timedelta(days=1), time.min),
             )
@@ -234,49 +243,6 @@ class ReminderService:
                 case_name=case_name,
             )
             for task, case_name in rows
-        ]
-
-    def _hearing_candidates(self, today: date, last_day: date) -> list[_Candidate]:
-        hearing_event_days = {
-            (law_firm_id, case_id, starts_at.date())
-            for law_firm_id, case_id, starts_at in self.db.query(
-                CalendarEvent.law_firm_id, CalendarEvent.case_id, CalendarEvent.starts_at
-            )
-            .filter(
-                CalendarEvent.event_type == CalendarEventType.HEARING,
-                CalendarEvent.case_id.isnot(None),
-                CalendarEvent.starts_at >= datetime.combine(today, time.min),
-                CalendarEvent.starts_at < datetime.combine(last_day + timedelta(days=1), time.min),
-            )
-            .all()
-        }
-        cases = (
-            self.db.query(Case)
-            .filter(
-                case_is_active(),
-                Case.is_precedent.is_(False),
-                Case.next_hearing_date >= today,
-                Case.next_hearing_date <= last_day,
-            )
-            .all()
-        )
-        return [
-            _Candidate(
-                source_type=ReminderSourceType.CASE_HEARING,
-                source_id=case.id,
-                law_firm_id=case.law_firm_id,
-                occurrence_date=case.next_hearing_date,
-                reminder_days=list(HEARING_REMINDER_DAYS),
-                recipient_id=case.assigned_lawyer_id,
-                type_label=TYPE_LABELS["hearing"],
-                title=case.case_name,
-                starts_at=None,
-                location=case.court,
-                case_id=case.id,
-                case_name=case.case_name,
-            )
-            for case in cases
-            if (case.law_firm_id, case.id, case.next_hearing_date) not in hearing_event_days
         ]
 
     # ----- deliveries -----

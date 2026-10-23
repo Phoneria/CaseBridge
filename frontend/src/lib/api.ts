@@ -25,6 +25,9 @@ import type {
   CalendarEvent,
   CalendarEventPayload,
   CalendarEventRecord,
+  CaseHearing,
+  HearingResultPayload,
+  HearingResultResponse,
   NotificationStatus,
   TestEmailResult,
   AIStatus,
@@ -490,6 +493,19 @@ export async function updateCalendarEvent(
 
 export async function deleteCalendarEvent(id: string): Promise<void> {
   return request(`/calendar/events/${id}`, { method: "DELETE" });
+}
+
+/** Every hearing of the case, earliest first. */
+export async function getCaseHearings(caseId: string): Promise<CaseHearing[]> {
+  return request(`/cases/${caseId}/hearings`);
+}
+
+/** The note after a hearing, with an optional next hearing (one request, one transaction). */
+export async function recordHearingResult(
+  eventId: string,
+  payload: HearingResultPayload,
+): Promise<HearingResultResponse> {
+  return request(`/calendar/events/${eventId}/result`, { method: "POST", body: JSON.stringify(payload) });
 }
 
 /** null resets the task to the default reminder (1 day before). */

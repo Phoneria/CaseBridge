@@ -231,3 +231,11 @@ Status: COMPLETE
 - `cases.decision_date` / `closing_note` (migration `e6c1b9a4d2f8`); `POST /cases/{id}/close|reopen|archive|unarchive`; `PATCH /cases/{id}` no longer sets `status=kapali` or `outcome`.
 - An archived case is read-only: PATCH, close, reopen, events, tasks, documents and calendar events linked to it answer 409 until it is unarchived. The case list has an "Arşivi göster" switch and an "Arşivli" badge.
 - New E2E spec `11-case-lifecycle.spec.ts`.
+
+## Hearing dates (case page ↔ calendar)
+Status: COMPLETE
+
+- A hearing is a calendar event of type `hearing` linked to a case; `cases.next_hearing_date` is a cache (earliest hearing today or later, `APP_TIMEZONE`) recomputed on every hearing change, on case creation, import and seed, and once a day by the reminder worker. `PATCH /cases/{id}` rejects the field (422). The calendar no longer shows derived `case_hearing` rows.
+- Case page "Duruşmalar" card: add, edit, delete, "Sonuç gir" (result note + optional next hearing) via `GET /cases/{id}/hearings` and `POST /calendar/events/{id}/result`; the result adds a "Duruşma yapıldı" timeline entry. Closed cases take no new hearings; archived cases are read-only.
+- Migration `a7d2e4f6b8c1` adds `result_note` / `result_case_event_id` and turns each existing `next_hearing_date` into an all-day hearing event.
+- New E2E spec `13-hearing-dates.spec.ts`.

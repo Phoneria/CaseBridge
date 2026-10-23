@@ -163,15 +163,15 @@ export function CalendarEventDrawer({
                 <dd className="whitespace-pre-wrap text-navy-800">{item.notes}</dd>
               </>
             )}
+            {item.result_note && (
+              <>
+                <dt className="text-navy-500">Sonuç</dt>
+                <dd className="whitespace-pre-wrap text-navy-800">{item.result_note}</dd>
+              </>
+            )}
             <dt className="text-navy-500">Hatırlatmalar</dt>
             <dd className="text-navy-800">{describeReminders(item.reminder_days)}</dd>
           </dl>
-
-          {item.kind === "case_hearing" && (
-            <p className="rounded-xl bg-surface-muted px-3 py-2 text-xs text-navy-600">
-              Dava duruşmalarında varsayılan hatırlatma: 3 gün ve 1 gün önce, davanın sorumlu avukatına e-posta.
-            </p>
-          )}
 
           {editingReminders && (
             <div className="space-y-3 rounded-xl border border-surface-border p-3">
@@ -241,11 +241,6 @@ export function CalendarEventDrawer({
                 </Link>
               )}
             </>
-          )}
-          {item.kind === "case_hearing" && item.case_id && (
-            <Link href={caseDetailHref(item.case_id)} className={PRIMARY_BUTTON}>
-              Davayı aç
-            </Link>
           )}
         </div>
       </div>

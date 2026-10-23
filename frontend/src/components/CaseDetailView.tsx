@@ -7,6 +7,7 @@ import {
   createTask,
   generateHandover,
   getCase,
+  getCaseHearings,
   getMe,
   getSimulation,
   listCaseTasks,
@@ -22,7 +23,8 @@ import {
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, SIMULATION_STATUS_LABELS, formatDate } from "@/lib/labels";
 import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
 import { useUrlParams } from "@/lib/urlState";
-import type { AppUser, Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import type { AppUser, Case, CaseDetail, CaseHearing, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import { hearingWhen, nextHearing } from "@/lib/hearings";
 import { canManageCase, caseActions, type CaseAction } from "@/lib/caseAccess";
 import { userMessage } from "@/lib/userMessages";
 import { LoadingState } from "@/components/LoadingState";
@@ -43,6 +45,7 @@ import { CaseEditModal } from "@/components/CaseEditModal";
 import { CaseCloseModal, type CloseResult } from "@/components/CaseCloseModal";
 import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 import { CaseDecisionCard } from "@/components/CaseDecisionCard";
+import { CaseHearingsCard } from "@/components/CaseHearingsCard";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -84,6 +87,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [handoverGenerating, setHandoverGenerating] = useState(false);
   const [handoverError, setHandoverError] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [hearings, setHearings] = useState<CaseHearing[]>([]);
+  const [hearingsFailed, setHearingsFailed] = useState(false);
   const [taskForm, setTaskForm] = useState({ title: "", due_date: "" });
   const [addingTask, setAddingTask] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
@@ -97,6 +102,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const actionInFlight = useRef(false);
   // Reloads after an action may answer out of order; only the latest one is applied.
   const reloadSeq = useRef(0);
+  const hearingsSeq = useRef(0);
   // Set by the new-case page when some events or documents could not be added after the case was created.
   const skippedParam = params.get("eklenemeyen") ?? "";
   const skippedCount = /^[1-9]\d*$/.test(skippedParam) ? Number(skippedParam) : 0;
@@ -138,6 +144,37 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       active = false;
     };
   }, []);
+
+  // The hearings load on their own so a failure here never breaks the rest of the page.
+  async function loadHearings() {
+    const seq = ++hearingsSeq.current;
+    try {
+      const fresh = await getCaseHearings(caseId);
+      if (seq === hearingsSeq.current) {
+        setHearings(fresh);
+        setHearingsFailed(false);
+      }
+    } catch {
+      // Keep the list we have; the case page itself still works (the overview then shows the cached date).
+      if (seq === hearingsSeq.current) setHearingsFailed(true);
+    }
+  }
+
+  useEffect(() => {
+    setHearings([]);
+    setHearingsFailed(false);
+    void loadHearings();
+    return () => {
+      hearingsSeq.current += 1;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseId]);
+
+  /** After a hearing was added, edited, deleted or given a result: the case's next date and timeline changed too. */
+  function handleHearingsChanged() {
+    void loadHearings();
+    void refreshCaseAndDocuments();
+  }
 
   // Follow external URL changes (e.g. a quick-view shortcut to another tab of this case).
   useEffect(() => {
@@ -315,6 +352,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const actions = caseActions(me, caseDetail);
   const archived = caseDetail.is_archived;
   const canEditDetails = !archived && canManageCase(me, caseDetail);
+  const upcomingHearing = nextHearing(hearings);
+  // The cached date is only a fallback for a hearings list that could not be loaded.
+  const nextHearingText = upcomingHearing
+    ? hearingWhen(upcomingHearing)
+    : hearingsFailed && caseDetail.next_hearing_date
+      ? formatDate(caseDetail.next_hearing_date)
+      : null;
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
   const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
@@ -381,18 +425,24 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                 ["Mahkeme", caseDetail.court ?? "—"],
                 ["Durum", CASE_STATUS_LABELS[caseDetail.status]],
                 ["Açılış Tarihi", formatDate(caseDetail.opening_date)],
-                ["Sonraki Duruşma", caseDetail.next_hearing_date ? formatDate(caseDetail.next_hearing_date) : "Planlanmadı"],
+                ["Sonraki Duruşma", nextHearingText ?? "Planlanmadı"],
                 ["Karşı Taraf", caseDetail.opposing_party ?? "—"],
                 ["Dava Değeri", caseDetail.case_value ? new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(caseDetail.case_value) : "Belirtilmedi"],
                 ["Dosya Numarası", caseDetail.case_number],
               ].map(([label, value]) => <div key={label} className="bg-white p-4">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-400">{label}</p>
-                <p className="mt-1 text-sm font-medium text-navy-800">{value}</p>
+                {label === "Sonraki Duruşma" && nextHearingText ? (
+                  <a href="#durusmalar" className="mt-1 block text-sm font-medium text-accent-700 hover:underline">{value}</a>
+                ) : (
+                  <p className="mt-1 text-sm font-medium text-navy-800">{value}</p>
+                )}
               </div>)}
             </div>
           </section>
 
           {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+
+          <CaseHearingsCard caseDetail={caseDetail} hearings={hearings} readOnly={archived} onChanged={handleHearingsChanged} />
 
           <div className="grid gap-4 xl:grid-cols-2">
             <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />

@@ -231,8 +231,10 @@ def test_filter_cases_active_true_and_false(client, two_firms_two_users):
 
 
 def test_filter_cases_by_hearing_window_is_inclusive(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
     headers = _auth_headers(client, two_firms_two_users)
-    today = date.today()
+    today = local_today()
     today_case = _create(client, headers, case_number="2026/720", next_hearing_date=today.isoformat())
     soon = _create(client, headers, case_number="2026/721", next_hearing_date=(today + timedelta(days=3)).isoformat())
     edge = _create(client, headers, case_number="2026/722", next_hearing_date=(today + timedelta(days=30)).isoformat())
@@ -250,3 +252,70 @@ def test_hearing_window_rejects_out_of_range_values(client, two_firms_two_users)
     headers = _auth_headers(client, two_firms_two_users)
     assert client.get("/cases?hearing_within_days=0", headers=headers).status_code == 422
     assert client.get("/cases?hearing_within_days=366", headers=headers).status_code == 422
+
+
+def _hearing_events(client, headers, window):
+    return [item for item in client.get("/calendar", params=window, headers=headers).json() if item["event_type"] == "hearing"]
+
+
+def test_create_case_turns_next_hearing_date_into_an_all_day_hearing_event(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
+    fixtures = two_firms_two_users
+    headers = _auth_headers(client, fixtures)
+    today = local_today()
+    day = (today + timedelta(days=9)).isoformat()
+
+    case = _create(client, headers, next_hearing_date=day)
+
+    assert case["next_hearing_date"] == day
+    [item] = _hearing_events(client, headers, {"from": today.isoformat(), "to": (today + timedelta(days=30)).isoformat()})
+    event = client.get(f"/calendar/events/{item['event_id']}", headers=headers).json()
+    assert (event["title"], event["event_type"], event["all_day"]) == ("Duruşma", "hearing", True)
+    assert event["starts_at"] == f"{day}T00:00:00"
+    assert (event["case_id"], event["created_by"], event["reminder_days"]) == (case["id"], fixtures["user_a"].id, [3, 1])
+    assert event["assignee_id"] == case["assigned_lawyer_id"] == fixtures["user_a"].id
+
+
+def test_create_case_with_a_past_hearing_date_keeps_the_event_as_history(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today = local_today()
+    yesterday = (today - timedelta(days=1)).isoformat()
+
+    case = _create(client, headers, next_hearing_date=yesterday)
+
+    assert case["next_hearing_date"] is None
+    assert [item["date"] for item in _hearing_events(client, headers, {"from": yesterday, "to": today.isoformat()})] == [yesterday]
+
+
+def test_create_closed_case_with_a_hearing_date_creates_no_hearing(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today = local_today()
+    day = (today + timedelta(days=9)).isoformat()
+
+    response = client.post("/cases", json={**VALID_CASE_PAYLOAD, "status": "kapali", "next_hearing_date": day}, headers=headers)
+
+    assert response.status_code == 201, response.text
+    assert response.json()["next_hearing_date"] is None
+    assert _hearing_events(client, headers, {"from": today.isoformat(), "to": (today + timedelta(days=30)).isoformat()}) == []
+
+
+def test_create_case_without_a_hearing_date_creates_no_event(client, two_firms_two_users):
+    from app.core.timeutil import local_today
+
+    headers = _auth_headers(client, two_firms_two_users)
+    today = local_today()
+    _create(client, headers)
+    assert _hearing_events(client, headers, {"from": (today - timedelta(days=30)).isoformat(), "to": (today + timedelta(days=300)).isoformat()}) == []
+
+
+def test_a_duplicate_case_number_creates_no_hearing_event(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    _create(client, headers)
+    duplicate = client.post("/cases", json={**VALID_CASE_PAYLOAD, "next_hearing_date": "2099-01-05"}, headers=headers)
+    assert duplicate.status_code == 409
+    assert _hearing_events(client, headers, {"from": "2099-01-01", "to": "2099-12-31"}) == []

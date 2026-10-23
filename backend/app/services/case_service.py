@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 
 from sqlalchemy.exc import IntegrityError
@@ -17,6 +18,7 @@ from app.services.case_parties import (
     party_models,
     require_client,
 )
+from app.services.hearing_dates import add_all_day_hearing, recompute_next_hearing
 
 
 class DuplicateCaseNumberError(Exception):
@@ -41,11 +43,16 @@ class CaseService:
         require_client(data)
         return data
 
-    def create_case(self, law_firm_id: str, payload: CaseCreate) -> Case:
+    def create_case(self, law_firm_id: str, payload: CaseCreate, created_by: str, today: date) -> Case:
         """With `parties` the legacy client_name / opposing_party / client_role
         are derived from them; without (old clients) the parties are built from
-        client_name / opposing_party."""
+        client_name / opposing_party.
+
+        A next_hearing_date becomes an all-day hearing event of the new case in the
+        same transaction (a past date too: it is history); next_hearing_date itself
+        is then computed from the events like everywhere else."""
         fields = payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"})
+        hearing_day = fields.pop("next_hearing_date", None)
         client_role = payload.client_role.value if payload.client_role else None
         if payload.parties is not None:
             parties = self._party_data(payload.parties)
@@ -57,12 +64,19 @@ class CaseService:
         case = Case(law_firm_id=law_firm_id, client_role=client_role, **fields)
         case.parties = party_models(parties, law_firm_id)
         try:
-            return self.cases.create(case)
+            self.db.add(case)
+            self.db.flush()
         except IntegrityError as exc:
             self.db.rollback()
             raise DuplicateCaseNumberError(
                 f"Case number '{payload.case_number}' already exists for this firm."
             ) from exc
+        if hearing_day is not None and case.status != CaseStatus.KAPALI:  # a closed case takes no new hearing
+            add_all_day_hearing(self.db, case, hearing_day, created_by)
+            recompute_next_hearing(self.db, case, today)
+        self.db.commit()
+        self.db.refresh(case)
+        return case
 
     def get_case(self, case_id: str, law_firm_id: str) -> Optional[Case]:
         return self.cases.get_by_id_in_firm(case_id, law_firm_id)

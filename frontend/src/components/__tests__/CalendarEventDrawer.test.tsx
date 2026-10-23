@@ -22,15 +22,15 @@ const event: CalendarEvent = {
   id: "event:e1", kind: "event", event_type: "meeting", title: "Müvekkil toplantısı", date: "2026-10-07",
   start: "2026-10-07T14:30:00", end: "2026-10-07T16:00:00", all_day: false, case_id: "c1",
   case_name: "Ticari Kira Uyarlama Davası", task_id: null, event_id: "e1", assignee_id: "u1",
-  assignee_name: "Avukat A", location: "Büro", notes: "Belgeleri getir", reminder_days: [3, 1], editable: true,
+  assignee_name: "Avukat A", location: "Büro", notes: "Belgeleri getir", result_note: null, reminder_days: [3, 1], editable: true,
 };
 const task: CalendarEvent = {
   ...event, id: "task:t1", kind: "task", event_type: "task", title: "Dilekçe hazırla", start: null, end: null,
   all_day: true, task_id: "t1", event_id: null, location: null, notes: null, reminder_days: [1], editable: false,
 };
 const hearing: CalendarEvent = {
-  ...event, id: "hearing:c1", kind: "case_hearing", event_type: "hearing", title: "Duruşma - Ticari Kira Uyarlama Davası",
-  start: null, end: null, all_day: true, event_id: null, notes: null, reminder_days: [3, 1], editable: false,
+  ...event, id: "event:h1", event_type: "hearing", title: "Duruşma", event_id: "h1", notes: null,
+  result_note: "Bilirkişi raporu beklenecek.", reminder_days: [3, 1],
 };
 
 function renderDrawer(item: CalendarEvent) {
@@ -98,11 +98,12 @@ describe("CalendarEventDrawer", () => {
     expect(handlers.onClose).toHaveBeenCalled();
   });
 
-  it("shows case hearings read-only with a link to the case", () => {
-    renderDrawer(hearing);
-    expect(screen.getByRole("link", { name: "Davayı aç" })).toHaveAttribute("href", "/davalar/c1");
-    expect(screen.getByText(/varsayılan hatırlatma: 3 gün ve 1 gün önce/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Hatırlatmayı değiştir" })).not.toBeInTheDocument();
+  it("shows the hearing result row only when a result note exists", () => {
+    const { unmount } = render(<CalendarEventDrawer item={hearing} onClose={vi.fn()} onEdit={vi.fn()} onChanged={vi.fn()} />);
+    expect(screen.getByRole("dialog", { name: "Duruşma" })).toHaveTextContent("SonuçBilirkişi raporu beklenecek.");
+    unmount();
+    renderDrawer(event);
+    expect(screen.getByRole("dialog")).not.toHaveTextContent("Sonuç");
   });
 
   it("shows an error when an action fails and closes on Escape", async () => {
