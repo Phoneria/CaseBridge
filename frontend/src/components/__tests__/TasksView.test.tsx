@@ -87,6 +87,19 @@ describe("TasksView", () => {
     await waitFor(() => expect(updateTaskStatus).toHaveBeenCalledWith("c1", "t1", "completed"));
   });
 
+  it("shows the server's message when a task cannot be changed (archived case), else a Turkish fallback", async () => {
+    listAllTasks.mockResolvedValue([pendingTask]);
+    updateTaskStatus.mockRejectedValueOnce(new ApiError("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.", 409));
+    render(<TasksView />);
+    await userEvent.click(await screen.findByRole("checkbox"));
+    expect(await screen.findByText("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.")).toBeInTheDocument();
+
+    updateTaskStatus.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    await userEvent.click(screen.getByRole("checkbox"));
+    expect(await screen.findByText("Görev güncellenemedi. Lütfen tekrar deneyin.")).toBeInTheDocument();
+    expect(screen.queryByText("Failed to fetch")).toBeNull();
+  });
+
   it("filters by ?vade=gecikmis and lists overdue first by default", async () => {
     listAllTasks.mockResolvedValue([futureTask, overdueTask, doneTask]);
 

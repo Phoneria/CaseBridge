@@ -39,6 +39,8 @@ describe("AnalyticsView", () => {
     await waitFor(() => expect(screen.getByText("108")).toBeInTheDocument());
     expect(screen.getByText("%69.77")).toBeInTheDocument();
     expect(screen.getByText("60 ÷ (60 + 26) × 100 = %69.77")).toBeInTheDocument();
+    expect(screen.getByText(/Devam eden ve sulhla kapanan davalar paydaya girmez/)).toBeInTheDocument();
+    expect(screen.queryByText(/uzlaş/i)).not.toBeInTheDocument();
   });
 
   it("renders zeros (not an error) for an empty dataset", async () => {

@@ -18,6 +18,7 @@ import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
 import type { Case, Task, TaskWithCase } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
+import { userMessage } from "@/lib/userMessages";
 import { EmptyState } from "@/components/EmptyState";
 import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { FilterChips, NoFilterResults } from "@/components/FilterChips";
@@ -56,8 +57,8 @@ export function TasksView() {
     try {
       const updated = await updateTaskStatus(task.case_id, task.id, nextStatus);
       setTasks((prev) => prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
-    } catch {
-      setToggleError("Görev güncellenemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setToggleError(userMessage(err, "Görev güncellenemedi. Lütfen tekrar deneyin."));
     }
   }
 

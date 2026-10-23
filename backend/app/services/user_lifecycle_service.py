@@ -2,7 +2,7 @@
 another lawyer in the same operation, so nothing is left with nobody."""
 from datetime import datetime, time
 
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core.timeutil import local_today
@@ -32,11 +32,18 @@ def _open_cases_filter(user: User):
     )
 
 
+def _archived_case_ids(user: User):
+    """Work on an archived case is read-only history: it stays with the user,
+    is not counted in the workload and is not transferred."""
+    return select(Case.id).where(Case.law_firm_id == user.law_firm_id, Case.is_archived.is_(True))
+
+
 def _pending_tasks_filter(user: User):
     return (
         Task.law_firm_id == user.law_firm_id,
         Task.assigned_to == user.id,
         Task.status == TaskStatus.PENDING,
+        Task.case_id.not_in(_archived_case_ids(user)),
     )
 
 
@@ -57,6 +64,7 @@ def _upcoming_events_filter(user: User):
         CalendarEvent.law_firm_id == user.law_firm_id,
         CalendarEvent.assignee_id == user.id,
         CalendarEvent.starts_at >= start_of_today,
+        or_(CalendarEvent.case_id.is_(None), CalendarEvent.case_id.not_in(_archived_case_ids(user))),
     )
 
 

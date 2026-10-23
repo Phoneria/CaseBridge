@@ -20,12 +20,14 @@ import type { Case } from "@/types";
 interface Props {
   caseDetail: Case;
   onSaved: (updated: Case) => void;
+  /** False for an archived case or a user who may not change it: the edit button is not shown. */
+  canEdit: boolean;
 }
 
 const NO_AI: ReadonlySet<string> = new Set();
 
 /** "Taraflar" card of the case detail: read-only list with an inline editor. */
-export function CasePartiesCard({ caseDetail, onSaved }: Props) {
+export function CasePartiesCard({ caseDetail, onSaved, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
   const [rows, setRows] = useState<PartyRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function CasePartiesCard({ caseDetail, onSaved }: Props) {
     <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-navy-800">Taraflar</h2>
-        {!editing && (
+        {canEdit && !editing && (
           <button
             type="button"
             aria-label="Tarafları düzenle"

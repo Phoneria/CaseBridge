@@ -21,14 +21,16 @@ Rules (occurrence day D, offset d in reminder_days, today = now_local.date()):
     attempts < REMINDER_MAX_ATTEMPTS;
   - recipient: event assignee, else its creator; task assignee, else its
     creator; case hearing: the case's assigned lawyer. Inactive users and
-    users without an e-mail address are skipped.
+    users without an e-mail address are skipped;
+  - a closed or archived case sends no hearing reminder, and tasks and events
+    of an archived case send none either.
 """
 import logging
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Callable, Optional
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -41,7 +43,7 @@ from app.models.calendar import (
     ReminderDeliveryStatus,
     ReminderSourceType,
 )
-from app.models.case import Case
+from app.models.case import Case, case_is_active
 from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.email import EmailMessage, EmailSendError, send_email
@@ -179,6 +181,7 @@ class ReminderService:
             self.db.query(CalendarEvent, Case.case_name)
             .outerjoin(Case, and_(CalendarEvent.case_id == Case.id, Case.law_firm_id == CalendarEvent.law_firm_id))
             .filter(
+                or_(Case.id.is_(None), Case.is_archived.is_(False)),  # no reminder for an archived case
                 CalendarEvent.starts_at >= datetime.combine(today, time.min),
                 CalendarEvent.starts_at < datetime.combine(last_day + timedelta(days=1), time.min),
             )
@@ -208,6 +211,7 @@ class ReminderService:
             .join(Case, and_(Task.case_id == Case.id, Case.law_firm_id == Task.law_firm_id))
             .filter(
                 Case.is_precedent.is_(False),
+                Case.is_archived.is_(False),
                 Task.status == TaskStatus.PENDING,
                 Task.due_date >= today,
                 Task.due_date <= last_day,
@@ -249,7 +253,7 @@ class ReminderService:
         cases = (
             self.db.query(Case)
             .filter(
-                Case.is_archived.is_(False),
+                case_is_active(),
                 Case.is_precedent.is_(False),
                 Case.next_hearing_date >= today,
                 Case.next_hearing_date <= last_day,

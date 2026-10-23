@@ -35,7 +35,7 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     client_ip = request.client.host if request.client else "unknown"
     limiter_key = f"{client_ip}:{payload.email.lower()}"
 
-    if is_rate_limited(limiter_key):
+    if is_rate_limited(limiter_key, settings.login_rate_limit_per_minute):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Çok fazla giriş denemesi. Lütfen bir dakika sonra tekrar deneyin.",

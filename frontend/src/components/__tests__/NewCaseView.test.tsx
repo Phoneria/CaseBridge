@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const extractCaseIntake = vi.fn();
@@ -273,6 +273,18 @@ describe("NewCaseView create flow", () => {
     await submit();
     expect(createCase).not.toHaveBeenCalled();
     expect((scrollIntoView.mock.instances[0] as HTMLElement).id).toBe("bolum-taraflar");
+  });
+
+  it("blocks creating the case while the browser cannot read the typed case value", async () => {
+    render(<NewCaseView />);
+    await fillRequired();
+    const value = screen.getByLabelText("Dava değeri") as HTMLInputElement;
+    Object.defineProperty(value, "validity", { configurable: true, value: { badInput: true, valid: false } });
+    fireEvent.input(value, { target: { value: "" } });
+    await submit();
+
+    expect(createCase).not.toHaveBeenCalled();
+    expect(screen.getByText("Geçerli bir tutar girin.")).toBeInTheDocument();
   });
 
   it("creates a manually entered case with parties only and opens it", async () => {

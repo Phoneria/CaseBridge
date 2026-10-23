@@ -11,7 +11,10 @@ import {
   emptyCaseForm,
   firstErrorSection,
   hasErrors,
+  buildBasicInfoPayload,
   buildDisputePayload,
+  hasBasicInfoErrors,
+  validateBasicInfo,
   buildPartiesPayload,
   formFromCase,
   hasFillableContent,
@@ -403,5 +406,101 @@ describe("case detail editors", () => {
     expect(buildPartiesPayload(rows)).toEqual([
       { name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece" },
     ]);
+  });
+
+  it("fills the basic-info fields of the form from the case", () => {
+    const form = formFromCase({ ...storedCase, court: "Ankara 3. Asliye Hukuk", opening_date: "2026-02-03", case_value: 125000 } as Case);
+    expect(form).toMatchObject({
+      case_number: "2026/7",
+      case_name: "Tahliye",
+      case_type: "kira",
+      court: "Ankara 3. Asliye Hukuk",
+      opening_date: "2026-02-03",
+      case_value: "125000",
+      status: "durusma_bekleyen",
+    });
+  });
+
+  it("uses empty strings for missing basic info and an open status for a closed case", () => {
+    const form = formFromCase({ ...storedCase, court: null, case_value: null, opening_date: null, status: "kapali" } as unknown as Case);
+    expect(form).toMatchObject({ court: "", case_value: "", opening_date: "", status: "devam_eden" });
+  });
+});
+
+describe("Bilgileri düzenle rules", () => {
+  const valid: CaseFormState = {
+    ...emptyCaseForm(),
+    case_name: " Tahliye ",
+    case_type: "kira",
+    court: "  ",
+    court_file_number: "2026/7 E.",
+    opening_date: "2026-02-03",
+    case_value: "",
+    status: "karar_bekleyen",
+  };
+
+  it("accepts a complete form", () => {
+    expect(hasBasicInfoErrors(validateBasicInfo(valid))).toBe(false);
+  });
+
+  it("requires the case name and the case date", () => {
+    const errors = validateBasicInfo({ ...valid, case_name: "  ", opening_date: "" });
+    expect(errors).toMatchObject({ case_name: "Dava adı gerekli.", opening_date: "Dava tarihi gerekli." });
+    expect(hasBasicInfoErrors(errors)).toBe(true);
+  });
+
+  it("rejects a negative or non-numeric value and over-long texts", () => {
+    expect(validateBasicInfo({ ...valid, case_value: "-5" }).case_value).toBe("Dava değeri geçerli bir sayı olmalı.");
+    expect(validateBasicInfo({ ...valid, case_value: "abc" }).case_value).toBe("Dava değeri geçerli bir sayı olmalı.");
+    expect(validateBasicInfo({ ...valid, court: "x".repeat(256) }).court).toBe("En fazla 255 karakter olabilir.");
+  });
+
+  it("builds a PATCH body that clears emptied optional fields", () => {
+    expect(buildBasicInfoPayload(valid, { includeStatus: true })).toEqual({
+      case_name: "Tahliye",
+      case_type: "kira",
+      court: null,
+      court_file_number: "2026/7 E.",
+      case_value: null,
+      opening_date: "2026-02-03",
+      status: "karar_bekleyen",
+    });
+  });
+
+  it("leaves the status out for a closed case and converts the value to a number", () => {
+    const payload = buildBasicInfoPayload({ ...valid, case_value: "125000.5" }, { includeStatus: false });
+    expect(payload).not.toHaveProperty("status");
+    expect(payload.case_value).toBe(125000.5);
+  });
+});
+
+describe("unparseable case value (validity.badInput)", () => {
+  const BAD = "Geçerli bir tutar girin.";
+
+  it("is an error in both forms, even though the browser reports an empty value", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "", case_value_bad_input: true };
+    expect(validateBasicInfo(form).case_value).toBe(BAD);
+    expect(hasBasicInfoErrors(validateBasicInfo(form))).toBe(true);
+    expect(validateCaseForm(form, { requireLawyer: false }).case_value).toBe(BAD);
+    expect(firstErrorSection(validateCaseForm(form, { requireLawyer: false }))).toBe("temel");
+  });
+
+  it("is not reported for a field the user really cleared", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "" };
+    expect(form.case_value_bad_input).toBe(false);
+    expect(validateBasicInfo(form).case_value).toBeUndefined();
+    expect(buildBasicInfoPayload(form, { includeStatus: false }).case_value).toBeNull();
+  });
+
+  it("never turns into a null case value in the PATCH body", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_name: "Tahliye", opening_date: "2026-02-03", case_value: "", case_value_bad_input: true };
+    expect(buildBasicInfoPayload(form, { includeStatus: false })).not.toHaveProperty("case_value");
+    expect(buildCasePayload(form)).not.toHaveProperty("case_value");
+  });
+
+  it("is reset by a draft value", () => {
+    const form: CaseFormState = { ...emptyCaseForm(), case_value_bad_input: true };
+    const { form: next } = applyDraft(form, { ...EMPTY_DRAFT, case_value: 1000 });
+    expect(next).toMatchObject({ case_value: "1000", case_value_bad_input: false });
   });
 });

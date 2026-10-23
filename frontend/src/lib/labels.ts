@@ -15,10 +15,10 @@ export const CASE_STATUS_LABELS: Record<string, string> = {
 };
 
 export const CASE_OUTCOME_LABELS: Record<string, string> = {
-  ongoing: "Devam Ediyor",
+  ongoing: "Devam ediyor",
   won: "Kazanıldı",
   lost: "Kaybedildi",
-  settled: "Uzlaşma",
+  settled: "Sulh",
 };
 
 export const SIMULATION_STATUS_LABELS: Record<string, string> = {

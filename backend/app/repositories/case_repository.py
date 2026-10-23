@@ -10,7 +10,7 @@ from typing import Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from app.models.case import Case, CaseOutcome, CaseStatus, CaseType
+from app.models.case import Case, CaseOutcome, CaseStatus, CaseType, case_is_active
 
 
 class CaseRepository:
@@ -27,6 +27,18 @@ class CaseRepository:
         return (
             self.db.query(Case)
             .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
+            .first()
+        )
+
+    def get_by_id_in_firm_for_update(self, case_id: str, law_firm_id: str) -> Optional[Case]:
+        """Same lookup, but the row is locked until the transaction ends, so a state
+        check and the update that follows cannot interleave with another request
+        (a no-op on SQLite). populate_existing re-reads the row after the lock."""
+        return (
+            self.db.query(Case)
+            .filter(Case.id == case_id, Case.law_firm_id == law_firm_id, Case.is_precedent.is_(False))
+            .populate_existing()
+            .with_for_update()
             .first()
         )
 
@@ -76,7 +88,9 @@ class CaseRepository:
 
         if hearing_within_days is not None:
             today = date.today()
+            # Closed and archived cases keep the date but have no upcoming hearing.
             query = query.filter(
+                case_is_active(),
                 Case.next_hearing_date.isnot(None),
                 Case.next_hearing_date >= today,
                 Case.next_hearing_date <= today + timedelta(days=hearing_within_days),

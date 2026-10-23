@@ -56,6 +56,8 @@ export default defineConfig({
         EMAIL_BACKEND: "file",
         EMAIL_FILE_DIR: e2eMailDir,
         FRONTEND_BASE_URL: FRONTEND_URL,
+        // E2E logs in many times per minute across specs; the default limit (5) would make runs flaky.
+        LOGIN_RATE_LIMIT_PER_MINUTE: "1000",
       },
     },
     {

@@ -33,12 +33,12 @@ def test_analytics_overview_empty_dataset(client, two_firms_two_users):
     assert body["win_rate"] == 0.0
 
 
-def test_analytics_overview_reflects_created_cases(client, two_firms_two_users):
+def test_analytics_overview_reflects_created_cases(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     won = _create_case(client, headers, case_number="1")
-    client.patch(f"/cases/{won['id']}", json={"status": "kapali", "outcome": "won"}, headers=headers)
+    close_case(headers, won["id"], "won")
     lost = _create_case(client, headers, case_number="2")
-    client.patch(f"/cases/{lost['id']}", json={"status": "kapali", "outcome": "lost"}, headers=headers)
+    close_case(headers, lost["id"], "lost")
 
     response = client.get("/analytics/overview", headers=headers)
     body = response.json()
@@ -48,13 +48,13 @@ def test_analytics_overview_reflects_created_cases(client, two_firms_two_users):
     assert body["win_rate"] == 50.0
 
 
-def test_analytics_isolated_by_law_firm(client, two_firms_two_users):
+def test_analytics_isolated_by_law_firm(client, two_firms_two_users, close_case):
     fixtures = two_firms_two_users
     headers_a = _auth_headers(client, fixtures, "user_a")
     headers_b = _auth_headers(client, fixtures, "user_b")
 
     won = _create_case(client, headers_a, case_number="1")
-    client.patch(f"/cases/{won['id']}", json={"status": "kapali", "outcome": "won"}, headers=headers_a)
+    close_case(headers_a, won["id"], "won")
 
     response_b = client.get("/analytics/overview", headers=headers_b)
     assert response_b.json()["total_cases"] == 0
@@ -84,7 +84,7 @@ def test_analytics_overview_includes_status_breakdown(client, two_firms_two_user
     assert [row["status"] for row in body["by_status"]] == ["devam_eden", "kapali"]
 
 
-def test_overview_counts_match_case_list_filters(client, two_firms_two_users):
+def test_overview_counts_match_case_list_filters(client, two_firms_two_users, close_case):
     """Spec 5.1: every analytics number must equal the row count of the
     list it links to (links from analytics always add include_archived)."""
     headers = _auth_headers(client, two_firms_two_users)
@@ -92,8 +92,8 @@ def test_overview_counts_match_case_list_filters(client, two_firms_two_users):
     _create_case(client, headers, case_number="2026/602", case_type="icra")
     lost = _create_case(client, headers, case_number="2026/603", case_type="kira")
     _create_case(client, headers, case_number="2026/604", case_type="kira", status="karar_bekleyen")
-    client.patch(f"/cases/{won_archived['id']}", json={"outcome": "won", "status": "kapali"}, headers=headers)
-    client.patch(f"/cases/{lost['id']}", json={"outcome": "lost", "status": "kapali"}, headers=headers)
+    close_case(headers, won_archived["id"], "won")
+    close_case(headers, lost["id"], "lost")
     client.post(f"/cases/{won_archived['id']}/archive", headers=headers)
 
     overview = client.get("/analytics/overview", headers=headers).json()

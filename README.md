@@ -7,7 +7,7 @@
 ## Product
 
 CaseBridge helps a law firm:
-- Manage active/closed cases, clients, opposing parties, documents, hearings, and timelines.
+- Manage active/closed cases, clients, opposing parties, documents, hearings, and timelines. The responsible lawyer (or an administrator) edits a case, closes it with an outcome (won / lost / settled), decision date, note and optional decision document, reopens it, and archives it; an archived case is read-only until it is unarchived.
 - Run an AI case simulation across four perspectives (Judge, Plaintiff Lawyer, Defendant Lawyer, Legal Researcher) to surface arguments, risks, missing information, and suggested next steps — always labeled as an AI-generated estimate, never a guaranteed outcome.
 - Practice a six-stage fictional hearing as plaintiff or defendant counsel. A local model plays opposing counsel and judge with isolated role prompts, evidence access rules, a resumable transcript, and a final 100-point training evaluation.
 - See firm-wide analytics: win/loss ratio, performance by category, historical trends.

@@ -223,3 +223,11 @@ Status: COMPLETE
 - The login form is empty; the demo accounts hint shows only in demo mode (`GET /auth/config`).
 - Real-data mode no longer creates a demo firm or users; `python -m app.db.create_admin` creates the first administrator and `import_cases` takes `--firm` and `--lawyer`.
 - New E2E spec `10-user-management.spec.ts` (EMAIL_BACKEND=file, reads the invite link from the newest `.eml`).
+
+## Case lifecycle (edit, close, reopen, archive)
+Status: COMPLETE
+
+- Case page "İşlemler" menu: Bilgileri düzenle, Davayı kapat (outcome, decision date, note, decision document), Yeniden aç, Arşivle, Arşivden çıkar. Only the responsible lawyer and administrators see it; the backend answers 403 to everybody else.
+- `cases.decision_date` / `closing_note` (migration `e6c1b9a4d2f8`); `POST /cases/{id}/close|reopen|archive|unarchive`; `PATCH /cases/{id}` no longer sets `status=kapali` or `outcome`.
+- An archived case is read-only: PATCH, close, reopen, events, tasks, documents and calendar events linked to it answer 409 until it is unarchived. The case list has an "Arşivi göster" switch and an "Arşivli" badge.
+- New E2E spec `11-case-lifecycle.spec.ts`.

@@ -42,7 +42,7 @@ describe("BasicInfoFields", () => {
     const type = screen.getByLabelText(/^Dava türü/) as HTMLSelectElement;
     expect([...type.options].map((option) => option.text)).toEqual(["İş Hukuku", "Ticaret Hukuku", "Sözleşme", "Kira", "İcra", "Diğer"]);
     const status = screen.getByLabelText("Durum") as HTMLSelectElement;
-    expect([...status.options].map((option) => option.text)).toEqual(["Devam Eden", "Duruşma Bekleyen", "Karar Bekleyen", "Kapalı"]);
+    expect([...status.options].map((option) => option.text)).toEqual(["Devam Eden", "Duruşma Bekleyen", "Karar Bekleyen"]);
   });
 
   it("edits values and shows errors next to the field", async () => {

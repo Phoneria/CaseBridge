@@ -152,6 +152,15 @@ export function CaseListView() {
             </option>
           ))}
         </select>
+        <label className="flex items-center gap-2 text-sm text-navy-700">
+          <input
+            type="checkbox"
+            checked={query.arsiv === "dahil"}
+            onChange={(e) => setParams({ arsiv: e.target.checked ? "dahil" : null })}
+            className="h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400"
+          />
+          Arşivi göster
+        </label>
       </div>
 
       <FilterChips chips={chips} onRemove={removeFilter} onClear={clearFilters} resultCount={loading || error ? undefined : cases.length} />
@@ -187,6 +196,9 @@ export function CaseListView() {
                     <Link href={`/davalar/${c.id}`} className="font-medium text-navy-900 hover:text-accent-600">
                       {c.case_name}
                     </Link>
+                    {c.is_archived && (
+                      <span className="ml-2 rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-navy-500">Arşivli</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-navy-700">{c.client_name}</td>
                   <td className="px-4 py-3">

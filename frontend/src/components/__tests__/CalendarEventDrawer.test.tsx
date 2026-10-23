@@ -15,6 +15,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import { CalendarEventDrawer } from "@/components/calendar/CalendarEventDrawer";
+import { ApiError } from "@/lib/apiError";
 import type { CalendarEvent } from "@/types";
 
 const event: CalendarEvent = {
@@ -113,6 +114,14 @@ describe("CalendarEventDrawer", () => {
 
     await userEvent.keyboard("{Escape}");
     expect(handlers.onClose).toHaveBeenCalled();
+  });
+
+  it("shows the server's message, such as the archived-case refusal", async () => {
+    deleteCalendarEvent.mockRejectedValue(new ApiError("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.", 409));
+    renderDrawer(event);
+    await userEvent.click(screen.getByRole("button", { name: "Sil" }));
+    await userEvent.click(screen.getByRole("button", { name: "Evet, sil" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.");
   });
 
   it("ignores Escape and disables actions while busy", async () => {

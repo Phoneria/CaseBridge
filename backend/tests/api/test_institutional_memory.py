@@ -111,7 +111,7 @@ def test_archived_cases_remain_searchable_with_include_archived(client, two_firm
     assert results[0]["is_archived"] is True
 
 
-def test_closed_historical_case_outcome_is_retrievable(client, two_firms_two_users):
+def test_closed_historical_case_outcome_is_retrievable(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     created = client.post(
         "/cases",
@@ -120,11 +120,11 @@ def test_closed_historical_case_outcome_is_retrievable(client, two_firms_two_use
             "case_name": "Gecmis Dava",
             "client_name": "M",
             "case_type": "diger",
-            "status": "kapali",
+            "status": "devam_eden",
         },
         headers=headers,
     ).json()
-    client.patch(f"/cases/{created['id']}", json={"outcome": "won"}, headers=headers)
+    close_case(headers, created["id"], "won")
 
     response = client.get(f"/cases/{created['id']}", headers=headers)
     assert response.json()["outcome"] == "won"

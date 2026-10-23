@@ -25,9 +25,11 @@ interface Props {
   uploadError: string | null;
   onUpload: (file: File) => void;
   onDeleted: (id: string) => void;
+  /** Archived case: no upload and no delete. */
+  readOnly?: boolean;
 }
 
-export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload, onDeleted }: Props) {
+export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload, onDeleted, readOnly = false }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(documents[0]?.id ?? null);
   const [listFilter, setListFilter] = useState("");
   const [query, setQuery] = useState("");
@@ -149,7 +151,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
     });
   }
 
-  const uploadZone = (
+  const uploadZone = readOnly ? null : (
     <div
       onDragOver={(e) => {
         e.preventDefault();
@@ -190,7 +192,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
       <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         {uploadZone}
         {uploadError && <ErrorState message={uploadError} />}
-        <EmptyState message="Henüz belge yok." hint="Bu davaya PDF, DOCX veya TXT belge yükleyin." />
+        <EmptyState message="Henüz belge yok." hint={readOnly ? undefined : "Bu davaya PDF, DOCX veya TXT belge yükleyin."} />
       </div>
     );
   }
@@ -271,7 +273,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
                 <ToolButton onClick={handleDownload} disabled={busy === "download"}>
                   {busy === "download" ? "İndiriliyor..." : "İndir"}
                 </ToolButton>
-                {confirmDelete ? (
+                {readOnly ? null : confirmDelete ? (
                   <span className="flex items-center gap-1 rounded-lg bg-rose-50 px-2 py-1 text-xs text-rose-700">
                     Silinsin mi?
                     <button type="button" onClick={handleDelete} disabled={busy === "delete"} className="font-semibold hover:underline">

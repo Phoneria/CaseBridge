@@ -35,6 +35,8 @@ def test_create_case_success(client, two_firms_two_users):
     assert body["case_number"] == "2026/101"
     assert body["status"] == "devam_eden"
     assert body["is_archived"] is False
+    assert body["decision_date"] is None
+    assert body["closing_note"] is None
 
 
 def test_create_case_missing_required_field_fails(client, two_firms_two_users):
@@ -66,9 +68,10 @@ def test_update_case(client, two_firms_two_users):
     assert response.json()["status"] == "karar_bekleyen"
 
 
-def test_archive_case(client, two_firms_two_users):
+def test_archive_case(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     created = client.post("/cases", json=VALID_CASE_PAYLOAD, headers=headers).json()
+    close_case(headers, created["id"])
 
     response = client.post(f"/cases/{created['id']}/archive", headers=headers)
     assert response.status_code == 200
@@ -203,11 +206,11 @@ def _create(client, headers, **overrides):
     return response.json()
 
 
-def test_filter_cases_by_outcome(client, two_firms_two_users):
+def test_filter_cases_by_outcome(client, two_firms_two_users, close_case):
     headers = _auth_headers(client, two_firms_two_users)
     won = _create(client, headers, case_number="2026/701")
     _create(client, headers, case_number="2026/702")
-    client.patch(f"/cases/{won['id']}", json={"outcome": "won", "status": "kapali"}, headers=headers)
+    close_case(headers, won["id"], "won")
 
     response = client.get("/cases?outcome=won", headers=headers)
 

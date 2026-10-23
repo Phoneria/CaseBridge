@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.case_access import require_case_id_writable, require_case_writable
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.db.session import get_db
 from app.models.task import TaskStatus
@@ -38,6 +39,7 @@ def create_task(
     db: Session = Depends(get_db),
 ):
     case = _get_owned_case_or_404(db, case_id, law_firm_id)
+    require_case_writable(case)
     try:
         return TaskService(db).create_task(case, payload, created_by=current_user.id)
     except AssigneeNotFound as exc:
@@ -64,11 +66,12 @@ def update_case_task(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
 ):
-    _get_owned_case_or_404(db, case_id, law_firm_id)
+    case = _get_owned_case_or_404(db, case_id, law_firm_id)
     service = TaskService(db)
     task = service.get(task_id, law_firm_id)
     if task is None or task.case_id != case_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    require_case_writable(case)
     try:
         return service.update_task(task, payload)
     except AssigneeNotFound as exc:
@@ -106,6 +109,7 @@ def update_task(
     task = service.get(task_id, law_firm_id)
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Görev bulunamadı")
+    require_case_id_writable(db, task.case_id, law_firm_id)
     try:
         return service.update_task(task, payload)
     except AssigneeNotFound as exc:

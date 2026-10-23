@@ -68,7 +68,7 @@ export function AnalyticsView() {
 
       <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         <h2 className="text-sm font-semibold text-navy-800">Kazanma oranı nasıl hesaplanır?</h2>
-        <p className="mt-2 text-sm text-navy-700">Kazanılan dava sayısı ÷ (kazanılan + kaybedilen dava sayısı) × 100. Devam eden ve uzlaşmayla kapanan davalar paydaya girmez. Arşivdeki davalar dahildir; bu oran bir tahmin veya hukuki başarı garantisi değildir.</p>
+        <p className="mt-2 text-sm text-navy-700">Kazanılan dava sayısı ÷ (kazanılan + kaybedilen dava sayısı) × 100. Devam eden ve sulhla kapanan davalar paydaya girmez. Arşivdeki davalar dahildir; bu oran bir tahmin veya hukuki başarı garantisi değildir.</p>
         <p className="mt-2 text-sm font-medium text-navy-900">{overview.won_cases} ÷ ({overview.won_cases} + {overview.lost_cases}) × 100 = %{overview.win_rate}</p>
         {overview.won_cases + overview.lost_cases === 0 && <p className="mt-1 text-xs text-navy-500">Henüz karara bağlanmış kazanılan veya kaybedilen dava yok; oran %0 olarak gösterilir.</p>}
       </section>

@@ -6,6 +6,7 @@ vi.mock("next/navigation", async () => (await import("@/test/navigation")).navig
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const getCase = vi.fn();
+const getMe = vi.fn();
 const listSimulations = vi.fn();
 const listDocuments = vi.fn();
 const startSimulation = vi.fn();
@@ -21,6 +22,7 @@ const updateCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getCase: (...args: unknown[]) => getCase(...args),
+  getMe: (...args: unknown[]) => getMe(...args),
   listSimulations: (...args: unknown[]) => listSimulations(...args),
   listDocuments: (...args: unknown[]) => listDocuments(...args),
   startSimulation: (...args: unknown[]) => startSimulation(...args),
@@ -59,6 +61,8 @@ beforeEach(() => {
   setUrl("/davalar/c1");
 
   getCase.mockReset();
+  getMe.mockReset();
+  getMe.mockResolvedValue({ id: "u-admin", role: "admin", full_name: "Yönetici" });
   listSimulations.mockReset();
   listDocuments.mockReset();
   startSimulation.mockReset();

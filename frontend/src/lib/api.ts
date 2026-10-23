@@ -5,6 +5,7 @@ import type {
   ChatStatus,
   AnalyticsOverview,
   Case,
+  CaseClosePayload,
   CaseDetail,
   CaseEvent,
   CaseEventType,
@@ -292,8 +293,20 @@ export async function updateCase(id: string, payload: CaseUpdatePayload): Promis
   return request(`/cases/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
 }
 
+export async function closeCase(id: string, payload: CaseClosePayload): Promise<Case> {
+  return request(`/cases/${id}/close`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function reopenCase(id: string): Promise<Case> {
+  return request(`/cases/${id}/reopen`, { method: "POST" });
+}
+
 export async function archiveCase(id: string): Promise<Case> {
   return request(`/cases/${id}/archive`, { method: "POST" });
+}
+
+export async function unarchiveCase(id: string): Promise<Case> {
+  return request(`/cases/${id}/unarchive`, { method: "POST" });
 }
 
 export async function addCaseEvent(

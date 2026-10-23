@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
+from app.api.case_access import require_case_id_writable, require_case_writable
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.config import settings
 from app.db.session import get_db
@@ -29,7 +30,8 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    _get_owned_case_or_404(db, case_id, law_firm_id)
+    case = _get_owned_case_or_404(db, case_id, law_firm_id)
+    require_case_writable(case)
     raw_bytes = await file.read()
     if len(raw_bytes) > settings.max_upload_size_bytes:
         raise HTTPException(
@@ -107,4 +109,5 @@ def delete_document(
     document = service.get(document_id, law_firm_id)
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    require_case_id_writable(db, document.case_id, law_firm_id)
     service.delete(document)

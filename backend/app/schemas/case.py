@@ -1,11 +1,14 @@
 from datetime import date, datetime
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole, PartyRole
 
 PartyName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+CaseName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+ClientName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+ClosingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=4000)]
 
 
 class CaseEventCreate(BaseModel):
@@ -78,17 +81,26 @@ class CaseCreate(BaseModel):
         return self
 
 
+_REQUIRED_ON_UPDATE = ("case_name", "client_name", "case_type", "status", "opening_date")
+
+
 class CaseUpdate(BaseModel):
-    case_name: Optional[str] = None
-    client_name: Optional[str] = None
+    """PATCH /cases/{id}. `status` only moves between the open statuses and
+    `outcome` is not accepted at all (CaseLifecycleService.ensure_patch_allowed
+    answers those with their Turkish messages); the field stays here so that
+    sending it can be told apart from leaving it out."""
+
+    case_name: Optional[CaseName] = None
+    client_name: Optional[ClientName] = None
     opposing_party: Optional[str] = None
     case_type: Optional[CaseType] = None
-    court: Optional[str] = None
+    court: Optional[str] = Field(default=None, max_length=255)
     assigned_lawyer_id: Optional[str] = None
+    opening_date: Optional[date] = None
     next_hearing_date: Optional[date] = None
     status: Optional[CaseStatus] = None
     outcome: Optional[CaseOutcome] = None
-    case_value: Optional[float] = None
+    case_value: Optional[float] = Field(default=None, ge=0)
     description: Optional[str] = None
     client_role: Optional[ClientRole] = None
     court_file_number: Optional[str] = Field(default=None, max_length=100)
@@ -97,6 +109,33 @@ class CaseUpdate(BaseModel):
     plaintiff_position: Optional[str] = None
     defendant_position: Optional[str] = None
     parties: Optional[list[CasePartyIn]] = Field(default=None, min_length=1, max_length=20)
+
+    @field_validator("court")
+    @classmethod
+    def _blank_court_is_none(cls, value: Optional[str]) -> Optional[str]:
+        value = value.strip() if value else None
+        return value or None
+
+    @model_validator(mode="after")
+    def _required_fields_are_not_null(self):
+        for field in _REQUIRED_ON_UPDATE:
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null")
+        return self
+
+
+class CaseClose(BaseModel):
+    """POST /cases/{id}/close. The outcome is one of the three closing outcomes
+    ("ongoing" is not a way to close); the note is trimmed, a blank note is none."""
+
+    outcome: Literal["won", "lost", "settled"]
+    decision_date: date
+    note: Optional[ClosingNote] = None
+
+    @field_validator("note")
+    @classmethod
+    def _blank_note_is_none(cls, value: Optional[str]) -> Optional[str]:
+        return value or None
 
 
 class CaseAssignment(BaseModel):
@@ -124,6 +163,8 @@ class CaseOut(BaseModel):
     next_hearing_date: Optional[date] = None
     status: CaseStatus
     outcome: CaseOutcome
+    decision_date: Optional[date] = None
+    closing_note: Optional[str] = None
     case_value: Optional[float] = None
     description: Optional[str] = None
     client_role: Optional[str] = None

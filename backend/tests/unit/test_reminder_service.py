@@ -418,3 +418,33 @@ def test_moving_a_hearing_event_later_sends_no_reminder_for_the_old_day(world):
     ReminderService(world["db"], sender=outbox).send_due(datetime(2026, 10, 4, 9, 0))
 
     assert outbox.messages == []
+
+
+# ----- closed and archived cases (final review) -----
+
+
+def test_a_closed_case_sends_no_hearing_reminder(world):
+    from app.models.case import CaseStatus
+
+    world["case"].next_hearing_date = date(2026, 10, 5)
+    world["case"].status = CaseStatus.KAPALI
+    world["db"].commit()
+
+    assert ReminderService(world["db"]).collect_due(NOW) == []
+
+
+def test_tasks_and_events_of_an_archived_case_send_no_reminder(world):
+    from app.models.case import CaseStatus
+
+    add_task(world, date(2026, 10, 3), assigned_to=world["lawyer"].id)
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id, case_id=world["case"].id)
+    world["case"].status = CaseStatus.KAPALI
+    world["db"].commit()
+    assert {due.source_type.value for due in ReminderService(world["db"]).collect_due(NOW)} == {"task", "event"}
+
+    world["case"].is_archived = True
+    world["db"].commit()
+    free = add_event(world, datetime(2026, 10, 3, 11, 0), [1], assignee_id=world["lawyer"].id, title="Davasız")
+
+    [due] = ReminderService(world["db"]).collect_due(NOW)
+    assert (due.source_type.value, due.source_id) == ("event", free.id)

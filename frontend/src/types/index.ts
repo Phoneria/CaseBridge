@@ -1,6 +1,10 @@
 export type CaseType = "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
 export type CaseStatus = "devam_eden" | "durusma_bekleyen" | "karar_bekleyen" | "kapali";
 export type CaseOutcome = "ongoing" | "won" | "lost" | "settled";
+/** The statuses a case can be edited between; "kapali" is reached only by closing. */
+export type OpenCaseStatus = Exclude<CaseStatus, "kapali">;
+/** What a case is closed with ("ongoing" is not a way to close). */
+export type ClosingOutcome = Exclude<CaseOutcome, "ongoing">;
 
 export type PartyRole = "plaintiff" | "defendant" | "intervener" | "other";
 export type ClientRole = "plaintiff" | "defendant" | "other";
@@ -29,6 +33,9 @@ export interface Case {
   next_hearing_date: string | null;
   status: CaseStatus;
   outcome: CaseOutcome;
+  /** Set when the case is closed (YYYY-MM-DD); empty for cases closed before the close action existed. */
+  decision_date: string | null;
+  closing_note: string | null;
   case_value: number | null;
   description: string | null;
   client_role: ClientRole | null;
@@ -73,10 +80,30 @@ export interface CasePayload {
   assigned_lawyer_id?: string;
 }
 
-/** PATCH /cases/{id}: any subset; null clears a text field. */
+/** PATCH /cases/{id}: any subset; null clears an optional field. The status is one of the open statuses and is not sent for a closed case. */
 export type CaseUpdatePayload = Partial<
-  Pick<Case, "court_file_number" | "claim" | "facts_summary" | "plaintiff_position" | "defendant_position" | "description">
-> & { parties?: CasePartyPayload[] };
+  Pick<
+    Case,
+    | "court"
+    | "court_file_number"
+    | "case_value"
+    | "claim"
+    | "facts_summary"
+    | "plaintiff_position"
+    | "defendant_position"
+    | "description"
+  >
+> &
+  Partial<{ case_name: string; case_type: CaseType; opening_date: string; status: OpenCaseStatus }> & {
+    parties?: CasePartyPayload[];
+  };
+
+/** POST /cases/{id}/close. */
+export interface CaseClosePayload {
+  outcome: ClosingOutcome;
+  decision_date: string;
+  note?: string;
+}
 
 export interface CaseIntakeParty {
   name: string;

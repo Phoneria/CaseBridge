@@ -208,7 +208,7 @@ def test_patch_without_parties_keeps_them(client, two_firms_two_users):
 
     body = client.patch(
         f"/cases/{created['id']}",
-        json={"claim": "Yeni talep", "court_file_number": "2026/9 Esas", "status": "kapali"},
+        json={"claim": "Yeni talep", "court_file_number": "2026/9 Esas", "status": "karar_bekleyen"},
         headers=headers,
     ).json()
 

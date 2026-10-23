@@ -1,25 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   addCaseEvent,
+  archiveCase,
   createTask,
   generateHandover,
   getCase,
+  getMe,
   getSimulation,
   listCaseTasks,
   listDocuments,
   listSimulations,
+  reopenCase,
   retrySimulation,
   startSimulation,
+  unarchiveCase,
   updateTaskStatus,
   uploadDocument,
 } from "@/lib/api";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, SIMULATION_STATUS_LABELS, formatDate } from "@/lib/labels";
 import { parseCaseTab, type CaseTabSlug } from "@/lib/filters";
 import { useUrlParams } from "@/lib/urlState";
-import type { Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import type { AppUser, Case, CaseDetail, DocumentItem, HandoverReport, Simulation, Task } from "@/types";
+import { canManageCase, caseActions, type CaseAction } from "@/lib/caseAccess";
+import { userMessage } from "@/lib/userMessages";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
@@ -31,6 +37,11 @@ import { AI_PERSPECTIVES } from "@/lib/ai";
 import { CaseDocumentsPanel } from "@/components/CaseDocumentsPanel";
 import { CaseDisputeCard } from "@/components/CaseDisputeCard";
 import { CasePartiesCard } from "@/components/CasePartiesCard";
+import { CaseHeader } from "@/components/CaseHeader";
+import { CaseEditModal } from "@/components/CaseEditModal";
+import { CaseCloseModal, type CloseResult } from "@/components/CaseCloseModal";
+import { CaseConfirmModal } from "@/components/CaseConfirmModal";
+import { CaseDecisionCard } from "@/components/CaseDecisionCard";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -79,6 +90,15 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const [addingTask, setAddingTask] = useState(false);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [skippedDismissed, setSkippedDismissed] = useState(false);
+  // The signed-in user decides which lifecycle actions are offered; the server stays the authority (403/409).
+  const [me, setMe] = useState<AppUser | null>(null);
+  const [dialog, setDialog] = useState<"edit" | "close" | "reopen" | "archive" | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const actionInFlight = useRef(false);
+  // Reloads after an action may answer out of order; only the latest one is applied.
+  const reloadSeq = useRef(0);
   // Set by the new-case page when some events or documents could not be added after the case was created.
   const skippedParam = params.get("eklenemeyen") ?? "";
   const skippedCount = /^[1-9]\d*$/.test(skippedParam) ? Number(skippedParam) : 0;
@@ -110,6 +130,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseId]);
+
+  useEffect(() => {
+    let active = true;
+    getMe()
+      .then((user) => active && setMe(user))
+      .catch(() => active && setMe(null));
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Follow external URL changes (e.g. a quick-view shortcut to another tab of this case).
   useEffect(() => {
@@ -175,8 +205,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       await uploadDocument(caseId, file);
       const refreshed = await listDocuments(caseId);
       setDocuments(refreshed);
-    } catch {
-      setUploadError("Belge yüklenemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setUploadError(userMessage(err, "Belge yüklenemedi. Lütfen tekrar deneyin."));
     } finally {
       setUploading(false);
     }
@@ -193,8 +223,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       });
       setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, newEvent] } : prev));
       setEventForm({ event_date: "", title: "" });
-    } catch {
-      setEventError("Gelişme eklenemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setEventError(userMessage(err, "Gelişme eklenemedi. Lütfen tekrar deneyin."));
     } finally {
       setAddingEvent(false);
     }
@@ -210,8 +240,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       const newTask = await createTask(caseId, payload);
       setTasks((prev) => [...prev, newTask]);
       setTaskForm({ title: "", due_date: "" });
-    } catch {
-      setTaskError("Görev eklenemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setTaskError(userMessage(err, "Görev eklenemedi. Lütfen tekrar deneyin."));
     } finally {
       setAddingTask(false);
     }
@@ -223,14 +253,56 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
     try {
       const updated = await updateTaskStatus(caseId, task.id, nextStatus);
       setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-    } catch {
-      setTaskError("Görev güncellenemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      setTaskError(userMessage(err, "Görev güncellenemedi. Lütfen tekrar deneyin."));
     }
   }
 
   /** A PATCH result replaces the case fields but never the timeline, which the PATCH response does not carry. */
   function handleCaseSaved(updated: Case) {
     setCaseDetail((prev) => (prev ? { ...prev, ...updated, timeline: prev.timeline } : prev));
+  }
+
+  async function runCaseAction(request: () => Promise<Case>, fallback: string) {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
+    setActionBusy(true);
+    setActionError(null);
+    try {
+      handleCaseSaved(await request());
+    } catch (err) {
+      setActionError(userMessage(err, fallback));
+    } finally {
+      actionInFlight.current = false;
+      setActionBusy(false);
+    }
+  }
+
+  /** Reload the case after an action that adds a timeline event; the merged state stays if the reload fails. */
+  async function refreshCaseAndDocuments() {
+    const seq = ++reloadSeq.current;
+    try {
+      const [fresh, freshDocuments] = await Promise.all([getCase(caseId), listDocuments(caseId)]);
+      if (seq !== reloadSeq.current) return; // a later reload started meanwhile
+      setCaseDetail(fresh);
+      setDocuments(freshDocuments);
+    } catch {
+      // Keep what the action already returned.
+    }
+  }
+
+  function handleClosed({ updated, documentFailed }: CloseResult) {
+    handleCaseSaved(updated);
+    setDialog(null);
+    if (documentFailed) setActionNotice("Dava kapatıldı ancak karar belgesi yüklenemedi.");
+    void refreshCaseAndDocuments();
+  }
+
+  function pickAction(action: CaseAction) {
+    setActionNotice(null);
+    setActionError(null);
+    if (action === "edit" || action === "close" || action === "reopen" || action === "archive") setDialog(action);
+    else if (action === "unarchive") void runCaseAction(() => unarchiveCase(caseId), "Dava arşivden çıkarılamadı. Lütfen tekrar deneyin.");
   }
 
   function dismissSkippedNotice() {
@@ -260,6 +332,9 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   if (error) return <ErrorState message={error} />;
   if (!caseDetail) return null;
 
+  const actions = caseActions(me, caseDetail);
+  const archived = caseDetail.is_archived;
+  const canEditDetails = !archived && canManageCase(me, caseDetail);
   const notes = caseDetail.timeline.filter((e) => e.event_type === "note");
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
@@ -271,16 +346,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-accent-600">
-          {caseDetail.case_number}
-        </p>
-        <h1 className="text-xl font-semibold text-navy-900">{caseDetail.case_name}</h1>
-        <p className="text-sm text-navy-500">
-          {caseDetail.client_name}
-          {caseDetail.opposing_party ? ` vs. ${caseDetail.opposing_party}` : ""}
-        </p>
-      </div>
+      <CaseHeader caseDetail={caseDetail} actions={actions} busy={actionBusy} actionError={actionError} onPick={pickAction} />
+
+      {actionNotice && (
+        <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p>{actionNotice}</p>
+          <button type="button" aria-label="Uyarıyı kapat" onClick={() => setActionNotice(null)} className="text-xs font-semibold hover:underline">
+            Kapat
+          </button>
+        </div>
+      )}
 
       {skippedCount > 0 && !skippedDismissed && (
         <div role="status" className="flex items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -338,9 +413,11 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             </div>
           </section>
 
+          {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+
           <div className="grid gap-4 xl:grid-cols-2">
-            <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} />
-            <CaseDisputeCard caseDetail={caseDetail} onSaved={handleCaseSaved} />
+            <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
+            <CaseDisputeCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -372,7 +449,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <section className="flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
               <header className="flex items-center justify-between border-b border-surface-border bg-gradient-to-r from-white to-accent-50/60 px-4 py-3">
                 <div><h2 className="text-sm font-semibold text-navy-800">Gelişmeler</h2><p className="text-[11px] text-navy-500">En yeniden eskiye dosya hareketleri</p></div>
-                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gelismeler")!)} className="text-xs font-semibold text-accent-700 hover:underline">Gelişme ekle →</button>
+                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gelismeler")!)} className="text-xs font-semibold text-accent-700 hover:underline">{archived ? "Tümünü aç →" : "Gelişme ekle →"}</button>
               </header>
               {latestEvents.length === 0 ? <div className="grid flex-1 place-items-center p-5"><EmptyState message="Henüz gelişme yok." /></div> : <ol className="max-h-[390px] overflow-y-auto p-4">
                 {latestEvents.map((event, index) => <li key={event.id} className="relative flex gap-3 pb-5 last:pb-0">
@@ -386,13 +463,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <section className="flex min-h-[390px] flex-col overflow-hidden rounded-2xl border border-surface-border bg-white shadow-card">
               <header className="flex items-center justify-between border-b border-surface-border bg-gradient-to-r from-white to-accent-50/60 px-4 py-3">
                 <div><h2 className="text-sm font-semibold text-navy-800">Görevler</h2><p className="text-[11px] text-navy-500">Öncelikli işler ve son tarihler</p></div>
-                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gorevler")!)} className="text-xs font-semibold text-accent-700 hover:underline">Görev ekle →</button>
+                <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "gorevler")!)} className="text-xs font-semibold text-accent-700 hover:underline">{archived ? "Tümünü aç →" : "Görev ekle →"}</button>
               </header>
               {orderedTasks.length === 0 ? <div className="grid flex-1 place-items-center p-5"><EmptyState message="Henüz görev yok." hint="Görevler sekmesinden ekleyebilirsiniz." /></div> : <ul className="max-h-[390px] divide-y divide-surface-border overflow-y-auto px-4">
                 {orderedTasks.map((task) => {
                   const overdue = task.status === "pending" && Boolean(task.due_date) && task.due_date! < new Date().toISOString().slice(0, 10);
                   return <li key={task.id} className="flex gap-3 py-3">
-                    <input type="checkbox" checked={task.status === "completed"} onChange={() => handleToggleTask(task)} className="mt-0.5 h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400" aria-label={`${task.title} tamamlandı olarak işaretle`} />
+                    <input type="checkbox" checked={task.status === "completed"} onChange={() => handleToggleTask(task)} disabled={archived} className="mt-0.5 h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400" aria-label={`${task.title} tamamlandı olarak işaretle`} />
                     <div className="min-w-0 flex-1"><p className={`text-sm font-medium ${task.status === "completed" ? "text-navy-400 line-through" : "text-navy-800"}`}>{task.title}</p>{task.description && <p className="mt-1 text-xs leading-5 text-navy-500">{task.description}</p>}<div className="mt-2 flex flex-wrap gap-1.5">{task.due_date && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${overdue ? "bg-rose-50 text-rose-700" : "bg-amber-50 text-amber-700"}`}>{overdue ? "Gecikti · " : "Son tarih · "}{formatDate(task.due_date)}</span>}<span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${task.status === "completed" ? "bg-emerald-50 text-emerald-700" : "bg-accent-50 text-accent-700"}`}>{task.status === "completed" ? "Tamamlandı" : "Devam ediyor"}</span></div></div>
                   </li>;
                 })}
@@ -417,45 +494,48 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           uploadError={uploadError}
           onUpload={uploadFile}
           onDeleted={(id) => setDocuments((prev) => prev.filter((d) => d.id !== id))}
+          readOnly={archived}
         />
       )}
 
       {activeTab === "Gelişmeler" && (
         <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          {!archived && (
           <form onSubmit={handleAddEvent} className="flex flex-wrap items-end gap-3">
-            <div>
-              <label htmlFor="event_date" className="mb-1 block text-xs font-medium text-navy-600">
-                Tarih
-              </label>
-              <input
-                id="event_date"
-                type="date"
-                required
-                value={eventForm.event_date}
-                onChange={(event) => setEventForm({ ...eventForm, event_date: event.target.value })}
-                className="rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-              />
-            </div>
-            <div className="flex-1 min-w-[200px]">
-              <label htmlFor="event_title" className="mb-1 block text-xs font-medium text-navy-600">
-                Gelişme Başlığı
-              </label>
-              <input
-                id="event_title"
-                required
-                value={eventForm.title}
-                onChange={(event) => setEventForm({ ...eventForm, title: event.target.value })}
-                className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={addingEvent}
-              className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
-            >
-              {addingEvent ? "Ekleniyor..." : "Ekle"}
-            </button>
-          </form>
+              <div>
+                <label htmlFor="event_date" className="mb-1 block text-xs font-medium text-navy-600">
+                  Tarih
+                </label>
+                <input
+                  id="event_date"
+                  type="date"
+                  required
+                  value={eventForm.event_date}
+                  onChange={(event) => setEventForm({ ...eventForm, event_date: event.target.value })}
+                  className="rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
+                />
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <label htmlFor="event_title" className="mb-1 block text-xs font-medium text-navy-600">
+                  Gelişme Başlığı
+                </label>
+                <input
+                  id="event_title"
+                  required
+                  value={eventForm.title}
+                  onChange={(event) => setEventForm({ ...eventForm, title: event.target.value })}
+                  className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={addingEvent}
+                className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
+              >
+                {addingEvent ? "Ekleniyor..." : "Ekle"}
+              </button>
+            </form>
+          )}
           {eventError && <ErrorState message={eventError} />}
 
           {caseDetail.timeline.length === 0 ? (
@@ -478,43 +558,45 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
       {activeTab === "Görevler" && (
         <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          {!archived && (
           <form onSubmit={handleAddTask} className="flex flex-wrap items-end gap-3">
-            <div className="flex-1 min-w-[200px]">
-              <label htmlFor="task_title" className="mb-1 block text-xs font-medium text-navy-600">
-                Görev Başlığı
-              </label>
-              <input
-                id="task_title"
-                required
-                value={taskForm.title}
-                onChange={(event) => setTaskForm({ ...taskForm, title: event.target.value })}
-                className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-              />
-            </div>
-            <div>
-              <label htmlFor="task_due_date" className="mb-1 block text-xs font-medium text-navy-600">
-                Son Tarih (opsiyonel)
-              </label>
-              <input
-                id="task_due_date"
-                type="date"
-                value={taskForm.due_date}
-                onChange={(event) => setTaskForm({ ...taskForm, due_date: event.target.value })}
-                className="rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={addingTask}
-              className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
-            >
-              {addingTask ? "Ekleniyor..." : "Görev Ekle"}
-            </button>
-          </form>
+              <div className="flex-1 min-w-[200px]">
+                <label htmlFor="task_title" className="mb-1 block text-xs font-medium text-navy-600">
+                  Görev Başlığı
+                </label>
+                <input
+                  id="task_title"
+                  required
+                  value={taskForm.title}
+                  onChange={(event) => setTaskForm({ ...taskForm, title: event.target.value })}
+                  className="w-full rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
+                />
+              </div>
+              <div>
+                <label htmlFor="task_due_date" className="mb-1 block text-xs font-medium text-navy-600">
+                  Son Tarih (opsiyonel)
+                </label>
+                <input
+                  id="task_due_date"
+                  type="date"
+                  value={taskForm.due_date}
+                  onChange={(event) => setTaskForm({ ...taskForm, due_date: event.target.value })}
+                  className="rounded-lg border border-surface-border px-3 py-2 text-sm outline-none focus:border-accent-400"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={addingTask}
+                className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700 disabled:opacity-60"
+              >
+                {addingTask ? "Ekleniyor..." : "Görev Ekle"}
+              </button>
+            </form>
+          )}
           {taskError && <ErrorState message={taskError} />}
 
           {tasks.length === 0 ? (
-            <EmptyState message="Bu dava için henüz görev yok." hint="Yukarıdaki formla yeni bir görev ekleyin." />
+            <EmptyState message="Bu dava için henüz görev yok." hint={archived ? undefined : "Yukarıdaki formla yeni bir görev ekleyin."} />
           ) : (
             <ul className="divide-y divide-surface-border text-sm">
               {tasks.map((task) => (
@@ -523,6 +605,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
                     type="checkbox"
                     checked={task.status === "completed"}
                     onChange={() => handleToggleTask(task)}
+                    disabled={archived}
                     className="h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400"
                     aria-label={`${task.title} tamamlandı olarak işaretle`}
                   />
@@ -684,6 +767,52 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             </ul>
           )}
         </div>
+      )}
+      {dialog === "close" && (
+        <CaseCloseModal
+          caseId={caseId}
+          openingDate={caseDetail.opening_date ?? null}
+          pendingTaskCount={pendingTasks}
+          onClose={() => setDialog(null)}
+          onClosed={handleClosed}
+        />
+      )}
+      {dialog === "reopen" && (
+        <CaseConfirmModal
+          title="Dava yeniden açılsın mı?"
+          message="Sonuç ve karar bilgisi temizlenecek; kapanış kaydı zaman çizelgesinde kalır."
+          confirmLabel="Yeniden aç"
+          fallbackError="Dava yeniden açılamadı. Lütfen tekrar deneyin."
+          onClose={() => setDialog(null)}
+          onConfirm={async () => {
+            handleCaseSaved(await reopenCase(caseId));
+            setDialog(null);
+            void refreshCaseAndDocuments();
+          }}
+        />
+      )}
+      {dialog === "archive" && (
+        <CaseConfirmModal
+          title="Dava arşivlensin mi?"
+          message="Arşivli dava salt okunur olur."
+          confirmLabel="Arşivle"
+          fallbackError="Dava arşivlenemedi. Lütfen tekrar deneyin."
+          onClose={() => setDialog(null)}
+          onConfirm={async () => {
+            handleCaseSaved(await archiveCase(caseId));
+            setDialog(null);
+          }}
+        />
+      )}
+      {dialog === "edit" && (
+        <CaseEditModal
+          caseDetail={caseDetail}
+          onClose={() => setDialog(null)}
+          onSaved={(updated) => {
+            handleCaseSaved(updated);
+            setDialog(null);
+          }}
+        />
       )}
     </div>
   );

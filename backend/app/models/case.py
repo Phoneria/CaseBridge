@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -68,6 +68,10 @@ class Case(Base):
 
     status: Mapped[CaseStatus] = mapped_column(str_enum(CaseStatus), default=CaseStatus.DEVAM_EDEN, nullable=False)
     outcome: Mapped[CaseOutcome] = mapped_column(str_enum(CaseOutcome), default=CaseOutcome.ONGOING, nullable=False)
+    # Set by POST /cases/{id}/close, cleared by /reopen. Cases closed before
+    # the close endpoint existed keep both empty.
+    decision_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    closing_note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     case_value: Mapped[float] = mapped_column(Float, nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
@@ -98,6 +102,13 @@ class Case(Base):
         order_by="CaseParty.sort_order",
         lazy="selectin",
     )
+
+
+def case_is_active():
+    """SQL condition shared by the calendar, the reminders and the hearing lists:
+    the case is neither archived nor closed. A closed or archived case keeps its
+    next_hearing_date (data is not cleared) but no longer produces hearings."""
+    return and_(Case.is_archived.is_(False), Case.status != CaseStatus.KAPALI)
 
 
 class CaseParty(Base):

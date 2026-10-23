@@ -54,3 +54,30 @@ def test_case_repository_list_only_returns_own_firm_cases(db_session):
     results = repo.list_in_firm(firm_a.id)
     assert len(results) == 1
     assert results[0].case_number == "A-1"
+
+
+def test_hearing_window_excludes_closed_and_archived_cases(db_session):
+    from datetime import date, timedelta
+
+    from app.models.case import CaseStatus
+    from app.models.law_firm import LawFirm
+    from app.repositories.case_repository import CaseRepository
+
+    firm = LawFirm(name="Firm H")
+    db_session.add(firm)
+    db_session.flush()
+    soon = date.today() + timedelta(days=5)
+    db_session.add_all([
+        _make_case(firm.id, case_number="H/1", case_name="Açık", next_hearing_date=soon),
+        _make_case(firm.id, case_number="H/2", case_name="Kapalı", next_hearing_date=soon, status=CaseStatus.KAPALI),
+        _make_case(firm.id, case_number="H/3", case_name="Arşivli", next_hearing_date=soon,
+                   status=CaseStatus.KAPALI, is_archived=True),
+        _make_case(firm.id, case_number="H/4", case_name="Eski arşivli açık", next_hearing_date=soon,
+                   is_archived=True),
+    ])
+    db_session.commit()
+
+    repo = CaseRepository(db_session)
+    for include_archived in (False, True):
+        names = [c.case_name for c in repo.list_in_firm(firm.id, hearing_within_days=30, include_archived=include_archived)]
+        assert names == ["Açık"], include_archived
