@@ -21,6 +21,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import { AdminView } from "@/components/AdminView";
+import { ApiError } from "@/lib/apiError";
 
 const lawyers = [
   { id: "u1", full_name: "Emre Yılmaz", department: "Ticaret Hukuku", role: "lawyer", is_active: true },
@@ -62,6 +63,22 @@ describe("AdminView", () => {
     expect(screen.queryByText("Emsal İnceleme Atamaları")).not.toBeInTheDocument();
     await userEvent.selectOptions(screen.getByRole("combobox", { name: "Ticari Dava sorumlu avukatı" }), "u2");
     await waitFor(() => expect(assignCaseLawyer).toHaveBeenCalledWith("c1", "u2"));
+  });
+
+  it("shows an Arşivli badge instead of the assignment select for an archived case", async () => {
+    getCases.mockResolvedValue([{ ...caseRow, is_archived: true }]);
+    render(<AdminView />);
+    expect((await screen.findAllByText("Ticari Dava")).length).toBeGreaterThan(0);
+    expect(screen.getByText("Arşivli")).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Ticari Dava sorumlu avukatı" })).not.toBeInTheDocument();
+  });
+
+  it("shows the API message when assigning fails", async () => {
+    assignCaseLawyer.mockRejectedValue(new ApiError("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.", 409));
+    render(<AdminView />);
+    await screen.findAllByText("Ticari Dava");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Ticari Dava sorumlu avukatı" }), "u2");
+    expect(await screen.findByText("Arşivlenmiş dava değiştirilemez. Önce arşivden çıkarın.")).toBeInTheDocument();
   });
 
   it("shows the busiest lawyer's full name", async () => {

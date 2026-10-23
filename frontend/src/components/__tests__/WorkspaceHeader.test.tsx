@@ -36,13 +36,23 @@ describe("WorkspaceHeader", () => {
       gender: null, role: "admin", law_firm_id: "f1", is_active: true,
     }} />);
 
-    expect(screen.getByText("CaseBridge / Admin Paneli")).toBeInTheDocument();
+    const section = screen.getByRole("link", { name: "Admin Paneli" });
+    expect(section).toHaveAttribute("href", "/admin");
+    expect(section).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Takvim" })).toHaveAttribute("href", "/takvim");
     expect(screen.getByRole("link", { name: "Görevler" })).toHaveAttribute("href", "/gorevler");
     expect(screen.getByText("Ayşe Demir")).toBeInTheDocument();
     expect(screen.getByText("Yönetici")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Kullanıcı menüsü, Ayşe Demir" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("button", { name: "Bildirimler" })).toBeInTheDocument());
+  });
+
+  it("links the section name to its list from a page inside it", () => {
+    setUrl("/davalar/c1");
+    render(<WorkspaceHeader user={null} />);
+    const section = screen.getByRole("link", { name: "Davalar" });
+    expect(section).toHaveAttribute("href", "/davalar");
+    expect(section).not.toHaveAttribute("aria-current");
   });
 
   it("searches precedents and opens the selected decision", async () => {

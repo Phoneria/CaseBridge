@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.case_access import require_case_writable
 from app.api.deps import get_current_admin
 from app.db.session import get_db
 from app.models.case import Case
@@ -36,7 +37,8 @@ def assign_case_lawyer(
         Case.is_precedent.is_(False),
     ).first()
     if case is None:
-        raise HTTPException(status_code=404, detail="Case not found")
+        raise HTTPException(status_code=404, detail="Dava bulunamadı.")
+    require_case_writable(case)
     lawyer = db.query(User).filter(
         User.id == payload.assigned_lawyer_id,
         User.law_firm_id == admin.law_firm_id,
@@ -45,10 +47,11 @@ def assign_case_lawyer(
         User.password_set_at.isnot(None),
     ).first()
     if lawyer is None:
-        raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")
+        raise HTTPException(status_code=422, detail="Bu büroda aktif bir avukat seçin.")
     case.assigned_lawyer_id = lawyer.id
     db.commit()
     db.refresh(case)
+    db.expire(case, ["assigned_lawyer"])  # the view-only relationship still points at the previous lawyer
     return case
 
 

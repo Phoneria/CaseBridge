@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.case import Case, CaseEvent, CaseOutcome, CaseStatus, CaseType
 from app.repositories.case_event_repository import CaseEventRepository
 from app.repositories.case_repository import CaseRepository
+from app.services.case_events import clean_event_fields
 from app.schemas.case import CaseCreate, CaseEventCreate, CasePartyIn, CaseUpdate
 from app.services.case_parties import (
     PartyData,
@@ -119,10 +120,11 @@ class CaseService:
         return self.events.list_for_case(case_id, law_firm_id)
 
     def add_event(self, case: Case, payload: CaseEventCreate, created_by: Optional[str] = None) -> CaseEvent:
+        """Raises CaseEventInputError (Turkish detail) when the entry breaks an input rule."""
         event = CaseEvent(
             case_id=case.id,
             law_firm_id=case.law_firm_id,
             created_by=created_by,
-            **payload.model_dump(),
+            **clean_event_fields(payload),
         )
         return self.events.create(event)

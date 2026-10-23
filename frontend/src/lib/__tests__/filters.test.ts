@@ -156,3 +156,15 @@ describe("calendar, tabs and dates", () => {
     expect(daysUntil("2026-09-29", TODAY)).toBe(-1);
   });
 });
+
+describe("responsible lawyer filter", () => {
+  it("maps avukat=yok to the API's none and keeps ids as they are", () => {
+    expect(toCaseListFilters({ avukat: "yok" }).assigned_lawyer_id).toBe("none");
+    expect(toCaseListFilters({ avukat: "u1" }).assigned_lawyer_id).toBe("u1");
+  });
+
+  it("names the chip after the given label", () => {
+    expect(describeCaseListQuery({ avukat: "u1" }, "Ayşe Demir")).toContainEqual({ key: "avukat", label: "Sorumlu: Ayşe Demir" });
+    expect(describeCaseListQuery({ avukat: "u1" })).toContainEqual({ key: "avukat", label: "Sorumlu: Diğer avukat" });
+  });
+});

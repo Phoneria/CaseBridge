@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getCases } from "@/lib/api";
+import { getCases, getMe, listUsers } from "@/lib/api";
+import { rememberCaseListHref } from "@/lib/caseListMemory";
 import {
   CASE_LIST_PARAM_KEYS,
   CASE_STATUSES,
   CASE_TYPES,
   OUTCOME_SLUG_LABELS,
+  UNASSIGNED_SLUG,
   caseListHref,
   describeCaseListQuery,
   parseCaseListQuery,
@@ -18,7 +20,7 @@ import {
 } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { Case } from "@/types";
+import type { AppUser, Case } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
@@ -39,7 +41,33 @@ export function CaseListView() {
   const quickViewHref = useQuickViewHref();
   const query = useMemo(() => parseCaseListQuery(params), [params]);
   const queryKey = caseListHref(query);
-  const chips = describeCaseListQuery(query);
+
+  const [me, setMe] = useState<AppUser | null>(null);
+  const [lawyers, setLawyers] = useState<AppUser[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getMe().then((user) => active && setMe(user)).catch(() => {});
+    listUsers()
+      .then((users) => active && setLawyers(users.filter((user) => user.role === "lawyer").sort((a, b) => a.full_name.localeCompare(b.full_name, "tr"))))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const myId = me?.role === "lawyer" ? me.id : null;
+  const otherLawyers = lawyers.filter((lawyer) => lawyer.id !== myId);
+  const owner = query.avukat;
+  const ownerKnown = !owner || owner === UNASSIGNED_SLUG || owner === myId || otherLawyers.some((lawyer) => lawyer.id === owner);
+  const ownerLabel = !owner
+    ? undefined
+    : owner === UNASSIGNED_SLUG
+      ? "Atanmamış"
+      : owner === myId
+        ? "Benim davalarım"
+        : otherLawyers.find((lawyer) => lawyer.id === owner)?.full_name;
+  const chips = describeCaseListQuery(query, ownerLabel);
 
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +96,10 @@ export function CaseListView() {
         }
       });
   }
+
+  useEffect(() => {
+    rememberCaseListHref(queryKey);
+  }, [queryKey]);
 
   useEffect(() => {
     load();
@@ -152,6 +184,15 @@ export function CaseListView() {
             </option>
           ))}
         </select>
+        <select aria-label="Sorumlu filtresi" value={owner ?? ""} onChange={(e) => setParams({ avukat: e.target.value || null })} className={SELECT}>
+          <option value="">Tüm sorumlular</option>
+          {myId && <option value={myId}>Benim davalarım</option>}
+          {otherLawyers.map((lawyer) => (
+            <option key={lawyer.id} value={lawyer.id}>{lawyer.full_name}</option>
+          ))}
+          <option value={UNASSIGNED_SLUG}>Atanmamış</option>
+          {!ownerKnown && owner && <option value={owner}>Diğer avukat</option>}
+        </select>
         <label className="flex items-center gap-2 text-sm text-navy-700">
           <input
             type="checkbox"
@@ -181,6 +222,7 @@ export function CaseListView() {
                 <th className="px-4 py-3 font-medium">Dava Adı</th>
                 <th className="px-4 py-3 font-medium">Müvekkil</th>
                 <th className="px-4 py-3 font-medium">Kategori</th>
+                <th className="px-4 py-3 font-medium">Sorumlu</th>
                 <th className="px-4 py-3 font-medium">Durum</th>
                 <th className="px-4 py-3 font-medium">Sonraki Duruşma</th>
                 <th className="px-4 py-3 font-medium">
@@ -206,6 +248,7 @@ export function CaseListView() {
                       {CASE_TYPE_LABELS[c.case_type] ?? c.case_type}
                     </Link>
                   </td>
+                  <td className="px-4 py-3 text-navy-700">{c.assigned_lawyer_name ?? "—"}</td>
                   <td className="px-4 py-3">
                     <Link
                       href={caseListHref({ ...query, durum: c.status })}

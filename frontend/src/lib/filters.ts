@@ -15,6 +15,9 @@ export const CASE_STATUSES: CaseStatus[] = ["devam_eden", "durusma_bekleyen", "k
 /** The statuses a case can be created with and edited between ("kapali" only through the close action). */
 export const OPEN_CASE_STATUSES: OpenCaseStatus[] = ["devam_eden", "durusma_bekleyen", "karar_bekleyen"];
 
+/** URL value of the "Atanmamış" choice; the API's value is "none". */
+export const UNASSIGNED_SLUG = "yok";
+
 export const OUTCOME_SLUGS = {
   kazanilan: "won",
   kaybedilen: "lost",
@@ -126,7 +129,7 @@ export function toCaseListFilters(query: CaseListQuery): CaseListFilters {
   if (query.sonuc) filters.outcome = OUTCOME_SLUGS[query.sonuc];
   if (query.durusma === "yaklasan") filters.hearing_within_days = UPCOMING_HEARING_DAYS;
   if (query.arsiv === "dahil") filters.include_archived = true;
-  if (query.avukat) filters.assigned_lawyer_id = query.avukat;
+  if (query.avukat) filters.assigned_lawyer_id = query.avukat === UNASSIGNED_SLUG ? "none" : query.avukat;
   return filters;
 }
 
@@ -135,7 +138,7 @@ export interface FilterChip {
   label: string;
 }
 
-export function describeCaseListQuery(query: CaseListQuery): FilterChip[] {
+export function describeCaseListQuery(query: CaseListQuery, ownerLabel?: string): FilterChip[] {
   const chips: FilterChip[] = [];
   if (query.ara) chips.push({ key: "ara", label: `Arama: ${query.ara}` });
   if (query.kategori) chips.push({ key: "kategori", label: `Kategori: ${CASE_TYPE_LABELS[query.kategori]}` });
@@ -145,7 +148,7 @@ export function describeCaseListQuery(query: CaseListQuery): FilterChip[] {
   if (query.sonuc) chips.push({ key: "sonuc", label: `Sonuç: ${OUTCOME_SLUG_LABELS[query.sonuc]}` });
   if (query.durusma) chips.push({ key: "durusma", label: `Duruşma: önümüzdeki ${UPCOMING_HEARING_DAYS} gün` });
   if (query.arsiv) chips.push({ key: "arsiv", label: "Arşiv dahil" });
-  if (query.avukat) chips.push({ key: "avukat", label: "Avukat filtresi" });
+  if (query.avukat) chips.push({ key: "avukat", label: `Sorumlu: ${ownerLabel ?? "Diğer avukat"}` });
   return chips;
 }
 

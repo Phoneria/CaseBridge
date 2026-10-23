@@ -311,9 +311,21 @@ export async function unarchiveCase(id: string): Promise<Case> {
 
 export async function addCaseEvent(
   caseId: string,
-  payload: { event_date: string; title: string; description?: string; event_type?: CaseEventType | string }
+  payload: { event_date: string; title?: string; description?: string; event_type?: CaseEventType }
 ): Promise<CaseEvent> {
   return request(`/cases/${caseId}/events`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateCaseNote(
+  caseId: string,
+  eventId: string,
+  payload: { description?: string; event_date?: string }
+): Promise<CaseEvent> {
+  return request(`/cases/${caseId}/events/${eventId}`, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function deleteCaseNote(caseId: string, eventId: string): Promise<void> {
+  return request(`/cases/${caseId}/events/${eventId}`, { method: "DELETE" });
 }
 
 export async function listCaseTasks(caseId: string): Promise<Task[]> {

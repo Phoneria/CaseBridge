@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.models.case import CaseEvent
@@ -12,6 +14,23 @@ class CaseEventRepository:
         self.db.commit()
         self.db.refresh(event)
         return event
+
+    def get_in_case(self, event_id: str, case_id: str, law_firm_id: str) -> Optional[CaseEvent]:
+        return (
+            self.db.query(CaseEvent)
+            .filter(CaseEvent.id == event_id, CaseEvent.case_id == case_id, CaseEvent.law_firm_id == law_firm_id)
+            .first()
+        )
+
+    def save(self, event: CaseEvent) -> CaseEvent:
+        self.db.add(event)
+        self.db.commit()
+        self.db.refresh(event)
+        return event
+
+    def delete(self, event: CaseEvent) -> None:
+        self.db.delete(event)
+        self.db.commit()
 
     def list_for_case(self, case_id: str, law_firm_id: str) -> list[CaseEvent]:
         return (

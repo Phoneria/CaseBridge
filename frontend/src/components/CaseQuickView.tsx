@@ -232,6 +232,7 @@ function QuickViewBody({
         <Field label="Müvekkil" value={detail.client_name} />
         <Field label="Karşı taraf" value={detail.opposing_party} />
         <Field label="Mahkeme" value={detail.court} />
+        <Field label="Sorumlu avukat" value={detail.assigned_lawyer_name} />
         <div>
           <dt className="text-xs text-navy-500">Sonraki duruşma</dt>
           <dd className="mt-0.5 font-medium text-navy-800">

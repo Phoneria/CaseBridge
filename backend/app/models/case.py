@@ -1,6 +1,7 @@
 import enum
 import uuid
 from datetime import date, datetime, timezone
+from typing import Optional
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -62,6 +63,16 @@ class Case(Base):
     court: Mapped[str] = mapped_column(String(255), nullable=True)
     assigned_lawyer_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
     reviewer_lawyer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
+
+    # The responsible lawyer, for showing their name. viewonly: assignments keep writing
+    # assigned_lawyer_id; selectin: a case list loads every name in one extra query.
+    assigned_lawyer: Mapped[Optional["User"]] = relationship(
+        foreign_keys=[assigned_lawyer_id], lazy="selectin", viewonly=True,
+    )
+
+    @property
+    def assigned_lawyer_name(self) -> Optional[str]:
+        return self.assigned_lawyer.full_name if self.assigned_lawyer is not None else None
 
     opening_date: Mapped[date] = mapped_column(Date, default=lambda: datetime.now(timezone.utc).date())
     next_hearing_date: Mapped[date] = mapped_column(Date, nullable=True)
@@ -155,3 +166,10 @@ class CaseEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     case: Mapped["Case"] = relationship(back_populates="events")
+    # Who wrote the entry (None for imported or seeded rows). selectin: a timeline
+    # loads every author in one extra query.
+    author: Mapped[Optional["User"]] = relationship(foreign_keys=[created_by], lazy="selectin", viewonly=True)
+
+    @property
+    def created_by_name(self) -> Optional[str]:
+        return self.author.full_name if self.author is not None else None

@@ -13,7 +13,7 @@ ClosingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length
 
 class CaseEventCreate(BaseModel):
     event_date: date
-    title: str
+    title: Optional[str] = None
     description: Optional[str] = None
     event_type: CaseEventType = CaseEventType.OTHER
 
@@ -26,7 +26,16 @@ class CaseEventOut(BaseModel):
     title: str
     description: Optional[str] = None
     event_type: CaseEventType
+    created_by: Optional[str] = None
+    created_by_name: Optional[str] = None
     created_at: datetime
+
+
+class CaseNoteUpdate(BaseModel):
+    """PATCH /cases/{id}/events/{event_id}: a note's text and/or date. Missing or null keeps the value."""
+
+    description: Optional[str] = None
+    event_date: Optional[date] = None
 
 
 class CasePartyIn(BaseModel):
@@ -158,6 +167,7 @@ class CaseOut(BaseModel):
     case_type: CaseType
     court: Optional[str] = None
     assigned_lawyer_id: Optional[str] = None
+    assigned_lawyer_name: Optional[str] = None
     reviewer_lawyer_id: Optional[str] = None
     opening_date: date
     next_hearing_date: Optional[date] = None
