@@ -8,6 +8,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { getMe } from "@/lib/api";
+import { ApiError } from "@/lib/apiError";
+import { FIRM_SUSPENDED } from "@/lib/firmStatus";
 import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
@@ -39,7 +41,12 @@ export function AppShell({ children, platform = false }: { children: React.React
       }
       setUser(result);
       setReady(true);
-    }).catch(() => router.replace("/login"));
+    }).catch((err) => {
+      // A suspended firm: api.ts is already loading /login?askida=1; a client
+      // redirect here would race it and drop the notice.
+      if (err instanceof ApiError && err.message === FIRM_SUSPENDED) return;
+      router.replace("/login");
+    });
   }, [router, platform, pathname]);
 
   // The account page announces profile changes so the header stays current.

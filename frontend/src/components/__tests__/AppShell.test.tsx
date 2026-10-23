@@ -11,6 +11,7 @@ vi.mock("@/components/WorkspaceHeader", () => ({ WorkspaceHeader: () => null }))
 vi.mock("@/components/CaseQuickView", () => ({ CaseQuickView: () => null }));
 
 import { AppShell } from "@/components/AppShell";
+import { ApiError } from "@/lib/apiError";
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const LAWYER = { id: "l1", role: "lawyer", is_platform_admin: false };
@@ -48,6 +49,24 @@ describe("AppShell", () => {
 
     await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/dashboard"));
     expect(screen.queryByText("panel")).not.toBeInTheDocument();
+  });
+
+  it("leaves the suspended-firm redirect to the API layer", async () => {
+    setUrl("/dashboard");
+    getMe.mockRejectedValue(new ApiError("Büronuzun erişimi askıya alındı.", 403));
+    render(<AppShell><p>sayfa</p></AppShell>);
+
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it("still sends the user to login for any other getMe failure", async () => {
+    setUrl("/dashboard");
+    getMe.mockRejectedValue(new ApiError("Oturum süresi doldu.", 401));
+    render(<AppShell><p>sayfa</p></AppShell>);
+
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/login"));
   });
 
   it("shows the platform panel to a platform admin", async () => {
