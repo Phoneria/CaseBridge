@@ -10,6 +10,7 @@ from app.api.routes import activity, admin, admin_users, analytics, auth, calend
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
 from app.core.log_redaction import install_access_log_redaction
+from app.services.platform_bootstrap import run_platform_bootstrap
 from app.services.simulation_worker import start_worker_thread
 from app.services.courtroom_worker import start_courtroom_worker_thread
 from app.services.reminder_worker import should_start_reminder_worker, start_reminder_worker_thread
@@ -32,6 +33,11 @@ async def lifespan(app: FastAPI):
         # A real provider was selected but is misconfigured - this must be
         # visible at startup, never silently degraded to MockProvider.
         logger.error("AI provider misconfigured: %s", ai_status["error"])
+
+    # The CaseBridge team's platform admins (PLATFORM_ADMIN_EMAILS). Not in
+    # automated tests: they call ensure_platform_admins on their own session.
+    if settings.env != "test":
+        run_platform_bootstrap()
 
     # Phase 3 - in-process simulation worker. NOT started during
     # automated tests: tests drive process_one_pending_simulation
