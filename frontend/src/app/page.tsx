@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getMe } from "@/lib/api";
+import { homePath } from "@/lib/home";
 
 export default function RootPage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function RootPage() {
       router.replace("/login");
       return;
     }
-    getMe().then((user) => router.replace(user.role === "admin" ? "/admin" : "/dashboard"))
+    getMe().then((user) => router.replace(homePath(user)))
       .catch(() => router.replace("/login"));
   }, [router]);
 

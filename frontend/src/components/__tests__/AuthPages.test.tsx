@@ -54,8 +54,17 @@ describe("LoginView", () => {
     expect(await screen.findByText("Demo hesapları")).toBeInTheDocument();
     expect(screen.getByText("Yönetici: admin@demo.casebridge.dev")).toBeInTheDocument();
     expect(screen.getByText("Avukat: avukat@demo.casebridge.dev")).toBeInTheDocument();
+    expect(screen.getByText("Platform: platform@demo.casebridge.dev")).toBeInTheDocument();
     expect(screen.getByText("Şifre: demo1234")).toBeInTheDocument();
     expect(screen.getByLabelText("E-posta")).toHaveValue("");
+  });
+
+  it("shows the suspension notice when sent back from a suspended firm", async () => {
+    window.history.pushState({}, "", "/login?askida=1");
+    render(<LoginView />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Büronuzun erişimi askıya alındı.");
+    window.history.pushState({}, "", "/login");
   });
 
   it("works without a hint when the config call fails", async () => {
@@ -70,9 +79,10 @@ describe("LoginView", () => {
   it.each([
     ["admin", "/admin"],
     ["lawyer", "/dashboard"],
+    ["platform", "/platform"],
   ])("logs in a %s and goes to %s", async (role, destination) => {
     login.mockResolvedValue({ access_token: "tok" });
-    getMe.mockResolvedValue({ id: "u1", role });
+    getMe.mockResolvedValue(role === "platform" ? { id: "u1", role: "admin", is_platform_admin: true } : { id: "u1", role });
     const user = userEvent.setup();
     render(<LoginView />);
 

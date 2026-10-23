@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AUTH_BUTTON, AUTH_INPUT, AUTH_LABEL, AuthCard } from "@/components/auth/AuthCard";
 import { getMe, getTokenInfo, setPassword } from "@/lib/api";
 import { ApiError } from "@/lib/apiError";
+import { homePath } from "@/lib/home";
 import { PASSWORD_HINT, validateNewPassword } from "@/lib/passwordRules";
 import { userMessage } from "@/lib/userMessages";
 import type { TokenInfo } from "@/types";
@@ -73,7 +74,7 @@ export function SetPasswordView() {
     // The password is set and the new token stored: continue to the right home page.
     try {
       const user = await getMe();
-      router.replace(user.role === "admin" ? "/admin" : "/dashboard");
+      router.replace(homePath(user));
     } catch {
       router.replace("/login");
     }

@@ -10,6 +10,7 @@ import type { AppUser } from "@/types";
 
 const PAGE_TITLES: Record<string, string> = {
   "/admin": "Admin Paneli",
+  "/platform": "Büro Yönetimi",
   "/dashboard": "Dashboard",
   "/davalar": "Davalar",
   "/emsaller": "Emsal Kararlar",

@@ -71,4 +71,15 @@ describe("Sidebar", () => {
     expect(screen.getByText("CaseBridge")).toBeInTheDocument();
     expect(screen.queryByText("CB")).not.toBeInTheDocument();
   });
+
+  it("shows only the platform items to a platform admin", () => {
+    pathname = "/platform";
+    render(<Sidebar role="admin" platform />);
+
+    expect(screen.getByRole("link", { name: /Büro Yönetimi/ })).toHaveAttribute("href", "/platform");
+    expect(screen.getByRole("link", { name: /Hesabım/ })).toHaveAttribute("href", "/hesabim");
+    expect(screen.queryByRole("link", { name: /Davalar/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Admin Paneli/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "CaseBridge AI" })).not.toBeInTheDocument();
+  });
 });

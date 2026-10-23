@@ -1,4 +1,9 @@
 import type {
+  PlatformAdminInvite,
+  PlatformAdminPayload,
+  PlatformFirm,
+  PlatformFirmCreated,
+  PlatformFirmPayload,
   ChatConversation,
   ChatConversationSummary,
   ChatMessage,
@@ -55,6 +60,9 @@ import type {
 } from "@/types";
 
 import { ApiError } from "@/lib/apiError";
+import { FIRM_SUSPENDED } from "@/lib/firmStatus";
+
+export { FIRM_SUSPENDED };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -94,6 +102,14 @@ async function throwApiError(response: Response, path: string): Promise<never> {
     clearToken();
     if (typeof window !== "undefined") {
       window.location.href = "/login";
+    }
+  }
+
+  if (response.status === 403 && detail === FIRM_SUSPENDED && !NO_SESSION_REDIRECT_PATHS.includes(path)) {
+    // The firm was suspended: the session is over. The login page shows why.
+    clearToken();
+    if (typeof window !== "undefined") {
+      window.location.href = "/login?askida=1";
     }
   }
 
@@ -207,6 +223,30 @@ export async function deactivateUser(id: string, transferTo?: string): Promise<D
 
 export async function activateUser(id: string): Promise<ManagedUser> {
   return request(`/admin/users/${id}/activate`, { method: "POST" });
+}
+
+export async function listPlatformFirms(): Promise<PlatformFirm[]> {
+  return request("/platform/firms");
+}
+
+export async function createPlatformFirm(payload: PlatformFirmPayload): Promise<PlatformFirmCreated> {
+  return request("/platform/firms", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function addPlatformFirmAdmin(firmId: string, payload: PlatformAdminPayload): Promise<PlatformAdminInvite> {
+  return request(`/platform/firms/${firmId}/admins`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function resendPlatformAdminInvite(firmId: string, userId: string): Promise<PlatformAdminInvite> {
+  return request(`/platform/firms/${firmId}/admins/${userId}/invite`, { method: "POST" });
+}
+
+export async function suspendPlatformFirm(firmId: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/suspend`, { method: "POST" });
+}
+
+export async function activatePlatformFirm(firmId: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/activate`, { method: "POST" });
 }
 
 export async function listUsers(): Promise<AppUser[]> {
