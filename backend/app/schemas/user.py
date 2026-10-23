@@ -1,5 +1,6 @@
 from app.models.user import UserRole
-from pydantic import BaseModel, ConfigDict
+from app.schemas.text_rules import clean_department, clean_full_name
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class UserOut(BaseModel):
@@ -13,3 +14,20 @@ class UserOut(BaseModel):
     role: UserRole
     law_firm_id: str
     is_active: bool
+
+
+class ProfileUpdate(BaseModel):
+    """What a user may change about themselves (PATCH /users/me)."""
+
+    full_name: str | None = None
+    department: str | None = None
+
+    @field_validator("full_name")
+    @classmethod
+    def _full_name(cls, value: str | None) -> str:
+        return clean_full_name(value)
+
+    @field_validator("department")
+    @classmethod
+    def _department(cls, value: str | None) -> str | None:
+        return clean_department(value)

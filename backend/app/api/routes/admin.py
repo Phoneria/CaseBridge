@@ -14,9 +14,13 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/lawyers", response_model=list[UserOut])
 def list_lawyers(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """The lawyers cases can be given to: active and past the invitation
+    (a lawyer who has not chosen a password yet is not assignable)."""
     return db.query(User).filter(
         User.law_firm_id == admin.law_firm_id,
         User.role == UserRole.LAWYER,
+        User.is_active.is_(True),
+        User.password_set_at.isnot(None),
     ).order_by(User.full_name).all()
 
 
@@ -38,6 +42,7 @@ def assign_case_lawyer(
         User.law_firm_id == admin.law_firm_id,
         User.role == UserRole.LAWYER,
         User.is_active.is_(True),
+        User.password_set_at.isnot(None),
     ).first()
     if lawyer is None:
         raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")
@@ -65,6 +70,7 @@ def assign_precedent_reviewer(
         User.law_firm_id == admin.law_firm_id,
         User.role == UserRole.LAWYER,
         User.is_active.is_(True),
+        User.password_set_at.isnot(None),
     ).first()
     if reviewer is None:
         raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")

@@ -9,6 +9,7 @@ const FRONTEND_URL = `http://127.0.0.1:${FRONTEND_PORT}`;
 const backendDir = path.resolve(__dirname, "../../backend");
 const frontendDir = path.resolve(__dirname, "../../frontend");
 const e2eDbPath = path.resolve(__dirname, "e2e.db");
+const e2eMailDir = path.resolve(__dirname, "mail");
 
 export default defineConfig({
   testDir: "./specs",
@@ -42,7 +43,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `sh -c "rm -f '${e2eDbPath}' && .venv/bin/python -m app.db.seed && .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port ${BACKEND_PORT}"`,
+      command: `sh -c "rm -rf '${e2eDbPath}' '${e2eMailDir}' && .venv/bin/python -m app.db.seed && .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port ${BACKEND_PORT}"`,
       cwd: backendDir,
       url: `${BACKEND_URL}/health`,
       timeout: 60_000,
@@ -52,6 +53,9 @@ export default defineConfig({
         JWT_SECRET: "e2e-test-secret",
         EXTRA_CORS_ORIGINS: FRONTEND_URL,
         CHAT_PROVIDER: "mock",
+        EMAIL_BACKEND: "file",
+        EMAIL_FILE_DIR: e2eMailDir,
+        FRONTEND_BASE_URL: FRONTEND_URL,
       },
     },
     {

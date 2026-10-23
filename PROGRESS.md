@@ -215,3 +215,11 @@ Implemented:
 - `TEST_REPORT.md` — final deliverable per spec: suite-by-suite pass/fail/skip counts, what each suite covers, and an explicit statement that the real-OpenAI test was not executed (rather than silently omitting it or claiming a pass).
 
 This is the last milestone in the build plan. CaseBridge MVP is feature-complete per the original spec's Definition of Done: a user can log in, create a case, upload a document, run a 4-perspective AI simulation and get a labeled-as-estimate structured result, add a development, generate a handover report, and view firm-wide analytics including drill-down into lost cases — all exercised by a real, passing E2E run, not just unit-level mocks.
+
+## User management (invites, password reset, deactivation)
+Status: COMPLETE
+
+- Admins invite, edit, deactivate (with hand-over) and re-activate users from Ayarlar > Kullanıcılar; users set their own password from an e-mailed one-time link, can reset it from the login page, and change it under Hesabım. Sessions are bound to the password (JWT `pwd` claim).
+- The login form is empty; the demo accounts hint shows only in demo mode (`GET /auth/config`).
+- Real-data mode no longer creates a demo firm or users; `python -m app.db.create_admin` creates the first administrator and `import_cases` takes `--firm` and `--lawyer`.
+- New E2E spec `10-user-management.spec.ts` (EMAIL_BACKEND=file, reads the invite link from the newest `.eml`).

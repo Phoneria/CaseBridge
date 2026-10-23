@@ -125,3 +125,90 @@ def two_firms_two_users(db_session):
         "user_b": user_b,
         "password": "password123",
     }
+
+
+class MailOutbox:
+    """The .eml files written by EMAIL_BACKEND=file during a test."""
+
+    def __init__(self, directory):
+        self.directory = directory
+
+    def messages(self, to=None):
+        from email import policy
+        from email.parser import BytesParser
+
+        parsed = [
+            BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+            for path in sorted(self.directory.glob("*.eml"))
+        ] if self.directory.exists() else []
+        return [m for m in parsed if to is None or m["To"] == to]
+
+    def latest_token(self, to):
+        """The token in the newest link e-mailed to `to`."""
+        import re
+
+        messages = self.messages(to)
+        assert messages, f"no e-mail was sent to {to}"
+        body = messages[-1].get_body(preferencelist=("plain",)).get_content()
+        match = re.search(r"/sifre-belirle\?token=([A-Za-z0-9_-]+)", body)
+        assert match, body
+        return match.group(1)
+
+
+@pytest.fixture()
+def mail_outbox(tmp_path, monkeypatch):
+    """Switches the e-mail backend to files in a temp directory."""
+    from app.core.config import settings
+
+    directory = tmp_path / "outbox"
+    monkeypatch.setattr(settings, "email_backend", "file")
+    monkeypatch.setattr(settings, "email_file_dir", str(directory))
+    return MailOutbox(directory)
+
+
+@pytest.fixture()
+def office(db_session):
+    """Two firms for user-management tests. Firm A: an admin and two lawyers;
+    firm B: an admin and a lawyer. Every password is `password` below."""
+    from types import SimpleNamespace
+
+    from app.core.security import hash_password
+    from app.models.law_firm import LawFirm
+    from app.models.user import User, UserRole
+
+    password = "password123"
+    firm_a = LawFirm(name="Demir Hukuk")
+    firm_b = LawFirm(name="Kaya Hukuk")
+    db_session.add_all([firm_a, firm_b])
+    db_session.flush()
+
+    def make(firm, email, name, role):
+        user = User(
+            law_firm_id=firm.id, email=email, hashed_password=hash_password(password),
+            full_name=name, role=role, is_active=True,
+        )
+        db_session.add(user)
+        return user
+
+    admin_a = make(firm_a, "yonetici.a@example.com", "Yönetici A", UserRole.ADMIN)
+    lawyer_a1 = make(firm_a, "ayse.a@example.com", "Ayşe Avukat", UserRole.LAWYER)
+    lawyer_a2 = make(firm_a, "mehmet.a@example.com", "Mehmet Avukat", UserRole.LAWYER)
+    admin_b = make(firm_b, "yonetici.b@example.com", "Yönetici B", UserRole.ADMIN)
+    lawyer_b = make(firm_b, "ali.b@example.com", "Ali Avukat", UserRole.LAWYER)
+    db_session.commit()
+    return SimpleNamespace(
+        password=password, firm_a=firm_a, firm_b=firm_b, admin_a=admin_a, lawyer_a1=lawyer_a1,
+        lawyer_a2=lawyer_a2, admin_b=admin_b, lawyer_b=lawyer_b,
+    )
+
+
+@pytest.fixture()
+def auth_headers(client, office):
+    """auth_headers(user) -> Authorization header for one of the office users."""
+
+    def _headers(user):
+        response = client.post("/auth/login", json={"email": user.email, "password": office.password})
+        assert response.status_code == 200, response.text
+        return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+    return _headers

@@ -1,36 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { getAiStatus, getMe, getNotificationStatus, listUsers, sendTestEmail } from "@/lib/api";
+import { getAiStatus, getMe, getNotificationStatus, sendTestEmail } from "@/lib/api";
+import { userMessage } from "@/lib/userMessages";
 import type { AIStatus, AppUser, NotificationStatus } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
+import { UsersPanel } from "@/components/users/UsersPanel";
 
-const ROLE_LABELS: Record<string, string> = { admin: "Yönetici", lawyer: "Avukat" };
 const EMAIL_BACKEND_LABELS: Record<NotificationStatus["email_backend"], string> = {
   smtp: "SMTP",
   console: "Konsol (yalnızca sunucu logu)",
+  file: "Dosya (.eml, yalnızca geliştirme)",
 };
 
 type TestEmailState = { kind: "idle" } | { kind: "sending" } | { kind: "done"; message: string } | { kind: "error"; message: string };
 
 export function SettingsView() {
   const [me, setMe] = useState<AppUser | null>(null);
-  const [users, setUsers] = useState<AppUser[]>([]);
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
   const [notifications, setNotifications] = useState<NotificationStatus | null>(null);
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sendingTest = useRef(false);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    Promise.all([getMe(), listUsers(), getAiStatus(), getNotificationStatus()])
-      .then(([meResult, usersResult, aiStatusResult, notificationResult]) => {
+    Promise.all([getMe(), getAiStatus(), getNotificationStatus()])
+      .then(([meResult, aiStatusResult, notificationResult]) => {
         setMe(meResult);
-        setUsers(usersResult);
         setAiStatus(aiStatusResult);
         setNotifications(notificationResult);
       })
@@ -39,6 +40,10 @@ export function SettingsView() {
   }, []);
 
   async function sendTest() {
+    if (sendingTest.current) return;
+    sendingTest.current = true;
+    // Read before the await: the address the server sends to is this user's.
+    const recipient = me?.email ?? "hesabınıza";
     setTestEmail({ kind: "sending" });
     try {
       const result = await sendTestEmail();
@@ -47,10 +52,14 @@ export function SettingsView() {
         message:
           result.backend === "console"
             ? "Test e-postası sunucu loguna yazıldı (konsol modu)."
-            : `Test e-postası ${me?.email ?? "hesabınıza"} adresine gönderildi.`,
+            : result.backend === "file"
+              ? "Test e-postası dosyaya yazıldı (dosya modu)."
+              : `Test e-postası ${recipient} adresine gönderildi.`,
       });
     } catch (err) {
-      setTestEmail({ kind: "error", message: err instanceof Error ? err.message : "E-posta gönderilemedi." });
+      setTestEmail({ kind: "error", message: userMessage(err, "Test e-postası gönderilemedi. Lütfen tekrar deneyin.") });
+    } finally {
+      sendingTest.current = false;
     }
   }
 
@@ -101,8 +110,8 @@ export function SettingsView() {
             <button
               type="button"
               onClick={sendTest}
-              disabled={testEmail.kind === "sending"}
-              className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted disabled:opacity-60"
+              aria-disabled={testEmail.kind === "sending"}
+              className="rounded-xl border border-surface-border px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted aria-disabled:opacity-60"
             >
               {testEmail.kind === "sending" ? "Gönderiliyor..." : "Test e-postası gönder"}
             </button>
@@ -120,24 +129,14 @@ export function SettingsView() {
         </section>
       )}
 
-      <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-        <p className="mb-3 text-sm font-medium text-navy-700">Kullanıcı Yönetimi</p>
-        {isAdmin ? (
-          <ul className="divide-y divide-surface-border text-sm">
-            {users.map((user) => (
-              <li key={user.id} className="flex items-center justify-between py-2">
-                <div>
-                  <p className="font-medium text-navy-800">{user.full_name}</p>
-                  <p className="text-xs text-navy-500">{user.email}</p>
-                </div>
-                <span className="text-xs text-navy-500">{ROLE_LABELS[user.role] ?? user.role}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
+      {isAdmin && me ? (
+        <UsersPanel currentUser={me} />
+      ) : (
+        <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          <p className="mb-3 text-sm font-medium text-navy-700">Kullanıcı Yönetimi</p>
           <p className="text-sm text-navy-500">Kullanıcı yönetimi sadece yöneticiler içindir.</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

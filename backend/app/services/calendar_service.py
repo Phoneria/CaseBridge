@@ -14,7 +14,7 @@ from app.models.calendar import CalendarEvent, CalendarEventType
 from app.models.case import Case
 from app.models.task import Task, TaskStatus
 from app.models.user import User
-from app.repositories.user_repository import UserRepository
+from app.services.assignees import find_assignable_in_firm
 from app.schemas.calendar import CalendarEventCreate, CalendarEventUpdate, CalendarItemOut
 
 
@@ -70,7 +70,10 @@ class CalendarService:
 
     def update_event(self, event: CalendarEvent, payload: CalendarEventUpdate, today: date) -> CalendarEvent:
         updates = payload.model_dump(exclude_unset=True)
-        self._check_references(event.law_firm_id, updates.get("case_id"), updates.get("assignee_id"))
+        # Only a new assignee is checked: an event whose assignee was
+        # deactivated since can still be edited.
+        new_assignee = updates.get("assignee_id") if updates.get("assignee_id") != event.assignee_id else None
+        self._check_references(event.law_firm_id, updates.get("case_id"), new_assignee)
         old_hearing = _hearing_anchor(event)
         for field, value in updates.items():
             setattr(event, field, value)
@@ -196,7 +199,8 @@ class CalendarService:
             case = self._case_in_firm(case_id, law_firm_id)
             if case is None:
                 raise CalendarReferenceNotFound("Dava bulunamadı")
-        if assignee_id is not None and UserRepository(self.db).get_by_id_in_firm(assignee_id, law_firm_id) is None:
+        # AssigneeNotAssignable (422) for a pending or inactive user.
+        if assignee_id is not None and find_assignable_in_firm(self.db, assignee_id, law_firm_id) is None:
             raise CalendarReferenceNotFound("Kullanıcı bulunamadı")
         return case
 

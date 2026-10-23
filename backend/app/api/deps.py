@@ -13,7 +13,7 @@ from app.ai.case_intake import UNCONFIGURED_MESSAGE
 from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_case_intake_provider, get_llm_provider
 from app.ai.providers.base import LLMProvider
-from app.core.security import decode_access_token
+from app.core.security import decode_access_token, password_epoch
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
@@ -46,6 +46,18 @@ def get_current_user(
 
     user = db.query(User).filter(User.id == user_id).first()
     if user is None or not user.is_active:
+        raise _CREDENTIALS_EXCEPTION
+
+    # "pwd" is the password_set_at of the session's login, in whole seconds.
+    # Setting or changing the password moves it, which ends every older
+    # session. Tokens without it (issued before this check existed) and
+    # users who have no password yet are rejected: the user logs in again.
+    pwd = payload.get("pwd")
+    if (
+        user.password_set_at is None
+        or isinstance(pwd, bool)
+        or pwd != password_epoch(user.password_set_at)
+    ):
         raise _CREDENTIALS_EXCEPTION
     return user
 

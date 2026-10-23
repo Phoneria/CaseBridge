@@ -6,6 +6,7 @@ its id. This is the pattern later Case/Document repositories follow.
 """
 from typing import Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.user import User
@@ -16,7 +17,9 @@ class UserRepository:
         self.db = db
 
     def get_by_email(self, email: str) -> Optional[User]:
-        return self.db.query(User).filter(User.email == email).first()
+        """Case-insensitive: e-mail addresses are stored lower-case, but older
+        rows may not be."""
+        return self.db.query(User).filter(func.lower(User.email) == email.strip().lower()).first()
 
     def get_by_id_in_firm(self, user_id: str, law_firm_id: str) -> Optional[User]:
         return (
@@ -26,4 +29,13 @@ class UserRepository:
         )
 
     def list_in_firm(self, law_firm_id: str) -> list[User]:
-        return self.db.query(User).filter(User.law_firm_id == law_firm_id).all()
+        """Active users who have chosen a password."""
+        return (
+            self.db.query(User)
+            .filter(
+                User.law_firm_id == law_firm_id,
+                User.is_active.is_(True),
+                User.password_set_at.isnot(None),
+            )
+            .all()
+        )

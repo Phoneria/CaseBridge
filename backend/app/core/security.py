@@ -2,6 +2,7 @@
 
 Never log tokens, passwords, or the JWT secret.
 """
+import calendar
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -19,6 +20,13 @@ def hash_password(plain_password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return _pwd_context.verify(plain_password, hashed_password)
+
+
+def password_epoch(password_set_at: datetime) -> int:
+    """The value of the JWT "pwd" claim: users.password_set_at (naive UTC) as
+    integer seconds since the epoch. A token only works while it equals the
+    user's current value, so setting a new password ends every older session."""
+    return calendar.timegm(password_set_at.utctimetuple())
 
 
 def create_access_token(subject: str, extra_claims: Optional[dict[str, Any]] = None) -> str:
@@ -41,6 +49,7 @@ def decode_access_token(token: str) -> dict[str, Any]:
 __all__ = [
     "hash_password",
     "verify_password",
+    "password_epoch",
     "create_access_token",
     "decode_access_token",
     "JWTError",

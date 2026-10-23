@@ -1,7 +1,7 @@
 """Turkish e-mail content for notifications (test e-mail, reminders)."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from html import escape
 from typing import TYPE_CHECKING
 
@@ -74,3 +74,64 @@ def build_reminder_email(due: DueReminder, today: date) -> EmailMessage:
         + f'</p><p style="color:#6b7280;font-size:12px">{FOOTER}</p>'
     )
     return EmailMessage(to=due.recipient_email, subject=subject, text=text, html=html)
+
+
+def password_link(token: str) -> str:
+    return f"{settings.frontend_base_url.rstrip('/')}/sifre-belirle?token={token}"
+
+
+def validity_phrase(lifetime: timedelta) -> str:
+    minutes = int(lifetime.total_seconds() // 60)
+    if minutes % 60 == 0:
+        return f"{minutes // 60} saat"
+    return f"{minutes} dakika"
+
+
+def build_invite_email(*, user: User, firm_name: str, inviter_name: str | None, token: str) -> EmailMessage:
+    link = password_link(token)
+    validity = validity_phrase(timedelta(hours=settings.invite_token_hours))
+    if inviter_name:
+        intro = f"{inviter_name} sizi {firm_name} bürosunun CaseBridge çalışma alanına davet etti."
+    else:
+        intro = f"{firm_name} bürosunun CaseBridge çalışma alanına davet edildiniz."
+    expiry = f"Bu bağlantı {validity} geçerlidir ve yalnızca bir kez kullanılabilir."
+    text = (
+        f"Merhaba {user.full_name},\n\n{intro}\n\n"
+        f"Şifrenizi belirleyin: {link}\n\n{expiry}\n\n{FOOTER}\n"
+    )
+    html = (
+        f"<p>Merhaba {escape(user.full_name)},</p><p>{escape(intro)}</p>"
+        f'<p><a href="{escape(link)}">Şifrenizi belirleyin</a></p><p>{escape(expiry)}</p>'
+        f'<p style="color:#6b7280;font-size:12px">{FOOTER}</p>'
+    )
+    return EmailMessage(
+        to=user.email,
+        subject=f"CaseBridge davetiniz — {firm_name}",
+        text=text,
+        html=html,
+        show_body_in_dev_console=True,
+    )
+
+
+def build_reset_email(*, user: User, token: str) -> EmailMessage:
+    link = password_link(token)
+    validity = validity_phrase(timedelta(minutes=settings.reset_token_minutes))
+    expiry = f"Bu bağlantı {validity} geçerlidir ve yalnızca bir kez kullanılabilir."
+    ignore = "Bu isteği siz yapmadıysanız dikkate almayın."
+    text = (
+        f"Merhaba {user.full_name},\n\nCaseBridge şifrenizi sıfırlamak için bağlantıyı kullanın.\n\n"
+        f"Şifrenizi belirleyin: {link}\n\n{expiry}\n{ignore}\n\n{FOOTER}\n"
+    )
+    html = (
+        f"<p>Merhaba {escape(user.full_name)},</p>"
+        "<p>CaseBridge şifrenizi sıfırlamak için bağlantıyı kullanın.</p>"
+        f'<p><a href="{escape(link)}">Şifrenizi belirleyin</a></p><p>{escape(expiry)}<br>{escape(ignore)}</p>'
+        f'<p style="color:#6b7280;font-size:12px">{FOOTER}</p>'
+    )
+    return EmailMessage(
+        to=user.email,
+        subject="CaseBridge şifre sıfırlama",
+        text=text,
+        html=html,
+        show_body_in_dev_console=True,
+    )
