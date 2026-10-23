@@ -143,6 +143,14 @@ def test_inactive_recipient_is_skipped(world):
     assert ReminderService(world["db"]).collect_due(NOW) == []
 
 
+def test_recipients_of_a_suspended_firm_are_skipped(world):
+    add_event(world, datetime(2026, 10, 3, 10, 0), [1], assignee_id=world["lawyer"].id)
+    world["firm"].is_active = False
+    world["db"].commit()
+
+    assert ReminderService(world["db"]).collect_due(NOW) == []
+
+
 def test_all_day_events_have_no_time(world):
     add_event(world, datetime(2026, 10, 3, 0, 0), [1], all_day=True)
     [due] = ReminderService(world["db"]).collect_due(NOW)

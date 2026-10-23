@@ -20,6 +20,7 @@ from app.schemas.auth import (
 )
 from app.services.account_service import apply_new_password, deliver, prepare_reset_email
 from app.services.auth_service import AuthService
+from app.services.firm_access import FIRM_SUSPENDED, firm_is_open
 from app.services.password_policy import PasswordPolicyError, validate_password
 from app.services.user_token_service import consume_token, find_usable_token
 
@@ -50,6 +51,9 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="E-posta veya şifre hatalı.",
         )
+    # Only someone who knows the password learns that the firm is suspended.
+    if not firm_is_open(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=FIRM_SUSPENDED)
     token = service.issue_token_for(user)
     return TokenResponse(access_token=token)
 
@@ -88,7 +92,7 @@ def forgot_password(
     record_attempt(limiter_key)
 
     user = UserRepository(db).get_by_email(payload.email)
-    if user is not None and user.is_active and user.password_set_at is not None:
+    if user is not None and user.is_active and user.password_set_at is not None and firm_is_open(user):
         background_tasks.add_task(deliver, prepare_reset_email(db, user, created_by=None))
     return MessageOut(message=FORGOT_PASSWORD_MESSAGE)
 

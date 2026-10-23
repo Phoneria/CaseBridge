@@ -17,6 +17,7 @@ from app.core.security import decode_access_token, password_epoch
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
+from app.services.firm_access import FIRM_SUSPENDED, firm_is_open
 
 logger = logging.getLogger("casebridge")
 
@@ -59,6 +60,10 @@ def get_current_user(
         or pwd != password_epoch(user.password_set_at)
     ):
         raise _CREDENTIALS_EXCEPTION
+    if not firm_is_open(user):
+        # 403, not 401: the session is valid, the firm is suspended. The
+        # frontend shows the message on the login page.
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=FIRM_SUSPENDED)
     return user
 
 
