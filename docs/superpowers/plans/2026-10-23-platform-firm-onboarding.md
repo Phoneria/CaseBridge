@@ -93,6 +93,7 @@ Every task's requirements include this section.
 
 **Frontend — create**
 - `frontend/src/lib/home.ts` — `homePath(user)`.
+- `frontend/src/lib/firmStatus.ts` — `FIRM_SUSPENDED` (its own module so component tests that mock `@/lib/api` still get the real string).
 - `frontend/src/components/platform/NoticeLine.tsx` — `Notice` type and line.
 - `frontend/src/components/platform/FirmFormModal.tsx` — new firm / add admin form.
 - `frontend/src/components/platform/FirmDetailModal.tsx` — firm panel.
@@ -1565,7 +1566,7 @@ git commit -m "feat: demo platform admin in the seed; remove the create_admin co
 ### Task 6: Frontend foundation — types, API, home routing, suspension handling, platform shell
 
 **Files:**
-- Create: `frontend/src/lib/home.ts`, `frontend/src/lib/__tests__/home.test.ts`, `frontend/src/components/__tests__/AppShell.test.tsx`
+- Create: `frontend/src/lib/home.ts`, `frontend/src/lib/firmStatus.ts`, `frontend/src/lib/__tests__/home.test.ts`, `frontend/src/components/__tests__/AppShell.test.tsx`
 - Modify:
   - `frontend/src/types/index.ts`
   - `frontend/src/lib/api.ts`
@@ -1584,7 +1585,7 @@ git commit -m "feat: demo platform admin in the seed; remove the create_admin co
     - `resendPlatformAdminInvite(firmId, userId)`
     - `suspendPlatformFirm(firmId)`
     - `activatePlatformFirm(firmId)`
-  - `FIRM_SUSPENDED` exported from `@/lib/api`.
+  - `FIRM_SUSPENDED` exported from `@/lib/firmStatus`.
   - `homePath(user)`.
   - `<AppShell platform>`.
   - `<Sidebar platform>`.
@@ -1696,6 +1697,7 @@ vi.mock("@/components/WorkspaceHeader", () => ({ WorkspaceHeader: () => null }))
 vi.mock("@/components/CaseQuickView", () => ({ CaseQuickView: () => null }));
 
 import { AppShell } from "@/components/AppShell";
+import { ApiError } from "@/lib/apiError";
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const LAWYER = { id: "l1", role: "lawyer", is_platform_admin: false };
@@ -1733,6 +1735,16 @@ describe("AppShell", () => {
 
     await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/dashboard"));
     expect(screen.queryByText("panel")).not.toBeInTheDocument();
+  });
+
+  it("leaves the suspended-firm redirect to the API layer", async () => {
+    setUrl("/dashboard");
+    getMe.mockRejectedValue(new ApiError("Büronuzun erişimi askıya alındı.", 403));
+    render(<AppShell><p>sayfa</p></AppShell>);
+
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(nav.replace).not.toHaveBeenCalled();
   });
 
   it("shows the platform panel to a platform admin", async () => {
@@ -1828,12 +1840,15 @@ export interface PlatformAdminInvite {
 
 `frontend/src/lib/api.ts`:
 - Add the six platform types to the `import type {...} from "@/types"` list: `PlatformAdminInvite`, `PlatformAdminPayload`, `PlatformFirm`, `PlatformFirmCreated`, `PlatformFirmPayload`.
-- After `NO_SESSION_REDIRECT_PATHS`, add:
+- Create `frontend/src/lib/firmStatus.ts`:
 
 ```ts
-/** The backend's answer for every request of a suspended firm's user (403). */
+/** The backend's answer (403) for every request of a suspended firm's user. Kept
+ * out of api.ts so tests that mock the API module still see the real text. */
 export const FIRM_SUSPENDED = "Büronuzun erişimi askıya alındı.";
 ```
+
+- In `api.ts`, add `import { FIRM_SUSPENDED } from "@/lib/firmStatus";` next to the `ApiError` import.
 
 - In `throwApiError`, after the 401 block, add:
 
@@ -1897,7 +1912,7 @@ Use it in three places:
 - [ ] **Step 6: Login notice and demo hint**
 
 `frontend/src/components/auth/LoginView.tsx`:
-- Import `FIRM_SUSPENDED` from `@/lib/api` (extend the existing import).
+- Add `import { FIRM_SUSPENDED } from "@/lib/firmStatus";`.
 - Add the state `const [notice, setNotice] = useState<string | null>(null);`.
 - Add this effect after the auth-config effect:
 
@@ -1935,6 +1950,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { getMe } from "@/lib/api";
+import { ApiError } from "@/lib/apiError";
+import { FIRM_SUSPENDED } from "@/lib/firmStatus";
 import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
@@ -1966,7 +1983,12 @@ export function AppShell({ children, platform = false }: { children: React.React
       }
       setUser(result);
       setReady(true);
-    }).catch(() => router.replace("/login"));
+    }).catch((err) => {
+      // A suspended firm: api.ts is already loading /login?askida=1; a client
+      // redirect here would race it and drop the notice.
+      if (err instanceof ApiError && err.message === FIRM_SUSPENDED) return;
+      router.replace("/login");
+    });
   }, [router, platform, pathname]);
 
   // The account page announces profile changes so the header stays current.
@@ -2047,7 +2069,7 @@ Expected: no errors.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add frontend/src/types/index.ts frontend/src/lib/api.ts frontend/src/lib/home.ts frontend/src/app/page.tsx frontend/src/components/AppShell.tsx frontend/src/components/Sidebar.tsx frontend/src/components/WorkspaceHeader.tsx frontend/src/components/auth/LoginView.tsx frontend/src/components/auth/SetPasswordView.tsx frontend/src/lib/__tests__/home.test.ts frontend/src/lib/__tests__/api.test.ts frontend/src/components/__tests__/Sidebar.test.tsx frontend/src/components/__tests__/AppShell.test.tsx frontend/src/components/__tests__/AuthPages.test.tsx
+git add frontend/src/types/index.ts frontend/src/lib/api.ts frontend/src/lib/home.ts frontend/src/lib/firmStatus.ts frontend/src/app/page.tsx frontend/src/components/AppShell.tsx frontend/src/components/Sidebar.tsx frontend/src/components/WorkspaceHeader.tsx frontend/src/components/auth/LoginView.tsx frontend/src/components/auth/SetPasswordView.tsx frontend/src/lib/__tests__/home.test.ts frontend/src/lib/__tests__/api.test.ts frontend/src/components/__tests__/Sidebar.test.tsx frontend/src/components/__tests__/AppShell.test.tsx frontend/src/components/__tests__/AuthPages.test.tsx
 git commit -m "feat: platform admin routing, sidebar and the suspended-firm notice"
 ```
 
