@@ -79,6 +79,15 @@ def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
+PLATFORM_REQUIRED = "Platform yetkisi gerekli."
+
+
+def get_current_platform_admin(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.is_platform_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=PLATFORM_REQUIRED)
+    return current_user
+
+
 def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
     return UserRepository(db)
 

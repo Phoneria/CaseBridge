@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.security_headers import SecurityHeadersMiddleware
 
-from app.api.routes import activity, admin, admin_users, analytics, auth, calendar, case_intake, cases, chat, courtroom, documents, handover, health, notifications, precedents, reports, simulations, system, tasks, users
+from app.api.routes import activity, admin, admin_users, analytics, auth, calendar, case_intake, cases, chat, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
 from app.core.log_redaction import install_access_log_redaction
@@ -85,6 +85,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(admin.router)
 app.include_router(admin_users.router)
+app.include_router(platform.router)
 app.include_router(cases.router)
 app.include_router(case_intake.router)
 app.include_router(precedents.router)
