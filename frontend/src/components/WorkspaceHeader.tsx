@@ -55,8 +55,9 @@ export function WorkspaceHeader({ user }: { user: AppUser | null }) {
         <p className="mt-1 text-sm text-navy-700">{today}</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-        <GlobalSearch />
-        <UpcomingNotifications />
+        {/* Both query firm data, which the platform firm does not have. */}
+        {!user?.is_platform_admin && <GlobalSearch />}
+        {!user?.is_platform_admin && <UpcomingNotifications />}
         <nav aria-label="Hızlı erişim" className="flex items-center gap-1 text-sm">
           <Link href="/takvim" className="rounded-lg px-3 py-2 text-navy-600 hover:bg-surface-muted hover:text-navy-900">Takvim</Link>
           <Link href="/gorevler" className="rounded-lg px-3 py-2 text-navy-600 hover:bg-surface-muted hover:text-navy-900">Görevler</Link>

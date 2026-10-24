@@ -54,7 +54,12 @@ test("open a firm, its admin signs in, then the firm is suspended", async ({ pag
   // ... and signing in again is refused.
   await adminPage.getByLabel(/e-posta/i).fill(ADMIN_EMAIL);
   await adminPage.getByLabel(/şifre/i).fill(PASSWORD);
-  await adminPage.getByRole("button", { name: /giriş/i }).click();
+  const [loginResponse] = await Promise.all([
+    adminPage.waitForResponse((r) => r.url().includes("/auth/login") && r.request().method() === "POST"),
+    adminPage.getByRole("button", { name: /giriş/i }).click(),
+  ]);
+  expect(loginResponse.status()).toBe(403);
   await expect(adminPage.locator("p[role=alert]")).toHaveText(SUSPENDED);
+  await expect(adminPage).not.toHaveURL(/\/(admin|dashboard)/);
   await adminContext.close();
 });

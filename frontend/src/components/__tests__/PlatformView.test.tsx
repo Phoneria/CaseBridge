@@ -60,6 +60,21 @@ describe("PlatformView", () => {
     expect(row).toHaveTextContent("Davet bekliyor");
   });
 
+  it("reads the backend's offset-less timestamps as UTC", async () => {
+    const zone = process.env.TZ;
+    process.env.TZ = "Asia/Tokyo"; // 22:30 UTC is already the next day here
+    try {
+      api.listPlatformFirms.mockResolvedValue([{ ...DEMIR, created_at: "2026-10-01T22:30:00" }]);
+      render(<PlatformView />);
+
+      const row = (await screen.findByRole("button", { name: "Demir Hukuk" })).closest("tr")!;
+      expect(row).toHaveTextContent("2.10.2026");
+    } finally {
+      if (zone === undefined) delete process.env.TZ;
+      else process.env.TZ = zone;
+    }
+  });
+
   it("shows an empty-state hint when there are no firms", async () => {
     api.listPlatformFirms.mockResolvedValue([]);
     render(<PlatformView />);

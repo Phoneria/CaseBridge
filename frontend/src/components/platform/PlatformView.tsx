@@ -26,8 +26,14 @@ function byName(a: PlatformFirm, b: PlatformFirm) {
   return a.name.localeCompare(b.name, "tr");
 }
 
+// The backend sends naive UTC timestamps (no offset); without a "Z" the
+// browser would read them as local time and can show the wrong day.
+const HAS_OFFSET = /(Z|[+-]\d{2}:?\d{2})$/i;
+
 function formatDate(value: string | null): string {
-  return value ? new Date(value).toLocaleDateString("tr-TR") : "—";
+  if (!value) return "—";
+  const date = new Date(HAS_OFFSET.test(value) ? value : `${value}Z`);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("tr-TR");
 }
 
 /** The CaseBridge team's list of customer firms (/platform). */
