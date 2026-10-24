@@ -139,3 +139,27 @@ def test_real_data_mode_keeps_real_platform_admins(run_seed, db_session):
 
     assert [u.email for u in db_session.query(User).all()] == ["ops@casebridge.example.com"]
     assert [f.name for f in db_session.query(LawFirm).all()] == ["CaseBridge Platform"]
+
+
+def test_demo_mode_in_production_creates_no_platform_demo_user(run_seed, db_session, monkeypatch, capsys):
+    monkeypatch.setattr(settings, "env", "production")
+
+    run_seed(True)
+
+    emails = {u.email for u in db_session.query(User).all()}
+    assert seed_module.PLATFORM_DEMO_EMAIL not in emails
+    assert seed_module.ADMIN_EMAIL in emails
+    out = capsys.readouterr().out
+    assert "Platform login:" not in out
+    assert "production ortamında oluşturulmaz" in out
+
+
+def test_production_reseed_removes_an_earlier_platform_demo_user(run_seed, db_session, monkeypatch):
+    run_seed(True)
+    assert db_session.query(User).filter_by(email=seed_module.PLATFORM_DEMO_EMAIL).count() == 1
+
+    monkeypatch.setattr(settings, "env", "production")
+    run_seed(True)
+
+    assert db_session.query(User).filter_by(email=seed_module.PLATFORM_DEMO_EMAIL).count() == 0
+    assert db_session.query(User).filter_by(email=seed_module.ADMIN_EMAIL).count() == 1

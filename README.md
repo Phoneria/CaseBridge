@@ -101,7 +101,7 @@ Administrators manage the firm's users in **Ayarlar > Kullanıcılar**: invite (
 Created by `python -m app.db.seed` (idempotent - safe to re-run):
 - `admin@demo.casebridge.dev` / `demo1234` (Admin, Demo Hukuk Bürosu)
 - `avukat@demo.casebridge.dev` / `demo1234` (Lawyer, Demo Hukuk Bürosu)
-- `platform@demo.casebridge.dev` / `demo1234` (CaseBridge platform admin: opens and suspends firms at /platform)
+- `platform@demo.casebridge.dev` / `demo1234` (CaseBridge platform admin: opens and suspends firms at /platform; never created when `ENV=production`, and a leftover one is removed on the next seed)
 
 The demo firm has three lawyers: Emre Yılmaz (Ticaret Hukuku, login above),
 Kerem Demir (İş Hukuku, `kerem@demo.casebridge.dev`) and Zeynep Arslan

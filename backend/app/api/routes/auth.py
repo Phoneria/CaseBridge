@@ -61,7 +61,10 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
 @router.get("/config", response_model=AuthConfigOut)
 def get_auth_config():
     """Public: lets the login page show the demo accounts hint."""
-    return AuthConfigOut(demo_mode=settings.seed_demo_data)
+    return AuthConfigOut(
+        demo_mode=settings.seed_demo_data,
+        platform_demo=settings.seed_demo_data and settings.env != "production",
+    )
 
 
 @router.post("/logout")

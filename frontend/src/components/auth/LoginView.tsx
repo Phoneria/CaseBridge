@@ -18,6 +18,7 @@ export function LoginView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [platformDemo, setPlatformDemo] = useState(false);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -25,7 +26,9 @@ export function LoginView() {
     // The hint is optional: if the call fails the form simply has no hint.
     getAuthConfig()
       .then((config) => {
-        if (active) setDemoMode(config.demo_mode);
+        if (!active) return;
+        setDemoMode(config.demo_mode);
+        setPlatformDemo(config.platform_demo === true);
       })
       .catch(() => undefined);
     return () => {
@@ -114,7 +117,7 @@ export function LoginView() {
           <p className="mb-1 font-medium text-navy-700">Demo hesapları</p>
           <p>Yönetici: admin@demo.casebridge.dev</p>
           <p>Avukat: avukat@demo.casebridge.dev</p>
-          <p>Platform: platform@demo.casebridge.dev</p>
+          {platformDemo && <p>Platform: platform@demo.casebridge.dev</p>}
           <p>Şifre: demo1234</p>
         </div>
       )}

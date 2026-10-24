@@ -405,6 +405,7 @@ export interface DeactivateResult {
 
 export interface AuthConfig {
   demo_mode: boolean;
+  platform_demo?: boolean;
 }
 
 export interface TokenInfo {
