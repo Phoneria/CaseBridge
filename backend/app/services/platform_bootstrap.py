@@ -30,17 +30,18 @@ _EMAIL = TypeAdapter(EmailStr)
 
 
 def parse_platform_admin_emails(raw: str) -> list[str]:
-    """Lower-cased, trimmed, without duplicates; invalid entries are logged
-    (without the address) and skipped."""
+    """Lower-cased, trimmed, without duplicates; invalid entries are skipped and
+    logged by position (1-based within the raw comma-separated list, empty
+    parts counted) and never by address."""
     emails: list[str] = []
-    for part in raw.split(","):
+    for position, part in enumerate(raw.split(","), start=1):
         email = part.strip().lower()
         if not email or email in emails:
             continue
         try:
             _EMAIL.validate_python(email)
         except ValidationError:
-            logger.warning("PLATFORM_ADMIN_EMAILS içinde geçersiz bir adres atlandı.")
+            logger.warning("PLATFORM_ADMIN_EMAILS: %d. adres geçersiz olduğu için atlandı.", position)
             continue
         emails.append(email)
     return emails
@@ -56,12 +57,14 @@ def _has_usable_invite(db: Session, user: User) -> bool:
 
 
 def ensure_platform_admins(db: Session, emails: list[str]) -> None:
+    """Creates/flags the platform admins. A skipped customer-firm address is
+    logged by its 1-based position in `emails` (the parsed list), never by address."""
     if not emails:
         return
     firm = get_or_create_platform_firm(db)
     users = UserRepository(db)
     to_invite: list[User] = []
-    for email in emails:
+    for position, email in enumerate(emails, start=1):
         user = users.get_by_email(email)
         if user is None:
             user = create_pending_user(
@@ -71,7 +74,7 @@ def ensure_platform_admins(db: Session, emails: list[str]) -> None:
             to_invite.append(user)
             continue
         if user.law_firm_id != firm.id:
-            logger.warning("PLATFORM_ADMIN_EMAILS: bir adres müşteri bürosunda kayıtlı olduğu için atlandı.")
+            logger.warning("PLATFORM_ADMIN_EMAILS: %d. adres bir müşteri bürosunda kayıtlı olduğu için atlandı.", position)
             continue
         user.is_platform_admin = True
         if user.is_active and user.password_set_at is None and not _has_usable_invite(db, user):

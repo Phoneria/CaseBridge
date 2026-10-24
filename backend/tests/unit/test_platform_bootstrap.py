@@ -1,6 +1,7 @@
 """PLATFORM_ADMIN_EMAILS: platform admins are created and invited once; a
 running invite is not re-sent, an expired or failed one is; addresses of
 customer firms are never touched; startup never fails because of it."""
+import logging
 from datetime import timedelta
 
 from app.core.config import settings
@@ -23,6 +24,16 @@ def test_parse_lowercases_trims_drops_duplicates_and_invalid_addresses():
     raw = " Ops@CaseBridge.example.com, ops@casebridge.example.com ,, gecersiz , ekip@casebridge.example.com"
     assert parse_platform_admin_emails(raw) == [OPS, "ekip@casebridge.example.com"]
     assert parse_platform_admin_emails("") == []
+
+
+def test_an_invalid_entry_is_reported_by_position_not_by_address(caplog):
+    raw = " Ops@CaseBridge.example.com, ops@casebridge.example.com ,, gecersiz@ , ekip@casebridge.example.com"
+    with caplog.at_level(logging.WARNING, logger="casebridge"):
+        parse_platform_admin_emails(raw)
+
+    messages = [r.getMessage() for r in caplog.records]
+    assert messages == ["PLATFORM_ADMIN_EMAILS: 4. adres geçersiz olduğu için atlandı."]
+    assert "gecersiz" not in caplog.text
 
 
 def test_an_empty_list_creates_nothing(db_session):
@@ -74,8 +85,13 @@ def test_a_failed_e_mail_is_retried_on_the_next_start(db_session, mail_outbox, m
     assert len(mail_outbox.messages(to=OPS)) == 1
 
 
-def test_an_address_of_a_customer_firm_is_left_alone(db_session, office, mail_outbox):
-    ensure_platform_admins(db_session, [office.admin_a.email])
+def test_an_address_of_a_customer_firm_is_left_alone(db_session, office, mail_outbox, caplog):
+    with caplog.at_level(logging.WARNING, logger="casebridge"):
+        ensure_platform_admins(db_session, [OPS, office.admin_a.email])
+
+    messages = [r.getMessage() for r in caplog.records]
+    assert messages == ["PLATFORM_ADMIN_EMAILS: 2. adres bir müşteri bürosunda kayıtlı olduğu için atlandı."]
+    assert office.admin_a.email not in caplog.text
 
     db_session.refresh(office.admin_a)
     assert office.admin_a.is_platform_admin is False
