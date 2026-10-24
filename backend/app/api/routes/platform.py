@@ -1,5 +1,7 @@
 """The platform panel's API: customer firms and their administrators
 (platform admins only)."""
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -29,6 +31,7 @@ from app.services.platform_service import (
 )
 from app.services.user_admin_service import EMAIL_TAKEN, UserAdminError
 
+logger = logging.getLogger("casebridge")
 router = APIRouter(prefix="/platform", tags=["platform"])
 
 
@@ -48,6 +51,11 @@ def _firm_out(firm: LawFirm) -> PlatformFirmOut:
     )
 
 
+def _audit(action: str, firm_id: str, admin_id: str | None, actor: User) -> None:
+    """One INFO line per successful platform action: ids only, never names or e-mails."""
+    logger.info("Platform işlemi: %s büro=%s yönetici=%s işlemi yapan=%s", action, firm_id, admin_id or "-", actor.id)
+
+
 def _firm(db: Session, firm_id: str) -> LawFirm:
     try:
         return get_customer_firm(db, firm_id)
@@ -61,7 +69,9 @@ def list_firms(_: User = Depends(get_current_platform_admin), db: Session = Depe
 
 
 @router.post("/firms", response_model=PlatformFirmCreatedOut, status_code=status.HTTP_201_CREATED)
-def create(payload: PlatformFirmCreate, _: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def create(
+    payload: PlatformFirmCreate, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)
+):
     try:
         firm, admin = create_firm(db, payload.name, payload.admin_full_name, str(payload.admin_email))
         db.commit()
@@ -72,6 +82,7 @@ def create(payload: PlatformFirmCreate, _: User = Depends(get_current_platform_a
         # Lost a race against another request using the same e-mail address.
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=EMAIL_TAKEN)
+    _audit("büro_oluşturuldu", firm.id, admin.id, actor)
     email_sent = send_invite(db, admin)
     db.refresh(firm)
     db.refresh(admin)
@@ -82,7 +93,7 @@ def create(payload: PlatformFirmCreate, _: User = Depends(get_current_platform_a
 def add_admin(
     firm_id: str,
     payload: PlatformAdminCreate,
-    _: User = Depends(get_current_platform_admin),
+    actor: User = Depends(get_current_platform_admin),
     db: Session = Depends(get_db),
 ):
     firm = _firm(db, firm_id)
@@ -95,6 +106,7 @@ def add_admin(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=EMAIL_TAKEN)
+    _audit("yönetici_eklendi", firm.id, admin.id, actor)
     # A suspended firm's admin is invited after the firm is activated again.
     email_sent = send_invite(db, admin) if firm.is_active else False
     db.refresh(admin)
@@ -105,7 +117,7 @@ def add_admin(
 def resend_invite(
     firm_id: str,
     user_id: str,
-    _: User = Depends(get_current_platform_admin),
+    actor: User = Depends(get_current_platform_admin),
     db: Session = Depends(get_db),
 ):
     firm = _firm(db, firm_id)
@@ -114,24 +126,29 @@ def resend_invite(
         check_can_invite(firm, admin)
     except UserAdminError as error:
         raise _http(error)
+    _audit("davet_yeniden_gönderildi", firm.id, admin.id, actor)
     email_sent = send_invite(db, admin)
     db.refresh(admin)
     return PlatformAdminInviteOut(admin=PlatformAdminOut.model_validate(admin), email_sent=email_sent)
 
 
 @router.post("/firms/{firm_id}/suspend", response_model=PlatformFirmOut)
-def suspend(firm_id: str, _: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def suspend(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
-    set_firm_active(firm, False)
+    changed = set_firm_active(firm, False)
     db.commit()
+    if changed:
+        _audit("büro_askıya_alındı", firm.id, None, actor)
     db.refresh(firm)
     return _firm_out(firm)
 
 
 @router.post("/firms/{firm_id}/activate", response_model=PlatformFirmOut)
-def activate(firm_id: str, _: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def activate(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
-    set_firm_active(firm, True)
+    changed = set_firm_active(firm, True)
     db.commit()
+    if changed:
+        _audit("büro_aktifleştirildi", firm.id, None, actor)
     db.refresh(firm)
     return _firm_out(firm)

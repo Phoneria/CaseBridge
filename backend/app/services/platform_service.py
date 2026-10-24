@@ -94,9 +94,11 @@ def send_invite(db: Session, user: User) -> bool:
     return deliver(prepare_invite_email(db, user, inviter=None))
 
 
-def set_firm_active(firm: LawFirm, active: bool) -> None:
-    """Idempotent: suspending a suspended firm keeps its suspended_at."""
+def set_firm_active(firm: LawFirm, active: bool) -> bool:
+    """Idempotent: suspending a suspended firm keeps its suspended_at.
+    Returns True when the state actually changed."""
     if firm.is_active == active:
-        return
+        return False
     firm.is_active = active
     firm.suspended_at = None if active else utc_now()
+    return True

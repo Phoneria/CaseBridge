@@ -1,6 +1,7 @@
 """/platform: only platform admins; firms are listed (the platform firm never),
 created with an invited admin, get extra admins and re-sent invites, and are
 suspended / re-activated."""
+import logging
 from types import SimpleNamespace
 
 import pytest
@@ -8,6 +9,7 @@ from sqlalchemy import null
 
 from app.core.security import hash_password
 from app.core.timeutil import utc_now
+from app.models.case import Case, CaseType
 from app.models.law_firm import LawFirm
 from app.models.user import User, UserRole
 from app.services import platform_service
@@ -205,3 +207,56 @@ def test_a_suspended_firm_gets_admins_but_no_invite_e_mails(client, db_session, 
 
     resend = client.post(f"/platform/firms/{office.firm_b.id}/admins/{pending.id}/invite", headers=platform.headers)
     assert (resend.status_code, resend.json()["detail"]) == (409, "Askıdaki büroya davet gönderilemez.")
+
+
+def _platform_log(caplog):
+    return [r.getMessage() for r in caplog.records if r.name == "casebridge" and r.getMessage().startswith("Platform işlemi")]
+
+
+def test_platform_actions_are_logged_with_ids_only(client, db_session, office, platform, mail_outbox, caplog):
+    caplog.set_level(logging.INFO, logger="casebridge")
+    actor = platform.user.id
+    firm_id = office.firm_b.id
+
+    created = client.post("/platform/firms", json=NEW_FIRM, headers=platform.headers).json()
+    added = client.post(
+        f"/platform/firms/{firm_id}/admins",
+        json={"full_name": "İkinci Yönetici", "email": "ikinci@kaya.example.com"},
+        headers=platform.headers,
+    ).json()
+    client.post(f"/platform/firms/{firm_id}/admins/{added['admin']['id']}/invite", headers=platform.headers)
+    client.post(f"/platform/firms/{firm_id}/suspend", headers=platform.headers)
+    client.post(f"/platform/firms/{firm_id}/suspend", headers=platform.headers)  # unchanged: no line
+    client.post(f"/platform/firms/{firm_id}/activate", headers=platform.headers)
+    client.post(f"/platform/firms/{firm_id}/activate", headers=platform.headers)  # unchanged: no line
+
+    assert _platform_log(caplog) == [
+        f"Platform işlemi: büro_oluşturuldu büro={created['firm']['id']} yönetici={created['admin']['id']} işlemi yapan={actor}",
+        f"Platform işlemi: yönetici_eklendi büro={firm_id} yönetici={added['admin']['id']} işlemi yapan={actor}",
+        f"Platform işlemi: davet_yeniden_gönderildi büro={firm_id} yönetici={added['admin']['id']} işlemi yapan={actor}",
+        f"Platform işlemi: büro_askıya_alındı büro={firm_id} yönetici=- işlemi yapan={actor}",
+        f"Platform işlemi: büro_aktifleştirildi büro={firm_id} yönetici=- işlemi yapan={actor}",
+    ]
+    # (The dev "file" mail backend logs recipients itself; that is outside this audit trail.)
+    assert all("@" not in message for message in _platform_log(caplog))
+
+
+def test_a_customer_user_with_a_stray_platform_flag_is_refused(client, db_session, office, auth_headers):
+    office.admin_a.is_platform_admin = True
+    db_session.commit()
+
+    response = client.get("/platform/firms", headers=auth_headers(office.admin_a))
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Platform yetkisi gerekli."
+
+
+def test_a_platform_admin_cannot_read_a_customer_firms_case(client, db_session, office, platform):
+    case = Case(
+        law_firm_id=office.firm_b.id, case_number="2026/7", case_name="Dava", client_name="Müvekkil",
+        case_type=CaseType.KIRA, assigned_lawyer_id=office.lawyer_b.id,
+    )
+    db_session.add(case)
+    db_session.commit()
+
+    assert client.get(f"/cases/{case.id}", headers=platform.headers).status_code == 404
