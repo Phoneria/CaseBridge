@@ -1,0 +1,302 @@
+{
+  "asOf": "2026-10-25",
+  "currency": "USD",
+  "seed": 1500000,
+  "firmMonthly": 100,
+  "companyMonthly": 500,
+  "labRoyaltyShare": 0.4,
+  "licenseOperationsShare": 0.15,
+  "subscriptionServiceCostShare": 0.9,
+  "forecast": [
+    {
+      "year": 1,
+      "calendar": 2027,
+      "firms": 100,
+      "companies": 0,
+      "avgFirms": 50.0,
+      "avgCompanies": 0.0,
+      "subscriptions": 60000.0,
+      "buyers": 1,
+      "licenseFee": 25000,
+      "licensing": 25000,
+      "royalty": 10000.0,
+      "dataOperations": 3750.0,
+      "serviceCosts": 54000.0,
+      "fixedCosts": 400000,
+      "revenue": 100000.0,
+      "costs": 470750.0,
+      "result": -370750.0,
+      "exitRunRate": 120000,
+      "commissions": 15000,
+      "transactions": 30,
+      "transactionValue": 5000,
+      "commissionRate": 0.1,
+      "engineering": 200000,
+      "sales": 80000,
+      "legalAdmin": 120000,
+      "commissionOperations": 3000.0
+    },
+    {
+      "year": 2,
+      "calendar": 2028,
+      "firms": 200,
+      "companies": 10,
+      "avgFirms": 150.0,
+      "avgCompanies": 5.0,
+      "subscriptions": 210000.0,
+      "buyers": 3,
+      "licenseFee": 100000,
+      "licensing": 300000,
+      "royalty": 120000.0,
+      "dataOperations": 45000.0,
+      "serviceCosts": 189000.0,
+      "fixedCosts": 800000,
+      "revenue": 600000.0,
+      "costs": 1172000.0,
+      "result": -572000.0,
+      "exitRunRate": 300000,
+      "commissions": 90000,
+      "transactions": 180,
+      "transactionValue": 5000,
+      "commissionRate": 0.1,
+      "engineering": 400000,
+      "sales": 200000,
+      "legalAdmin": 200000,
+      "commissionOperations": 18000.0
+    },
+    {
+      "year": 3,
+      "calendar": 2029,
+      "firms": 350,
+      "companies": 100,
+      "avgFirms": 275.0,
+      "avgCompanies": 55.0,
+      "subscriptions": 660000.0,
+      "buyers": 10,
+      "licenseFee": 300000,
+      "licensing": 3000000,
+      "royalty": 1200000.0,
+      "dataOperations": 450000.0,
+      "serviceCosts": 594000.0,
+      "fixedCosts": 1500000,
+      "revenue": 4000000.0,
+      "costs": 3812000.0,
+      "result": 188000.0,
+      "exitRunRate": 1020000,
+      "commissions": 340000,
+      "transactions": 680,
+      "transactionValue": 5000,
+      "commissionRate": 0.1,
+      "engineering": 700000,
+      "sales": 500000,
+      "legalAdmin": 300000,
+      "commissionOperations": 68000.0
+    },
+    {
+      "year": 4,
+      "calendar": 2030,
+      "firms": 600,
+      "companies": 350,
+      "avgFirms": 475.0,
+      "avgCompanies": 225.0,
+      "subscriptions": 1920000.0,
+      "buyers": 22,
+      "licenseFee": 500000,
+      "licensing": 11000000,
+      "royalty": 4400000.0,
+      "dataOperations": 1650000.0,
+      "serviceCosts": 1728000.0,
+      "fixedCosts": 2700000,
+      "revenue": 15000000.0,
+      "costs": 10894000.0,
+      "result": 4106000.0,
+      "exitRunRate": 2820000,
+      "commissions": 2080000,
+      "transactions": 4160,
+      "transactionValue": 5000,
+      "commissionRate": 0.1,
+      "engineering": 1200000,
+      "sales": 1000000,
+      "legalAdmin": 500000,
+      "commissionOperations": 416000.0
+    },
+    {
+      "year": 5,
+      "calendar": 2031,
+      "firms": 1000,
+      "companies": 1000,
+      "avgFirms": 800.0,
+      "avgCompanies": 675.0,
+      "subscriptions": 5010000.0,
+      "buyers": 40,
+      "licenseFee": 750000,
+      "licensing": 30000000,
+      "royalty": 12000000.0,
+      "dataOperations": 4500000.0,
+      "serviceCosts": 4509000.0,
+      "fixedCosts": 4800000,
+      "revenue": 40000000.0,
+      "costs": 26807000.0,
+      "result": 13193000.0,
+      "exitRunRate": 7200000,
+      "commissions": 4990000,
+      "transactions": 9980,
+      "transactionValue": 5000,
+      "commissionRate": 0.1,
+      "engineering": 2000000,
+      "sales": 2000000,
+      "legalAdmin": 800000,
+      "commissionOperations": 998000.0
+    }
+  ],
+  "competitors": {
+    "Turkey": [
+      [
+        "LEXPERA / LEXI",
+        "https://www.lexpera.com.tr/",
+        "Legal research across legislation, case law and literature, with the LEXI AI assistant.",
+        "Connect research to interview preparation, case monitoring and hearing practice."
+      ],
+      [
+        "Kazanc\u0131 AI",
+        "https://kazanci.com/",
+        "Source-based legal answers, petition preparation and document analysis.",
+        "Track the client-to-case workflow and return reviewable next actions."
+      ],
+      [
+        "Lexapel",
+        "https://lexapel.com/",
+        "Case-file copilot, page citations, chronology and UDF drafting.",
+        "Differentiate through guided intake, voice analysis and rehearsal; case context alone is not unique."
+      ],
+      [
+        "Lexara",
+        "https://lexara.com.tr/",
+        "Turkish legal research, case briefings, drafting and contract tools.",
+        "Compete on the combined workflow and measured usefulness, rather than claiming exclusive drafting capabilities."
+      ],
+      [
+        "Themis.ai",
+        "https://themisai.com.tr/hakkimizda",
+        "Turkish-law research, official-source references and document drafting.",
+        "Add ongoing case review and practical hearing feedback alongside legal research."
+      ]
+    ],
+    "United States": [
+      [
+        "Harvey",
+        "https://www.harvey.ai/",
+        "Enterprise legal agents, document analysis, knowledge and workflow orchestration.",
+        "Start with Turkish firms and a focused interview-to-hearing workflow; broader scale is an incumbent advantage."
+      ],
+      [
+        "Thomson Reuters / CoCounsel",
+        "https://www.thomsonreuters.com/en/cocounsel",
+        "Legal AI connected to Westlaw, Practical Law and professional workflows.",
+        "Develop a complementary workflow layer; do not claim an equivalent licensed research corpus."
+      ],
+      [
+        "LexisNexis / Prot\u00e9g\u00e9",
+        "https://www.lexisnexis.com/en-us/products/protege.page",
+        "Research, analysis and drafting grounded in LexisNexis content.",
+        "Focus on case preparation and small-firm deployment; source coverage needs independent validation."
+      ],
+      [
+        "Filevine / LOIS",
+        "https://www.filevine.com/",
+        "Matter management, documents, intake, legal research and AI drafting.",
+        "Demonstrate a tighter intake-to-monitoring feedback loop in our initial Turkish segment."
+      ],
+      [
+        "Everlaw",
+        "https://www.everlaw.com/",
+        "Evidence review, litigation and investigation workflows with legal AI integrations.",
+        "Concentrate on attorney preparation and rehearsal; do not position as enterprise eDiscovery replacement."
+      ]
+    ],
+    "International": [
+      [
+        "Legora",
+        "https://legora.com/",
+        "Collaborative legal AI, research and agentic workflow execution.",
+        "Win a focused local segment through direct iteration with working firms, before expanding jurisdiction coverage."
+      ],
+      [
+        "Luminance",
+        "https://www.luminance.com/",
+        "Contract intelligence, review, negotiation and connected workflows.",
+        "Focus first on disputes and preparation, then validate cross-border company workflows."
+      ],
+      [
+        "Spellbook",
+        "https://spellbook.com/",
+        "AI contract review, drafting and consistency across agreements.",
+        "Support disputes and hearings in addition to document preparation; drafting alone is not a moat."
+      ],
+      [
+        "Jus Mundi / Jus AI",
+        "https://jusmundi.com/en/jus-ai",
+        "Arbitration research, verified sources, analysis and drafting support.",
+        "Build a Turkey-to-international-trade workflow; specialized arbitration coverage remains an incumbent strength."
+      ],
+      [
+        "Clio",
+        "https://www.clio.com/",
+        "Practice management, intake, documents and AI-assisted analysis and strategy.",
+        "Prove a combined, locally adapted preparation experience instead of claiming case management is unique."
+      ]
+    ]
+  },
+  "marketSizing": {
+    "tam2026": 2100000000,
+    "sam": 109414240,
+    "somYear5ExitSubscriptions": 7200000,
+    "turkeyLawyers2025": 206678,
+    "usLawyers2025Rounded": 1370000,
+    "turkeyAssumedLawyersPerFirm": 3,
+    "usAssumedLawyersPerFirm": 5,
+    "turkeyTargetFit": 0.2,
+    "usTargetFit": 0.1,
+    "assumedNonLawFirmCompanies": 10000,
+    "sources": [
+      {
+        "url": "https://t.barobirlik.org.tr/Haberler/2025-avukat-sayilari-31122025-86223",
+        "type": "Official lawyer count",
+        "baseYear": 2025
+      },
+      {
+        "url": "https://www.americanbar.org/news/profile-legal-profession/",
+        "type": "Official lawyer count",
+        "baseYear": 2025
+      },
+      {
+        "url": "https://www.grandviewresearch.com/industry-analysis/legal-ai-market-report",
+        "type": "Publisher market estimate",
+        "baseYear": 2026
+      },
+      {
+        "url": "https://www.grandviewresearch.com/horizon/outlook/legal-ai-market/united-states",
+        "type": "Publisher market estimate",
+        "baseYear": 2024
+      }
+    ]
+  },
+  "legalSources": [
+    "https://www.kvkk.gov.tr/Icerik/2038/kisisel-verilerin-silinmesi-yok-edilmesi-veya-anonim-hale-getirilmesi",
+    "https://www.kvkk.gov.tr/Icerik/8143/Kisisel-Verilerin-Yurt-Disina-Aktarilmasi-Rehberi",
+    "https://www.americanbar.org/content/dam/aba/administrative/professional_responsibility/ethics-opinions/aba-formal-opinion-512.pdf"
+  ],
+  "pricingSources": [
+    "https://lexara.com.tr/",
+    "https://www.harvey.ai/blog/top-harvey-use-cases"
+  ],
+  "caveat": "Aggressive founder-directed $40m Year-5 annual revenue planning target. All buyer counts, fees, marketplace volume and prospects are unvalidated assumptions; no contracted pipeline is claimed. Software SOM excludes licensing and commissions.",
+  "yearFiveRevenueTarget": 40000000,
+  "commissionRate": 0.1,
+  "commissionOperationsShare": 0.2,
+  "commissionScope": "Illustrative non-legal software and workflow-service marketplace. No legal referral or success fees modeled.",
+  "licensingBasis": "Annual non-exclusive licensing of eligible accumulated datasets, refreshed and evaluated each year. Not cumulative cash receipts or a data asset valuation.",
+  "prospectSources": [
+    "https://openai.com/index/data-partnerships/"
+  ]
+}
