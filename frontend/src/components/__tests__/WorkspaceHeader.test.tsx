@@ -65,6 +65,7 @@ describe("WorkspaceHeader", () => {
     expect(screen.getByRole("button", { name: "Kullanıcı menüsü, Platform Ekibi" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Genel arama" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Bildirimler" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Hızlı erişim" })).not.toBeInTheDocument();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(getCalendarEvents).not.toHaveBeenCalled();
     expect(listAllTasks).not.toHaveBeenCalled();
