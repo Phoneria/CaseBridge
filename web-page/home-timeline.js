@@ -66,10 +66,13 @@
     currentRows().forEach((row, i) => {
       const button = el('button', 'home-month-button');
       button.type = 'button';
-      button.append(el('span', '', monthName(row.month)), el('strong', '', money(scenario === 'risk' ? riskRows.find(item => item.month === row.month).stress_revenue_usd : row.revenue_usd)));
+      const revenue = money(scenario === 'risk' ? riskRows.find(item => item.month === row.month).stress_revenue_usd : row.revenue_usd);
+      button.setAttribute('aria-label', `${monthName(row.month)} · revenue ${revenue}`);
+      button.append(el('span', '', monthName(row.month).split(' ')[0]), el('strong', '', revenue));
       button.addEventListener('click', () => { index = i; renderMonth(); });
       months.append(button);
     });
+    months.scrollLeft = months.children[index].offsetLeft - months.children[0].offsetLeft;
     renderMonth();
   }
   function showYear(selected) {
@@ -103,6 +106,15 @@
       const current = options.findIndex(button => Number(button.dataset.year) === year);
       const next = options[(current + (event.key === 'ArrowRight' ? 1 : -1) + options.length) % options.length];
       showYear(Number(next.dataset.year)); next.focus();
+    });
+    months.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      const buttons = [...months.querySelectorAll('button')];
+      index = (index + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+      renderMonth();
+      buttons[index].focus();
+      buttons[index].scrollIntoView({block: 'nearest', inline: 'nearest'});
     });
     document.querySelectorAll('[data-home-scenario]').forEach(button => button.addEventListener('click', () => {
       scenario = button.dataset.homeScenario;
