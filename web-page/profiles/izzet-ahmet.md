@@ -2,13 +2,13 @@
 
 **AI Engineer | Project Manager**
 
-### [Perpetual Labs](https://perpetual-labs.ai/) | AI Engineer
+### [Perpetual Labs](https://perpetual-labs.ai/) | AI Operations & Partnerships
 
-*Silicon Valley-based AI training data company.*
+*Silicon Valley-based AI training data company. Role description based on Izzet's account; not a verified formal job title.*
 
-- Managing 6 AI projects
-- AI development and team coordination
-- Business development and dataset acquisition
+- Develops API services that coordinate people's shared operational workflows and respond to their needs.
+- Builds automations and pipelines that monitor connections and work across shared servers.
+- Coordinates with partner companies and negotiates working arrangements when needed.
 
 ### [ASELSAN](https://www.aselsan.com/) | AI & Test Automation Engineer
 

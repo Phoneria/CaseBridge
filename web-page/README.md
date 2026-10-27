@@ -1,6 +1,6 @@
 # CaseBridge marketing website
 
-A standalone English static website. Open `index.html` in a browser, or run `python3 -m http.server 4173 --bind 127.0.0.1` in this folder for a local preview.
+A standalone English static website. Run `python3 -m http.server 8081 --bind 127.0.0.1` in this folder, then open `http://localhost:8081/`. The monthly timeline loads local JSON and needs this local server.
 
 No installation, external fonts, API, or internet connection is required for the website. External company links require internet access.
 
@@ -10,6 +10,10 @@ No installation, external fonts, API, or internet connection is required for the
 - `styles.css`: responsive blue, turquoise, white, and red styling.
 - `script.js`: mobile navigation, screenshot tabs, and keyboard-accessible product tabs.
 - `assets/`: real application screenshots and team portraits.
+- `timeline.html`: interactive 60-month plan, with year filters and downloadable CSV/Excel sheets.
+- `planning/monthly-roadmap.xlsx`: editable monthly model and roadmap; the monthly figures reconcile to the existing annual forecast.
+- `planning/risk-scenario.json` and `.csv`: illustrative downside calculations, including revenue, expenses, standby retainers, crisis response and cash buffer targets.
+- `assets/MEDIA_CREDITS.md`: origins and licenses of the real meeting photo and geographic map used in the new visuals.
 - `profiles/`: downloadable Markdown biographies. Izzet’s and Ahmet’s biographies are supplied by the user. Bengü and Hatice profiles include clearly marked provisional drafts.
 
 When updating a biography, update both its Markdown file and its matching inline biography in `index.html`. Use the downward arrow on the right of each team member to expand their biography within the page. Native details elements work offline and support keyboard navigation; no pop-up or network request is involved.
@@ -25,13 +29,15 @@ The site includes founder-reported three-firm traction, five feedback-led produc
 
 The proposed $1.5m seed covers a 24-month planning envelope; actual cash needs depend on receipts, delivery timing and working capital. Licensing is conditional on rights, privilege, privacy, quality, lawful transfers and actual buyer demand. Company-supplied feature descriptions are not an independent technical verification of every deployment.
 
+The timeline charts compare monthly and annual base targets with an illustrative downside case: 20% fewer paying customers, 25% lower commission receipts, a three-month lab receipt delay, on-call staffing retainers and five explicitly budgeted crisis events. The risk case is not a probabilistic forecast. Its cash buffer target equals the greater of $150,000 or three months of modeled risk-case expenses, including the current month. Holding that cash is a liquidity target, not a P&L expense. Only retainers and crisis response costs are expensed. Rebuild the risk JSON/CSV after changing the base monthly plan with `python planning/build-risk.py`; `planning/build-roadmap.mjs` then exports the Excel workbook with a Risk case sheet.
+
 
 ## Overview interaction
 
 The page presents the product, three-firm Turkey POC, team, market sizing, financial forecasts, investor ask and growth roadmap without requiring clicks. Optional product detail, competitor comparisons, biographies, risks and sources expand inline. Only optional panels collapse when they scroll fully out of view. Category bars, phase counters and the allocation donut animate as they enter the viewport; reduced-motion preferences are respected. Revenue and cost scenarios, individual years and category bars are interactive. Selecting a year opens a chart; selecting a category opens annual customer-cohort or spending-driver tables. Annual targets are $100k / $600k / $4m / $15m / $40m. Year 5 comprises $30m data licensing, $5.01m subscriptions and $4.99m marketplace commissions; these are aggressive, unvalidated planning assumptions. Commission revenue assumes a future non-legal software/service marketplace with a 10% take rate. Potential customer examples imply no relationship or confirmed demand.
 
-Bengü and Hatice use the supplied `bengu.jpeg` and `hatis.jpeg` portraits, copied into versioned filenames under `assets/team`. Bengü’s biography remains a provisional draft. Hatice’s biography uses the supplied Technarts event-platform/IPAM experience and long-standing oil-painting interest, with no year counts.
+Bengü now uses the newly supplied personal photograph, optimized as `assets/team/bengu-ozbek-current.jpg`. Bengü’s biography remains a provisional draft. Hatice’s biography uses the supplied Technarts event-platform/IPAM experience and long-standing oil-painting interest, with no year counts.
 
 ## Visual identity and market graphics
 
-The header and footer use an integrated CaseBridge wordmark: one fine bridge line connects the two e letters. Its tagline is “Every case. End to end.” `assets/casebridge-e2e.svg` is the standalone vector version. The market section uses an explicitly schematic expansion globe, a SAM composition donut with selectable formula breakdowns, and a SOM/SAM share ring. These charts preserve existing sourced estimates and distinguish planning assumptions. The annual financial table has a large caption and colored revenue, cost and result columns.
+The header and footer use an integrated CaseBridge wordmark: one fine bridge line connects the two e letters. Its tagline is “Every case. End to end.” `assets/casebridge-e2e.svg` is the standalone vector version. The first-meeting panel edits a real consultation photograph to show illustrative question prompts. The market section uses a geographic map derived from Natural Earth data, a SAM composition donut with selectable formula breakdowns, and a SOM/SAM share ring. These charts preserve existing sourced estimates and distinguish planning assumptions. The annual financial table has a large caption and colored revenue, cost and result columns.

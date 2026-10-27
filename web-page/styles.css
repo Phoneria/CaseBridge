@@ -681,3 +681,39 @@ em { font-style: normal; color: var(--teal); }
 .brand-lockup>small { font-size:7.5px;letter-spacing:1.1px; }
 .footer .brand-lockup>small { font-size:7px;letter-spacing:.8px; }
 @media(max-width:600px) { .brand-lockup>small { font-size:6.5px;letter-spacing:.8px; }.brand-lockup { gap:8px; } }
+
+/* Readability and visual-first product story. */
+body { font-size:16px; }
+.story-lead,.business-heading>p,.business-intro,.model-columns article>p:not(.section-label):not(.source-note) { font-size:16px;line-height:1.65; }
+.source-note,.research-body p,.research-table td,.research-table th { font-size:13px;line-height:1.6; }
+.offering-grid { grid-template-columns:repeat(3,minmax(0,1fr));gap:22px; }
+.offering-grid article { padding:22px;background:#fff;border:1px solid var(--line); }
+.offering-grid article>span,.meeting-copy>span { font-size:12px;letter-spacing:.06em;font-weight:700;color:#00658a; }
+.offering-grid h3 { font-size:25px;line-height:1.2;margin:16px 0 10px; }
+.offering-grid p { font-size:15px;line-height:1.6;color:#3d556a; }
+.meeting-feature { grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:30px;align-items:center;background:#eaf4f9!important;overflow:hidden; }
+.meeting-feature .meeting-copy { padding:15px 8px 15px 16px; }
+.meeting-feature h3 { font-size:clamp(28px,3vw,43px); }
+.meeting-feature p { font-size:18px;max-width:34ch; }
+.meeting-feature small { display:block;color:#52697b;font-size:12px;line-height:1.5;margin-top:20px; }
+.meeting-feature img { width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;border-radius:3px; }
+.team-surface .member-photo[src$="bengu-ozbek-current.jpg"] { object-position:50% 43%; }
+.expansion-atlas { grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:40px; }
+.atlas-globe { margin:0;min-width:0; }
+.atlas-globe img { display:block;width:100%;height:auto;border:1px solid #c9dce9; }
+.atlas-caption { font-size:12px;text-align:left;line-height:1.5; }
+.atlas-story .section-label { font-size:12px;line-height:1.4; }
+.atlas-story h3 { font-size:clamp(30px,3vw,44px); }
+.atlas-story>div>span { font-size:15px;font-weight:700; }
+.atlas-story>div p { font-size:14px;line-height:1.55;color:#3d556a; }
+.atlas-story strong { font-size:17px;margin-bottom:3px; }
+.atlas-story>.text-link { display:inline-block;margin-top:16px; }
+@media(max-width:800px) { .expansion-atlas { grid-template-columns:1fr; }.meeting-feature { grid-template-columns:1fr; }.meeting-feature .meeting-copy { padding:0; }.offering-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:600px) { .offering-grid { grid-template-columns:1fr; }.meeting-feature { grid-column:auto; }.meeting-feature p { font-size:16px; }.offering-grid p { font-size:15px; }.story-lead,.business-heading>p,.business-intro { font-size:15px; }.source-note { font-size:12px; }.atlas-caption { font-size:11px; } }
+.phase-track article>p,.phase-track small,.phase-track article>span:not(.phase-point),.market-context h4,.market-context p,.market-graphic>p:not(.section-label),.market-graphic>small,.sam-segments button,.finance-year>span:first-child,.finance-year small,.explorer-heading p:not(.section-label),.explorer-hint,.annual-plan-heading>span { font-size:13px;line-height:1.55; }
+.phase-track h3 { font-size:17px; }.market-context p { line-height:1.6; }
+.category-name,.category-prompt,.detail-table th,.detail-table td,.finance-table thead th,.finance-table tbody th,.finance-table td { font-size:14px;line-height:1.55; }
+.category-value small,.sam-formula span:not(.formula-equals),.market-graphic .section-label { font-size:12px; }
+.model-columns details { margin-top:18px;border-top:1px solid var(--line);padding-top:15px; }
+.model-columns details summary,.model-surface>.research-detail summary { color:var(--blue,#076e93);font-size:15px;font-weight:600;cursor:pointer; }
+@media(max-width:600px) { .phase-track article>p,.phase-track article>span:not(.phase-point),.phase-track small,.market-context p,.market-graphic>p:not(.section-label),.market-graphic>small,.finance-year>span:first-child,.finance-year small { font-size:12px; }.phase-track h3 { font-size:16px; } }
