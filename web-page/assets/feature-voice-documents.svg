@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#edf6fa"/>
+  <rect x="27" y="25" width="586" height="350" rx="17" fill="#fff" stroke="#c9dce9" stroke-width="2"/>
+  <path d="M44 25h552a17 17 0 0 1 17 17v47H27V42a17 17 0 0 1 17-17Z" fill="#17213a"/>
+  <circle cx="57" cy="57" r="17" fill="#007eac"/>
+  <text x="57" y="63" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700">C</text>
+  <text x="87" y="64" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700">CaseBridge</text>
+  <text x="426" y="62" fill="#a9cadb" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" letter-spacing="1.2">VOICE TO FILE</text>
+  <text x="51" y="123" fill="#007eac" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.1">CLIENT MEETING</text>
+  <rect x="51" y="140" width="538" height="92" rx="12" fill="#eaf4f9" stroke="#c5deea"/>
+  <circle cx="83" cy="186" r="19" fill="#007eac"/>
+  <rect x="78" y="173" width="10" height="20" rx="5" fill="#fff"/>
+  <path d="M74 187a9 9 0 0 0 18 0m-9 9v6m-6 0h12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <text x="113" y="177" fill="#142d4e" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700">Conversation captured</text>
+  <text x="113" y="204" fill="#567189" font-family="Arial,Helvetica,sans-serif" font-size="15">With client permission</text>
+  <g fill="#007eac">
+    <rect x="379" y="178" width="7" height="17" rx="3.5"/>
+    <rect x="391" y="168" width="7" height="37" rx="3.5"/>
+    <rect x="403" y="175" width="7" height="23" rx="3.5"/>
+    <rect x="415" y="158" width="7" height="57" rx="3.5"/>
+    <rect x="427" y="172" width="7" height="30" rx="3.5"/>
+    <rect x="439" y="163" width="7" height="48" rx="3.5"/>
+    <rect x="451" y="177" width="7" height="19" rx="3.5"/>
+    <rect x="463" y="168" width="7" height="38" rx="3.5"/>
+    <rect x="475" y="181" width="7" height="12" rx="3.5"/>
+    <rect x="487" y="173" width="7" height="28" rx="3.5"/>
+    <rect x="499" y="161" width="7" height="51" rx="3.5"/>
+    <rect x="511" y="176" width="7" height="22" rx="3.5"/>
+    <rect x="523" y="169" width="7" height="37" rx="3.5"/>
+    <rect x="535" y="181" width="7" height="12" rx="3.5"/>
+  </g>
+  <path d="M320 238v14m-7-6 7 7 7-7" fill="none" stroke="#007eac" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="51" y="263" width="255" height="79" rx="10" fill="#fff" stroke="#d5e5ed"/>
+  <rect x="70" y="280" width="25" height="34" rx="3" fill="#e4f2f8" stroke="#9fc8db"/>
+  <path d="M76 289h13m-13 6h13m-13 6h9" stroke="#007eac" stroke-width="2" stroke-linecap="round"/>
+  <text x="108" y="292" fill="#142d4e" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700">Case notes</text>
+  <text x="108" y="316" fill="#567189" font-family="Arial,Helvetica,sans-serif" font-size="15">Review before saving</text>
+  <rect x="320" y="263" width="269" height="79" rx="10" fill="#fff" stroke="#d5e5ed"/>
+  <rect x="338" y="282" width="22" height="22" rx="5" fill="#e3f5ee" stroke="#a6d9c7"/>
+  <path d="m344 293 5 5 8-10" fill="none" stroke="#12875d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="373" y="292" fill="#142d4e" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700">Next actions</text>
+  <text x="373" y="316" fill="#567189" font-family="Arial,Helvetica,sans-serif" font-size="15">Drafts and open tasks</text>
+  <text x="51" y="361" fill="#6f8598" font-family="Arial,Helvetica,sans-serif" font-size="13">Illustrative workflow · recordings require permission</text>
+</svg>

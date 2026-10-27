@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#edf6fa"/>
+  <rect x="27" y="25" width="586" height="350" rx="17" fill="#fff" stroke="#c9dce9" stroke-width="2"/>
+  <path d="M44 25h552a17 17 0 0 1 17 17v47H27V42a17 17 0 0 1 17-17Z" fill="#17213a"/>
+  <circle cx="57" cy="57" r="17" fill="#007eac"/>
+  <text x="57" y="63" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700">C</text>
+  <text x="87" y="64" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700">CaseBridge</text>
+  <text x="405" y="62" fill="#a9cadb" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" letter-spacing="1.2">SPECIALIST PATH</text>
+  <text x="51" y="124" fill="#007eac" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" letter-spacing="1.1">FROM ISSUE TO EXPERT</text>
+  <rect x="51" y="143" width="238" height="188" rx="11" fill="#f5f9fc" stroke="#cddfea"/>
+  <circle cx="79" cy="174" r="13" fill="#d8eaf3"/>
+  <path d="m79 165 2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5Z" fill="#007eac"/>
+  <text x="103" y="181" fill="#142d4e" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700">Issue identified</text>
+  <text x="70" y="220" fill="#405c72" font-family="Arial,Helvetica,sans-serif" font-size="17">Cross-border tax</text>
+  <rect x="70" y="238" width="164" height="27" rx="13" fill="#e5eef8"/>
+  <text x="152" y="256" text-anchor="middle" fill="#375c91" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">Specialist review</text>
+  <path d="M70 285h198" stroke="#d8e5ed" stroke-width="2"/>
+  <text x="70" y="311" fill="#567189" font-family="Arial,Helvetica,sans-serif" font-size="15">Add context from case file</text>
+  <path d="M298 238h32m-9-9 9 9-9 9" fill="none" stroke="#007eac" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="341" y="143" width="248" height="188" rx="11" fill="#eaf4f9" stroke="#b9d8e7"/>
+  <circle cx="371" cy="174" r="13" fill="#d1e8f2"/>
+  <circle cx="371" cy="171" r="4" fill="#007eac"/>
+  <path d="M363 182a8 8 0 0 1 16 0" fill="none" stroke="#007eac" stroke-width="3" stroke-linecap="round"/>
+  <text x="393" y="181" fill="#142d4e" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700">Expert handoff</text>
+  <text x="360" y="220" fill="#405c72" font-family="Arial,Helvetica,sans-serif" font-size="17">Relevant counsel</text>
+  <text x="360" y="244" fill="#567189" font-family="Arial,Helvetica,sans-serif" font-size="15">Issue summary prepared</text>
+  <rect x="360" y="268" width="193" height="40" rx="8" fill="#007eac"/>
+  <text x="456" y="294" text-anchor="middle" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700">Request introduction</text>
+  <text x="51" y="361" fill="#6f8598" font-family="Arial,Helvetica,sans-serif" font-size="13">Illustrative workflow · partner availability varies</text>
+</svg>
