@@ -2,7 +2,7 @@
 .story-hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:45px}
 .story-hero h1{font-size:clamp(43px,4.4vw,61px);line-height:1.07}
 .story-hero h1 span{white-space:normal}
-.outcome-preview{margin:0;min-width:0;overflow:hidden;border:1px solid #cddfea;border-top:4px solid #142d4e;border-radius:9px;background:#f4f8fb;box-shadow:0 18px 36px #173c5a16;color:#142d4e;font-family:Arial,Helvetica,sans-serif}
+.outcome-preview{margin:0;min-width:0;overflow:hidden;border:1px solid #cddfea;border-top:4px solid #142d4e;border-radius:9px;background:#f4f8fb;box-shadow:0 18px 36px #173c5a16;color:#142d4e;font-family:var(--sans)}
 .outcome-appbar{display:flex;align-items:center;gap:13px;min-height:53px;padding:7px 16px;background:#fff;border-bottom:1px solid #dce8f0}
 .outcome-appbar img{width:107px;height:36px;object-fit:contain;object-position:left center;flex:none}
 .outcome-appbar-divider{height:19px;border-left:1px solid #dce8f0}

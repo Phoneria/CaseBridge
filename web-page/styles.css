@@ -6,12 +6,12 @@
   --gray: #56677c;
   --line: #dce5ee;
   --sans: Arial, Helvetica, sans-serif;
-  --serif: Georgia, 'Times New Roman', serif;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+html { scroll-behavior: smooth; scroll-padding-top: 100px; font-family: var(--sans); }
 body { margin: 0; background: white; color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font-family: inherit; }
 button { font: inherit; }
 [hidden] { display: none !important; }
 a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 5px; }
@@ -267,7 +267,7 @@ em { font-style: normal; color: var(--teal); }
 .brand {
   display: inline-flex;
   align-items: baseline;
-  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--sans);
   font-size: 29px;
   line-height: 1;
   letter-spacing: -1.65px;

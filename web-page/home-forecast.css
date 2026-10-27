@@ -3,7 +3,7 @@
 .home-forecast-heading h3{margin:7px 0 10px;color:#142d4e;font-size:clamp(29px,3vw,43px);font-weight:500;letter-spacing:-.04em}
 .home-forecast-heading p:not(.section-label){max-width:66ch;margin:0;color:#53718a;font-size:14px;line-height:1.6}
 .home-period{display:flex;flex-shrink:0;border:1px solid #cddfe9}
-.home-period button{border:0;background:#fff;color:#294a65;padding:11px 17px;font:700 12px Arial,sans-serif;cursor:pointer}
+.home-period button{border:0;background:#fff;color:#294a65;padding:11px 17px;font:700 12px var(--sans);cursor:pointer}
 .home-period button[aria-pressed=true]{background:#142d4e;color:#fff}
 .home-period button:focus-visible,.home-forecast-downloads a:focus-visible{outline:3px solid #007eac;outline-offset:3px}
 .home-forecast>#home-period-note{margin:16px 0 18px}
@@ -15,7 +15,7 @@
 .home-chart svg{display:block;width:100%;height:auto}
 .home-grid-line{stroke:#dce7ee;stroke-width:1}
 .home-zero-line{stroke:#8c9bab;stroke-width:1.5;stroke-dasharray:4 4}
-.home-axis-label{fill:#475e70;font:12px Arial,Helvetica,sans-serif}
+.home-axis-label{fill:#475e70;font:12px var(--sans)}
 .home-chart-legend{display:flex;gap:8px 17px;flex-wrap:wrap;margin-top:11px;color:#294a65;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 .home-chart-legend span{display:flex;align-items:center;gap:7px}
 .home-chart-legend span:before{content:"";display:block;width:22px;border-top:3px solid var(--series-color)}
