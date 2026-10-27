@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <title>CaseBridge workflow preview</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="hero-outcome.css">
+  <link rel="stylesheet" href="previews/workflow-preview.css">
+</head>
+<body>
+  <main class="workflow-stage">
+    <figure class="outcome-preview workflow-preview" aria-labelledby="workflow-title" aria-describedby="workflow-caption">
+      <div class="demo-shell">
+        <aside class="demo-sidebar" aria-label="Illustrative CaseBridge navigation">
+          <img src="assets/casebridge-e2e-dark.svg" alt="CaseBridge" width="174" height="50">
+          <nav aria-label="Application sections"><span>Dashboard</span><span>Cases</span><span>Calendar</span><span>Tasks</span><span>Documents</span><span>Analytics</span></nav>
+          <div class="demo-ai-nav"><strong><span aria-hidden="true">✦</span> CaseBridge AI</strong><span class="is-current">Case Analysis</span><span>Hearing Practice</span><span>Legal Assistant</span></div>
+        </aside>
+        <div class="demo-workspace">
+          <div class="demo-topbar"><div><strong id="workflow-top-title">Case Analysis</strong><span>CaseBridge AI workspace</span></div><span class="demo-user">ILLUSTRATIVE DEMO <b aria-hidden="true">IA</b></span></div>
+          <div class="demo-page">
+            <div class="demo-page-heading"><div><p>CASEBRIDGE AI</p><h2 id="workflow-title">Case Analysis</h2><span id="workflow-subtitle"></span></div><span class="demo-ready"><i aria-hidden="true"></i><span id="workflow-status">For lawyer review</span></span></div>
+            <div class="demo-stats" id="workflow-stats" aria-label="Illustrative case overview"></div>
+            <div class="workflow-content" id="workflow-content"></div>
+          </div>
+        </div>
+      </div>
+      <figcaption id="workflow-caption">Illustrative CaseBridge screen with fictional case data. All legal outputs require lawyer review.</figcaption>
+    </figure>
+  </main>
+  <script src="previews/workflow-preview.js"></script>
+</body>
+</html>
