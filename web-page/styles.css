@@ -129,6 +129,7 @@ em { font-style: normal; color: var(--teal); }
 .footer { border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 25px; padding-block: 30px; }
 .footer .brand { font-size: 22px; }
 .footer p, .footer>span { font-size: 10px; color: var(--gray); margin: 0; }
+.footer>span a { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 1000px) {
   .wrap { width: calc(100% - 56px); }
   .nav nav { gap: 22px; }
@@ -697,7 +698,6 @@ body { font-size:16px; }
 .meeting-feature .meeting-copy { padding:15px 8px 15px 16px; }
 .meeting-feature h3 { font-size:clamp(28px,3vw,43px); }
 .meeting-feature p { font-size:18px;max-width:34ch; }
-.meeting-feature small { display:block;color:#52697b;font-size:12px;line-height:1.5;margin-top:20px; }
 .meeting-feature img { width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;display:block;border-radius:3px; }
 .team-surface .member-photo[src$="bengu-ozbek-current.jpg"] { object-position:50% 43%; }
 .expansion-atlas { grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:40px; }
