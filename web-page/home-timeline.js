@@ -125,7 +125,7 @@
       const target = [2027, 2028, 2031][i];
       const button = el('button', 'roadmap-explore', `Explore ${target} month by month ↘`);
       button.type = 'button';
-      button.addEventListener('click', () => { showYear(target); root.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); });
+      button.addEventListener('click', () => { showYear(target); for (let parent = root.parentElement; parent; parent = parent.parentElement) { if (parent.tagName === 'DETAILS') parent.open = true; } root.scrollIntoView({behavior: 'instant', block: 'start'}); });
       card.append(button);
     });
     showYear(2027);

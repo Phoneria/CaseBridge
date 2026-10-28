@@ -5,3 +5,7 @@
 - `team/bengu-ozbek-current.jpg`: user-provided photograph, resized for web delivery.
 
 Market routes, lab sales and operating plans are illustrative targets rather than current geographic activity or signed transactions.
+
+## AI workflow application screenshots
+
+`ai-hearing-conversation.jpg`, `ai-hearing-evidence.jpg` and `ai-hearing-evaluation.jpg` are first-party browser captures of the existing CaseBridge application and its built-in fictional training hearing. See `AI_SCREENSHOTS.md` for capture provenance. No image generator or recreated application UI was used.

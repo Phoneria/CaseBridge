@@ -41,3 +41,18 @@ Bengü now uses the newly supplied personal photograph, optimized as `assets/tea
 ## Visual identity and market graphics
 
 The header and footer use an integrated CaseBridge wordmark: one fine bridge line connects the two e letters. Its tagline is “Every case. End to end.” `assets/casebridge-e2e.svg` is the standalone vector version. The first-meeting panel edits a real consultation photograph to show illustrative question prompts. The market section uses a geographic map derived from Natural Earth data, a SAM composition donut with selectable formula breakdowns, and a SOM/SAM share ring. These charts preserve existing sourced estimates and distinguish planning assumptions. The annual financial table has a large caption and colored revenue, cost and result columns.
+
+
+## Hero case map
+
+The hero keeps its original copy beside a connected SVG mind map, without an application frame. `hero-case-map.css` scopes its layout to the hero. `hero-case-map.js` renders six primary branches and nineteen secondary nodes with cross-links, selectable branches and TR/EN translations through the existing language system. The graph is an illustrative preparation workflow and does not present a live case analysis. Keyboard users can select nodes with Enter or Space; reduced-motion preferences disable decorative animation.
+
+## Actual AI screen gallery
+
+The “A practical assistant. Across the whole case.” section now uses three direct browser captures from the existing application instead of the meeting illustration and concept SVGs. `ai-screen-gallery.js` controls accessible vertical tabs and a native in-page enlargement dialog; `ai-screen-gallery.css` provides responsive layout. Its labels integrate with the existing TR/EN translator. The captured application itself is in Turkish.
+
+Capture provenance and exact crops are recorded in `assets/AI_SCREENSHOTS.md`. All three images show the same existing fictional training hearing and its 73/100 feedback, with no UI reconstruction or generated image assets.
+
+## Finance overview and optional detail
+
+The finance section now opens with the proposed $1.5m seed, 24-month planning horizon, five allocation percentages and three short growth stages. The original annual financial model, capital assumptions and monthly/risk roadmap are preserved inside two initially closed native details panels. `finance-overview.css` styles the summary; `finance-overview.js` supplies its TR/EN labels. All existing model IDs and financial inputs are retained. Timeline hash links open the monthly detail panel through the existing deep-link handler; the roadmap's year buttons also open its ancestor panel before scrolling.
