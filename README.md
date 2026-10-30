@@ -46,6 +46,8 @@ casebridge/
 
 CaseBridge runs as one cloud service for many law firms. Nothing is installed per firm. The CaseBridge team's **platform administrators** open each firm and its first administrator in the platform panel (`/platform`). Firm administrators then invite their own lawyers.
 
+A step-by-step installation guide in Turkish (setup, first login, full reset, production checklist, troubleshooting) is in [`docs/KURULUM.md`](docs/KURULUM.md).
+
 ### Quick start with Docker (recommended)
 
 Requirements: Docker Desktop (or Docker Engine with the Compose plugin) and git. For real local AI actors you also need Ollama; see "AI provider" below.
