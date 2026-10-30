@@ -55,6 +55,22 @@ describe("WorkspaceHeader", () => {
     expect(section).not.toHaveAttribute("aria-current");
   });
 
+  it("leaves out firm-data widgets for platform admins", async () => {
+    setUrl("/platform");
+    render(<WorkspaceHeader user={{
+      id: "u2", email: "ops@example.test", full_name: "Platform Ekibi", department: null,
+      gender: null, role: "admin", law_firm_id: "p1", is_active: true, is_platform_admin: true,
+    }} />);
+
+    expect(screen.getByRole("button", { name: "Kullanıcı menüsü, Platform Ekibi" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Genel arama" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bildirimler" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Hızlı erişim" })).not.toBeInTheDocument();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(getCalendarEvents).not.toHaveBeenCalled();
+    expect(listAllTasks).not.toHaveBeenCalled();
+  });
+
   it("searches precedents and opens the selected decision", async () => {
     getPrecedents.mockResolvedValue([{ id: "p1", case_name: "Kira tespit kararı", case_number: "2026/1", description: "Kira artışı" }]);
     render(<WorkspaceHeader user={null} />);

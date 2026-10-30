@@ -13,6 +13,7 @@ class TokenResponse(BaseModel):
 
 class AuthConfigOut(BaseModel):
     demo_mode: bool
+    platform_demo: bool
 
 
 class ForgotPasswordRequest(BaseModel):

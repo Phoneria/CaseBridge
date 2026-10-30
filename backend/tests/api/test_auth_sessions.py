@@ -102,7 +102,14 @@ def test_login_ignores_the_case_of_the_email(client, two_firms_two_users):
 
 
 def test_auth_config_is_public_and_reports_demo_mode(client, monkeypatch):
+    monkeypatch.setattr(settings, "env", "development")
     monkeypatch.setattr(settings, "seed_demo_data", True)
-    assert client.get("/auth/config").json() == {"demo_mode": True}
+    assert client.get("/auth/config").json() == {"demo_mode": True, "platform_demo": True}
     monkeypatch.setattr(settings, "seed_demo_data", False)
-    assert client.get("/auth/config").json() == {"demo_mode": False}
+    assert client.get("/auth/config").json() == {"demo_mode": False, "platform_demo": False}
+
+
+def test_auth_config_platform_demo_is_never_offered_in_production(client, monkeypatch):
+    monkeypatch.setattr(settings, "seed_demo_data", True)
+    monkeypatch.setattr(settings, "env", "production")
+    assert client.get("/auth/config").json() == {"demo_mode": True, "platform_demo": False}

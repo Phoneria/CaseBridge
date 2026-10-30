@@ -125,7 +125,10 @@ class ReminderService:
         due: list[DueReminder] = []
         for candidate in candidates:
             user = users.get(candidate.recipient_id) if candidate.recipient_id else None
-            if user is None or not user.is_active or not user.email or user.law_firm_id != candidate.law_firm_id:
+            if (
+                user is None or not user.is_active or not user.email
+                or user.law_firm_id != candidate.law_firm_id or not user.law_firm.is_active
+            ):
                 continue
             offsets = due_offsets(candidate.occurrence_date, candidate.reminder_days, today)
             if candidate.source_type == ReminderSourceType.EVENT and candidate.starts_at is not None:

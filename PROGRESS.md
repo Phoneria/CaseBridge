@@ -239,3 +239,8 @@ Status: COMPLETE
 - Case page "Duruşmalar" card: add, edit, delete, "Sonuç gir" (result note + optional next hearing) via `GET /cases/{id}/hearings` and `POST /calendar/events/{id}/result`; the result adds a "Duruşma yapıldı" timeline entry. Closed cases take no new hearings; archived cases are read-only.
 - Migration `a7d2e4f6b8c1` adds `result_note` / `result_case_event_id` and turns each existing `next_hearing_date` into an all-day hearing event.
 - New E2E spec `13-hearing-dates.spec.ts`.
+
+## Platform panel (2026-10-23)
+- Firms and their first administrators are opened by the CaseBridge team in the platform panel (/platform); `python -m app.db.create_admin` is removed.
+- Platform admins come from PLATFORM_ADMIN_EMAILS (created and invited on startup, idempotent); demo: platform@demo.casebridge.dev / demo1234.
+- A firm can be suspended: its users cannot sign in, open sessions end, links and reset e-mails stop, reminders are skipped; data stays.

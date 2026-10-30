@@ -58,14 +58,14 @@ def issue_token(db: Session, user: User, purpose: TokenPurpose, created_by: str 
 
 def find_usable_token(db: Session, raw_token: str) -> tuple[UserToken, User] | None:
     """The token row and its user when the token exists, is unused, is not
-    expired and its user is active; otherwise None (callers answer 410)."""
+    expired and its user is active in a firm that is not suspended; otherwise None (callers answer 410)."""
     if not raw_token or len(raw_token) > _MAX_RAW_LENGTH:
         return None
     token = db.query(UserToken).filter(UserToken.token_hash == hash_token(raw_token)).first()
     if token is None or token.used_at is not None or token.expires_at <= utc_now():
         return None
     user = db.query(User).filter(User.id == token.user_id, User.law_firm_id == token.law_firm_id).first()
-    if user is None or not user.is_active:
+    if user is None or not user.is_active or not user.law_firm.is_active:
         return None
     return token, user
 

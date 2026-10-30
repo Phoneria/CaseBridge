@@ -34,6 +34,59 @@ describe("api request()", () => {
     expect(window.location.href).toContain("/login");
   });
 
+  it("clears the token and sends a suspended firm's user to the login page with the notice", async () => {
+    window.localStorage.setItem("casebridge_token", "valid-token");
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ detail: "Büronuzun erişimi askıya alındı." }),
+    }) as unknown as typeof fetch;
+
+    const { listAllTasks } = await import("@/lib/api");
+
+    await expect(listAllTasks()).rejects.toThrow("Büronuzun erişimi askıya alındı.");
+    expect(window.localStorage.getItem("casebridge_token")).toBeNull();
+    expect(window.location.href).toContain("/login?askida=1");
+  });
+
+  it("does not redirect on another 403", async () => {
+    window.localStorage.setItem("casebridge_token", "valid-token");
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ detail: "Admin access required" }),
+    }) as unknown as typeof fetch;
+
+    const { listAllTasks } = await import("@/lib/api");
+
+    await expect(listAllTasks()).rejects.toThrow();
+    expect(window.localStorage.getItem("casebridge_token")).toBe("valid-token");
+    expect(window.location.href).not.toContain("/login");
+  });
+
+  it("calls the platform endpoints with the right methods", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const api = await import("@/lib/api");
+
+    await api.listPlatformFirms();
+    await api.createPlatformFirm({ name: "B", admin_full_name: "Y", admin_email: "y@b.test" });
+    await api.addPlatformFirmAdmin("f1", { full_name: "Y", email: "y@b.test" });
+    await api.resendPlatformAdminInvite("f1", "u1");
+    await api.suspendPlatformFirm("f1");
+    await api.activatePlatformFirm("f1");
+
+    const calls = fetchMock.mock.calls.map(([url, init]) => [String(url).replace(/^https?:\/\/[^/]+/, ""), init?.method ?? "GET"]);
+    expect(calls).toEqual([
+      ["/platform/firms", "GET"],
+      ["/platform/firms", "POST"],
+      ["/platform/firms/f1/admins", "POST"],
+      ["/platform/firms/f1/admins/u1/invite", "POST"],
+      ["/platform/firms/f1/suspend", "POST"],
+      ["/platform/firms/f1/activate", "POST"],
+    ]);
+  });
+
   it("does not redirect on a non-401 error", async () => {
     window.localStorage.setItem("casebridge_token", "valid-token");
 

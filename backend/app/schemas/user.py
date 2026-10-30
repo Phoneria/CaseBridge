@@ -14,6 +14,7 @@ class UserOut(BaseModel):
     role: UserRole
     law_firm_id: str
     is_active: bool
+    is_platform_admin: bool = False
 
 
 class ProfileUpdate(BaseModel):

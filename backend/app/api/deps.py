@@ -17,6 +17,7 @@ from app.core.security import decode_access_token, password_epoch
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
+from app.services.firm_access import FIRM_SUSPENDED, firm_is_open
 
 logger = logging.getLogger("casebridge")
 
@@ -59,6 +60,10 @@ def get_current_user(
         or pwd != password_epoch(user.password_set_at)
     ):
         raise _CREDENTIALS_EXCEPTION
+    if not firm_is_open(user):
+        # 403, not 401: the session is valid, the firm is suspended. The
+        # frontend shows the message on the login page.
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=FIRM_SUSPENDED)
     return user
 
 
@@ -71,6 +76,16 @@ def get_current_law_firm_id(current_user: User = Depends(get_current_user)) -> s
 def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user
+
+
+PLATFORM_REQUIRED = "Platform yetkisi gerekli."
+
+
+def get_current_platform_admin(current_user: User = Depends(get_current_user)) -> User:
+    # Both must hold: a stray flag on a customer-firm user grants nothing.
+    if not (current_user.is_platform_admin and current_user.law_firm.is_platform):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=PLATFORM_REQUIRED)
     return current_user
 
 

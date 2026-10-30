@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -26,6 +26,7 @@ import { nav, resetNav, setUrl } from "@/test/navigation";
 import { ApiError } from "@/lib/apiError";
 import { ForgotPasswordView } from "@/components/auth/ForgotPasswordView";
 import { LoginView } from "@/components/auth/LoginView";
+import RootPage from "@/app/page";
 import { SetPasswordView } from "@/components/auth/SetPasswordView";
 
 const LINK_INVALID = "Bağlantının süresi dolmuş veya bağlantı daha önce kullanılmış.";
@@ -48,14 +49,32 @@ describe("LoginView", () => {
   });
 
   it("shows the demo accounts hint in demo mode", async () => {
-    getAuthConfig.mockResolvedValue({ demo_mode: true });
+    getAuthConfig.mockResolvedValue({ demo_mode: true, platform_demo: true });
     render(<LoginView />);
 
     expect(await screen.findByText("Demo hesapları")).toBeInTheDocument();
     expect(screen.getByText("Yönetici: admin@demo.casebridge.dev")).toBeInTheDocument();
     expect(screen.getByText("Avukat: avukat@demo.casebridge.dev")).toBeInTheDocument();
+    expect(await screen.findByText("Platform: platform@demo.casebridge.dev")).toBeInTheDocument();
     expect(screen.getByText("Şifre: demo1234")).toBeInTheDocument();
     expect(screen.getByLabelText("E-posta")).toHaveValue("");
+  });
+
+  it("hides the platform demo account unless the server offers it", async () => {
+    getAuthConfig.mockResolvedValue({ demo_mode: true, platform_demo: false });
+    render(<LoginView />);
+
+    expect(await screen.findByText("Demo hesapları")).toBeInTheDocument();
+    expect(screen.getByText("Yönetici: admin@demo.casebridge.dev")).toBeInTheDocument();
+    expect(screen.queryByText("Platform: platform@demo.casebridge.dev")).not.toBeInTheDocument();
+  });
+
+  it("shows the suspension notice when sent back from a suspended firm", async () => {
+    window.history.pushState({}, "", "/login?askida=1");
+    render(<LoginView />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Büronuzun erişimi askıya alındı.");
+    window.history.pushState({}, "", "/login");
   });
 
   it("works without a hint when the config call fails", async () => {
@@ -70,9 +89,10 @@ describe("LoginView", () => {
   it.each([
     ["admin", "/admin"],
     ["lawyer", "/dashboard"],
+    ["platform", "/platform"],
   ])("logs in a %s and goes to %s", async (role, destination) => {
     login.mockResolvedValue({ access_token: "tok" });
-    getMe.mockResolvedValue({ id: "u1", role });
+    getMe.mockResolvedValue(role === "platform" ? { id: "u1", role: "admin", is_platform_admin: true } : { id: "u1", role });
     const user = userEvent.setup();
     render(<LoginView />);
 
@@ -322,5 +342,26 @@ describe("LoginView session handling (fix 1)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Giriş yapılamadı. Lütfen tekrar deneyin.");
     expect(clearToken).toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Giriş Yap" })).toHaveAttribute("aria-disabled", "false");
+  });
+});
+
+describe("RootPage", () => {
+  beforeEach(() => window.localStorage.setItem("casebridge_token", "tok"));
+  afterEach(() => window.localStorage.clear());
+
+  it("goes to the login page when the session cannot be read", async () => {
+    getMe.mockRejectedValue(new ApiError("Oturum geçersiz.", 401));
+    render(<RootPage />);
+
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith("/login"));
+  });
+
+  it("leaves the redirect to the API layer when the firm is suspended", async () => {
+    getMe.mockRejectedValue(new ApiError("Büronuzun erişimi askıya alındı.", 403));
+    render(<RootPage />);
+
+    await waitFor(() => expect(getMe).toHaveBeenCalled());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(nav.replace).not.toHaveBeenCalled();
   });
 });

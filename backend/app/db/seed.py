@@ -3,8 +3,8 @@
 Run with: python -m app.db.seed
 
 Idempotent: safe to run multiple times (looks up by email/case_number
-before inserting). Creates one demo law firm, an admin and three lawyers
-user with known credentials, and a handful of demo cases so the app
+before inserting). Creates one demo law firm, an admin and three lawyers,
+the platform firm with a demo platform admin, and a handful of demo cases so the app
 is not empty on first login (used by E2E tests and local/demo use).
 """
 from datetime import date, datetime, timedelta, timezone
@@ -28,6 +28,7 @@ from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
 from app.services.case_parties import legacy_parties, party_models
 from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
+from app.services.platform_service import PLATFORM_FIRM_NAME, get_or_create_platform_firm
 
 DEMO_FIRM_NAME = "Demo Hukuk Bürosu"
 ADMIN_EMAIL = "admin@demo.casebridge.dev"
@@ -38,6 +39,7 @@ DEMO_LAWYERS = (
     ("zeynep@demo.casebridge.dev", "Zeynep Arslan", "Kira ve Gayrimenkul Hukuku", "female"),
 )
 DEMO_PASSWORD = "demo1234"
+PLATFORM_DEMO_EMAIL = "platform@demo.casebridge.dev"
 
 
 def _get_or_create_firm(db) -> LawFirm:
@@ -651,6 +653,18 @@ def _seed_case_detail(db, case: Case, lawyer: User) -> None:
                              event_type=CaseEventType.NOTE, event_date=event_date)
 
 
+def _remove_platform_demo(db) -> None:
+    """Removes the demo platform admin; the platform firm goes with it unless
+    real platform admins (PLATFORM_ADMIN_EMAILS) belong to it."""
+    remove_demo_data(
+        db,
+        firm_name=PLATFORM_FIRM_NAME,
+        case_numbers=[],
+        emails=[PLATFORM_DEMO_EMAIL],
+        demo_password=DEMO_PASSWORD,
+    )
+
+
 def seed() -> None:
     upgrade_to_head(engine)
     db = SessionLocal()
@@ -665,6 +679,7 @@ def seed() -> None:
                 emails=[ADMIN_EMAIL, *(email for email, *_ in DEMO_LAWYERS)],
                 demo_password=DEMO_PASSWORD,
             )
+            _remove_platform_demo(db)
             scenario_count = seed_courtroom_scenarios(db)
             db.commit()
             print("Seed complete (real data mode). No demo firm or users are created.")
@@ -676,7 +691,7 @@ def seed() -> None:
             for email in removed.passwords_revoked:
                 print(f"  Şifresi geçersiz kılınan demo hesabı: {email}")
             print(f"  Courtroom scenarios: {scenario_count}")
-            print('  Create the first administrator with: python -m app.db.create_admin --firm "<büro adı>" --email <e-posta> --name "<ad soyad>"')
+            print("  Platform yöneticileri PLATFORM_ADMIN_EMAILS ayarıyla oluşturulur; bürolar platform panelinden (/platform) açılır.")
             return
 
         firm = _get_or_create_firm(db)
@@ -687,6 +702,15 @@ def seed() -> None:
             for email, name, department, gender in DEMO_LAWYERS
         ]
         lawyer = lawyers[0]
+        # The well-known demo platform account reaches every firm, so it never
+        # exists in production, even if the demo seed was left switched on.
+        platform_demo = settings.env != "production"
+        if platform_demo:
+            platform_firm = get_or_create_platform_firm(db)
+            platform_admin = _get_or_create_user(db, platform_firm, PLATFORM_DEMO_EMAIL, "Platform Ekibi", UserRole.ADMIN)
+            platform_admin.is_platform_admin = True
+        else:
+            _remove_platform_demo(db)
 
         # Preserve legacy case records while ensuring every existing case in
         # the demo firm has an owner.
@@ -830,6 +854,10 @@ def seed() -> None:
         print(f"Seed complete. Firm: {DEMO_FIRM_NAME}")
         print(f"  Admin login:  {ADMIN_EMAIL} / {DEMO_PASSWORD}")
         print(f"  Lawyer login: {LAWYER_EMAIL} / {DEMO_PASSWORD}")
+        if platform_demo:
+            print(f"  Platform login: {PLATFORM_DEMO_EMAIL} / {DEMO_PASSWORD}")
+        else:
+            print("  Platform demo hesabı production ortamında oluşturulmaz; PLATFORM_ADMIN_EMAILS kullanın.")
         print(f"  Demo cases: {len(DEMO_CASES)}")
         print(f"  Demo tasks: {len(DEMO_TASKS) + len(TICARI_KIRA_TASKS) + 3 * len(CASE_EVIDENCE)}")
         print(f"  Demo documents: {len(DEMO_DOCUMENTS) + len(TICARI_KIRA_DOCUMENTS) + 2 * len(CASE_EVIDENCE)}")

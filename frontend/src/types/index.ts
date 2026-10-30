@@ -313,6 +313,8 @@ export interface AppUser {
   role: UserRole;
   law_firm_id: string;
   is_active: boolean;
+  /** CaseBridge team member who manages customer firms (/platform). */
+  is_platform_admin?: boolean;
 }
 
 export type UserStatus = "pending" | "active" | "inactive";
@@ -333,6 +335,49 @@ export interface ManagedUser {
 
 /** Create / re-invite answer: email_sent is false when the e-mail could not be sent. */
 export interface ManagedUserInvite extends ManagedUser {
+  email_sent: boolean;
+}
+
+/** An administrator of a customer firm as the platform panel shows them. */
+export interface PlatformAdmin {
+  id: string;
+  full_name: string;
+  email: string;
+  status: UserStatus;
+  invited_at: string | null;
+}
+
+/** A customer firm in the platform panel (GET /platform/firms). */
+export interface PlatformFirm {
+  id: string;
+  name: string;
+  created_at: string | null;
+  is_active: boolean;
+  suspended_at: string | null;
+  active_user_count: number;
+  admins: PlatformAdmin[];
+}
+
+export interface PlatformFirmPayload {
+  name: string;
+  admin_full_name: string;
+  admin_email: string;
+}
+
+/** email_sent is false when the invite could not be sent (it can be sent again). */
+export interface PlatformFirmCreated {
+  firm: PlatformFirm;
+  admin: PlatformAdmin;
+  email_sent: boolean;
+}
+
+export interface PlatformAdminPayload {
+  full_name: string;
+  email: string;
+}
+
+export interface PlatformAdminInvite {
+  admin: PlatformAdmin;
   email_sent: boolean;
 }
 
@@ -360,6 +405,7 @@ export interface DeactivateResult {
 
 export interface AuthConfig {
   demo_mode: boolean;
+  platform_demo?: boolean;
 }
 
 export interface TokenInfo {

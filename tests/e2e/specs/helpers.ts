@@ -4,6 +4,7 @@ import path from "path";
 
 export const DEMO_ADMIN = { email: "admin@demo.casebridge.dev", password: "demo1234" };
 export const DEMO_LAWYER = { email: "avukat@demo.casebridge.dev", password: "demo1234" };
+export const DEMO_PLATFORM = { email: "platform@demo.casebridge.dev", password: "demo1234" };
 
 // The backend webServer writes every outgoing e-mail here (EMAIL_BACKEND=file).
 export const MAIL_DIR = path.resolve(__dirname, "../mail");
@@ -14,8 +15,8 @@ export async function login(page: Page, creds: { email: string; password: string
   await page.getByLabel(/e-posta/i).fill(creds.email);
   await page.getByLabel(/şifre/i).fill(creds.password);
   await page.getByRole("button", { name: /giriş/i }).click();
-  // Admins land on /admin, lawyers on /dashboard.
-  await expect(page).toHaveURL(/\/(dashboard|admin)(\/|$|\?)/);
+  // Platform admins land on /platform, firm admins on /admin, lawyers on /dashboard.
+  await expect(page).toHaveURL(/\/(dashboard|admin|platform)(\/|$|\?)/);
 }
 
 function decodeQuotedPrintable(text: string): string {

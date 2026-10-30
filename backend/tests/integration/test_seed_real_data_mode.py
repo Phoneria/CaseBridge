@@ -34,12 +34,13 @@ def test_real_data_mode_on_an_empty_database_creates_no_firm_and_no_users(run_se
     assert db_session.query(User).count() == 0
     assert db_session.query(Case).count() == 0
     out = capsys.readouterr().out
-    assert "real data mode" in out and "python -m app.db.create_admin" in out
+    assert "real data mode" in out and "PLATFORM_ADMIN_EMAILS" in out
+    assert "create_admin" not in out
 
 
 def test_real_data_mode_removes_an_earlier_demo_completely(run_seed, db_session):
     run_seed(True)
-    assert db_session.query(User).count() == 4 and db_session.query(CourtroomSession).count() == 24
+    assert db_session.query(User).count() == 5 and db_session.query(CourtroomSession).count() == 24
 
     run_seed(False)
 
@@ -94,7 +95,7 @@ def test_demo_mode_still_creates_the_demo_accounts(run_seed, db_session):
     run_seed(True)
 
     assert {u.email for u in db_session.query(User).all()} == {
-        seed_module.ADMIN_EMAIL, *(email for email, *_ in seed_module.DEMO_LAWYERS),
+        seed_module.ADMIN_EMAIL, seed_module.PLATFORM_DEMO_EMAIL, *(email for email, *_ in seed_module.DEMO_LAWYERS),
     }
     assert all(u.password_set_at is not None for u in db_session.query(User).all())
 
@@ -124,3 +125,41 @@ def test_kept_demo_accounts_lose_the_demo_password_and_become_pending(run_seed, 
     response = client.post("/auth/login", json={"email": kept.email, "password": seed_module.DEMO_PASSWORD})
     assert response.status_code == 401
     assert f"Şifresi geçersiz kılınan demo hesabı: {seed_module.ADMIN_EMAIL}" in capsys.readouterr().out
+
+
+def test_real_data_mode_keeps_real_platform_admins(run_seed, db_session):
+    run_seed(True)
+    platform_firm = db_session.query(LawFirm).filter_by(is_platform=True).one()
+    db_session.add(User(law_firm_id=platform_firm.id, email="ops@casebridge.example.com",
+                        hashed_password=hash_password("x"), full_name="Ops", role=UserRole.ADMIN,
+                        is_platform_admin=True))
+    db_session.commit()
+
+    run_seed(False)
+
+    assert [u.email for u in db_session.query(User).all()] == ["ops@casebridge.example.com"]
+    assert [f.name for f in db_session.query(LawFirm).all()] == ["CaseBridge Platform"]
+
+
+def test_demo_mode_in_production_creates_no_platform_demo_user(run_seed, db_session, monkeypatch, capsys):
+    monkeypatch.setattr(settings, "env", "production")
+
+    run_seed(True)
+
+    emails = {u.email for u in db_session.query(User).all()}
+    assert seed_module.PLATFORM_DEMO_EMAIL not in emails
+    assert seed_module.ADMIN_EMAIL in emails
+    out = capsys.readouterr().out
+    assert "Platform login:" not in out
+    assert "production ortamında oluşturulmaz" in out
+
+
+def test_production_reseed_removes_an_earlier_platform_demo_user(run_seed, db_session, monkeypatch):
+    run_seed(True)
+    assert db_session.query(User).filter_by(email=seed_module.PLATFORM_DEMO_EMAIL).count() == 1
+
+    monkeypatch.setattr(settings, "env", "production")
+    run_seed(True)
+
+    assert db_session.query(User).filter_by(email=seed_module.PLATFORM_DEMO_EMAIL).count() == 0
+    assert db_session.query(User).filter_by(email=seed_module.ADMIN_EMAIL).count() == 1

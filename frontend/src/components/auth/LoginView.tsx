@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { AUTH_BUTTON, AUTH_INPUT, AUTH_LABEL, AuthCard } from "@/components/auth/AuthCard";
 import { clearToken, getAuthConfig, getMe, login, setToken } from "@/lib/api";
+import { FIRM_SUSPENDED } from "@/lib/firmStatus";
+import { homePath } from "@/lib/home";
 import { userMessage } from "@/lib/userMessages";
 
 export function LoginView() {
@@ -13,8 +15,10 @@ export function LoginView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [platformDemo, setPlatformDemo] = useState(false);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -22,12 +26,19 @@ export function LoginView() {
     // The hint is optional: if the call fails the form simply has no hint.
     getAuthConfig()
       .then((config) => {
-        if (active) setDemoMode(config.demo_mode);
+        if (!active) return;
+        setDemoMode(config.demo_mode);
+        setPlatformDemo(config.platform_demo === true);
       })
       .catch(() => undefined);
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {
+    // Sent here by the API layer when the firm was suspended (see api.ts).
+    if (new URLSearchParams(window.location.search).get("askida") === "1") setNotice(FIRM_SUSPENDED);
   }, []);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -43,7 +54,7 @@ export function LoginView() {
       stored = true;
       const user = await getMe();
       // Stay locked on success: the page is navigating away.
-      router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      router.push(homePath(user));
     } catch (err) {
       // A token stored for a profile we could not read must not stay behind.
       if (stored) clearToken();
@@ -85,9 +96,9 @@ export function LoginView() {
           />
         </div>
 
-        {error && (
+        {(error ?? notice) && (
           <p role="alert" className="text-sm text-red-600">
-            {error}
+            {error ?? notice}
           </p>
         )}
 
@@ -106,6 +117,7 @@ export function LoginView() {
           <p className="mb-1 font-medium text-navy-700">Demo hesapları</p>
           <p>Yönetici: admin@demo.casebridge.dev</p>
           <p>Avukat: avukat@demo.casebridge.dev</p>
+          {platformDemo && <p>Platform: platform@demo.casebridge.dev</p>}
           <p>Şifre: demo1234</p>
         </div>
       )}

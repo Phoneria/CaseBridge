@@ -39,6 +39,18 @@ const SETTINGS_ITEM: NavItem = {
   icon: <Icon d="M10.5 3.5h3l.5 2.3a7 7 0 0 1 1.8 1l2.2-.8 1.5 2.6-1.8 1.5a7 7 0 0 1 0 2.1l1.8 1.5-1.5 2.6-2.2-.8a7 7 0 0 1-1.8 1L13.5 20.5h-3l-.5-2.3a7 7 0 0 1-1.8-1l-2.2.8-1.5-2.6 1.8-1.5a7 7 0 0 1 0-2.1L4 10.3l1.5-2.6 2.2.8a7 7 0 0 1 1.8-1zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />,
 };
 
+const PLATFORM_ITEM: NavItem = {
+  label: "Büro Yönetimi",
+  href: "/platform",
+  icon: <Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2" />,
+};
+
+const ACCOUNT_ITEM: NavItem = {
+  label: "Hesabım",
+  href: "/hesabim",
+  icon: <Icon d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0" />,
+};
+
 const AI_ITEMS = [
   { label: "Dosya Analizi", href: AI_ROUTES.analysis },
   { label: "Canlı Duruşma", href: AI_ROUTES.courtroom },
@@ -67,7 +79,7 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
   );
 }
 
-export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
+export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer"; platform?: boolean }) {
   const pathname = usePathname();
   const inAi = isActive(pathname, AI_ROUTES.hub);
   const hubActive = pathname === AI_ROUTES.hub;
@@ -81,6 +93,14 @@ export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
         </div>
       </div>
 
+      {platform ? (
+        <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+          <NavLink item={PLATFORM_ITEM} pathname={pathname} />
+          <div className="mt-auto flex flex-col gap-2 pt-4">
+            <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+          </div>
+        </nav>
+      ) : (
       <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
         {role === "admin" && (
           <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
@@ -127,6 +147,7 @@ export function Sidebar({ role }: { role?: "admin" | "lawyer" }) {
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>
+      )}
     </aside>
   );
 }

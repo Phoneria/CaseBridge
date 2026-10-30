@@ -40,6 +40,9 @@ class User(Base):
     gender: Mapped[str | None] = mapped_column(String(16), nullable=True)
     role: Mapped[UserRole] = mapped_column(str_enum(UserRole), default=UserRole.LAWYER, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # A member of the CaseBridge team (internal platform firm) who manages
+    # customer firms in the platform panel.
+    is_platform_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # When the password was last set (UTC, whole seconds). NULL = never set:
     # the user was invited and has not chosen a password yet. A new User that
     # is built without this value counts as "password set now"; an invited

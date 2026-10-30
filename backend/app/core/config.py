@@ -117,6 +117,12 @@ class Settings(BaseSettings):
     reset_token_minutes: PositiveInt = 60
     frontend_base_url: str = ""
 
+    # The CaseBridge team's platform administrators (comma-separated e-mail
+    # addresses). On every start the missing ones are created in the internal
+    # platform firm and get an invite e-mail; they open customer firms in the
+    # platform panel (/platform). Removing an address does not revoke access.
+    platform_admin_emails: str = ""
+
     # Calendar and reminders. Event times are stored as naive local times
     # in APP_TIMEZONE; the reminder worker computes "now" in this zone.
     app_timezone: str = "Europe/Istanbul"
