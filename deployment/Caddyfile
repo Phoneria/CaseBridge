@@ -1,0 +1,14 @@
+# HTTPS for app.casebridge.com.tr. Caddy obtains and renews the certificate itself
+# once the DNS A record points at this server and ports 80/443 are reachable.
+app.casebridge.com.tr {
+	encode gzip
+
+	# /api/auth/login -> backend /auth/login (the prefix is stripped).
+	handle_path /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
