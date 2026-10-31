@@ -1,0 +1,90 @@
+# CaseBridge production stack: Caddy (HTTPS) -> Next.js frontend + FastAPI backend -> PostgreSQL.
+# Run ONLY with:
+#   sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml <command>
+# Never use the root docker-compose.yml on the server: it seeds demo accounts and publishes 3000/8000/5432.
+name: cb-prod
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: casebridge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in /etc/casebridge/production.env}
+      POSTGRES_DB: casebridge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U casebridge -d casebridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *default-logging
+
+  backend:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    # Migrations, then ONE Uvicorn process: the simulation, courtroom and reminder
+    # workers run inside it, so never add --workers or scale this service.
+    # No seed here: the demo seed creates accounts with a known password.
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
+    env_file:
+      - /etc/casebridge/production.env
+    environment:
+      DATABASE_URL: postgresql://casebridge:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in /etc/casebridge/production.env}@db:5432/casebridge
+      STORAGE_DIR: /app/storage
+      ENV: production
+      SEED_DEMO_DATA: "false"
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ../frontend
+      args:
+        # Inlined into the browser bundle at build time: change it -> rebuild the frontend.
+        NEXT_PUBLIC_API_URL: https://app.casebridge.com.tr/api
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    logging: *default-logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    # The only published ports. 3000, 8000 and 5432 stay inside the Docker network.
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    logging: *default-logging
+
+volumes:
+  pgdata:
+  storage:
+  caddy_data:
+  caddy_config:

@@ -48,6 +48,8 @@ CaseBridge runs as one cloud service for many law firms. Nothing is installed pe
 
 A step-by-step installation guide in Turkish (setup, first login, full reset, production checklist, troubleshooting) is in [`docs/KURULUM.md`](docs/KURULUM.md).
 
+To run CaseBridge on a real server (Hetzner + Caddy HTTPS at `app.casebridge.com.tr`), follow [`deployment/README.md`](deployment/README.md) and use only `deployment/compose.production.yml`; the root `docker-compose.yml` is for local development and demos.
+
 ### Quick start with Docker (recommended)
 
 Requirements: Docker Desktop (or Docker Engine with the Compose plugin) and git. For real local AI actors you also need Ollama; see "AI provider" below.
