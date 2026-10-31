@@ -1,0 +1,16 @@
+# Block to APPEND to Autosense's Caddyfile on the server: /opt/autosense-b2c/deploy/Caddyfile
+# (mounted into autosense-b2c-web-1 as /etc/caddy/Caddyfile). Do not change the other blocks.
+# Caddy obtains the HTTPS certificate itself once the DNS A record "app" points at this server.
+
+app.casebridge.com.tr {
+	encode zstd gzip
+
+	# /api/auth/login -> CaseBridge backend /auth/login (the prefix is stripped).
+	handle_path /api/* {
+		reverse_proxy cb-backend:8000
+	}
+
+	handle {
+		reverse_proxy cb-frontend:3000
+	}
+}

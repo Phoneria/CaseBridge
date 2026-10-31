@@ -1,4 +1,14 @@
-# CaseBridge production stack: Caddy (HTTPS) -> Next.js frontend + FastAPI backend -> PostgreSQL.
+# CaseBridge production stack on the shared Hetzner server (ubuntu-8gb-fsn1-1),
+# next to the Autosense stack in /opt/autosense-b2c.
+#
+# HTTPS is NOT handled here: Autosense's Caddy (container autosense-b2c-web-1) already
+# owns ports 80/443. Its Caddyfile (/opt/autosense-b2c/deploy/Caddyfile) gets the block in
+# deployment/Caddyfile.app-block, which proxies app.casebridge.com.tr to cb-frontend / cb-backend.
+# For that, cb-frontend and cb-backend also join Autosense's Docker network.
+#
+# Service names start with "cb-" ON PURPOSE: Autosense's Caddy resolves "backend" on that
+# network, so a CaseBridge service called "backend" there would steal Autosense's API traffic.
+#
 # Run ONLY with:
 #   sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml <command>
 # Never use the root docker-compose.yml on the server: it seeds demo accounts and publishes 3000/8000/5432.
@@ -11,7 +21,7 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
-  db:
+  cb-db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -20,6 +30,8 @@ services:
       POSTGRES_DB: casebridge
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U casebridge -d casebridge"]
       interval: 5s
@@ -27,7 +39,7 @@ services:
       retries: 20
     logging: *default-logging
 
-  backend:
+  cb-backend:
     build:
       context: ../backend
     restart: unless-stopped
@@ -38,14 +50,17 @@ services:
     env_file:
       - /etc/casebridge/production.env
     environment:
-      DATABASE_URL: postgresql://casebridge:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in /etc/casebridge/production.env}@db:5432/casebridge
+      DATABASE_URL: postgresql://casebridge:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in /etc/casebridge/production.env}@cb-db:5432/casebridge
       STORAGE_DIR: /app/storage
       ENV: production
       SEED_DEMO_DATA: "false"
     volumes:
       - storage:/app/storage
+    networks:
+      - internal
+      - edge
     depends_on:
-      db:
+      cb-db:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
@@ -55,36 +70,28 @@ services:
       start_period: 20s
     logging: *default-logging
 
-  frontend:
+  cb-frontend:
     build:
       context: ../frontend
       args:
         # Inlined into the browser bundle at build time: change it -> rebuild the frontend.
         NEXT_PUBLIC_API_URL: https://app.casebridge.com.tr/api
     restart: unless-stopped
+    networks:
+      - edge
     depends_on:
-      backend:
+      cb-backend:
         condition: service_healthy
     logging: *default-logging
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    # The only published ports. 3000, 8000 and 5432 stay inside the Docker network.
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - frontend
-      - backend
-    logging: *default-logging
+networks:
+  # CaseBridge only: the database is reachable from cb-backend alone.
+  internal: {}
+  # Autosense's network, where its Caddy runs. Created by the Autosense stack, not by us.
+  edge:
+    name: autosense-b2c_default
+    external: true
 
 volumes:
   pgdata:
   storage:
-  caddy_data:
-  caddy_config:
