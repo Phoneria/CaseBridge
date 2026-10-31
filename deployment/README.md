@@ -2,7 +2,28 @@
 
 Hazırlanma: 31 Ekim 2026; aynı gün `main` dalındaki güncel koda göre düzenlendi (platform paneli, e-posta ile davet, OpenAI).
 
-Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/compose.production.yml`, `deployment/Caddyfile`, `deployment/production.env.example`) repoda hazırdır. Sunucu, DNS ve hesap adımları henüz yapılmadı. Panel menüleri zamanla değişebilir; resmi bağlantılar en sonda bulunur.
+Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/compose.production.yml`, `deployment/Caddyfile.app-block`, `deployment/production.env.example`) repoda hazırdır. Panel menüleri zamanla değişebilir; resmi bağlantılar en sonda bulunur.
+
+## 0. Bu kurulumun gerçek durumu (31 Ekim 2026 incelemesi)
+
+CaseBridge **ayrı bir sunucuya değil**, Autosense ile ortak kullanılan mevcut Hetzner sunucusuna kurulur. Aşağıdaki bölümlerdeki genel adımlardan bu sunucu için geçerli olanlar bu tabloda özetlenmiştir. Çelişki olursa bu bölüm esas alınır.
+
+| Konu | Durum |
+| --- | --- |
+| DNS | `casebridge.com.tr` için NS kayıtları Hetzner'i gösteriyor (`hydrogen/oxygen.ns.hetzner.com`, `helium.ns.hetzner.de`). Zone, Hetzner Console'da **Autosense** projesinin DNS bölümünde. Natro yalnızca alan adının kayıt şirketi; **Natro'da değişiklik gerekmez** (bölüm 5 atlanır). `app` için A kaydı Hetzner DNS'e eklenir. |
+| Mevcut kayıtlar | A `@` ve `www` → `49.13.139.19`. MX `smtp.google.com` (Google Workspace). TXT `@` ve `google._domainkey` (SPF/DKIM). Hiçbiri değiştirilmez. |
+| Sunucu | Autosense projesindeki `ubuntu-8gb-fsn1-1`: CX33 (4 vCPU, 8 GB RAM, 80 GB disk), Falkenstein, IPv4 `49.13.139.19`, Ubuntu 26.04 LTS. Bölüm 6'daki sunucu oluşturma ve bölüm 9'daki Docker kurulumu **atlanır**; Docker zaten kurulu. |
+| Çalışan servisler | `/opt/autosense-b2c` içindeki Autosense stack'i: `autosense-b2c-web-1` (Caddy; 80/443), `-backend-1`, `-postgres-1`, `-redis-1`. Ana tanıtım sitesi aynı Caddy'den, `/opt/casebridge-source/web-page` klasöründen yayınlanır. |
+| HTTPS | Autosense'in Caddy'si 80/443'ü kullandığı için CaseBridge kendi Caddy'sini **çalıştırmaz**. `app.casebridge.com.tr` bloğu (`deployment/Caddyfile.app-block`) Autosense'in Caddyfile'ına (`/opt/autosense-b2c/deploy/Caddyfile`) eklenir ve Caddy yeniden yüklenir (bölüm 14.2). |
+| Docker ağı | `cb-frontend` ve `cb-backend`, Caddy'nin onlara ulaşabilmesi için Autosense'in `autosense-b2c_default` ağına katılır. Veritabanı (`cb-db`) yalnızca CaseBridge'in iç ağındadır. Servis adlarındaki `cb-` öneki zorunludur: Autosense'in Caddy'si o ağda `backend` adını arar. |
+| SSH | `root` için yalnızca anahtarla giriş açık (`PermitRootLogin prohibit-password`). `PasswordAuthentication yes` ayarı diğer kullanıcılar için kapatılmalı. Operatör anahtarı: `~/.ssh/casebridge_hetzner`. Sunucu parmak izi: `SHA256:eNaBaQ+Z+YxqmUJR365SjyNkioCMoJZk/MrD0DeudrY`. |
+| E-posta | Google Workspace SMTP: `smtp.gmail.com:587`, gönderen hesap için uygulama şifresi. SPF/DKIM zaten kurulu. |
+| Diğer | `127.0.0.1:8080` üzerinde 4 gündür çalışan bir `python3 -m http.server` var (yalnızca yerel). CaseBridge ile ilgisi yok; sahibine sorulmadan kapatılmaz. |
+
+**Autosense'i korumak için:**
+- `/opt/autosense-b2c` içinde yalnızca Caddyfile'a blok eklenir. Autosense'in compose dosyası, container'ları ve volume'ları değiştirilmez.
+- `docker compose down`, `docker system prune` ve `docker volume prune` çalıştırılmaz.
+- Caddy yeniden **başlatılmaz**; yeni ayar `caddy reload` ile kesintisiz yüklenir.
 
 ## 1. Ne yapıyoruz?
 
@@ -345,17 +366,19 @@ git log -1 --oneline
 
 Commit SHA'yı yayın kaydına yazın. `git status` değişiklik gösteriyorsa bunların kaynağını anlayın; `reset --hard` ile silmeyin. Ajan varsa `AGENTS.md` talimatlarını ve güncel README'yi okumalı, bu belgeyi yeni kodla karşılaştırmalıdır.
 
-## 11. Önerilen sunucu mimarisi
+## 11. Sunucu mimarisi
 
 ```text
-İnternet → app.casebridge.com.tr → Hetzner IP :443 → Caddy
-                                                      │
-                                    /api/* → FastAPI :8000
-                                    diğer  → Next.js :3000
-                                                      │
-                                          PostgreSQL :5432
+İnternet → 49.13.139.19 :443 → Autosense Caddy (autosense-b2c-web-1)
+                                   │
+        ┌──────────────────────────┼────────────────────────────┐
+  Autosense alan adı     casebridge.com.tr, www      app.casebridge.com.tr
+  (mevcut, değişmez)     (statik site, değişmez)     /api/* → cb-backend :8000
+                                                      diğer  → cb-frontend :3000
+                                                                   │
+                                                          cb-db (PostgreSQL 16)
 
-Kalıcı veriler: PostgreSQL volume + yüklenen dosyalar volume'u
+Kalıcı veriler: cb-prod_pgdata + cb-prod_storage volume'ları
 ```
 
 Tarayıcı API'ye `https://app.casebridge.com.tr/api` üzerinden erişir. Caddy `/api` önekini kaldırır; örneğin dışarıdaki `/api/auth/login`, backend'de `/auth/login` olur. Böylece arayüz ve API aynı origin'de çalışır. Ayrı bir `api` DNS kaydı gerekmiyor.
@@ -364,17 +387,19 @@ Yapılandırma dosyaları repoda hazırdır; sunucuda yeniden yazmayın, repodak
 
 | Dosya | Ne yapar |
 | --- | --- |
-| `deployment/compose.production.yml` | Servisleri tanımlar: db, backend, frontend, caddy. Proje adı `cb-prod`. Backend: migration + tek Uvicorn, seed yok, sağlık kontrolü var. Frontend `NEXT_PUBLIC_API_URL=https://app.casebridge.com.tr/api` ile derlenir. Yalnızca Caddy 80/443 yayınlar. |
-| `deployment/Caddyfile` | `app.casebridge.com.tr` için otomatik HTTPS sağlar. `/api/*` isteklerini önek kaldırılarak backend'e, geri kalanını frontend'e iletir. |
+| `deployment/compose.production.yml` | Servisler: `cb-db`, `cb-backend`, `cb-frontend`; proje adı `cb-prod`. Backend migration'ları çalıştırıp tek Uvicorn süreciyle başlar; seed yok, sağlık kontrolü var. Frontend `NEXT_PUBLIC_API_URL=https://app.casebridge.com.tr/api` ile derlenir. **Hiçbir port host'a yayınlanmaz.** `cb-frontend` ve `cb-backend` Autosense ağına (`autosense-b2c_default`) katılır. |
+| `deployment/Caddyfile.app-block` | Autosense'in Caddyfile'ına eklenecek blok. `app.casebridge.com.tr` için otomatik HTTPS sağlar; `/api/*` isteklerini önek kaldırılarak `cb-backend:8000`'e, geri kalanını `cb-frontend:3000`'e iletir. |
 | `deployment/production.env.example` | `/etc/casebridge/production.env` dosyasının şablonu (bölüm 12). |
 
 Kök geliştirme Compose dosyasıyla birleştirmeyin; her komutta yalnızca `-f deployment/compose.production.yml` kullanın.
 
 `forwarded-allow-ips='*'` yalnızca bu mimari için güvenlidir: backend portu dışarıya açık değildir ve aynı Docker ağına güvenilmeyen servis eklenmez. İleride ağ yapısı değişirse güvenilen proxy adreslerini daraltın. Backend'i `--scale` ile çoğaltmayın, `--workers` eklemeyin.
 
-İlk pilot doğrulandıktan sonra Caddy/Postgres image'larını test edilen sürüm/digest'e sabitleyin ve image kimliklerini yayın kaydında saklayın.
+İlk pilot doğrulandıktan sonra Postgres image'ını test edilen sürüm/digest'e sabitleyin ve image kimliklerini yayın kaydında saklayın.
 
-Caddy, DNS doğru IP'yi gösterdiğinde ve 80/443 erişilebilir olduğunda sertifikayı kendisi alır ve yeniler. Caddy'nin `/data` volume'unu koruyun. Natro'dan bu alt alan adı için sertifika satın almanız gerekmez. [Caddy HTTPS açıklaması](https://caddyserver.com/docs/automatic-https)
+Autosense ağı (`autosense-b2c_default`) Autosense stack'i tarafından oluşturulur. Autosense yeniden kurulur ve ağ yeniden yaratılırsa CaseBridge container'larını `up -d --force-recreate cb-backend cb-frontend` ile yeniden bağlayın.
+
+Autosense'in Caddy'si, DNS doğru IP'yi gösterdiğinde `app.casebridge.com.tr` sertifikasını kendisi alır ve yeniler. Sertifikalar `autosense-b2c_caddy_data` volume'unda durur; bu volume silinmemelidir. Natro'dan bu alt alan adı için sertifika satın almanız gerekmez. [Caddy HTTPS açıklaması](https://caddyserver.com/docs/automatic-https)
 
 ## 12. Gizli ayarlar: `.env` yerine sunucuda korunan dosya
 
@@ -414,15 +439,15 @@ Gönderim hatası kaydı engellemez: kullanıcı oluşur, ekranda "Davet e-posta
 
 **Önemli:** Postgres volume'u ilk kez oluşturulurken kullanılan parola esas alınır. Sonradan env dosyasındaki parolayı değiştirmek veritabanındaki parolayı otomatik değiştirmez. Parola dönüşümünü DB ve backend tarafında birlikte planlayın. JWT secret değişirse mevcut token'lar geçersiz olur.
 
-## 13. DNS: Natro'daki adresi Hetzner'e bağlamak
+## 13. DNS: `app` kaydını eklemek
 
-Sunucu IP'si ve firewall hazır olduğunda gerçek DNS sağlayıcısının paneline dönün.
+Bu kurulumda DNS, Hetzner Console'da **Autosense projesi → DNS → casebridge.com.tr** zone'unda yönetilir (bölüm 0); Natro'da işlem yapılmaz. Yeni kayıt ekleyin:
 
 | Alan | Değer |
 | --- | --- |
 | Tür / Type | `A` |
 | Host / Name | `app` |
-| Değer / Target / IP | Hetzner sunucusunun genel IPv4 adresi |
+| Değer / Target / IP | `49.13.139.19` |
 | TTL | Panel izin veriyorsa 300 saniye; yoksa varsayılan |
 
 Bazı paneller host için `app`, bazıları tam `app.casebridge.com.tr` ister; panelin zone ekleyip eklemediğine bakın. Yanlışlıkla `app.casebridge.com.tr.casebridge.com.tr` oluşturmayın.
@@ -452,20 +477,20 @@ A kaydı sunucunun IPv4 adresini göstermeli. TTL, önceki cache ve sağlayıcı
 cd /opt/casebridge
 sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml config --quiet
 sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml build
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d db backend frontend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d
 sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml ps
 ```
 
 `db` healthy olmalı; backend migration tamamlanmalı. `depends_on`, backend'in istek kabul etmeye başladığını tek başına garanti etmez. Logları inceleyin:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 backend frontend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 cb-backend cb-frontend
 ```
 
 Backend container içinden sağlık kontrolü:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml exec -T backend python -c 'import urllib.request; print(urllib.request.urlopen("http://127.0.0.1:8000/health").read().decode())'
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml exec -T cb-backend python -c 'import urllib.request; print(urllib.request.urlopen("http://127.0.0.1:8000/health").read().decode())'
 ```
 
 Beklenen: `status` alanı `ok`. Bu sadece API sürecinin yanıt verdiğini gösterir; veritabanı, dosya yükleme ve AI ayrıca test edilir.
@@ -476,9 +501,9 @@ Beklenen: `status` alanı `ok`. Bu sadece API sürecinin yanıt verdiğini göst
 
 1. `production.env` içindeki `PLATFORM_ADMIN_EMAILS` adreslerine backend ilk açılışta platform yöneticisi hesabı açar ve davet e-postası gönderir. Logda kontrol edin:
    ```bash
-   sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs backend | grep -i "platform\|e-posta"
+   sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs cb-backend | grep -i "platform\|e-posta"
    ```
-   - "bir müşteri bürosunda kayıtlı olduğu için atlandı": adres zaten bir büroda kullanılıyor; başka adres yazıp `up -d --force-recreate backend`.
+   - "bir müşteri bürosunda kayıtlı olduğu için atlandı": adres zaten bir büroda kullanılıyor; başka adres yazıp `up -d --force-recreate cb-backend`.
    - "Platform yöneticisi davet e-postası gönderilemedi": SMTP ayarlarını düzeltip backend'i yeniden oluşturun. Yeni davet bir sonraki açılışta gider.
 2. Bölüm 14.2'de HTTPS çalıştıktan sonra davet e-postasındaki bağlantıyı açın ve şifrenizi belirleyin. `https://app.casebridge.com.tr/platform` sayfasına gelirsiniz.
 3. **Büro Yönetimi → Yeni büro** ile büroyu açın: büro adı, yöneticinin adı ve e-postası. Yöneticiye davet e-postası gider. Gitmezse büronun panelinden "Daveti yeniden gönder" kullanın.
@@ -489,21 +514,45 @@ Davet bağlantısı varsayılan olarak 72 saat geçerlidir (`INVITE_TOKEN_HOURS`
 Canlı duruşma ekranında hazır kurgu senaryoları gerekiyorsa yalnızca senaryo seed'ini çalıştırın. Bu işlem demo hesabı veya dava oluşturmaz:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml exec -T backend python -c 'from app.db.session import SessionLocal; from app.db.courtroom_seed import seed_courtroom_scenarios; db = SessionLocal(); count = seed_courtroom_scenarios(db); db.commit(); db.close(); print("Senaryo adedi:", count)'
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml exec -T cb-backend python -c 'from app.db.session import SessionLocal; from app.db.courtroom_seed import seed_courtroom_scenarios; db = SessionLocal(); count = seed_courtroom_scenarios(db); db.commit(); db.close(); print("Senaryo adedi:", count)'
 ```
 
-### 14.2. HTTPS erişimini başlat
+### 14.2. HTTPS erişimini başlat (Autosense'in Caddy'sine blok eklemek)
 
-DNS hazır olduktan sonra:
+Başlamadan önce iki koşul sağlanmalı:
+- Bölüm 13'teki `app` A kaydı eklenmiş olmalı. `dig A app.casebridge.com.tr +short` komutu `49.13.139.19` döndürene kadar bekleyin.
+- CaseBridge container'ları çalışıyor ve `cb-backend` healthy olmalı (bölüm 14).
 
-```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d caddy
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 caddy
-curl --fail --show-error https://app.casebridge.com.tr/api/health
-curl -I https://app.casebridge.com.tr/login
-```
+1. Mevcut Caddyfile'ın yedeğini alın:
+   ```bash
+   sudo cp /opt/autosense-b2c/deploy/Caddyfile /opt/autosense-b2c/deploy/Caddyfile.bak-$(date +%Y%m%d%H%M)
+   ```
+2. CaseBridge bloğunu dosyanın sonuna ekleyin. Dosyada `app.casebridge.com.tr` zaten varsa komut tekrar eklemez:
+   ```bash
+   grep -q 'app.casebridge.com.tr' /opt/autosense-b2c/deploy/Caddyfile || { echo; grep -v '^#' /opt/casebridge/deployment/Caddyfile.app-block; } | sudo tee -a /opt/autosense-b2c/deploy/Caddyfile >/dev/null
+   ```
+3. Yeni ayarı çalışan Caddy içinde doğrulayın. Hata varsa **4. adıma geçmeyin**; yedeği geri koyun:
+   ```bash
+   sudo docker exec autosense-b2c-web-1 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+   ```
+4. Ayarı kesintisiz yeniden yükleyin. Container yeniden başlatılmaz; Autosense ve ana site açık kalır:
+   ```bash
+   sudo docker exec -w /etc/caddy autosense-b2c-web-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+   sudo docker logs --since 5m autosense-b2c-web-1 2>&1 | grep -i 'app.casebridge\|certificate\|error' | tail -20
+   ```
+5. Kontrol edin:
+   ```bash
+   curl --fail --show-error https://app.casebridge.com.tr/api/health
+   curl -I https://app.casebridge.com.tr/login
+   curl -sI https://casebridge.com.tr | head -1
+   ```
+   Son komut ana sitenin hâlâ açık olduğunu gösterir.
 
-Caddy'nin ilk sertifika işlemi tamamlanmadan erişim geçici hata verebilir. HTTPS sertifika hatasını `curl -k` ile gizleyerek başarılı saymayın.
+Geri almak gerekirse yedeği geri koyup aynı `caddy reload` komutunu çalıştırın.
+
+Caddyfile Autosense'in deposunda izleniyorsa (`cd /opt/autosense-b2c && git status`), eklenen bloğu Autosense deposuna da commit edin. Aksi hâlde Autosense'in bir sonraki yayınında blok kaybolabilir.
+
+Caddy'nin ilk sertifika işlemi tamamlanmadan erişim geçici olarak hata verebilir. HTTPS sertifika hatasını `curl -k` ile gizleyip başarılı saymayın.
 
 ## 15. Yapay zekâ: OpenAI
 
@@ -527,7 +576,7 @@ CHAT_MODEL=gpt-4o-mini
 Backend ortamı değiştiğinde `restart` yerine container'ı yeniden oluşturun:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d --force-recreate backend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d --force-recreate cb-backend
 ```
 
 Arayüzde Ayarlar bölümünden sağlayıcı durumunu kontrol edin; bu durumun başarılı olması modelin gerçek istekle yanıt verdiğini kanıtlamaz. Hem analiz hem canlı duruşma için uçtan uca test yapın.
@@ -582,6 +631,7 @@ Butonu herkese göstermeden önce sonuçları not edin:
 - [ ] Test bürosu askıya alındığında kullanıcıları giriş yapamıyor; aktifleştirince tekrar girebiliyor.
 - [ ] Yetkisiz/role uygun olmayan erişimler sunucuda reddediliyor; sadece menü gizlemeye güvenilmiyor.
 - [ ] Sunucunun 3000/8000/5432/11434 portları harici bilgisayardan erişilemiyor.
+- [ ] Autosense ve `casebridge.com.tr` ana sitesi CaseBridge kurulumundan sonra da açılıyor.
 - [ ] DB ve dosya yedeği alınmış; ayrı ortamda geri yüklenip okunmuş.
 - [ ] Ana sitedeki buton masaüstü ve mobilde doğru adrese gidiyor.
 
@@ -600,10 +650,10 @@ sudo docker compose --env-file /etc/casebridge/production.env -f deployment/comp
 Son loglar:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 backend frontend caddy
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 cb-backend cb-frontend
 ```
 
-Log takip etmek için `logs -f --tail=100 backend`; çıkmak için `Ctrl+C`. Bu container'ı durdurmaz. Logları paylaşırken kimlik bilgisi, token ve kullanıcı verilerini temizleyin.
+Log takip etmek için `logs -f --tail=100 cb-backend`; çıkmak için `Ctrl+C`. Bu container'ı durdurmaz. Logları paylaşırken kimlik bilgisi, token ve kullanıcı verilerini temizleyin.
 
 Kaynak kullanımı:
 
@@ -639,15 +689,15 @@ cd /opt/casebridge
 backup_dir="/var/backups/casebridge/$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$backup_dir"
 compose=(docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml)
-trap '"${compose[@]}" up -d backend frontend' EXIT
-"${compose[@]}" stop frontend backend
-"${compose[@]}" exec -T db pg_dump -U casebridge -d casebridge -Fc > "$backup_dir/database.dump"
+trap '"${compose[@]}" up -d cb-backend cb-frontend' EXIT
+"${compose[@]}" stop cb-frontend cb-backend
+"${compose[@]}" exec -T cb-db pg_dump -U casebridge -d casebridge -Fc > "$backup_dir/database.dump"
 docker run --rm -v cb-prod_storage:/data:ro -v "$backup_dir:/backup" alpine:3.22 tar -czf /backup/storage.tar.gz -C /data .
 git rev-parse HEAD > "$backup_dir/commit.txt"
 "${compose[@]}" images > "$backup_dir/images.txt"
 cp /etc/casebridge/production.env "$backup_dir/production.env"
 cp deployment/compose.production.yml "$backup_dir/compose.production.yml"
-cp deployment/Caddyfile "$backup_dir/Caddyfile"
+cp /opt/autosense-b2c/deploy/Caddyfile "$backup_dir/autosense-Caddyfile"
 sha256sum "$backup_dir/database.dump" "$backup_dir/storage.tar.gz" > "$backup_dir/SHA256SUMS"
 echo "Yedek tamamlandi: $backup_dir"
 BACKUP
@@ -692,11 +742,11 @@ git fetch --prune origin
 `git status` temiz değilse durup değişiklikleri değerlendirin. Hazır olduğunuzda:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml stop frontend backend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml stop cb-frontend cb-backend
 git pull --ff-only
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml build backend frontend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml build cb-backend cb-frontend
 sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 backend
+sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 cb-backend
 curl --fail --show-error https://app.casebridge.com.tr/api/health
 ```
 
@@ -721,7 +771,10 @@ Yalnızca kod değiştiyse ve DB şeması eski sürümle uyumluysa kaydedilen ö
 | GitHub `Repository not found` | Repo yolu veya deploy key yetkisi yanlış; private repo erişimi yok |
 | Git branch bulunamıyor | Varsayılan branch'i tahmin etmeyin; `git branch -r` ve sahibinin onayı |
 | Compose env eksik diyor | `--env-file /etc/casebridge/production.env` unutulmuş veya değer boş |
-| Port already allocated | Sunucuda başka Caddy/Nginx/Apache veya eski container çalışıyor; `sudo ss -ltnp` ile inceleyin |
+| Port already allocated | CaseBridge compose dosyası port yayınlamaz; root `docker-compose.yml` yanlışlıkla çalıştırılmış olabilir. `sudo ss -ltnp` ile inceleyin |
+| `network autosense-b2c_default not found` | Autosense stack'i kapalı veya ağ adı değişmiş; `docker network ls` ile bakın. Autosense ayakta olmadan CaseBridge başlatılamaz |
+| `app.casebridge.com.tr` 502 | `cb-frontend`/`cb-backend` çalışmıyor veya Autosense ağına bağlı değil; CaseBridge loglarına ve `docker network inspect autosense-b2c_default` çıktısına bakın |
+| Autosense API'si CaseBridge'e gidiyor | Bir CaseBridge servisi `backend` adıyla Autosense ağına katılmış; servis adları `cb-` önekli olmalı |
 | HTTPS sertifika alınamıyor | Yanlış A/AAAA, kapalı 80/443, CAA kısıtı, DNS cache veya ACME limitleri; Caddy logları |
 | `/api/health` 502 | Backend hazır değil veya migration çöktü; backend logları ve DB health |
 | `/api/health` 404 | `/api` öneki yanlış iletiliyor; `handle_path /api/*` kontrolü |
@@ -729,7 +782,7 @@ Yalnızca kod değiştiyse ve DB şeması eski sürümle uyumluysa kaydedilen ö
 | Tarayıcı localhost'a bağlanıyor | `NEXT_PUBLIC_API_URL` yanlış; frontend image'ını yeniden build edin |
 | Login 401 | Yanlış hesap/parola veya hesap henüz davet bekliyor; demo hesaba güvenmeyin |
 | Davet e-postası gelmiyor | SMTP ayarları, 587/STARTTLS, spam klasörü, SPF/DKIM; backend logunda "E-posta gönderilemedi" satırı |
-| Davet bağlantısı localhost'a gidiyor | `FRONTEND_BASE_URL` / `APP_BASE_URL` eksik; düzeltip `up -d --force-recreate backend`, daveti yeniden gönderin |
+| Davet bağlantısı localhost'a gidiyor | `FRONTEND_BASE_URL` / `APP_BASE_URL` eksik; düzeltip `up -d --force-recreate cb-backend`, daveti yeniden gönderin |
 | Platform daveti hiç oluşmadı | `PLATFORM_ADMIN_EMAILS` boş veya adres bir büroda kayıtlı; backend logunda "PLATFORM_ADMIN_EMAILS" satırı |
 | Login 429 | Giriş sınırına takılma; bekleyin, proxy IP iletimini ve deneme sayısını inceleyin |
 | DB parola doğrulaması başarısız | Env parolası ile ilk volume kurulumundaki parola farklı |
@@ -765,11 +818,13 @@ hedefle; nameserver veya kök domain taşıması yapma.
 Hesap girişi, 2FA ve ödeme gibi adımları hesap sahibi tamamlasın.
 Gizli anahtar/parolaları sohbete, Git'e veya frontend koduna koyma.
 
-deployment/compose.production.yml, deployment/Caddyfile ve
-deployment/production.env.example repoda hazır; güncel kodla karşılaştırıp kullan.
+deployment/compose.production.yml, deployment/Caddyfile.app-block ve
+deployment/production.env.example repoda hazır. Sunucu Autosense ile ortak:
+bölüm 0'ı oku; Autosense'in compose'una ve volume'larına dokunma, yalnızca
+Caddyfile'a app bloğunu ekleyip caddy reload yap.
 Kök geliştirme Compose dosyasını production için doğrudan kullanma.
-Caddy ile aynı origin /api yönlendirmesi ve HTTPS kur.
-DB/backend/frontend portlarını internete açma.
+Autosense Caddy'si üzerinden aynı origin /api yönlendirmesi ve HTTPS kur.
+DB/backend/frontend portlarını host'a yayınlama.
 Tek backend ve tek worker kullan; otomatik demo seed çalıştırma.
 İlk hesaplar PLATFORM_ADMIN_EMAILS + SMTP davetiyle açılır; büroları
 /platform panelinden aç. Elle kullanıcı ekleyen betik yazma.
