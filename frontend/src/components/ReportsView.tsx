@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND_ACCENT } from "@/lib/brand";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -60,7 +62,7 @@ const REPORTS: ReportCard[] = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  devam_eden: "#6d43f5",
+  devam_eden: BRAND_ACCENT[600],
   durusma_bekleyen: "#f59e0b",
   karar_bekleyen: "#0ea5e9",
   kapali: "#10b981",

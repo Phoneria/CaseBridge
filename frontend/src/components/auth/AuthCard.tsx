@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 /** The centred card shared by the pages that need no login: login, forgot
  * password and set password (they live outside AppShell). */
@@ -7,7 +8,7 @@ export function AuthCard({ title, children }: { title?: string; children: ReactN
     <div className="flex min-h-screen items-center justify-center bg-surface-muted px-4">
       <div className="w-full max-w-sm rounded-2xl border border-surface-border bg-white p-8 shadow-card">
         <div className="mb-6">
-          <p className="text-base font-semibold text-navy-900">CaseBridge</p>
+          <BrandLogo />
           <p className="text-[11px] text-navy-500">Hukuk bürosu çalışma alanı</p>
         </div>
         {title && <h1 className="mb-4 text-lg font-semibold text-navy-900">{title}</h1>}

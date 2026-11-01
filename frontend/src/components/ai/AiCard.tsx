@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-/** White card with a violet→navy gradient frame; used for AI-produced or AI-starting content only. */
+/** White card with a turquoise gradient frame; used for AI-produced or AI-starting content only. */
 export function AiCard({
   children,
   disclaimer,

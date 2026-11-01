@@ -279,14 +279,14 @@ export function ChatView() {
             <button
               type="button"
               onClick={exportTrainingData}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15"
+              className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700"
             >
               Eğitim verisini indir (JSONL)
             </button>
           ) : undefined
         }
       >
-        <AiModelStatus status={status} variant="dark" />
+        <AiModelStatus status={status} variant="light" />
       </AiHero>
 
       {error && <ErrorState message={error} />}
