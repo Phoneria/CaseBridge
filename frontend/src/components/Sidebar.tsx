@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { AiMark } from "@/components/ai/AiMark";
 import { AiStatusIndicator } from "@/components/AiStatusIndicator";
 import { AI_ROUTES } from "@/lib/ai";
@@ -69,8 +70,8 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
         active
-          ? "bg-[#6941E8] text-white shadow-[0_6px_18px_rgba(59,31,140,0.28)]"
-          : "text-[#C2CCE0] hover:bg-white/[0.08] hover:text-white"
+          ? "bg-accent-600 text-white shadow-card"
+          : "text-navy-600 hover:bg-accent-50 hover:text-accent-700"
       }`}
     >
       {item.icon}
@@ -85,12 +86,9 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
   const hubActive = pathname === AI_ROUTES.hub;
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#273450] bg-[#17213A] px-4 py-6">
-      <div className="mb-8 px-2">
-        <div className="leading-tight">
-          <p className="text-base font-semibold text-white">CaseBridge</p>
-          <p className="text-[11px] text-[#9EACC7]">Hukuk bürosu çalışma alanı</p>
-        </div>
+    <aside className="flex h-full w-64 shrink-0 flex-col overflow-y-auto border-r border-surface-border bg-white px-4 py-6">
+      <div className="mb-8 shrink-0 px-2">
+        <BrandLogo />
       </div>
 
       {platform ? (
@@ -112,17 +110,17 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
         <div
           role="group"
           aria-label="CaseBridge AI"
-          className={`relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
+          className={`relative mt-4 overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link
             href={AI_ROUTES.hub}
             aria-current={hubActive ? "page" : undefined}
-            className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
-              hubActive ? "bg-white/15" : "hover:bg-white/10"
+            className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-accent-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
+              hubActive ? "bg-accent-100" : "hover:bg-accent-100"
             }`}
           >
-            <AiMark className="h-4 w-4 text-accent-300" />
+            <AiMark className="h-4 w-4 text-accent-600" />
             CaseBridge AI
           </Link>
           {AI_ITEMS.map((item) => {
@@ -133,7 +131,7 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={`relative flex items-center rounded-xl py-1.5 pl-9 pr-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
-                  active ? "bg-white/15 font-medium text-white" : "text-accent-100 hover:bg-white/10 hover:text-white"
+                  active ? "bg-accent-600 font-medium text-white" : "text-accent-800 hover:bg-accent-100 hover:text-accent-900"
                 }`}
               >
                 {item.label}
@@ -143,7 +141,7 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
         </div>
 
         <div className="mt-auto flex flex-col gap-2 pt-4">
-          <AiStatusIndicator tone="dark" />
+          <AiStatusIndicator />
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>

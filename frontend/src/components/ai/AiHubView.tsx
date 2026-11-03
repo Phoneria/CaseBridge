@@ -71,7 +71,7 @@ export function AiHubView() {
           { label: "Son duruşma puanı", value: loading ? pending : error ? unavailable : lastSession?.total_score ?? "—" },
         ]}
       >
-        <AiModelStatus status={aiStatus} variant="dark" />
+        <AiModelStatus status={aiStatus} variant="light" />
       </AiHero>
 
       {error && <ErrorState message={error} />}

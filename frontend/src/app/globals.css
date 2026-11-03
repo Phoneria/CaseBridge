@@ -19,9 +19,9 @@ body {
   .chat-markdown h2 { font-size: 1rem; }
   .chat-markdown h3 { font-size: 0.9375rem; }
   .chat-markdown strong { font-weight: 600; color: #0f1a2e; }
-  .chat-markdown a { color: #5a2fdb; text-decoration: underline; text-underline-offset: 2px; }
-  .chat-markdown code { background: #f3f1ff; border-radius: 0.25rem; padding: 0.1rem 0.3rem; font-size: 0.85em; }
+  .chat-markdown a { color: #007eac; text-decoration: underline; text-underline-offset: 2px; }
+  .chat-markdown code { background: #edf9fc; border-radius: 0.25rem; padding: 0.1rem 0.3rem; font-size: 0.85em; }
   .chat-markdown pre { overflow-x: auto; background: #0b1220; color: #ffffff; padding: 0.75rem; border-radius: 0.75rem; }
   .chat-markdown pre code { background: transparent; padding: 0; color: inherit; }
-  .chat-markdown blockquote { border-left: 3px solid #cfc4ff; padding-left: 0.75rem; color: #3d5170; }
+  .chat-markdown blockquote { border-left: 3px solid #afe3f0; padding-left: 0.75rem; color: #3d5170; }
 }
