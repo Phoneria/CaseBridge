@@ -257,6 +257,10 @@ export async function listAdminLawyers(): Promise<AppUser[]> {
   return request("/admin/lawyers");
 }
 
+export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number }> {
+  return request("/admin/demo-template", { method: "POST" });
+}
+
 export async function assignCaseLawyer(caseId: string, lawyerId: string): Promise<Case> {
   return request(`/admin/cases/${caseId}/lawyer`, {
     method: "PATCH",
