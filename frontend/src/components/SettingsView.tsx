@@ -73,9 +73,9 @@ export function SettingsView() {
       const result = await importDemoTemplate();
       setDemoTemplate({ kind: "done", message: result.added_cases
         ? `${result.added_cases} örnek dava ve ilişkili veriler büronuza eklendi.`
-        : "Örnek şablon zaten mevcut; yeni kayıt eklenmedi." });
+        : "Örnek veriler zaten mevcut; yeni kayıt eklenmedi." });
     } catch (err) {
-      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek şablon eklenemedi. Lütfen tekrar deneyin.") });
+      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek veriler eklenemedi. Lütfen tekrar deneyin.") });
     } finally {
       importingDemo.current = false;
     }
@@ -95,11 +95,11 @@ export function SettingsView() {
 
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek şablon</h2>
+          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek veriler</h2>
           <p className="mb-4 text-sm text-navy-500">Kurgusal davaları, görevleri, belgeleri ve olayları bu büroya ekleyin. Mevcut kayıtlar korunur.</p>
           <button type="button" onClick={addExamples} disabled={demoTemplate.kind === "sending"}
             className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
-            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek şablonu getir"}
+            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek verileri yükle"}
           </button>
           {demoTemplate.kind === "done" && <p role="status" className="mt-3 text-sm text-emerald-700">{demoTemplate.message}</p>}
           {demoTemplate.kind === "error" && <p role="alert" className="mt-3 text-sm text-red-700">{demoTemplate.message}</p>}

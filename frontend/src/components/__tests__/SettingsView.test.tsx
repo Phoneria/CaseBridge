@@ -6,6 +6,7 @@ const listManagedUsers = vi.fn();
 const getAiStatus = vi.fn();
 const getNotificationStatus = vi.fn();
 const sendTestEmail = vi.fn();
+const importDemoTemplate = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getMe: (...args: unknown[]) => getMe(...args),
@@ -13,6 +14,7 @@ vi.mock("@/lib/api", () => ({
   getAiStatus: (...args: unknown[]) => getAiStatus(...args),
   getNotificationStatus: (...args: unknown[]) => getNotificationStatus(...args),
   sendTestEmail: (...args: unknown[]) => sendTestEmail(...args),
+  importDemoTemplate: (...args: unknown[]) => importDemoTemplate(...args),
 }));
 
 import userEvent from "@testing-library/user-event";
@@ -37,6 +39,7 @@ const managed = (user: typeof adminUser, status = "active") => ({
 const lawyerUser = { ...adminUser, id: "u2", role: "lawyer", full_name: "Avukat Kullanici" };
 
 beforeEach(() => {
+  importDemoTemplate.mockReset();
   getMe.mockReset();
   listManagedUsers.mockReset();
   getAiStatus.mockReset();
@@ -142,5 +145,42 @@ describe("SettingsView", () => {
     expect(sendTestEmail).toHaveBeenCalledTimes(1);
     resolve({ sent: true, backend: "smtp" });
     expect(await screen.findByText(`Test e-postası ${lawyerUser.email} adresine gönderildi.`)).toBeInTheDocument();
+  });
+});
+
+
+describe("sample data import", () => {
+  it("prevents repeated clicks while importing and reports success", async () => {
+    getMe.mockResolvedValue(adminUser);
+    listManagedUsers.mockResolvedValue([]);
+    let resolve: (value: unknown) => void = () => {};
+    importDemoTemplate.mockReturnValue(new Promise((r) => { resolve = r; }));
+    render(<SettingsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+    const busy = screen.getByRole("button", { name: "Ekleniyor..." });
+    expect(busy).toBeDisabled();
+    await userEvent.click(busy);
+    expect(importDemoTemplate).toHaveBeenCalledTimes(1);
+    resolve({ total_cases: 20, added_cases: 20 });
+    expect(await screen.findByRole("status")).toHaveTextContent("20 örnek dava ve ilişkili veriler büronuza eklendi.");
+  });
+
+  it("reports an existing import and lets the user retry after an error", async () => {
+    getMe.mockResolvedValue(adminUser);
+    listManagedUsers.mockResolvedValue([]);
+    importDemoTemplate.mockRejectedValueOnce(new Error("internal detail"));
+    importDemoTemplate.mockResolvedValueOnce({ total_cases: 20, added_cases: 0 });
+    render(<SettingsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Örnek veriler eklenemedi. Lütfen tekrar deneyin.");
+    await userEvent.click(screen.getByRole("button", { name: "Örnek verileri yükle" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Örnek veriler zaten mevcut; yeni kayıt eklenmedi.");
+  });
+
+  it("hides the import for lawyers", async () => {
+    getMe.mockResolvedValue(lawyerUser);
+    render(<SettingsView />);
+    await screen.findByRole("heading", { name: "Ayarlar" });
+    expect(screen.queryByRole("button", { name: "Örnek verileri yükle" })).not.toBeInTheDocument();
   });
 });
