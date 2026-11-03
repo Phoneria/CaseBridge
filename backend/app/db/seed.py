@@ -599,7 +599,8 @@ TICARI_KIRA_EVENTS = [
 
 def _seed_case_detail(db, case: Case, lawyer: User) -> None:
     """Make every fictional demo case useful without inventing court evidence."""
-    evidence = CASE_EVIDENCE[case.case_number]
+    source_number = case.case_number.removeprefix("ÖRNEK-")
+    evidence = CASE_EVIDENCE[source_number]
     closed = case.status == CaseStatus.KAPALI
     result = {CaseOutcome.WON: "Kabul", CaseOutcome.LOST: "Ret"}.get(case.outcome, "Devam ediyor")
     fact_lines = [
