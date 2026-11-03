@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { getAiStatus, getMe, getNotificationStatus, sendTestEmail } from "@/lib/api";
+import { getAiStatus, getMe, getNotificationStatus, importDemoTemplate, sendTestEmail } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 import type { AIStatus, AppUser, NotificationStatus } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
@@ -22,9 +22,11 @@ export function SettingsView() {
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
   const [notifications, setNotifications] = useState<NotificationStatus | null>(null);
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
+  const [demoTemplate, setDemoTemplate] = useState<TestEmailState>({ kind: "idle" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sendingTest = useRef(false);
+  const importingDemo = useRef(false);
 
   useEffect(() => {
     setLoading(true);
@@ -63,6 +65,22 @@ export function SettingsView() {
     }
   }
 
+  async function addExamples() {
+    if (importingDemo.current) return;
+    importingDemo.current = true;
+    setDemoTemplate({ kind: "sending" });
+    try {
+      const result = await importDemoTemplate();
+      setDemoTemplate({ kind: "done", message: result.added_cases
+        ? `${result.added_cases} örnek dava ve ilişkili veriler büronuza eklendi.`
+        : "Örnek şablon zaten mevcut; yeni kayıt eklenmedi." });
+    } catch (err) {
+      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek şablon eklenemedi. Lütfen tekrar deneyin.") });
+    } finally {
+      importingDemo.current = false;
+    }
+  }
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
@@ -74,6 +92,19 @@ export function SettingsView() {
         <h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1>
         <p className="text-sm text-navy-500">Büro ve kullanıcı ayarlarınızı yönetin.</p>
       </div>
+
+      {isAdmin && (
+        <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek şablon</h2>
+          <p className="mb-4 text-sm text-navy-500">Kurgusal davaları, görevleri, belgeleri ve olayları bu büroya ekleyin. Mevcut kayıtlar korunur.</p>
+          <button type="button" onClick={addExamples} disabled={demoTemplate.kind === "sending"}
+            className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
+            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek şablonu getir"}
+          </button>
+          {demoTemplate.kind === "done" && <p role="status" className="mt-3 text-sm text-emerald-700">{demoTemplate.message}</p>}
+          {demoTemplate.kind === "error" && <p role="alert" className="mt-3 text-sm text-red-700">{demoTemplate.message}</p>}
+        </section>
+      )}
 
       <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         <p className="mb-3 text-sm font-medium text-navy-700">Yapay Zeka Durumu</p>

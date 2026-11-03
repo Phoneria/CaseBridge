@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.case_access import require_case_writable
 from app.api.deps import get_current_admin
 from app.core.timeutil import local_today
+from app.db.demo_template import add_demo_template
 from app.db.session import get_db
 from app.models.case import Case
 from app.models.user import User, UserRole
@@ -14,6 +15,18 @@ from app.schemas.user import UserOut
 from app.services.hearing_dates import move_upcoming_hearings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.post("/demo-template")
+def import_demo_template(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    """Populate the current firm with fictional sample records once."""
+    try:
+        result = add_demo_template(db, admin)
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
 
 
 @router.get("/lawyers", response_model=list[UserOut])
