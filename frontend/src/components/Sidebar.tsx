@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { BrandLogo } from "@/components/BrandLogo";
+import { APP_VERSION } from "@/lib/appVersion";
 import { AiMark } from "@/components/ai/AiMark";
 import { AiStatusIndicator } from "@/components/AiStatusIndicator";
 import { AI_ROUTES } from "@/lib/ai";
@@ -69,8 +71,8 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
       aria-current={active ? "page" : undefined}
       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
         active
-          ? "bg-[#6941E8] text-white shadow-[0_6px_18px_rgba(59,31,140,0.28)]"
-          : "text-[#C2CCE0] hover:bg-white/[0.08] hover:text-white"
+          ? "bg-accent-600 text-white shadow-card"
+          : "text-navy-700 hover:bg-accent-100 hover:text-accent-800"
       }`}
     >
       {item.icon}
@@ -85,34 +87,37 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
   const hubActive = pathname === AI_ROUTES.hub;
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#273450] bg-[#17213A] px-4 py-6">
-      <div className="mb-8 px-2">
-        <div className="leading-tight">
-          <p className="text-base font-semibold text-white">CaseBridge</p>
-          <p className="text-[11px] text-[#9EACC7]">Hukuk bürosu çalışma alanı</p>
-        </div>
-      </div>
+    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-5">
+      <div className="mb-6 shrink-0 px-2"><BrandLogo /></div>
+
+      <div className="min-h-0 flex flex-1 flex-col">
 
       {platform ? (
-        <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+        <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
           <NavLink item={PLATFORM_ITEM} pathname={pathname} />
           <div className="mt-auto flex flex-col gap-2 pt-4">
             <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+            <NavLink item={SETTINGS_ITEM} pathname={pathname} />
           </div>
         </nav>
       ) : (
-      <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+      <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="flex min-h-full flex-col">
+        <div className="shrink-0 space-y-1">
         {role === "admin" && (
           <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
         )}
         {NAV_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
+        </div>
 
+        <div className="mt-auto shrink-0 pt-4">
         <div
           role="group"
           aria-label="CaseBridge AI"
-          className={`relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
+          className={`relative overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link
@@ -142,12 +147,17 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
           })}
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 pt-4">
-          <AiStatusIndicator tone="dark" />
+        </div>
+        </div>
+        </div>
+        <div className="mt-auto flex shrink-0 flex-col gap-2 pt-4">
+          <AiStatusIndicator />
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>
       )}
+      </div>
+      <p className="mt-4 shrink-0 border-t border-accent-200 px-3 pt-3 text-xs font-medium text-navy-500" aria-label={`Uygulama sürümü ${APP_VERSION}`}>v.{APP_VERSION}</p>
     </aside>
   );
 }

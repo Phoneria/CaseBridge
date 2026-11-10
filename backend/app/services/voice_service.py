@@ -6,6 +6,7 @@ validated courtroom API and its role-isolated worker.
 import httpx
 
 from app.core.config import settings
+from app.services.ai_credentials import get_openai_api_key
 
 _BASE = "https://api.openai.com/v1/audio"
 
@@ -15,9 +16,10 @@ class VoiceUnavailable(Exception):
 
 
 def _headers() -> dict[str, str]:
-    if not settings.openai_api_key:
+    api_key = get_openai_api_key()
+    if not api_key:
         raise VoiceUnavailable("OpenAI voice is not configured")
-    return {"Authorization": f"Bearer {settings.openai_api_key}"}
+    return {"Authorization": f"Bearer {api_key}"}
 
 
 def transcribe(filename: str, content_type: str, data: bytes) -> str:

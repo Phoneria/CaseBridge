@@ -9,6 +9,13 @@ class AIStatusOut(BaseModel):
     error: Optional[str] = None
 
 
+class AIKeyStatusOut(BaseModel):
+    configured: bool
+    managed: bool
+    pending: bool
+    can_save: bool
+
+
 class AIConnectivityCheck(BaseModel):
     name: str
     provider: str

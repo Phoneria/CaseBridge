@@ -6,6 +6,34 @@ Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/
 
 ## 0. Bu kurulumun gerçek durumu (31 Ekim 2026 incelemesi)
 
+### 10 Kasım 2026 erişim ve AI kontrolü
+
+- Canlı sunucuya mevcut operatörün `~/.ssh/id_ed25519` anahtarıyla, host anahtarı doğrulanarak erişildi. Aşağıdaki eski kurulum örneklerindeki `casebridge_hetzner` dosyası bu bilgisayarda yok; çalışan anahtarın yeniden oluşturulması gerekmez.
+- Uygulama checkout'u `/opt/casebridge`; inceleme anında dal `codex/live-demo-import`, sürüm `094d514`. `cb-prod` servisleri çalışıyor, backend ve veritabanı sağlıklı.
+- `https://app.casebridge.com.tr/api/health` HTTP 200 yanıtlıyor.
+- Analiz ve sohbet OpenAI'ye bağlı. Mevcut anahtar sağlayıcı tarafından **401 / expired_secret_key** ile reddedildi. Entegrasyon eksik değil; anahtar yenilenmeli. Anahtarın kendisi kayda veya rapora alınmadı.
+- Yeni anahtar yalnızca sunucudaki `/etc/casebridge/production.env` dosyasına yazılır. Sohbete veya GitHub'a eklenmez. `OPENAI_API_KEY` güncellendikten sonra backend yeniden oluşturulur; `docker compose restart` ortam değişkenlerini yenilemez.
+- Yeni uygulama sürümü sol altta görünür. `frontend/app-version.json` sürüm ve kaynak parmak izini saklar. Aynı kaynak tekrar derlenince sürüm değişmez; uygulama kaynağı değişirse sonraki hazırlamada `0.1 → 0.2 → 0.3` ilerler. Dosya sürümle birlikte korunmalıdır.
+- Bundan sonraki yayınlarda sürümü tüm frontend/backend kaynağından hazırlayıp önce imajları derlemek, ardından yalnızca uygulama servislerini yenilemek için `bash deployment/publish.sh` kullanılır. Docker frontend derlemesi bu hazırlanan sürümü korur.
+
+OpenAI hata sınıfları için [resmi hata belgeleri](https://developers.openai.com/api/docs/guides/error-codes) esas alınır. Bağlantı kontrolünün başarılı olması, yanıt üretiminin kota/bakiye açısından çalıştığını tek başına kanıtlamaz.
+
+### Platform Settings üzerinden OpenAI anahtarı
+
+Platform yöneticisi hesabıyla `/ayarlar` açılır; **Gizli anahtar ekle** düğmesine basılıp anahtar parola alanına yapıştırılır. **Kaydet ve bağlantıyı kontrol et**, model erişimini ve küçük bir örnek yanıtı sınayıp anahtarı yalnızca aday olarak saklar; aktif bağlantı değişmez. **Yeni anahtarı etkinleştir** ayrı bir işlemdir: tekrar doğrular, önceki anahtarı korur ve yeni anahtarı kullanıma alır. Başarısız test veya etkinleştirmede mevcut aktif anahtar korunur. Anahtarlar storage volume'undaki `.system-secrets` klasöründe `openai-key.enc`, `openai-key.pending.enc` ve `openai-key.previous.enc` dosyalarında Fernet ile şifrelenir (klasör 700, dosyalar 600); API anahtarları geri döndürmez. Yeni AI istekleri ve arka plan görevleri etkin anahtarı kullanır; yeniden başlatma gerekmez.
+
+Bu geçici option-1 akışıdır. `todo.md`, başka bir müşteriye teslimden önce her hukuk bürosuna ayrı anahtar (option 2) gereksinimini zorunlu sürüm engeli olarak kaydeder.
+
+Bu ortak uygulama anahtarıdır: normal büro yöneticileri ve avukatlar kaydetme veya anahtar durumunu okuma endpoint'lerine erişemez. Form yalnızca platform yöneticisine gösterilir. Uygulama verileri bağlantı testine gönderilmez. Geçerli bir anahtarın testi az miktarda token kullanır.
+
+`AI_SECRETS_ENCRYPTION_KEY` sunucuda bir kez üretilip `/etc/casebridge/production.env` içinde korunur. Olmadan form kayıt kabul etmez. Bu değer release başına yenilenmez; kaybedilirse kayıtlı anahtar çözülemez ve yeni bir API anahtarı kaydedilmelidir. İlk kayıttan önce `OPENAI_API_KEY` ortam değişkeni kullanılır. Kayıtlı şifreli veri bozulursa eski ortam anahtarına sessizce dönülmez. Şifreleme anahtarı ve şifreli dosya güvenli yedeklerde birlikte korunmalıdır.
+
+### Uygulama renkleri
+
+Beyaz içerik kartları ana alanı, turkuaz ve açık tonları arka plan/menü alanlarını, koyu lacivert başlık ve AI vurgu alanlarını oluşturur. 60/30/10 görsel ağırlık hedefidir; veri miktarı ve ekran genişliği değiştikçe piksel oranları değişir. Başarı, hata ve uyarı renkleri anlamlarını korur.
+
+Mobil menü, klavye ile menü kapatma, dar ekranda başlık hizalaması ve AI durum düğmesinin tıklama/yeniden deneme davranışı bu düzenin parçasıdır. Ayarlar ekranındaki AI durumu artık yalnızca ayar varlığını değil, gerçek bağlantı kontrolünü gösterir. Demo modu gerçek bağlantı gibi sunulmaz.
+
 CaseBridge **ayrı bir sunucuya değil**, Autosense ile ortak kullanılan mevcut Hetzner sunucusuna kurulur. Aşağıdaki bölümlerdeki genel adımlardan bu sunucu için geçerli olanlar bu tabloda özetlenmiştir. Çelişki olursa bu bölüm esas alınır.
 
 | Konu | Durum |

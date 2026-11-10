@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { getAiConnectivity } from "@/lib/api";
+import { connectivityMessage } from "@/lib/aiConnectivity";
 import type { AIConnectivity } from "@/types";
 
 const POLL_MS = 60_000;
@@ -13,7 +15,19 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
   const [data, setData] = useState<AIConnectivity | null>(null);
   const [state, setState] = useState<State>("checking");
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const dialogId = useId();
   const busy = useRef(false);
+
+  useEffect(() => {
+    if (!open) return;
+    function outside(event: PointerEvent) {
+      if (!wrapperRef.current?.contains(event.target as Node)) { setOpen(false); setPinned(false); }
+    }
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [open]);
 
   const check = useCallback(async (force = false) => {
     if (busy.current) return;
@@ -49,17 +63,21 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
 
   return (
     <div
+      ref={wrapperRef}
       className="relative"
       onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseLeave={() => { if (!pinned) setOpen(false); }}
       onFocus={() => setOpen(true)}
       onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) { setOpen(false); setPinned(false); }
       }}
+      onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); wrapperRef.current?.querySelector("button")?.focus(); setOpen(false); setPinned(false); } }}
     >
       <button
         type="button"
         aria-expanded={open}
+        aria-controls={open ? dialogId : undefined}
+        onClick={() => { setPinned(!pinned); setOpen(!pinned); }}
         aria-label={`${label}. Ayrıntılar`}
         data-state={state}
         className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
@@ -79,8 +97,9 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 z-20 w-64 pb-2">
+        <div className="absolute bottom-full left-0 z-20 w-full pb-2">
         <div
+          id={dialogId}
           role="dialog"
           aria-label="AI bağlantı ayrıntıları"
           className="rounded-xl border border-surface-border bg-white p-3 shadow-lg"
@@ -94,7 +113,7 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
                     <span className="block font-semibold text-navy-900">
                       {c.name}
                     </span>
-                    {!c.reachable && <span className="block text-red-600">Hizmete şu anda ulaşılamıyor.</span>}
+                    {!c.reachable && <span className="mt-1 block leading-5 text-navy-600">{connectivityMessage(c)}</span>}
                   </span>
                 </li>
               ))}
@@ -110,6 +129,7 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
           >
             {state === "checking" ? "Kontrol ediliyor…" : "Yeniden kontrol et"}
           </button>
+          <Link href="/ayarlar" className="mt-2 block rounded-lg px-2 py-1.5 text-center text-xs font-semibold text-accent-700 hover:bg-accent-50">Bağlantı ayrıntıları</Link>
         </div>
         </div>
       )}

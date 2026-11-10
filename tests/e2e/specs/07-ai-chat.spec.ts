@@ -38,5 +38,6 @@ test("the system picks the answer level and labels the reply", async ({ page }) 
 
   await expect(page.getByText("Sorunuz: İstinaf süresi kaç gündür?")).toBeVisible();
   // Mock mode: the classifier always answers "standard".
-  await expect(page.getByText("Standart · mock")).toBeVisible();
+  await expect(page.getByText("Standart", { exact: true })).toBeVisible();
+  await expect(page.getByText("Standart · mock")).toHaveCount(0);
 });

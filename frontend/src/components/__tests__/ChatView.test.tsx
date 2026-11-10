@@ -241,7 +241,7 @@ describe("ChatView", () => {
 
     api.getChatStatus.mockResolvedValue({ ...STATUS, provider: "ollama", external: false });
     render(<ChatView />);
-    expect(await screen.findByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
+    expect(await screen.findByText("AI hizmeti yapılandırıldı")).toBeInTheDocument();
     expect(screen.queryByText(/harici bir AI sağlayıcısına/)).not.toBeInTheDocument();
     expect(screen.getByText("CaseBridge AI hukuki danışmanlık yerine geçmez; yanıtları doğrulayın.")).toBeInTheDocument();
   });

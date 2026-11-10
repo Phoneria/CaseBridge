@@ -13,6 +13,7 @@ from typing import Optional
 import httpx
 
 from app.core.config import settings
+from app.services.ai_credentials import get_openai_api_key
 
 PROBE_TIMEOUT_SECONDS = 4.0
 CACHE_TTL_SECONDS = 20.0
@@ -37,7 +38,7 @@ def _probe_ollama(model: str) -> tuple[bool, Optional[str]]:
     return True, None
 
 
-def _probe_openai_compatible(base_url: Optional[str], api_key: Optional[str]) -> tuple[bool, Optional[str]]:
+def _probe_openai_compatible(base_url: Optional[str], api_key: Optional[str], model: str = "") -> tuple[bool, Optional[str]]:
     if not api_key or not api_key.strip():
         return False, "API anahtarı tanımlı değil."
     if not base_url or not base_url.strip():
@@ -48,12 +49,28 @@ def _probe_openai_compatible(base_url: Optional[str], api_key: Optional[str]) ->
             headers={"Authorization": f"Bearer {api_key.strip()}"},
             timeout=PROBE_TIMEOUT_SECONDS,
         )
+    except httpx.TimeoutException:
+        return False, "Sağlayıcı bağlantısında zaman aşımı."
     except httpx.HTTPError:
         return False, "Sağlayıcıya ulaşılamadı."
-    if response.status_code in (401, 403):
+    if response.status_code == 401:
         return False, "API anahtarı geçersiz."
+    if response.status_code == 403:
+        return False, "Sağlayıcı erişim izni yetersiz."
+    if response.status_code == 429:
+        return False, "Sağlayıcı kullanım sınırına ulaşıldı (429)."
     if response.status_code >= 400:
         return False, f"Sağlayıcı hata döndürdü ({response.status_code})."
+    # A responsive /models endpoint alone does not establish access to the
+    # selected model. Never return the upstream body (it can contain secrets).
+    try:
+        models = response.json().get("data")
+        if not isinstance(models, list):
+            return False, "Sağlayıcı geçersiz yanıt döndürdü."
+        if model and model not in {item.get("id") for item in models if isinstance(item, dict)}:
+            return False, "Seçilen modele erişilemiyor."
+    except (ValueError, AttributeError):
+        return False, "Sağlayıcı geçersiz yanıt döndürdü."
     return True, None
 
 
@@ -63,9 +80,9 @@ def _probe(provider: str, model: str) -> tuple[bool, Optional[str]]:
     if provider == "ollama":
         return _probe_ollama(model)
     if provider == "openai":
-        return _probe_openai_compatible(OPENAI_BASE_URL, settings.openai_api_key)
+        return _probe_openai_compatible(OPENAI_BASE_URL, get_openai_api_key(), model)
     if provider == "qwen":
-        return _probe_openai_compatible(settings.qwen_base_url, settings.qwen_api_key)
+        return _probe_openai_compatible(settings.qwen_base_url, settings.qwen_api_key, model)
     return False, f"Bilinmeyen sağlayıcı: {provider}"
 
 

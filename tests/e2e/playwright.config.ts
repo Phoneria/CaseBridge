@@ -53,6 +53,8 @@ export default defineConfig({
         JWT_SECRET: "e2e-test-secret",
         EXTRA_CORS_ORIGINS: FRONTEND_URL,
         CHAT_PROVIDER: "mock",
+        LLM_PROVIDER: "mock",
+        OPENAI_API_KEY: "",
         EMAIL_BACKEND: "file",
         EMAIL_FILE_DIR: e2eMailDir,
         FRONTEND_BASE_URL: FRONTEND_URL,

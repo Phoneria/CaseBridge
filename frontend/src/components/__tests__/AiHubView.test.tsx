@@ -71,7 +71,7 @@ describe("AiHubView", () => {
     render(<AiHubView />);
 
     expect(await screen.findByRole("heading", { level: 1, name: "CaseBridge AI" })).toBeInTheDocument();
-    expect(await screen.findByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
+    expect(await screen.findByText("AI hizmeti yapılandırıldı")).toBeInTheDocument();
     const stats = screen.getByText("Tamamlanan analiz").closest("dl")!;
     await waitFor(() => expect(within(stats).getByText("Tamamlanan analiz").nextSibling).toHaveTextContent("1"));
     expect(within(stats).getByText("Duruşma oturumu").nextSibling).toHaveTextContent("1");

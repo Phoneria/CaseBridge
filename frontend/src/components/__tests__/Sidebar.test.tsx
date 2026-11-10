@@ -68,7 +68,7 @@ describe("Sidebar", () => {
 
   it("renders the CaseBridge brand name", () => {
     render(<Sidebar />);
-    expect(screen.getByText("CaseBridge")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "CaseBridge" })).toBeInTheDocument();
     expect(screen.queryByText("CB")).not.toBeInTheDocument();
   });
 

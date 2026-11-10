@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND_ACCENT, BRAND_CHART_COLORS } from "@/lib/brand";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +19,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { DashboardAiCard } from "@/components/ai/DashboardAiCard";
 
-const CHART_COLORS = ["#6d43f5", "#8b6bff", "#ac96ff", "#cfc4ff", "#4a25b3", "#2f1a6e"];
+const CHART_COLORS = BRAND_CHART_COLORS;
 
 function hrefFromChartEvent(data: unknown): string | undefined {
   return (data as { payload?: { href?: string } } | undefined)?.payload?.href;
@@ -121,7 +123,7 @@ export function DashboardView() {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
               <Tooltip />
-              <Bar dataKey="total" name="Toplam" fill="#6d43f5" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="total" name="Toplam" fill={BRAND_ACCENT[600]} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
               <Bar dataKey="won" name="Kazanılan" fill="#10b981" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
               <Bar dataKey="lost" name="Kaybedilen" fill="#f97373" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
             </BarChart>
@@ -145,8 +147,8 @@ export function DashboardView() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
-                  <Tooltip cursor={{ fill: "#f1eeff" }} />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]} fill="#6d43f5" cursor="pointer" onClick={openFromChart} />
+                  <Tooltip cursor={{ fill: "#edf9fc" }} />
+                  <Bar dataKey="total" radius={[6, 6, 0, 0]} fill={BRAND_ACCENT[600]} cursor="pointer" onClick={openFromChart} />
                 </BarChart>
               </ResponsiveContainer>
               <ChartLegendLinks
