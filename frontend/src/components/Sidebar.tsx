@@ -150,7 +150,7 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
       </nav>
       )}
       </div>
-      <p className="mt-4 shrink-0 border-t border-accent-200 px-3 pt-3 text-xs font-medium text-navy-500" aria-label={`Uygulama sürümü ${APP_VERSION}`}>v{APP_VERSION}</p>
+      <p className="mt-4 shrink-0 border-t border-accent-200 px-3 pt-3 text-xs font-medium text-navy-500" aria-label={`Uygulama sürümü ${APP_VERSION}`}>v.{APP_VERSION}</p>
     </aside>
   );
 }
