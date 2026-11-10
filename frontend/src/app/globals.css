@@ -4,8 +4,9 @@
 
 html,
 body {
-  background-color: #ffffff;
+  background-color: #e7f3f5;
   color: #0f1a2e;
+  overscroll-behavior-y: none;
 }
 
 /* Assistant replies rendered by react-markdown (no raw HTML). */

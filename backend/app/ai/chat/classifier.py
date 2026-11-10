@@ -73,9 +73,9 @@ def classify_level(provider: ChatProvider, question: str, previous_question: Opt
     return parse_level(reply)
 
 
-def classify_chat_level(question: str, previous_question: Optional[str] = None) -> str:
+def classify_chat_level(question: str, previous_question: Optional[str] = None, *, law_firm_id=None) -> str:
     try:
-        provider = get_chat_classifier_provider()
+        provider = get_chat_classifier_provider(law_firm_id=law_firm_id) if law_firm_id is not None else get_chat_classifier_provider()
     except Exception as exc:
         logger.warning("Chat level classifier unavailable (%s)", type(exc).__name__)
         return DEFAULT_CHAT_LEVEL

@@ -12,21 +12,21 @@ Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/
 - Uygulama checkout'u `/opt/casebridge`; inceleme anında dal `codex/live-demo-import`, sürüm `094d514`. `cb-prod` servisleri çalışıyor, backend ve veritabanı sağlıklı.
 - `https://app.casebridge.com.tr/api/health` HTTP 200 yanıtlıyor.
 - Analiz ve sohbet OpenAI'ye bağlı. Mevcut anahtar sağlayıcı tarafından **401 / expired_secret_key** ile reddedildi. Entegrasyon eksik değil; anahtar yenilenmeli. Anahtarın kendisi kayda veya rapora alınmadı.
-- Yeni anahtar yalnızca sunucudaki `/etc/casebridge/production.env` dosyasına yazılır. Sohbete veya GitHub'a eklenmez. `OPENAI_API_KEY` güncellendikten sonra backend yeniden oluşturulur; `docker compose restart` ortam değişkenlerini yenilemez.
+- Büro anahtarları Ayarlar üzerinden eklenir ve sunucuda şifreli saklanır; sohbete veya GitHub'a eklenmez. `/etc/casebridge/production.env` içindeki `OPENAI_API_KEY` yalnızca eski platform bağlantısı içindir; müşteri büroları bu ortak anahtara geri dönmez.
 - Yeni uygulama sürümü sol altta görünür. `frontend/app-version.json` sürüm ve kaynak parmak izini saklar. Aynı kaynak tekrar derlenince sürüm değişmez; uygulama kaynağı değişirse sonraki hazırlamada `0.1 → 0.2 → 0.3` ilerler. Dosya sürümle birlikte korunmalıdır.
 - Bundan sonraki yayınlarda sürümü tüm frontend/backend kaynağından hazırlayıp önce imajları derlemek, ardından yalnızca uygulama servislerini yenilemek için `bash deployment/publish.sh` kullanılır. Docker frontend derlemesi bu hazırlanan sürümü korur.
 
 OpenAI hata sınıfları için [resmi hata belgeleri](https://developers.openai.com/api/docs/guides/error-codes) esas alınır. Bağlantı kontrolünün başarılı olması, yanıt üretiminin kota/bakiye açısından çalıştığını tek başına kanıtlamaz.
 
-### Platform Settings üzerinden OpenAI anahtarı
+### Büro Ayarları üzerinden OpenAI anahtarı
 
-Platform yöneticisi hesabıyla `/ayarlar` açılır; **Gizli anahtar ekle** düğmesine basılıp anahtar parola alanına yapıştırılır. **Kaydet ve bağlantıyı kontrol et**, model erişimini ve küçük bir örnek yanıtı sınayıp anahtarı yalnızca aday olarak saklar; aktif bağlantı değişmez. **Yeni anahtarı etkinleştir** ayrı bir işlemdir: tekrar doğrular, önceki anahtarı korur ve yeni anahtarı kullanıma alır. Başarısız test veya etkinleştirmede mevcut aktif anahtar korunur. Anahtarlar storage volume'undaki `.system-secrets` klasöründe `openai-key.enc`, `openai-key.pending.enc` ve `openai-key.previous.enc` dosyalarında Fernet ile şifrelenir (klasör 700, dosyalar 600); API anahtarları geri döndürmez. Yeni AI istekleri ve arka plan görevleri etkin anahtarı kullanır; yeniden başlatma gerekmez.
+Büro yöneticisi kendi hesabıyla `/ayarlar` açar; **Gizli anahtar ekle** düğmesine basıp anahtarı parola alanına yapıştırır. Platform hesabına geçmek gerekmez. **Kaydet ve bağlantıyı kontrol et**, model erişimini ve küçük bir örnek yanıtı sınayıp anahtarı aday olarak saklar; aktif bağlantı değişmez. **Yeni anahtarı etkinleştir** ayrı bir işlemdir: tekrar doğrular, önceki anahtarı korur ve yeni anahtarı kullanıma alır. Başarısız test veya etkinleştirmede mevcut aktif anahtar korunur. Doğrulama testleri büro verisi kullanmaz; az miktarda token kullanır.
 
-Bu geçici option-1 akışıdır. `todo.md`, başka bir müşteriye teslimden önce her hukuk bürosuna ayrı anahtar (option 2) gereksinimini zorunlu sürüm engeli olarak kaydeder.
+Her büronun aktif, aday ve önceki anahtarları storage volume'unda `.system-secrets/firms/<büro-kimliğinin-SHA256-değeri>/openai-key*.enc` olarak saklanır. Şifreli içeriğe büro kimliği de bağlanır; başka büronun dosyasını kopyalamak o büroda geçerli bir anahtar oluşturmaz. Klasörler 700, dosyalar 600 izinlidir. Büro kimliği istemciden alınmaz, oturumdan türetilir. Anahtarlar API yanıtlarında geri verilmez. Avukatlar bağlantı durumunu görebilir, büronun ortak anahtarını değiştiremez. Platform yöneticisinin eski ortak anahtar akışı yalnızca iç platform hesabına aittir.
 
-Bu ortak uygulama anahtarıdır: normal büro yöneticileri ve avukatlar kaydetme veya anahtar durumunu okuma endpoint'lerine erişemez. Form yalnızca platform yöneticisine gösterilir. Uygulama verileri bağlantı testine gönderilmez. Geçerli bir anahtarın testi az miktarda token kullanır.
+Analiz, belge taslağı, sohbet, otomatik seviye seçimi, ses ve sıradaki arka plan görevleri ilgili büronun etkin anahtarını kullanır; yeniden başlatma gerekmez. Bağlantı önbelleği de büroya ayrıdır. Büro anahtarı yoksa veya şifreli dosya bozulursa ortam değişkenindeki ortak anahtara sessizce dönülmez.
 
-`AI_SECRETS_ENCRYPTION_KEY` sunucuda bir kez üretilip `/etc/casebridge/production.env` içinde korunur. Olmadan form kayıt kabul etmez. Bu değer release başına yenilenmez; kaybedilirse kayıtlı anahtar çözülemez ve yeni bir API anahtarı kaydedilmelidir. İlk kayıttan önce `OPENAI_API_KEY` ortam değişkeni kullanılır. Kayıtlı şifreli veri bozulursa eski ortam anahtarına sessizce dönülmez. Şifreleme anahtarı ve şifreli dosya güvenli yedeklerde birlikte korunmalıdır.
+`AI_SECRETS_ENCRYPTION_KEY` sunucuda bir kez üretilip `/etc/casebridge/production.env` içinde korunur. Olmadan form kayıt kabul etmez. Bu değer release başına yenilenmez; kaybedilirse kayıtlı anahtarlar çözülemez. Şifreleme anahtarı ve `.system-secrets` klasörünün tamamı korumalı yedeklerde birlikte saklanmalı ve birlikte geri yüklenmelidir. Yeni müşteri tesliminden önce `todo.md` içindeki kalan sürüm engelleri doğrulanmalıdır.
 
 ### Uygulama renkleri
 

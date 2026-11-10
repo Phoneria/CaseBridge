@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.connectivity import get_ai_connectivity, reset_cache
 from app.ai.provider_factory import get_ai_provider_status
-from app.api.deps import get_current_user, get_current_platform_admin
+from app.api.deps import get_current_user, get_current_admin, ai_credential_scope
 from app.core.rate_limit import is_rate_limited, record_attempt
 from app.db.session import get_db
 from app.models.user import User
@@ -23,13 +23,13 @@ router = APIRouter(prefix="/system", tags=["system"])
 
 
 @router.get("/openai-key", response_model=AIKeyStatusOut)
-def openai_key_status(response: Response, actor: User = Depends(get_current_platform_admin)):
+def openai_key_status(response: Response, actor: User = Depends(get_current_user)):
     response.headers["Cache-Control"] = "no-store"
-    return key_status()
+    return key_status(ai_credential_scope(actor))
 
 
 @router.put("/openai-key", response_model=AIKeyStatusOut)
-async def update_openai_key(request: Request, response: Response, actor: User = Depends(get_current_platform_admin)):
+async def update_openai_key(request: Request, response: Response, actor: User = Depends(get_current_admin)):
     response.headers["Cache-Control"] = "no-store"
     limiter = f"ai-key:{actor.id}"
     if is_rate_limited(limiter, max_attempts=5):
@@ -52,40 +52,41 @@ async def update_openai_key(request: Request, response: Response, actor: User = 
             raise ValueError()
     except (ValueError, UnicodeError):
         raise HTTPException(400, "Geçerli bir OpenAI API anahtarı girin.") from None
-    if not key_status()["can_save"]:
+    scope = ai_credential_scope(actor)
+    if not key_status(scope)["can_save"]:
         raise HTTPException(503, "Güvenli anahtar yönetimi sunucuda etkinleştirilmemiş.")
     try:
-        await run_in_threadpool(save_openai_api_key, api_key)
+        await run_in_threadpool(save_openai_api_key, api_key, scope)
     except CredentialError as exc:
         raise HTTPException(400, str(exc)) from None
     logging.getLogger("casebridge").info("AI credential staged actor=%s", actor.id)
-    return key_status()
+    return key_status(scope)
 
 
 @router.post("/openai-key/activate", response_model=AIConnectivityOut)
-def activate_openai_key(response: Response, actor: User = Depends(get_current_platform_admin)):
+def activate_openai_key(response: Response, actor: User = Depends(get_current_admin)):
     response.headers["Cache-Control"] = "no-store"
     limiter = f"ai-key:{actor.id}"
     if is_rate_limited(limiter, max_attempts=5):
         raise HTTPException(429, "Çok fazla deneme. Bir dakika sonra yeniden deneyin.")
     record_attempt(limiter)
     try:
-        activate_openai_api_key()
+        activate_openai_api_key(ai_credential_scope(actor))
     except CredentialError as exc:
         raise HTTPException(400, str(exc)) from None
-    reset_cache()
+    reset_cache(ai_credential_scope(actor))
     logging.getLogger("casebridge").info("AI credential activated actor=%s", actor.id)
-    return get_ai_connectivity(force=True)
+    return get_ai_connectivity(force=True, law_firm_id=ai_credential_scope(actor))
 
 
 @router.get("/ai-status", response_model=AIStatusOut)
 def ai_status(current_user: User = Depends(get_current_user)):
-    return AIStatusOut(**get_ai_provider_status())
+    return AIStatusOut(**get_ai_provider_status(ai_credential_scope(current_user)))
 
 
 @router.get("/ai-connectivity", response_model=AIConnectivityOut)
 def ai_connectivity(force: bool = False, current_user: User = Depends(get_current_user)):
-    return AIConnectivityOut(**get_ai_connectivity(force=force))
+    return AIConnectivityOut(**get_ai_connectivity(force=force, law_firm_id=ai_credential_scope(current_user)))
 
 
 @router.get("/ai-usage", response_model=AIUsageOut)

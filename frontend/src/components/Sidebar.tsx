@@ -102,7 +102,7 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
         </nav>
       ) : (
       <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
         <div className="flex min-h-full flex-col">
         <div className="shrink-0 space-y-1">
         {role === "admin" && (

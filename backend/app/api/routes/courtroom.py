@@ -147,7 +147,7 @@ async def transcribe_move(
     if not data or len(data) > 10 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Audio must be between 1 byte and 10 MB")
     try:
-        text = voice_service.transcribe(f"courtroom{extension}", content_type, data)
+        text = voice_service.transcribe(f"courtroom{extension}", content_type, data, law_firm_id=current_user.law_firm_id)
     except voice_service.VoiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     if not text:
@@ -167,7 +167,7 @@ def speak_turn(
     if turn is None or turn.actor not in (CourtroomActor.OPPONENT, CourtroomActor.JUDGE):
         raise HTTPException(status_code=404, detail="Spoken turn not found")
     try:
-        audio = voice_service.synthesize(turn.content, turn.actor.value)
+        audio = voice_service.synthesize(turn.content, turn.actor.value, law_firm_id=current_user.law_firm_id)
     except voice_service.VoiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return Response(content=audio, media_type="audio/mpeg")

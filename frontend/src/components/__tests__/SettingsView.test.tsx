@@ -14,6 +14,7 @@ vi.mock("@/lib/api", () => ({
   listManagedUsers: (...args: unknown[]) => listManagedUsers(...args),
   getAiStatus: (...args: unknown[]) => getAiStatus(...args),
   getAiConnectivity: (...args: unknown[]) => getAiConnectivity(...args),
+  getAiKeyStatus: () => Promise.resolve({ configured: false, managed: false, pending: false, can_save: true }),
   getNotificationStatus: (...args: unknown[]) => getNotificationStatus(...args),
   importDemoTemplate: (...args: unknown[]) => importDemoTemplate(...args),
   sendTestEmail: (...args: unknown[]) => sendTestEmail(...args),
@@ -63,6 +64,7 @@ describe("SettingsView", () => {
     expect(await screen.findByText(/Demo modu açık/)).toBeInTheDocument();
     expect(screen.queryByText("Hizmet hazır")).not.toBeInTheDocument();
     expect(screen.queryByText("mock")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Gizli anahtar ekle" })).toBeEnabled();
   });
 
   it("hides user management for a non-admin user", async () => {
@@ -73,6 +75,7 @@ describe("SettingsView", () => {
 
     await waitFor(() => expect(screen.getByText(/sadece yöneticiler/i)).toBeInTheDocument());
     expect(screen.queryByText("Avukat Kullanici")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Gizli anahtar ekle" })).not.toBeInTheDocument();
     expect(listManagedUsers).not.toHaveBeenCalled();
   });
 

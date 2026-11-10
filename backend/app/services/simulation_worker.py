@@ -40,6 +40,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.ai.providers.base import LLMProvider
+from app.ai.errors import AIProviderConfigError
 from app.db.session import SessionLocal
 from app.models.case import Case
 from app.models.simulation import Simulation, SimulationStatus
@@ -51,7 +52,7 @@ logger = logging.getLogger("casebridge")
 DEFAULT_POLL_INTERVAL_SECONDS = 2.0
 
 
-def process_one_pending_simulation(db: Session, provider: LLMProvider) -> Optional[Simulation]:
+def process_one_pending_simulation(db: Session, provider: Optional[LLMProvider] = None, *, provider_factory=None) -> Optional[Simulation]:
     """Does at most one unit of work: picks the oldest PENDING
     simulation (across all firms - this is infra-level, not a
     tenant-scoped read) and runs it to a terminal state. Returns the
@@ -64,7 +65,7 @@ def process_one_pending_simulation(db: Session, provider: LLMProvider) -> Option
         return None
 
     case = db.query(Case).filter(Case.id == simulation.case_id).first()
-    if case is None:
+    if case is None or case.law_firm_id != simulation.law_firm_id:
         # Data integrity edge case (case deleted after simulation was
         # queued) - fail the row safely rather than crash the worker.
         simulation.status = SimulationStatus.FAILED
@@ -74,6 +75,16 @@ def process_one_pending_simulation(db: Session, provider: LLMProvider) -> Option
         db.commit()
         return simulation
 
+    if provider_factory is not None:
+        try:
+            provider = provider_factory(law_firm_id=simulation.law_firm_id)
+        except AIProviderConfigError:
+            simulation.status = SimulationStatus.FAILED
+            simulation.failure_category = "configuration_error"
+            simulation.error_message = "Büronuzun AI anahtarı ayarlanmamış. Ayarlar üzerinden bağlantıyı yapılandırın."
+            db.add(simulation)
+            db.commit()
+            return simulation
     service = SimulationService(db, provider)
     try:
         service.execute_pending_simulation(simulation, case)
@@ -96,8 +107,7 @@ def run_worker_loop(
     while not stop_event.is_set():
         db = SessionLocal()
         try:
-            provider = provider_factory()
-            processed = process_one_pending_simulation(db, provider)
+            processed = process_one_pending_simulation(db, provider_factory=provider_factory)
         except Exception:
             logger.exception("Simulation worker tick failed")
             processed = None

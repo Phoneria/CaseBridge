@@ -75,7 +75,7 @@ export function AppShell({ children, platform = false }: { children: React.React
   // Suspense boundaries: views and the drawer read useSearchParams(), which
   // Next 14 requires to be inside <Suspense> for static prerendering.
   return (
-    <div className="flex h-dvh bg-surface-muted">
+    <div className="fixed inset-0 flex overflow-hidden bg-surface-muted">
       <div className="hidden w-64 shrink-0 md:block"><Sidebar role={user?.role} platform={!!user?.is_platform_admin} /></div>
       {menuOpen && (
         <dialog ref={menuRef} aria-label="Uygulama menüsü" onCancel={() => setMenuOpen(false)}
@@ -91,7 +91,7 @@ export function AppShell({ children, platform = false }: { children: React.React
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <WorkspaceHeader user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
-        <main id="main-content" className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
           <ErrorBoundary>
             <Suspense fallback={null}>{children}</Suspense>

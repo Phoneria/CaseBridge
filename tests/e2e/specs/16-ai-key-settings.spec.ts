@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { login, DEMO_PLATFORM } from "./helpers";
+import { login, DEMO_PLATFORM, DEMO_ADMIN, DEMO_LAWYER } from "./helpers";
 
-test("platform Settings supports masked key entry and a verified connection", async ({ page }) => {
+for (const [role, credentials] of [["platform", DEMO_PLATFORM], ["bureau administrator", DEMO_ADMIN]] as const) {
+test(`${role} Settings supports masked key entry and explicit activation`, async ({ page }) => {
   await page.route("**/system/openai-key**", async (route) => {
     if (route.request().method() === "POST") {
       await route.fulfill({ json: { connected: true, checked_at: 1, checks: [
@@ -14,7 +15,7 @@ test("platform Settings supports masked key entry and a verified connection", as
       await route.fulfill({ json: { configured: true, managed: false, pending, can_save: true } });
     }
   });
-  await login(page, DEMO_PLATFORM);
+  await login(page, credentials);
   await page.getByRole("link", { name: "Ayarlar", exact: true }).click();
   await page.getByRole("button", { name: "Gizli anahtar ekle" }).click();
   const input = page.getByLabel("OpenAI API anahtarı", { exact: true });
@@ -28,4 +29,13 @@ test("platform Settings supports masked key entry and a verified connection", as
   await page.getByRole("button", { name: "Gizli anahtar ekle" }).click();
   await expect(input).toHaveValue("");
   await page.screenshot({ path: test.info().outputPath("ai-key-entry.png") });
+});
+}
+
+test("a bureau lawyer sees connection status without bureau-wide key controls", async ({ page }) => {
+  await login(page, DEMO_LAWYER);
+  await page.goto("/ayarlar");
+  await expect(page.getByRole("region", { name: "Yapay Zeka Durumu" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Gizli anahtar ekle" })).toHaveCount(0);
+  await expect(page.getByText(/büro yöneticinizle iletişime geçin/)).toBeVisible();
 });

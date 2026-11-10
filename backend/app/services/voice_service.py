@@ -15,18 +15,18 @@ class VoiceUnavailable(Exception):
     pass
 
 
-def _headers() -> dict[str, str]:
-    api_key = get_openai_api_key()
+def _headers(law_firm_id=None) -> dict[str, str]:
+    api_key = get_openai_api_key(law_firm_id)
     if not api_key:
         raise VoiceUnavailable("OpenAI voice is not configured")
     return {"Authorization": f"Bearer {api_key}"}
 
 
-def transcribe(filename: str, content_type: str, data: bytes) -> str:
+def transcribe(filename: str, content_type: str, data: bytes, *, law_firm_id=None) -> str:
     try:
         response = httpx.post(
             f"{_BASE}/transcriptions",
-            headers=_headers(),
+            headers=_headers(law_firm_id),
             data={"model": settings.voice_transcription_model},
             files={"file": (filename, data, content_type)},
             timeout=60,
@@ -37,11 +37,11 @@ def transcribe(filename: str, content_type: str, data: bytes) -> str:
         raise VoiceUnavailable("Voice transcription failed") from exc
 
 
-def synthesize(text: str, actor: str) -> bytes:
+def synthesize(text: str, actor: str, *, law_firm_id=None) -> bytes:
     try:
         response = httpx.post(
             f"{_BASE}/speech",
-            headers=_headers(),
+            headers=_headers(law_firm_id),
             json={
                 "model": settings.voice_speech_model,
                 "voice": "onyx" if actor == "judge" else "coral",

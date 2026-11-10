@@ -12,7 +12,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.ai.errors import AIProviderError, AIProviderTimeoutError, AIResponseValidationError
+from app.ai.errors import AIProviderConfigError, AIProviderError, AIProviderTimeoutError, AIResponseValidationError
 from app.ai.providers.base import LLMProvider
 from app.db.session import SessionLocal
 from app.models.courtroom import CourtroomSession
@@ -24,7 +24,7 @@ DEFAULT_POLL_INTERVAL_SECONDS = 1.0
 
 
 def process_one_pending_courtroom_turn(
-    db: Session, provider: LLMProvider
+    db: Session, provider: Optional[LLMProvider] = None, *, provider_factory=None
 ) -> Optional[CourtroomSession]:
     session = CourtroomRepository(db).get_oldest_pending()
     if session is None:
@@ -32,10 +32,14 @@ def process_one_pending_courtroom_turn(
 
     service = CourtroomService(db)
     try:
+        if provider_factory is not None:
+            provider = provider_factory(law_firm_id=session.law_firm_id)
         return service.process_pending_turn(session, provider)
     except CourtroomConflictError:
         db.rollback()
         return session
+    except AIProviderConfigError:
+        service.mark_failed(session, "configuration_error", "Büronuzun AI anahtarını Ayarlar üzerinden yapılandırın.")
     except AIProviderTimeoutError:
         service.mark_failed(session, "provider_timeout", "Yerel model zamanında yanıt vermedi.")
     except AIResponseValidationError:
@@ -57,8 +61,7 @@ def run_courtroom_worker_loop(
     while not stop_event.is_set():
         db = SessionLocal()
         try:
-            provider = provider_factory()
-            processed = process_one_pending_courtroom_turn(db, provider)
+            processed = process_one_pending_courtroom_turn(db, provider_factory=provider_factory)
         except Exception:
             logger.exception("Courtroom worker tick failed")
             processed = None
