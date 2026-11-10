@@ -90,17 +90,18 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
     <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-5">
       <div className="mb-6 shrink-0 px-2"><BrandLogo /></div>
 
-      <div className="min-h-0 flex flex-1 flex-col overflow-y-auto">
+      <div className="min-h-0 flex flex-1 flex-col">
 
       {platform ? (
-        <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+        <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
           <NavLink item={PLATFORM_ITEM} pathname={pathname} />
           <div className="mt-auto flex flex-col gap-2 pt-4">
             <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
           </div>
         </nav>
       ) : (
-      <nav aria-label="Ana menü" className="flex flex-1 flex-col gap-1">
+      <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
+        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
         {role === "admin" && (
           <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
         )}
@@ -141,7 +142,8 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
           })}
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 pt-4">
+        </div>
+        <div className="mt-auto flex shrink-0 flex-col gap-2 pt-4">
           <AiStatusIndicator />
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>

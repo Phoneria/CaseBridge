@@ -5,7 +5,7 @@ export function BrandLogo() {
       alt="CaseBridge"
       width={374}
       height={108}
-      className="block h-auto w-52 max-w-full"
+      className="block h-auto w-52 max-w-full mix-blend-multiply"
     />
   );
 }

@@ -28,6 +28,7 @@ test("mobile navigation opens, follows a link and returns focus on Escape", asyn
   const menu = page.getByRole("dialog", { name: "Uygulama menüsü" });
   await expect(menu).toBeVisible();
   await expect(menu.getByLabel(/Uygulama sürümü/)).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Ayarlar", exact: true })).toBeInViewport();
   await page.screenshot({ path: test.info().outputPath("mobile-menu.png") });
   await menu.getByRole("link", { name: "Dashboard", exact: true }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
