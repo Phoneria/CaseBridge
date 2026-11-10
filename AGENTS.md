@@ -5,3 +5,4 @@
 - The currently authorized interim workflow is option 1: add and test a candidate key separately, then activate explicitly while retaining the previous key. Saving a candidate must not replace the active key.
 - Never commit, log, return or persist in browser storage any real API key or encryption key.
 - Keep the `v.` version-label format and increment the released version when application behavior changes. Record actual validation results; leave incomplete checklist items unchecked.
+- Before announcing a deployment complete, verify the expected version and updated application code are served by the public site and its health check passes. A running build or deployment is not a completed release.
