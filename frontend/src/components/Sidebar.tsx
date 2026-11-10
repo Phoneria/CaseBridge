@@ -54,6 +54,7 @@ const ACCOUNT_ITEM: NavItem = {
 };
 
 const AI_ITEMS = [
+  { label: "Sufle", href: AI_ROUTES.sufle },
   { label: "Dosya Analizi", href: AI_ROUTES.analysis },
   { label: "Canlı Duruşma", href: AI_ROUTES.courtroom },
   { label: "Hukuk Asistanı", href: AI_ROUTES.chat },

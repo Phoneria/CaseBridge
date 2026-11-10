@@ -1,0 +1,2273 @@
+CASEBRIDGE • SUFLE
+20 farklı olay örgüsü • 1.002 konuşma sırası • 120 bağlama bağlı sufle
+
+NASIL OKUNUR?
+Her numaralı Avukat veya Müvekkil sözü bir konuşma sırasıdır. Her senaryo en az 50 sıra içerir; bu, en az 25 avukat ve 25 müvekkil repliğidir. İş hukuku örneği 52 sıra, diğerleri 50 sıradır. Sufle kartları bu sayılara dahil değildir.
+
+Kişiler, olaylar, tutarlar ve işletmeler kurgusaldır. Bu metin hukuki görüş veya gerçek dosya çözümü değil, görüşme yardımcısının davranışını tasarlamak için hazırlanmış örneklerdir. Kesin süreler, kanun maddeleri, parasal başvuru sınırları ve kazanma tahminleri bilinçli olarak üretilmemiştir. Gerçek dosyada güncel mevzuat ve dosya belgeleri avukat tarafından incelenir.
+
+Her görüşmede sesin işlenmesi için gerekli hukuki değerlendirme, aydınlatma ve uygulanabilir izin/onay süreçlerinin önceden tamamlandığı varsayılır. Örneklerdeki veri minimizasyonu yaklaşımı için KVKK'nın resmi kaynakları metnin sonunda verilmiştir. Görüşme içeriği başka bir büronun verileriyle birleştirilmez.
+
+SUFLE NASIL SUNULUR?
+• Yalnız avukatın ekranında sessiz bir kart: kısa öneri ve önerilen soru. Müvekkile sesli müdahale yapılmaz.
+• Karttaki “Nerede?” alanı tam konuşma sırasını, “Tetikleyici” alanı o ana kadar öğrenilmiş bilgiyi gösterir.
+• ACİL: mevcut güvenlik, devam eden zarar, kaybolabilecek delil veya yakın tarih nedeniyle şimdi incelenecek konu. Bu bir kesin hukuki süre sınıflandırması değildir.
+• ÖNEMLİ: anlatımı veya hak/borç değerlendirmesini değiştiren eksik bilgi, belge ya da çelişki.
+• NORMAL: uygun konuşma boşluğunda gösterilecek takip sorusu veya belge işi.
+• ACİL kart hemen görünür; diğerleri tamamlanan ifade sonrasında, avukatın sözünü bölmeden öneri kuyruğuna alınır. Sesli acil durum yönlendirmesinin yerine geçmez.
+• Bu dosya test kapsamı için altı müdahale anını da gösterir. Canlı üründe aynı anda en fazla üç kart gösterilir; aynı konu yeniden üretilmez.
+• Avukat soruyu zaten sormuşsa kart “Soruldu” durumuna geçirilir; yeni bilgi geldiyse mevcut kart güncellenir. Kartın çıkarıldığı sıra, sorunun bir sonraki replikte mutlaka kelimesi kelimesine okunacağı anlamına gelmez.
+• “Soruldu / Sonra hatırlat / Belge iste / Kapat” kontrolleri bulunur. Görev veya dosya kaydı avukatın inceleme ve onayıyla oluşur.
+• Her kart konuşma kaynağına dayanır; bir tarih veya isim yanlış çözümlendiyse düzeltilebilir. Duyum, iddia, belge ve doğrudan gözlem ayrı işaretlenir.
+
+KAPSAM
+01. Boşanma — güvenlik, çocuk ve ortak birikimler
+02. İcra — kısmen ödenmiş borç ve belirsiz tebligat
+03. Ticari satış — üretim makinesindeki arıza ve kabul belgesi
+04. İş hukuku — işten çıkarma, istifa belgesi ve değişken ücret
+05. Kira — tahliye talebi, imza ve kısmi ödemeler
+06. Miras — aile içi devir, vasiyet ve miras borçları
+07. Tüketici — internetten alınan telefon, servis ve finansman
+08. Ceza — yaralama iddiası, ifade çağrısı ve kamera kaydı
+09. Trafik ve sigorta — kavşak kazası, yaralanma ve ticari araç kaybı
+10. Sağlık hukuku — ameliyat sonrası zarar iddiası ve kayıt eksikliği
+11. Taşınmaz — tamamlanmayan konut, tapu ve ek ödeme talebi
+12. İdare — belediye işyeri kapatma işlemi
+13. Vergi — inceleme, e-fatura kayıtları ve farklı şirketler
+14. İnşaat — tadilat sözleşmesi, ilave işler ve su sızıntısı
+15. Fikri mülkiyet — marka benzerliği ve tasarım ajansının hakları
+16. Kişisel veriler — sağlık merkezinde yanlış alıcıya gönderilen dosya
+17. Bankacılık — sosyal mühendislik, onaysız işlem ve yeni kredi
+18. Şirket ortaklığı — erişim kaybı, ilişkili şirket ve çıkış pazarlığı
+19. Yabancılar hukuku — ikamet başvurusu, adres ve seyahat baskısı
+20. Eğitim — üniversite disiplin soruşturması ve burs kaybı endişesi
+
+================================================================================
+01. BOŞANMA — GÜVENLIK, ÇOCUK VE ORTAK BIRIKIMLER
+================================================================================
+OLAY ÖRGÜSÜ
+Elif, on iki yıllık evliliğini bitirmeyi düşünüyor. Bir çocukları var. İlk anlatım iletişimsizlik üzerine kurulu; görüşme ilerledikçe ekonomik kontrol, güvenlik kaygısı ve ortak hesapta hareket ortaya çıkıyor. Avukat, müvekkilin kararını yönlendirmeden acil ihtiyaçları ve dosya bilgisini ayırmaya çalışıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Bugün buradan hangi konuyu netleştirerek ayrılmak istersiniz?
+02. Müvekkil: Boşanmak istiyorum ama oğlumun düzenini bozmak istemiyorum.
+03. Avukat: Bu karara gelmenize neden olan son olayı anlatır mısınız?
+04. Müvekkil: Eşim geçen hafta kartımı kapattı, evden çıkmamamı söyledi.
+05. Avukat: Kartın kapanması dışında o gün neler oldu?
+06. Müvekkil: Kapının önünde durdu, gitmeme izin vermedi; sonra çekildi.
+07. Avukat: Şu anda kendinizi güvende hissediyor musunuz?
+08. Müvekkil: Ablamdayım ama adresi biliyor, bu akşam geleceğini yazmış.
+
+  [SUFLE S01-01 | ACİL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Adresin bilindiği ve bu akşam gelme mesajı.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Önce mevcut güvenliği ve güvenli iletişim kanalını netleştir.
+  Önerilen soru: “Şu an güvenli bir yerde misiniz; bu görüşmenin bildirimi size risk yaratır mı?”
+
+09. Avukat: Önce bugün için güvenliğinizi konuşalım. Oğlunuz şu an nerede?
+10. Müvekkil: Benimle. Okuldan alırken karşılaşmaktan da korkuyorum.
+11. Avukat: Mesajda doğrudan bir tehdit veya zarar verme ifadesi var mı?
+12. Müvekkil: “Seni oradan alırım” yazdı; ne yapacağını bilmiyorum.
+13. Avukat: Mesajı değiştirmeden saklayabilir misiniz; önceki benzer olaylar oldu mu?
+14. Müvekkil: İki ay önce kolumu sıktı, hastaneye gitmedim.
+15. Avukat: O olayı gören veya sonrasında konuştuğunuz biri var mı?
+16. Müvekkil: Komşum sesi duydu; ablama da aynı gece mesaj attım.
+
+  [SUFLE S01-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Geçmiş fiziksel temas ve eşzamanlı mesaj.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Olayı, doğrudan tanığı ve sonradan bilgilenen kişiyi ayrı kaydet.
+  Önerilen soru: “Komşunuz tam olarak neyi gördü veya duydu?”
+
+17. Avukat: Bu olayların tarihlerini mümkün olduğunca ayrı ayrı yazabilir miyiz?
+18. Müvekkil: Son olay perşembeydi; kolumu sıktığı günü mesajdan bulabilirim.
+19. Avukat: Çocuğunuz bu olaylara tanık oldu mu?
+20. Müvekkil: Tartışmayı duydu, ama ona babasının kötü olduğunu söylemek istemiyorum.
+21. Avukat: Çocuğunuzun yaşını ve günlük bakım düzenini anlatır mısınız?
+22. Müvekkil: Sekiz yaşında; okula ben bırakıyorum, babası hafta sonları ilgileniyor.
+23. Avukat: Şu an okul, sağlık ve barınma giderlerini nasıl karşılıyorsunuz?
+24. Müvekkil: Yarı zamanlı çalışıyorum; birikimimiz var sanıyordum, hesaba erişemiyorum.
+
+  [SUFLE S01-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Çocuğun düzeni ve hesaba erişememe.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Çocuğun güncel ihtiyaçlarıyla mali erişimi ayrı başlıkta aç.
+  Önerilen soru: “Bu hafta karşılanamayan okul, barınma veya sağlık gideri var mı?”
+
+25. Avukat: Hesap kimin adına ve erişiminiz ne zaman kesildi?
+26. Müvekkil: Onun adına; telefonumdaki bankacılık erişimini geçen hafta kaldırdı.
+27. Avukat: Kendi adınıza hesap veya düzenli gelir kaydınız bulunuyor mu?
+28. Müvekkil: Maaş hesabım var. Ortak birikime her ay para gönderdim.
+29. Avukat: Bu gönderimlerin açıklamalarında ne yazıyor?
+30. Müvekkil: Çoğunda “ev birikimi” yazıyor; bazıları açıklamasız.
+31. Avukat: Konut ve diğer önemli mallar hakkında bildiklerinizi anlatır mısınız?
+32. Müvekkil: Ev onun adına, evlendikten dört yıl sonra aldık.
+
+  [SUFLE S01-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Evlilik sırasında edinilen konut.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Edinim tarihi, finansman ve mülkiyeti ayrı doğrula; otomatik paylaşım sonucu çıkarma.
+  Önerilen soru: “Satış tarihi ve kredi belgelerine erişebiliyor musunuz?”
+
+33. Avukat: Peşinat ve kredi ödemelerinin kaynağını biliyor musunuz?
+34. Müvekkil: Benim annem de para verdi; o parayı hediye sayıyor.
+35. Avukat: Anneniz parayı kime, hangi açıklamayla gönderdi?
+36. Müvekkil: Bana gönderdi; ben aynı gün eşime aktardım, dekontları vardır.
+37. Avukat: Eşinizin gelirini hangi somut belgelere dayanarak biliyorsunuz?
+38. Müvekkil: Maaşını biliyorum ama ek iş kazancını yalnızca anlattıklarından biliyorum.
+39. Avukat: Bugün erişebildiğiniz belgeler hangileri?
+40. Müvekkil: Kendi dekontlarım, mesajlar ve ev kredisine ait eski bir ödeme planı.
+
+  [SUFLE S01-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Sınırlı erişilebilir belge seti.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Yalnızca hukuka uygun erişilen belgeleri listele.
+  Önerilen soru: “Belgelerin asılları veya değişmemiş dijital örnekleri nerede?”
+
+41. Avukat: Eşinizin özel hesaplarına erişmeden bunlarla başlayabiliriz. Daha önce başvuru yaptınız mı?
+42. Müvekkil: Hayır. Bir arkadaşım gizlice telefonunu kopyalamamı önerdi.
+43. Avukat: Yetkisiz erişim yoluna gitmeyelim; mevcut bilgileri hukuka uygun yollarla değerlendirelim.
+44. Müvekkil: Peki. Ben sadece çocuğumla güvende olmak istiyorum.
+45. Avukat: Uzlaşma düşünür müsünüz, yoksa önce güvenlik ve geçici düzen mi öncelikli?
+46. Müvekkil: Önce güvenlik. Sonrasını sakin konuşabilirim.
+47. Avukat: Bugün güvenlik ihtiyacını, çocuğun düzenini ve erişilebilir belgeleri ayrı planlayalım.
+48. Müvekkil: Bir de ortak hesaptan dün büyük para çıktığını öğrendim.
+
+  [SUFLE S01-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yeni öğrenilen büyük para çıkışı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Doğrulanmamış mali hareketi kaynak ve tarihle işaretle.
+  Önerilen soru: “Hareketin tarihini, tutarını ve kaynağını gösteren belge var mı?”
+
+49. Avukat: Bunu nereden öğrendiğinizi ve elinizdeki bildirimi de inceleyelim; kesinleşmeyen bilgiyi ayıralım.
+50. Müvekkil: Ekranı eşim gönderdi. Ablamla birlikte belgeleri size ulaştıracağım.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: güvenlik değerlendirmesi; çocuk için güncel ihtiyaç listesi; olay kronolojisi; erişilebilir mali belgeler. Açık noktalar: mesajın bağlamı, hesap hareketinin doğruluğu, konut finansmanı. Sufle herhangi bir koruma, velayet veya mal paylaşımı sonucunu kendiliğinden ilan etmez.
+
+================================================================================
+02. İCRA — KISMEN ÖDENMIŞ BORÇ VE BELIRSIZ TEBLIGAT
+================================================================================
+OLAY ÖRGÜSÜ
+Murat, eski tedarikçisinden geldiğini düşündüğü ödeme emri nedeniyle görüşmeye geliyor. Borcu tamamen ödediğini söyleyerek başlıyor; dekontlar incelendikçe kısmi ödeme, başka faturalar ve teslim alınması belirsiz bir evrak ortaya çıkıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Size ulaşan evrakı ve ne zaman fark ettiğinizi anlatır mısınız?
+02. Müvekkil: Dün icra mesajı gördüm; borcu aylar önce ödemiştim.
+03. Avukat: Mesajı kim gönderdi, resmi dosya numarası içeriyor mu?
+04. Müvekkil: Bir hukuk bürosu yazmış; ayrıca evde bir zarf var.
+05. Avukat: Zarfı ve içindeki bütün sayfaları getirdiniz mi?
+06. Müvekkil: Ödeme emrini getirdim; zarfı eşim saklamış olabilir.
+07. Avukat: Evrak size hangi tarihte, hangi yolla ulaştı?
+08. Müvekkil: Ben dün gördüm ama eşim geçen hafta kapıcıdan almış.
+
+  [SUFLE S02-01 | ACİL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Dün görülmüş fakat daha önce teslim alınmış evrak.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Tebliğ tarihi belirsiz; süre üretme, belgenin tamamını iste.
+  Önerilen soru: “Zarfın ön ve arka yüzüyle resmi tebliğ kaydı mevcut mu?”
+
+09. Avukat: Süreyi tahmin etmeyelim; zarf ve resmi tebliğ kaydını incelememiz gerekiyor.
+10. Müvekkil: O zaman sadece mesajdaki tarihe güvenemeyiz, doğru mu?
+11. Avukat: Evet. Şimdi borcun hangi ilişkiden çıktığını anlatalım.
+12. Müvekkil: Kafem için kahve ve makine aldığım tedarikçiyle çalışıyordum.
+13. Avukat: Takipte istenen tutar ve dayanak belgeler ne görünüyor?
+14. Müvekkil: İki yüz kırk bin lira, üç fatura yazıyor.
+15. Avukat: Ödediğinizi söylediğiniz işlemleri tek tek sayabilir misiniz?
+16. Müvekkil: Yüz bin havale yaptım, seksen bin de elden verdim.
+
+  [SUFLE S02-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ödendi denilen borçtan düşük ödeme toplamı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İlk anlatımla tutar hesabı uyuşmuyor; ödemeleri fatura bazında ayır.
+  Önerilen soru: “İstenen üç faturadan hangisine hangi ödeme yapıldı?”
+
+17. Avukat: Havale dekontunun açıklamasında ne yazıyor?
+18. Müvekkil: “Makine ödemesi” yazıyor; fatura numarası yazmadım.
+19. Avukat: Elden ödeme için makbuz veya yazılı kabul var mı?
+20. Müvekkil: Makbuz yok ama satış temsilcisi “aldım” diye mesaj attı.
+21. Avukat: Parayı şirket adına tahsil ettiğini gösteren başka bilgi var mı?
+22. Müvekkil: Daha önce de ona ödedim; şirket sonrasında hesabı kapatmıştı.
+23. Avukat: Üç faturanın toplamını ve içeriklerini birlikte kontrol edelim mi?
+24. Müvekkil: Biri makine, diğerleri kahve sevkiyatı; onları hesapta unutmuşum.
+
+  [SUFLE S02-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Makine ve kahve faturaları karışmış.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Kalem bazlı borç/ödeme/itiraz tablosu öner.
+  Önerilen soru: “Her faturanın teslim ve ödeme durumunu ayrı inceleyelim mi?”
+
+25. Avukat: Kahve faturalarına ilişkin teslim veya ödeme itirazınız var mı?
+26. Müvekkil: Bir sevkiyat eksikti, ama faturanın hepsine itiraz etmemiştim.
+27. Avukat: Eksikliği ne zaman ve nasıl bildirdiniz?
+28. Müvekkil: Depo sayımında fark edip temsilciye fotoğraf gönderdim.
+29. Avukat: Fotoğrafla birlikte miktarı belirten bir yazışma var mı?
+30. Müvekkil: Var; o da sonraki sevkiyatta tamamlarız demiş.
+31. Avukat: Sonraki sevkiyat gerçekleşti mi?
+32. Müvekkil: Bir kısmı geldi, hangi kısmı olduğunu muhasebecim bilir.
+
+  [SUFLE S02-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Eksik teslimin sonradan kısmen tamamlanması.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İlk eksikliği güncel açık miktar sanma.
+  Önerilen soru: “Tamamlanan sevkiyatın belgesi ve kalan eksik miktar nedir?”
+
+33. Avukat: Muhasebe kayıtlarını ve sevk belgelerini karşılaştırmamız gerekiyor.
+34. Müvekkil: Muhasebecim geçen yıl değişti; eski kayıtların bir bölümü onda.
+35. Avukat: Tedarikçi size daha önce hesap mutabakatı gönderdi mi?
+36. Müvekkil: Evet, ben de “bakıp döneceğim” yazdım; imzalamadım.
+37. Avukat: Takip evrakında sizin dışınızda borçlu gösterilen biri var mı?
+38. Müvekkil: Şirketim ve ben varım; ben şahsen neden varım bilmiyorum.
+39. Avukat: Sözleşmede kişisel imza veya ayrı taahhüt bulunuyor mu?
+40. Müvekkil: Makine sözleşmesini şirket kaşesinin yanına imzalamıştım.
+
+  [SUFLE S02-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Şirket ve şahıs birlikte borçlu gösteriliyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Taraf ve imza sıfatını kontrol et; kişisel sorumluluk varsayma.
+  Önerilen soru: “Sözleşmede adınızın bulunduğu tüm imza alanlarını görebilir miyim?”
+
+41. Avukat: İmzanın hangi sıfatla atıldığını sözleşmenin tamamından inceleyelim.
+42. Müvekkil: Karşı taraf arayıp bugün ödemezsem her şeyi haczedeceğini söyledi.
+43. Avukat: Telefonla söyleneni dosyanın gerçek durumundan ayıralım; mevcut işlemleri kontrol edeceğim.
+44. Müvekkil: Aslında kalan borç varsa taksit yapmak isterim.
+45. Avukat: Önce tartışmalı ve kabul ettiğiniz tutarları ayıralım; bütçeniz nedir?
+46. Müvekkil: Aylık yirmi bin ayırabilirim, ama yanlış tutarı kabul etmek istemiyorum.
+47. Avukat: Yazılı uzlaşma koşullarını ve mevcut dosyaya etkisini inceleyerek ilerleyebiliriz.
+48. Müvekkil: Şimdi eşim zarfın fotoğrafını gönderdi; üzerinde başka bir tarih var.
+
+  [SUFLE S02-06 | ACİL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Zarfta farklı tarih ortaya çıkıyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Tarih değişikliğini görünür kıl; önceki süre varsayımını geçersiz işaretle.
+  Önerilen soru: “Bu tarih hangi işlem alanında yazıyor; kayıtla örtüşüyor mu?”
+
+49. Avukat: Onu dosyaya ekleyelim; tebliğ kaydıyla karşılaştırıp uygulanacak süreyi doğrulayacağım.
+50. Müvekkil: Muhasebeciden de tüm faturaları ve ödemeleri bugün isteyeceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: doğrulanacak tebliğ kaydı, fatura bazlı hesap, şirket/şahıs taraf haritası, belge listesi ve uzlaşma bütçesi. Sufle dosya türü ile tebliğ doğrulanmadan kesin itiraz süresi veya haciz sonucu söylemez.
+
+================================================================================
+03. TICARI SATIŞ — ÜRETIM MAKINESINDEKI ARIZA VE KABUL BELGESI
+================================================================================
+OLAY ÖRGÜSÜ
+Bir ambalaj şirketinin müdürü olan Deniz, yeni makinenin durması nedeniyle üretim kaybı yaşadığını anlatıyor. Satış, kurulum, eğitim ve bakım farklı işletmelerce yapılmış. İmzalanmış kabul belgesi ile sonradan değiştirilen parça, ilk anlatımı karmaşıklaştırıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Şirketinizin yaşadığı sorunu ve bugünkü hedefinizi anlatır mısınız?
+02. Müvekkil: Aldığımız paketleme makinesi duruyor; üretim kaybımızı karşılasınlar istiyorum.
+03. Avukat: Makineyi kimden, hangi sözleşmeyle aldınız?
+04. Müvekkil: Bir distribütörden aldık; üretici yabancı, montajı başka ekip yaptı.
+05. Avukat: Satıcı, kurulumcu ve servis belgelerde ayrı şirketler mi?
+06. Müvekkil: Evet; hepsi aynı marka logosunu kullanıyor ama unvanları farklı.
+07. Avukat: Teslim, kurulum ve ilk arıza tarihlerini sıralayabilir misiniz?
+08. Müvekkil: Teslim hazirandaydı, kurulum temmuzda; ilk hafta sorun çıktı.
+
+  [SUFLE S03-01 | NORMAL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Birden fazla şirket ve farklı tarihler.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Satış/kurulum/servis taraflarını ve tarihlerini ayrı çizelgeye al.
+  Önerilen soru: “İlk arızanın günü ve ilk bildirimin günü nedir?”
+
+09. Avukat: İlk sorun tam olarak neydi ve nasıl kayda geçti?
+10. Müvekkil: Sıcaklık düşüyordu; teknisyene video yolladım, ayar sorunu dedi.
+11. Avukat: Videoyu hangi kanaldan, kime gönderdiniz?
+12. Müvekkil: Servis çalışanının iş telefonuna, şirket grubumuzdan gönderdim.
+13. Avukat: Makinenin kabulüne ilişkin imzaladığınız bir belge var mı?
+14. Müvekkil: “Çalışır teslim edildi” formunu ustabaşımız imzaladı.
+15. Avukat: Form imzalanırken kaç saatlik deneme yapılmıştı?
+16. Müvekkil: Yarım saat; gerçek üretimde ancak üç saat sonra bozuluyor.
+
+  [SUFLE S03-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Çalışır teslim formu ile kısa deneme.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kabul belgesiyle uzun kullanım arızasının farkını incele.
+  Önerilen soru: “İmzalı formun tamamı ve deneme koşulları mevcut mu?”
+
+17. Avukat: Bu farkı servise yazılı olarak anlattınız mı?
+18. Müvekkil: Sonraki hafta e-posta attım, gelen servis de bunu rapora yazdı.
+19. Avukat: Raporlarda hangi arıza ve yapılan işlemler belirtiliyor?
+20. Müvekkil: İki kez sensör değişimi, bir kez yazılım güncellemesi var.
+21. Avukat: Bunlardan sonra sorun tamamen düzeldi mi?
+22. Müvekkil: Hayır; farklı ürün ambalajında yeniden durdu.
+23. Avukat: Sözleşmede hangi ürünler ve kapasite taahhüt edilmişti?
+24. Müvekkil: Teklifte üç ürün yazıyor; satıcı sözlü olarak hepsini işler demişti.
+
+  [SUFLE S03-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Teklifte üç ürün ve sözlü geniş kapasite beyanı.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Yazılı taahhüt ile sözlü anlatımı ayrı etiketle.
+  Önerilen soru: “Sözlü beyanı doğrulayan yazışma veya katılımcı var mı?”
+
+25. Avukat: Sorun çıkan ürün teklif kapsamındaki üç üründen biri mi?
+26. Müvekkil: İlk arızada evet; son denemede dördüncü ürün vardı.
+27. Avukat: O iki durumu ayrı inceleyelim. Kullanım ayarlarını kim belirledi?
+28. Müvekkil: İlkini servis; sonuncuyu bizim operatör ayarladı.
+29. Avukat: Sonradan dışarıdan müdahale veya parça değişimi oldu mu?
+30. Müvekkil: Üretim yetişsin diye bağımsız bir usta rezistansı değiştirdi.
+31. Avukat: Bu işlemden önce ve sonra arızayı gösteren kayıtlar var mı?
+32. Müvekkil: Öncesinin videosu var; sonrasını yalnız vardiya defterine yazdık.
+
+  [SUFLE S03-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Bağımsız ustanın sonradan müdahalesi.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Arıza kronolojisini müdahale öncesi/sonrası ayır.
+  Önerilen soru: “Ustanın işlem kaydı, faturası ve değişen parçanın bilgisi var mı?”
+
+33. Avukat: Değiştirilen eski parça nerede?
+34. Müvekkil: Depoda olmalı; hurdaya atılmasını söylemiştim ama henüz atılmadı.
+35. Avukat: Parçayı ve mevcut durumu değiştirmeden koruyalım; inceleme ihtiyacını değerlendireceğiz.
+36. Müvekkil: Makineyi durdurursak müşteriye yetişemeyiz; çalıştırmaya devam etmeliyiz.
+37. Avukat: İşletme ihtiyacınızı anlıyorum; mevcut durumun nasıl belgelenebileceğini planlayalım.
+38. Müvekkil: Bir müşteri gecikme yüzünden siparişini iptal etti.
+39. Avukat: İptal gerekçesi ve zarar hesabını gösteren belgeler var mı?
+40. Müvekkil: E-posta var, ama başka ürünlerimiz de gecikmişti.
+
+  [SUFLE S03-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Zararın birden fazla gecikmeyle ilişkili olması.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Zarar tutarıyla nedensellik kanıtını ayır.
+  Önerilen soru: “İptal edilen sipariş hangi üretim hattına ve tarihe bağlıydı?”
+
+41. Avukat: Makine arızasının etkisini diğer gecikme nedenlerinden ayırmamız gerekiyor.
+42. Müvekkil: O zaman bütün kaybı tek kalem yazmayacağız.
+43. Avukat: Evet. Satıcıya hangi çözümü istediğinizi bildirdiniz mi?
+44. Müvekkil: Önce tamir dedim; şimdi değişim veya bedel iadesi istiyorum.
+45. Avukat: Bu taleplerin tarihlerini ve verilen cevapları çıkarabilir misiniz?
+46. Müvekkil: E-postalar bende; ayrıca ödenmemiş son taksitimiz var.
+47. Avukat: Son taksitin vadesi ve sözleşmedeki ödeme koşulları nedir?
+48. Müvekkil: Gelecek hafta; otomatik tahsilat talimatı vermiştik.
+
+  [SUFLE S03-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yaklaşan taksit ve otomatik tahsilat.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Ödeme kararını otomatik önerme; vade ve talimatı inceleme görevi aç.
+  Önerilen soru: “Tahsilat tarihi ve ödeme uyuşmazlığına ilişkin sözleşme maddesi nedir?”
+
+49. Avukat: Ödemeye ilişkin adımı sözleşme ve dosya incelemesiyle birlikte değerlendirelim.
+50. Müvekkil: Sözleşmeyi, servis raporlarını ve iptal e-postasını bugün göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: taraf haritası, arıza/bildirim/müdahale zaman çizelgesi, korunacak parça, taahhüt ve zarar belgeleri. Sufle arızanın nedenini veya seçilecek hukuki talebin sonucunu teknik inceleme olmadan kesinleştirmez.
+
+================================================================================
+04. İŞ HUKUKU — IŞTEN ÇIKARMA, ISTIFA BELGESI VE DEĞIŞKEN ÜCRET
+================================================================================
+OLAY ÖRGÜSÜ
+Selin bir lojistik işletmesinde çalışırken iş ilişkisi sona ermiş. İşveren ayrılışı istifa olarak anlatıyor; Selin işten çıkarıldığını söylüyor. Prim ödemeleri, vardiya kayıtları ve devam eden işe dönme isteği görüşmenin yönünü değiştiriyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: İş ilişkinizin nasıl sona erdiğini kendi sıranızla anlatır mısınız?
+02. Müvekkil: Müdür pazartesi “artık gelme” dedi; sistemde istifa görünüyormuş.
+03. Avukat: Pazartesinin tarihini ve bunu nereden öğrendiğinizi netleştirelim.
+04. Müvekkil: Geçen ayın on dokuzuydu; çıkış bilgisini e-Devlet'te gördüm.
+05. Avukat: Size yazılı bir bildirim veya imzalatılan belge verildi mi?
+06. Müvekkil: Bir kağıt imzaladım ama kopyasını alamadım.
+07. Avukat: İmzalamadan önce okuma imkânınız oldu mu?
+08. Müvekkil: “Maaş işlemi için” dediler; boş kalan kısmı sonradan doldurmuş olabilirler.
+
+  [SUFLE S04-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kopyası olmayan imzalı belge ve doldurulma şüphesi.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Gözlem ile tahmini ayır; belgeyi elde etme ihtiyacını işaretle.
+  Önerilen soru: “Belgenin hangi kısmını imza anında gördünüz?”
+
+09. Avukat: Neyi bizzat gördüğünüzü ve neyi tahmin ettiğinizi ayıralım.
+10. Müvekkil: Başlık vardı ama metni hatırlamıyorum; sonradan doldurulduğunu görmedim.
+11. Avukat: Görüşmede kimler bulunuyordu?
+12. Müvekkil: İnsan kaynaklarından biri ve vardiya şefi vardı.
+13. Avukat: Çalışmaya ne zaman başladınız, hangi görevdeydiniz?
+14. Müvekkil: Dört yıldır depo planlama yapıyorum; son altı ay ekip sorumlusuydum.
+15. Avukat: İşvereninizin resmi unvanı dönem boyunca aynı mıydı?
+16. Müvekkil: İki yıl önce bordro başka şirkete geçti, işim değişmedi.
+
+  [SUFLE S04-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Aynı işte bordro şirketinin değişmesi.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İşveren ve hizmet dönemlerini ayrı kaydet.
+  Önerilen soru: “Eski ve yeni işveren unvanlarıyla geçiş tarihleri nedir?”
+
+17. Avukat: O geçişte yeni sözleşme, çıkış veya ödeme yapıldı mı?
+18. Müvekkil: Yeni sözleşme imzaladım; herhangi bir ayrılma ödemesi almadım.
+19. Avukat: Son ücretiniz ve düzenli yan ödemeleriniz nelerdi?
+20. Müvekkil: Bankaya kırk bin yatıyordu; bazı aylarda elden prim alıyordum.
+21. Avukat: Primin koşulları ve tutarları nasıl bildiriliyordu?
+22. Müvekkil: Hedef tablosu e-postayla geliyordu; son üç prim verilmedi.
+23. Avukat: Bordrolarda bu prim veya başka kesintiler görünüyor mu?
+24. Müvekkil: Bordroları uygulamada açıyorduk; hesabım şimdi kapatıldı.
+
+  [SUFLE S04-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ücret uygulamasına erişimin kapatılması.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Erişilebilir kişisel belgelerle ücret kalemlerini çıkar.
+  Önerilen soru: “Hangi aylara ait bordro ve banka hareketi elinizde?”
+
+25. Avukat: Kendi elinizde kalan bordro, e-posta veya hesap kaydı var mı?
+26. Müvekkil: İki bordro indirmiştim, hedef e-postaları kişisel adresimde de var.
+27. Avukat: Fiili çalışma saatlerinizi anlatır mısınız?
+28. Müvekkil: Kağıtta dokuz-altı; yoğun dönemde gece ona kadar kalıyordum.
+29. Avukat: Bu yoğun dönemler hangi aylar ve haftada kaç gündü?
+30. Müvekkil: Kasım ve aralıkta üç gün; bazen cumartesi de gittim.
+31. Avukat: Giriş-çıkış kayıtları dışında bunu gösterebilen kaynaklar var mı?
+32. Müvekkil: Servis listeleri ve vardiya grubundaki görev mesajları var.
+33. Avukat: Mesajlar çalışma süresinin tamamını mı, belirli işleri mi gösteriyor?
+34. Müvekkil: Yalnız görev saatlerini; arada mola da veriyorduk.
+
+  [SUFLE S04-04 | NORMAL]
+  Nerede: 34. konuşma tamamlandıktan sonra.
+  Tetikleyici: Mesaj saatleri tüm mesaiyi göstermiyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Kayıtları otomatik fazla çalışma hesabına dönüştürme.
+  Önerilen soru: “Her dönemde mola, izin ve fiili çıkış bilgisi nasıl doğrulanabilir?”
+
+35. Avukat: Mola ve izinleri de hesaba katacak bir çalışma çizelgesi hazırlayalım.
+36. Müvekkil: Kullanmadığım izin vardı; kaç gün kaldığını bilmiyorum.
+37. Avukat: İzin talep ve onay kayıtlarına erişebiliyor musunuz?
+38. Müvekkil: Eski e-postalarda bulabilirim; son izin talebim reddedilmişti.
+39. Avukat: İşten ayrılmanızın gerekçesi size nasıl açıklandı?
+40. Müvekkil: Performans dediler; geçen ay teşekkür belgesi vermişlerdi.
+41. Avukat: Performans hedefi, değerlendirme veya savunma talebi oldu mu?
+42. Müvekkil: Bir uyarı geldi ama o gün sistem arızalıydı; bunu yazmıştım.
+
+  [SUFLE S04-05 | NORMAL]
+  Nerede: 42. konuşma tamamlandıktan sonra.
+  Tetikleyici: Performans gerekçesine karşı teşekkür ve sistem arızası.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İddiaları belge bazında karşılaştır.
+  Önerilen soru: “Uyarı, savunma ve arıza yazışmalarının tarihleri nedir?”
+
+43. Avukat: O yazışmayı ve değerlendirmeleri birlikte inceleyelim. Şu an beklentiniz nedir?
+44. Müvekkil: Aslında işimi seviyordum; mümkünse geri dönmek isterim.
+45. Avukat: İşe dönme isteğinizi ayrı değerlendirelim; başka başvuru yaptınız mı?
+46. Müvekkil: Henüz yapmadım, sadece işvereni aradım.
+47. Avukat: Çalışan sayısı, sözleşme türü ve kesin tarihler de gerekiyor.
+48. Müvekkil: Depoda otuz kişi vardık ama şirket genelini bilmiyorum.
+49. Avukat: Bugün tarihleri ve belgeleri tamamlayıp uygulanabilecek yolları kontrol edeceğim.
+50. Müvekkil: Bana para yatırdılar; açıklamada “tüm hakları” yazıyor, ben onaylamadım.
+
+  [SUFLE S04-06 | ÖNEMLİ]
+  Nerede: 50. konuşma tamamlandıktan sonra.
+  Tetikleyici: Tek taraflı tüm haklar açıklamalı ödeme.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Ödeme, belge ve kabul beyanını ayrı incele.
+  Önerilen soru: “Bu ödemeye eşlik eden imzalı bir metin veya hesap dökümü var mı?”
+
+51. Avukat: Ödemenin tutarını ve ilgili belgeleri inceleyelim; açıklamayı tek başına sonuç saymayalım.
+52. Müvekkil: Dekontu, çıkış kaydını ve ulaşabildiğim belgeleri göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: sona erme tarihi ve belgeleri, işveren dönemleri, ücret/prim çizelgesi, çalışma süresi kaynakları ve işe dönme hedefi. Sufle belirli bir talebin koşulları doğrulanmadan süre veya tazminat tutarı hesaplamaz.
+
+================================================================================
+05. KIRA — TAHLIYE TALEBI, IMZA VE KISMI ÖDEMELER
+================================================================================
+OLAY ÖRGÜSÜ
+Emre konut kiracısı. Ev sahibi evi satacağını söyleyip çıkmasını istiyor. Kira artışı tartışmasıyla başlayan görüşmede taşınırken imzalanmış boş tarihli bir belge ve yeni malikin mesajı ortaya çıkıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Ev sahibi sizden ne istiyor ve bunu nasıl bildirdi?
+02. Müvekkil: Bir ay içinde çıkmamı istiyor; evi satacakmış.
+03. Avukat: Bu talep yazılı mı, elinizde resmi evrak var mı?
+04. Müvekkil: Mesaj var; dün de bir noter zarfı geldi.
+05. Avukat: Zarfı ve bütün sayfaları birlikte inceleyebilir miyiz?
+06. Müvekkil: Yanımda; ben satış olunca çıkmak zorundayım sandım.
+07. Avukat: Belgeyi görmeden sonuç çıkarmayalım. Ne zaman teslim aldınız?
+08. Müvekkil: Dün kendim aldım; teslim saatini de hatırlıyorum.
+
+  [SUFLE S05-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yeni teslim alınmış noter evrakı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Belge türü, teslim ve içerik bilgilerini kaydet; satışa otomatik sonuç bağlama.
+  Önerilen soru: “Evrakta sizden tam olarak ne talep ediliyor?”
+
+09. Avukat: Kira sözleşmesi ne zaman başladı ve kimlerle imzalandı?
+10. Müvekkil: Beş yıl önce; eşim değil ben imzaladım, malik de karşıdaydı.
+11. Avukat: Başlangıç sözleşmesi dışında ek belge imzaladınız mı?
+12. Müvekkil: Anahtarı alırken “standart evrak” diye bir kağıt daha imzaladım.
+13. Avukat: O kağıdın örneği veya fotoğrafı var mı?
+14. Müvekkil: Yok; tarihi boştu, ev sahibi sonra dolduracağını söyledi.
+15. Avukat: Belgede çıkış veya tahliye ifadesi hatırlıyor musunuz?
+16. Müvekkil: Galiba tahliye yazıyordu, ama tarih kısmını özellikle boş bırakmıştı.
+
+  [SUFLE S05-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Boş tarihli tahliye ifadesi içeren belge.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İmza, doldurma ve teslim kronolojisini ayır.
+  Önerilen soru: “Belgenin bir kopyasını hangi yolla elde edebiliriz?”
+
+17. Avukat: İmza günü, anahtar teslimi ve eve taşınma sırası nasıldı?
+18. Müvekkil: Hepsi aynı gündü; nakliyeci kapıda bekliyordu.
+19. Avukat: O anı gören veya yazışmayla doğrulayabilecek biri var mı?
+20. Müvekkil: Eşim yanımdaydı; emlakçıya attığım “anahtarı aldım” mesajı duruyor.
+21. Avukat: Ev sahibi şimdi o belgeye dayanıyor mu?
+22. Müvekkil: Mesajında “taahhüdün var” dedi, tarihini söylemedi.
+23. Avukat: Noter evrakında hangi gerekçe ve tarih yazıyor?
+24. Müvekkil: Satın alan kişinin taşınacağı yazıyor; demek ev satılmış.
+
+  [SUFLE S05-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Satış planı yerine gerçekleşmiş satış ortaya çıkıyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Taraf değişikliğini ve yeni talep gerekçesini güncelle.
+  Önerilen soru: “Noter belgesindeki kişi ve tarih önceki anlatımla nasıl örtüşüyor?”
+
+25. Avukat: Yeni malikin kimliği ve satış tarihi hakkında başka belgeniz var mı?
+26. Müvekkil: Sadece yeni bir numaradan IBAN geldi; kime ait bilmiyorum.
+27. Avukat: Yeni hesaba ödeme yaptınız mı?
+28. Müvekkil: Bu ayı eski hesaba gönderdim, para geri döndü.
+29. Avukat: İade dekontu ve sonraki ödeme girişimleriniz mevcut mu?
+30. Müvekkil: Evet; sonra yeni numaraya hesap sahibini sordum, cevap vermedi.
+31. Avukat: Önceki aylarda eksik veya geç ödemeler oldu mu?
+32. Müvekkil: İki ay artış konusunda anlaşamadık; eski tutarı yatırdım.
+
+  [SUFLE S05-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Dönen ödeme ve geçmiş kısmi ödemeler.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Ödememe ile alıcı belirsizliğini ayrı değerlendir.
+  Önerilen soru: “Her ayın vadesi, yatırılan tutarı ve iade tarihi nedir?”
+
+33. Avukat: Sözleşme tutarı, fiili ödemeler ve istenen artışları ayrı yazalım.
+34. Müvekkil: On beş bin ödüyorum; birden otuz bin istediler.
+35. Avukat: Artış görüşmelerini ve varsa ek anlaşmayı görebilir miyim?
+36. Müvekkil: Telefonda konuştuk; mesajda yalnız benim “kabul etmiyorum” cevabım var.
+37. Avukat: Daha önce ihtar, takip veya dava evrakı geldi mi?
+38. Müvekkil: Geçen yıl bir ihtar geldi; ödeme yapınca kapanmıştır diye düşündüm.
+39. Avukat: O evrakın ve ödemenin tarihini ayrıca inceleyelim.
+40. Müvekkil: Eşim dosyaları saklıyor; akşam getirebilir.
+
+  [SUFLE S05-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Eski ihtarın kapandığı varsayımı.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Eski evrakın durumunu doğrulanmadı olarak işaretle.
+  Önerilen soru: “Önceki ihtar ve sonraki ödeme belgelerini görebilir miyiz?”
+
+41. Avukat: Evde sizinle yaşayanlar ve taşınmanın etkisi nedir?
+42. Müvekkil: Eşim ve çocuğum; çocuğun okulu burada, taşınmak zor.
+43. Avukat: Kalmak mı, uygun süre ve koşulla anlaşmak mı önceliğiniz?
+44. Müvekkil: En azından okul dönemi bitene kadar kalmak isterim.
+45. Avukat: Görüşme kapısını açık tutabiliriz; önce belgelerin neye dayandığını belirleyelim.
+46. Müvekkil: Ev sahibi depozitoyu son kira saymamı da önerdi.
+47. Avukat: Depozitonun miktarı ve tutulduğu yer belli mi?
+48. Müvekkil: İki aylıktı, elden verdim; sözleşmede aldığını yazmış.
+
+  [SUFLE S05-06 | NORMAL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Depozitonun son kiraya sayılması önerisi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Sözlü öneriyi kesin mahsup anlaşması sayma.
+  Önerilen soru: “Depozito ve son kira konusunda karşılıklı yazılı koşul var mı?”
+
+49. Avukat: Ödeme ve depozito adımlarını yazılı koşullar incelenmeden değiştirmeyelim.
+50. Müvekkil: Tamam; kira ödemek istiyorum, ama yanlış kişiye göndermekten korkuyorum.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: sözleşme ve ek belge incelemesi, yeni malik doğrulaması, ay bazlı ödeme/iade tablosu, önceki ihtar ve barınma hedefi. Sufle tahliye belgesinin geçerli veya geçersiz olduğunu yalnızca anlatıma dayanarak söylemez.
+
+================================================================================
+06. MIRAS — AILE IÇI DEVIR, VASIYET VE MIRAS BORÇLARI
+================================================================================
+OLAY ÖRGÜSÜ
+Zeynep babasının ölümünden sonra kardeşine devredilmiş bir daireyi öğreniyor. Hedefi başlangıçta evi geri almak. Ancak bakım ilişkisi, bedel iddiası, aile içi para transferleri ve açılmamış bir vasiyet bildirimi dosyanın kapsamını genişletiyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Babanızın vefatından sonra hangi işlem sizi buraya getirdi?
+02. Müvekkil: Kardeşim babamın dairesini üstüne almış; bana hiçbir şey kalmadı.
+03. Avukat: Vefat ve öğrendiğiniz devir tarihlerini biliyor musunuz?
+04. Müvekkil: Babam iki ay önce öldü; devri geçen hafta öğrendim.
+05. Avukat: Devri gösteren resmi kayıt gördünüz mü?
+06. Müvekkil: Kardeşim tapu fotoğrafı gönderdi; işlem tarihi iki yıl önce.
+07. Avukat: Ailede başka mirasçı olabilecek kişiler kimler?
+08. Müvekkil: Annem hayatta, bir kardeşim daha var; babamın önceki evliliğinden de kızı var.
+
+  [SUFLE S06-01 | NORMAL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Önceki evlilikten çocuk dahil geniş aile.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Mirasçı haritasını yalnız başvuranın varsayımıyla sınırlama.
+  Önerilen soru: “Resmi aile kayıtları ve mevcut mirasçı belgesi var mı?”
+
+09. Avukat: Bütün aile ilişkilerini ve varsa resmi mirasçı belgesini birlikte inceleyelim.
+10. Müvekkil: Belgeyi kardeşim çıkarmış; beni dahil edip etmediğini bilmiyorum.
+11. Avukat: Dairenin devri için kardeşiniz ne açıklama yapıyor?
+12. Müvekkil: “Parasını ödedim” diyor; babama baktığı için verildiğini de söylüyor.
+13. Avukat: Bu iki açıklama yazılı bir yerde geçiyor mu?
+14. Müvekkil: Aile grubunda farklı günlerde ikisini de yazdı.
+15. Avukat: Babanız o dönemde nerede yaşıyor, bakımını kim üstleniyordu?
+16. Müvekkil: Annemle yaşıyordu; kardeşim hastaneye götürüyordu, ben masraf gönderiyordum.
+
+  [SUFLE S06-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Satış ve bakım açıklamalarının birlikte geçmesi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Alternatif işlem anlatımlarını yan yana tut.
+  Önerilen soru: “Hangi açıklama hangi tarihte ve kim tarafından yapıldı?”
+
+17. Avukat: Sizin gönderdiğiniz ödemelerin alıcısı ve açıklaması neydi?
+18. Müvekkil: Annemin hesabına “baba ilaç” yazarak yatırıyordum.
+19. Avukat: Devir sırasında babanızın sağlık durumunu somut olarak neyle biliyorsunuz?
+20. Müvekkil: Unutkanlığı vardı ama her işi anlayamazdı diyemem.
+21. Avukat: Tanı, rapor veya o dönemde yapılan bir değerlendirme var mı?
+22. Müvekkil: Nörolojiye gitmişti; raporun içeriğini bilmiyorum.
+23. Avukat: O halde karar verme durumunu şimdi kesinleştirmeyelim. Dairenin bedelini biliyor musunuz?
+24. Müvekkil: Tapu fotoğrafında düşük bir rakam var; gerçek ödeme yapıldığını görmedim.
+
+  [SUFLE S06-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Sağlık ve bedel hakkında eksik bilgi.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Unutkanlığı ehliyetsizlik, düşük bedeli de kesin usulsüzlük sayma.
+  Önerilen soru: “İşlem gününe yakın kayıt ve ödeme belgesi mevcut mu?”
+
+25. Avukat: Bedel aktarımına ilişkin belge veya babanızın açıklaması var mı?
+26. Müvekkil: Babam bana “hepinizin hakkı duruyor” demişti; yazılı değil.
+27. Avukat: Bu konuşmayı başka biri duydu mu?
+28. Müvekkil: Teyzem yanımızdaydı; ama evden mi bahsettiğini tam hatırlamıyorum.
+29. Avukat: Başka mal, borç veya aile bireylerine yapılmış devir var mı?
+30. Müvekkil: Annemin oturduğu ev var; bir de bana yıllar önce para vermişti.
+31. Avukat: O para ne amaçla ve nasıl verilmişti?
+32. Müvekkil: Dükkan açmam için; kardeşim bunu miras payımı aldığım diye yorumluyor.
+
+  [SUFLE S06-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Başvuranın da geçmişte para almış olması.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Bütün önemli devirleri tarafsız listele.
+  Önerilen soru: “Size verilen paranın tarihi ve bildirilen amacı neydi?”
+
+33. Avukat: Babanızın bu amaçla yazdığı bir belge var mı?
+34. Müvekkil: Dekontta “destek” yazıyor; başka anlaşma yok.
+35. Avukat: Babanızın banka, kredi veya kefalet borcu olduğuna dair bilgi var mı?
+36. Müvekkil: Bir bankadan mektup geldi; ben açmadım, kardeşim öder sandım.
+37. Avukat: Mektubun tarihini ve içeriğini bugün inceleyelim.
+38. Müvekkil: Borç varsa mirastan vazgeçmek gerekir mi, korktum şimdi.
+39. Avukat: Bunu mal ve borç tablosu, tarihler ve yaptığınız işlemlerle değerlendireceğiz.
+40. Müvekkil: Ben babamın hesabından cenaze için para çekmiştim.
+
+  [SUFLE S06-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Borç mektubu ve hesaptan para çekme.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Miras borçlarıyla ölüm sonrası işlemleri öncelikli incelemeye al.
+  Önerilen soru: “Mektup ve hesap hareketinin gerçek sahibi kim?”
+
+41. Avukat: İşlemin tarihini, yetkisini, tutarını ve kullanım belgelerini de açıklığa kavuşturalım.
+42. Müvekkil: Annemin kartıyla çektim; hesabın kimin adına olduğunu kontrol etmeliyim.
+43. Avukat: Bir vasiyet veya mahkemeden gelen bildirim duydunuz mu?
+44. Müvekkil: Dün “vasiyetin açılması” yazan bir tebligat geldi, yanımda değil.
+45. Avukat: Bunu öncelikle görelim; içerik ve tarihe göre dosyayı güncelleyeceğiz.
+46. Müvekkil: Ben hemen kardeşime dava açıp evi sattırmak istiyordum.
+47. Avukat: Önce mirasçıları, işlemleri, borçları ve gerçek hedefinizi netleştirelim.
+48. Müvekkil: Annem evinden olmasın, ama kardeşim de her şeyi almasın.
+
+  [SUFLE S06-06 | NORMAL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Annenin barınmasını koruma hedefi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Maddi talep ile aile içi pratik öncelikleri ayrı kaydet.
+  Önerilen soru: “Sizin için kabul edilebilir çözümün değişmez koşulları neler?”
+
+49. Avukat: Annenizin barınma ihtiyacını ve sizin taleplerinizi ayrı başlıklar halinde çalışalım.
+50. Müvekkil: Aile grubunu, banka mektubunu ve yeni tebligatı getireceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: mirasçı ve mal/borç haritası, geçmiş devirler, vasiyet tebligatı ve ölüm sonrası işlemler. Sufle miras payını, ret imkanını veya devrin niteliğini eksik aile ve belge bilgisiyle kesinleştirmez.
+
+================================================================================
+07. TÜKETICI — INTERNETTEN ALINAN TELEFON, SERVIS VE FINANSMAN
+================================================================================
+OLAY ÖRGÜSÜ
+Can internetten aldığı telefonun kullanılmış çıktığını söylüyor. İade talebi servis raporuyla reddedilmiş. Ürünün işletme adına faturalandırılması, kredi kullanımı ve satıcı/pazaryeri ayrımı başvuru yolunun önce doğru sınıflandırılmasını gerektiriyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Satın aldığınız ürünle ilgili sorunu baştan anlatır mısınız?
+02. Müvekkil: Sıfır telefon aldım, içinden başka kişinin fotoğrafları çıktı.
+03. Avukat: Ürünü nereden ve hangi tarihte sipariş ettiniz?
+04. Müvekkil: Geçen ay bir pazaryerinden; satıcı başka bir mağaza.
+05. Avukat: Fatura, sipariş ekranı ve satıcı unvanı elinizde mi?
+06. Müvekkil: Evet; faturayı serbest meslek işim için işletme adına kestirdim.
+07. Avukat: Telefonu hangi amaçla kullanacaktınız?
+08. Müvekkil: Hem aile için hem müşteri aramaları için; tek telefonum olacaktı.
+
+  [SUFLE S07-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: İşletme faturası ve karma kullanım.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Tüketici sıfatını otomatik kabul etme; kullanım amacını incele.
+  Önerilen soru: “Satın alma kararında kişisel ve mesleki kullanımın yeri neydi?”
+
+09. Avukat: Kullanım amacı ve faturayı inceleyerek ilişkinin niteliğini belirleyelim.
+10. Müvekkil: Ben otomatik olarak tüketici başvurusu yaparım sanıyordum.
+11. Avukat: Teslim aldığınızda paket ve cihazın durumu nasıldı?
+12. Müvekkil: Kutu jelatini yamuktu, ama kargo görevlisi beklemiyordu.
+13. Avukat: Açılışı kaydettiniz mi veya yanınızda biri var mıydı?
+14. Müvekkil: Eşim video çekti; yalnız cihaz açılınca videoyu durdurduk.
+15. Avukat: Başka kişinin fotoğraflarını nasıl fark ettiniz?
+16. Müvekkil: Kurulum sırasında galeride gördüm; sonra satıcıyı aradım.
+
+  [SUFLE S07-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Önceki kullanıcıya ait veriler görülmüş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Üçüncü kişinin verisini yaymadan ürün durumunu belgele.
+  Önerilen soru: “Tespit anını kişisel içeriği çoğaltmadan gösteren kayıt var mı?”
+
+17. Avukat: Fotoğrafları yaymadan cihazın durumunu kayda aldınız mı?
+18. Müvekkil: Birkaç ekran görüntüsü aldım, hiçbir yerde paylaşmadım.
+19. Avukat: Satıcıya ilk başvurunuz hangi tarihte ve ne taleple oldu?
+20. Müvekkil: Teslimden iki gün sonra iade istedim; servise yollamamı söylediler.
+21. Avukat: Gönderi belgesi ve başvuru metniniz mevcut mu?
+22. Müvekkil: Var; pazaryeri formunda “ürün kullanılmış” diye yazdım.
+23. Avukat: Servis raporunda tam olarak ne söyleniyor?
+24. Müvekkil: “Kullanıcı hesabı kurulmuş, iade uygun değildir” yazıyor.
+
+  [SUFLE S07-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Servis raporu sadece yeni hesap kurulumuna dayanıyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Raporun yanıtlamadığı esas iddiayı belirle.
+  Önerilen soru: “Raporda ürünün önceki kullanımına ilişkin teknik inceleme var mı?”
+
+25. Avukat: Sizin kurduğunuz hesapla önceden bulunan veriler ayrıştırılmış mı?
+26. Müvekkil: Hayır; telefonu denemek için ben de hesabımı açmıştım.
+27. Avukat: Servise yollamadan önce cihazı sıfırladınız mı?
+28. Müvekkil: Kendi hesabımı çıkardım; satıcının önerisiyle fabrika ayarı yaptım.
+29. Avukat: O öneri yazılı mı?
+30. Müvekkil: Destek sohbetinde duruyor; şimdi keşke yapmasaydım diyorum.
+31. Avukat: Mevcut kanıtları değerlendirelim; eksik kaydı olmuş gibi göstermeyelim.
+32. Müvekkil: Pazaryeri de servis raporu var diye dosyayı kapattı.
+
+  [SUFLE S07-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Satıcı yönlendirmesiyle sıfırlama ve kapanan destek dosyası.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kanıt kaybını ve mevcut destek kayıtlarını ayrı işaretle.
+  Önerilen soru: “Sıfırlama yönlendirmesinin tarihli sohbet çıktısı alınabiliyor mu?”
+
+33. Avukat: Siparişte satıcı ve platformun verdiği güvenceler ayrı ayrı neler?
+34. Müvekkil: Satıcı sıfır yazmış; platform “güvenli alışveriş” etiketi koymuş.
+35. Avukat: İlanın işlem tarihindeki görüntüsüne erişebiliyor musunuz?
+36. Müvekkil: Ekran görüntüm var; ilan sonradan kaldırıldı.
+37. Avukat: Ödemeyi nasıl yaptınız?
+38. Müvekkil: Bankanın alışveriş kredisiyle; taksitler devam ediyor.
+39. Avukat: Kredi sözleşmesi ve alışverişle bağlantılı belgeler var mı?
+40. Müvekkil: Uygulamada var; ürün dönse kredi kendiliğinden kapanır sanıyordum.
+
+  [SUFLE S07-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Alışveriş kredisi sürüyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Ürün uyuşmazlığı ile finansmanı ayrı ilişkilendir.
+  Önerilen soru: “Kredi belgeleri satıcı ve siparişe nasıl atıf yapıyor?”
+
+41. Avukat: İade ve finansman işlemlerini ayrı doğrulamamız gerekecek.
+42. Müvekkil: Şu an telefonsuzum; işim de aksıyor.
+43. Avukat: Önceliğiniz yeni cihaz mı, bedel iadesi mi?
+44. Müvekkil: Bedel iadesi; ama krediyi ödemeyi durdurmak istiyorum.
+45. Avukat: Ödemeyle ilgili karar vermeden sözleşme ve riskleri inceleyelim.
+46. Müvekkil: Satıcı dün yeni cihaz gönderelim dedi, kabul etmedim.
+47. Avukat: Teklifin koşullarını ve yazılı cevabınızı görebilir miyim?
+48. Müvekkil: Yalnız telefonla söylediler; kutusu açılmış olabilir dediler.
+
+  [SUFLE S07-06 | NORMAL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Sözlü değişim teklifi ve açılmış kutu açıklaması.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Teklifi kanıtlanmış kabul veya çözüm sayma.
+  Önerilen soru: “Satıcı teklifi ve ürünün durumunu yazılı teyit ediyor mu?”
+
+49. Avukat: Yazılı teklif isteyip mevcut taleplerinizi ve belgeleri birlikte değerlendirelim.
+50. Müvekkil: Fatura, kredi sözleşmesi, video ve destek sohbetini göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: ilişkinin niteliği, ürün durumu kanıtları, servis incelemesinin kapsamı, taraf rolleri ve finansman belgeleri. Sufle başvuru mercisini veya parasal sınırı güncel mevzuat ve işlem niteliği kontrol edilmeden seçmez.
+
+================================================================================
+08. CEZA — YARALAMA IDDIASI, IFADE ÇAĞRISI VE KAMERA KAYDI
+================================================================================
+OLAY ÖRGÜSÜ
+Burak bir otopark tartışması sonrası polis tarafından aranmış. Başlangıçta olaya hiç karışmadığını söylüyor, sonra karşı tarafı ittiğini açıklıyor. Görüşme; sıfat, güvenilir olay sırası, yaralanma ve silinme ihtimali olan görüntüler üzerine kuruluyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Size ulaşan çağrıda ne söylendi, hangi birim aradı?
+02. Müvekkil: Polis yarın ifade vermeye gel dedi; otoparktaki tartışma yüzündenmiş.
+03. Avukat: Arayan birimi ve dosyayı resmi kanaldan doğruladınız mı?
+04. Müvekkil: Hayır; telefondaki numarayı kaydettim, bir mesaj da geldi.
+05. Avukat: Çağrıdaki sıfatınız veya isnat edilen olay belirtilmiş mi?
+06. Müvekkil: Şüpheli dediğini hatırlıyorum; mesajda yalnız adres ve saat var.
+07. Avukat: Önce çağrıyı ve dosya bilgisini doğrulayalım. Şu an özgürce buradasınız, doğru mu?
+08. Müvekkil: Evet, kimse beni almadı; yarın gitmem gerektiğini söylediler.
+
+  [SUFLE S08-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Telefonla ifade çağrısı ve belirsiz dosya.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Çağrı, sıfat ve dosya bilgisini doğrulama görevi aç.
+  Önerilen soru: “Resmi çağrı veya teyit edilebilir birim bilgisi var mı?”
+
+09. Avukat: Otoparktaki olayı gördüğünüz sırayla anlatır mısınız?
+10. Müvekkil: Bir adam arabamın çıkışını kapattı, bağırdı; ben karışmadım.
+11. Avukat: “Karışmadım” derken aranızda temas veya karşılıklı söz olmadığını mı söylüyorsunuz?
+12. Müvekkil: Söz oldu; üzerime gelince omzundan ittirdim ama vurmadım.
+13. Avukat: İtmeden hemen önce mesafe ve hareketler nasıldı?
+14. Müvekkil: Çok yakındı, elini kaldırdı; vuracak sandım.
+15. Avukat: Elinin size değdiğini gördünüz mü?
+16. Müvekkil: Hayır; sonra geriye düşüp kolunu tuttu.
+
+  [SUFLE S08-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Hiç karışmadım anlatımı fiziksel itmeye dönüşüyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Çelişkiyi suçluluk kararı vermeden görünür kıl.
+  Önerilen soru: “Teması ve öncesindeki hareketleri adım adım yeniden anlatır mısınız?”
+
+17. Avukat: Yere düşme, başka temas veya araya giren kişi oldu mu?
+18. Müvekkil: Güvenlik araya girdi, ben arabaya bindim.
+19. Avukat: Güvenlik görevlisi olayın ne kadarını gördü?
+20. Müvekkil: Son kısmını; başta kulübedeydi.
+21. Avukat: Olay anında sizin yanınızda biri var mıydı?
+22. Müvekkil: Arkadaşım yolcu koltuğundaydı, tartışmanın başını gördü.
+23. Avukat: Karşı tarafın yaralandığına ilişkin bildiğiniz somut bilgi nedir?
+24. Müvekkil: Kırık varmış diyorlar; raporu görmedim, komşudan duydum.
+
+  [SUFLE S08-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kırık bilgisi yalnız komşudan duyulmuş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Tıbbi bilgiyi doğrulanmamış duyum olarak etiketle.
+  Önerilen soru: “Rapor dosyada mevcut mu; bu bilgiyi kimden aldınız?”
+
+25. Avukat: Duyum ile gördüğünüzü ayıralım. Sizin yaralanmanız oldu mu?
+26. Müvekkil: Bileğim çizildi; arabaya binerken mi oldu bilmiyorum.
+27. Avukat: O gün sağlık kuruluşuna başvurdunuz mu?
+28. Müvekkil: Hayır, ertesi gün fotoğraf çektim.
+29. Avukat: Otoparkta kamera var mı ve olayın tarihi nedir?
+30. Müvekkil: Var; olay altı gün önceydi, kayıtlar haftalık siliniyormuş.
+31. Avukat: Silinme ihtimalini bugün ele alalım; bunu kimden öğrendiniz?
+32. Müvekkil: Güvenlik görevlisi söyledi; sistemin sorumlusu yöneticiymiş.
+
+  [SUFLE S08-04 | ACİL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kameraların haftalık silindiği söyleniyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Görüntü kaybı ihtimalini önceliklendir; silinme politikasını doğrula.
+  Önerilen soru: “Olay saati ve kayıt sorumlusu kim?”
+
+33. Avukat: Görüntüleri yetkisiz almadan korunması için uygun başvuruyu değerlendireceğim.
+34. Müvekkil: Arkadaşım bir tanıdığından kopya çıkarmayı teklif etti.
+35. Avukat: Resmi ve hukuka uygun kanalı kullanalım; kişilerin görüntülerini yaymayalım.
+36. Müvekkil: Karşı taraf bana da mesaj attı, para verirsem kapatacakmış.
+37. Avukat: Mesajın tamamını, tarihini ve kimden geldiğini görebilir miyim?
+38. Müvekkil: Var; ben öfkeyle “sen de görürsün” yazdım.
+39. Avukat: Kendi cevabınızı da eksiksiz saklayalım; devam eden iletişim var mı?
+40. Müvekkil: Hayır, engelledim; ailem konuşmaya gitmek istiyor.
+
+  [SUFLE S08-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Karşılıklı mesaj ve ailenin teması planlaması.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Tam konuşmayı koru; yeni gerilim ihtimalini işaretle.
+  Önerilen soru: “Mesaj zincirinin başı, sonu ve göndericisi doğrulanabiliyor mu?”
+
+41. Avukat: Baskı veya yeni tartışma yaratabilecek temastan kaçınarak hukuki yolu planlayalım.
+42. Müvekkil: Ben sadece kendimi korudum; kesin ceza alır mıyım?
+43. Avukat: Dosya ve deliller görülmeden sonuç söyleyemem; olayın tamamını değerlendirmemiz gerekiyor.
+44. Müvekkil: Otoparkın bir kör noktası var, itme orada olmuş olabilir.
+45. Avukat: Kameranın göstermediği kısmı da dürüstçe işaretleyelim; tanık anlatımıyla karıştırmayalım.
+46. Müvekkil: Arkadaşım benden önce araçtan indi; aslında itme anını görmemiş olabilir.
+47. Avukat: Her tanığın bizzat gördüğü bölümü ayrı kaydedelim.
+48. Müvekkil: Tamam, birlikte ifade uydurmak istemiyorum; ne olduysa anlatayım.
+
+  [SUFLE S08-06 | NORMAL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Tanığın görgü kapsamı daralıyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Tanıkları aynı anlatıya yönlendirme; doğrudan gözlem sınırını kaydet.
+  Önerilen soru: “Arkadaşınız tam olarak hangi anda ve nerede bulunuyordu?”
+
+49. Avukat: Çağrı teyidi, görüntülerin korunması ve ifade hazırlığını bugün sıraya koyacağız.
+50. Müvekkil: Mesajları, arkadaşımın iletişimini ve otopark bilgisini ileteceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: çağrı teyidi, olay/temas çizelgesi, kamera koruma ihtiyacı, tanıkların görgü sınırı ve mesaj bütünü. Sufle ifade metni uydurmaz, delil gizlemeyi önermez, suç veya savunma sonucunu kesinleştirmez.
+
+================================================================================
+09. TRAFIK VE SIGORTA — KAVŞAK KAZASI, YARALANMA VE TICARI ARAÇ KAYBI
+================================================================================
+OLAY ÖRGÜSÜ
+Kurye olarak çalışan Okan bir otomobille çarpışmış. Motosikleti başka birine ait, ilk tutanakta yaralanma yazmıyor, ağrıları sonra artmış. Kusur iddiası, sigorta süreçleri ve gelir kaybı ayrı kanıtlar gerektiriyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Kazanın yerini, zamanını ve araçları anlatır mısınız?
+02. Müvekkil: Geçen hafta kavşakta araba önüme çıktı; motosikletle çarptım.
+03. Avukat: Kaza anındaki yönünüz ve trafik işaretleri nasıldı?
+04. Müvekkil: Ben düz gidiyordum; o sola dönüyordu, ışık yoktu.
+05. Avukat: Yol önceliğine ilişkin levha veya görüntü gördünüz mü?
+06. Müvekkil: Benim yolum genişti, o yüzden haklıyım diye düşündüm.
+07. Avukat: Yolun genişliğinden sonuç çıkarmayalım. Tutanak ve fotoğraflar var mı?
+08. Müvekkil: İkimiz tutanak tuttuk; karşı taraf “yaralanma yok” yazdırdı.
+09. Avukat: O anda gerçekten ağrı veya başka belirti var mıydı?
+10. Müvekkil: Bacağım ağrıyordu ama çalışabilirim sandım, hastaneye ertesi gün gittim.
+
+  [SUFLE S09-01 | ÖNEMLİ]
+  Nerede: 10. konuşma tamamlandıktan sonra.
+  Tetikleyici: Tutanakta yaralanma yok fakat ağrı var.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İlk kayıtla sonraki sağlık durumunu ayrı kronolojiye al.
+  Önerilen soru: “İlk belirtiler ne zaman başladı ve nerede kayda geçti?”
+
+11. Avukat: Hastane başvurusunda kazayı ve belirtileri anlattınız mı?
+12. Müvekkil: Evet, bilekte çatlak dediler; rapor ve film var.
+13. Avukat: Şu anda tedaviniz devam ediyor mu?
+14. Müvekkil: Kontrolüm var; doktor işe ara vermemi söyledi.
+15. Avukat: Çalışma durumunu gösteren rapor veya yazılı öneri elinizde mi?
+16. Müvekkil: Bir rapor verdiler ama kaç gün olduğunu şimdi bilmiyorum.
+
+  [SUFLE S09-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: İşe ara önerisi fakat rapor süresi bilinmiyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Tıbbi ve çalışma bilgilerini belgeye bağla.
+  Önerilen soru: “Raporun başlangıç, bitiş ve kontrol bilgileri nedir?”
+
+17. Avukat: Tedavi ve çalışma belgelerini ayrı çıkaralım. Motosiklet kimin adına?
+18. Müvekkil: Ağabeyimin; ben kullanıyor ve masraflarını ödüyorum.
+19. Avukat: Siz, araç sahibi ve sigorta poliçeleri için bilgiler mevcut mu?
+20. Müvekkil: Ruhsat ağabeyimde; benim ehliyetim ve poliçe fotoğrafları bende.
+21. Avukat: Karşı aracın sürücüsü ve sahibi aynı kişi mi?
+22. Müvekkil: Şirket aracıymış; kullanan çalışanıymış, sahibi tutanakta yazıyor.
+23. Avukat: Herhangi bir sigortacıya veya başka kuruma başvuru yapıldı mı?
+24. Müvekkil: Servis benim adıma dosya açtı, ne gönderdiğini bilmiyorum.
+
+  [SUFLE S09-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Motosiklet başkasına ait, servis başvurusu belirsiz.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Hak sahibi ve başvuru sahibini ayrı belirle.
+  Önerilen soru: “Servis hangi kişi adına, hangi taleple başvurdu?”
+
+25. Avukat: Başvuru ve verilen cevapların kopyalarını isteyelim.
+26. Müvekkil: Servis “tam hasar olabilir” dedi; sigorta henüz bir şey demedi.
+27. Avukat: Onarım incelemesi yapıldı mı, motosiklet şu an nerede?
+28. Müvekkil: Özel serviste; parça sökmeye başlamışlar.
+29. Avukat: Söküm öncesi ve sonrası fotoğraf, hasar tespiti ve teklif var mı?
+30. Müvekkil: Öncesinin fotoğrafı var; değişen parçalar orada duruyor.
+31. Avukat: Bunları ve teslim belgelerini koruyalım. Kusur hakkında resmi sonuç gördünüz mü?
+32. Müvekkil: Uygulamada yüzde yüz bana yazıyor; açıklamasını indirmedim.
+
+  [SUFLE S09-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Uygulamada kusur sonucu var fakat dayanağı yok.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kusur değerlendirmesini anlatıdan değil belgeden incele.
+  Önerilen soru: “Kayıt hangi kuruluşun değerlendirmesi ve bildirim tarihi nedir?”
+
+33. Avukat: Görünen kayıt ve dayanaklarını birlikte inceleyelim; itiraz veya önceki başvuru var mı?
+34. Müvekkil: Yok; karşı taraf telefonda benim hızlı olduğumu söylüyor.
+35. Avukat: Hız konusunda somut kayıt, tanık veya görüntü var mı?
+36. Müvekkil: Kask kameram vardı ama dosya bozuk görünüyor.
+37. Avukat: Kartı yeniden yazmadan saklayın; uygun incelemeyi değerlendirelim.
+38. Müvekkil: Bir dükkânın kamerası da kazayı görüyor olabilir.
+39. Avukat: Dükkânı, olay saatini ve kayıtların korunma durumunu netleştirelim.
+40. Müvekkil: Günlük kazancım da kesildi; hepsini isteyebilir miyim?
+
+  [SUFLE S09-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Bozuk kask kaydı ve olası dükkân kamerası.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kaybolabilecek görüntülere öncelik ver.
+  Önerilen soru: “Özgün kart ve dükkân kaydı değişmeden korunabiliyor mu?”
+
+41. Avukat: Hangi gelir kaybının hangi belgelerle ilişkilendiğini incelememiz gerekiyor.
+42. Müvekkil: Uygulamada haftalık kazanç dökümlerim var; nakit bahşişler yok.
+43. Avukat: Belgeli gelirle tahmini geliri ayrı kaydedelim. İkame araç kullandınız mı?
+44. Müvekkil: İlk iki gün kiraladım, sonra ağrıdan bıraktım.
+45. Avukat: Kira faturası ve çalışamadığınız günleri gösteren kayıtları ekleyelim.
+46. Müvekkil: Sigorta bir ödeme teklif etti, linkte kabul yazıyordu.
+47. Avukat: Teklif metnini ve kabulün kapsamını görmeden işlem yapmayın; inceleyelim.
+48. Müvekkil: Ağabeyim paraya ihtiyacımız var diye kabul etmeyi düşünüyor.
+
+  [SUFLE S09-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ödeme kabulünü araç sahibi yapabilir.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Teklif kapsamıyla kişilerin ayrı taleplerini karşılaştır.
+  Önerilen soru: “Kabul metni yalnız araç hasarını mı, başka talepleri de mi kapsıyor?”
+
+49. Avukat: Araç sahibiyle sizin taleplerinizi ayrı değerlendirip kapsamı açıklayalım.
+50. Müvekkil: Tutanak, raporlar, gelir dökümleri ve teklif linkini paylaşacağım.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: kaza ve sağlık kronolojisi, taraf/sigorta haritası, başvuru kaydı, görüntü koruma listesi, gelir ve teklif belgeleri. Sufle kusur yüzdesi, sağlık sonucu veya kesin tazminat tutarı üretmez.
+
+================================================================================
+10. SAĞLIK HUKUKU — AMELIYAT SONRASI ZARAR IDDIASI VE KAYIT EKSIKLIĞI
+================================================================================
+OLAY ÖRGÜSÜ
+Derya özel hastanede bir ameliyat sonrası devam eden uyuşukluk nedeniyle geliyor. Doktorun bilgilendirme yapmadığını düşünüyor. Sonradan ikinci müdahale, önceki hastalık ve hastane markası altında farklı şirketler bulunduğu öğreniliyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Önce şu anki sağlık durumunuzu ve tedavinizin sürüp sürmediğini öğrenebilir miyim?
+02. Müvekkil: Ameliyattan sonra bacağımda uyuşukluk başladı; kontroller devam ediyor.
+03. Avukat: Yeni veya kötüleşen belirti varsa sağlık ekibinizle görüşmeniz öncelikli. Buraya geliş hedefiniz nedir?
+04. Müvekkil: Neden olduğunu öğrenmek ve zararımı karşılatmak istiyorum.
+05. Avukat: Hangi ameliyat, hangi tarihte ve nerede yapıldı?
+06. Müvekkil: Dört ay önce özel hastanede bel ameliyatı oldum.
+07. Avukat: Ameliyat öncesinde hangi şikayetleriniz vardı?
+08. Müvekkil: Ağrım vardı; uyuşukluk yoktu diyordum ama bazen karıncalanma oluyordu.
+
+  [SUFLE S10-01 | NORMAL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Uyuşukluk yok anlatımına önceki karıncalanma ekleniyor.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Önceki ve sonraki belirtileri tarafsız ayır.
+  Önerilen soru: “Ameliyat öncesi kayıtlarda hangi yakınmalar yazıyor?”
+
+09. Avukat: Önceki belirtileri de ayrıntısıyla kaydedelim; eski muayene kayıtları var mı?
+10. Müvekkil: Başka bir klinikte MR çekilmişti, raporu e-posta hesabımda.
+11. Avukat: Ameliyat kararından önce hangi seçenekler konuşuldu?
+12. Müvekkil: Doktor ameliyatın iyi geleceğini söyledi; diğer seçenekleri hatırlamıyorum.
+13. Avukat: Bilgilendirme veya onam belgesi imzaladınız mı?
+14. Müvekkil: Yatış günü çok sayfa imzaladım; kopya verilmedi.
+15. Avukat: Belgeleri okuma ve soru sorma imkânınız nasıldı?
+16. Müvekkil: Ağrım vardı; hemşire yerleri gösterdi, eşim de yanımdaydı.
+
+  [SUFLE S10-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ağrılı yatış sırasında çok sayfalı imza.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İmzayı yeterli bilgilendirme veya eksiklik sonucu sayma.
+  Önerilen soru: “Hangi belge, ne zaman ve hangi açıklamadan sonra imzalandı?”
+
+17. Avukat: Doktorla ayrı bir açıklama görüşmesi yapıldı mı?
+18. Müvekkil: Bir hafta önce konuşmuştuk; risklerden ne dediğini tam hatırlamıyorum.
+19. Avukat: Ameliyat sonrası yeni şikayeti ilk ne zaman fark ettiniz?
+20. Müvekkil: Uyandığımda vardı; normal deyip beklememi söylediler.
+21. Avukat: Bunu kime, ne zaman bildirdiğinizi gösteren kayıt var mı?
+22. Müvekkil: Hemşireye söyledim; taburcu olunca da doktora mesaj attım.
+23. Avukat: Taburculuk özeti ve ameliyat raporunu aldınız mı?
+24. Müvekkil: Özet var, ayrıntılı ameliyat raporu yok.
+
+  [SUFLE S10-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ayrıntılı ameliyat raporu eksik.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Eksik tıbbi kayıtları görünür listele.
+  Önerilen soru: “Ameliyat, anestezi ve takip kayıtlarının tam kopyası istenmiş mi?”
+
+25. Avukat: Sonrasında başka müdahale veya tedavi uygulandı mı?
+26. Müvekkil: İki hafta sonra tekrar ameliyata aldılar; bunu düzeltme dediler.
+27. Avukat: İkinci müdahalenin gerekçesi hangi belgede yazıyor?
+28. Müvekkil: Ben bilmiyorum; eşime vida kontrolü demişler.
+29. Avukat: İlk ve ikinci müdahalenin kayıtlarını ayrı istememiz gerekecek.
+30. Müvekkil: Hastane “bütün belgeler sistemde” dedi ama yalnız faturayı gönderdi.
+31. Avukat: Kayıt talebinizi nasıl yaptınız ve cevap yazılı mıydı?
+32. Müvekkil: Çağrı merkezini aradım; konuşma numarası var, yazılı talep vermedim.
+
+  [SUFLE S10-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: İkinci ameliyat ve sözlü kayıt talebi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İki işlemin kronolojisini ayır; kayıt talebini belgelenebilir hale getir.
+  Önerilen soru: “İkinci işlemin tarihli açıklaması ve yazılı kayıt talebi var mı?”
+
+33. Avukat: Tedaviyi yapan doktorla hastanenin hukuki ilişkisini biliyor musunuz?
+34. Müvekkil: Doktor muayene ücretini kendi kliniğinde aldı; ameliyat hastanede oldu.
+35. Avukat: Fatura ve sözleşmelerde hangi unvanlar bulunuyor?
+36. Müvekkil: Üç farklı unvan var; biri malzeme bedeli içinmiş.
+37. Avukat: Bunları taraf ve ödeme tablosuna ayıralım. Başka hekim değerlendirmesi aldınız mı?
+38. Müvekkil: Bir doktor “sinir etkilenmiş olabilir” dedi; kesin konuşmadı.
+39. Avukat: Bu değerlendirme yazılı mı, hangi incelemelere dayanıyor?
+40. Müvekkil: Muayene notunda var; yeni test istemiş, henüz yapılmadı.
+
+  [SUFLE S10-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Olasılık bildiren ikinci hekim ve beklenen test.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Tıbbi olasılığı kesin neden olarak aktarma.
+  Önerilen soru: “Değerlendirmenin kapsamı ve tamamlanmamış incelemeler neler?”
+
+41. Avukat: Belirsizliği koruyalım; teknik neden için uzman incelemesi gerekecek.
+42. Müvekkil: İnternette aynı ameliyatı olanların hepsi hata diyor.
+43. Avukat: Başkalarının yorumlarını sizin tıbbi kayıtlarınızın yerine koyamayız.
+44. Müvekkil: İki aydır çalışamadım, annem de yanıma taşındı.
+45. Avukat: İş, bakım ve ek giderlerinizi hangi belgelerle gösterebiliriz?
+46. Müvekkil: Raporlarım, ulaşım faturaları ve annemin biletleri var.
+47. Avukat: Hastaneye veya başka kuruma daha önce resmi başvuru yaptınız mı?
+48. Müvekkil: Bir şikayet formu doldurdum; dün “inceleme tamamlandı” mesajı geldi.
+
+  [SUFLE S10-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: İnceleme tamamlandı mesajı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Başvuru cevabının tamamını ve bildirim tarihini iste.
+  Önerilen soru: “Mesaj bir karar belgesine veya ayrıntılı cevaba bağlantı veriyor mu?”
+
+49. Avukat: Formu ve cevabı inceleyelim; tarihleri ve eksik kayıtları birlikte çıkaralım.
+50. Müvekkil: Önce gerçeği öğrenmek istiyorum; kesin hata var diye yazmayalım.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: belirti ve müdahale kronolojisi, eksik kayıtlar, taraf/fatura haritası, iş ve bakım giderleri, önceki başvuru. Sufle tanı koymaz, tedavi önermez veya olumsuz sonucu otomatik tıbbi hata saymaz.
+
+================================================================================
+11. TAŞINMAZ — TAMAMLANMAYAN KONUT, TAPU VE EK ÖDEME TALEBI
+================================================================================
+OLAY ÖRGÜSÜ
+Ece bir projeden daire satın almış, teslim gecikmiş. Tapunun henüz geçmemesi, aracıyla yapılan sözleşme ve projedeki farklı daire numaraları teslim sorununu mülkiyet ve taraf tespiti sorununa dönüştürüyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Satın aldığınız daireyle ilgili şu an hangi sorunla karşı karşıyasınız?
+02. Müvekkil: Teslim bir yıl gecikti; müteahhit anahtar için ek para istiyor.
+03. Avukat: Sözleşmede satıcı olarak hangi kişi veya şirket yazıyor?
+04. Müvekkil: Satış ofisinin şirketi yazıyor; inşaat tabelasında başka isim var.
+05. Avukat: Sözleşmeyi ve eklerini getirdiniz mi?
+06. Müvekkil: Sözleşme var, teknik şartnameyi hiç vermediler.
+07. Avukat: Taahhüt edilen teslim tarihi nerede yazıyor?
+08. Müvekkil: Broşürde geçen eylül, sözleşmede iskandan sonra teslim yazıyor.
+
+  [SUFLE S11-01 | NORMAL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Broşür ve sözleşmede farklı teslim ifadeleri.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Teslim taahhüdünün kaynaklarını ayrı kaydet.
+  Önerilen soru: “Broşür ve mesajlar işlem öncesinde mi size verilmişti?”
+
+09. Avukat: Bu iki belgeyi ayrı tutalım. İşlem sırasında size hangi tarih söylendi?
+10. Müvekkil: Satış temsilcisi kesin eylül dedi; mesajı bende.
+11. Avukat: Taşınmazın tapusu veya payı adınıza geçti mi?
+12. Müvekkil: Hayır, tüm ödemeyi yapınca geçecek dediler.
+13. Avukat: Ne kadar ödeme yaptınız, hangi hesaplara gönderdiniz?
+14. Müvekkil: Bedelin tamamını ödedim; son kısmı müdürün şahsi hesabına istediler.
+15. Avukat: Şahsi hesaba yönlendirme yazılı mı?
+16. Müvekkil: Evet, şirket e-postasından IBAN gönderdiler.
+
+  [SUFLE S11-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Şirket talimatıyla şahsi hesaba ödeme.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Alıcı, yönlendiren ve sözleşme tarafını eşleştir.
+  Önerilen soru: “E-postanın özgün hali ve hesap sahibinin bilgisi mevcut mu?”
+
+17. Avukat: Dekont açıklamaları daireyi veya sözleşmeyi tanımlıyor mu?
+18. Müvekkil: İlk ödemeler tanımlıyor; sonuncuda sadece “ödeme” yazıyor.
+19. Avukat: Sözleşmedeki daire numarası ve size gösterilen daire aynı mı?
+20. Müvekkil: Sözleşmede B-12, kapıda B-14 yazıyor; numaralar değişti dediler.
+21. Avukat: Değişikliği gösteren plan veya ek anlaşma verildi mi?
+22. Müvekkil: Hayır; geçen ay aynı dairenin ilanını başka sitede gördüm.
+23. Avukat: İlanın tarihi, adresi ve görüntüsünü sakladınız mı?
+24. Müvekkil: Bağlantıyı kaydettim; şimdi ilan kaldırılmış.
+
+  [SUFLE S11-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Daire numarası değişmiş, benzer ilan kaldırılmış.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Daire kimliğini ve ilan iddiasını doğrulamaya al.
+  Önerilen soru: “Bağımsız bölümün resmi tanımı ile ilanı nasıl karşılaştırabiliriz?”
+
+25. Avukat: İçeriğin başka kaydı veya size iletilmiş görüntüsü var mı?
+26. Müvekkil: Eşim ekran görüntüsü almış; kat ve manzara aynı.
+27. Avukat: Aynı daire olduğundan emin olduğunuz ve olmadığınız noktaları ayıralım.
+28. Müvekkil: Numarası görünmüyor; fotoğraflar örnek daire de olabilir.
+29. Avukat: Tapu, proje ve bağımsız bölüm bilgilerinin resmi doğrulamasına ihtiyaç var.
+30. Müvekkil: Arsa sahibinin başka biri olduğunu da duydum.
+31. Avukat: Bunu hangi kaynaktan öğrendiniz?
+32. Müvekkil: Şantiyedeki komşu söyledi; ben resmi kayda bakmadım.
+
+  [SUFLE S11-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Arsa sahibine ilişkin yalnız komşu duyumu.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Mülkiyet iddiasını doğrulanmamış olarak etiketle.
+  Önerilen soru: “Güncel resmi kaydı hangi taşınmaz bilgileriyle sorgulayacağız?”
+
+33. Avukat: Duyumu ayrıca işaretleyelim. Dairede fiilen ne eksik?
+34. Müvekkil: Asansör çalışmıyor, elektrik şantiye elektriği; içi büyük ölçüde bitti.
+35. Avukat: Size teslim belgesi veya anahtar teklif edildi mi?
+36. Müvekkil: Anahtar için “eksiksiz teslim aldım” kağıdı ve ek ödeme istiyorlar.
+37. Avukat: Belgenin ve ek ödeme gerekçesinin kopyası var mı?
+38. Müvekkil: WhatsApp'ta yolladılar; maliyet artışı yazıyor.
+39. Avukat: Sözleşmede bedel değişikliğiyle ilgili hangi hüküm var?
+40. Müvekkil: Ben sabit fiyat sanıyordum; küçük yazıları okumadım.
+
+  [SUFLE S11-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Eksiksiz teslim belgesi ve değişken bedel ihtimali.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İmza ve ek ödeme koşullarını ayrı incele.
+  Önerilen soru: “Belge eksikleri kabul etmeyen bir beyan içeriyor mu?”
+
+41. Avukat: Tam metni inceleyelim. Gecikme nedeniyle hangi masraflarınız oldu?
+42. Müvekkil: Kirada kaldım; eşyaları depoya koydum, iki kere taşıdım.
+43. Avukat: Bunların tarihli sözleşme ve ödeme belgeleri mevcut mu?
+44. Müvekkil: Kira dekontları var, deponun bazı ödemeleri nakit.
+45. Avukat: Önceliğiniz daireyi almak mı, işlemden çıkmak mı?
+46. Müvekkil: Tapusu güvenliyse almak isterim; yeni ev bulmak çok zor.
+47. Avukat: Bu hedefi, tapu durumu ve tamamlanma koşullarıyla birlikte değerlendirelim.
+48. Müvekkil: Şirketten yarına kadar ek parayı yatırmamı istediler.
+
+  [SUFLE S11-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ertesi güne kadar ödeme baskısı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Karşı tarafın tarihini yasal süre sanma; kaynağını belirt.
+  Önerilen soru: “Bu son tarih sözleşmeye mi, yeni bir talebe mi dayanıyor?”
+
+49. Avukat: Talep tarihini kaydedelim; ödeme veya imza öncesi belge ve taraf incelemesini tamamlayalım.
+50. Müvekkil: Bütün sözleşmeleri, dekontları ve teslim kağıdını göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: taraf/ödeme haritası, dairenin resmi kimliği, teslim eksikleri, ek ödeme ve imza metni, gecikme giderleri. Sufle tapu incelemesi olmadan aynı dairenin birden fazla kişiye satıldığını kesinleştirmez.
+
+================================================================================
+12. İDARE — BELEDIYE IŞYERI KAPATMA IŞLEMI
+================================================================================
+OLAY ÖRGÜSÜ
+Bir kafenin işletmecisi olan Aslı, belediye ekiplerinin kapatma yaptığını anlatıyor. Ruhsat, canlı müzik, komşu şikayeti ve yapısal değişiklik farklı işlemlerle ilgili. Gelir kaybı baskısı nedeniyle mühürlü yeri açma düşüncesi de ortaya çıkıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: İşyerinizde hangi işlem yapıldı, size hangi belge bırakıldı?
+02. Müvekkil: Belediye dün kafeyi mühürledi; ruhsatımız vardı, anlayamadım.
+03. Avukat: İşlem tutanağı ve kapatma kararını yanınızda getirdiniz mi?
+04. Müvekkil: Tutanak var; kararı e-posta atacaklarını söylediler.
+05. Avukat: Tutanakta işlem gerekçesi ve karar numarası yazıyor mu?
+06. Müvekkil: Gürültü ve ruhsata aykırı faaliyet diyor; iki farklı numara var.
+07. Avukat: Size belgeler hangi tarihlerde ve kime teslim edildi?
+08. Müvekkil: Dün çalışanıma verdiler; önceki bir yazı da kasada kalmış.
+
+  [SUFLE S12-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Dünkü tutanak dışında eski bildirim var.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Tek işlem varsayma; her karar ve bildirim için ayrı satır aç.
+  Önerilen soru: “Önceki yazının konusu, tarihi ve teslim alanı kim?”
+
+09. Avukat: Önce bütün bildirimlerin tarihini çıkaralım. İşletmenin resmi sahibi kim?
+10. Müvekkil: Şirket benim; ruhsat eski ortakla kurduğumuz şirket adına.
+11. Avukat: Ortak değiştiğinde şirketin unvanı veya işletme yapısı değişti mi?
+12. Müvekkil: Unvan aynı, ben hisseleri aldım; müdür değişikliği yaptık.
+13. Avukat: Ruhsatta faaliyet türü nasıl yazıyor?
+14. Müvekkil: Kafe yazıyor; akşamları canlı müzik de yapıyoruz.
+15. Avukat: Canlı müzik veya ilgili başka izin belgeleri var mı?
+16. Müvekkil: Bir başvurumuz vardı; onay geldi sanıyordum, muhasebeci takip ediyordu.
+
+  [SUFLE S12-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: İzin alındığı varsayılıyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Başvuru ile izin sonucunu birbirinden ayır.
+  Önerilen soru: “Olumlu kararın numarası ve belgesi bulunuyor mu?”
+
+17. Avukat: Başvuru alındısı ile izin belgesini ayrı inceleyelim.
+18. Müvekkil: Evet, elimde yalnız başvuru numarası olabilir.
+19. Avukat: Daha önce denetim, uyarı veya ölçüm yapıldı mı?
+20. Müvekkil: İki kez geldiler; birinde dışarıdaki masaları kaldırmamızı söylediler.
+21. Avukat: O tutanaklarda belirtilen eksikleri giderdiniz mi?
+22. Müvekkil: Masaları kaldırdık; ama camla çevirdiğimiz bölüme de itiraz etmişler.
+23. Avukat: Camlı bölüm için proje veya izin var mı?
+24. Müvekkil: Mülk sahibi yaptırdı, kiraladığımızda öyleydi.
+
+  [SUFLE S12-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Malikin yaptığı camlı bölüm.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Fiili yapım, ruhsat ve kiralama bilgisini ayrı incele.
+  Önerilen soru: “İşlem hangi bölüm veya faaliyet için hangi aykırılığı belirtiyor?”
+
+25. Avukat: Malikin yaptırmış olması ile izinli olmasını ayıralım; kira eki var mı?
+26. Müvekkil: Fotoğraflı teslim eki var; yapıyı kimin yaptığını gösteren yazışma da var.
+27. Avukat: Gürültü iddiasıyla ilgili ölçüm veya komşu şikayeti belgesi gördünüz mü?
+28. Müvekkil: Sadece üst komşu şikayet ediyor; ölçümü görmedim.
+29. Avukat: Denetim saatinde müzik veya etkinlik var mıydı?
+30. Müvekkil: Canlı müzik bitmişti ama hoparlör açıktı, kayıt çalıyordu.
+31. Avukat: O saate ilişkin işletme ve etkinlik kayıtlarını çıkarabilir misiniz?
+32. Müvekkil: Rezervasyon listesi, kasa kapanışı ve çalışanların vardiyası var.
+
+  [SUFLE S12-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Etkinlik kayıtları mevcut, ölçüm görülmemiş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İdarenin dayanağını ve işletmenin karşı kayıtlarını ayır.
+  Önerilen soru: “Ölçüm veya denetim raporunun tamamını isteyebilir miyiz?”
+
+33. Avukat: Şu anda mühür hangi bölümleri kapsıyor?
+34. Müvekkil: Ana kapıyı; içeride buzdolabında bozulacak ürünler var.
+35. Avukat: Ürünlere erişim ihtiyacını yetkili birimle uygun yoldan değerlendirelim.
+36. Müvekkil: Çalışan arka kapıdan girip açalım diyor; kira işliyor.
+37. Avukat: Mührü veya işlem durumunu kendiniz değiştirmeyin; hukuki başvuru ve izin yolunu çalışalım.
+38. Müvekkil: Tamam; zarar büyüyor diye panikledim.
+39. Avukat: Günlük giderlerinizi ve iptal edilen etkinlikleri belgeleyebilir misiniz?
+40. Müvekkil: Faturalar var; hafta sonu toplu rezervasyon iptal oldu.
+
+  [SUFLE S12-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Mühürlü işyerinde ürün ve gelir kaybı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Fiili müdahale yerine erişim ve başvuru ihtiyacını görünür kıl.
+  Önerilen soru: “Bozulacak ürünlerin listesi ve yetkili erişim talebi hazırlanmış mı?”
+
+41. Avukat: İptalin bu işlemle bağlantısını gösteren kayıt var mı?
+42. Müvekkil: Müşteriye kapandığımızı yazdım, o da iptal etti.
+43. Avukat: Önceliğiniz hangi faaliyeti ne koşulla yeniden açabilmek?
+44. Müvekkil: Canlı müziksiz de olur; gündüz kafeyi açabilsek yeter.
+45. Avukat: Bu hedefi işlemin kapsamıyla karşılaştıracağız; daha önce resmi itiraz yaptınız mı?
+46. Müvekkil: Belediyeye kısa bir dilekçe verdim, teslim kaşesi aldım.
+47. Avukat: Metni ve teslim tarihini de inceleyelim; etkisini varsaymadan başvuru planını çıkaralım.
+48. Müvekkil: Kasadaki eski yazının fotoğrafı geldi; ona da bakar mısınız?
+
+  [SUFLE S12-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yeni bulunan eski yazı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Tarih çizelgesini yeniden hesaplat; önceki varsayımı kaldır.
+  Önerilen soru: “Bu yazı ayrı bir karar mı, eksiklik bildirimi mi?”
+
+49. Avukat: Evet, ilk öğrenme ve bildirim sırasını bununla güncelleyelim.
+50. Müvekkil: Ruhsatı, başvuru alındısını ve bütün tutanakları göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: karar/bildirim tablosu, faaliyet ve izin ayrımı, yapısal değişiklik belgeleri, yeniden açılma hedefi ve belgeli kayıp. Sufle bir dilekçenin işlemi veya süreyi kendiliğinden durdurduğunu varsaymaz.
+
+================================================================================
+13. VERGI — INCELEME, E-FATURA KAYITLARI VE FARKLI ŞIRKETLER
+================================================================================
+OLAY ÖRGÜSÜ
+Yusuf bir toptan ticaret şirketi yöneticisi. Gelen vergi yazısını basit bir düzeltme isteği sanmış. İki şirketin karışan sevkiyatları, e-fatura iptalleri ve farklı bildirim belgeleri, dosyanın dikkatle ayrıştırılmasını gerektiriyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Size gelen vergi belgesinin başlığını birlikte okuyabilir miyiz?
+02. Müvekkil: Vergi dairesinden borç yazısı geldi; muhasebeci düzeltir dedi.
+03. Avukat: Yanınızda bütün sayfalar ve elektronik bildirim kaydı var mı?
+04. Müvekkil: Ekran görüntüsü var; PDF'yi muhasebecim indirmişti.
+05. Avukat: Belgede ihbarname, ödeme emri veya inceleme gibi hangi ifade geçiyor?
+06. Müvekkil: Birinde ihbarname, diğerinde izaha davet yazıyor; aynı şey sandım.
+07. Avukat: Her belgeyi ayrı inceleyeceğiz. Hangi tarihlerde bildirildiler?
+08. Müvekkil: Sisteme ne zaman düştüğünü bilmiyorum; geçen cuma okudum.
+
+  [SUFLE S13-01 | ACİL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Farklı belge türleri ve belirsiz elektronik bildirim.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Belge türü ve tebliğ kaydını doğrulamadan süre üretme.
+  Önerilen soru: “Her belgenin tam PDF ve elektronik bildirim kaydı alınabilir mi?”
+
+09. Avukat: Elektronik bildirim kayıtlarını isteyelim; okuma tarihini tek başına esas almayalım.
+10. Müvekkil: Şifre muhasebecide; ben genellikle mesaj gelince bakıyorum.
+11. Avukat: Belgeler hangi mükellef ve hangi dönem için düzenlenmiş?
+12. Müvekkil: İki şirketim var; biri 2024, biri 2025 faturalarıyla ilgili.
+13. Avukat: Şirketleri ve dönemleri ayrı dosyalayabilir miyiz?
+14. Müvekkil: Evet; ikisi aynı depoyu kullanıyor, bazı faturalar karışmış olabilir.
+15. Avukat: “Karışmış” derken hangi işlemi kastediyorsunuz?
+16. Müvekkil: Malı bir şirket gönderdi, faturayı bazen diğeri kesti.
+
+  [SUFLE S13-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: İki şirket arasında sevkiyat ve fatura ayrışması.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Mükellef, dönem ve işlem bazında tablo aç.
+  Önerilen soru: “Somut işlemde siparişi kim aldı, kim sevk etti, kim fatura kesti?”
+
+17. Avukat: Bunun nedenini ve işlem sırasını somut örnek üzerinden anlatalım.
+18. Müvekkil: Müşteri eski şirketin hesabına ödeme yapmış, biz de oradan yürütmüşüz.
+19. Avukat: Sipariş, irsaliye, fatura ve ödeme kayıtları mevcut mu?
+20. Müvekkil: Çoğu var; e-faturaların bir kısmı sonradan iptal edildi.
+21. Avukat: İptal nedenleri ve karşı tarafın kayıtları biliniyor mu?
+22. Müvekkil: İadeydi diye hatırlıyorum ama malların hepsi geri gelmedi.
+23. Avukat: İade belge ve depo hareketlerini karşılaştıralım.
+24. Müvekkil: Depo sorumlusu elektronik tablo tutuyor; muhasebe başka programda.
+
+  [SUFLE S13-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: İptal faturalar ve kısmi iade.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Muhasebe düzeltmesiyle fiili mal hareketini ayrı karşılaştır.
+  Önerilen soru: “İade ve stok kayıtlarının aynı işlem numarasıyla eşleşmesi mümkün mü?”
+
+25. Avukat: İnceleme sırasında sizden hangi açıklamalar veya belgeler istendi?
+26. Müvekkil: Banka hareketlerini ve üç tedarikçinin faturalarını sordular.
+27. Avukat: Bu tedarikçilerle işlemleri kim yürütüyordu?
+28. Müvekkil: Satın alma müdürü; ikisini hiç yüz yüze görmedim.
+29. Avukat: Teslimin gerçekleştiğini gösteren lojistik ve stok kayıtları var mı?
+30. Müvekkil: Nakliye fişleri var; bazı mallar doğrudan müşteriye gitti.
+31. Avukat: Doğrudan sevkiyatlarda teslimi hangi belgeler doğruluyor?
+32. Müvekkil: Müşterinin depo girişleri olabilir; bizde imzalı kağıt eksik.
+
+  [SUFLE S13-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Doğrudan müşteriye sevkiyat ve eksik imza.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Eksik belgenin yerine hukuka uygun mevcut kaynakları araştır.
+  Önerilen soru: “Taşıyıcı ve alıcıdaki tarihli kayıtlar hangileri?”
+
+33. Avukat: Eksik belgeyi varmış gibi tamamlamayalım; mevcut kaynağı belirleyelim.
+34. Müvekkil: Muhasebeci geriye dönük açıklama ekleyelim dedi, neyi kastetti bilmiyorum.
+35. Avukat: Özgün kayıtları değiştirmeden, yapılacak açıklamanın kapsamını yazılı netleştirelim.
+36. Müvekkil: Tamam; zaten inceleme başladığında dosyaları yedeklemiştim.
+37. Avukat: İncelemeye verilmiş bir ifade, tutanak veya imzalı açıklamanız var mı?
+38. Müvekkil: Bir tutanak imzaladım; “teslimler tamamlandı” yazıyordu.
+39. Avukat: Kopyasını ve imza sırasındaki ekleri görebilir miyim?
+40. Müvekkil: Var; bazı işlemleri müdürün bilgisine dayanarak söylemiştim.
+
+  [SUFLE S13-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: İmzalı tutanak başkasının bilgisine dayanıyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Beyan kapsamını ve bilgi kaynağını görünür kıl.
+  Önerilen soru: “Tutanakta hangi işlemleri bizzat gözleminizle doğruladınız?”
+
+41. Avukat: Doğrudan bildiğiniz ve başkasından öğrendiğiniz işlemleri ayıralım.
+42. Müvekkil: Borç çıkarsa şirketi kapatmak gerekir mi?
+43. Avukat: Bu belgelerden böyle bir sonuç çıkaramayız; işlem, tutar ve seçenekleri inceleyelim.
+44. Müvekkil: Ayrıca hesabımıza bloke geldi, onu da aynı olay sanmıştım.
+45. Avukat: Blokenin kaynağı ve belgesi nedir?
+46. Müvekkil: Banka yalnız kamu alacağı dedi; başka borç da olabilir.
+47. Avukat: Tahakkuk, tahsil ve inceleme süreçlerini ayrı haritalayacağız.
+48. Müvekkil: Ben tüm dosyayı tek borç diye görüyordum; şimdi ayırmak gerekiyor.
+
+  [SUFLE S13-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Bloke başka borçtan kaynaklanabilir.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İnceleme, tahakkuk ve tahsil işlemlerini birbirine karıştırma.
+  Önerilen soru: “Banka veya ilgili idarenin bloke dayanak belgesi var mı?”
+
+49. Avukat: Bugün belgelerin asıllarını ve bildirim kayıtlarını toplayıp tarih önceliği çıkaralım.
+50. Müvekkil: İki şirketin belgelerini ayrı klasörlerle göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: mükellef/dönem/belge haritası, resmi bildirimler, işlem zincirleri, stok karşılaştırması ve imzalı açıklamalar. Sufle eksik belgelerle vergi borcu hesaplamaz, kayıt değiştirme veya belge üretme önermez.
+
+================================================================================
+14. İNŞAAT — TADILAT SÖZLEŞMESI, ILAVE IŞLER VE SU SIZINTISI
+================================================================================
+OLAY ÖRGÜSÜ
+Bir butik otelin işletmecisi olan Melis, tadilat yapan yükleniciyle anlaşmazlık yaşıyor. Yazılı kapsamla sözlü ilave işler karışmış, sızıntı farklı taşeronların çalıştığı bölgede çıkmış ve açılış tarihi baskısı altında onarım planlanıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Tadilatta hangi işin hangi nedenle uyuşmazlık konusu olduğunu anlatır mısınız?
+02. Müvekkil: Oteli yenilettim; odaları teslim etmediler, alt kata su aktı.
+03. Avukat: Sözleşmeyi kim imzaladı, iş sahibi hangi kişi veya şirket?
+04. Müvekkil: Otel şirketimle ana yüklenici imzaladı; bazı ustaları ben buldum.
+05. Avukat: Yazılı iş kapsamı ve ek teklifleri görebilir miyim?
+06. Müvekkil: Banyo, boya ve elektrik yazıyor; sonradan terası da konuştuk.
+07. Avukat: Başlangıç ve teslim tarihleri sözleşmede nasıl belirlenmiş?
+08. Müvekkil: Altmış gün; ama başlangıç için yer teslimi gerekiyor, tutanak yok.
+
+  [SUFLE S14-01 | NORMAL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Süre yer teslimine bağlı, tutanak yok.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Süre başlangıcını varsayma; fiili ve belgeli tarihleri ayır.
+  Önerilen soru: “Yer teslimine ilişkin hangi tarihli kayıtlar mevcut?”
+
+09. Avukat: Yüklenici fiilen ne zaman çalışmaya başladı?
+10. Müvekkil: Anahtarı mart başında verdim; ilk hafta malzeme getirdiler.
+11. Avukat: Yer teslimini gösteren mesaj veya şantiye kaydı var mı?
+12. Müvekkil: Anahtar mesajı ve güvenlik giriş listesi var.
+13. Avukat: İlave teras işinin bedeli ve süresi nasıl konuşuldu?
+14. Müvekkil: Usta “bir haftada yaparım” dedi, müdür de grupta tamam yazdı.
+15. Avukat: Bu müdür sizin adınıza ek iş onaylamaya yetkili miydi?
+16. Müvekkil: Satın alma yapardı; sözleşme imzalama yetkisi yoktu diye biliyorum.
+
+  [SUFLE S14-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Müdürün grup mesajıyla ek iş onayı.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Onay içeriği ve temsil yetkisini ayrı incele.
+  Önerilen soru: “Müdürün yetki belgesi ve daha önceki benzer işlemleri var mı?”
+
+17. Avukat: Yetki ve önceki uygulamayı inceleyelim. Ek iş için ödeme yapıldı mı?
+18. Müvekkil: Şirketten para çıktı; açıklamaya malzeme yazılmış.
+19. Avukat: Yüklenicinin istediği toplam tutarla sizin hesabınız neden farklı?
+20. Müvekkil: O bütün ek işleri onayladığımızı söylüyor, ben yalnız malzemeyi kabul ettim.
+21. Avukat: Her ek işi teklif, onay, ödeme ve gerçekleşme olarak ayıralım.
+22. Müvekkil: Teras dışında yangın kapısı ve iki yeni banyo da var.
+23. Avukat: Su sızıntısı ne zaman, hangi bölümde fark edildi?
+24. Müvekkil: Geçen cuma alt kattaki restoranın tavanından su indi.
+25. Avukat: Sızıntı öncesinde o bölgede kimler çalışmıştı?
+26. Müvekkil: Yüklenicinin tesisatçısı ve benim çağırdığım klima ustası.
+
+  [SUFLE S14-03 | ÖNEMLİ]
+  Nerede: 26. konuşma tamamlandıktan sonra.
+  Tetikleyici: Alt katta sızıntı ve birden fazla ekip.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Neden ve sorumlu kişi hakkında erken sonuç çıkarma.
+  Önerilen soru: “Hangi ekip hangi tarihte hangi bölüme müdahale etti?”
+
+27. Avukat: Sızıntı kaynağına ilişkin teknik tespit var mı?
+28. Müvekkil: Yüklenici klimayı, klima ustası su yalıtımını suçluyor.
+29. Avukat: Mevcut durumu gösteren fotoğraf, video ve rapor var mı?
+30. Müvekkil: Fotoğraflar var; yarın zemini kırıp onaracaklar.
+31. Avukat: Onarımdan önce mevcut durumun nasıl belgelenebileceğini bugün değerlendirelim.
+32. Müvekkil: Oteli haftaya açacağım; beklemek çok zor.
+
+  [SUFLE S14-04 | ACİL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yarın zeminin kırılması ve açılış baskısı.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Değişecek fiziksel durumu öncelikli belgeleme konusu yap.
+  Önerilen soru: “Onarım öncesi uygun teknik tespit nasıl yapılabilir?”
+
+33. Avukat: Açılış ihtiyacını ve inceleme imkanını birlikte planlayalım; güvenlik riski belirtildi mi?
+34. Müvekkil: Elektrik panosuna su yaklaşmış; teknik ekip o hattı kapattı.
+35. Avukat: Teknik ekibin güvenlik yönlendirmesini esas alın; müdahale kayıtlarını saklayalım.
+36. Müvekkil: Restoran zararını benden istiyor, onlar da kiracı.
+37. Avukat: Malik, işletmeci ve alt kattaki işletmenin ilişkilerini açıklığa kavuşturalım.
+38. Müvekkil: Binayı kiraladım; ana tesisatın bir kısmı mal sahibine ait.
+39. Avukat: Kira sözleşmesinin bakım ve tadilat hükümlerini de inceleyelim.
+40. Müvekkil: Yüklenici son hakedişi ödemediğim için şantiyeyi bıraktı.
+
+  [SUFLE S14-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Malik, işletmeci, alt kiracı ve hakediş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Sözleşme ilişkileriyle zarar iddialarını ayrı haritala.
+  Önerilen soru: “Talep sahibi kim, hangi belgeye dayanarak kime başvuruyor?”
+
+41. Avukat: Hakedişin hangi işlere dayandığını ve itirazınızı gösteren belge var mı?
+42. Müvekkil: Bir tablo gönderdiler; ben “eksikler bitmedi” diye cevapladım.
+43. Avukat: Eksikleri oda ve iş kalemi bazında listeleyebilir misiniz?
+44. Müvekkil: Evet; bazı odaları kullanmaya başladık, bazıları kapalı.
+45. Avukat: Kullanılan ve teslimi tartışmalı bölümleri ayrı kaydedelim.
+46. Müvekkil: O halde oteli açmam bütün işi kabul ettiğim anlamına gelir mi?
+47. Avukat: Bunu sözleşme, yazışma ve fiili kullanımla birlikte değerlendireceğiz.
+48. Müvekkil: Ben onarıma devam etmek istiyorum, delil kaybolmasın da istiyorum.
+
+  [SUFLE S14-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kısmi kullanım ve onarıma devam etme isteği.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kullanım, teslim ve ayıp bildirimlerini ayrı tut.
+  Önerilen soru: “Hangi bölümler kullanılıyor, hangileri için hangi eksik bildirilmiş?”
+
+49. Avukat: Bugün teknik durum, belge koruma ve taraflara bildirim adımlarını planlayalım.
+50. Müvekkil: Sözleşme, ek iş mesajları ve yarınki onarım programını göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: kapsam ve ek iş tablosu, yetki incelemesi, ekip/müdahale çizelgesi, onarım öncesi durum koruma planı, taraf ve zarar haritası. Sufle sızıntının teknik nedenini veya kısmi kullanımın hukuki sonucunu kendiliğinden belirlemez.
+
+================================================================================
+15. FIKRI MÜLKIYET — MARKA BENZERLIĞI VE TASARIM AJANSININ HAKLARI
+================================================================================
+OLAY ÖRGÜSÜ
+Bir kozmetik girişiminin kurucusu olan İpek, benzer isim ve ambalaj kullanan bir rakibin satışlarını durdurmak istiyor. Başvuru halinde bir marka, ajansın hazırladığı tasarım ve üçüncü kişilere ait görseller farklı hak başlıkları doğuruyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Hangi kullanımın size ait hakkı ihlal ettiğini düşünüyorsunuz?
+02. Müvekkil: Rakip markamızın adını ve kutusunu kopyaladı, ilanlarını kaldırtmak istiyorum.
+03. Avukat: Sizin markanızın adı, ilk kullanımı ve kayıt durumu nedir?
+04. Müvekkil: İki yıldır kullanıyoruz; geçen ay marka başvurusu yaptık.
+05. Avukat: Başvuru mu var, tescil belgesi de geldi mi?
+06. Müvekkil: Yalnız başvuru numarası var; ben tescilli demeye başlamıştım.
+07. Avukat: Başvuru sahibi kim, hangi ürün ve hizmetler yazıyor?
+08. Müvekkil: Başvuru benim adıma; ürünleri şirketim satıyor, sınıfları ajans seçti.
+
+  [SUFLE S15-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Başvuru, tescil ve kişi/şirket ayrımı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Başvuru statüsünü ve hak sahibini doğru etiketle.
+  Önerilen soru: “Resmi başvuru kaydındaki durum ve ürün kapsamı nedir?”
+
+09. Avukat: Başvuru evrakını ve şirketle kullanım ilişkisini inceleyelim.
+10. Müvekkil: Şirketle aramda ayrı marka sözleşmesi yok.
+11. Avukat: Rakibin adı ve sizin adınız arasındaki benzerlik tam olarak ne?
+12. Müvekkil: Bir harf farklı; renkleri ve yaprak simgesi de aynı.
+13. Avukat: Kendi ilk kullanımınızı gösteren tarihli kaynaklar var mı?
+14. Müvekkil: İlk faturalar, fuar fotoğrafları ve sosyal medya paylaşımları var.
+15. Avukat: Rakibin ne zamandır kullandığını biliyor musunuz?
+16. Müvekkil: Ben geçen hafta gördüm; hesabı üç yıl önce açılmış.
+
+  [SUFLE S15-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Rakip hesabı eski fakat yeni kullanım belirsiz.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Hesap açılışını işaretin ilk kullanımı sayma.
+  Önerilen soru: “Benzer işaretin ilk görüldüğü tarihli içerik hangisi?”
+
+17. Avukat: Hesabın yaşı ile bu işaretin kullanımını ayıralım.
+18. Müvekkil: Eski paylaşımlarda başka logo var; yenisi bu ay yüklenmiş.
+19. Avukat: Rakibin kullanımını gösteren tam bağlantı ve tarihli görüntüler mevcut mu?
+20. Müvekkil: Ekran görüntüleri var; bazı ilanları kaldırdılar.
+21. Avukat: Tüketicilerin karıştırdığını gösteren somut bir olay yaşandı mı?
+22. Müvekkil: İki müşteri yanlış ürün aldığını yazdı; birinin faturasını görmedim.
+23. Avukat: Bu mesajları ve ürün bilgilerini kişisel verileri koruyarak inceleyelim.
+24. Müvekkil: Bir müşterinin bizim eski ürünümüzü almış olması da mümkün.
+
+  [SUFLE S15-03 | NORMAL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Karıştırma iddiasının bir örneği belirsiz.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Somut karıştırma olayını doğrulanmamış iddiadan ayır.
+  Önerilen soru: “Müşterinin aldığı ürün ve satıcısı belgelenebiliyor mu?”
+
+25. Avukat: Ambalaj tasarımını kim hazırladı, sözleşme var mı?
+26. Müvekkil: Ajans yaptı; fatura var ama hak devri metni bilmiyorum.
+27. Avukat: Teklif ve sözleşmede kullanım veya haklara ilişkin bölüm bulunuyor mu?
+28. Müvekkil: E-postada “tam paket tasarım” yazıyor, kaynak dosyayı vermediler.
+29. Avukat: Sembol, fotoğraf ve yazı tiplerinin kaynakları biliniyor mu?
+30. Müvekkil: Yaprak simgesini stok siteden aldıklarını söylediler.
+31. Avukat: Stok lisansı ve kullanım koşulları elinizde mi?
+32. Müvekkil: Hayır; demek sadece bize ait olmayabilir.
+
+  [SUFLE S15-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ajans tasarımı ve stok simge lisansı eksik.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Marka, tasarım, fotoğraf ve lisans haklarını ayır.
+  Önerilen soru: “Hangi görsel unsur hangi sözleşme veya lisansla kullanılıyor?”
+
+33. Avukat: Bu ihtimali ayrı değerlendirelim; özgün tasarım bileşenlerini çıkaralım.
+34. Müvekkil: Rakip bizim ürün fotoğrafımızı da kullanmış, çizik bile aynı.
+35. Avukat: O fotoğrafın çekimi ve ilk yayın kaydı kimde?
+36. Müvekkil: Fotoğrafçının faturası ve ham dosyaları var; sözleşme ajansla yapılmış.
+37. Avukat: Fotoğraf, marka ve ambalaj iddialarını ayrı dosyalayalım.
+38. Müvekkil: Pazaryerine tek şikayette hepsini yazdım, belge eksik diye reddettiler.
+39. Avukat: Başvuru metni ve ret gerekçesini görebilir miyim?
+40. Müvekkil: Tescil belgesi istediler; ben başvuru ekranını göndermiştim.
+
+  [SUFLE S15-05 | NORMAL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Pazaryeri tescil belgesi istemiş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Talep edilen işlemle sunulan hak belgesini eşleştir.
+  Önerilen soru: “Ret hangi hak iddiasını ve hangi belgeyi eksik buluyor?”
+
+41. Avukat: Her talebi dayandığı hak ve mevcut belgeyle eşleştirelim.
+42. Müvekkil: Rakibi sosyal medyada hırsız diye paylaşmak istiyorum.
+43. Avukat: Kamuya suçlayıcı açıklama yerine doğrulanmış delil ve uygun başvuru yoluyla ilerleyelim.
+44. Müvekkil: Önce en çok satış yapan ilanın kalkması yeter.
+45. Avukat: Hedefi önceliklendirelim; yanlış kaldırma veya kapsam aşımı ihtimalini de değerlendirelim.
+46. Müvekkil: Bu arada ajans rakibe de iş yapmış olabilir, emin değilim.
+47. Avukat: Şüpheyi olgu gibi yazmayalım; ajans ilişkisi için mevcut belge var mı?
+48. Müvekkil: Yalnız eski bir etiket gördüm; sözleşmeleri ve dosyaları isteyeceğim.
+
+  [SUFLE S15-06 | NORMAL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ajansın rakiple ilişkisine dair şüphe.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: İlişki iddiasını araştırma notu tut; ihlal sonucu çıkarma.
+  Önerilen soru: “Etiketin tam içeriği, tarihi ve gösterdiği ilişki nedir?”
+
+49. Avukat: Bugün hak sahibi, kullanım tarihi, lisans ve ilan kanıtlarını birleştirelim.
+50. Müvekkil: Başvuru evrakını, ilk satış kayıtlarını ve fotoğraf dosyalarını göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: hak sahibi/statü tablosu, ilk kullanım ve ilan kanıtları, ajans/lisans zinciri, karıştırma örnekleri ve öncelikli hedef. Sufle başvuruyu tescil saymaz veya bütün benzerlikleri otomatik ihlal olarak etiketlemez.
+
+================================================================================
+16. KIŞISEL VERILER — SAĞLIK MERKEZINDE YANLIŞ ALICIYA GÖNDERILEN DOSYA
+================================================================================
+OLAY ÖRGÜSÜ
+Özel bir sağlık merkezinin yöneticisi olan Nihan, bir çalışanın hasta listesini yanlış e-posta adresine gönderdiğini anlatıyor. İlk tahmin az sayıda kayıt iken ekin kapsamı ve dış hizmet sağlayıcının rolü belirsizleşiyor. Amaç olayı örtmek değil, yayılmayı sınırlamak ve doğrulanmış bilgiyle yükümlülükleri değerlendirmek.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Şimdilik hasta isimleri paylaşmadan olayın nasıl fark edildiğini anlatır mısınız?
+02. Müvekkil: Çalışanımız hasta listesini laboratuvara gönderecekken başka bir adrese göndermiş.
+03. Avukat: Olay ne zaman oldu, kim ne zaman öğrendi?
+04. Müvekkil: Dün öğleden sonra gönderilmiş; ben bu sabah öğrendim.
+05. Avukat: Gönderim ve öğrenme saatlerini gösteren kayıt var mı?
+06. Müvekkil: E-posta kaydı var; bilgi işlem geri çağırmayı denemiş.
+07. Avukat: Geri çağırmanın başarılı olduğuna dair ne biliyoruz?
+08. Müvekkil: Ekranda istek gönderildi yazıyor; dosya silinmiştir sanıyorduk.
+
+  [SUFLE S16-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Geri çağırma isteği silinme sanılıyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İşlem talebi ile doğrulanmış sonucu ayır.
+  Önerilen soru: “Alıcı sisteminden veya erişim kaydından hangi sonuç doğrulanabiliyor?”
+
+09. Avukat: İstek ile sonucu ayıralım. Yanlış alıcı kim?
+10. Müvekkil: Eski bir tedarikçinin çalışanı; şirketi artık bizimle çalışmıyor.
+11. Avukat: Alıcıyla kurumsal ve güvenli bir iletişim kurulmuş mu?
+12. Müvekkil: Çalışan arayıp silmesini istemiş, o da tamam demiş.
+13. Avukat: Bu iletişimin zamanı ve yazılı teyidi mevcut mu?
+14. Müvekkil: Sadece arama kaydı var; teyit e-postası henüz yok.
+15. Avukat: Ekin içeriğini kim ve hangi kayıttan doğruladı?
+16. Müvekkil: Randevu listesi dediler; dosyayı ben açmadım.
+
+  [SUFLE S16-02 | ACİL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ekteki veri kategorileri henüz incelenmemiş.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Ham veriyi sohbette çoğaltmadan kontrollü kapsam tespiti iste.
+  Önerilen soru: “Yetkili inceleme hangi veri kategorileri ve kişi gruplarını saptıyor?”
+
+17. Avukat: Dosyayı kontrollü ortamda yetkili kişi inceleyip veri kategorilerini çıkarsın.
+18. Müvekkil: İsim ve telefon dışında tetkik adı da olabilir.
+19. Avukat: Kaç kişinin etkilendiği kesin olarak biliniyor mu?
+20. Müvekkil: Yirmi hasta sandık; tabloda gizli sekmeler varmış.
+21. Avukat: Gizli sekmelerin içeriği ve kapsamı doğrulandı mı?
+22. Müvekkil: Henüz değil; aylık rapor kopyalanmış olabilir.
+23. Avukat: Dosyaya erişim bağlantısı mı, doğrudan ek mi gönderildi?
+24. Müvekkil: Doğrudan Excel eki; ayrıca bulut klasörü bağlantısı var.
+
+  [SUFLE S16-03 | ACİL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Gizli sekmeler ve ekle birlikte bulut bağlantısı.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Her aktarım kanalını ve etkilenen kapsamı ayrı kaydet.
+  Önerilen soru: “Ek, bağlantı ve gizli sekmeler için ayrı erişim/kapsam bilgisi var mı?”
+
+25. Avukat: Bağlantının erişim yetkisi ve erişim kayıtları biliniyor mu?
+26. Müvekkil: Bilgi işlem bağlantıyı kapattı; dosya ekini geri alamıyor.
+27. Avukat: Mevcut gönderim ve erişim kayıtları korunuyor mu?
+28. Müvekkil: Yönetici “maili silin, mesele kapanır” demiş; çalışan silmemiş.
+29. Avukat: Kayıtları değiştirmeden koruyalım; daha fazla yayılmayı sınırlama adımlarını ayrı kaydedelim.
+30. Müvekkil: Ekip grubunda ekran görüntüsü paylaşılmış; hastanın adı görünüyor.
+31. Avukat: Yeni yayılımı sınırlandırıp kimlerin eriştiğini kayda alalım; görüntüyü burada çoğaltmayın.
+32. Müvekkil: Dosya dışarıdaki yazılım şirketinin sisteminden indirilmiş.
+
+  [SUFLE S16-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ekran görüntüsüyle ikinci yayılım ve dış sistem.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İkincil yayılımı ve hizmet sağlayıcı rolünü olay haritasına ekle.
+  Önerilen soru: “Kim, hangi kanaldan, hangi içeriğe erişti?”
+
+33. Avukat: O şirketin bu süreçteki rolü ve sözleşmesi nedir?
+34. Müvekkil: Randevu sistemini yönetiyor; verileri nerede tuttuğunu bilmiyorum.
+35. Avukat: Rol, erişim ve saklama yerini sözleşme ve teknik kayıttan doğrulayalım.
+36. Müvekkil: Bildirim yapmak zorunda mıyız; itibarımız zarar görür diye korkuyoruz.
+37. Avukat: Olayın niteliği, öğrenme zamanı ve güncel yükümlülükleri öncelikle değerlendireceğiz.
+38. Müvekkil: Önce bütün sayıyı kesinleştirmek için birkaç hafta beklesek?
+39. Avukat: Eksikleri açıkça işaretleyerek değerlendirmeyi geciktirmeyelim; tek bir sayıyı beklemek yeterli değil.
+40. Müvekkil: Yetkili birinin bu işi yürütmesi gerekiyor; herkes ayrı konuşuyor.
+
+  [SUFLE S16-05 | ACİL]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Bildirim değerlendirmesini haftalarca erteleme isteği.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Öğrenme zamanını sabitle; güncel yükümlülük kontrolünü önceliklendir.
+  Önerilen soru: “İlk öğrenme kaydı, olay sorumlusu ve bugün tamamlanacak inceleme nedir?”
+
+41. Avukat: Bir olay sorumlusu ve doğrulanmış bilgi çizelgesi belirleyelim.
+42. Müvekkil: Dış alıcı dosyayı telefondan açtığını şimdi söyledi.
+43. Avukat: Açma, indirme ve başka yere iletme bilgilerini ayrı teyit edelim.
+44. Müvekkil: Silmiş olduğunu söylüyor ama otomatik yedeği var mı bilmiyor.
+45. Avukat: Silinme iddiasını kesinleşmiş saymayalım; yazılı ve teknik teyit imkanını inceleyelim.
+46. Müvekkil: Hastalara ne diyeceğimizi de bilmiyoruz.
+47. Avukat: Yükümlülük değerlendirmesine uygun, olgusal ve doğrulanmış bir iletişim taslağı hazırlayabiliriz.
+48. Müvekkil: İlk açıklamamızda yalnız isim gitti demeyelim, içerik henüz net değil.
+
+  [SUFLE S16-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yalnız isim gitti açıklaması yapılması düşünülmüş.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Doğrulanmamış dar kapsamlı açıklamayı düzelt.
+  Önerilen soru: “Açıklamadaki hangi cümleler doğrulanmış kayda dayanıyor?”
+
+49. Avukat: Evet; kesin bilinen, araştırılan ve alınan önlemleri ayrı anlatacağız.
+50. Müvekkil: Olay kayıtlarını, sözleşmeleri ve yetkili ekip bilgisini güvenli kanaldan ileteceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: olay/öğrenme çizelgesi, veri kategorisi ve kanal haritası, korunacak kayıtlar, erişim sınırlama adımları ve yükümlülük incelemesi. Sufle hasta verisini çoğaltmaz; geri çağırmayı veya sözlü silme beyanını kesin çözüm saymaz.
+
+================================================================================
+17. BANKACILIK — SOSYAL MÜHENDISLIK, ONAYSIZ IŞLEM VE YENI KREDI
+================================================================================
+OLAY ÖRGÜSÜ
+Ahmet kendisini banka görevlisi olarak tanıtan bir kişinin yönlendirmesi sonrası hesabından para çıktığını anlatıyor. Havale dışında kredi ve cihaz eşleşmesi bulunması olayın kapsamını değiştiriyor. Görüşmede halen süren aramalar ve açık bağlantılar fark ediliyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Önce güvenliğiniz için sorayım: Şu an sizi yönlendiren kişiyle iletişim devam ediyor mu?
+02. Müvekkil: Az önce yine aradı; işlemi iptal etmek için kod bekliyormuş.
+
+  [SUFLE S17-01 | ACİL]
+  Nerede: 02. konuşma tamamlandıktan sonra.
+  Tetikleyici: Saldırganla iletişim halen sürüyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Devam eden zararı ve resmi kanal doğrulamasını öne al.
+  Önerilen soru: “Güvenli cihazdan bankanın bağımsız doğrulanmış kanalına erişebiliyor musunuz?”
+
+03. Avukat: Kod veya şifre paylaşmayın; o bağlantıyı kesip bankanın resmi kanalına ulaşalım.
+04. Müvekkil: Tamam, telefonu sessize aldım; sizi bankanın avukatı sanmasınlar diye korktum.
+05. Avukat: Benimle de şifre paylaşmayın. Bankaya resmi kanaldan bildirim yaptınız mı?
+06. Müvekkil: Çağrı merkezini aradım ama arayan kişinin verdiği numaraydı.
+07. Avukat: Kanalı bağımsız doğrulamamız gerekiyor. İlk arama ne zaman geldi?
+08. Müvekkil: Bu sabah; hesabımda şüpheli işlem var deyip uygulama kurdurdu.
+09. Avukat: Uygulamanın adı ve istediği izinler neydi?
+10. Müvekkil: Ekran paylaşımı gibi bir şeydi; her şeyi ben görüyordum.
+11. Avukat: Olayın kaydını koruyarak bankanın ve teknik desteğin uygun güvenlik adımlarını uygulayalım.
+12. Müvekkil: Hesabıma yeniden girsem ne olduğunu görürüm mü?
+13. Avukat: Etkilenmiş cihazdaki işlemi teknik güvenlikle değerlendirelim; güvenli cihaz ve resmi kanal kullanalım.
+14. Müvekkil: Eşimin telefonundan bankayı arayabilirim.
+15. Avukat: Hesaptan çıktığını bildiğiniz tutar ve işlem türü nedir?
+16. Müvekkil: Üç yüz bin havale gitmiş; ben onaylamadım sanıyordum.
+
+  [SUFLE S17-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Onaylamadım ifadesi ile işlem adımları belirsiz.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Onay sonucunu varsayma; kullanıcının fiili adımlarını topla.
+  Önerilen soru: “Hangi ekrana bastınız ve ne söylendi? Kodun kendisini paylaşmayın.”
+
+17. Avukat: Hangi ekranları gördüğünüzü ve hangi adımları yaptığınızı sırayla anlatalım.
+18. Müvekkil: İptal butonu dedikleri yere bastım, iki kodu da söyledim.
+19. Avukat: Kodları burada tekrar etmeyin; mesajların işlem açıklamaları neydi?
+20. Müvekkil: Birinde yeni cihaz, diğerinde para transferi yazıyormuş; o an okumadım.
+21. Avukat: Bu mesajları değişmeden saklayalım. Yeni cihaz kaydı bankaya bildirildi mi?
+22. Müvekkil: Hayır; resmi bankayla henüz konuşmadım.
+23. Avukat: Resmi bildirimi ve işlem kısıtlama taleplerini öncelikle ele alalım.
+24. Müvekkil: Şimdi bankadan başka bildirim geldi; kredi kullanılmış görünüyor.
+
+  [SUFLE S17-03 | ACİL]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Havale dışında yeni kredi öğreniliyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Zarar kapsamını yeni işlemle güncelle.
+  Önerilen soru: “Kredi kullandırım, hesaba giriş ve havale saatleri nedir?”
+
+25. Avukat: Kredi, havale ve cihaz kaydını ayrı olaylar olarak listeleyelim.
+26. Müvekkil: Ben kredi istemedim; para önce hesabıma girip sonra çıkmış.
+27. Avukat: İşlem saatlerini ve tutarlarını resmi dökümden isteyelim.
+28. Müvekkil: Uygulamadaki görüntüler elimde ama karşı hesap adını tam göremiyorum.
+29. Avukat: Karşı hesap ve işlem referansını bankanın kayıtlarıyla tamamlayacağız.
+30. Müvekkil: Dolandırıcıya kimliğimin fotoğrafını da yolladım.
+31. Avukat: Hangi kanaldan, ne zaman ve başka hangi belgelerle gönderildi?
+32. Müvekkil: Mesaj uygulamasından; yüzümü gösteren bir video da çektiler.
+
+  [SUFLE S17-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kimlik görseli ve yüz videosu paylaşılmış.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Ek kimlik kötüye kullanım ihtimalini ayrı kayıt açarak değerlendir.
+  Önerilen soru: “Bu içeriklerin alıcısı, kanalı ve paylaşım zamanı nedir?”
+
+33. Avukat: Kimlik ve video paylaşımını ayrı risk başlığına ekleyelim.
+34. Müvekkil: Bütün mesajları silsem rahatlarım diye düşünüyorum.
+35. Avukat: Kayıtları değiştirmeden koruyalım; güvenlik önlemleri ile delil korumayı birlikte planlayalım.
+36. Müvekkil: Arayan kişi bana parayı geri almak için ücret göndermemi yazdı.
+37. Avukat: Yeni ödeme yapmayın; bu teması da olay zincirine ekleyelim.
+38. Müvekkil: Bankaya suç duyurusu yaptım demem yeter mi?
+39. Avukat: Her başvurunun muhatabı ve amacı farklı; yapılan işlemleri ayrı belgeleyelim.
+40. Müvekkil: Henüz resmi hiçbir başvuru yok; çok utanıyorum.
+
+  [SUFLE S17-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Parayı kurtarma ücreti ve hiç resmi başvuru olmaması.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: İkinci ödeme talebini işaretle; başvuru var/yok bilgisini düzelt.
+  Önerilen soru: “Hangi resmi kurumdan hangi başvuru numarası gerçekten alındı?”
+
+41. Avukat: Burada amacımız sizi yargılamak değil, adımları doğru ve hızlı sıraya koymak.
+42. Müvekkil: Eşim öğrensin istemiyorum; ama güvenli telefona ihtiyacım var.
+43. Avukat: Güvenli iletişim ve bildirim tercihinizi belirleyelim; hassas ayrıntıları kimle paylaşabileceğimizi siz söyleyin.
+44. Müvekkil: Kardeşimin telefonu olur; banka dönüşünü ona yönlendirebilir miyiz bilmiyorum.
+45. Avukat: Bankanın yetkilendirme koşullarını kontrol ederiz. Hesap şirket hesabı mı kişisel mi?
+46. Müvekkil: Kişisel; ama paranın bir kısmı şirket ödemesi için bendeydi.
+47. Avukat: Hesap sahibi ve paranın ekonomik kaynağını ayrı kaydedelim.
+48. Müvekkil: Kredi taksidi iki hafta sonra görünüyor; otomatik ödemeyi de sorayım mı?
+
+  [SUFLE S17-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kredi taksidi yaklaşıyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Dolandırıcılık bildirimi ile kredi durumunu ayrı izle.
+  Önerilen soru: “Bankanın kredi ve tahsilat hakkında yazılı cevabı mevcut mu?”
+
+49. Avukat: Evet, kredi ve ödeme durumuna ilişkin yazılı cevap isteyelim; kendiliğinden iptal olduğunu varsaymayalım.
+50. Müvekkil: Resmi bankayı güvenli telefondan arayıp başvuru numarası alacağım.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: güvenli iletişim, resmi banka başvurusu, cihaz/kredi/havale çizelgesi, paylaşılan kimlik verileri ve delil listesi. Sufle şifre veya kod istemez; para iadesi veya kredi iptali garantisi vermez.
+
+================================================================================
+18. ŞIRKET ORTAKLIĞI — ERIŞIM KAYBI, ILIŞKILI ŞIRKET VE ÇIKIŞ PAZARLIĞI
+================================================================================
+OLAY ÖRGÜSÜ
+Bir yazılım şirketinde yüzde kırk payı olduğunu söyleyen Baran, diğer ortak tarafından sistemlerden çıkarılmış. Pay sahipliği, müdürlük, fikri haklar ve kişisel kefaletin birbirine karışması görüşmenin ana ekseni. Başlangıçta tüm sunucuları kapatmak isteyen müvekkilin gerçek hedefi kontrollü çıkış.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Ortağınızla yaşadığınız sorunda bugün önceliğiniz nedir?
+02. Müvekkil: Beni şirketten kovdu; bütün sistemi kapatmak istiyorum.
+03. Avukat: Kapatma adımı atmadan payınızı, görevinizi ve erişim durumunu ayrı konuşalım.
+04. Müvekkil: Yüzde kırk ortağım; yazılımı da ben yazdım.
+05. Avukat: Payınızı gösteren sözleşme ve güncel şirket kayıtları var mı?
+06. Müvekkil: Kuruluşta yüzde yirmiydi; sonra sözle kırka çıkardık.
+07. Avukat: Artış için imzalı belge veya resmi işlem yapıldı mı?
+08. Müvekkil: Bir protokol taslağı var, ikimiz de imzalamadık.
+
+  [SUFLE S18-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yüzde kırk pay iddiasına karşı yüzde yirmi resmi kayıt.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Kayıtlı durum ve sözlü anlaşmayı ayrı göster.
+  Önerilen soru: “İddia edilen pay değişikliğini hangi kayıtlar destekliyor?”
+
+09. Avukat: O halde kayıtlı payla mutabakat iddiasını ayrı tutalım.
+10. Müvekkil: Ama iki yıldır karı yüzde kırk diye hesaplıyorlardı.
+11. Avukat: Bu hesaplama ve ödemeleri gösteren kayıtlar var mı?
+12. Müvekkil: Ortaklık grubunda tablolar var; bazen para almadan bıraktım.
+13. Avukat: Şirkette ayrıca müdür, çalışan veya hizmet sağlayıcı sıfatınız var mı?
+14. Müvekkil: Müdürlükten geçen ay çıkarıldığımı söylüyor; bordrom da vardı.
+15. Avukat: Müdürlük ve çalışma ilişkisine ait belgeleri gördünüz mü?
+16. Müvekkil: Kararı görmedim; bordro uygulamasına erişimim de kapandı.
+
+  [SUFLE S18-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Müdürlük ve çalışma ilişkisi belgeleri görülmemiş.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Pay, görev ve çalışma statüsünü birbirine karıştırma.
+  Önerilen soru: “Her statünün başlangıç ve sona erme belgesi mevcut mu?”
+
+17. Avukat: Erişiminiz hangi gün ve hangi sistemlerden kaldırıldı?
+18. Müvekkil: Dün banka görüntüleme, muhasebe ve şirket e-postası kapandı.
+19. Avukat: Size yazılı gerekçe veya bildirim gönderildi mi?
+20. Müvekkil: Kişisel e-postama “iş ilişkimiz bitti” diye yazdı.
+21. Avukat: Şirketi temsile ilişkin yetki veya imzanız halen görünüyor mu?
+22. Müvekkil: Bilmiyorum; banka kredisine de şahsen kefil olmuştum.
+23. Avukat: Kefalet ve kredi belgelerini ayrıca incelememiz gerekiyor.
+24. Müvekkil: Şirketten çıksam borçla ilişkim de biter sanıyordum.
+
+  [SUFLE S18-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Çıkışın kefaleti bitireceği varsayımı.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Şirketten ayrılma ile kişisel taahhüdü ayrı incele.
+  Önerilen soru: “Kişisel taahhüdün kapsamı, tarafı ve sona erme koşulu nedir?”
+
+25. Avukat: Pay devri, görev ve kişisel taahhütleri ayrı değerlendireceğiz.
+26. Müvekkil: Ortağım müşterileri yeni şirketine taşıyormuş.
+27. Avukat: Bunu hangi somut bilgiye dayanarak söylüyorsunuz?
+28. Müvekkil: İki müşteri yeni unvandan fatura aldığını söyledi.
+29. Avukat: Fatura ve hizmet ilişkisini gösteren belgeyi paylaşmaya yetkileri var mı?
+30. Müvekkil: Bir müşteri kendi faturasını bana gönderdi; diğeri yalnız anlattı.
+31. Avukat: Belgeyle doğrulananı ve duyumu ayıralım; ilgili şirketin rolünü inceleyelim.
+32. Müvekkil: Kod deposunun yönetici şifresi hâlâ bende, kapatabilirim.
+
+  [SUFLE S18-04 | ÖNEMLİ]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kod deposunu kapatabilecek erişim.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Yetki sınırı ve iş sürekliliğini öne al; misilleme önerme.
+  Önerilen soru: “Erişim yetkisinin dayanağı ve sistemin kullanıcıları kim?”
+
+33. Avukat: Tek taraflı erişim değişikliği yapmayalım; yetki ve iş sürekliliğini inceleyelim.
+34. Müvekkil: Kod benim bilgisayarımda başladı; hepsi benim değil mi?
+35. Avukat: Geliştirme dönemleri, sözleşmeler ve katkı sahipleri önemli; bunları çıkaralım.
+36. Müvekkil: İlk sürümü önce yazdım, son iki yıl üç çalışan geliştirdi.
+37. Avukat: İlk sürümle sonraki geliştirmeleri gösteren kayıtlar var mı?
+38. Müvekkil: Depo geçmişi var; bir kısım açık kaynak paket kullanıyoruz.
+
+  [SUFLE S18-05 | NORMAL]
+  Nerede: 38. konuşma tamamlandıktan sonra.
+  Tetikleyici: Kodun farklı dönem ve kişilerce geliştirilmesi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Fikri hak zincirini ortaklık payından ayır.
+  Önerilen soru: “İlk sürüm, çalışan katkıları ve açık kaynak lisansları nasıl belgeleniyor?”
+
+39. Avukat: Kod hakları ve lisansları şirket payından ayrı başlık yapalım.
+40. Müvekkil: Çıkış için bana yüz bin teklif etti; şirketin değeri daha fazla.
+41. Avukat: Teklif yazılı mı, hangi varlık ve yükümlülükleri kapsıyor?
+42. Müvekkil: Bir sayfa yolladı; tüm alacaklarımı bıraktığımı yazıyor.
+43. Avukat: Vazgeçme kapsamını ve bilgiye erişim ihtiyacını değerlendirmeden imzalamayalım.
+44. Müvekkil: Ben aslında kavga değil, adil bedelle çıkış istiyorum.
+45. Avukat: Bedel kadar kişisel taahhütler, ödeme güvencesi ve geçiş şartları da önemli mi?
+46. Müvekkil: Evet, kefalet kalırsa aldığım para işe yaramaz.
+47. Avukat: Mevcut belgelerle pay, görev, alacak ve taahhüt haritası hazırlayacağız.
+48. Müvekkil: Şirket hesabından dün yeni şirkete para çıkmış; eski bildirim e-postasında gördüm.
+
+  [SUFLE S18-06 | ÖNEMLİ]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: İlişkili şirkete para transferi öğreniliyor.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Yeni iddiayı açıklaması doğrulanacak işlem olarak ekle.
+  Önerilen soru: “Tutar, tarih, açıklama ve işlem dayanağı mevcut mu?”
+
+49. Avukat: Hareketin açıklamasını ve dayanağını doğrulayalım; tek kayıttan usulsüzlük sonucu çıkarmayalım.
+50. Müvekkil: Teklif, kredi belgeleri ve elimdeki eski kayıtları göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: statü ve pay tablosu, erişim değişiklikleri, kefalet belgeleri, kod/hak zinciri, çıkış teklifinin kapsamı ve ilişkili işlemler. Sufle kayıt dışı pay artışını olmuş saymaz; sunucu kapatma veya veri çekme yoluyla baskı önermez.
+
+================================================================================
+19. YABANCILAR HUKUKU — IKAMET BAŞVURUSU, ADRES VE SEYAHAT BASKISI
+================================================================================
+OLAY ÖRGÜSÜ
+Leyla adına görüşmeye gelen yabancı bir müvekkil, ikamet uzatmasının reddedildiğini düşünüyor. Ekrandaki durumun gerçekten ret olup olmadığı, eski adres, aracıya yapılan ödeme ve yaklaşan seyahat dosyanın kritik belirsizliklerini oluşturuyor. Dil desteği ve belgeyi anlama ayrıca ele alınıyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Görüşmeyi hangi dilde rahat sürdürebilirsiniz; tercüman desteği ister misiniz?
+02. Müvekkil: Türkçe konuşabilirim ama resmi yazıları anlamakta zorlanıyorum.
+03. Avukat: Anlamadığınız bölümü durdurabilirsiniz. Size ulaşan belge nedir?
+04. Müvekkil: İkamet uzatmam reddedilmiş olabilir; ekranda olumsuz bir yazı var.
+05. Avukat: Tam belge veya başvuru ekranını birlikte görebilir miyiz?
+06. Müvekkil: Telefonumda “değerlendirme tamamlandı” yazıyor; aracı reddedildi dedi.
+07. Avukat: Bu ifadeyi kararın kendisi saymayalım. Resmi karar veya bildirim ulaştı mı?
+08. Müvekkil: Eski evime bir zarf gitmiş; yeni kiracı fotoğrafını gönderdi.
+
+  [SUFLE S19-01 | ÖNEMLİ]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ekran durumu aracı tarafından ret sayılmış.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Resmi karar ile ekran durumunu ayır.
+  Önerilen soru: “Karar belgesinin adı, numarası ve tam metni mevcut mu?”
+
+09. Avukat: Zarfın ve bütün sayfaların görüntüsü var mı?
+10. Müvekkil: Yalnız ilk sayfa var, tarih kısmı bulanık.
+11. Avukat: Belgenin tam kopyasını ve bildirim kaydını isteyelim. Mevcut izin türünüz nedir?
+12. Müvekkil: Kısa dönem; iki yıldır buradayım, uzatmaya başvurdum.
+13. Avukat: Kartın bitişi, başvuru ve randevu tarihleri nedir?
+14. Müvekkil: Kart geçen ay bitti; başvuruyu bitmeden yaptım, randevu sonra oldu.
+15. Avukat: Bu tarihleri gösteren resmi belgeler mevcut mu?
+16. Müvekkil: Başvuru formu ve ödeme makbuzu var; randevu kağıdını aracı tuttu.
+
+  [SUFLE S19-02 | ÖNEMLİ]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: İzin bitişi, başvuru ve randevu farklı tarihlerde.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Tarihleri resmi belge kaynaklarıyla eşleştir.
+  Önerilen soru: “Her tarihin dayandığı belge hangisi?”
+
+17. Avukat: Aracının sizin adınıza hangi işlemleri yapmasına izin verdiniz?
+18. Müvekkil: Formu doldurdu, ücret aldı; resmi bir görevli sanmıştım.
+19. Avukat: Kurumsal kimliği, sözleşmesi veya yetkilendirme belgesi var mı?
+20. Müvekkil: Sadece sosyal medya hesabı ve mesajlaşma var.
+21. Avukat: Şifre veya doğrulama kodlarınızı paylaşmadan mevcut iletişimi saklayalım.
+22. Müvekkil: Sistem şifrem onda; hesabıma ben de giremiyorum.
+23. Avukat: Hesap güvenliğini resmi kanalla ele alalım. Başvuruda hangi adres yazıyor?
+24. Müvekkil: Eski adres; taşındığımı söyledim ama değiştirdi mi bilmiyorum.
+
+  [SUFLE S19-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Şifre aracıda ve eski adres kullanılmış.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Hesap güvenliği ile adres doğruluğunu ayrı önceliklendir.
+  Önerilen soru: “Resmi hesap erişimi ve güncel adres kaydı nasıl doğrulanabilir?”
+
+25. Avukat: Taşınma ve adres bildirimiyle ilgili tarihli belge var mı?
+26. Müvekkil: Yeni kira sözleşmem var; resmi kayıt eski olabilir.
+27. Avukat: Karar gerekçesini henüz bilmiyoruz; adresi otomatik neden saymayalım.
+28. Müvekkil: Aracı daha fazla para verirsem başvuruyu düzeltiriz dedi.
+29. Avukat: Yetkisi ve işlem dayanağı doğrulanmadan yeni ödeme veya belge vermeyin.
+30. Müvekkil: Benden boş bir kağıda imza istedi, imzalamadım.
+31. Avukat: Bunu da kaydedelim. Daha önce ret, iptal veya başka işlem oldu mu?
+32. Müvekkil: Hayır; ama havaalanında geçen yıl bir belge imzaladım.
+
+  [SUFLE S19-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Geçmişte içeriği bilinmeyen havaalanı belgesi.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Belgeyi ikamet işlemine otomatik bağlama.
+  Önerilen soru: “Belgenin başlığı ve düzenleyen kurumu görülebiliyor mu?”
+
+33. Avukat: O belgenin konusu veya kopyası var mı?
+34. Müvekkil: Kayıp bagajla ilgili olabilir; emin değilim, fotoğrafını bulabilirim.
+35. Avukat: Belgeyi görmeden ikametle ilgili olduğunu varsaymayalım.
+36. Müvekkil: Haftaya annemi görmek için ülke dışına çıkacağım; dönüş biletim var.
+37. Avukat: Seyahat öncesi mevcut statü ve giriş-çıkış koşullarını resmi bilgilerle değerlendirmeliyiz.
+38. Müvekkil: Başvuru kağıdıyla kesin dönebilirim dediler.
+39. Avukat: Bunu garanti saymayalım; belgenin türü, geçerliliği ve dosyanın durumu önemli.
+40. Müvekkil: Eşim ve çocuğum burada; onların izinleri sürüyor.
+
+  [SUFLE S19-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Yaklaşan seyahat ve kesin dönüş vaadi.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Seyahat imkanını garanti etme; resmi statü kontrolünü önceliklendir.
+  Önerilen soru: “Seyahat gününde hangi belgeniz hangi statüyü gösteriyor olacak?”
+
+41. Avukat: Aile üyelerinin statülerini ve sizin başvuruyla ilişkisini ayrı inceleyelim.
+42. Müvekkil: Çocuğum okula gidiyor; adresimiz okul kaydında yeni.
+43. Avukat: Okul kaydıyla resmi adres kaydını ayrı tutacağız.
+44. Müvekkil: Benim için en acil konu seyahat edip edemeyeceğimi bilmek.
+45. Avukat: Önce resmi karar, bildirim, mevcut izin ve başvuru belgelerini tamamlayalım.
+46. Müvekkil: Yeni kiracı zarfın kalanını yarın gönderebilir; gecikir mi bilmiyorum.
+
+  [SUFLE S19-06 | ACİL]
+  Nerede: 46. konuşma tamamlandıktan sonra.
+  Tetikleyici: Eksik karar kopyası için ertesi günü bekleme.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Olası süre kaybını önlemek için bugün resmi belge erişimini araştır.
+  Önerilen soru: “Resmi karar ve bildirim kaydına bugün erişmenin yolu var mı?”
+
+47. Avukat: Bugün erişilebilen resmi kopya yollarını araştıralım; yalnız yarını beklemeyelim.
+48. Müvekkil: Aracının yazışmalarını da size güvenli kanaldan göndereceğim.
+49. Avukat: Belgeleri size anlaşılır dille açıklayıp doğrulanmış seçenekleri birlikte değerlendireceğiz.
+50. Müvekkil: Tamam; başvuru tamamlandı yazısını ret diye kabul etmeyelim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: anlaşılır dilde belge özeti, izin/başvuru/bildirim çizelgesi, güvenli hesap erişimi, adres teyidi ve seyahat öncesi statü incelemesi. Sufle eksik belgeyle ret, ülkede kalma veya dönüş garantisi vermez; milliyetten hukuki sonuç çıkarmaz.
+
+================================================================================
+20. EĞITIM — ÜNIVERSITE DISIPLIN SORUŞTURMASI VE BURS KAYBI ENDIŞESI
+================================================================================
+OLAY ÖRGÜSÜ
+Üniversite öğrencisi Ada, çevrim içi sınavda kopya iddiasıyla savunma istenmesi üzerine geliyor. İlk başta savunma sürecini kesin ceza sanıyor. Ortak cihaz, sistem kayıtları, başka dersin ekranı ve burs sözleşmesi farklı değerlendirme alanları oluşturuyor.
+
+GÖRÜŞME VE MÜDAHALE ANLARI
+01. Avukat: Üniversiteden gelen yazı ne istiyor, birlikte okuyabilir miyiz?
+02. Müvekkil: Kopya çektiğim için okuldan atılacakmışım; savunma yazısı geldi.
+03. Avukat: Yazıda verilmiş karar mı var, yoksa açıklamanız mı isteniyor?
+04. Müvekkil: “Savunmanızın sunulması” yazıyor; ben karar sanmıştım.
+05. Avukat: Belge hangi birimden ve hangi tarihte ulaştı?
+06. Müvekkil: Dekanlıktan; dün öğrenci sistemine girdi, e-posta da geldi.
+07. Avukat: Savunma için belirtilen tarih ve erişebildiğiniz ekler neler?
+08. Müvekkil: Cuma diyor; ekinde sınav oturum kaydı olduğu yazıyor ama dosya açılmıyor.
+
+  [SUFLE S20-01 | ACİL]
+  Nerede: 08. konuşma tamamlandıktan sonra.
+  Tetikleyici: Savunma tarihi var fakat isnat eki açılamıyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Savunma talebiyle kesin kararı ayır; erişim engelini önceliklendir.
+  Önerilen soru: “Belirtilen gün, erişim denemesi ve yardım talebi kayıtları mevcut mu?”
+
+09. Avukat: Ulaşılamayan eki ve erişim sorununuzu tarihli kayda alalım.
+10. Müvekkil: Ekran görüntüsü aldım; yardım masasına da yazdım.
+11. Avukat: Üniversite ve program türünüz nedir?
+12. Müvekkil: Vakıf üniversitesinde burslu okuyorum; son sınıftayım.
+13. Avukat: İddia hangi sınav ve davranışla ilgili?
+14. Müvekkil: Çevrim içi istatistik sınavında başka sekme açtığımı söylüyorlar.
+15. Avukat: Sınav kurallarında hangi araçlar ve sekmeler yasaktı?
+16. Müvekkil: Hesap tablosuna izin vardı; mesaj uygulamasına yoktu.
+
+  [SUFLE S20-02 | NORMAL]
+  Nerede: 16. konuşma tamamlandıktan sonra.
+  Tetikleyici: Bazı uygulamalara izin verilmiş.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Sınav kurallarını genel kopya varsayımına indirgeme.
+  Önerilen soru: “İzin verilen ve yasaklanan araçları belirten duyuru hangisi?”
+
+17. Avukat: O gün hangi cihazı ve uygulamaları kullandınız?
+18. Müvekkil: Ablamın dizüstüsünü; hesap tablosu ve ders notu açıktı.
+19. Avukat: Ders notuna izin verildiğini hangi duyurudan biliyorsunuz?
+20. Müvekkil: Geçen haftaki denemede serbestti; gerçek sınavda aynı sandım.
+21. Avukat: Deneme ve gerçek sınavın duyurularını ayrı inceleyelim.
+22. Müvekkil: Gerçek sınavda notlar yasak olabilir; duyuruyu okumamışım.
+23. Avukat: Sınav sırasında notlara fiilen baktınız mı?
+24. Müvekkil: Bir formülü kontrol ettim; ama başka kişiyle konuşmadım.
+
+  [SUFLE S20-03 | ÖNEMLİ]
+  Nerede: 24. konuşma tamamlandıktan sonra.
+  Tetikleyici: Deneme kurallarıyla gerçek sınav karışmış, nota bakılmış.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Yanlış varsayımı ve gerçek davranışı dürüstçe ayrı kaydet.
+  Önerilen soru: “Gerçek sınavın kuralı ve o gün yaptığınız işlem tam olarak neydi?”
+
+25. Avukat: Savunmada fiili davranışınızı ve başkasından yardım iddiasını ayrı açıklayalım.
+26. Müvekkil: Bir arkadaşım “hiç sekme açmadım de” dedi, öyle yazmak istemiyorum.
+27. Avukat: Gerçeğe uygun anlatım hazırlayacağız; sistemin neyi kaydettiğini de görmemiz gerekiyor.
+28. Müvekkil: Ablamın mesaj hesabı arka planda açıktı; bildirim gelmiş olabilir.
+29. Avukat: Bunun sınav kaydında nasıl göründüğünü biliyor musunuz?
+30. Müvekkil: Hayır, bana yalnız sekme değişikliği olduğunu söylediler.
+31. Avukat: Bir başka öğrenciyle aynı yanıt verdiğiniz de ileri sürülüyor mu?
+32. Müvekkil: Yazıda benzer cevaplar diyor; hangileri olduğunu göstermemişler.
+
+  [SUFLE S20-04 | NORMAL]
+  Nerede: 32. konuşma tamamlandıktan sonra.
+  Tetikleyici: Benzer cevap iddiasının içeriği açıklanmamış.
+  Nasıl: Uygun konuşma boşluğunda öneri kuyruğundan gösterilir.
+  Avukatın ekranındaki kart: Savunma ihtiyacını somut iddia ve delille eşleştir.
+  Önerilen soru: “Hangi sorular ve hangi karşılaştırma bu iddiaya dayanak gösteriliyor?”
+
+33. Avukat: Hangi soru ve cevapların dayanak yapıldığını öğrenme ihtiyacını kaydedelim.
+34. Müvekkil: Benim çözüm dosyamın işlem geçmişi var, işe yarar mı?
+35. Avukat: Özgün dosyayı değiştirmeden koruyalım; neyi gösterdiğini inceleyeceğiz.
+36. Müvekkil: Bursumun kesileceğini de öğrenci işleri telefonda söyledi.
+37. Avukat: Disiplin süreci ile burs koşullarını ayrı belge üzerinden değerlendirelim.
+38. Müvekkil: Burs sözleşmem var; “disiplin cezası” ifadesi geçiyor.
+39. Avukat: Hangi ceza ve hangi karar aşamasıyla ilişkilendirildiğini tam metinden inceleyelim.
+40. Müvekkil: Bu dönem mezun olmazsam iş teklifimi kaybedebilirim.
+
+  [SUFLE S20-05 | ÖNEMLİ]
+  Nerede: 40. konuşma tamamlandıktan sonra.
+  Tetikleyici: Burs ve iş teklifine etkiler var.
+  Nasıl: Tamamlanan ifadeden sonra öncelikli öneri kartı olarak görünür.
+  Avukatın ekranındaki kart: Disiplin, burs ve mezuniyet sonuçlarını ayrı incele.
+  Önerilen soru: “Hangi sonuç hangi belgeye ve hangi karar aşamasına bağlanmış?”
+
+41. Avukat: Mezuniyet, iş başlangıcı ve başvuru tarihlerini gösteren belgeler var mı?
+42. Müvekkil: İş teklifi e-postası var; diploma şartı yazıyor.
+43. Avukat: Pratik etkileri dosyaya ekleyelim; daha önce savunma veya başvuru yaptınız mı?
+44. Müvekkil: Panikle iki satır yazdım, henüz göndermedim.
+45. Avukat: Taslağı inceleyebiliriz; sizin anlatmadığınız olay veya kabul eklemeyeceğiz.
+46. Müvekkil: Yazıdaki toplantıya tek başıma mı gideceğim, bilmiyorum.
+47. Avukat: Çağrının niteliğini ve geçerli usulü kontrol edip katılım seçeneklerini açıklayacağım.
+48. Müvekkil: Sistem eki hâlâ açmıyor, ama savunma tarihi yaklaşıyor.
+
+  [SUFLE S20-06 | ACİL]
+  Nerede: 48. konuşma tamamlandıktan sonra.
+  Tetikleyici: Ek açılmadan savunma tarihi yaklaşıyor.
+  Nasıl: Hemen görünür; mevcut riski avukatın önüne alır.
+  Avukatın ekranındaki kart: Erişim ve süre sorununu aynı gün inceleme görevi yap.
+  Önerilen soru: “İdareye yapılan kayıtlı erişim talebinin cevabı ve başvuru imkanı nedir?”
+
+49. Avukat: Erişim talebini ve tarih sorununu bugün belgeli şekilde ele alalım; ek gelince hazırlanır varsaymayalım.
+50. Müvekkil: Yazı, sınav duyuruları, dosya geçmişi ve burs sözleşmesini göndereceğim.
+
+GÖRÜŞME SONU
+Görüşme çıktısı: savunma çağrısı ve erişim sorunu, sınav kuralları, fiili davranış, özgün dosyalar, burs/mezuniyet etkileri. Sufle öğrenci adına gerçeğe aykırı inkâr üretmez veya henüz verilmemiş cezayı kesinleşmiş saymaz.
+
+ORTAK ÜRÜN DAVRANIŞLARI VE KABUL ÖLÇÜTLERİ
+
+1. Bilinen/iddia edilen/bilinmeyen ayrımı
+“Eşin parayı kaçırdığı”, “doktorun hata yaptığı”, “borcun kapandığı”, “izin alındığı” gibi sonuçlar anlatımın kendisinden türetilmez. İddia, dayanak ve eksik doğrulama ayrı tutulur.
+
+2. Kaynak ve zaman
+Kart yalnız tetikleyici konuşma dahil o ana kadarki içerikten çıkar. Gelecekte öğrenilecek olguyu kullanamaz. “Dün”, “geçen hafta” gibi ifadeler, oturum tarihiyle birlikte avukata doğrulatılır. Göreli tarih kesin takvim tarihine sessizce dönüştürülmez.
+
+3. Süre ve yetki
+Belge türü, işlem, bildirim ve taraf doğrulanmadan kesin başvuru süresi veya görevli merci yazılmaz. Karşı tarafın verdiği son tarih, yasal süre gibi sunulmaz. Başvuru yapıldığı söyleniyorsa numarası ve kapsamı sorulur.
+
+4. Dikkat ve tekrar
+Aynı bilgi açığını tekrar eden kart bastırılır. Cevaplanan kart kapanır. Yeni bilgi eski kartı geçersiz kılıyorsa güncellenir ve değişiklik gösterilir. Görüşme konusuyla ilgisiz hukuki araştırma kartı açılmaz.
+
+5. Hassasiyet ve sınırlar
+Duygudan yalan veya güvenilirlik puanı çıkarılmaz. Müvekkilin kastı, tanısı veya suçluluğu tahmin edilmez. Şifre, doğrulama kodu, gerçek API anahtarı veya gereksiz üçüncü kişi verisi istenmez. Delil uydurma, hesaplara yetkisiz girme, kayıt silme ve tanıkları ortak anlatıya yönlendirme önerilmez.
+
+6. Hukuki araştırma
+Canlı görüşmede sorulabilecek somut soru önceliklidir. Mevzuat veya emsal gerekiyorsa avukatın isteğiyle ayrı araştırma başlatılır. Kaynak bulunamazsa madde veya karar numarası uydurulmaz. Araştırma sonucu kaynağı ve güncellik kontrolüyle gösterilir.
+
+7. Görüşme sonu taslak
+Olay özeti; doğrulanmış tarihler; taraflar ve sıfatlar; müvekkilin önceliği; açık sorular; beklenen belgeler; öncelikli inceleme işleri. Her kalem konuşma veya belge kaynağına bağlanır. Bu taslak otomatik kesin hukuki kanaat veya gönderilecek dilekçe değildir.
+
+8. Casebridge içinde uygulama sınırı
+Büro ve dosya yetkileri sunucuda doğrulanır. Her büro yalnız kendi şifreli AI kimlik bilgisiyle çalışır. Anahtarın kaydedilmesi aktif anahtarı değiştirmez; aday anahtarın ayrı test edilmesi, açık aktivasyon ve önceki anahtarın korunması gerekir. Anahtarlar istemci depolamasına, loglara veya görüşme çıktısına yazılmaz. Bu senaryo dosyası uygulama değişikliği, dağıtım veya müşteri teslimi değildir; mevcut müşteri-yayını kontrol listesini tamamlanmış saydırmaz.
+
+TESTTE HER SENARYO İÇİN BAKILACAKLAR
+• Altı kartın her biri doğru konuşmadan sonra ve o ana kadarki bilgiyle üretilebiliyor mu?
+• Belirtilen tetikleyici bulunmadığında kart bastırılıyor mu?
+• Müvekkil bilgiyi düzelttiğinde kart ve özet güncelleniyor mu?
+• Avukat soruyu önceden sorduğunda sistem tekrarı engelliyor mu?
+• Acil/önemli/normal sıralaması doğru mu; ekranda üçten fazla kart oluşuyor mu?
+• Kaynak konuşmaya geri gidilebiliyor mu; yanlış transkripsiyon düzeltilebiliyor mu?
+• İstenmeyen görev, dış mesaj, başvuru veya dosya değişikliği otomatik yapılmıyor mu?
+• Hukuki sonuç, süre, tazminat, tanı veya suçluluk kesinleştirilmeden belirsizlik korunuyor mu?
+
+KAYNAK NOTU
+Senaryolar ve sufle metinleri özgün kurgudur. Aşağıdaki resmi kaynaklar yalnız kişisel veri, yapay zeka ve aydınlatma tasarımına dayanak sağlar; senaryolardaki uyuşmazlıkların hukuki sonucunu kanıtlamaz. Erişim tarihi: 10 Kasım 2026.
+
+KVKK — Üretken Yapay Zeka ve Kişisel Verilerin Korunması Rehberi (15 Soruda)
+https://www.kvkk.gov.tr/Icerik/8547/uretken-yapay-zeka-ve-kisisel-verilerin-korunmasi-rehberi-15-soruda
+
+KVKK — Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak Usul ve Esaslar Hakkında Tebliğ
+https://www.kvkk.gov.tr/Icerik/4132/aydinlatma-yukumlulugunun-yerine-getirilmesinde-uyulacak-usul-ve-esaslar-hakkinda-teblig
+
+KVKK — Yurt Dışına Aktarım
+https://www.kvkk.gov.tr/Icerik/2053/Yurtdisina-Aktarim
