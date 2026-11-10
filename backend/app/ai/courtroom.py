@@ -10,7 +10,7 @@ from app.ai.llm_levels import provider_for
 from app.ai.providers.base import LLMProvider
 from app.models.courtroom import CourtroomPhase, CourtroomRole
 
-PROMPT_VERSION = "courtroom-v1"
+PROMPT_VERSION = "courtroom-v2"
 
 PHASE_SEQUENCE = [
     CourtroomPhase.OPENING,
@@ -129,7 +129,8 @@ def _role_name(role: CourtroomRole) -> str:
 
 
 def build_opponent_prompts(
-    *, scenario_payload: dict, opponent_role: CourtroomRole, transcript: list[dict], phase: CourtroomPhase
+    *, scenario_payload: dict, opponent_role: CourtroomRole, transcript: list[dict], phase: CourtroomPhase,
+    conversation_mode: bool = False,
 ) -> tuple[str, str]:
     system_prompt = f"""COURTROOM_OPPONENT
 Sen Türkçe yürütülen kurgusal bir hukuk duruşması eğitiminde {_role_name(opponent_role)} rolündesin.
@@ -144,6 +145,8 @@ Sadece sana verilen özel rol bilgisini ve duruşmada açıklanmış kayıtları
 content alanında backend delil kodlarını veya XML benzeri bağlam etiketlerini gösterme; delilin adını kullan.
 Yanıtın SADECE OpponentOutput şemasına uyan geçerli bir JSON nesnesi olsun.
 """
+    if conversation_mode:
+        system_prompt += "\nSerbest karşılıklı beyan akışındasın. Kullanıcının son savunmasına doğrudan ve kısa yanıt ver. Kullanıcı adına konuşma; hâkim rolüne geçme, karar veya puan verme. Oturumu veya aşamayı kendiliğinden bitirme.\n"
     user_prompt = (
         "Çıktı şeması:\n"
         f"{json.dumps(OpponentOutput.model_json_schema(), ensure_ascii=False)}\n\n"
@@ -188,11 +191,13 @@ Yalnızca mevcut aşama "evidence" ise action_type="question" kullan; bu soru bi
 
 
 def build_judge_final_prompts(
-    *, scenario_payload: dict, transcript: list[dict], evidence_record: dict, chosen_role: CourtroomRole
+    *, scenario_payload: dict, transcript: list[dict], evidence_record: dict, chosen_role: CourtroomRole,
+    conversation_mode: bool = False,
 ) -> tuple[str, str]:
-    system_prompt = """COURTROOM_JUDGE_FINAL
+    evidence_scope = "sunulmuş deliller" if conversation_mode else "kabul edilmiş deliller"
+    system_prompt = f"""COURTROOM_JUDGE_FINAL
 Sen kurgusal bir Türk hukuk duruşmasının tarafsız eğitim hâkimisin. Yalnızca açık senaryo bilgisi,
-duruşma tutanağı ve kabul edilmiş deliller üzerinden kısa gerekçeli sonuç üret. Gizli taraf bilgisine sahip
+duruşma tutanağı ve {evidence_scope} üzerinden kısa gerekçeli sonuç üret. Gizli taraf bilgisine sahip
 değilsin. Senaryoda bulunmayan olay, delil, mevzuat veya içtihat üretme. Chain-of-thought verme.
 legal_context alanında verilmeyen hiçbir hukuk kuralını, maddeyi veya ilkeyi ekleme.
 Tarafların adları ile davacı/davalı rollerini bağlam açıkça kurmuyorsa tahmin etme; rol adlarını kullan.
@@ -202,6 +207,8 @@ Puanlar gerçek davanın kazanma ihtimali değil, kullanıcının eğitim perfor
 total_score alanına yaz. Her zaman hukuki danışmanlık/sonuç garantisi olmadığı uyarısını ekle.
 Yanıtın SADECE JudgeFinalOutput şemasına uyan geçerli JSON olsun.
 """
+    if conversation_mode:
+        system_prompt += "\nKullanıcı karşılıklı beyanları açıkça bitirdi. Tüm tutanağı değerlendir. Sunulan ancak kabul edilmemiş veya itirazlı delilleri kesinleşmiş kanıt sayma; belirsizliği ve kabul/ret durumunu gerekçende açıkla. Kayıt yetersizse bunu belirt.\n"
     user_prompt = (
         "Çıktı şeması:\n"
         f"{json.dumps(JudgeFinalOutput.model_json_schema(), ensure_ascii=False)}\n\n"

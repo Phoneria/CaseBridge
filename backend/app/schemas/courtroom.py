@@ -76,6 +76,7 @@ class JudgeEvaluationOut(BaseModel):
 
 
 class CourtroomSessionSummaryOut(BaseModel):
+    conversation_mode: bool = False
     id: str
     scenario_id: str
     scenario_title: str
@@ -108,11 +109,13 @@ class CourtroomSessionOut(CourtroomSessionSummaryOut):
 
 
 class CourtroomSessionCreate(BaseModel):
+    conversation_mode: bool = False
     scenario_id: str
     chosen_role: CourtroomRole
 
 
 class CourtroomCaseSessionCreate(BaseModel):
+    conversation_mode: bool = False
     case_id: str
     chosen_role: CourtroomRole
 
@@ -122,3 +125,7 @@ class CourtroomMoveCreate(BaseModel):
     action_type: Literal["opening", "argument", "rebuttal", "evidence", "objection", "answer", "closing"]
     evidence_code: str | None = Field(default=None, max_length=60)
     client_request_id: str | None = Field(default=None, min_length=8, max_length=64)
+
+
+class CourtroomFinishCreate(BaseModel):
+    content: str | None = Field(default=None, max_length=4000)

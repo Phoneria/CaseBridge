@@ -569,6 +569,7 @@ export interface JudgeEvaluation {
 }
 
 export interface CourtroomSessionSummary {
+  conversation_mode?: boolean;
   id: string;
   scenario_id: string;
   scenario_title: string;

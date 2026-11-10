@@ -41,11 +41,11 @@ def process_one_pending_courtroom_turn(
     except AIProviderConfigError:
         service.mark_failed(session, "configuration_error", "Büronuzun AI anahtarını Ayarlar üzerinden yapılandırın.")
     except AIProviderTimeoutError:
-        service.mark_failed(session, "provider_timeout", "Yerel model zamanında yanıt vermedi.")
+        service.mark_failed(session, "provider_timeout", "AI hizmeti zamanında yanıt vermedi.")
     except AIResponseValidationError:
-        service.mark_failed(session, "invalid_model_response", "Yerel model geçerli bir tur üretemedi.")
+        service.mark_failed(session, "invalid_model_response", "AI hizmeti geçerli bir yanıt üretemedi.")
     except AIProviderError:
-        service.mark_failed(session, "provider_error", "Yerel modele ulaşılamadı.")
+        service.mark_failed(session, "provider_error", "AI hizmetine ulaşılamadı.")
     except Exception:
         logger.exception("Unexpected error while processing courtroom session %s", session.id)
         service.mark_failed(session, "unexpected_error", "Tur işlenirken beklenmeyen bir hata oluştu.")

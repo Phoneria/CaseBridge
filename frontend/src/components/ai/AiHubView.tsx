@@ -110,7 +110,7 @@ export function AiHubView() {
           </p>
           <h2 className="mt-2 text-lg font-semibold text-navy-900">Hâkim karşısında pratik yapın</h2>
           <p className="mt-1 text-sm leading-6 text-navy-500">
-            Karşı taraf vekili ve hâkim canlandırılır. 6 aşama · 100 puanlık değerlendirme.
+            Yazılı veya sesli savunma · AI karşı avukat · bitirdiğinizde hâkim kararı ve 100 puanlık değerlendirme.
           </p>
           <div className="mt-auto flex flex-wrap items-center gap-4 pt-5">
             {liveSession ? (

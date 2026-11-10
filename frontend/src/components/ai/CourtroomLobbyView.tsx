@@ -111,7 +111,7 @@ export function CourtroomLobbyView() {
       <AiHero
         compact
         title="Canlı Duruşma"
-        description="Bir taraf seç, delillerini kullan ve yerel AI'ın oynadığı karşı taraf vekili ile hâkim karşısında davanı savun."
+        description="Bir taraf seç, yazılı veya sesli beyanını sun ve AI karşı avukatla görüşmeyi sürdür. Bitirdiğinde hâkim kararını ve değerlendirmesini hazırlar."
         stats={[
           { label: "Oturumlarım", value: personal.length },
           { label: "En yüksek puan", value: best ?? "—" },

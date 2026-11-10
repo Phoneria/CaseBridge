@@ -85,6 +85,10 @@ def _role_display(role: CourtroomRole) -> str:
     return "davacı vekili" if role == CourtroomRole.PLAINTIFF else "davalı vekili"
 
 
+def is_finish_command(content: str) -> bool:
+    return content.strip().lower().replace("i\u0307", "i").strip(" .!?") in {"done", "bitir", "bitti", "bit"}
+
+
 class CourtroomService:
     def __init__(self, db: Session):
         self.db = db
@@ -94,7 +98,7 @@ class CourtroomService:
         return self.repo.list_scenarios()
 
     def create_session(
-        self, scenario: CourtroomScenario, law_firm_id: str, user_id: str, chosen_role: CourtroomRole
+        self, scenario: CourtroomScenario, law_firm_id: str, user_id: str, chosen_role: CourtroomRole, *, conversation_mode: bool = False
     ) -> CourtroomSession:
         opponent_role = (
             CourtroomRole.DEFENDANT if chosen_role == CourtroomRole.PLAINTIFF else CourtroomRole.PLAINTIFF
@@ -104,6 +108,7 @@ class CourtroomService:
             law_firm_id=law_firm_id,
             user_id=user_id,
             chosen_role=chosen_role,
+            conversation_mode=conversation_mode,
             opponent_role=opponent_role,
             max_rounds=min(max(scenario.estimated_rounds, 1), len(PHASE_SEQUENCE)),
             model=_model_name(),
@@ -120,7 +125,7 @@ class CourtroomService:
                 turn_type=CourtroomTurnType.INSTRUCTION,
                 content=(
                     f"Simülasyon başladı. Rolünüz: {_role_display(chosen_role)}. "
-                    f"İlk aşama: {PHASE_GUIDANCE[CourtroomPhase.OPENING]}"
+                    + ("Beyanınızı yazın veya konuşun; karşı avukat yanıtlar. Karar için Bitir düğmesini kullanın ya da yalnızca bitir/done deyin." if conversation_mode else f"İlk aşama: {PHASE_GUIDANCE[CourtroomPhase.OPENING]}")
                 ),
                 structured_data={"phase": CourtroomPhase.OPENING.value},
             )
@@ -137,7 +142,12 @@ class CourtroomService:
             raise CourtroomConflictError("Bu simülasyon artık aktif değil.")
         if session.current_actor != CourtroomActor.USER:
             raise CourtroomConflictError("Şu anda karşı avukat ve hâkim yanıt hazırlıyor.")
-        if move.action_type not in ALLOWED_ACTIONS.get(session.phase, set()):
+        if session.conversation_mode and is_finish_command(move.content):
+            return self.request_final(session)
+        if session.conversation_mode and sum(len(turn.content) for turn in session.turns) + len(move.content) > 100000:
+            raise CourtroomInputError("Bu oturumun konuşma sınırına ulaşıldı. Bitir düğmesiyle hâkim değerlendirmesini isteyin.")
+        allowed = set().union(*ALLOWED_ACTIONS.values()) if session.conversation_mode else ALLOWED_ACTIONS.get(session.phase, set())
+        if move.action_type not in allowed:
             raise CourtroomInputError("Bu hamle türü mevcut duruşma aşamasında kullanılamaz.")
 
         evidence = None
@@ -182,28 +192,54 @@ class CourtroomService:
         self.db.commit()
         return self.repo.get_session_for_user(session.id, session.law_firm_id, session.user_id)  # type: ignore[return-value]
 
+    def request_final(self, session: CourtroomSession, content: str | None = None):
+        if session.status == CourtroomSessionStatus.COMPLETED and session.evaluation:
+            return session
+        if not session.conversation_mode:
+            raise CourtroomInputError("Bu oturum aşamalı eğitim modunda. Serbest konuşma için yeni bir oturum açın.")
+        if session.status == CourtroomSessionStatus.ACTIVE and session.phase == CourtroomPhase.CLOSING and session.current_actor == CourtroomActor.OPPONENT:
+            return session
+        if session.status != CourtroomSessionStatus.ACTIVE or session.current_actor != CourtroomActor.USER:
+            raise CourtroomConflictError("Karşı avukat yanıtını tamamladıktan sonra bitirebilirsiniz.")
+        closing = (content or "").strip()
+        if not closing and not any(turn.actor == CourtroomActor.USER for turn in session.turns):
+            raise CourtroomInputError("Karar istemeden önce en az bir beyanınızı gönderin.")
+        if closing:
+            self.db.add(CourtroomTurn(session_id=session.id, sequence_number=self.repo.next_sequence(session.id),
+                actor=CourtroomActor.USER, legal_role=_legal_role(session.chosen_role),
+                turn_type=CourtroomTurnType.CLOSING, content=closing, structured_data={"final_statement": True}))
+        session.phase = CourtroomPhase.CLOSING
+        session.current_actor = CourtroomActor.OPPONENT
+        session.pending_judge_question = None
+        self.db.add(session)
+        self.db.commit()
+        return self.repo.get_session_for_user(session.id, session.law_firm_id, session.user_id)
+
     def process_pending_turn(self, session: CourtroomSession, provider: LLMProvider) -> CourtroomSession:
         if session.status != CourtroomSessionStatus.ACTIVE or session.current_actor != CourtroomActor.OPPONENT:
             raise CourtroomConflictError("İşlenecek bekleyen kullanıcı hamlesi yok.")
 
         sequence = self.repo.next_sequence(session.id)
-        transcript = self._transcript(session)
+        if session.conversation_mode and session.phase == CourtroomPhase.CLOSING:
+            return self._complete_with_judge(session, provider, self._transcript(session, complete=True), sequence)
+        transcript = self._transcript(session, complete=session.conversation_mode)
         opponent_context = self._opponent_context(session)
         system_prompt, user_prompt = build_opponent_prompts(
             scenario_payload=opponent_context,
             opponent_role=session.opponent_role,
             transcript=transcript,
             phase=session.phase,
+            conversation_mode=session.conversation_mode,
         )
         opponent_raw = provider_for(provider, "courtroom.opponent").complete(
             system_prompt, user_prompt, response_format="json_object"
         )
         opponent = parse_with_one_repair(provider, opponent_raw, OpponentOutput)
         # Referring to a document is not the same as formally presenting it.
-        # Only accept the model's evidence_code during the evidence phase and
-        # when it explicitly chose an evidence action.
+        # In structured sessions evidence belongs to its dedicated phase; in
+        # conversation mode it may be presented at any turn. Both require an explicit evidence action.
         may_present_evidence = (
-            session.phase == CourtroomPhase.EVIDENCE
+            (session.conversation_mode or session.phase == CourtroomPhase.EVIDENCE)
             and opponent.action_type == "evidence"
             and opponent.evidence_code
         )
@@ -239,6 +275,14 @@ class CourtroomService:
         self.db.add(opponent_turn)
         self.db.flush()
 
+        if session.conversation_mode:
+            session.phase = CourtroomPhase.MAIN_ARGUMENTS
+            session.current_actor = CourtroomActor.USER
+            session.round_number += 1
+            self.db.add(session)
+            self.db.commit()
+            return self.repo.get_session_in_firm(session.id)
+
         judge_transcript = transcript + [self._turn_prompt_row(opponent_turn)]
         public_context = self._public_context(session.scenario)
         evidence_record = self._evidence_record(
@@ -246,60 +290,7 @@ class CourtroomService:
         )
 
         if session.phase == CourtroomPhase.CLOSING:
-            judge_system, judge_user = build_judge_final_prompts(
-                scenario_payload=public_context,
-                transcript=judge_transcript,
-                evidence_record=evidence_record,
-                chosen_role=session.chosen_role,
-            )
-            final_raw = provider_for(provider, "courtroom.judge_final").complete(
-                judge_system, judge_user, response_format="json_object"
-            )
-            final = parse_with_one_repair(provider, final_raw, JudgeFinalOutput)
-            total = (
-                final.relevance_score
-                + final.evidence_score
-                + final.rebuttal_score
-                + final.courtroom_strategy_score
-            )
-            evaluation = JudgeEvaluation(
-                session_id=session.id,
-                verdict=final.verdict,
-                summary=self._clean_model_content(session, final.summary),
-                reasoning=self._clean_model_content(session, final.reasoning),
-                evidence_assessment=self._clean_model_list(session, final.evidence_assessment),
-                unanswered_questions=self._clean_model_list(session, final.unanswered_questions),
-                user_strengths=self._clean_model_list(session, final.user_strengths),
-                user_weaknesses=self._clean_model_list(session, final.user_weaknesses),
-                learning_notes=self._clean_model_list(session, final.learning_notes),
-                relevance_score=final.relevance_score,
-                evidence_score=final.evidence_score,
-                rebuttal_score=final.rebuttal_score,
-                courtroom_strategy_score=final.courtroom_strategy_score,
-                total_score=total,
-                confidence=final.confidence,
-                requires_verification=True,
-                disclaimer=TRAINING_DISCLAIMER,
-            )
-            self.db.add(evaluation)
-            self.db.add(
-                CourtroomTurn(
-                    session_id=session.id,
-                    sequence_number=sequence + 1,
-                    actor=CourtroomActor.JUDGE,
-                    legal_role="judge",
-                    turn_type=CourtroomTurnType.VERDICT,
-                    content=(
-                        f"{self._clean_model_content(session, final.summary)}\n\n"
-                        f"{self._clean_model_content(session, final.reasoning)}"
-                    ),
-                    structured_data={"verdict": final.verdict, "training_score": total},
-                )
-            )
-            session.status = CourtroomSessionStatus.COMPLETED
-            session.phase = CourtroomPhase.VERDICT
-            session.current_actor = CourtroomActor.SYSTEM
-            session.completed_at = datetime.now(timezone.utc)
+            return self._complete_with_judge(session, provider, judge_transcript, sequence + 1)
         else:
             judge_system, judge_user = build_judge_interim_prompts(
                 scenario_payload=public_context,
@@ -352,6 +343,68 @@ class CourtroomService:
         self.db.add(session)
         self.db.commit()
         return self.repo.get_session_in_firm(session.id)  # type: ignore[return-value]
+
+    def _complete_with_judge(self, session, provider, transcript, sequence):
+        public_context = self._public_context(session.scenario)
+        evidence_record = self._evidence_record(session, admitted_only=not session.conversation_mode)
+        judge_system, judge_user = build_judge_final_prompts(
+            scenario_payload=public_context,
+            transcript=transcript,
+            evidence_record=evidence_record,
+            chosen_role=session.chosen_role,
+            conversation_mode=session.conversation_mode,
+        )
+        final_raw = provider_for(provider, "courtroom.judge_final").complete(
+            judge_system, judge_user, response_format="json_object"
+        )
+        final = parse_with_one_repair(provider, final_raw, JudgeFinalOutput)
+        total = (
+            final.relevance_score
+            + final.evidence_score
+            + final.rebuttal_score
+            + final.courtroom_strategy_score
+        )
+        evaluation = JudgeEvaluation(
+            session_id=session.id,
+            verdict=final.verdict,
+            summary=self._clean_model_content(session, final.summary),
+            reasoning=self._clean_model_content(session, final.reasoning),
+            evidence_assessment=self._clean_model_list(session, final.evidence_assessment),
+            unanswered_questions=self._clean_model_list(session, final.unanswered_questions),
+            user_strengths=self._clean_model_list(session, final.user_strengths),
+            user_weaknesses=self._clean_model_list(session, final.user_weaknesses),
+            learning_notes=self._clean_model_list(session, final.learning_notes),
+            relevance_score=final.relevance_score,
+            evidence_score=final.evidence_score,
+            rebuttal_score=final.rebuttal_score,
+            courtroom_strategy_score=final.courtroom_strategy_score,
+            total_score=total,
+            confidence=final.confidence,
+            requires_verification=True,
+            disclaimer=TRAINING_DISCLAIMER,
+        )
+        self.db.add(evaluation)
+        self.db.add(
+            CourtroomTurn(
+                session_id=session.id,
+                sequence_number=sequence,
+                actor=CourtroomActor.JUDGE,
+                legal_role="judge",
+                turn_type=CourtroomTurnType.VERDICT,
+                content=(
+                    f"{self._clean_model_content(session, final.summary)}\n\n"
+                    f"{self._clean_model_content(session, final.reasoning)}"
+                ),
+                structured_data={"verdict": final.verdict, "training_score": total},
+            )
+        )
+        session.status = CourtroomSessionStatus.COMPLETED
+        session.phase = CourtroomPhase.VERDICT
+        session.current_actor = CourtroomActor.SYSTEM
+        session.completed_at = datetime.now(timezone.utc)
+        self.db.add(session)
+        self.db.commit()
+        return self.repo.get_session_in_firm(session.id)
 
     def mark_failed(self, session: CourtroomSession, category: str, message: str) -> None:
         self.db.rollback()
@@ -495,8 +548,8 @@ class CourtroomService:
             "rejected_codes": session.rejected_evidence_codes,
         }
 
-    def _transcript(self, session: CourtroomSession) -> list[dict]:
-        return [self._turn_prompt_row(turn) for turn in session.turns[-24:]]
+    def _transcript(self, session: CourtroomSession, complete=False) -> list[dict]:
+        return [self._turn_prompt_row(turn) for turn in (session.turns if complete else session.turns[-24:])]
 
     @staticmethod
     def _turn_prompt_row(turn: CourtroomTurn) -> dict:
@@ -528,6 +581,7 @@ class CourtroomService:
             scenario_id=session.scenario_id,
             scenario_title=session.scenario.title,
             chosen_role=session.chosen_role,
+            conversation_mode=session.conversation_mode,
             status=session.status,
             phase=session.phase,
             current_actor=session.current_actor,

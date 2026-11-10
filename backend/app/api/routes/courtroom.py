@@ -1,5 +1,5 @@
 """Interactive courtroom training endpoints."""
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.models.courtroom import CourtroomActor, CourtroomSessionStatus
 from app.repositories.courtroom_repository import CourtroomRepository
 from app.schemas.courtroom import (
     CourtroomMoveCreate,
+    CourtroomFinishCreate,
     CourtroomScenarioOut,
     CourtroomSessionCreate,
     CourtroomCaseSessionCreate,
@@ -71,7 +72,7 @@ def create_session(
     if scenario is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scenario not found")
     session = CourtroomService(db).create_session(
-        scenario, law_firm_id, current_user.id, payload.chosen_role
+        scenario, law_firm_id, current_user.id, payload.chosen_role, conversation_mode=payload.conversation_mode
     )
     return CourtroomService.detail_out(session)
 
@@ -91,7 +92,7 @@ def create_session_from_case(
     if case is None:
         raise HTTPException(status_code=404, detail="Dava bulunamadı")
     scenario = scenario_from_case(db, case, payload.chosen_role)
-    session = CourtroomService(db).create_session(scenario, law_firm_id, current_user.id, payload.chosen_role)
+    session = CourtroomService(db).create_session(scenario, law_firm_id, current_user.id, payload.chosen_role, conversation_mode=payload.conversation_mode)
     return CourtroomService.detail_out(session)
 
 
@@ -152,13 +153,14 @@ async def transcribe_move(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     if not text:
         raise HTTPException(status_code=422, detail="No speech was recognized")
-    return {"text": text[:4000]}
+    return {"text": text}
 
 
 @router.get("/courtroom-sessions/{session_id}/voice/turns/{turn_id}")
 def speak_turn(
     session_id: str,
     turn_id: str,
+    part: int = Query(default=0, ge=0, le=10),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -166,8 +168,11 @@ def speak_turn(
     turn = next((row for row in session.turns if row.id == turn_id), None)
     if turn is None or turn.actor not in (CourtroomActor.OPPONENT, CourtroomActor.JUDGE):
         raise HTTPException(status_code=404, detail="Spoken turn not found")
+    text = turn.content[part * 4000:(part + 1) * 4000]
+    if not text:
+        raise HTTPException(status_code=404, detail="Audio segment not found")
     try:
-        audio = voice_service.synthesize(turn.content, turn.actor.value, law_firm_id=current_user.law_firm_id)
+        audio = voice_service.synthesize(text, turn.actor.value, law_firm_id=current_user.law_firm_id)
     except voice_service.VoiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return Response(content=audio, media_type="audio/mpeg")
@@ -192,6 +197,23 @@ def add_move(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except CourtroomInputError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    return CourtroomService.detail_out(result)
+
+
+@router.post("/courtroom-sessions/{session_id}/finish", response_model=CourtroomSessionOut, status_code=status.HTTP_202_ACCEPTED)
+def finish_session(
+    session_id: str,
+    payload: CourtroomFinishCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    session = _owned_session_or_404(db, session_id, current_user.law_firm_id, current_user.id)
+    try:
+        result = CourtroomService(db).request_final(session, payload.content)
+    except CourtroomConflictError as exc:
+        raise HTTPException(409, str(exc)) from None
+    except CourtroomInputError as exc:
+        raise HTTPException(422, str(exc)) from None
     return CourtroomService.detail_out(result)
 
 

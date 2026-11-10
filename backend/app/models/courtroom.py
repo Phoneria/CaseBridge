@@ -131,6 +131,7 @@ class CourtroomSession(Base):
     )
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
     chosen_role: Mapped[CourtroomRole] = mapped_column(str_enum(CourtroomRole), nullable=False)
+    conversation_mode: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false", nullable=False)
     opponent_role: Mapped[CourtroomRole] = mapped_column(str_enum(CourtroomRole), nullable=False)
     status: Mapped[CourtroomSessionStatus] = mapped_column(
         str_enum(CourtroomSessionStatus), default=CourtroomSessionStatus.ACTIVE, nullable=False
