@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const getCourtroomSession = vi.fn();
 const sendCourtroomMove = vi.fn();
 const retryCourtroomSession = vi.fn();
 const abandonCourtroomSession = vi.fn();
+const finishCourtroomSession = vi.fn();
 const transcribeCourtroomAudio = vi.fn();
 const getCourtroomTurnAudio = vi.fn();
 
@@ -13,11 +14,12 @@ vi.mock("@/lib/api", () => ({
   sendCourtroomMove: (...args: unknown[]) => sendCourtroomMove(...args),
   retryCourtroomSession: (...args: unknown[]) => retryCourtroomSession(...args),
   abandonCourtroomSession: (...args: unknown[]) => abandonCourtroomSession(...args),
+  finishCourtroomSession: (...args: unknown[]) => finishCourtroomSession(...args),
   transcribeCourtroomAudio: (...args: unknown[]) => transcribeCourtroomAudio(...args),
   getCourtroomTurnAudio: (...args: unknown[]) => getCourtroomTurnAudio(...args),
 }));
 
-import { CourtroomSessionView } from "@/components/CourtroomSessionView";
+import { CourtroomSessionView, isFinishCommand } from "@/components/CourtroomSessionView";
 
 const activeSession = {
   id: "session-1",
@@ -89,6 +91,7 @@ beforeEach(() => {
   sendCourtroomMove.mockReset().mockResolvedValue({ ...activeSession, current_actor: "opponent" });
   retryCourtroomSession.mockReset();
   abandonCourtroomSession.mockReset();
+  finishCourtroomSession.mockReset().mockResolvedValue({ ...activeSession, conversation_mode: true, phase: "closing", current_actor: "opponent" });
   transcribeCourtroomAudio.mockReset();
   getCourtroomTurnAudio.mockReset();
 });
@@ -124,5 +127,90 @@ describe("CourtroomSessionView", () => {
     expect(await screen.findByRole("button", { name: /Sesli beyan/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Dinle/ })).toBeInTheDocument();
     expect(screen.getByText(/yapay zekâ tarafından üretilir/)).toBeInTheDocument();
+  });
+});
+
+const conversation = { ...activeSession, conversation_mode: true };
+
+afterEach(() => { vi.unstubAllGlobals(); });
+
+function mockMicrophone(text: string) {
+  const stopTrack = vi.fn();
+  vi.stubGlobal("navigator", { mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [{ stop: stopTrack }] }) } });
+  class Recorder {
+    static isTypeSupported() { return true; }
+    state = "inactive";
+    onstop: (() => void) | null = null;
+    ondataavailable: ((event: { data: Blob }) => void) | null = null;
+    start() { this.state = "recording"; }
+    stop() { this.state = "inactive"; this.ondataavailable?.({ data: new Blob(["synthetic recording"]) }); this.onstop?.(); }
+  }
+  vi.stubGlobal("MediaRecorder", Recorder);
+  transcribeCourtroomAudio.mockResolvedValue({ text });
+  return stopTrack;
+}
+
+describe("conversation mode", () => {
+  beforeEach(() => {
+    getCourtroomSession.mockResolvedValue(conversation);
+    sendCourtroomMove.mockResolvedValue({ ...conversation, current_actor: "opponent" });
+  });
+
+  it("keeps the final draft when explicitly requesting the judge", async () => {
+    render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.change(await screen.findByRole("textbox"), { target: { value: "Son talebimizin kabulünü istiyorum." } });
+    fireEvent.click(screen.getByRole("button", { name: "Bitir ve karar iste" }));
+    await waitFor(() => expect(finishCourtroomSession).toHaveBeenCalledWith("session-1", "Son talebimizin kabulünü istiyorum."));
+    expect(sendCourtroomMove).not.toHaveBeenCalled();
+    expect(await screen.findByText(/Hâkim karar ve değerlendirmeyi hazırlıyor/)).toBeInTheDocument();
+  });
+
+  it.each(["DONE!", "BİTİR."])("routes typed %s to the final evaluation", async (command) => {
+    render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.change(await screen.findByRole("textbox"), { target: { value: command } });
+    fireEvent.click(screen.getByRole("button", { name: "Beyanı gönder" }));
+    await waitFor(() => expect(finishCourtroomSession).toHaveBeenCalledWith("session-1", undefined));
+    expect(sendCourtroomMove).not.toHaveBeenCalled();
+  });
+
+  it("sends a recorded statement automatically and releases the microphone", async () => {
+    const stopTrack = mockMicrophone("Savunmam bitti ama eklemek istediğim bir delil var.");
+    render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: /Konuş/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Kaydı bitir" }));
+    await waitFor(() => expect(sendCourtroomMove).toHaveBeenCalledTimes(1));
+    expect(sendCourtroomMove.mock.calls[0][1]).toMatchObject({ content: "Savunmam bitti ama eklemek istediğim bir delil var.", action_type: "argument" });
+    expect(finishCourtroomSession).not.toHaveBeenCalled();
+    expect(stopTrack).toHaveBeenCalled();
+  });
+
+  it("recognizes a spoken finish command separately from the closing draft", async () => {
+    mockMicrophone("Bitir.");
+    render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.change(await screen.findByRole("textbox"), { target: { value: "Son savunmam." } });
+    fireEvent.click(screen.getByRole("button", { name: /Konuş/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Kaydı bitir" }));
+    await waitFor(() => expect(finishCourtroomSession).toHaveBeenCalledWith("session-1", "Son savunmam."));
+    expect(sendCourtroomMove).not.toHaveBeenCalled();
+  });
+
+  it("plays every segment of a long response and cancels on unmount", async () => {
+    const play = vi.fn().mockImplementation(function (this: { onended?: () => void }) { queueMicrotask(() => this.onended?.()); return Promise.resolve(); });
+    const pause = vi.fn();
+    vi.stubGlobal("Audio", class { play = play; pause = pause; });
+    URL.createObjectURL = vi.fn().mockReturnValue("blob:test");
+    URL.revokeObjectURL = vi.fn();
+    getCourtroomTurnAudio.mockResolvedValue(new Blob(["audio"]));
+    getCourtroomSession.mockResolvedValue({ ...conversation, turns: [...conversation.turns, { ...conversation.turns[0], id: "long-reply", actor: "opponent", content: "😀".repeat(9000) }] });
+    const view = render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: /Dinle/ }));
+    await waitFor(() => expect(play).toHaveBeenCalledTimes(3));
+    expect(getCourtroomTurnAudio.mock.calls).toEqual([["session-1", "long-reply"], ["session-1", "long-reply", 1], ["session-1", "long-reply", 2]]);
+    await act(async () => view.unmount());
+    expect(pause).toHaveBeenCalled();
+  });
+
+  it.each(["Savunmam bitti ama bir sorum var", "done kelimesi", "bitirme"])("keeps ordinary speech as a statement: %s", (text) => {
+    expect(isFinishCommand(text)).toBe(false);
   });
 });

@@ -28,6 +28,14 @@ Analiz, belge taslağı, sohbet, otomatik seviye seçimi, ses ve sıradaki arka 
 
 `AI_SECRETS_ENCRYPTION_KEY` sunucuda bir kez üretilip `/etc/casebridge/production.env` içinde korunur. Olmadan form kayıt kabul etmez. Bu değer release başına yenilenmez; kaybedilirse kayıtlı anahtarlar çözülemez. Şifreleme anahtarı ve `.system-secrets` klasörünün tamamı korumalı yedeklerde birlikte saklanmalı ve birlikte geri yüklenmelidir. Yeni müşteri tesliminden önce `todo.md` içindeki kalan sürüm engelleri doğrulanmalıdır.
 
+### Canlı Duruşma — karşılıklı yazılı ve sesli prova
+
+Yeni bir duruşma açıldığında kullanıcı seçtiği tarafın avukatı olarak beyanını yazar veya **Konuş → Kaydı bitir** ile ses kaydını tamamlar. Ses kaydı metne çevrilip otomatik gönderilir; karşı avukatın yanıtı tutanağa eklenir ve otomatik ses açıksa okunur. Tarayıcının mikrofon izni gerekir; kayıt düğmeyle bitirilir, sürekli dinleme veya sessizlik algılama yoktur. Ses ve metin ilgili büronun etkin OpenAI anahtarıyla işlenir.
+
+Karşılıklı beyanlar aşama sayısıyla otomatik kapanmaz. Kullanıcı **Bitir ve karar iste** düğmesine basar veya tek başına `bitir` / `done` yazar ya da söyler; bunun üzerine hâkim tüm tutanağı değerlendirir ve kurgusal karar ile eğitim puanını verir. Bitir düğmesi yazılmakta olan son beyanı da korur. Eski aşamalı oturumlar aynı biçimde devam eder; yeni akış için yeni oturum açılır.
+
+Bu sürüm veritabanına `conversation_mode` alanı ekler. Önce veritabanının doğrulanmış yedeğini alın; imajları derleyin, sonra yalnızca uygulama servislerini yenileyin. Açılış migration'ı mevcut oturumları eski modda bırakır. Önceki imajlara dönüşte bu ek alan kalabilir; veri silen downgrade gerekmez.
+
 ### Uygulama renkleri
 
 Beyaz içerik kartları ana alanı, turkuaz ve açık tonları arka plan/menü alanlarını, koyu lacivert başlık ve AI vurgu alanlarını oluşturur. 60/30/10 görsel ağırlık hedefidir; veri miktarı ve ekran genişliği değiştikçe piksel oranları değişir. Başarı, hata ve uyarı renkleri anlamlarını korur.

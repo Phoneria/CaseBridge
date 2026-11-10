@@ -461,7 +461,7 @@ export async function createCourtroomSession(
 ): Promise<CourtroomSession> {
   return request("/courtroom-sessions", {
     method: "POST",
-    body: JSON.stringify({ scenario_id: scenarioId, chosen_role: chosenRole }),
+    body: JSON.stringify({ scenario_id: scenarioId, chosen_role: chosenRole, conversation_mode: true }),
   });
 }
 
@@ -471,7 +471,7 @@ export async function createCourtroomSessionFromCase(
 ): Promise<CourtroomSession> {
   return request("/courtroom-sessions/from-case", {
     method: "POST",
-    body: JSON.stringify({ case_id: caseId, chosen_role: chosenRole }),
+    body: JSON.stringify({ case_id: caseId, chosen_role: chosenRole, conversation_mode: true }),
   });
 }
 
@@ -485,8 +485,12 @@ export async function transcribeCourtroomAudio(sessionId: string, audio: Blob): 
   return request(`/courtroom-sessions/${sessionId}/voice/transcribe`, { method: "POST", body: form });
 }
 
-export async function getCourtroomTurnAudio(sessionId: string, turnId: string): Promise<Blob> {
-  return fetchBlob(`/courtroom-sessions/${sessionId}/voice/turns/${turnId}`, "Ses oluşturulamadı");
+export async function getCourtroomTurnAudio(sessionId: string, turnId: string, part = 0): Promise<Blob> {
+  return fetchBlob(`/courtroom-sessions/${sessionId}/voice/turns/${turnId}${part ? `?part=${part}` : ""}`, "Ses oluşturulamadı");
+}
+
+export async function finishCourtroomSession(sessionId: string, content?: string): Promise<CourtroomSession> {
+  return request(`/courtroom-sessions/${sessionId}/finish`, { method: "POST", body: JSON.stringify({ content }) });
 }
 
 export async function sendCourtroomMove(
