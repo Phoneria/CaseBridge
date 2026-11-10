@@ -1,6 +1,30 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
 
+test("scrolling past Settings keeps the workspace inside the viewport", async ({ page }) => {
+  await login(page);
+  await page.goto("/ayarlar");
+  await expect(page.locator("main").getByRole("heading", { name: "Ayarlar", exact: true })).toBeVisible();
+  for (const viewport of [{ width: 1440, height: 800 }, { width: 390, height: 700 }]) {
+    await page.setViewportSize(viewport);
+    const main = page.locator("main");
+    await main.hover();
+    await page.mouse.wheel(0, 10000);
+    await expect.poll(() => main.evaluate(el => Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop))).toBeLessThanOrEqual(1);
+    await page.mouse.wheel(0, 10000);
+    const bounds = await page.evaluate(() => {
+      window.scrollTo(0, 10000);
+      const main = document.querySelector("main")!.getBoundingClientRect();
+      return { outerScroll: window.scrollY, outerHeight: document.documentElement.scrollHeight,
+        height: window.innerHeight, mainBottom: main.bottom };
+    });
+    expect(bounds.outerScroll).toBe(0);
+    expect(bounds.outerHeight).toBeLessThanOrEqual(bounds.height);
+    expect(bounds.mainBottom).toBe(bounds.height);
+    await page.screenshot({ path: test.info().outputPath(`settings-bottom-${viewport.width}.png`) });
+  }
+});
+
 test("workspace sections load and AI diagnostics explain demo mode", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await login(page);

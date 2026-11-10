@@ -234,7 +234,8 @@ def test_provider_failures_map_to_502_504_and_503(client, two_firms_two_users):
 def test_a_misconfigured_provider_is_a_503(client, monkeypatch, two_firms_two_users):
     import app.api.deps as deps
 
-    def broken():
+    def broken(law_firm_id=None):
+        assert law_firm_id == two_firms_two_users["firm_a"].id
         raise AIProviderConfigError("OPENAI_API_KEY is not set")
 
     monkeypatch.setattr(deps, "get_case_intake_provider", broken)
