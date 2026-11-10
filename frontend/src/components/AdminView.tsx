@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND_ACCENT } from "@/lib/brand";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -140,12 +142,12 @@ export function AdminView() {
           <div className="h-64" aria-label="Yeni dava trend grafiği">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-                <defs><linearGradient id="caseTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6d43f5" stopOpacity={0.32}/><stop offset="100%" stopColor="#6d43f5" stopOpacity={0.02}/></linearGradient></defs>
+                <defs><linearGradient id="caseTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={BRAND_ACCENT[600]} stopOpacity={0.32}/><stop offset="100%" stopColor={BRAND_ACCENT[600]} stopOpacity={0.02}/></linearGradient></defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
                 <XAxis dataKey="ay" tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: "#cfc4ff" }} />
-                <Area type="monotone" dataKey="dava" name="Yeni dava" stroke="#6d43f5" strokeWidth={3} fill="url(#caseTrend)" activeDot={{ r: 5, fill: "#6d43f5", stroke: "white", strokeWidth: 2 }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: "#afe3f0" }} />
+                <Area type="monotone" dataKey="dava" name="Yeni dava" stroke={BRAND_ACCENT[600]} strokeWidth={3} fill="url(#caseTrend)" activeDot={{ r: 5, fill: BRAND_ACCENT[600], stroke: "white", strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -175,8 +177,8 @@ export function AdminView() {
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#f7f8fb" }} />
-              <Bar dataKey="aktif" name="Aktif" stackId="cases" fill="#6d43f5" radius={[6, 0, 0, 6]} />
-              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#e7e3ff" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="aktif" name="Aktif" stackId="cases" fill={BRAND_ACCENT[600]} radius={[6, 0, 0, 6]} />
+              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#d7f1f8" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

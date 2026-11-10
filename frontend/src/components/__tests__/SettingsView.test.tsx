@@ -4,14 +4,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 const getMe = vi.fn();
 const listManagedUsers = vi.fn();
 const getAiStatus = vi.fn();
+const getAiConnectivity = vi.fn();
 const getNotificationStatus = vi.fn();
 const sendTestEmail = vi.fn();
+const importDemoTemplate = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getMe: (...args: unknown[]) => getMe(...args),
   listManagedUsers: (...args: unknown[]) => listManagedUsers(...args),
   getAiStatus: (...args: unknown[]) => getAiStatus(...args),
+  getAiConnectivity: (...args: unknown[]) => getAiConnectivity(...args),
   getNotificationStatus: (...args: unknown[]) => getNotificationStatus(...args),
+  importDemoTemplate: (...args: unknown[]) => importDemoTemplate(...args),
   sendTestEmail: (...args: unknown[]) => sendTestEmail(...args),
 }));
 
@@ -37,10 +41,12 @@ const managed = (user: typeof adminUser, status = "active") => ({
 const lawyerUser = { ...adminUser, id: "u2", role: "lawyer", full_name: "Avukat Kullanici" };
 
 beforeEach(() => {
+  importDemoTemplate.mockReset();
   getMe.mockReset();
   listManagedUsers.mockReset();
   getAiStatus.mockReset();
   getAiStatus.mockResolvedValue({ provider: "mock", configured: true, error: null });
+  getAiConnectivity.mockReset().mockResolvedValue({ connected: false, checked_at: 0, checks: [{ name: "Analiz", provider: "mock", model: "mock", reachable: false, detail: "Mock mod: gerçek bir AI sağlayıcısı yok." }] });
   getNotificationStatus.mockReset();
   sendTestEmail.mockReset();
   getNotificationStatus.mockResolvedValue({ email_backend: "smtp", reminders_enabled: true, reminder_send_hour: 9, timezone: "Europe/Istanbul" });
@@ -54,7 +60,8 @@ describe("SettingsView", () => {
     render(<SettingsView />);
 
     await waitFor(() => expect(screen.getByText("Avukat Kullanici")).toBeInTheDocument());
-    expect(screen.getByText("Hizmet hazır")).toBeInTheDocument();
+    expect(await screen.findByText(/Demo modu açık/)).toBeInTheDocument();
+    expect(screen.queryByText("Hizmet hazır")).not.toBeInTheDocument();
     expect(screen.queryByText("mock")).not.toBeInTheDocument();
   });
 
@@ -142,5 +149,42 @@ describe("SettingsView", () => {
     expect(sendTestEmail).toHaveBeenCalledTimes(1);
     resolve({ sent: true, backend: "smtp" });
     expect(await screen.findByText(`Test e-postası ${lawyerUser.email} adresine gönderildi.`)).toBeInTheDocument();
+  });
+});
+
+
+describe("sample data import", () => {
+  it("prevents repeated clicks while importing and reports success", async () => {
+    getMe.mockResolvedValue(adminUser);
+    listManagedUsers.mockResolvedValue([]);
+    let resolve: (value: unknown) => void = () => {};
+    importDemoTemplate.mockReturnValue(new Promise((r) => { resolve = r; }));
+    render(<SettingsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+    const busy = screen.getByRole("button", { name: "Ekleniyor..." });
+    expect(busy).toBeDisabled();
+    await userEvent.click(busy);
+    expect(importDemoTemplate).toHaveBeenCalledTimes(1);
+    resolve({ total_cases: 20, added_cases: 20 });
+    expect(await screen.findByText("20 örnek dava ve ilişkili veriler büronuza eklendi.")).toBeInTheDocument();
+  });
+
+  it("reports an existing import and lets the user retry after an error", async () => {
+    getMe.mockResolvedValue(adminUser);
+    listManagedUsers.mockResolvedValue([]);
+    importDemoTemplate.mockRejectedValueOnce(new Error("internal detail"));
+    importDemoTemplate.mockResolvedValueOnce({ total_cases: 20, added_cases: 0 });
+    render(<SettingsView />);
+    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Örnek veriler eklenemedi. Lütfen tekrar deneyin.");
+    await userEvent.click(screen.getByRole("button", { name: "Örnek verileri yükle" }));
+    expect(await screen.findByText("Örnek veriler zaten mevcut; yeni kayıt eklenmedi.")).toBeInTheDocument();
+  });
+
+  it("hides the import for lawyers", async () => {
+    getMe.mockResolvedValue(lawyerUser);
+    render(<SettingsView />);
+    await screen.findByRole("heading", { name: "Ayarlar" });
+    expect(screen.queryByRole("button", { name: "Örnek verileri yükle" })).not.toBeInTheDocument();
   });
 });

@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND_ACCENT } from "@/lib/brand";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -93,11 +95,11 @@ export function AnalyticsView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
                 <YAxis tick={{ fontSize: 11 }} stroke="#3d5170" />
-                <Tooltip cursor={{ fill: "#f1eeff" }} />
+                <Tooltip cursor={{ fill: "#edf9fc" }} />
                 <Bar
                   dataKey="Kazanma Oranı"
                   radius={[6, 6, 0, 0]}
-                  fill="#6d43f5"
+                  fill={BRAND_ACCENT[600]}
                   cursor="pointer"
                   onClick={(data: unknown) => {
                     const href = (data as { payload?: { href?: string } } | undefined)?.payload?.href;

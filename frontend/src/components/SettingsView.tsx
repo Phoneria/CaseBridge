@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { getAiStatus, getMe, getNotificationStatus, importDemoTemplate, sendTestEmail } from "@/lib/api";
+import { getMe, getNotificationStatus, importDemoTemplate, sendTestEmail } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
-import type { AIStatus, AppUser, NotificationStatus } from "@/types";
+import type { AppUser, NotificationStatus } from "@/types";
+import { AiConnectionPanel } from "@/components/AiConnectionPanel";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { UsersPanel } from "@/components/users/UsersPanel";
@@ -19,7 +20,6 @@ type TestEmailState = { kind: "idle" } | { kind: "sending" } | { kind: "done"; m
 
 export function SettingsView() {
   const [me, setMe] = useState<AppUser | null>(null);
-  const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
   const [notifications, setNotifications] = useState<NotificationStatus | null>(null);
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
   const [demoTemplate, setDemoTemplate] = useState<TestEmailState>({ kind: "idle" });
@@ -31,10 +31,9 @@ export function SettingsView() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    Promise.all([getMe(), getAiStatus(), getNotificationStatus()])
-      .then(([meResult, aiStatusResult, notificationResult]) => {
+    Promise.all([getMe(), getNotificationStatus()])
+      .then(([meResult, notificationResult]) => {
         setMe(meResult);
-        setAiStatus(aiStatusResult);
         setNotifications(notificationResult);
       })
       .catch(() => setError("Ayarlar yüklenemedi. Lütfen daha sonra tekrar deneyin."))
@@ -73,9 +72,9 @@ export function SettingsView() {
       const result = await importDemoTemplate();
       setDemoTemplate({ kind: "done", message: result.added_cases
         ? `${result.added_cases} örnek dava ve ilişkili veriler büronuza eklendi.`
-        : "Örnek şablon zaten mevcut; yeni kayıt eklenmedi." });
+        : "Örnek veriler zaten mevcut; yeni kayıt eklenmedi." });
     } catch (err) {
-      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek şablon eklenemedi. Lütfen tekrar deneyin.") });
+      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek veriler eklenemedi. Lütfen tekrar deneyin.") });
     } finally {
       importingDemo.current = false;
     }
@@ -95,39 +94,25 @@ export function SettingsView() {
 
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek şablon</h2>
+          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek veriler</h2>
           <p className="mb-4 text-sm text-navy-500">Kurgusal davaları, görevleri, belgeleri ve olayları bu büroya ekleyin. Mevcut kayıtlar korunur.</p>
           <button type="button" onClick={addExamples} disabled={demoTemplate.kind === "sending"}
             className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
-            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek şablonu getir"}
+            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek verileri yükle"}
           </button>
           {demoTemplate.kind === "done" && <p role="status" className="mt-3 text-sm text-emerald-700">{demoTemplate.message}</p>}
           {demoTemplate.kind === "error" && <p role="alert" className="mt-3 text-sm text-red-700">{demoTemplate.message}</p>}
         </section>
       )}
 
-      <div className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-        <p className="mb-3 text-sm font-medium text-navy-700">Yapay Zeka Durumu</p>
-        {aiStatus && (
-          <div className="flex items-center gap-3 text-sm">
-            <span
-              className={`inline-block h-2 w-2 rounded-full ${
-                aiStatus.configured ? "bg-emerald-500" : "bg-amber-500"
-              }`}
-            />
-            <span className="text-navy-500">
-              {aiStatus.configured ? "Hizmet hazır" : "Hizmet yapılandırılmadı"}
-            </span>
-          </div>
-        )}
-      </div>
+      <AiConnectionPanel />
 
       {notifications && (
         <section aria-labelledby="settings-notifications" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
           <h2 id="settings-notifications" className="mb-3 text-sm font-medium text-navy-700">
             Bildirimler
           </h2>
-          <dl className="grid grid-cols-[160px_1fr] gap-y-1.5 text-sm">
+          <dl className="grid gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[160px_minmax(0,1fr)]">
             <dt className="text-navy-500">E-posta yöntemi</dt>
             <dd className="text-navy-800">{EMAIL_BACKEND_LABELS[notifications.email_backend]}</dd>
             <dt className="text-navy-500">Hatırlatmalar</dt>

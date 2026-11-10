@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/update-version.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/update-version.mjs",
     "build": "next build",
+    "version:check": "node scripts/update-version.mjs",
+    "test:version": "node --test scripts/update-version.test.mjs",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest"

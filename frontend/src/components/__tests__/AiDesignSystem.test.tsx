@@ -48,7 +48,7 @@ describe("AI design system", () => {
 
   it("shows model readiness or a settings warning", () => {
     const { rerender } = render(<AiModelStatus status={{ provider: "ollama", configured: true, error: null }} variant="dark" />);
-    expect(screen.getByText("Yapay zekâ hizmeti hazır")).toBeInTheDocument();
+    expect(screen.getByText("AI hizmeti yapılandırıldı")).toBeInTheDocument();
 
     rerender(<AiModelStatus status={{ provider: "ollama", configured: false, error: "x" }} variant="light" />);
     expect(screen.getByText(/Yapay zekâ hizmeti yapılandırılmamış/)).toBeInTheDocument();

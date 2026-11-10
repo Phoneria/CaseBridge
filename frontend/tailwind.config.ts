@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { BRAND_ACCENT } from "./src/lib/brand";
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -12,23 +13,17 @@ const config: Config = {
           700: "#1d2d47",
           600: "#2a3b58",
           500: "#3d5170",
+          400: "#61738d",
+          300: "#94a6bc",
+          200: "#cbd5e1",
+          100: "#e9eef4",
+          50: "#f5f7fa",
         },
-        accent: {
-          50: "#f3f1ff",
-          100: "#e7e3ff",
-          200: "#cfc4ff",
-          300: "#ac96ff",
-          400: "#8b6bff",
-          500: "#6d43f5",
-          600: "#5a2fdb",
-          700: "#4a25b3",
-          800: "#3b1f8c",
-          900: "#2f1a6e",
-        },
+        accent: BRAND_ACCENT,
         surface: {
           DEFAULT: "#ffffff",
-          muted: "#f7f8fb",
-          border: "#e6e8ef",
+          muted: "#e7f3f5",
+          border: "#d8e5e9",
         },
       },
       fontFamily: {
@@ -50,8 +45,8 @@ const config: Config = {
       },
       backgroundImage: {
         "ai-glow":
-          "radial-gradient(600px circle at 85% -10%, rgba(109, 67, 245, 0.45), transparent 60%), radial-gradient(500px circle at -5% 110%, rgba(90, 47, 219, 0.35), transparent 55%)",
-        "ai-border": "linear-gradient(135deg, #8b6bff 0%, #5a2fdb 45%, #152238 100%)",
+          "radial-gradient(600px circle at 85% -10%, rgba(0, 150, 190, 0.30), transparent 60%), radial-gradient(500px circle at -5% 110%, rgba(59, 179, 208, 0.18), transparent 55%)",
+        "ai-border": "linear-gradient(135deg, #79cde3 0%, #007eac 65%, #152238 100%)",
       },
       keyframes: {
         "ai-glow": {

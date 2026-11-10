@@ -36,7 +36,7 @@ describe("AiStatusIndicator", () => {
     const button = await screen.findByRole("button", { name: /AI bağlantısı yok/ });
     expect(button).toHaveAttribute("data-state", "offline");
     fireEvent.mouseEnter(button.parentElement!);
-    expect(screen.getByText("Hizmete şu anda ulaşılamıyor.")).toBeInTheDocument();
+    expect(screen.getByText(/AI hizmetine ulaşılamadı/)).toBeInTheDocument();
     expect(screen.queryByText(/ollama|qwen/i)).not.toBeInTheDocument();
   });
 
@@ -47,6 +47,22 @@ describe("AiStatusIndicator", () => {
     fireEvent.mouseEnter(wrapper);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     fireEvent.mouseLeave(wrapper);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps details open after a touch/click, and closes on a second click or Escape", async () => {
+    getAiConnectivity.mockResolvedValue({ connected: false, checked_at: 0, checks: [
+      { name: "Analiz", provider: "openai", model: "test", reachable: false, detail: "API anahtarı tanımlı değil." },
+    ] });
+    render(<AiStatusIndicator />);
+    const button = await screen.findByRole("button", { name: /AI bağlantısı yok/ });
+    fireEvent.click(button);
+    fireEvent.mouseLeave(button.parentElement!);
+    expect(screen.getByRole("dialog")).toHaveTextContent("AI erişim anahtarı eksik.");
+    fireEvent.click(button);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(button);
+    fireEvent.keyDown(screen.getByRole("button", { name: "Yeniden kontrol et" }), { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
