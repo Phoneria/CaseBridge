@@ -184,6 +184,16 @@ describe("conversation mode", () => {
     expect(stopTrack).toHaveBeenCalled();
   });
 
+  it("keeps the recognized statement as a draft if automatic submission fails", async () => {
+    mockMicrophone("Kaybolmaması gereken savunmam.");
+    sendCourtroomMove.mockRejectedValue(new Error("Connection failed"));
+    render(<CourtroomSessionView sessionId="session-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: /Konuş/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Kaydı bitir" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Hamle gönderilemedi.");
+    expect(screen.getByRole("textbox")).toHaveValue("Kaybolmaması gereken savunmam.");
+  });
+
   it("recognizes a spoken finish command separately from the closing draft", async () => {
     mockMicrophone("Bitir.");
     render(<CourtroomSessionView sessionId="session-1" />);

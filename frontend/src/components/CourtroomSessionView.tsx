@@ -298,7 +298,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
             if (combined.length > 4000) {
               setContent(combined);
               setError("Beyan 4000 karakteri aşıyor. Metni kontrol edip kısaltarak gönderin.");
-            } else if (session.conversation_mode) await submitText(combined);
+            } else if (session.conversation_mode) { setContent(combined); await submitText(combined); }
             else setContent(combined);
           }
         } catch {
