@@ -24,6 +24,13 @@ beforeEach(() => {
 });
 
 describe("AppShell", () => {
+  it("lets platform administrators open Settings", async () => {
+    setUrl("/ayarlar");
+    getMe.mockResolvedValue(PLATFORM);
+    render(<AppShell><p>AI ayarları</p></AppShell>);
+    expect(await screen.findByText("AI ayarları")).toBeInTheDocument();
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
   it("sends a platform admin from a firm page to the platform panel", async () => {
     setUrl("/dashboard");
     getMe.mockResolvedValue(PLATFORM);

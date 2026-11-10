@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getAiConnectivity } from "@/lib/api";
 import { connectivityMessage } from "@/lib/aiConnectivity";
 import type { AIConnectivity } from "@/types";
+import { AiKeySettings } from "@/components/AiKeySettings";
 
-export function AiConnectionPanel() {
+export function AiConnectionPanel({ canManageSecrets = false }: { canManageSecrets?: boolean }) {
   const [data, setData] = useState<AIConnectivity | null>(null);
   const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -52,6 +53,7 @@ export function AiConnectionPanel() {
         </ul>
         <p className="mt-4 text-xs leading-5 text-navy-500">Bu kontrol hizmete erişimi doğrular. Yanıt üretimi ayrıca kullanım kotasına ve model erişimine bağlıdır.</p>
       </>}
+      {canManageSecrets && <AiKeySettings onSaved={(result) => { setData(result); setChecking(false); setFailed(false); }} />}
     </section>
   );
 }

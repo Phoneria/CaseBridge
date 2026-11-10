@@ -287,6 +287,20 @@ export async function getAiConnectivity(force = false): Promise<AIConnectivity> 
   return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
+export interface AIKeyStatus { configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
+
+export async function getAiKeyStatus(): Promise<AIKeyStatus> {
+  return request("/system/openai-key", { cache: "no-store" });
+}
+
+export async function saveAiKey(apiKey: string): Promise<AIKeyStatus> {
+  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey }), cache: "no-store" });
+}
+
+export async function activateAiKey(): Promise<AIConnectivity> {
+  return request("/system/openai-key/activate", { method: "POST", cache: "no-store" });
+}
+
 export interface CaseListFilters {
   search?: string;
   status?: CaseStatus;

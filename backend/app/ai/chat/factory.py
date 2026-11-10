@@ -9,6 +9,7 @@ from app.ai.chat.ollama_provider import OllamaChatProvider
 from app.ai.chat.openai_provider import OpenAIChatProvider
 from app.ai.errors import AIProviderConfigError
 from app.core.config import settings
+from app.services.ai_credentials import get_openai_api_key
 
 
 def get_chat_provider(
@@ -23,13 +24,14 @@ def get_chat_provider(
     timeout = timeout_seconds if timeout_seconds is not None else settings.chat_timeout_seconds
     name = settings.chat_provider
     if name == "openai":
-        if not settings.openai_api_key or not settings.openai_api_key.strip():
+        api_key = get_openai_api_key()
+        if not api_key or not api_key.strip():
             raise AIProviderConfigError(
                 "CHAT_PROVIDER=openai but OPENAI_API_KEY is not set. "
                 "Set OPENAI_API_KEY, or set CHAT_PROVIDER=mock to run without a real AI provider."
             )
         return OpenAIChatProvider(
-            api_key=settings.openai_api_key,
+            api_key=api_key,
             model=config.model,
             timeout_seconds=timeout,
             max_tokens=cap,

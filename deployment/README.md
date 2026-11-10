@@ -18,7 +18,17 @@ Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/
 
 OpenAI hata sınıfları için [resmi hata belgeleri](https://developers.openai.com/api/docs/guides/error-codes) esas alınır. Bağlantı kontrolünün başarılı olması, yanıt üretiminin kota/bakiye açısından çalıştığını tek başına kanıtlamaz.
 
-### Renk ve kullanım düzeni
+### Platform Settings üzerinden OpenAI anahtarı
+
+Platform yöneticisi hesabıyla `/ayarlar` açılır; **Gizli anahtar ekle** düğmesine basılıp anahtar parola alanına yapıştırılır. **Kaydet ve bağlantıyı kontrol et**, model erişimini ve küçük bir örnek yanıtı sınayıp anahtarı yalnızca aday olarak saklar; aktif bağlantı değişmez. **Yeni anahtarı etkinleştir** ayrı bir işlemdir: tekrar doğrular, önceki anahtarı korur ve yeni anahtarı kullanıma alır. Başarısız test veya etkinleştirmede mevcut aktif anahtar korunur. Anahtarlar storage volume'undaki `.system-secrets` klasöründe `openai-key.enc`, `openai-key.pending.enc` ve `openai-key.previous.enc` dosyalarında Fernet ile şifrelenir (klasör 700, dosyalar 600); API anahtarları geri döndürmez. Yeni AI istekleri ve arka plan görevleri etkin anahtarı kullanır; yeniden başlatma gerekmez.
+
+Bu geçici option-1 akışıdır. `todo.md`, başka bir müşteriye teslimden önce her hukuk bürosuna ayrı anahtar (option 2) gereksinimini zorunlu sürüm engeli olarak kaydeder.
+
+Bu ortak uygulama anahtarıdır: normal büro yöneticileri ve avukatlar kaydetme veya anahtar durumunu okuma endpoint'lerine erişemez. Form yalnızca platform yöneticisine gösterilir. Uygulama verileri bağlantı testine gönderilmez. Geçerli bir anahtarın testi az miktarda token kullanır.
+
+`AI_SECRETS_ENCRYPTION_KEY` sunucuda bir kez üretilip `/etc/casebridge/production.env` içinde korunur. Olmadan form kayıt kabul etmez. Bu değer release başına yenilenmez; kaybedilirse kayıtlı anahtar çözülemez ve yeni bir API anahtarı kaydedilmelidir. İlk kayıttan önce `OPENAI_API_KEY` ortam değişkeni kullanılır. Kayıtlı şifreli veri bozulursa eski ortam anahtarına sessizce dönülmez. Şifreleme anahtarı ve şifreli dosya güvenli yedeklerde birlikte korunmalıdır.
+
+### Uygulama renkleri
 
 Beyaz içerik kartları ana alanı, turkuaz ve açık tonları arka plan/menü alanlarını, koyu lacivert başlık ve AI vurgu alanlarını oluşturur. 60/30/10 görsel ağırlık hedefidir; veri miktarı ve ekran genişliği değiştikçe piksel oranları değişir. Başarı, hata ve uyarı renkleri anlamlarını korur.
 

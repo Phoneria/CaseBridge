@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # OpenAI (optional at startup - MVP can run entirely on mocks)
     openai_api_key: Optional[str] = None
+    ai_secrets_encryption_key: str = Field(default="", repr=False)
     openai_model: str = "gpt-4o-mini"
     voice_transcription_model: str = "gpt-4o-mini-transcribe"
     voice_speech_model: str = "gpt-4o-mini-tts"

@@ -13,6 +13,7 @@ from typing import Optional
 import httpx
 
 from app.core.config import settings
+from app.services.ai_credentials import get_openai_api_key
 
 PROBE_TIMEOUT_SECONDS = 4.0
 CACHE_TTL_SECONDS = 20.0
@@ -79,7 +80,7 @@ def _probe(provider: str, model: str) -> tuple[bool, Optional[str]]:
     if provider == "ollama":
         return _probe_ollama(model)
     if provider == "openai":
-        return _probe_openai_compatible(OPENAI_BASE_URL, settings.openai_api_key, model)
+        return _probe_openai_compatible(OPENAI_BASE_URL, get_openai_api_key(), model)
     if provider == "qwen":
         return _probe_openai_compatible(settings.qwen_base_url, settings.qwen_api_key, model)
     return False, f"Bilinmeyen sağlayıcı: {provider}"

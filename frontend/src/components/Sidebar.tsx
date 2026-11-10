@@ -97,6 +97,7 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
           <NavLink item={PLATFORM_ITEM} pathname={pathname} />
           <div className="mt-auto flex flex-col gap-2 pt-4">
             <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
+            <NavLink item={SETTINGS_ITEM} pathname={pathname} />
           </div>
         </nav>
       ) : (

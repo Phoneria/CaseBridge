@@ -15,7 +15,7 @@ import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
 /** Pages a platform admin may open besides the platform panel. */
-const PLATFORM_ALLOWED = ["/hesabim"];
+const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar"];
 
 /** `platform`: the page is the platform panel (platform admins only). A
  * platform admin is kept out of the firm pages: they belong to no customer firm. */

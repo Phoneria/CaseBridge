@@ -16,6 +16,7 @@ from app.ai.providers.openai_provider import OpenAIProvider
 from app.ai.providers.qwen_provider import QwenProvider
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.core.config import settings
+from app.services.ai_credentials import get_openai_api_key
 
 # Used whenever LLM_PROVIDER=mock (the default). Must be valid JSON matching
 # AIAnalysisResult (app/ai/schemas.py) so simulations/analyses still complete
@@ -77,13 +78,14 @@ def build_llm_provider(model: str) -> LLMProvider:
         )
 
     if provider_name == "openai":
-        if not settings.openai_api_key or not settings.openai_api_key.strip():
+        api_key = get_openai_api_key()
+        if not api_key or not api_key.strip():
             raise AIProviderConfigError(
                 "LLM_PROVIDER=openai but OPENAI_API_KEY is not set. "
                 "Set OPENAI_API_KEY in your environment, or set "
                 "LLM_PROVIDER=mock to run without a real AI provider."
             )
-        return OpenAIProvider(api_key=settings.openai_api_key, model=model)
+        return OpenAIProvider(api_key=api_key, model=model)
 
     if provider_name == "ollama":
         return OllamaProvider(

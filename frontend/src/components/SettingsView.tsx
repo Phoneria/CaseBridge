@@ -85,6 +85,13 @@ export function SettingsView() {
 
   const isAdmin = me?.role === "admin";
 
+  if (me?.is_platform_admin) return (
+    <div className="space-y-5">
+      <div><h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1><p className="text-sm text-navy-500">Uygulamanın ortak AI bağlantısını yönetin.</p></div>
+      <AiConnectionPanel canManageSecrets />
+    </div>
+  );
+
   return (
     <div className="space-y-5">
       <div>
