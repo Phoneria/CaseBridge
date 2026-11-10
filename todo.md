@@ -40,10 +40,17 @@ Internal development pushes may continue while the customer-release gate remains
 - Browser checks: platform navigation, desktop/mobile workspace checks and key entry passed; the final save-then-activate flow passed after refinement. Provider responses used synthetic test fixtures.
 - Production build and type checks passed. A live user-provided key has not been entered, replaced or activated by the assistant.
 - Deployed application commit `08bc3e6` to the existing app on 10 November 2026. Public health check passed; served Settings bundles contain the add-key and explicit activation controls and the `v.0.2` label. Server metadata confirms encrypted storage is enabled, with no managed or pending key yet. Previous images and protected configuration remain available for rollback.
-- The full backend suite was not run; the focused backend checks above cover this update. Per-firm configuration remains incomplete and blocks additional customer rollout.
+- The full backend suite subsequently passed in GitHub CI on commit `0332187`: **994 tests passed**. Later version, permission-guidance and sidebar changes affect only frontend code and release documentation. Per-firm configuration remains incomplete and blocks additional customer rollout.
 
 ## Follow-up — v.0.3
 
 - Clarify in the AI status panel that adding, testing and activating the shared key requires a platform administrator login; a bureau administrator cannot change the shared key.
 - Keep the requested `v.0.3` release label. This clarification does not grant new permissions or implement per-firm credentials.
-- Deployment and validation: pending.
+- Deployed to the existing app; public health and served Settings bundles confirmed the permission guidance and `v.0.3` label. All 15 affected Settings tests passed; server production compilation and type checks passed.
+
+## Follow-up — sidebar placement
+
+- Anchor the three-link CaseBridge AI block above the sidebar's connection status, Settings and version, keeping the main navigation at the top.
+- Keep the navigation scrollable on short screens so the footer remains reachable.
+- Validation: 8 sidebar component tests passed. The desktop placement check and mobile navigation check passed; the complete workspace browser tour passed on rerun with a 120-second limit after the first cold-development run reached its 60-second limit. Screenshots were reviewed at desktop and mobile sizes.
+- Release version: `v.0.4`, following the already published `v.0.3` update. Deployment: pending.

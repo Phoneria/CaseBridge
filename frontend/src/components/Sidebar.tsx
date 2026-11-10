@@ -102,18 +102,22 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
         </nav>
       ) : (
       <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
-        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="flex min-h-full flex-col">
+        <div className="shrink-0 space-y-1">
         {role === "admin" && (
           <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
         )}
         {NAV_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
+        </div>
 
+        <div className="mt-auto shrink-0 pt-4">
         <div
           role="group"
           aria-label="CaseBridge AI"
-          className={`relative mt-4 overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
+          className={`relative overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link
@@ -143,6 +147,8 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
           })}
         </div>
 
+        </div>
+        </div>
         </div>
         <div className="mt-auto flex shrink-0 flex-col gap-2 pt-4">
           <AiStatusIndicator />
