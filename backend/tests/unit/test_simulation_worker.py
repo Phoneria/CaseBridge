@@ -42,6 +42,40 @@ def _make_firm_and_case(db_session, name="Firm A"):
     return firm, case
 
 
+def test_queued_jobs_build_provider_from_each_jobs_firm(db_session):
+    from app.ai.providers.mock_provider import MockProvider
+    from app.services.simulation_service import SimulationService
+    from app.services.simulation_worker import process_one_pending_simulation
+    firms = []
+    for name in ("First bureau", "Second bureau"):
+        firm, case = _make_firm_and_case(db_session, name)
+        firms.append(firm.id)
+        SimulationService(db_session).create_pending_simulation(case, requested_by=None)
+    seen = []
+    def build(*, law_firm_id):
+        seen.append(law_firm_id)
+        return MockProvider(responses=["r", "p", "d", VALID_JUDGE_JSON])
+    for firm_id in firms:
+        result = process_one_pending_simulation(db_session, provider_factory=build)
+        assert result.law_firm_id == firm_id
+        assert result.status.value == "completed"
+    assert seen == firms
+
+
+def test_missing_bureau_key_fails_job_without_blocking_queue(db_session):
+    from app.ai.errors import AIProviderConfigError
+    from app.services.simulation_service import SimulationService
+    from app.services.simulation_worker import process_one_pending_simulation
+    firm, case = _make_firm_and_case(db_session)
+    SimulationService(db_session).create_pending_simulation(case, requested_by=None)
+    def unavailable(*, law_firm_id):
+        assert law_firm_id == firm.id
+        raise AIProviderConfigError("missing")
+    result = process_one_pending_simulation(db_session, provider_factory=unavailable)
+    assert result.status.value == "failed"
+    assert result.failure_category == "configuration_error"
+
+
 # --- create_pending_simulation: fast, no LLM call, idempotent ------------
 
 

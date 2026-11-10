@@ -12,13 +12,13 @@ Updated: 10 November 2026.
 
 ## Mandatory before any additional customer rollout — option 2
 
-**Customer rollout is blocked until this section is complete.** The user explicitly requires separate AI keys for each law firm before delivery or onboarding to another customer. Option 1 is the interim workflow.
+**Customer rollout is blocked until this section is complete.** The user explicitly requires separate AI keys for each law firm before delivery or onboarding to another customer. The user subsequently authorized per-bureau key management; the staged save/test/activate workflow remains required.
 
-- [ ] Store encrypted credentials separately for each law firm, including active and pending keys.
-- [ ] Let each firm's administrator manage only that firm's keys; derive the firm from the authenticated session, never client-supplied IDs.
-- [ ] Resolve the correct firm's key throughout analysis, document intake, chat, automatic answer classification, courtroom, voice and background jobs.
-- [ ] Keep connection status, validation results and caches scoped to the firm.
-- [ ] Prevent customer requests from falling back to another firm's key or a shared application key.
+- [x] Store encrypted credentials separately for each law firm, including active and pending keys.
+- [x] Let each firm's administrator manage only that firm's keys; derive the firm from the authenticated session, never client-supplied IDs.
+- [x] Resolve the correct firm's key throughout analysis, document intake, chat, automatic answer classification, courtroom, voice and background jobs.
+- [x] Keep connection status, validation results and caches scoped to the firm.
+- [x] Prevent customer requests from falling back to another firm's key or a shared application key.
 - [ ] Test cross-firm reads, writes, activation, cache isolation and provider requests, including queued jobs and restarts.
 - [ ] Preserve encryption keys and credential versions in protected backups; test recovery without exposing plaintext.
 - [ ] Verify successful and failed activation with synthetic data, and confirm no secret appears in responses, logs, browser storage, source control or screenshots.
@@ -54,3 +54,10 @@ Internal development pushes may continue while the customer-release gate remains
 - Keep the navigation scrollable on short screens so the footer remains reachable.
 - Validation: 8 sidebar component tests passed. The desktop placement check and mobile navigation check passed; the complete workspace browser tour passed on rerun with a 120-second limit after the first cold-development run reached its 60-second limit. Screenshots were reviewed at desktop and mobile sizes.
 - Release version: `v.0.4`, following the already published `v.0.3` update. Deployed application commit `cf81f26`; the public Settings bundle serves the exact `v.0.4` label and bottom-anchored sidebar layout, and the health endpoint passes. Server production build/type checks and GitHub frontend CI passed for this commit. The backend source is unchanged from the 994-test successful CI run above.
+
+## Follow-up — bureau key management, v.0.5
+
+- User authorized bureau administrators, including the current bureau account, to add/test/activate their own encrypted OpenAI credential directly in Settings. The platform account is no longer required for bureau configuration.
+- Each bureau has isolated active, pending and previous credential files, with encrypted scope binding. Bureau requests and queued jobs never use the platform fallback key. Lawyers can use the bureau connection and inspect its status; bureau administrators manage the bureau-wide key.
+- Validation so far: 709 frontend tests passed, plus 46 existing credential/status/provider checks and 28 final isolation/worker/courtroom checks. All three browser scenarios passed: platform key staging/activation, bureau administrator key staging/activation and lawyer read-only access. Provider responses were synthetic. Full backend suite and deployment evidence are pending.
+- Additional-customer rollout remains blocked until the unchecked requirements above have final release evidence. No real customer API key has been entered or changed by the assistant.

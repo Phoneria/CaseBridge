@@ -18,14 +18,17 @@ def get_chat_provider(
     max_tokens: Optional[int] = None,
     timeout_seconds: Optional[float] = None,
     max_retries: Optional[int] = None,
+    law_firm_id=None,
 ) -> ChatProvider:
     config = get_level_config(level)
     cap = max_tokens if max_tokens is not None else config.max_tokens
     timeout = timeout_seconds if timeout_seconds is not None else settings.chat_timeout_seconds
     name = settings.chat_provider
     if name == "openai":
-        api_key = get_openai_api_key()
+        api_key = get_openai_api_key(law_firm_id)
         if not api_key or not api_key.strip():
+            if law_firm_id is not None:
+                raise AIProviderConfigError("Büronuzun AI anahtarı tanımlı değil. Ayarlar üzerinden API anahtarınızı ekleyin.")
             raise AIProviderConfigError(
                 "CHAT_PROVIDER=openai but OPENAI_API_KEY is not set. "
                 "Set OPENAI_API_KEY, or set CHAT_PROVIDER=mock to run without a real AI provider."
@@ -49,7 +52,7 @@ def get_chat_provider(
     return MockChatProvider(max_tokens=cap)
 
 
-def get_chat_classifier_provider() -> ChatProvider:
+def get_chat_classifier_provider(law_firm_id=None) -> ChatProvider:
     """The Basit model with a tiny output cap and short timeout, used to pick
     each question's level. Mock mode always answers "standard"."""
     from app.ai.chat.classifier import CLASSIFIER_MAX_TOKENS
@@ -61,14 +64,15 @@ def get_chat_classifier_provider() -> ChatProvider:
         max_tokens=CLASSIFIER_MAX_TOKENS,
         timeout_seconds=settings.chat_classifier_timeout_seconds,
         max_retries=0,
+        law_firm_id=law_firm_id,
     )
 
 
-def get_chat_provider_status() -> dict:
+def get_chat_provider_status(law_firm_id=None) -> dict:
     """Safe, user-facing status (no secrets). Never raises."""
     external = settings.chat_provider == "openai"
     try:
-        provider = get_chat_provider()
+        provider = get_chat_provider(law_firm_id=law_firm_id) if law_firm_id is not None else get_chat_provider()
     except AIProviderConfigError as exc:
         return {
             "provider": settings.chat_provider,

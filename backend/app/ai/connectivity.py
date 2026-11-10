@@ -21,6 +21,7 @@ OPENAI_BASE_URL = "https://api.openai.com/v1"
 
 _lock = threading.Lock()
 _cache: dict = {"at": 0.0, "value": None}
+_firm_caches: dict = {}
 
 
 def _probe_ollama(model: str) -> tuple[bool, Optional[str]]:
@@ -74,13 +75,13 @@ def _probe_openai_compatible(base_url: Optional[str], api_key: Optional[str], mo
     return True, None
 
 
-def _probe(provider: str, model: str) -> tuple[bool, Optional[str]]:
+def _probe(provider: str, model: str, law_firm_id=None) -> tuple[bool, Optional[str]]:
     if provider == "mock":
         return False, "Mock mod: gerçek bir AI sağlayıcısı yok."
     if provider == "ollama":
         return _probe_ollama(model)
     if provider == "openai":
-        return _probe_openai_compatible(OPENAI_BASE_URL, get_openai_api_key(), model)
+        return _probe_openai_compatible(OPENAI_BASE_URL, get_openai_api_key(law_firm_id), model)
     if provider == "qwen":
         return _probe_openai_compatible(settings.qwen_base_url, settings.qwen_api_key, model)
     return False, f"Bilinmeyen sağlayıcı: {provider}"
@@ -94,14 +95,14 @@ def _llm_model() -> str:
     }.get(settings.llm_provider, "mock")
 
 
-def _compute() -> dict:
+def _compute(law_firm_id=None) -> dict:
     targets = [
         ("Analiz", settings.llm_provider, _llm_model()),
         ("Hukuk Asistanı", settings.chat_provider, settings.chat_model),
     ]
     checks = []
     for name, provider, model in targets:
-        reachable, detail = _probe(provider, model)
+        reachable, detail = _probe(provider, model, law_firm_id) if law_firm_id is not None else _probe(provider, model)
         checks.append(
             {"name": name, "provider": provider, "model": model, "reachable": reachable, "detail": detail}
         )
@@ -112,19 +113,24 @@ def _compute() -> dict:
     }
 
 
-def get_ai_connectivity(force: bool = False) -> dict:
+def get_ai_connectivity(force: bool = False, *, law_firm_id=None) -> dict:
     with _lock:
-        cached = _cache["value"]
-        if not force and cached is not None and time.monotonic() - _cache["at"] < CACHE_TTL_SECONDS:
+        cache = _cache if law_firm_id is None else _firm_caches.setdefault(law_firm_id, {"at": 0.0, "value": None})
+        cached = cache["value"]
+        if not force and cached is not None and time.monotonic() - cache["at"] < CACHE_TTL_SECONDS:
             return cached
-    value = _compute()
+    value = _compute(law_firm_id) if law_firm_id is not None else _compute()
     with _lock:
-        _cache["value"] = value
-        _cache["at"] = time.monotonic()
+        cache["value"] = value
+        cache["at"] = time.monotonic()
     return value
 
 
-def reset_cache() -> None:
+def reset_cache(law_firm_id=None) -> None:
     with _lock:
+        if law_firm_id is not None:
+            _firm_caches.pop(law_firm_id, None)
+            return
+        _firm_caches.clear()
         _cache["value"] = None
         _cache["at"] = 0.0

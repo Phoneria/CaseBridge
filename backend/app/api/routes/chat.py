@@ -11,7 +11,7 @@ from app.ai.chat.factory import get_chat_provider_status
 from app.ai.chat.levels import DEFAULT_CHAT_LEVEL, ChatLevel, get_level_config
 from app.ai.chat.prompt import system_prompt_for
 from app.ai.errors import AIProviderConfigError
-from app.api.deps import get_chat_level_classifier, get_chat_provider_resolver, get_chat_session_factory, get_current_user
+from app.api.deps import ai_credential_scope, get_chat_level_classifier, get_chat_provider_resolver, get_chat_session_factory, get_current_user
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User, UserRole
@@ -48,7 +48,7 @@ def _conversation_out(service: ChatService, conversation) -> ChatConversationOut
 
 @router.get("/status", response_model=ChatStatusOut)
 def chat_status(current_user: User = Depends(get_current_user)):
-    return ChatStatusOut(**get_chat_provider_status())
+    return ChatStatusOut(**get_chat_provider_status(ai_credential_scope(current_user)))
 
 
 @router.get("/conversations", response_model=list[ChatConversationSummaryOut])

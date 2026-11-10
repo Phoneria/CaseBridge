@@ -6,6 +6,7 @@ raises AIProviderConfigError rather than quietly degrading to
 MockProvider, so startup / the AI health status can report it clearly.
 """
 import json
+from functools import partial
 from typing import Callable, Optional
 
 from app.ai.errors import AIProviderConfigError
@@ -51,7 +52,7 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
 )
 
 
-def build_llm_provider(model: str) -> LLMProvider:
+def build_llm_provider(model: str, *, law_firm_id=None) -> LLMProvider:
     """One real provider (LLM_PROVIDER=qwen/openai/ollama) for `model`."""
     provider_name = settings.llm_provider
 
@@ -78,8 +79,10 @@ def build_llm_provider(model: str) -> LLMProvider:
         )
 
     if provider_name == "openai":
-        api_key = get_openai_api_key()
+        api_key = get_openai_api_key(law_firm_id)
         if not api_key or not api_key.strip():
+            if law_firm_id is not None:
+                raise AIProviderConfigError("Büronuzun AI anahtarı tanımlı değil. Ayarlar üzerinden API anahtarınızı ekleyin.")
             raise AIProviderConfigError(
                 "LLM_PROVIDER=openai but OPENAI_API_KEY is not set. "
                 "Set OPENAI_API_KEY in your environment, or set "
@@ -168,38 +171,39 @@ class _TrackedProvider(LLMProvider):
         return self._inner.last_latency_ms
 
 
-def get_llm_provider() -> LLMProvider:
+def get_llm_provider(law_firm_id=None) -> LLMProvider:
     if settings.llm_provider in ("qwen", "openai", "ollama"):
-        return LevelRoutedProvider(build=build_llm_provider, model_for_level=llm_model_for_level)
+        build = partial(build_llm_provider, law_firm_id=law_firm_id) if law_firm_id is not None else build_llm_provider
+        return LevelRoutedProvider(build=build, model_for_level=llm_model_for_level)
     return MockProvider(default_response=_MOCK_DISABLED_RESPONSE)
 
 
-def get_courtroom_provider() -> LLMProvider:
+def get_courtroom_provider(law_firm_id=None) -> LLMProvider:
     """Interactive simulations need role-shaped mock JSON in offline mode."""
     if settings.llm_provider == "mock":
         from app.ai.courtroom import CourtroomMockProvider
 
         return CourtroomMockProvider()
-    return get_llm_provider()
+    return get_llm_provider(law_firm_id)
 
 
-def get_case_intake_provider() -> LLMProvider:
+def get_case_intake_provider(law_firm_id=None) -> LLMProvider:
     """"Belgeden doldur" needs a draft-shaped answer in offline mock mode."""
     if settings.llm_provider == "mock":
         from app.ai.case_intake import CaseIntakeMockProvider
 
         return CaseIntakeMockProvider()
-    return get_llm_provider()
+    return get_llm_provider(law_firm_id)
 
 
-def get_ai_provider_status() -> dict:
+def get_ai_provider_status(law_firm_id=None) -> dict:
     """Safe (no secret values), user-facing status of the configured AI
     provider - for the AI health/status surface (Settings page, /health
     or a dedicated endpoint). Never raises: a misconfiguration is
     reported as data, not an exception, so a status page can always
     render it."""
     try:
-        get_llm_provider()
+        get_llm_provider(law_firm_id)
     except AIProviderConfigError as exc:
         return {"provider": settings.llm_provider, "configured": False, "error": str(exc)}
     return {"provider": settings.llm_provider, "configured": True, "error": None}

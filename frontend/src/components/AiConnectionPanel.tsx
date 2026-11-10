@@ -54,7 +54,7 @@ export function AiConnectionPanel({ canManageSecrets = false }: { canManageSecre
         <p className="mt-4 text-xs leading-5 text-navy-500">Bu kontrol hizmete erişimi doğrular. Yanıt üretimi ayrıca kullanım kotasına ve model erişimine bağlıdır.</p>
       </>}
       {canManageSecrets && <AiKeySettings onSaved={(result) => { setData(result); setChecking(false); setFailed(false); }} />}
-      {!canManageSecrets && <p className="mt-4 rounded-xl border border-surface-border bg-surface-muted/40 p-4 text-sm leading-6 text-navy-600">Gizli anahtar ekleme, test etme ve etkinleştirme için platform yöneticisi hesabıyla oturum açın. Büro yöneticisi yetkisi, uygulamanın ortak AI anahtarını değiştirme izni vermez.</p>}
+      {!canManageSecrets && <p className="mt-4 rounded-xl border border-surface-border bg-surface-muted/40 p-4 text-sm leading-6 text-navy-600">Büronuzun AI anahtarını eklemek, test etmek ve etkinleştirmek için büro yöneticinizle iletişime geçin.</p>}
     </section>
   );
 }

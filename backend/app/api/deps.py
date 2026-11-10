@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 from typing import Callable, Optional
 
 from fastapi import Depends, HTTPException, status
@@ -93,32 +94,39 @@ def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
     return UserRepository(db)
 
 
-def get_llm_provider_dep() -> LLMProvider:
+def ai_credential_scope(user: User):
+    return None if user.is_platform_admin and user.law_firm.is_platform else user.law_firm_id
+
+
+def get_llm_provider_dep(current_user: User = Depends(get_current_user)) -> LLMProvider:
     """FastAPI dependency wrapping the provider factory - overridable in
     tests via app.dependency_overrides so no test ever needs a real
     OPENAI_API_KEY or hits the network."""
-    return get_llm_provider()
+    try:
+        return get_llm_provider(ai_credential_scope(current_user))
+    except AIProviderConfigError:
+        raise HTTPException(status_code=503, detail="Büronuzun AI bağlantısı yapılandırılmamış. Ayarlar üzerinden API anahtarınızı ekleyin.") from None
 
 
-def get_case_intake_provider_dep() -> LLMProvider:
+def get_case_intake_provider_dep(current_user: User = Depends(get_current_user)) -> LLMProvider:
     """Provider for "Belgeden doldur". A misconfigured real provider is a 503
     with a generic message (the configuration error text is never exposed)."""
     try:
-        return get_case_intake_provider()
+        return get_case_intake_provider(ai_credential_scope(current_user))
     except AIProviderConfigError as exc:
         logger.warning("Case intake provider is misconfigured: %s", type(exc).__name__)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=UNCONFIGURED_MESSAGE)
 
 
-def get_chat_provider_resolver() -> Callable[[str], ChatProvider]:
+def get_chat_provider_resolver(current_user: User = Depends(get_current_user)) -> Callable[[str], ChatProvider]:
     """Returns level -> configured chat provider (raises AIProviderConfigError
     when misconfigured). Overridable in tests."""
-    return get_chat_provider
+    return partial(get_chat_provider, law_firm_id=ai_credential_scope(current_user))
 
 
-def get_chat_level_classifier() -> Callable[[str, Optional[str]], str]:
+def get_chat_level_classifier(current_user: User = Depends(get_current_user)) -> Callable[[str, Optional[str]], str]:
     """(question, previous_question) -> level. Overridable in tests."""
-    return classify_chat_level
+    return partial(classify_chat_level, law_firm_id=ai_credential_scope(current_user))
 
 
 def get_chat_session_factory() -> Callable[[], Session]:

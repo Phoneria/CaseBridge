@@ -29,12 +29,12 @@ def operator(db_session, office, auth_headers, monkeypatch):
     return SimpleNamespace(user=user, headers=auth_headers(user))
 
 
-def test_only_platform_admin_can_read_or_change_key(client, office, operator, auth_headers):
+def test_admins_manage_their_scope_and_lawyers_cannot_change_key(client, office, operator, auth_headers):
     for method, path in (("get", "/system/openai-key"), ("put", "/system/openai-key"), ("post", "/system/openai-key/activate")):
         assert getattr(client, method)(path).status_code == 401
-        for user in (office.admin_a, office.lawyer_a1):
+        for user in (office.lawyer_a1,):
             response = getattr(client, method)(path, headers=auth_headers(user))
-            assert response.status_code == 403
+            assert response.status_code == (200 if method == "get" else 403)
 
 
 def test_rotates_key_encrypted_and_never_returns_or_logs_secret(client, operator, monkeypatch, caplog):

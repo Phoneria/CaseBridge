@@ -112,7 +112,8 @@ export function SettingsView() {
         </section>
       )}
 
-      <AiConnectionPanel />
+      <AiConnectionPanel canManageSecrets={isAdmin} />
+      {isAdmin && <p className="text-sm text-navy-600">Buradan eklediğiniz AI anahtarı yalnızca bu büronun işlemlerinde kullanılır. Diğer büroların bağlantısı değişmez.</p>}
 
       {notifications && (
         <section aria-labelledby="settings-notifications" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">

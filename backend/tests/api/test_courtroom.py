@@ -21,6 +21,25 @@ def _seed_and_pick(db_session):
     return db_session.query(CourtroomScenario).filter_by(slug="odenmeyen-borc").first()
 
 
+def test_queued_courtroom_turn_uses_its_firm(client, two_firms_two_users, db_session):
+    scenario = _seed_and_pick(db_session)
+    seen = []
+    for who in ("user_a", "user_b"):
+        headers = _headers(client, two_firms_two_users, who)
+        created = client.post("/courtroom-sessions", headers=headers, json={
+            "scenario_id": scenario.id, "chosen_role": "plaintiff",
+        }).json()
+        assert client.post(f"/courtroom-sessions/{created['id']}/moves", headers=headers, json={
+            "action_type": "opening", "content": "Örnek açılış beyanı, taleplerimizi sunuyoruz.",
+        }).status_code == 202
+        def build(*, law_firm_id):
+            seen.append(law_firm_id)
+            return CourtroomMockProvider()
+        result = process_one_pending_courtroom_turn(db_session, provider_factory=build)
+        assert result.law_firm_id == two_firms_two_users[who].law_firm_id
+    assert seen == [two_firms_two_users["user_a"].law_firm_id, two_firms_two_users["user_b"].law_firm_id]
+
+
 def test_scenarios_expose_public_information_only(client, two_firms_two_users, db_session):
     _seed_and_pick(db_session)
     body = client.get(
@@ -92,7 +111,7 @@ def test_voice_uses_owned_session_and_persisted_ai_turn(client, two_firms_two_us
     }).json()
     path = f"/courtroom-sessions/{created['id']}/voice"
 
-    monkeypatch.setattr(voice_service, "transcribe", lambda filename, content_type, data: "Sayın hâkim, delilim budur.")
+    monkeypatch.setattr(voice_service, "transcribe", lambda filename, content_type, data, **kwargs: "Sayın hâkim, delilim budur.")
     audio = {"file": ("move.webm", b"audio", "audio/webm")}
     assert client.post(f"{path}/transcribe", headers=outsider, files=audio).status_code == 404
     transcript = client.post(f"{path}/transcribe", headers=owner, files=audio)
@@ -109,7 +128,7 @@ def test_voice_uses_owned_session_and_persisted_ai_turn(client, two_firms_two_us
     state = client.get(f"/courtroom-sessions/{created['id']}", headers=owner).json()
     opponent = next(turn for turn in state["turns"] if turn["actor"] == "opponent")
     own_turn = next(turn for turn in state["turns"] if turn["actor"] == "user")
-    monkeypatch.setattr(voice_service, "synthesize", lambda text, actor: b"mp3-bytes")
+    monkeypatch.setattr(voice_service, "synthesize", lambda text, actor, **kwargs: b"mp3-bytes")
     assert client.get(f"{path}/turns/{opponent['id']}", headers=outsider).status_code == 404
     assert client.get(f"{path}/turns/{own_turn['id']}", headers=owner).status_code == 404
     spoken = client.get(f"{path}/turns/{opponent['id']}", headers=owner)
