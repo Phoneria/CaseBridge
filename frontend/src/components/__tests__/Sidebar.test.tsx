@@ -32,6 +32,7 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "Dosya Analizi" })).toHaveAttribute("href", "/ai/analiz");
     expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("href", "/ai/durusma");
     expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("href", "/ai/sohbet");
+    expect(screen.getByRole("link", { name: "Sufle" })).toHaveAttribute("href", "/ai/sufle");
   });
 
   it("marks the current route as active", () => {
