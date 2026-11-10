@@ -84,7 +84,7 @@ describe("AiHubView", () => {
 
     expect(await screen.findByRole("link", { name: "Analizi başlat" })).toHaveAttribute("href", "/ai/analiz");
     expect(screen.getByRole("link", { name: "Raporları gör" })).toHaveAttribute("href", "/ai/analiz#raporlar");
-    expect(screen.getByRole("link", { name: "Devam et: Senaryo live" })).toHaveAttribute("href", "/ai/durusma/oturum/live");
+    expect(await screen.findByRole("link", { name: "Devam et: Senaryo live" })).toHaveAttribute("href", "/ai/durusma/oturum/live");
   });
 
   it("offers to enter the courtroom when no session is active", async () => {
@@ -98,7 +98,7 @@ describe("AiHubView", () => {
     render(<AiHubView />);
 
     const list = await screen.findByRole("list", { name: "Son AI aktivitesi" });
-    const links = within(list).getAllByRole("link");
+    const links = await within(list).findAllByRole("link");
     expect(links[0]).toHaveAttribute("href", "/ai/durusma/oturum/o1");
     expect(links[1]).toHaveAttribute("href", "/davalar/c1?sekme=ai");
   });
