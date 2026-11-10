@@ -41,3 +41,9 @@ Internal development pushes may continue while the customer-release gate remains
 - Production build and type checks passed. A live user-provided key has not been entered, replaced or activated by the assistant.
 - Deployed application commit `08bc3e6` to the existing app on 10 November 2026. Public health check passed; served Settings bundles contain the add-key and explicit activation controls and the `v.0.2` label. Server metadata confirms encrypted storage is enabled, with no managed or pending key yet. Previous images and protected configuration remain available for rollback.
 - The full backend suite was not run; the focused backend checks above cover this update. Per-firm configuration remains incomplete and blocks additional customer rollout.
+
+## Follow-up — v.0.3
+
+- Clarify in the AI status panel that adding, testing and activating the shared key requires a platform administrator login; a bureau administrator cannot change the shared key.
+- Keep the requested `v.0.3` release label. This clarification does not grant new permissions or implement per-firm credentials.
+- Deployment and validation: pending.
