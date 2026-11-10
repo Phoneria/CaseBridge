@@ -8,7 +8,7 @@ Updated: 10 November 2026.
 - [x] Test and encrypt the candidate separately; saving must not change the active key.
 - [x] Require a separate Activate action, revalidate the candidate, and retain the previous key.
 - [x] Verify authorization, secret redaction, failed-key handling and persistence.
-- [ ] Publish this update as **v.0.2**, using the `v.` display prefix.
+- [x] Publish this update as **v.0.2**, using the `v.` display prefix.
 
 ## Mandatory before any additional customer rollout — option 2
 
@@ -26,9 +26,9 @@ Updated: 10 November 2026.
 
 ## Before pushing or releasing
 
-- [ ] Review this checklist and the diff; do not include real credentials, private environment files or database dumps.
-- [ ] Run checks appropriate to the change and record material limits honestly.
-- [ ] Keep the displayed version aligned with the actual release.
+- [x] Review this checklist and the diff; do not include real credentials, private environment files or database dumps.
+- [x] Run checks appropriate to the change and record material limits honestly.
+- [x] Keep the displayed version aligned with the actual release.
 - [ ] For a customer rollout, complete every mandatory option-2 item above first.
 
 Internal development pushes may continue while the customer-release gate remains blocked. Never mark an unchecked requirement complete merely because a TODO or UI has been added.
@@ -39,3 +39,5 @@ Internal development pushes may continue while the customer-release gate remains
 - Backend: 52 focused provider, credential, authentication and secret-handling tests passed.
 - Browser checks: platform navigation, desktop/mobile workspace checks and key entry passed; the final save-then-activate flow passed after refinement. Provider responses used synthetic test fixtures.
 - Production build and type checks passed. A live user-provided key has not been entered, replaced or activated by the assistant.
+- Deployed application commit `08bc3e6` to the existing app on 10 November 2026. Public health check passed; served Settings bundles contain the add-key and explicit activation controls and the `v.0.2` label. Server metadata confirms encrypted storage is enabled, with no managed or pending key yet. Previous images and protected configuration remain available for rollback.
+- The full backend suite was not run; the focused backend checks above cover this update. Per-firm configuration remains incomplete and blocks additional customer rollout.
