@@ -19,10 +19,10 @@ Updated: 10 November 2026.
 - [x] Resolve the correct firm's key throughout analysis, document intake, chat, automatic answer classification, courtroom, voice and background jobs.
 - [x] Keep connection status, validation results and caches scoped to the firm.
 - [x] Prevent customer requests from falling back to another firm's key or a shared application key.
-- [ ] Test cross-firm reads, writes, activation, cache isolation and provider requests, including queued jobs and restarts.
-- [ ] Preserve encryption keys and credential versions in protected backups; test recovery without exposing plaintext.
-- [ ] Verify successful and failed activation with synthetic data, and confirm no secret appears in responses, logs, browser storage, source control or screenshots.
-- [ ] Record release commit and test evidence here before marking the application ready for another customer.
+- [x] Test cross-firm reads, writes, activation, cache isolation and provider requests, including queued jobs and restarts.
+- [x] Preserve encryption keys and credential versions in protected backups; test recovery without exposing plaintext.
+- [x] Verify successful and failed activation with synthetic data, and confirm no secret appears in responses, logs, browser storage, source control or screenshots.
+- [x] Record release commit and test evidence here before marking the application ready for another customer.
 
 ## Before pushing or releasing
 
@@ -121,3 +121,11 @@ Internal development pushes may continue while the customer-release gate remains
 - Merged-source validation: 1,069 backend tests passed in the isolated synthetic-fixture bcrypt-cost-4 process; 733 frontend tests and TypeScript passed. The default production bcrypt-cost-12 checks and normal-cost management checks from the preceding development record remain applicable; production password settings are unchanged.
 - No live credential is to be entered, rotated or activated by this deployment. Existing encrypted credential versions and matching encryption configuration must be preserved in protected backups and recovered in isolation without revealing their values.
 - Production backup, live PostgreSQL migration rehearsal, browser release checks, public version/code/health and post-restart credential metadata checks are pending. The customer-rollout gate remains incomplete until its evidence is recorded.
+
+### Verified preflight — application source `4dfbf27`
+
+- All **1,069 backend** and **733 frontend** tests passed on the combined bureau-management/Sufle source. **7 Chromium release scenarios passed**, including both platform/bureau key staging and explicit activation, lawyer read-only key status, management/client portal and Sufle desktop/mobile/audio retry flows. Synthetic-provider fixtures were used for key activation and AI browser calls.
+- Tenant credential evidence includes `test_firm_ai_keys.py`, `test_ai_key_settings.py`, queued-job provider selection, firm cache isolation, ciphertext scope binding, failed activation retention, synthetic protected recovery and fresh-process resolution. No real key was entered, changed, returned, logged or placed in browser storage.
+- Protected preflight backup: `/var/backups/casebridge-bureau-v010-preflight/` on the server, restricted to root. It contains the database dump, document/storage archive, encrypted active/pending/previous credential files, matching production encryption configuration and previous commit/image records. Dump/archive readability and checksums were checked. The backup was restored to a network-isolated PostgreSQL 16 container and separate protected storage.
+- Real backup recovery preserved **7 firms, 8 users, 40 cases and 98 documents**. **Two stored encrypted credential versions** were decrypted only in isolated process memory with the backed-up configuration; no plaintext was written or printed. PostgreSQL upgrade → downgrade → upgrade reached `d8e9f0a1b2c3` and the five expected management tables. The initial probe encountered the temporary PostgreSQL initialization socket restarting; waiting for TCP readiness and rerunning the restore completed successfully. Production remained available during the probe.
+- These results complete the four outstanding technical option-2 checklist items above. This deployment does not create or onboard a new customer. Public deployment verification is still pending below and must pass before calling this release complete.
