@@ -105,12 +105,12 @@ def add_demo_template(db: Session, admin: User) -> dict:
             event_type=event_type, event_date=date.today() - timedelta(days=days_ago),
             created_at=datetime.now(timezone.utc) - timedelta(hours=days_ago),
         )
+    enrich_cases(db, admin, list(demo_cases.values()))
     for case_number, case in demo_cases.items():
         if case_number != "2026/153":
             assigned = next((user for user in owners if user.id == case.assigned_lawyer_id), author)
             _seed_case_detail(db, case, assigned)
 
-    enrich_cases(db, admin, list(demo_cases.values()))
     seed_operations(db, admin, list(demo_cases.values()))
     seed_courtroom_scenarios(db)
     seed_courtroom_showcases(db, admin)

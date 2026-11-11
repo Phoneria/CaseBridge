@@ -159,3 +159,16 @@ def test_existing_scoped_client_is_never_a_sample_case_owner(client, db_session,
     response=client.post("/admin/demo-template",headers=auth_headers(office.admin_a))
     assert response.status_code==200,response.text
     assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id,assigned_lawyer_id=office.lawyer_a1.id).count()==0
+
+
+def test_old_template_with_missing_hearing_is_repaired_before_detail_notes(client, db_session, office, auth_headers):
+    from app.core.timeutil import local_today
+    source=DEMO_CASES[0]
+    legacy=Case(law_firm_id=office.firm_a.id,case_number="ÖRNEK-"+source["case_number"],case_name=source["case_name"],client_name=source["client_name"],opposing_party=source["opposing_party"],case_type=source["case_type"],description="[ÖRNEK ŞABLON] Eski gösterim kaydı",assigned_lawyer_id=office.lawyer_a1.id,next_hearing_date=None)
+    db_session.add(legacy);db_session.commit()
+    response=client.post("/admin/demo-template",headers=auth_headers(office.admin_a))
+    assert response.status_code==200,response.text
+    assert response.json()["added_cases"]==len(DEMO_CASES)-1
+    db_session.refresh(legacy)
+    assert legacy.next_hearing_date>=local_today()
+    assert db_session.query(Document).filter_by(case_id=legacy.id).count()>=2

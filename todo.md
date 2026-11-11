@@ -172,3 +172,5 @@ Internal development pushes may continue while the customer-release gate remains
 - Bu yayın yeni müşteri teslimi değildir; mevcut deneme2 bürosunda kullanıcının gösterim talebini karşılar. Zorunlu ek müşteri sürüm kapıları değiştirilmez.
 - [ ] Korumalı yedek ve PostgreSQL üzerinde şablon doğrulaması.
 - [ ] Mevcut kurulumda v.0.16 yayın, kamuya açık sürüm/kod/health doğrulaması ve hedef büroda gösterim verilerinin doğrulanması.
+
+- İzole üretim PostgreSQL kopyası, eski şablondaki boş `next_hearing_date` alanının `_seed_case_detail` içinde biçimlendirme hatasına yol açtığını ortaya çıkardı. Eksik tarihleri/alanları not üretiminden önce tamamlama sırası düzeltildi; eski tek dava şablonu için regresyon testi eklendi. Üretim servisleri bu hata sırasında değiştirilmedi.

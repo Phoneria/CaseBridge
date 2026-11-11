@@ -62,10 +62,6 @@ def enrich_cases(db, admin, cases):
             from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
             ensure_all_day_hearing(db, case, today+timedelta(days=index%6+2), admin.id)
             recompute_next_hearing(db, case, today)
-        for task in db.query(Task).filter_by(case_id=case.id,law_firm_id=admin.law_firm_id).all():
-            task.reminder_days=[]
-        for event in db.query(CalendarEvent).filter_by(case_id=case.id,law_firm_id=admin.law_firm_id).all():
-            event.reminder_days=[]
         # Legacy seeds had demo:// documents which could be read but not downloaded.
         for document in db.query(Document).filter_by(case_id=case.id, law_firm_id=admin.law_firm_id).all():
             if document.storage_path.startswith("demo://"):
@@ -171,6 +167,12 @@ def seed_operations(db: Session, admin: User, cases: list[Case]):
     # Never change a real firm's billing/contact or existing budget configuration.
     if "ai_budget" not in profile.data:
         profile.data={**profile.data,"ai_budget":{"token_budget":250000,"cost_per_million":"2.50","currency":"USD"}}
+    db.flush()
+    case_ids=[case.id for case in cases]
+    for task in db.query(Task).filter(Task.law_firm_id==firm_id,Task.case_id.in_(case_ids)):
+        task.reminder_days=[]
+    for event in db.query(CalendarEvent).filter(CalendarEvent.law_firm_id==firm_id,CalendarEvent.case_id.in_(case_ids)):
+        event.reminder_days=[]
     db.flush()
     return members
 
