@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { CaseConfirmModal } from "@/components/CaseConfirmModal";
+import { ReasonDialog } from "@/components/management/RecordPanel";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { FirmDetailModal } from "@/components/platform/FirmDetailModal";
@@ -11,6 +11,8 @@ import { NoticeLine, type Notice } from "@/components/platform/NoticeLine";
 import { activatePlatformFirm, listPlatformFirms, resendPlatformAdminInvite, suspendPlatformFirm } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 import type { PlatformAdmin, PlatformFirm } from "@/types";
+import Link from "next/link";
+import { INPUT } from "@/lib/management";
 
 const INVITE_FAILED = "Davet e-postası gönderilemedi; daveti yeniden gönderebilirsiniz.";
 const SUSPENDED_ADD =
@@ -44,6 +46,8 @@ export function PlatformView() {
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -110,8 +114,8 @@ export function PlatformView() {
     }
   }
 
-  async function changeStatus(firmId: string, suspend: boolean) {
-    const next = suspend ? await suspendPlatformFirm(firmId) : await activatePlatformFirm(firmId);
+  async function changeStatus(firmId: string, suspend: boolean, reason: string) {
+    const next = suspend ? await suspendPlatformFirm(firmId, reason) : await activatePlatformFirm(firmId, reason);
     putFirm(next);
     setDialog({ kind: "detail", firmId });
     setNotice({ tone: "ok", text: suspend ? "Büro askıya alındı." : "Büro aktifleştirildi." });
@@ -122,6 +126,10 @@ export function PlatformView() {
 
   const current = dialog && dialog.kind !== "create" ? firms.find((item) => item.id === dialog.firmId) : undefined;
   const confirm = dialog?.kind === "confirm" ? dialog : null;
+  const visibleFirms = firms.filter(item =>
+    `${item.name} ${item.admins.map(a => `${a.full_name} ${a.email}`).join(" ")}`.toLocaleLowerCase("tr-TR").includes(search.toLocaleLowerCase("tr-TR")) &&
+    (!statusFilter || (statusFilter === "active" ? item.is_active : statusFilter === "suspended" ? !item.is_active : item.admins.some(a => a.status === "pending")))
+  );
 
   return (
     <section aria-labelledby="platform-firms" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
@@ -141,7 +149,13 @@ export function PlatformView() {
         </button>
       </div>
 
+      <p className="mb-5 text-sm text-navy-500">Büroların hesap durumunu, kurulum adımlarını ve müşteri ilişkisini yönetin.</p>
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[["Toplam büro", firms.length], ["Aktif büro", firms.filter(f => f.is_active).length], ["Askıda büro", firms.filter(f => !f.is_active).length], ["Aktif kullanıcı hesabı", firms.reduce((sum, f) => sum + f.active_user_count, 0)]].map(([label, value]) => <div key={label} className="rounded-xl border border-surface-border bg-surface-muted p-4"><p className="text-xs text-navy-500">{label}</p><p className="mt-2 text-2xl font-semibold text-navy-900">{value}</p></div>)}
+      </div>
+      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_220px]"><label className="text-xs text-navy-500">Büro veya yönetici ara<input className={INPUT} value={search} onChange={e => setSearch(e.target.value)} placeholder="Ad veya e-posta" /></label><label className="text-xs text-navy-500">Büro durumu<select className={INPUT} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option value="">Tüm bürolar</option><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="pending">Davet bekleyen</option></select></label></div>
       {notice && !dialog && <NoticeLine notice={notice} />}
+      {firms.length > 0 && visibleFirms.length === 0 && <p className="my-6 text-sm text-navy-500">Aramaya uygun büro bulunamadı.</p>}
 
       {firms.length === 0 ? (
         <p className="text-sm text-navy-500">Henüz büro yok. &quot;Yeni büro&quot; ile ilk büroyu açın.</p>
@@ -158,12 +172,13 @@ export function PlatformView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {firms.map((item) => (
+              {visibleFirms.map((item) => (
                 <tr key={item.id}>
                   <td className="py-2 pr-3">
                     <button type="button" onClick={() => openDetail(item.id)} className="font-medium text-navy-800 hover:underline">
                       {item.name}
                     </button>
+                    <Link href={`/platform/${item.id}`} className="mt-1 block text-xs text-accent-700 hover:underline">Profili aç →</Link>
                   </td>
                   <td className="py-2 pr-3">
                     <span
@@ -216,16 +231,15 @@ export function PlatformView() {
         />
       )}
       {confirm && current && (
-        <CaseConfirmModal
+        <ReasonDialog
           title={confirm.suspend ? "Büroyu askıya al" : "Büroyu aktifleştir"}
-          message={
+          description={
             confirm.suspend
               ? `${current.name} bürosunun hiçbir kullanıcısı giriş yapamayacak ve açık oturumlar kapanacak. Veriler silinmez; büroyu daha sonra yeniden aktifleştirebilirsiniz.`
               : `${current.name} bürosunun kullanıcıları yeniden giriş yapabilecek.`
           }
           confirmLabel={confirm.suspend ? "Askıya al" : "Aktifleştir"}
-          fallbackError="İşlem tamamlanamadı. Lütfen tekrar deneyin."
-          onConfirm={() => changeStatus(current.id, confirm.suspend)}
+          onConfirm={(reason) => changeStatus(current.id, confirm.suspend, reason)}
           onClose={() => setDialog({ kind: "detail", firmId: current.id })}
         />
       )}

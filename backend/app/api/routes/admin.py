@@ -33,11 +33,14 @@ def import_demo_template(admin: User = Depends(get_current_admin), db: Session =
 def list_lawyers(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     """The lawyers cases can be given to: active and past the invitation
     (a lawyer who has not chosen a password yet is not assignable)."""
+    from app.models.management import WorkspaceAccess
+    restricted = db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == admin.law_firm_id)
     return db.query(User).filter(
         User.law_firm_id == admin.law_firm_id,
         User.role == UserRole.LAWYER,
         User.is_active.is_(True),
         User.password_set_at.isnot(None),
+        User.id.notin_(restricted),
     ).order_by(User.full_name).all()
 
 
@@ -61,9 +64,13 @@ def assign_case_lawyer(
     ).first()
     if lawyer is None:
         raise HTTPException(status_code=422, detail="Bu büroda aktif bir avukat seçin.")
+    from app.services.management_service import access_for, audit
+    if access_for(db, lawyer):
+        raise HTTPException(422, "Dava sahipliği için tam erişimli bir avukat seçin.")
     previous = case.assigned_lawyer_id
     case.assigned_lawyer_id = lawyer.id
     move_upcoming_hearings(db, case, previous, lawyer.id, local_today())
+    audit(db, admin, admin.law_firm_id, "case.assigned", "case", case.id, {"owner_id": previous}, {"owner_id": lawyer.id})
     db.commit()
     db.refresh(case)
     db.expire(case, ["assigned_lawyer"])  # the view-only relationship still points at the previous lawyer

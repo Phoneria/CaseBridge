@@ -30,12 +30,15 @@ class UserRepository:
 
     def list_in_firm(self, law_firm_id: str) -> list[User]:
         """Active users who have chosen a password."""
+        from app.models.management import WorkspaceAccess
+        clients = self.db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == law_firm_id, WorkspaceAccess.position == "client")
         return (
             self.db.query(User)
             .filter(
                 User.law_firm_id == law_firm_id,
                 User.is_active.is_(True),
                 User.password_set_at.isnot(None),
+                User.id.notin_(clients),
             )
             .all()
         )

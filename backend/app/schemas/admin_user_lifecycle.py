@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.admin_user import AdminUserOut
 
@@ -21,6 +21,7 @@ class WorkloadOut(BaseModel):
     precedents_reviewing: int
     # Calendar events assigned to the user that start today or later.
     upcoming_events: int
+    management_work: list[WorkloadTask] = Field(default_factory=list)
 
 
 class DeactivateRequest(BaseModel):

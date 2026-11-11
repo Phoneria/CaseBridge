@@ -81,7 +81,7 @@ def test_workload_lists_open_cases_pending_tasks_and_precedents(client, office, 
 
 def test_workload_is_empty_for_a_user_without_work(client, office, auth_headers):
     body = client.get(f"/admin/users/{office.lawyer_a2.id}/workload", headers=auth_headers(office.admin_a)).json()
-    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
+    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0, "management_work": []}
 
 
 def test_workload_is_admin_only_and_firm_scoped(client, office, busy, auth_headers):
@@ -207,7 +207,7 @@ def test_deactivation_moves_open_cases_pending_tasks_and_precedents_in_one_step(
     assert tasks["Mehmet'in görevi"] == mehmet
 
     workload = client.get(f"/admin/users/{office.lawyer_a1.id}/workload", headers=auth_headers(office.admin_a)).json()
-    assert workload == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
+    assert workload == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0, "management_work": []}
 
 
 def test_deactivation_ends_the_session_and_invalidates_unused_links(client, db_session, office, auth_headers):
@@ -428,7 +428,7 @@ def archived_work(db_session, office):
 def test_work_on_archived_cases_is_not_counted(client, office, archived_work, auth_headers):
     body = client.get(f"/admin/users/{office.lawyer_a1.id}/workload", headers=auth_headers(office.admin_a)).json()
 
-    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0}
+    assert body == {"open_cases": [], "pending_tasks": [], "precedents_reviewing": 0, "upcoming_events": 0, "management_work": []}
 
 
 def test_work_on_archived_cases_stays_with_the_user(client, db_session, office, busy, archived_work, auth_headers):

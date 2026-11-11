@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { logout } from "@/lib/api";
 import type { AppUser } from "@/types";
+import { POSITION_LABELS } from "@/lib/management";
 
 export function UserMenu({ user }: { user: AppUser | null }) {
   const router = useRouter();
@@ -16,7 +17,7 @@ export function UserMenu({ user }: { user: AppUser | null }) {
   const loggingOutRef = useRef(false);
 
   const name = user?.full_name ?? "Kullanıcı";
-  const roleLabel = user?.role === "admin" ? "Yönetici" : "Avukat";
+  const roleLabel = user?.workspace_position ? POSITION_LABELS[user.workspace_position] : user?.role === "admin" ? "Yönetici" : "Avukat";
   const initials =
     user?.full_name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR") ?? "CB";
 

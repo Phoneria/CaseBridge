@@ -82,7 +82,7 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
   );
 }
 
-export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer"; platform?: boolean }) {
+export function Sidebar({ role, platform = false, restricted = false }: { role?: "admin" | "lawyer"; platform?: boolean; restricted?: boolean }) {
   const pathname = usePathname();
   const inAi = isActive(pathname, AI_ROUTES.hub);
   const hubActive = pathname === AI_ROUTES.hub;
@@ -93,7 +93,12 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
 
       <div className="min-h-0 flex flex-1 flex-col">
 
-      {platform ? (
+      {restricted ? (
+        <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
+          <NavLink item={{label:"Çalışma Alanım",href:"/calisma-alanim",icon:<Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2"/>}} pathname={pathname}/>
+          <div className="mt-auto pt-4"><NavLink item={ACCOUNT_ITEM} pathname={pathname}/></div>
+        </nav>
+      ) : platform ? (
         <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
           <NavLink item={PLATFORM_ITEM} pathname={pathname} />
           <div className="mt-auto flex flex-col gap-2 pt-4">
@@ -106,6 +111,8 @@ export function Sidebar({ role, platform = false }: { role?: "admin" | "lawyer";
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
         <div className="flex min-h-full flex-col">
         <div className="shrink-0 space-y-1">
+        {role === "admin" && <NavLink item={{label:"Büro Yönetimi",href:"/buro",icon:<Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2"/>}} pathname={pathname}/>}
+        {role === "lawyer" && <NavLink item={{label:"Çalışma Alanım",href:"/calisma-alanim",icon:<Icon d="M9 11.5 11 13.5 15.5 9M5 6h14v14H5z"/>}} pathname={pathname}/>}
         {role === "admin" && (
           <NavLink item={{ label: "Admin Paneli", href: "/admin", icon: <Icon d="M12 3 4 7v5c0 5 3 8 8 10 5-2 8-5 8-10V7l-8-4ZM9 12l2 2 4-4" /> }} pathname={pathname} />
         )}

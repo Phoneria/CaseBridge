@@ -24,6 +24,7 @@ from app.services.user_admin_service import (
     update_user,
 )
 from app.services.user_lifecycle_service import activate_user, deactivate_user, get_workload
+from app.services.management_service import audit
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
@@ -56,6 +57,7 @@ def list_users(admin: User = Depends(get_current_admin), db: Session = Depends(g
 def create_user(payload: AdminUserCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     try:
         user = create_pending_user(db, admin.law_firm_id, payload)
+        audit(db, admin, admin.law_firm_id, "user.created", "user", user.id)
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -76,7 +78,9 @@ def patch_user(
 ):
     try:
         user = get_user_in_firm(db, admin.law_firm_id, user_id)
+        before = {"full_name": user.full_name, "role": user.role.value, "email": user.email, "department": user.department}
         update_user(db, admin, user, payload)
+        audit(db, admin, admin.law_firm_id, "user.updated", "user", user.id, before, {"full_name": user.full_name, "role": user.role.value, "email": user.email, "department": user.department})
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -132,6 +136,7 @@ def deactivate(
     try:
         user = get_user_in_firm(db, admin.law_firm_id, user_id)
         counts = deactivate_user(db, admin, user, payload.transfer_to)
+        audit(db, admin, admin.law_firm_id, "user.deactivated", "user", user.id)
     except UserAdminError as error:
         db.rollback()
         raise _http(error)
@@ -144,9 +149,10 @@ def deactivate(
 def activate(user_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     try:
         user = get_user_in_firm(db, admin.law_firm_id, user_id)
+        activate_user(db, user)
     except UserAdminError as error:
+        db.rollback()
         raise _http(error)
-    activate_user(db, user)
     db.commit()
     db.refresh(user)
     return user

@@ -5,6 +5,8 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
+from app.services.management_service import audit
 
 from app.api.deps import get_current_platform_admin
 from app.db.session import get_db
@@ -33,6 +35,10 @@ from app.services.user_admin_service import EMAIL_TAKEN, UserAdminError
 
 logger = logging.getLogger("casebridge")
 router = APIRouter(prefix="/platform", tags=["platform"])
+
+
+class StatusReason(BaseModel):
+    reason: str = Field(default="Platform yöneticisi işlemi", min_length=3, max_length=1000)
 
 
 def _http(error: UserAdminError) -> HTTPException:
@@ -74,6 +80,7 @@ def create(
 ):
     try:
         firm, admin = create_firm(db, payload.name, payload.admin_full_name, str(payload.admin_email))
+        audit(db, actor, firm.id, "firm.created", "firm", firm.id, after={"name": firm.name})
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -99,6 +106,7 @@ def add_admin(
     firm = _firm(db, firm_id)
     try:
         admin = add_firm_admin(db, firm, payload.full_name, str(payload.email))
+        audit(db, actor, firm.id, "admin.invited", "platform_admin", admin.id)
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -133,9 +141,11 @@ def resend_invite(
 
 
 @router.post("/firms/{firm_id}/suspend", response_model=PlatformFirmOut)
-def suspend(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def suspend(firm_id: str, payload: StatusReason | None = None, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
     changed = set_firm_active(firm, False)
+    if changed:
+        audit(db, actor, firm.id, "firm.suspended", "firm", firm.id, reason=payload.reason if payload else "Platform yöneticisi işlemi")
     db.commit()
     if changed:
         _audit("büro_askıya_alındı", firm.id, None, actor)
@@ -144,9 +154,11 @@ def suspend(firm_id: str, actor: User = Depends(get_current_platform_admin), db:
 
 
 @router.post("/firms/{firm_id}/activate", response_model=PlatformFirmOut)
-def activate(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def activate(firm_id: str, payload: StatusReason | None = None, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
     changed = set_firm_active(firm, True)
+    if changed:
+        audit(db, actor, firm.id, "firm.activated", "firm", firm.id, reason=payload.reason if payload else "Platform yöneticisi işlemi")
     db.commit()
     if changed:
         _audit("büro_aktifleştirildi", firm.id, None, actor)

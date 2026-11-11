@@ -88,7 +88,13 @@ async function throwApiError(response: Response, path: string): Promise<never> {
   let detail = `İstek başarısız oldu (${response.status}).`;
   try {
     const body = await response.json();
-    if (body?.detail) detail = typeof body.detail === "string" ? body.detail : detail;
+    if (body?.detail) {
+      if (typeof body.detail === "string") detail = body.detail;
+      else if ((path.startsWith("/bureau/") || path.startsWith("/platform/")) && Array.isArray(body.detail)) {
+        // Show validation messages without reflecting the submitted data.
+        detail = body.detail.map((item: {msg?: string}) => item.msg?.replace(/^Value error, /, "")).filter(Boolean).join(" ") || detail;
+      }
+    }
   } catch {
     // response had no JSON body - keep the generic message
   }
@@ -130,6 +136,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/** Shared authenticated transport for the bureau/platform workflow modules. */
+export function managementRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return request<T>(path, {...options, cache: "no-store"});
 }
 
 export async function login(email: string, password: string): Promise<{ access_token: string }> {
@@ -241,12 +252,12 @@ export async function resendPlatformAdminInvite(firmId: string, userId: string):
   return request(`/platform/firms/${firmId}/admins/${userId}/invite`, { method: "POST" });
 }
 
-export async function suspendPlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/suspend`, { method: "POST" });
+export async function suspendPlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/suspend`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
-export async function activatePlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/activate`, { method: "POST" });
+export async function activatePlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/activate`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
 export async function listUsers(): Promise<AppUser[]> {
@@ -608,6 +619,10 @@ export async function getReportSummary(): Promise<ReportSummary> {
 
 export async function downloadDocument(documentId: string): Promise<Blob> {
   return fetchBlob(`/documents/${documentId}/download`, "Belge indirilemedi");
+}
+
+export async function downloadWorkspaceDocument(documentId: string): Promise<Blob> {
+  return fetchBlob(`/bureau/workspace/documents/${encodeURIComponent(documentId)}`, "Belge indirilemedi");
 }
 
 // ---------- CaseBridge AI chat (Hukuk Asistanı) ----------

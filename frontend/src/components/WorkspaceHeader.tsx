@@ -9,6 +9,8 @@ import { UserMenu } from "@/components/UserMenu";
 import type { AppUser } from "@/types";
 
 const PAGE_TITLES: Record<string, string> = {
+  "/buro": "Büro Yönetimi",
+  "/calisma-alanim": "Çalışma Alanım",
   "/admin": "Admin Paneli",
   "/platform": "Büro Yönetimi",
   "/dashboard": "Dashboard",
@@ -63,7 +65,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         {/* Firm workspace widgets: the platform firm has no firm data or pages. */}
-        {!user?.is_platform_admin && (
+        {!user?.is_platform_admin && !user?.workspace_position && (
           <>
             <GlobalSearch />
             <UpcomingNotifications />

@@ -29,4 +29,7 @@ def find_assignable_in_firm(db: Session, user_id: str, law_firm_id: str) -> Opti
         return None
     if not is_assignable(user):
         raise AssigneeNotAssignable()
+    from app.models.management import WorkspaceAccess
+    if db.query(WorkspaceAccess).filter(WorkspaceAccess.user_id == user.id, WorkspaceAccess.law_firm_id == law_firm_id, WorkspaceAccess.position == "client").first():
+        raise AssigneeNotAssignable()
     return user

@@ -79,11 +79,18 @@ def get_workload(db: Session, user: User) -> WorkloadOut:
     )
     precedents = db.query(Case).filter(*_reviewed_precedents_filter(user)).count()
     events = db.query(CalendarEvent).filter(*_upcoming_events_filter(user)).count()
+    from app.models.management import ManagementRecord
+    management = db.query(ManagementRecord, Case.case_name).join(Case, Case.id == ManagementRecord.case_id).filter(
+        ManagementRecord.law_firm_id == user.law_firm_id, ManagementRecord.owner_id == user.id,
+        ManagementRecord.kind.in_(["deadline", "approval", "checklist"]), ManagementRecord.status.notin_(["completed", "approved"]),
+        ManagementRecord.deleted_at.is_(None), Case.is_archived.is_(False),
+    ).all()
     return WorkloadOut(
         open_cases=[WorkloadCase(id=c.id, case_number=c.case_number, case_name=c.case_name) for c in cases],
         pending_tasks=[WorkloadTask(id=t.id, title=t.title, case_name=name) for t, name in tasks],
         precedents_reviewing=precedents,
         upcoming_events=events,
+        management_work=[WorkloadTask(id=row.id, title=row.title, case_name=name) for row, name in management],
     )
 
 
@@ -103,6 +110,13 @@ def _transfer_target(locked: dict[str, User], user: User, transfer_to: str) -> U
     """An active lawyer of the same firm who has chosen a password, other
     than the user being deactivated (checked on the locked, fresh row)."""
     target = locked.get(transfer_to)
+    # Restricted staff/client accounts must never inherit full case ownership.
+    if target is not None:
+        from sqlalchemy.orm import object_session
+        from app.services.management_service import access_for
+        db = object_session(target)
+        if db is not None and access_for(db, target):
+            raise UserAdminError(422, TRANSFER_INVALID)
     if (
         target is None
         or target.id == user.id
@@ -132,7 +146,7 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
 
     workload = get_workload(db, user)
     has_work = bool(
-        workload.open_cases or workload.pending_tasks or workload.precedents_reviewing or workload.upcoming_events
+        workload.open_cases or workload.pending_tasks or workload.precedents_reviewing or workload.upcoming_events or workload.management_work
     )
     if has_work and transfer_to is None:
         raise UserAdminError(422, TRANSFER_REQUIRED)
@@ -157,6 +171,11 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
             update(CalendarEvent).where(*_upcoming_events_filter(user)).values(assignee_id=target.id)
             .execution_options(synchronize_session=False)
         ).rowcount
+        from app.models.management import WorkTransfer
+        from app.services.management_service import transfer_management_work, audit
+        management_count = transfer_management_work(db, admin, user, target, "Kullanıcı pasifleştirilirken iş devri")
+        db.add(WorkTransfer(law_firm_id=user.law_firm_id, from_user_id=user.id, to_user_id=target.id, created_by=admin.id, reason="Kullanıcı pasifleştirilirken iş devri", counts={**counts.model_dump(), "management": management_count}))
+        audit(db, admin, user.law_firm_id, "work.transferred", "user", user.id, after={"target_id": target.id, "counts": counts.model_dump()})
 
     user.is_active = False
     # Moving password_set_at ends every session issued so far for good: a
@@ -171,6 +190,13 @@ def deactivate_user(db: Session, admin: User, user: User, transfer_to: str | Non
 
 def activate_user(db: Session, user: User) -> User:
     """Idempotent. A user who never chose a password stays 'pending'."""
+    if not user.is_active:
+        from app.models.management import FirmProfile
+        profile = db.query(FirmProfile).filter(FirmProfile.law_firm_id == user.law_firm_id).with_for_update().first()
+        if profile and profile.data.get("seats"):
+            count = db.query(User).filter(User.law_firm_id == user.law_firm_id, User.is_active.is_(True)).count()
+            if count >= profile.data["seats"]:
+                raise UserAdminError(409, "Büronun kullanıcı limiti dolu.")
     user.is_active = True
     db.flush()
     return user

@@ -119,6 +119,7 @@ class ReminderService:
         candidates = (
             self._event_candidates(today, last_day)
             + self._task_candidates(today, last_day)
+            + self._management_candidates(today, last_day)
         )
         users = self._users({c.recipient_id for c in candidates if c.recipient_id})
 
@@ -249,6 +250,46 @@ class ReminderService:
         ]
 
     # ----- deliveries -----
+
+    def _management_candidates(self, today: date, last_day: date) -> list[_Candidate]:
+        """Verified critical deadlines, plus a daily overdue escalation.
+
+        Management UUIDs share the TASK ledger namespace (no source FK). The
+        escalation gets its own deterministic UUID so it cannot suppress the
+        owner's reminder. Existing delivery retries/deduplication apply.
+        """
+        import uuid
+        from app.models.management import ManagementRecord
+        from app.models.user import UserRole
+        rows = self.db.query(ManagementRecord).filter(
+            ManagementRecord.kind == "deadline", ManagementRecord.deleted_at.is_(None),
+            ManagementRecord.status != "completed", ManagementRecord.due_date <= last_day,
+        ).all()
+        candidates = []
+        for row in rows:
+            if not row.data.get("verified"):
+                continue
+            case = self.db.query(Case).filter(Case.id == row.case_id, Case.law_firm_id == row.law_firm_id).first()
+            if not case or case.is_archived:
+                continue
+            for recipient in {row.owner_id, row.data.get("backup_id")} - {None}:
+                candidates.append(_Candidate(
+                    source_type=ReminderSourceType.TASK, source_id=row.id, law_firm_id=row.law_firm_id,
+                    occurrence_date=row.due_date, reminder_days=row.data.get("reminder_days", [1, 0]),
+                    recipient_id=recipient, type_label="Kritik süre", title=row.title, starts_at=None,
+                    location=None, case_id=case.id, case_name=case.case_name,
+                ))
+            if row.due_date < today:
+                admins = self.db.query(User).filter(User.law_firm_id == row.law_firm_id, User.role == UserRole.ADMIN, User.is_active.is_(True)).all()
+                for admin in admins:
+                    candidates.append(_Candidate(
+                        source_type=ReminderSourceType.TASK,
+                        source_id=str(uuid.uuid5(uuid.NAMESPACE_URL, "management-overdue:" + row.id)),
+                        law_firm_id=row.law_firm_id, occurrence_date=today, reminder_days=[0],
+                        recipient_id=admin.id, type_label="Gecikmiş kritik süre", title=row.title,
+                        starts_at=None, location=None, case_id=case.id, case_name=case.case_name,
+                    ))
+        return candidates
 
     def _users(self, user_ids: set[str]) -> dict[str, User]:
         if not user_ids:

@@ -47,6 +47,7 @@ export function DeactivateUserModal({
     workload !== null &&
     (workload.open_cases.length > 0 ||
       workload.pending_tasks.length > 0 ||
+      (workload.management_work?.length ?? 0) > 0 ||
       workload.precedents_reviewing > 0 ||
       workload.upcoming_events > 0);
 
@@ -114,6 +115,7 @@ export function DeactivateUserModal({
             </div>
           )}
           {workload.precedents_reviewing > 0 && <p>İncelediği emsaller: {workload.precedents_reviewing}</p>}
+          {!!workload.management_work?.length && <div><p className="font-medium">Bekleyen yönetim işleri ({workload.management_work.length})</p><ul className="list-disc pl-5">{workload.management_work.map(item=><li key={item.id}>{item.title} — {item.case_name}</li>)}</ul></div>}
           {workload.upcoming_events > 0 && <p>{`${workload.upcoming_events} yaklaşan takvim etkinliği`}</p>}
           <label className="block">
             <span className="text-xs font-medium text-navy-600">Devredilecek avukat</span>

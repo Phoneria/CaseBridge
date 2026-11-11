@@ -17,6 +17,11 @@ beforeEach(() => {
 });
 
 describe("Sidebar", () => {
+  it("keeps scoped accounts inside their own workspace", () => {
+    render(<Sidebar role="lawyer" restricted />);
+    expect(screen.getByRole("link", { name: "Çalışma Alanım" })).toHaveAttribute("href", "/calisma-alanim");
+    for (const label of ["Davalar", "Ayarlar", "Büro Yönetimi", "Dosya Analizi"]) expect(screen.queryByRole("link", {name:label})).not.toBeInTheDocument();
+  });
   it("renders the main navigation without the old Simülasyonlar item", () => {
     render(<Sidebar />);
     for (const label of ["Dashboard", "Davalar", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {

@@ -15,6 +15,7 @@ class UserOut(BaseModel):
     law_firm_id: str
     is_active: bool
     is_platform_admin: bool = False
+    workspace_position: str | None = None
 
 
 class ProfileUpdate(BaseModel):
