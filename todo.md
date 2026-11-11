@@ -156,4 +156,9 @@ Internal development pushes may continue while the customer-release gate remains
 
 - User requested reversal of the v.0.11 visual redesign. Restored the four summary cards, rounded panel, blue platform shell, original sidebar width/label, firm detail buttons and separate profile links from v.0.10. Source files and existing tests are restored exactly; no bureau-management features are removed.
 - The application source hash returns exactly to the verified v.0.10 hash `a894ffe26251e2f7c097a0fd9a4896b8c383fd3fd93ab120efe78261e035b2ae`. The release label advances to v.0.12 to record this subsequent release. 33 affected component tests passed. The earlier v.0.10 full-suite/browser verification applies to the identical restored application source; no fresh full-suite result is claimed.
-- Production build and live version/code/health verification are pending. Frontend-only release; no schema, credentials or customer onboarding changes.
+- Production build and public version/code/health verification completed; final evidence follows. Frontend-only release; no schema, credentials or customer onboarding changes.
+
+### Verified restoration — v.0.12
+
+- Published source `609a81d`, restoring the verified v.0.10 platform design. 33 affected frontend tests, TypeScript and server production build/type checks passed. Public HTTPS `/platform` serves v.0.12 and the prior panel, four summary cards, original shell and profile links. All 10 public JavaScript files match the running frontend image byte-for-byte; health returns `status: ok`.
+- Only the frontend container was recreated; backend container identity is unchanged. No database, credential or onboarding changes. One transient startup HTTP 502 was followed by successful readiness and final public checks. Previous image, source IDs, build logs and verification evidence are retained at `/var/backups/casebridge-platform-v012/`; rollback image tag is `before-platform-v012`.
