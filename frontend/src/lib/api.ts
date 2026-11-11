@@ -268,7 +268,7 @@ export async function listAdminLawyers(): Promise<AppUser[]> {
   return request("/admin/lawyers");
 }
 
-export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number }> {
+export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
   return request("/admin/demo-template", { method: "POST" });
 }
 

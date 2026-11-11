@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta, timezone
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.db.demo_presentation_seed import enrich_cases, seed_operations, seed_ai_history, presentation_counts
 from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.db.courtroom_showcase_seed import seed_courtroom_showcases
 from app.db.seed import (
@@ -22,8 +23,8 @@ PREFIX = "ÖRNEK-"
 MARKER = "[ÖRNEK ŞABLON] "
 
 
-def add_demo_template(db: Session, admin: User) -> dict[str, int]:
-    """Seed only the authenticated firm; never create accounts or alter real cases."""
+def add_demo_template(db: Session, admin: User) -> dict:
+    """Seed only the authenticated firm; never alter real cases or send invitations."""
     # Serialize imports by two admins of the same firm before checking numbers.
     firm = db.query(LawFirm).filter(LawFirm.id == admin.law_firm_id).with_for_update().one()
     if firm.is_platform:
@@ -35,12 +36,16 @@ def add_demo_template(db: Session, admin: User) -> dict[str, int]:
     if any(not (case.description or "").startswith(MARKER) for case in existing):
         raise HTTPException(status_code=409, detail="Örnek numarası gerçek bir davada kullanılıyor; hiçbir kayıt eklenmedi.")
     before = len(existing)
+    counts_before = presentation_counts(db, firm.id)
 
+    from app.models.management import WorkspaceAccess
+    restricted = db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == firm.id)
     lawyers = db.query(User).filter(
         User.law_firm_id == firm.id,
         User.role == UserRole.LAWYER,
         User.is_active.is_(True),
         User.password_set_at.isnot(None),
+        User.id.notin_(restricted),
     ).order_by(User.full_name).all()
     owners = lawyers or [admin]
     author = owners[0]
@@ -105,6 +110,10 @@ def add_demo_template(db: Session, admin: User) -> dict[str, int]:
             assigned = next((user for user in owners if user.id == case.assigned_lawyer_id), author)
             _seed_case_detail(db, case, assigned)
 
+    enrich_cases(db, admin, list(demo_cases.values()))
+    seed_operations(db, admin, list(demo_cases.values()))
     seed_courtroom_scenarios(db)
     seed_courtroom_showcases(db, admin)
-    return {"total_cases": len(DEMO_CASES), "added_cases": len(DEMO_CASES) - before}
+    seed_ai_history(db, admin, list(demo_cases.values()))
+    coverage = presentation_counts(db, firm.id)
+    return {"total_cases": len(DEMO_CASES), "added_cases": len(DEMO_CASES) - before, "added_records": sum(coverage.values()) - sum(counts_before.values()), "coverage": coverage}

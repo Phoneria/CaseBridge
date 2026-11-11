@@ -364,7 +364,7 @@ def bureau_ai_usage(actor: User = Depends(bureau_admin), db: Session = Depends(g
             {"name": "Dosya analizi", "count": len(sims), "failed": sum(r.status.value == "failed" for r in sims)},
             {"name": "Hukuk asistanı", "count": len(chats), "failed": sum(r.status and r.status.value == "error" for r in chats)},
             {"name": "Duruşma oturumu", "count": len(courts), "failed": sum(r.status.value == "failed" for r in courts)},
-        ], "coverage": "Token ve maliyet hesabı kaydedilmiş analiz/sohbet tokenlarını kapsar; ses, belge alımı ve duruşmanın ölçülmeyen kullanımı dahil değildir. Bütçe bir uyarı eşiğidir; sağlayıcı faturasını veya harcama sınırını değiştirmez."}
+        ], "coverage": ("Kurgusal gösterim tokenları dahildir; gerçek sağlayıcı tüketimi veya fatura değildir. " if any(r.provider == "demo-template" for r in sims) else "") + "Token ve maliyet hesabı kaydedilmiş analiz/sohbet tokenlarını kapsar; ses, belge alımı ve duruşmanın ölçülmeyen kullanımı dahil değildir. Bütçe bir uyarı eşiğidir; sağlayıcı faturasını veya harcama sınırını değiştirmez."}
 
 
 @router.put("/ai-budget")

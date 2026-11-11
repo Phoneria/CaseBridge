@@ -162,3 +162,13 @@ Internal development pushes may continue while the customer-release gate remains
 
 - Published source `609a81d`, restoring the verified v.0.10 platform design. 33 affected frontend tests, TypeScript and server production build/type checks passed. Public HTTPS `/platform` serves v.0.12 and the prior panel, four summary cards, original shell and profile links. All 10 public JavaScript files match the running frontend image byte-for-byte; health returns `status: ok`.
 - Only the frontend container was recreated; backend container identity is unchanged. No database, credential or onboarding changes. One transient startup HTTP 502 was followed by successful readiness and final public checks. Previous image, source IDs, build logs and verification evidence are retained at `/var/backups/casebridge-platform-v012/`; rollback image tag is `before-platform-v012`.
+
+## Gösterim veri kapsamı — v.0.16 yayın hazırlığı
+
+- Canlı v.0.12 tabanından ayrı `codex/demo-presentation-release` dalı hazırlandı. Sufle, mevcut tasarım ve platform v.0.12 düzeni korundu. Ana çalışma dizinindeki bağımsız tasarım, tanıtım ve büro silme değişiklikleri bu yayına alınmadı.
+- Örnek yükleyici tüm büro kayıt türlerini, aktif destek örneklerini, üç kurgusal emsal incelemesini, arşivi, indirilebilir belgeleri, analiz/sohbet/kişisel prova geçmişini tamamlar. Var olan kaydı olan bürolar da eksik modülleri tek düğmeyle tamamlayabilir.
+- Aynı büroda kararlı kimliklerle tekrar yükleme çoğaltmaz. Örnek kişiler yalnızca kurgusal dava erişimi alır; bilinen ortak şifre, davet tokenı veya otomatik e-posta oluşturulmaz. Örnek görev/etkinlik/kritik süre e-posta hatırlatmaları kapalı, örnek izin talep aşamasındadır. Mevcut gerçek kayıtlar ve büro anahtarları korunur.
+- 52 ilgili backend testi, 38 Settings/Chat/Sufle testi ve üretim derlemesi/TypeScript geçti. E-posta yan etkisi kontrolleriyle son şablonun 6 testi tekrar geçti.
+- Bu yayın yeni müşteri teslimi değildir; mevcut deneme2 bürosunda kullanıcının gösterim talebini karşılar. Zorunlu ek müşteri sürüm kapıları değiştirilmez.
+- [ ] Korumalı yedek ve PostgreSQL üzerinde şablon doğrulaması.
+- [ ] Mevcut kurulumda v.0.16 yayın, kamuya açık sürüm/kod/health doğrulaması ve hedef büroda gösterim verilerinin doğrulanması.
