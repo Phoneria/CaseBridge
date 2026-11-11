@@ -1,6 +1,6 @@
 # Büro yönetimi
 
-Bu değişiklik yerel geliştirmedir; canlıya yayın veya yeni müşteri teslim onayı değildir. `todo.md` içindeki müşteri teslim koşulları geçerlidir.
+Bu özellikler mevcut kurulumda v.0.10 olarak canlıya yayımlandı. Yayın ve doğrulama kaydı `todo.md` içindedir; yeni müşteri teslim koşulları ayrıca geçerlidir.
 
 ## Ekranlar
 
