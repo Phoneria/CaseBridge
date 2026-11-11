@@ -42,7 +42,7 @@ const SETTINGS_ITEM: NavItem = {
 };
 
 const PLATFORM_ITEM: NavItem = {
-  label: "Büro Yönetimi",
+  label: "Bürolar",
   href: "/platform",
   icon: <Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2" />,
 };
@@ -88,7 +88,7 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
   const hubActive = pathname === AI_ROUTES.hub;
 
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-5">
+    <aside className={`flex h-full w-full shrink-0 flex-col border-r px-4 py-5 ${platform ? "border-slate-200 bg-white [&_nav_a]:rounded-md [&_nav_a]:shadow-none" : "border-accent-200 bg-accent-50"}`}>
       <div className="mb-6 shrink-0 px-2"><BrandLogo /></div>
 
       <div className="min-h-0 flex flex-1 flex-col">

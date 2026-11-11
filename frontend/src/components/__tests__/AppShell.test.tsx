@@ -82,6 +82,6 @@ describe("AppShell", () => {
     render(<AppShell platform><p>panel</p></AppShell>);
 
     expect(await screen.findByText("panel")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Büro Yönetimi/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Bürolar/ })).toBeInTheDocument();
   });
 });
