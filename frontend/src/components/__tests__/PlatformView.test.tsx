@@ -50,10 +50,10 @@ describe("PlatformView", () => {
     render(<PlatformView />);
 
     const table = await screen.findByRole("table");
-    for (const header of ["Büro", "Durum", "Aktif kullanıcı", "Yöneticiler", "Yönetici erişimi", "Oluşturulma"]) {
+    for (const header of ["Büro", "Durum", "Aktif kullanıcı", "Yöneticiler", "Oluşturulma"]) {
       expect(within(table).getByRole("columnheader", { name: header })).toBeInTheDocument();
     }
-    const row = within(table).getByRole("link", { name: "Demir Hukuk" }).closest("tr")!;
+    const row = within(table).getByRole("button", { name: "Demir Hukuk" }).closest("tr")!;
     expect(row).toHaveTextContent("Aktif");
     expect(row).toHaveTextContent("3");
     expect(row).toHaveTextContent("Bekleyen Kişi");
@@ -67,7 +67,7 @@ describe("PlatformView", () => {
       api.listPlatformFirms.mockResolvedValue([{ ...DEMIR, created_at: "2026-10-01T22:30:00" }]);
       render(<PlatformView />);
 
-      const row = (await screen.findByRole("link", { name: "Demir Hukuk" })).closest("tr")!;
+      const row = (await screen.findByRole("button", { name: "Demir Hukuk" })).closest("tr")!;
       expect(row).toHaveTextContent("2.10.2026");
     } finally {
       if (zone === undefined) delete process.env.TZ;
@@ -97,7 +97,7 @@ describe("PlatformView", () => {
       name: "Yıldız Hukuk", admin_full_name: "Selin Yıldız", admin_email: "selin@yildiz.test",
     });
     expect(await screen.findByRole("status")).toHaveTextContent("Büro oluşturuldu, davet gönderildi.");
-    expect(screen.getByRole("link", { name: "Yıldız Hukuk" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Yıldız Hukuk" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
@@ -144,9 +144,7 @@ describe("PlatformView", () => {
     api.resendPlatformAdminInvite.mockResolvedValue({ admin: DEMIR.admins[1], email_sent: true });
     render(<PlatformView />);
 
-    await screen.findByRole("link", { name: "Demir Hukuk" });
-    await userEvent.click(screen.getByLabelText("Demir Hukuk işlemleri"));
-    await userEvent.click(within(screen.getByLabelText("Demir Hukuk işlemleri").closest("details")!).getByRole("button", {name:"Yöneticiler ve davetler"}));
+    await userEvent.click(await screen.findByRole("button", { name: "Demir Hukuk" }));
     const panel = screen.getByRole("dialog", { name: "Demir Hukuk" });
     expect(within(panel).queryByRole("button", { name: "Daveti yeniden gönder, Ayşe Demir" })).not.toBeInTheDocument();
     await userEvent.click(within(panel).getByRole("button", { name: "Daveti yeniden gönder, Bekleyen Kişi" }));
@@ -159,9 +157,7 @@ describe("PlatformView", () => {
     api.suspendPlatformFirm.mockResolvedValue({ ...KAYA, is_active: false, suspended_at: "2026-10-23T20:00:00" });
     render(<PlatformView />);
 
-    await screen.findByRole("link", { name: "Kaya Hukuk" });
-    await userEvent.click(screen.getByLabelText("Kaya Hukuk işlemleri"));
-    await userEvent.click(within(screen.getByLabelText("Kaya Hukuk işlemleri").closest("details")!).getByRole("button", {name:"Yöneticiler ve davetler"}));
+    await userEvent.click(await screen.findByRole("button", { name: "Kaya Hukuk" }));
     await userEvent.click(within(screen.getByRole("dialog", { name: "Kaya Hukuk" })).getByRole("button", { name: "Büroyu askıya al" }));
     const confirm = screen.getByRole("dialog", { name: "Büroyu askıya al" });
     expect(confirm).toHaveTextContent("Veriler silinmez");
@@ -172,7 +168,7 @@ describe("PlatformView", () => {
     const panel = await screen.findByRole("dialog", { name: "Kaya Hukuk" });
     expect(within(panel).getByRole("status")).toHaveTextContent("Büro askıya alındı.");
     expect(within(panel).getByRole("button", { name: "Büroyu aktifleştir" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Kaya Hukuk" }).closest("tr")).toHaveTextContent("Askıda");
+    expect(screen.getByRole("button", { name: "Kaya Hukuk" }).closest("tr")).toHaveTextContent("Askıda");
   });
 
   it("adds an admin to a suspended firm and says the invite waits", async () => {
@@ -181,9 +177,7 @@ describe("PlatformView", () => {
     api.addPlatformFirmAdmin.mockResolvedValue({ admin: admin("n1", "Yeni Yönetici", { status: "pending" }), email_sent: false });
     render(<PlatformView />);
 
-    await screen.findByRole("link", { name: "Kaya Hukuk" });
-    await userEvent.click(screen.getByLabelText("Kaya Hukuk işlemleri"));
-    await userEvent.click(within(screen.getByLabelText("Kaya Hukuk işlemleri").closest("details")!).getByRole("button", {name:"Yöneticiler ve davetler"}));
+    await userEvent.click(await screen.findByRole("button", { name: "Kaya Hukuk" }));
     await userEvent.click(within(screen.getByRole("dialog", { name: "Kaya Hukuk" })).getByRole("button", { name: "Yönetici ekle" }));
     const form = screen.getByRole("dialog", { name: "Yönetici ekle — Kaya Hukuk" });
     await userEvent.type(within(form).getByLabelText("Ad soyad *"), "Yeni Yönetici");

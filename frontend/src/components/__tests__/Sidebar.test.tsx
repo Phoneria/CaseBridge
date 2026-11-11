@@ -82,7 +82,7 @@ describe("Sidebar", () => {
     pathname = "/platform";
     render(<Sidebar role="admin" platform />);
 
-    expect(screen.getByRole("link", { name: /Bürolar/ })).toHaveAttribute("href", "/platform");
+    expect(screen.getByRole("link", { name: /Büro Yönetimi/ })).toHaveAttribute("href", "/platform");
     expect(screen.getByRole("link", { name: /Hesabım/ })).toHaveAttribute("href", "/hesabim");
     expect(screen.queryByRole("link", { name: /Davalar/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Admin Paneli/ })).not.toBeInTheDocument();

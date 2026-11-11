@@ -12,7 +12,7 @@ import { activatePlatformFirm, listPlatformFirms, resendPlatformAdminInvite, sus
 import { userMessage } from "@/lib/userMessages";
 import type { PlatformAdmin, PlatformFirm } from "@/types";
 import Link from "next/link";
-
+import { INPUT } from "@/lib/management";
 
 const INVITE_FAILED = "Davet e-postası gönderilemedi; daveti yeniden gönderebilirsiniz.";
 const SUSPENDED_ADD =
@@ -131,89 +131,76 @@ export function PlatformView() {
     (!statusFilter || (statusFilter === "active" ? item.is_active : statusFilter === "suspended" ? !item.is_active : item.admins.some(a => a.status === "pending")))
   );
 
-  const counts = [
-    { value: "", label: "büro", count: firms.length },
-    { value: "active", label: "aktif", count: firms.filter(f => f.is_active).length },
-    { value: "suspended", label: "askıda", count: firms.filter(f => !f.is_active).length },
-    { value: "pending", label: "davet bekleyen", count: firms.filter(f => f.admins.some(a => a.status === "pending")).length },
-  ];
-  const fieldClass = "h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600";
-
   return (
-    <section aria-labelledby="platform-firms" className="text-slate-800">
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 id="platform-firms" className="text-2xl font-semibold tracking-tight text-slate-950">Bürolar</h1>
-          <div aria-label="Büro özeti" className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-            {counts.map(({value, label, count}, index) => <span key={label} className="inline-flex items-center gap-3">
-              {index > 0 && <span aria-hidden="true" className="text-slate-300">/</span>}
-              <button type="button" onClick={() => setStatusFilter(value)} aria-pressed={statusFilter === value}
-                className={`rounded-sm underline-offset-4 hover:text-accent-700 hover:underline ${statusFilter === value ? "text-slate-950 underline decoration-accent-600" : "text-slate-500"}`}>
-                <span className="font-medium tabular-nums">{count}</span> {label}
-              </button>
-            </span>)}
-          </div>
-        </div>
-        <button type="button" onClick={() => { setNotice(null); setDialog({kind:"create"}); }}
-          className="rounded-md bg-accent-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700">Yeni büro</button>
+    <section aria-labelledby="platform-firms" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
+      <div className="mb-3 flex items-center justify-between">
+        <h1 id="platform-firms" className="text-base font-semibold text-navy-900">
+          Bürolar
+        </h1>
+        <button
+          type="button"
+          onClick={() => {
+            setNotice(null);
+            setDialog({ kind: "create" });
+          }}
+          className="rounded-xl bg-navy-900 px-4 py-2 text-sm font-medium text-white"
+        >
+          Yeni büro
+        </button>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-end gap-3">
-        <label className="flex w-full flex-col gap-1.5 text-xs font-medium text-slate-600 sm:max-w-sm">Büro veya yönetici ara
-          <input type="search" className={fieldClass} value={search} onChange={e => setSearch(e.target.value)} placeholder="Ad veya e-posta" />
-        </label>
-        <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-600">Büro durumu
-          <select className={fieldClass} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">Tüm bürolar</option><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="pending">Davet bekleyen</option>
-          </select>
-        </label>
-        <p aria-live="polite" className="pb-2.5 text-xs text-slate-500 sm:ml-auto">{visibleFirms.length} büro gösteriliyor</p>
+      <p className="mb-5 text-sm text-navy-500">Büroların hesap durumunu, kurulum adımlarını ve müşteri ilişkisini yönetin.</p>
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[["Toplam büro", firms.length], ["Aktif büro", firms.filter(f => f.is_active).length], ["Askıda büro", firms.filter(f => !f.is_active).length], ["Aktif kullanıcı hesabı", firms.reduce((sum, f) => sum + f.active_user_count, 0)]].map(([label, value]) => <div key={label} className="rounded-xl border border-surface-border bg-surface-muted p-4"><p className="text-xs text-navy-500">{label}</p><p className="mt-2 text-2xl font-semibold text-navy-900">{value}</p></div>)}
       </div>
+      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_220px]"><label className="text-xs text-navy-500">Büro veya yönetici ara<input className={INPUT} value={search} onChange={e => setSearch(e.target.value)} placeholder="Ad veya e-posta" /></label><label className="text-xs text-navy-500">Büro durumu<select className={INPUT} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option value="">Tüm bürolar</option><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="pending">Davet bekleyen</option></select></label></div>
       {notice && !dialog && <NoticeLine notice={notice} />}
-      {firms.length > 0 && visibleFirms.length === 0 && <p className="border-t border-slate-200 py-10 text-sm text-slate-500">Aramaya uygun büro bulunamadı.</p>}
+      {firms.length > 0 && visibleFirms.length === 0 && <p className="my-6 text-sm text-navy-500">Aramaya uygun büro bulunamadı.</p>}
+
       {firms.length === 0 ? (
-        <p className="border-t border-slate-200 py-10 text-sm text-slate-500">Henüz büro yok. &quot;Yeni büro&quot; ile ilk büroyu açın.</p>
-      ) : visibleFirms.length > 0 && (
-        <div className="overflow-x-auto pb-32">
-          <table className="w-full min-w-[620px] text-left text-sm">
+        <p className="text-sm text-navy-500">Henüz büro yok. &quot;Yeni büro&quot; ile ilk büroyu açın.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-y border-slate-200 text-xs text-slate-500">
-                <th scope="col" className="py-3 pr-5 font-medium">Büro</th>
-                <th scope="col" className="py-3 pr-5 font-medium">Durum</th>
-                <th scope="col" className="py-3 pr-5 text-right font-medium">Aktif kullanıcı</th>
-                <th scope="col" className="py-3 pr-5 font-medium">Yöneticiler</th>
-                <th scope="col" className="py-3 pr-5 font-medium">Yönetici erişimi</th>
-                <th scope="col" className="hidden py-3 pr-5 font-medium xl:table-cell">Oluşturulma</th>
-                <th scope="col" className="py-3 text-right font-medium"><span className="sr-only">İşlemler</span></th>
+              <tr className="border-b border-surface-border text-xs text-navy-500">
+                <th className="py-2 pr-3 font-medium">Büro</th>
+                <th className="py-2 pr-3 font-medium">Durum</th>
+                <th className="py-2 pr-3 font-medium">Aktif kullanıcı</th>
+                <th className="py-2 pr-3 font-medium">Yöneticiler</th>
+                <th className="py-2 font-medium">Oluşturulma</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
-              {visibleFirms.map(item => {
-                const pending = item.admins.filter(a => a.status === "pending").length;
-                const active = item.admins.some(a => a.status === "active");
-                return <tr key={item.id} className="group hover:bg-slate-100/70">
-                  <th scope="row" className="py-4 pr-5 font-medium">
-                    <Link href={`/platform/${item.id}`} className="text-slate-950 underline-offset-4 hover:text-accent-700 hover:underline">{item.name}</Link>
-                  </th>
-                  <td className="py-4 pr-5"><span className={`inline-flex items-center gap-2 text-xs ${item.is_active ? "text-slate-600" : "font-medium text-red-700"}`}>
-                    <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${item.is_active ? "bg-emerald-600" : "bg-red-600"}`} />{item.is_active ? "Aktif" : "Askıda"}
-                  </span></td>
-                  <td className="py-4 pr-5 text-right tabular-nums text-slate-600">{item.active_user_count}</td>
-                  <td className="py-4 pr-5 text-slate-600">{item.admins.map(a => a.full_name).join(", ") || "—"}</td>
-                  <td className="py-4 pr-5 text-xs">{pending > 0 ? <span className="font-medium text-amber-800">Davet bekliyor{pending > 1 ? ` (${pending})` : ""}</span> : <span className={active ? "text-slate-500" : "text-red-700"}>{active ? "Hesap açıldı" : "Aktif yönetici yok"}</span>}</td>
-                  <td className="hidden py-4 pr-5 text-xs tabular-nums text-slate-500 xl:table-cell">{formatDate(item.created_at)}</td>
-                  <td className="py-3 text-right">
-                    <details className="relative inline-block text-left" onKeyDown={e => {if(e.key === "Escape") {e.currentTarget.open=false;e.currentTarget.querySelector("summary")?.focus();}}} onBlur={e => {if(!e.currentTarget.contains(e.relatedTarget as Node)) e.currentTarget.open=false;}}>
-                      <summary aria-label={`${item.name} işlemleri`} className="cursor-pointer list-none rounded-md px-3 py-2 font-semibold text-slate-500 hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-600 [&::-webkit-details-marker]:hidden">···</summary>
-                      <div className="absolute right-0 z-10 mt-1 w-48 rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg" onClick={e => { const d=e.currentTarget.closest("details");if(d)d.open=false; }}>
-                        <Link href={`/platform/${item.id}`} className="block px-3 py-2 hover:bg-slate-100">Büro profili</Link>
-                        <button type="button" onClick={() => openDetail(item.id)} className="block w-full px-3 py-2 text-left hover:bg-slate-100">Yöneticiler ve davetler</button>
-                        <button type="button" onClick={() => {setNotice(null);setDialog({kind:"confirm",firmId:item.id,suspend:item.is_active});}} className="block w-full px-3 py-2 text-left hover:bg-slate-100">{item.is_active ? "Büroyu askıya al" : "Büroyu aktifleştir"}</button>
-                      </div>
-                    </details>
+            <tbody className="divide-y divide-surface-border">
+              {visibleFirms.map((item) => (
+                <tr key={item.id}>
+                  <td className="py-2 pr-3">
+                    <button type="button" onClick={() => openDetail(item.id)} className="font-medium text-navy-800 hover:underline">
+                      {item.name}
+                    </button>
+                    <Link href={`/platform/${item.id}`} className="mt-1 block text-xs text-accent-700 hover:underline">Profili aç →</Link>
                   </td>
-                </tr>;
-              })}
+                  <td className="py-2 pr-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs ${item.is_active ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}
+                    >
+                      {item.is_active ? "Aktif" : "Askıda"}
+                    </span>
+                  </td>
+                  <td className="py-2 pr-3 text-navy-600">{item.active_user_count}</td>
+                  <td className="py-2 pr-3 text-navy-600">
+                    {item.admins.map((admin) => (
+                      <span key={admin.id} className="mr-3 inline-flex items-center gap-1">
+                        {admin.full_name}
+                        {admin.status === "pending" && (
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">Davet bekliyor</span>
+                        )}
+                      </span>
+                    ))}
+                  </td>
+                  <td className="py-2 text-navy-600">{formatDate(item.created_at)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -40,8 +40,7 @@ test("open a firm, its admin signs in, then the firm is suspended", async ({ pag
 
   // 3. The platform team suspends the firm.
   await page.reload();
-  await page.getByLabel(`${FIRM} işlemleri`).click();
-  await page.getByRole("button", {name:"Yöneticiler ve davetler"}).click();
+  await page.getByRole("button", { name: FIRM }).click();
   await page.getByRole("dialog", { name: FIRM }).getByRole("button", { name: "Büroyu askıya al" }).click();
   await page.getByRole("dialog", { name: "Büroyu askıya al" }).getByLabel("İşlem gerekçesi *").fill("Sentetik test askıya alma işlemi");
   await page.getByRole("dialog", { name: "Büroyu askıya al" }).getByRole("button", { name: "Askıya al" }).click();

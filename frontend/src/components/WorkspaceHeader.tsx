@@ -12,7 +12,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/buro": "Büro Yönetimi",
   "/calisma-alanim": "Çalışma Alanım",
   "/admin": "Admin Paneli",
-  "/platform": "Bürolar",
+  "/platform": "Büro Yönetimi",
   "/dashboard": "Dashboard",
   "/davalar": "Davalar",
   "/emsaller": "Emsal Kararlar",
