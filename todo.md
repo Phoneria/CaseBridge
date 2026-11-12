@@ -174,3 +174,12 @@ Internal development pushes may continue while the customer-release gate remains
 - [ ] Mevcut kurulumda v.0.16 yayın, kamuya açık sürüm/kod/health doğrulaması ve hedef büroda gösterim verilerinin doğrulanması.
 
 - İzole üretim PostgreSQL kopyası, eski şablondaki boş `next_hearing_date` alanının `_seed_case_detail` içinde biçimlendirme hatasına yol açtığını ortaya çıkardı. Eksik tarihleri/alanları not üretiminden önce tamamlama sırası düzeltildi; eski tek dava şablonu için regresyon testi eklendi. Üretim servisleri bu hata sırasında değiştirilmedi.
+
+## Application appearance preference — v.0.17, 12 November 2026
+
+- Added dark-by-default application styling and Settings > Görünüm > Koyu / Açık for all roles, including the platform administrator. The preference is local to the current browser and survives navigation, reload and logout; other tabs synchronize. Invalid/missing preferences fall back to dark. Storage failures do not prevent switching during the current session.
+- A small pre-body initialization script restores the saved theme before the page paints. Native form color schemes, semantic status colors, charts, AI content, translucent surfaces and the logo have dark treatments; light mode preserves the existing application palette. Appearance does not change bureau permissions or credential management.
+- Built on the clean live `92a44a1` application baseline in the isolated `codex/dark-theme` checkout. Independent unpublished development and marketing changes are excluded from the release.
+- Actual validation: 739 frontend tests passed (including four new preference/Settings/storage tests); production build and TypeScript passed. Synthetic local browser checks at 1440/390px passed for default dark, Settings selection, persistence/reload/navigation, cross-tab synchronization, dashboard/cases/analysis/calendar/reports/chat/hearing and unauthenticated login. Desktop/mobile dark/light Settings and representative route screenshots reviewed. Backend tests were not rerun for this frontend-only change.
+- [ ] Deploy the frontend and verify the public v.0.17 label, current Settings/theme bundles, dark/light browser behavior and health. A completed local build is not deployment evidence.
+- Existing mandatory additional-customer release requirements remain unchecked. No new customer rollout is authorized by this theme update.

@@ -7,6 +7,7 @@ import { getMe, getNotificationStatus, importDemoTemplate, sendTestEmail } from 
 import { userMessage } from "@/lib/userMessages";
 import type { AppUser, NotificationStatus } from "@/types";
 import { AiConnectionPanel } from "@/components/AiConnectionPanel";
+import { AppearanceSettings } from "@/components/AppearanceSettings";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { UsersPanel } from "@/components/users/UsersPanel";
@@ -85,14 +86,15 @@ export function SettingsView() {
     }
   }
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  if (loading) return <div className="space-y-5"><AppearanceSettings /><LoadingState /></div>;
+  if (error) return <div className="space-y-5"><AppearanceSettings /><ErrorState message={error} /></div>;
 
   const isAdmin = me?.role === "admin";
 
   if (me?.is_platform_admin) return (
     <div className="space-y-5">
       <div><h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1><p className="text-sm text-navy-500">Uygulamanın ortak AI bağlantısını yönetin.</p></div>
+      <AppearanceSettings />
       <AiConnectionPanel canManageSecrets />
     </div>
   );
@@ -103,6 +105,7 @@ export function SettingsView() {
         <h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1>
         <p className="text-sm text-navy-500">Büro ve kullanıcı ayarlarınızı yönetin.</p>
       </div>
+      <AppearanceSettings />
 
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
