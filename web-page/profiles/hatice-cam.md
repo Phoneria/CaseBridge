@@ -8,8 +8,6 @@ Backend developer at Technarts, contributing to two product development projects
 - Development of an IP Address Management (IPAM) system for network management
 - Experience with diverse technologies and different stages of product development
 
-### Artistic Background | Oil Painting
+### [Perpetual Labs](https://perpetual-labs.ai/) | AI-Assisted Presentation Preparation
 
-Hatice has enjoyed drawing and oil painting for a long time, developing an eye for color, light, composition and visual balance.
-
-Her artistic perspective helps us build an application that is easy to use, visually consistent and thoughtfully designed.
+- Works on using artificial intelligence to prepare presentations.

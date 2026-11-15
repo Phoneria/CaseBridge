@@ -1,0 +1,28 @@
+.atlas-globe { position: relative; }
+.expansion-routes { position: absolute; top: 0; left: 0; width: 100%; height: auto; aspect-ratio: 2000/1001; pointer-events: none; }
+.route-line { stroke-linecap: round; }
+.route-reveal { stroke-linecap: round; }
+.replay-routes { display: inline-flex; align-items: center; min-height: 44px; margin-top: 10px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 24px; background: #fff; color: #007f82; font-size: 12px; cursor: pointer; }
+.sufle-feature { margin-top: 36px; display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; padding: 28px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.sufle-visual { margin: 0; min-width: 0; }
+.sufle-visual img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.sufle-visual figcaption { color: var(--gray); font-size: 10px; line-height: 1.7; margin-top: 12px; }
+.sufle-visual figcaption a { text-decoration: underline; text-underline-offset: 3px; }
+.sufle-copy { min-width: 0; }
+.sufle-copy h3 { font-size: clamp(27px,3vw,38px); line-height: 1.15; letter-spacing: -.03em; font-weight: 400; }
+.sufle-copy>p:not(.section-label) { color: var(--gray); font-size: 14px; line-height: 1.8; }
+.sufle-prompts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.sufle-prompts button { min-height: 40px; border: 1px solid var(--line); border-radius: 20px; background: var(--pale); color: var(--ink); font-size: 11px; padding: 8px 12px; cursor: pointer; }
+.sufle-prompts button[aria-pressed=true] { border-color: #007f82; background: #e4f0f0; color: #00676a; }
+.sufle-question { margin: 18px 0 0; padding: 18px; background: #142d4e; color: #f5f7fa; border-left: 3px solid #007f82; border-radius: 6px; font-size: 16px; line-height: 1.6; min-height: 88px; }
+.replay-routes:focus-visible,.sufle-prompts button:focus-visible { outline: 3px solid #007f82; outline-offset: 4px; }
+@media(prefers-reduced-motion:no-preference) {
+  .photo-entrance { opacity: 0; transform: translateY(30px) scale(.94); filter: blur(8px); clip-path: inset(12% 0 0 0 round 10px); }
+  .photo-entrance.photo-entered { opacity: 1; transform: none; filter: blur(0); clip-path: inset(0 round 0); transition: opacity .85s ease var(--photo-delay,0ms), transform .85s cubic-bezier(.2,.75,.2,1) var(--photo-delay,0ms), filter .85s ease var(--photo-delay,0ms), clip-path .85s ease var(--photo-delay,0ms); }
+}
+@media(max-width:800px) { .sufle-feature { grid-template-columns: 1fr; gap: 24px; padding: 22px; } }
+@media(prefers-reduced-motion:reduce) { .photo-entrance { opacity: 1; transform: none; filter: none; clip-path: none; } }
+
+.sufle-copy>p.sufle-question { color: #f5f7fa; font-size: 16px; line-height: 1.6; }
+
+.team-surface .member-photo[src$="bengu-ozbek-web.jpg"] { object-position: 50% 43%; }

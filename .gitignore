@@ -40,10 +40,14 @@ backend/storage_e2e/
 _src_bundle.tar.gz
 _to_delete/
 _write_test.txt
+*.bundle
 
 # OS
 .DS_Store
 .next/
+
+# IDE (JetBrains: PyCharm / WebStorm / IntelliJ)
+.idea/
 
 # Real case data - never commit (KVKK)
 data/import/*

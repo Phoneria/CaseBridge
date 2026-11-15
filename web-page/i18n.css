@@ -1,0 +1,24 @@
+.language-switch{display:inline-flex;align-items:center;gap:2px;flex:none;padding:3px;border:1px solid #cbdce7;border-radius:999px;background:#f5f9fc;white-space:nowrap}
+.language-switch button{min-width:34px;min-height:30px;padding:5px 7px;border:0;border-radius:999px;background:transparent;color:#31536a;font:700 11px/1 var(--sans,Arial,Helvetica,sans-serif);letter-spacing:.04em;cursor:pointer}
+.language-switch button[aria-pressed="true"]{background:#142d4e;color:#fff}
+.language-switch button:hover:not([aria-pressed="true"]){background:#e3f1f8}
+.language-switch button:focus-visible{outline:2px solid #007eac;outline-offset:2px}
+@media(max-width:600px){.header .nav{gap:8px}.header .language-switch{margin-left:auto}.header .brand-lockup>small{display:none}.topbar{gap:10px}.topbar .brand{font-size:21px}.topbar>a:last-child{font-size:11px}.language-switch button{min-width:30px;min-height:28px;padding:4px}}
+
+/* v.0.40: dark-theme language switch */
+body .language-switch{border-color:#2d4140;background:#111718}
+body .language-switch button{color:#c2d2c9}
+body .language-switch button[aria-pressed="true"]{background:#9ddbd1;color:#0b0e0f}
+body .language-switch button:hover:not([aria-pressed="true"]){background:#1c302e}
+body .language-switch button:focus-visible{outline-color:#9ddbd1}
+.header .nav>.brand{order:0}.header .nav>nav{order:1}
+.header .nav .language-switch{order:2;margin-left:auto}
+.header .nav .menu-toggle{order:3}.header .nav .nav-cta{order:4;margin-left:0}
+/* Turkish column headings are longer; let them wrap instead of widening the table. */
+html[lang="tr"] body :is(table.home-annual-table,table.annual-risk-table) th{white-space:normal;vertical-align:bottom}
+.header .nav nav a,.header .nav .nav-cta{white-space:nowrap}
+/* Turkish menu labels are longer: scale the large menu type with the viewport. */
+html[lang="tr"] body .nav nav{font-size:clamp(22px,2.05vw,31.2px);gap:clamp(16px,1.8vw,28px)}
+/* While the switch is hidden the site is Turkish-only; keep the header spacing. */
+.language-switch[hidden]{display:none!important}
+.header .nav:has(.language-switch[hidden]) .nav-cta,.header .nav:has(.language-switch[hidden]) .menu-toggle{margin-left:auto}

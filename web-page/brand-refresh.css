@@ -1,0 +1,81 @@
+/* v.0.1 — 60% off-white, 30% navy, 10% petrol brand hierarchy. */
+:root {
+  --ink: #142d4e;
+  --teal: #007f82;
+  --pale: #f5f7fa;
+  --red: #007f82;
+  --gray: #526176;
+  --line: #dce2e9;
+}
+body, .header, .hero, .story-hero, .team-section, .analysis-section,
+.business-section, .finance-overview { background: var(--pale); }
+::selection { background: #cce5e6; color: var(--ink); }
+.story-hero { grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); gap: 36px; padding-block: 76px; }
+.story-hero-copy { max-width: 620px; }
+.story-hero h1 { font-size: clamp(44px,4.25vw,64px); line-height: 1.08; letter-spacing: -.045em; margin-bottom: 28px; }
+.story-hero h1 span { color: var(--teal); }
+.story-hero .story-lead { max-width: 570px; font-size: clamp(17px,1.4vw,20px); line-height: 1.7; margin-bottom: 30px; }
+.stage-label { color: var(--teal); line-height: 1.6; }
+.stage-label>span { background: var(--teal); }
+.button-red { background: var(--teal); color: #fff; }
+.button-red:hover, .button-app:hover { background: #00676a; }
+.button-app { background: var(--ink); color: #fff; }
+/* Broad navy panels establish the secondary color’s visual weight. */
+.intro, .workspace-section { --gray: #d5deea; --teal: #a3dddd; --line: #39516d; background: var(--ink); color: #f5f7fa; padding: 52px; border: 0; }
+.intro h2, .intro h3, .workspace-section h2, .workspace-section h3 { color: #f5f7fa; }
+.intro .section-label, .intro .perspectives span, .workspace-section .section-label { color: #a3dddd; }
+.footer { background: #f5f7fa; color: var(--ink); padding-inline: 32px; border-color: var(--line); }
+.footer p, .footer>span { color: #53718a; }
+
+/* Reuse the same accent in the interactive hero, without altering screenshots. */
+.mm-center path { stroke: var(--teal); }
+.mm-topic rect, .mm-leaf rect { fill: var(--pale); }
+.home-month-button[aria-pressed=true], .home-year-tabs button:hover,
+.finance-year[aria-expanded=true], .finance-year:hover,
+.actual-ai-tabs button[aria-selected=true] { border-color: #007f82; background: #e4f0f0; }
+@media(max-width:1100px) and (min-width:901px) {
+  .story-hero h1 { font-size: 44px; }
+  .story-hero .story-lead { font-size: 17px; }
+}
+@media(max-width:900px) {
+  .story-hero { grid-template-columns: minmax(0,1fr); gap: 30px; padding-block: 52px; }
+  .story-hero-copy { max-width: 720px; }
+  .story-hero h1 { font-size: clamp(40px,6.5vw,58px); }
+  .intro, .workspace-section { padding: 36px; }
+}
+@media(max-width:600px) {
+  .story-hero { padding-block: 38px; }
+  .story-hero h1 { font-size: clamp(36px,9vw,48px); }
+  .story-hero .story-lead { font-size: 17px; }
+  .intro, .workspace-section { padding: 28px 22px; }
+  .footer { padding-inline: 22px; }
+}
+.wordmark-bridge { color: #007f82; }
+.wordmark-line path { stroke: #007f82; }
+
+.pilot-results-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.pilot-result-card { background: #f5f7fa; border-color: var(--line); }
+.pilot-result-value { color: #142d4e; }
+@media(max-width:600px) { .pilot-results-grid { grid-template-columns: 1fr; } }
+.offering-surface>.business-heading { padding: 44px; background: #142d4e; color: #f5f7fa; margin-bottom: 32px; }
+.offering-surface>.business-heading h2 { color: #f5f7fa; }
+.offering-surface>.business-heading>p { color: #d5deea; }
+.offering-surface>.business-heading .section-label { color: #a3dddd; }
+@media(max-width:600px) { .offering-surface>.business-heading { padding: 28px 22px; } }
+/* Use the original header logo consistently on the light footer. */
+.footer { display: grid; grid-template-columns: max-content minmax(0,1fr) max-content; gap: 24px; padding-block: 32px; align-items: center; }
+.footer .wordmark-case { color: #142d4e; }
+.footer .wordmark-bridge { color: #007f82; }
+.footer .wordmark-line path { stroke: #007f82; }
+.footer .brand { font-size: 29px; }
+.footer .brand-lockup>small { color: #53718a; font-size: 7.5px; letter-spacing: 1.1px; }
+.footer p { display: block; justify-self: center; font-size: 12px; line-height: 1.7; }
+.footer>span { font-size: 11px; line-height: 1.7; }
+.footer a:focus-visible { outline-color: #007f82; }
+@media(max-width:760px) {
+  .footer { grid-template-columns: minmax(0,1fr); gap: 18px; justify-items: start; }
+  .footer p { justify-self: start; }
+}
+
+@media(max-width:1000px) { .footer .brand { font-size:25px; } }
+@media(max-width:600px) { .footer .brand { font-size:24px; } .footer .brand-lockup>small { font-size:6.5px; letter-spacing:.8px; } }
