@@ -206,8 +206,11 @@
     });
   }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: attributes });
 
+  // With the switch hidden the site is Turkish; ?lang=en still works for internal checks,
+  // and a remembered choice only applies while the switch is visible.
+  const switchVisible = languageButtons.some(button => !button.closest('[hidden]'));
   let initial = 'tr';
-  try { initial = new URLSearchParams(location.search).get('lang') || localStorage.getItem('casebridge-language') || 'tr'; } catch {}
+  try { initial = new URLSearchParams(location.search).get('lang') || (switchVisible && localStorage.getItem('casebridge-language')) || 'tr'; } catch {}
   setLanguage(initial, false);
   window.casebridgeSetLanguage = setLanguage;
   window.casebridgeTranslate = translate;

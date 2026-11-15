@@ -19,3 +19,6 @@ html[lang="tr"] body :is(table.home-annual-table,table.annual-risk-table) th{whi
 .header .nav nav a,.header .nav .nav-cta{white-space:nowrap}
 /* Turkish menu labels are longer: scale the large menu type with the viewport. */
 html[lang="tr"] body .nav nav{font-size:clamp(22px,2.05vw,31.2px);gap:clamp(16px,1.8vw,28px)}
+/* While the switch is hidden the site is Turkish-only; keep the header spacing. */
+.language-switch[hidden]{display:none!important}
+.header .nav:has(.language-switch[hidden]) .nav-cta,.header .nav:has(.language-switch[hidden]) .menu-toggle{margin-left:auto}
