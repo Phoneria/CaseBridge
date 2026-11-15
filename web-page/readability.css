@@ -136,3 +136,8 @@ body .nav>.brand{left:0;margin-left:48px}
 /* v.0.40: the light theme's per-card gradients (ending in white) outranked the
    dark card colour on the 2nd and 3rd roadmap cards; use one dark surface. */
 body .roadmap-grid>article:nth-child(n){background:#111718}
+/* v.0.40: smaller menu, centred in the header on wide screens. */
+@media(min-width:1251px){
+  body .nav{position:relative}
+  body .nav nav,html[lang="tr"] body .nav nav{position:absolute;left:50%;transform:translateX(-50%);font-size:17px;gap:36px}
+}
