@@ -1,10 +1,6 @@
-// Visible narrative first. Only supporting detail panels collapse on scroll.
-const supportingDetails = [...document.querySelectorAll('details:not(#monthly-details):not(.member-details)')];
-const detailGrace = new WeakMap();
-let detailScrollFrame;
-supportingDetails.forEach(detail => detail.addEventListener('toggle', () => {
-  if (detail.open) detailGrace.set(detail, performance.now() + 900);
-}));
+// Supporting detail panels stay as the reader left them: they open and close
+// only on click. (Auto-closing them on scroll moved the page twice, once by the
+// browser's scroll anchoring and once by the manual correction.)
 function openDeepLink() {
   let id;
   try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
@@ -12,29 +8,11 @@ function openDeepLink() {
   if (!target) return;
   let hasHiddenParent = false;
   for (let node = target; node; node = node.parentElement) {
-    if (node.tagName === 'DETAILS') { node.open = true; detailGrace.set(node, performance.now() + 1100); hasHiddenParent = true; }
+    if (node.tagName === 'DETAILS') { node.open = true; hasHiddenParent = true; }
   }
   if (hasHiddenParent) requestAnimationFrame(() => requestAnimationFrame(() => target.scrollIntoView({block:'start',behavior:'instant'})));
 }
 window.addEventListener('hashchange', openDeepLink);
-window.addEventListener('scroll', () => {
-  if (detailScrollFrame) return;
-  detailScrollFrame = requestAnimationFrame(() => {
-    detailScrollFrame = null;
-    const headerBottom = document.querySelector('.header').getBoundingClientRect().bottom;
-    // Close innermost panels first, retaining the reading position.
-    [...supportingDetails].reverse().forEach(detail => {
-      if (!detail.open || performance.now() < (detailGrace.get(detail) || 0)) return;
-      const rect = detail.getBoundingClientRect();
-      if (rect.bottom < headerBottom - 16 || rect.top > innerHeight + 24) {
-        const wasAbove = rect.bottom < headerBottom;
-        const oldHeight = rect.height;
-        detail.open = false;
-        if (wasAbove) window.scrollBy({top:-(oldHeight-detail.getBoundingClientRect().height),behavior:'instant'});
-      }
-    });
-  });
-}, {passive:true});
 openDeepLink();
 
 // Animate charts and milestone counts as they enter the viewport.
