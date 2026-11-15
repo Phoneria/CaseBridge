@@ -133,3 +133,6 @@ body .sam-segments button,body .finance-year,body .home-month-button{padding-lef
    menu is laid out after it instead of sliding underneath it. */
 body .nav>.brand{left:0;margin-left:48px}
 @media(max-width:650px){body .nav>.brand{left:0;margin-left:24px}}
+/* v.0.40: the light theme's per-card gradients (ending in white) outranked the
+   dark card colour on the 2nd and 3rd roadmap cards; use one dark surface. */
+body .roadmap-grid>article:nth-child(n){background:#111718}
