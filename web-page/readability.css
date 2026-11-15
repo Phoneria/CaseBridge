@@ -112,3 +112,20 @@ body #team{scroll-margin-top:100px}
 /* v.0.36: inset the header logo slightly farther from the left edge. */
 body .nav>.brand{position:relative;left:48px}
 @media(max-width:650px){body .nav>.brand{left:24px}}
+
+/* v.0.40 spacing fixes: the dark theme gives these elements their own
+   background, but they kept the zero or near-zero inner padding of the
+   original light layout, so text and images sat against the box edges. */
+body .strategy-step{padding:14px 16px;margin-block:12px}
+body .strategy-footer{padding:14px 16px}
+body .home-forecast{padding:44px clamp(16px,3vw,36px) clamp(24px,3vw,36px)}
+body .finance-glance{padding:clamp(20px,3vw,36px)}
+body .finance-growth-glance{padding-inline:clamp(16px,3vw,28px)}
+body .team-surface{padding-inline:clamp(16px,3vw,40px)}
+body table.research-table :is(th,td),body table.research-table thead th{padding-left:14px;padding-right:14px}
+body .annual-year-button[aria-pressed=true]{padding-inline:8px;margin-left:-8px}
+body .sam-segments button,body .finance-year,body .home-month-button{padding-left:12px;padding-right:12px}
+/* Wide screens: fit the forecast charts to their cards so the last months and
+   the final axis label are not hidden behind a horizontal scroll. Narrower
+   screens keep the scrollable 560px chart. */
+@media (min-width:1200px){body .home-chart-plot svg{min-width:0}}
