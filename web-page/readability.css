@@ -146,3 +146,6 @@ body .roadmap-grid>article:nth-child(n){background:#111718}
 body .finance-glance-legend>div[aria-pressed=true]{background:#1c302e;color:#f3f0e9}
 body .finance-glance-legend>div[aria-pressed=true] strong{color:#9ddbd1}
 body .allocation-selection{background:#152022;color:#dce7e1;border-left-color:#9ddbd1}
+/* v.0.40: hover states kept the light theme's near-white backgrounds under
+   light text; use the dark-theme highlight instead. */
+body .allocation-list>div:hover,body .finance-year:hover,body .home-year-tabs button:hover,body .sam-segments button:hover{background:#1c302e}

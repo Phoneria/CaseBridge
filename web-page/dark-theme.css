@@ -118,3 +118,5 @@ body .expansion-rationale .rationale-grid article>span,
 body .expansion-rationale a,
 body .expansion-rationale .expansion-gate>span{color:#9ddbd1}
 body .expansion-rationale .expansion-gate p{color:#f3f0e9}
+/* v.0.40: keyboard skip link was white text on the ivory button. */
+body .skip-link,body a.skip{background:#f3f0e9;color:#0b0e0f}
