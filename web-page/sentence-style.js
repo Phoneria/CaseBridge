@@ -4,12 +4,16 @@
   const attributes = ['aria-label', 'alt', 'title'];
   // Internal dots in decimal numbers, domains, email addresses and versions stay intact.
   const clean = text => text.replace(/\.(?=\s|$|[”’"')\]])/g, '');
+  // English copy drops sentence-final dots by design; Turkish keeps normal punctuation.
+  const english = () => document.documentElement.lang !== 'tr';
   function text(node) {
+    if (!english()) return;
     if (node.parentElement?.closest(excluded)) return;
     const value = clean(node.nodeValue);
     if (value !== node.nodeValue) node.nodeValue = value;
   }
   function labels(element) {
+    if (!english()) return;
     if (element.closest(excluded)) return;
     for (const name of attributes) {
       const value = element.getAttribute(name);

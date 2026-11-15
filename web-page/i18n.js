@@ -14,7 +14,7 @@
   const squash = text => clean(text.replace(/\s+/g, ' ').trim());
   // Other scripts sometimes copy already-translated text into new nodes; map it back.
   const reverse = new Map();
-  for (const [english, turkish] of Object.entries(dictionary)) if (turkish) reverse.set(squash(turkish), english);
+  for (const [english, turkish] of Object.entries(dictionary)) if (turkish) { reverse.set(squash(turkish), english); reverse.set(turkish.replace(/\s+/g, ' ').trim(), english); }
   const legacyClean = new Map();
   for (const [english, turkish] of Object.entries(legacy)) legacyClean.set(squash(english), turkish);
 
@@ -45,14 +45,14 @@
     [/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4}) · revenue (.+)$/, (_, m, y, v) => `${months[m]} ${y} · gelir ${numbers(v)}`],
     [/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)( \d{4})?$/, (_, m, y = '') => months[m] + y],
     [/^([\d.,]+)% YoY$/, (_, v) => `yıllık %${trNumber(v)} büyüme`],
-    [/^Year (\d+) · (\d{4}) — (.+) (revenue|operating costs)$/, (_, n, y, v, kind) => `${n}. yıl · ${y} — ${numbers(v)} ${kind === 'revenue' ? 'gelir' : 'faaliyet gideri'}`],
+    [/^Year (\d+) · (\d{4}) — (.+) (revenue|operating costs)$/, (_, n, y, v, kind) => `Yıl ${n} · ${y} — ${numbers(v)} ${kind === 'revenue' ? 'gelir' : 'faaliyet gideri'}`],
     [/^(\d+)% of ([\d,]+) orders × (\$[\d,]+) × (\d+)%$/, (_, share, count, value, fee) => `${trNumber(count)} siparişin %${share}’i × ${numbers(value)} × %${fee}`],
     [/^SELECTED YEAR · (\d{4})$/, (_, y) => `SEÇİLEN YIL · ${y}`],
-    [/^YEAR (\d+) · (\d{4})$/, (_, n, y) => `${n}. YIL · ${y}`],
-    [/^Year (\d+) · (\d{4})$/, (_, n, y) => `${n}. yıl · ${y}`],
-    [/^Year (\d+) at a glance$/, (_, n) => `${n}. yıla genel bakış`],
-    [/^Year (\d+) annual (revenue|cost)$/, (_, n, kind) => `${n}. yıl yıllık ${kind === 'revenue' ? 'gelir' : 'gider'}`],
-    [/^Y(\d+) \/ (\d{4}) ↗$/, (_, n, y) => `${n}. yıl / ${y} ↗`],
+    [/^YEAR (\d+) · (\d{4})$/, (_, n, y) => `YIL ${n} · ${y}`],
+    [/^Year (\d+) · (\d{4})$/, (_, n, y) => `Yıl ${n} · ${y}`],
+    [/^Year (\d+) at a glance$/, (_, n) => `Yıl ${n}${{1:'’e',2:'’ye',3:'’e',4:'’e',5:'’e'}[n] || '’e'} genel bakış`],
+    [/^Year (\d+) annual (revenue|cost)$/, (_, n, kind) => `Yıl ${n} yıllık ${kind === 'revenue' ? 'gelir' : 'gider'}`],
+    [/^Y(\d+) \/ (\d{4}) ↗$/, (_, n, y) => `Yıl ${n} / ${y} ↗`],
     [/^(\d+) buyers × (\S+) per year$/, (_, n, v) => `${n} alıcı × yıllık ${numbers(v)}`],
     [/^(\d+) modeled lab license contract\(s\) Team and customers are month-end targets$/, (_, n) => `${n} modellenen laboratuvar lisans sözleşmesi. Ekip ve müşteri sayıları ay sonu hedefleridir.`],
     [/^(\S+) \/ year$/, (_, v) => `yıllık ${numbers(v)}`],
@@ -64,7 +64,7 @@
     [/^Selected scenario: first 24 months modeled operating burn (\S+); peak cumulative operating funding need (\S+); additional need beyond \$1\.5m seed (\S+) Timing, collection delays and contract delivery can require more cash Seed is not deducted from operating expense$/,
       (_, burn, peak, extra) => `Seçilen senaryo: ilk 24 ayda modellenen faaliyet açığı ${numbers(burn)}; en yüksek kümülatif faaliyet finansmanı ihtiyacı ${numbers(peak)}; 1,5 milyon $’lık tohum yatırımın üzerindeki ek ihtiyaç ${numbers(extra)}. Zamanlama, tahsilat gecikmeleri ve sözleşme teslimatı daha fazla nakit gerektirebilir. Tohum yatırım faaliyet giderlerinden düşülmez.`],
     [/^Stress case: zero data licensing and zero variable lab\/data costs Subscription and assumed marketplace activity remain Year-5 revenue: (\S+); operating result: (\S+)$/,
-      (_, revenue, result) => `Stres senaryosu: veri lisanslama geliri ile değişken laboratuvar/veri giderleri sıfır. Abonelikler ve varsayılan pazar yeri faaliyeti sürer. 5. yıl geliri: ${numbers(revenue)}; faaliyet sonucu: ${numbers(result)}`],
+      (_, revenue, result) => `Stres senaryosu: veri lisanslama geliri ile değişken laboratuvar/veri giderleri sıfır. Abonelikler ve varsayılan pazar yeri faaliyeti sürer. Yıl 5 geliri: ${numbers(revenue)}; faaliyet sonucu: ${numbers(result)}`],
     [/^Potential purchasers: participating firms and cross-border companies buying optional third-party tools and operational services ([\d,]+) orders × \$5,000 = (\S+) gross marketplace volume; only the assumed 10% fee is revenue Suppliers receive the remaining 90%, which is not counted as CaseBridge revenue or expense This marketplace is planned; no supplier agreements, legal referrals or outcome fees are assumed$/,
       (_, count, volume) => `Olası alıcılar: isteğe bağlı üçüncü taraf araçları ve operasyonel hizmetler satın alan katılımcı bürolar ve sınır ötesi şirketler. ${trNumber(count)} sipariş × 5.000 $ = ${numbers(volume)} brüt pazar yeri hacmi; yalnızca varsayılan %10 komisyon gelirdir. Kalan %90 tedarikçilere gider ve CaseBridge geliri ya da gideri sayılmaz. Pazar yeri planlama aşamasındadır; tedarikçi anlaşması, hukuki yönlendirme ya da sonuca bağlı ücret varsayılmaz.`],
     [/^Target segments: Turkish law firms and international-trade company legal teams Year-end target: ([\d,]+) firms \+ ([\d,]+) companies; annual revenue uses the average paying base, not the year-end count Current traction remains the three-firm POC; future accounts are not contracted$/,
@@ -85,15 +85,15 @@
   function translate(value) {
     const key = squash(value);
     if (!key || !/[A-Za-z]/.test(key)) return numbers(key);
-    const known = lookup(key);
-    if (known !== undefined) return known === null ? key : known;
+    if (Object.prototype.hasOwnProperty.call(dictionary, key)) return dictionary[key] === null ? key : dictionary[key];
     for (const [pattern, format] of patterns) {
       const match = key.match(pattern);
       if (!match) continue;
       const result = format(...match);
       if (result) return result;
     }
-    return key;
+    // Older dictionaries (i18n-data.js, i18n-details.js) only as a last resort.
+    return legacyClean.has(key) ? legacyClean.get(key) : key;
   }
 
   const textState = new WeakMap();
@@ -102,7 +102,8 @@
   const skip = 'script,style,.language-switch,.brand,.brand-lockup,[data-i18n-html]';
   let language = 'tr';
 
-  function sameCopy(a, b) { return a === b || squash(a) === squash(b); }
+  const ws = text => text.replace(/\s+/g, ' ').trim();
+  function sameCopy(a, b) { return a === b || ws(a) === ws(b) || squash(a) === squash(b); }
 
   function translateText(node) {
     if (!node.nodeValue || !node.nodeValue.trim()) return;
@@ -111,8 +112,8 @@
     let state = textState.get(node);
     if (!state || (!sameCopy(current, state.en) && !sameCopy(current, state.tr))) {
       const [, lead, body, tail] = current.match(/^(\s*)([\s\S]*?)(\s*)$/);
-      const english = reverse.get(squash(body));
-      state = english ? { en: lead + english + tail, tr: current } : { en: current, tr: lead + clean(translate(body)) + tail };
+      const english = reverse.get(body.replace(/\s+/g, ' ').trim()) || reverse.get(squash(body));
+      state = english ? { en: lead + english + tail, tr: current } : { en: current, tr: lead + translate(body) + tail };
       textState.set(node, state);
     }
     const next = language === 'tr' ? state.tr : state.en;
@@ -129,8 +130,8 @@
       const current = element.getAttribute(name);
       let state = states.get(name);
       if (!state || (!sameCopy(current, state.en) && !sameCopy(current, state.tr))) {
-        const english = reverse.get(squash(current));
-        state = english ? { en: english, tr: current } : { en: current, tr: clean(translate(current)) };
+        const english = reverse.get(current.replace(/\s+/g, ' ').trim()) || reverse.get(squash(current));
+        state = english ? { en: english, tr: current } : { en: current, tr: translate(current) };
         states.set(name, state);
       }
       const next = language === 'tr' ? state.tr : state.en;
@@ -175,7 +176,7 @@
     language = next === 'en' ? 'en' : 'tr';
     document.documentElement.lang = language;
     for (const button of languageButtons) button.setAttribute('aria-pressed', String(button.dataset.language === language));
-    document.title = language === 'tr' ? clean(translate(englishTitle)) : englishTitle;
+    document.title = language === 'tr' ? translate(englishTitle) : englishTitle;
     apply(document.body);
     const description = document.querySelector('meta[name="description"]');
     if (description) translateAttributes(description);
