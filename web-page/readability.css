@@ -129,3 +129,7 @@ body .sam-segments button,body .finance-year,body .home-month-button{padding-lef
    the final axis label are not hidden behind a horizontal scroll. Narrower
    screens keep the scrollable 560px chart. */
 @media (min-width:1200px){body .home-chart-plot svg{min-width:0}}
+/* v.0.40: inset the logo with a margin instead of a relative offset, so the
+   menu is laid out after it instead of sliding underneath it. */
+body .nav>.brand{left:0;margin-left:48px}
+@media(max-width:650px){body .nav>.brand{left:0;margin-left:24px}}

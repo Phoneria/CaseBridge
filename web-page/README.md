@@ -1,6 +1,6 @@
 # CaseBridge marketing website
 
-A standalone English static website. Run `python3 -m http.server 8081 --bind 127.0.0.1` in this folder, then open `http://localhost:8081/`. The monthly timeline loads local JSON and needs this local server.
+A standalone static website in Turkish (default) and English; the TR/EN switch is in the header. Run `python3 -m http.server 8081 --bind 127.0.0.1` in this folder, then open `http://localhost:8081/`. The monthly timeline loads local JSON and needs this local server.
 
 No installation, external fonts, API, or internet connection is required for the website. External company links require internet access.
 
@@ -56,3 +56,8 @@ The original gallery captures (`assets/ai-gallery/`) are no longer used by the l
 ## Finance overview and optional detail
 
 The finance section now opens with the proposed $1.5m seed, 24-month planning horizon, five allocation percentages and three short growth stages. The original annual financial model, capital assumptions and monthly/risk roadmap are preserved inside two initially closed native details panels. `finance-overview.css` styles the summary; `finance-overview.js` supplies its TR/EN labels. All existing model IDs and financial inputs are retained. Timeline hash links open the monthly detail panel through the existing deep-link handler; the roadmap's year buttons also open its ancestor panel before scrolling.
+
+
+## Languages
+
+Turkish is the default language; `?lang=en` or the header switch shows English, and the choice is remembered in the browser. English remains the source copy in the HTML and scripts. `i18n-tr.js` holds the Turkish copy, keyed by the English text with sentence-final dots removed (the same rule as `sentence-style.js`); `null` keeps a name or brand in English. `window.casebridgeTRHtml` translates a few headings and sentences as whole elements where Turkish word order spans inline markup. `i18n.js` applies the copy, formats generated numbers in Turkish (`$1,500` → `1.500 $`, `40%` → `%40`) and handles generated chart, table and panel text through patterns. When you add or change English copy, add the matching Turkish entry to `i18n-tr.js`. The older `i18n-data.js` and `i18n-details.js` dictionaries are only a fallback. Product screenshots still show the English application interface.
