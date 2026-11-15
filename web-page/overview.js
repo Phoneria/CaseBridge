@@ -40,6 +40,7 @@ openDeepLink();
 // Animate charts and milestone counts as they enter the viewport.
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (!reducedMotion && 'IntersectionObserver' in window) {
+  document.querySelectorAll('.offering-grid>article, .member-details, .roadmap-grid>article, .expansion-gate, .allocation-list>div').forEach(element=>{ element.dataset.animate=''; });
   document.documentElement.classList.add('motion-ready');
   const animationObserver = new IntersectionObserver(entries => entries.forEach(entry => {
     if (!entry.isIntersecting) return;
@@ -55,6 +56,6 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
       counter.textContent = '0'; requestAnimationFrame(frame);
     });
     animationObserver.unobserve(entry.target);
-  }),{threshold:0.15});
+  }),{threshold:0.08});
   document.querySelectorAll('[data-animate]').forEach(element=>animationObserver.observe(element));
 }

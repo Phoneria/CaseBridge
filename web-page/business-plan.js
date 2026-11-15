@@ -2,7 +2,8 @@
 const financialPlan = JSON.parse(document.getElementById('finance-data').textContent);
 const usd = new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',maximumFractionDigits:0});
 const percent = new Intl.NumberFormat('en-US', {style:'percent',maximumFractionDigits:1});
-const explorerState = {revenue:{year:null,category:null},cost:{year:null,category:null}};
+const explorerState = {revenue:{year:1,category:null},cost:{year:null,category:null}};
+let selectedAnnualYear = 1;
 let activeScenario = 'base';
 const compact = value => value >= 1e6 ? '$'+(value/1e6).toFixed(2).replace(/\.00$/,'')+'m' : '$'+(value/1e3).toFixed(1).replace(/\.0$/,'')+'k';
 function valuesFor(year) {
@@ -28,13 +29,29 @@ function categoriesFor(kind,y) {
     {key:'legal',label:'Legal, security & administration',value:y.legalAdmin,color:'#889cae'}
   ];
 }
+function renderAnnualInsight() {
+  const y=financialPlan.find(item=>item.year===selectedAnnualYear);
+  const v=valuesFor(y);
+  const licensingShare=v.revenue?v.licensing/v.revenue:0;
+  document.getElementById('annual-insight').innerHTML=`<div><p class="section-label">SELECTED YEAR · ${y.calendar}</p><h4>Year ${y.year} at a glance</h4><p>Data licensing makes up ${percent.format(licensingShare)} of modeled revenue. All figures are planning targets.</p></div><div class="annual-insight-metrics"><div><span>Revenue</span><strong>${usd.format(v.revenue)}</strong></div><div><span>Operating costs</span><strong>${usd.format(v.costs)}</strong></div><div><span>Indicative result</span><strong>${usd.format(v.result)}</strong></div></div>`;
+  document.querySelectorAll('#finance-rows tr').forEach(row=>{
+    const active=Number(row.dataset.year)===selectedAnnualYear;
+    row.classList.toggle('is-selected',active);
+    row.querySelector('button')?.setAttribute('aria-pressed',String(active));
+  });
+}
+function selectAnnualYear(year) {
+  selectedAnnualYear=year;
+  ['revenue','cost'].forEach(kind=>{explorerState[kind]={year,category:null};renderExplorer(kind);});
+  renderAnnualInsight();
+}
 function showFinancialScenario(scenario) {
   activeScenario=scenario;
   let cumulative=0,peak=0,prior=0;
   document.getElementById('finance-rows').innerHTML=financialPlan.map(y=>{
     const v=valuesFor(y);cumulative+=v.result;peak=Math.max(peak,-cumulative);
     const growth=prior?percent.format(v.revenue/prior-1)+' YoY':'First modeled year';prior=v.revenue;
-    return `<tr><th scope="row">Y${y.year} / ${y.calendar}</th><td>${y.firms.toLocaleString()} / ${y.companies.toLocaleString()}</td><td>${usd.format(y.subscriptions)}</td><td>${usd.format(v.licensing)}</td><td>${usd.format(y.commissions)}</td><td><strong>${usd.format(v.revenue)}</strong><small>${growth}</small></td><td>${usd.format(v.costs)}</td><td class="${v.result<0?'negative-result':'positive-result'}">${usd.format(v.result)}</td></tr>`;
+    return `<tr data-year="${y.year}"><th scope="row"><button type="button" class="annual-year-button" data-annual-year="${y.year}" aria-pressed="${selectedAnnualYear===y.year}">Y${y.year} / ${y.calendar} ↗</button></th><td>${y.firms.toLocaleString()} / ${y.companies.toLocaleString()}</td><td>${usd.format(y.subscriptions)}</td><td>${usd.format(v.licensing)}</td><td>${usd.format(y.commissions)}</td><td><strong>${usd.format(v.revenue)}</strong><small>${growth}</small></td><td>${usd.format(v.costs)}</td><td class="${v.result<0?'negative-result':'positive-result'}">${usd.format(v.result)}</td></tr>`;
   }).join('');
   const last=valuesFor(financialPlan[4]);
   const firstTwo=-financialPlan.slice(0,2).reduce((sum,y)=>sum+valuesFor(y).result,0);
@@ -45,6 +62,7 @@ function showFinancialScenario(scenario) {
   document.getElementById('funding-note').textContent=`Selected scenario: first 24 months modeled operating burn ${usd.format(firstTwo)}; peak cumulative operating funding need ${usd.format(peak)}; additional need beyond $1.5m seed ${usd.format(Math.max(0,peak-1500000))}. Timing, collection delays and contract delivery can require more cash. Seed is not deducted from operating expense.`;
   document.querySelectorAll('[data-scenario]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scenario===scenario)));
   ['revenue','cost'].forEach(renderExplorer);
+  renderAnnualInsight();
 }
 function renderExplorer(kind) {
   const state=explorerState[kind];
@@ -54,7 +72,7 @@ function renderExplorer(kind) {
     return `<button class="finance-year" type="button" data-year="${y.year}" aria-expanded="${state.year===y.year}" aria-controls="${kind}-panel"><span>YEAR ${y.year} · ${y.calendar}</span><strong>${compact(total)}</strong><span class="year-spark" aria-hidden="true"><i style="width:${total/maximum*100}%"></i></span><small>${state.year===y.year?'Chart open ↓':'Explore breakdown ↓'}</small></button>`;
   }).join('');
   document.querySelectorAll(`#${kind}-years button`).forEach(b=>b.addEventListener('click',()=>{
-    state.year=Number(b.dataset.year);state.category=null;renderExplorer(kind);
+    selectAnnualYear(Number(b.dataset.year));
   }));
   const panel=document.getElementById(kind+'-panel');panel.hidden=state.year===null;
   if(state.year===null)return;
@@ -100,5 +118,6 @@ function renderCategory(kind,y,key) {
   document.getElementById(kind+'-detail').innerHTML=`<div class="category-detail-heading"><div><p class="section-label">YEAR ${y.year} · ${y.calendar}</p><h6>${cat.label}</h6></div><strong>${usd.format(cat.value)}<small>annual ${kind==='revenue'?'revenue':'cost'}</small></strong></div><div class="table-scroll" tabindex="0" aria-label="${cat.label} annual detail"><table class="research-table detail-table"><thead><tr>${headers.map(h=>'<th>'+h+'</th>').join('')}</tr></thead><tbody>${rows.map(row=>'<tr><th scope="row">'+row[0]+'</th><td>'+row[1]+'</td><td>'+usd.format(row[2])+'</td></tr>').join('')}<tr class="detail-total"><th scope="row">Total</th><td>Year ${y.year} annual ${kind==='revenue'?'revenue':'cost'}</td><td>${usd.format(cat.value)}</td></tr></tbody></table></div><p class="source-note">${note}</p>`;
 }
 document.querySelectorAll('[data-scenario]').forEach(b=>b.addEventListener('click',()=>showFinancialScenario(b.dataset.scenario)));
+document.getElementById('finance-rows').addEventListener('click',event=>{const button=event.target.closest('[data-annual-year]');if(button)selectAnnualYear(Number(button.dataset.annualYear));});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{const kind=b.dataset.close;explorerState[kind]={year:null,category:null};renderExplorer(kind);document.querySelector(`#${kind}-years button`).focus();}));
 showFinancialScenario('base');

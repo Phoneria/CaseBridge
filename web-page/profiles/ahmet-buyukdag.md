@@ -1,6 +1,6 @@
 # Ahmet Büyükdağ
 
-**Legal Professional | NGO Management | Project Coordinator**
+**Legal Professional | İHH Board Member | Project Coordinator**
 
 ### İHH Humanitarian Relief Foundation | Volunteer Management
 
