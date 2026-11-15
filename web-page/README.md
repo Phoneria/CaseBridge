@@ -13,7 +13,7 @@ No installation, external fonts, API, or internet connection is required for the
 - `timeline.html`: interactive 60-month plan, with year filters and downloadable CSV/Excel sheets.
 - `planning/monthly-roadmap.xlsx`: editable monthly model and roadmap; the monthly figures reconcile to the existing annual forecast.
 - `planning/risk-scenario.json` and `.csv`: illustrative downside calculations, including revenue, expenses, standby retainers, crisis response and cash buffer targets.
-- `assets/MEDIA_CREDITS.md`: origins and licenses of the real meeting photo and geographic map used in the new visuals.
+- `assets/MEDIA_CREDITS.md`: origin and license of the geographic map used in the expansion visuals.
 - `profiles/`: downloadable Markdown biographies. Izzet’s and Ahmet’s biographies are supplied by the user. Bengü and Hatice profiles include clearly marked provisional drafts.
 
 When updating a biography, update both its Markdown file and its matching inline biography in `index.html`. Use the downward arrow on the right of each team member to expand their biography within the page. Native details elements work offline and support keyboard navigation; no pop-up or network request is involved.
@@ -36,7 +36,7 @@ The timeline charts compare monthly and annual base targets with an illustrative
 
 The page presents the product, three-firm Turkey POC, team, market sizing, financial forecasts, investor ask and growth roadmap without requiring clicks. Optional product detail, competitor comparisons, biographies, risks and sources expand inline. Only optional panels collapse when they scroll fully out of view. Category bars, phase counters and the allocation donut animate as they enter the viewport; reduced-motion preferences are respected. Revenue and cost scenarios, individual years and category bars are interactive. Selecting a year opens a chart; selecting a category opens annual customer-cohort or spending-driver tables. Annual targets are $100k / $600k / $4m / $15m / $40m. Year 5 comprises $30m data licensing, $5.01m subscriptions and $4.99m marketplace commissions; these are aggressive, unvalidated planning assumptions. Commission revenue assumes a future non-legal software/service marketplace with a 10% take rate. Potential customer examples imply no relationship or confirmed demand.
 
-Bengü now uses the newly supplied personal photograph, optimized as `assets/team/bengu-ozbek-current.jpg`. Bengü’s biography remains a provisional draft. Hatice’s biography uses the supplied Technarts event-platform/IPAM experience and long-standing oil-painting interest, with no year counts.
+Bengü now uses the newly supplied personal photograph, delivered as `assets/team/bengu-ozbek-web.jpg`. Bengü’s biography remains a provisional draft. Hatice’s biography uses the supplied Technarts event-platform/IPAM experience and long-standing oil-painting interest, with no year counts.
 
 ## Visual identity and market graphics
 
@@ -51,7 +51,7 @@ The hero keeps its original copy beside a connected SVG mind map, without an app
 
 The “A practical assistant. Across the whole case.” section now uses three direct browser captures from the existing application instead of the meeting illustration and concept SVGs. `ai-screen-gallery.js` controls accessible vertical tabs and a native in-page enlargement dialog; `ai-screen-gallery.css` provides responsive layout. Its labels integrate with the existing TR/EN translator. The captured application itself is in Turkish.
 
-Capture provenance and exact crops are recorded in `assets/AI_SCREENSHOTS.md`. All three images show the same existing fictional training hearing and its 73/100 feedback, with no UI reconstruction or generated image assets.
+The original gallery captures (`assets/ai-gallery/`) are no longer used by the live page and were removed from the repository on 15 November 2026. The product screenshots currently shown are in `assets/feature-screens/en-dark/`; see `CAPTURE_NOTES.md` there for provenance.
 
 ## Finance overview and optional detail
 

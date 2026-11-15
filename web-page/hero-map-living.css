@@ -1,0 +1,29 @@
+/* Low-amplitude connected motion; all animated signals are decorative. */
+.mm-flow-layer { pointer-events: none; }
+.mm-signal-halo { fill: #007f82; opacity: .12; }
+.mm-signal-core, .mm-signal-arrow { fill: #007f82; }
+.mm-center-wave { fill: none; stroke: #007f82; stroke-width: 1.5; }
+.case-map-preview[data-map-motion=running] .mm-branch.is-selected:not(.is-engaged):not(.is-flowing) .mm-trunk { opacity: .26; stroke-width: 1.6; }
+.case-map-preview[data-map-motion=running] .mm-branch.is-selected:not(.is-engaged):not(.is-flowing) .mm-twig { opacity: .28; stroke-width: 1; }
+.mm-branch.is-flowing .mm-trunk { opacity: .62; stroke-width: 2.2; }
+.mm-branch.is-flowing .mm-twig { opacity: .4; stroke-width: 1.2; }
+.mm-labels.is-flowing .mm-topic rect { stroke: #5cabad; fill: #f0f8f8; }
+.mm-labels.is-flowing .mm-topic text { fill: #007f82; }
+.mm-branch.is-engaged .mm-trunk { opacity: .95; stroke-width: 2.8; }
+.mm-branch.is-engaged .mm-twig { opacity: .72; stroke-width: 1.6; }
+.mm-labels.is-engaged .mm-topic rect { fill: #e4f0f0; stroke: #007f82; stroke-width: 1.5; }
+.case-map-preview[data-map-motion=paused] *, .case-map-preview[data-map-motion=reduced] * { animation-play-state: paused!important; }
+@media(prefers-reduced-motion:reduce) {
+  .mm-flow-layer { display: none; }
+  .case-map-preview .mm-labels, .case-map-preview .mm-center { animation: none!important; }
+}
+
+/* Inner surfaces lift around the original anchors, preserving connected branch geometry. */
+.mm-node-surface { will-change: auto; }
+.mm-topic .mm-node-surface>circle:not(.mm-junction) { fill: var(--branch); }
+.mm-node-surface.has-proximity>rect { fill: #eef8f8; stroke: #007f82; stroke-width: 1.5; }
+.mm-center .mm-node-surface.has-proximity>rect { fill: #fff; }
+.mm-topic, .mm-leaf { -webkit-tap-highlight-color: transparent; }
+@media(prefers-reduced-motion:reduce) {
+  .mm-node-surface { transform: none!important; filter: none!important; }
+}

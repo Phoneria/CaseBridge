@@ -60,7 +60,7 @@
     const width = 640, height = 260, left = 68, right = 20, top = 18, bottom = 42;
     const x = i => left + (data.length === 1 ? 0 : i / (data.length - 1)) * (width - left - right);
     const y = value => top + (high - value) / (high - low) * (height - top - bottom);
-    const svg = svgNode('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': `${title}. ${series.map(item => `${item.label} ends at ${money ? usd(data.at(-1)[item.key]) : Math.round(data.at(-1)[item.key])}`).join('; ')}.` });
+    const svg = svgNode('svg', { viewBox: `0 0 ${width} ${height}`, role: 'group', 'aria-label': `${title}. ${series.map(item => `${item.label} ends at ${money ? usd(data.at(-1)[item.key]) : Math.round(data.at(-1)[item.key])}`).join('; ')}.` });
     for (let i = 0; i <= 4; i++) {
       const value = low + (high - low) * i, yy = y(value);
       svg.append(svgNode('line', { x1: left, y1: yy, x2: width - right, y2: yy, class: 'home-grid-line' }));
@@ -90,7 +90,12 @@
         svg.append(dot);
       });
     }
-    card.append(svg);
+    const plot = node('div', 'home-chart-plot');
+    plot.tabIndex = 0;
+    plot.setAttribute('role', 'region');
+    plot.setAttribute('aria-label', `${title} chart; scroll horizontally on narrow screens`);
+    plot.append(svg);
+    card.append(plot);
     const legend = node('div', 'home-chart-legend');
     series.forEach(item => {
       const entry = node('span', item.dashed ? 'dashed' : '', `${item.label} · ${money ? usd(data.at(-1)[item.key]) : Math.round(data.at(-1)[item.key]).toLocaleString('en-US')}`);
@@ -101,7 +106,7 @@
     return card;
   }
   function draw(data, period) {
-    const blue = '#007eac', red = '#c54b45', navy = '#142d4e', gold = '#a86d18';
+    const blue = '#69cff5', red = '#ff9389', navy = '#a4bfff', gold = '#f2c471';
     const plots = [
       ['Revenue', 'Receipts in the selected period', [{ key: 'baseRevenue', label: 'Base', color: blue }, { key: 'riskRevenue', label: 'Risk case', color: red, dashed: true }], true],
       ['Expenses', 'Includes modeled crisis response and standby retainers', [{ key: 'baseExpense', label: 'Base', color: navy }, { key: 'riskExpense', label: 'Risk case', color: red, dashed: true }], true],

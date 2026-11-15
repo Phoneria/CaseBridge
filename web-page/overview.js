@@ -1,5 +1,5 @@
 // Visible narrative first. Only supporting detail panels collapse on scroll.
-const supportingDetails = [...document.querySelectorAll('details')];
+const supportingDetails = [...document.querySelectorAll('details:not(#monthly-details):not(.member-details)')];
 const detailGrace = new WeakMap();
 let detailScrollFrame;
 supportingDetails.forEach(detail => detail.addEventListener('toggle', () => {

@@ -121,13 +121,44 @@
       document.querySelectorAll('[data-home-scenario]').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
       renderSummary(); renderMonths();
     }));
-    document.querySelectorAll('.roadmap-grid article').forEach((card, i) => {
-      const target = [2027, 2028, 2031][i];
-      const button = el('button', 'roadmap-explore', `Explore ${target} month by month ↘`);
-      button.type = 'button';
-      button.addEventListener('click', () => { showYear(target); for (let parent = root.parentElement; parent; parent = parent.parentElement) { if (parent.tagName === 'DETAILS') parent.open = true; } root.scrollIntoView({behavior: 'instant', block: 'start'}); });
-      card.append(button);
-    });
+    const roadmap = document.getElementById('roadmap');
+    const disclosure = document.getElementById('monthly-details') || root.closest('details');
+    const heading = roadmap?.querySelector('.business-title');
+    if (roadmap && disclosure && heading) {
+      roadmap.append(disclosure);
+      const toggle = el('button', '', heading.textContent);
+      toggle.type = 'button';
+      toggle.setAttribute('aria-controls', disclosure.id);
+      heading.replaceChildren(toggle);
+      const sync = () => {
+        toggle.setAttribute('aria-expanded', String(disclosure.open));
+        document.querySelectorAll('.roadmap-explore').forEach(button => button.setAttribute('aria-expanded', String(disclosure.open && Number(button.dataset.year) === year)));
+      };
+      const scrollToPlan = () => requestAnimationFrame(() => root.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start'
+      }));
+      toggle.addEventListener('click', () => {
+        disclosure.open = !disclosure.open; sync();
+        if (disclosure.open) scrollToPlan();
+      });
+      disclosure.addEventListener('toggle', sync);
+      document.querySelectorAll('.roadmap-grid article').forEach((card, i) => {
+        const target = [2027, 2028, 2031][i];
+        const button = el('button', 'roadmap-explore', `Explore ${target} month by month ↘`);
+        button.type = 'button'; button.dataset.year = target;
+        button.setAttribute('aria-controls', disclosure.id);
+        card.append(button);
+        card.addEventListener('click', event => {
+          if (event.target.closest('a')) return;
+          const close = disclosure.open && year === target;
+          showYear(target); disclosure.open = !close; sync();
+          if (!close) scrollToPlan();
+        });
+      });
+      tabs.addEventListener('click', sync);
+      tabs.addEventListener('keydown', sync);
+      sync();
+    }
     showYear(2027);
   }).catch(error => { summary.textContent = error.message; detail.textContent = 'The full planning sheet is available from the link above.'; });
 })();

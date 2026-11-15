@@ -1,0 +1,10 @@
+.pilot-results { border-top: 1px solid var(--line); }
+.pilot-results h2 { margin-bottom: 16px; }
+.pilot-results-intro { max-width: 640px; color: var(--gray); font-size: 15px; line-height: 1.8; margin-bottom: 30px; }
+.pilot-results-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.pilot-result-card { padding: 28px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--pale); }
+.pilot-result-value { margin: 0 0 18px; color: var(--teal); font-size: clamp(40px, 5vw, 60px); font-weight: 500; line-height: 1; letter-spacing: -2px; }
+.pilot-result-card h3 { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.5; }
+.pilot-results-note { margin: 20px 0 0; max-width: 720px; color: var(--gray); font-size: 12px; line-height: 1.7; }
+@media (max-width: 900px) { .pilot-results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .pilot-results-grid { gap: 12px; } .pilot-result-card { padding: 22px 16px; } .pilot-result-card h3 { font-size: 13px; } }

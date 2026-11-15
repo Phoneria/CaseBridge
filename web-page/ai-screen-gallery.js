@@ -18,9 +18,26 @@
     'Actual CaseBridge hearing transcript: the lawyer presents a payment record, opposing counsel presents a business plan and the judge questions the evidence':'Gerçek CaseBridge duruşma tutanağında avukat ödeme kaydını, karşı avukat iş planını sunuyor; hâkim delilleri sorguluyor',
     'Actual CaseBridge training evaluation for the same fictional hearing, showing a 73 out of 100 practice score, evidence feedback and improvement areas':'Gerçek CaseBridge arayüzünde aynı kurgusal duruşmanın 73/100 eğitim puanı, delil geri bildirimi ve gelişim alanları'
   });
+  Object.assign(window.casebridgeTranslations, {"Actual CaseBridge hearing conversation with fictional demo data": "Kurgusal demo verileriyle gerçek CaseBridge duruşma konuşması", "Actual CaseBridge hearing transcript showing bank transfer evidence and the judge's questions": "Gerçek CaseBridge duruşma tutanağında banka dekontu delili ve hâkimin soruları", "Actual CaseBridge training evaluation with feedback and practice scores for a fictional hearing": "Gerçek CaseBridge arayüzünde kurgusal bir duruşmanın eğitim puanları ve geri bildirimleri"});
   const tabs=[...gallery.querySelectorAll('[data-ai-shot]')];
   const dialog=document.getElementById('actual-ai-dialog');
   let trigger=null;
+  function syncLanguage(){
+    const language=document.documentElement.lang==='tr'?'tr':'en';
+    gallery.querySelectorAll('img[data-ai-screen-en]').forEach(image=>{
+      const source=image.getAttribute('data-ai-screen-'+language);
+      if(image.getAttribute('src')!==source)image.setAttribute('src',source);
+    });
+    if(dialog.open){
+      const tab=tabs.find(button=>button.getAttribute('aria-selected')==='true');
+      const current=document.getElementById(tab.getAttribute('aria-controls')).querySelector('img');
+      const expanded=dialog.querySelector('img');
+      expanded.src=current.getAttribute('src');expanded.alt=current.alt;
+      document.getElementById('actual-ai-dialog-title').textContent=tab.querySelector('strong').textContent;
+    }
+  }
+  syncLanguage();
+  window.addEventListener('casebridge:languagechange',syncLanguage);
   function activate(tab){
     tabs.forEach(button=>{const active=tab===button;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;document.getElementById(button.getAttribute('aria-controls')).hidden=!active;});
   }

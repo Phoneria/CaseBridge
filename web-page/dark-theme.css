@@ -1,0 +1,120 @@
+/* CaseBridge — charcoal, ivory and restrained turquoise. */
+:root{color-scheme:dark;--ink:#f3f0e9;--teal:#9ddbd1;--pale:#0b0e0f;--red:#9ddbd1;--gray:#a5aeae;--line:#2a3334;--surface:#111718;--surface-raised:#172022}
+html,body{background:#0b0e0f;color:var(--ink)}
+body{font-family:Arial,Helvetica,sans-serif}
+::selection{background:#9ddbd1;color:#101718}
+body .header{position:fixed;inset:0 0 auto;background:linear-gradient(#080d10b3,transparent);border:0;transition:background .2s;backdrop-filter:blur(8px)}
+body .header.is-scrolled{background:#0b0e0ff5;border-bottom:1px solid var(--line)}
+body .nav{height:82px;width:min(1440px,calc(100% - 80px))}
+body .nav nav{gap:28px;color:#f3f0e9}
+body .brand-lockup,body .wordmark-case,body .footer .wordmark-case{color:#f3f0e9}
+body .wordmark-bridge,body .footer .wordmark-bridge{color:#9ddbd1}
+body .wordmark-line path,body .footer .wordmark-line path{stroke:#9ddbd1}
+body .brand-lockup>small,body .footer .brand-lockup>small{color:#aeb9b8}
+body .nav-cta{background:#f3f0e9;color:#101718;border:1px solid #f3f0e9;border-radius:3px;padding:12px 18px;font-size:12px}
+body .menu-toggle{color:#f3f0e9}
+body .menu-toggle span{background:#f3f0e9}
+body .story-hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;width:100%;max-width:none;margin:0;min-height:860px;min-height:100svh;padding:180px max(48px,calc((100vw - 1200px)/2)) 92px;background:#0b0e0f;overflow:hidden}
+.hero-film{position:absolute;inset:0;z-index:-3;width:100%;height:100%;object-fit:cover;object-position:center}
+.story-hero:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#07101266,#080f1133 70%,#080f1122),linear-gradient(0deg,#0b0e0f 0%,#0b0e0f85 30%,#0b0e0f22 65%,#0b0e0f66)}
+body .story-hero-copy{max-width:850px}
+body .story-hero .stage-label{color:#b9d6d0;font-size:10px;letter-spacing:.18em;margin-bottom:26px}
+body .story-hero h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(55px,6.5vw,96px);font-weight:400;line-height:1.02;letter-spacing:-.055em;margin-bottom:27px;color:#f3f0e9;text-wrap:balance}
+body .story-hero h1 span{color:#bfddd4}
+body .story-hero .story-lead{max-width:560px;font-size:17px;line-height:1.7;color:#d0d8d4;margin-bottom:30px}
+body .hero-actions{gap:12px}
+body .button{border-radius:3px;font-size:13px;min-height:48px;padding:15px 22px}
+body .button-red{background:#f3f0e9;color:#111718;border:1px solid #f3f0e9}
+body .button-app{background:transparent;color:#f3f0e9;border:1px solid #acbab680}
+body .button-red:hover,body .nav-cta:hover{background:#badbd2;color:#0b0e0f}
+body .button-app:hover{background:#ffffff12}
+.hero-film-control{position:absolute;right:40px;bottom:34px;display:flex;align-items:center;gap:9px;padding:10px 14px;background:#0b0e0f88;border:1px solid #d1dfd444;border-radius:3px;color:#e9eeea;cursor:pointer;font-size:11px;backdrop-filter:blur(10px)}
+.hero-film-control:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
+body .section{padding-block:100px}
+body .section-label{color:#9ddbd1;letter-spacing:.13em;font-size:10px}
+body h2{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.035em}
+body h3,body h4{color:#eceee9}
+body p,body .business-intro,body .story-detail summary{color:var(--gray)}
+body .story-hero,body .team-section,body .analysis-section,body .business-section,body .finance-overview,body .market-surface,body .finance-surface,body .workspace-section,body .intro,body .platform-section,body .footer,body .research-surface{background-color:#0b0e0f;color:var(--ink)}
+body .pilot-results{border-bottom:1px solid var(--line);padding-block:64px}
+body .pilot-results h2{font-size:33px}
+body .pilot-result-card{background:transparent;border:0;border-left:1px solid var(--line);padding:8px 28px}
+body .pilot-result-value{color:#f3f0e9;font-family:Georgia,'Times New Roman',serif}
+body .pilot-result-card h3{color:#a7b3b0;font-size:13px}
+body .offering-surface>.business-heading{padding:0;background:transparent;margin-bottom:48px;gap:56px}
+body .offering-surface>.business-heading h2{color:#f3f0e9;font-size:clamp(36px,4.5vw,60px);line-height:1.08}
+body .offering-surface>.business-heading>p{color:#a5aeae;font-size:16px;line-height:1.8}
+body .offering-surface>.business-heading .section-label{color:#9ddbd1}
+body .capability-explorer{gap:44px;margin-bottom:64px}
+body .capability-tabs>button{padding:20px 14px;color:#dfe5df}
+body .capability-tabs>button[aria-selected=true]{background:#172627;border-left-color:#9ddbd1}
+body .capability-tabs strong{font-size:17px;font-weight:400}
+body .capability-tabs small{color:#aab6b2}
+body .actual-ai-number{color:#708f88}
+body .feature-screen-link{border-color:#354140;background:#101819;border-radius:5px;box-shadow:0 16px 60px #0005}
+body .feature-screen-expand{background:#101819eb;color:#d9e5df;border-color:#53655e}
+body .story-detail,body .finance-optional{background:transparent;border-color:var(--line)}
+body .story-detail>summary,body .finance-optional>summary{color:#dce5df}
+body .interactive-section,body .interactive-calculator,body .calculator-form,body .calculator-result,body .finance-glance,body .finance-growth-glance,body .finance-explorer,body .market-graphic,body .market-context article,body .revenue-visual,body .strategy-card,body .team-surface,body .member-details,body .allocation-detail,body .annual-chart,body .home-year-panel,body .home-month-panel,body .home-forecast,body .home-forecast-card,body .home-forecast-panel,body .forecast-detail,body .finance-growth-card,body .roadmap-grid>article,body .risk-grid>article,body .offering-grid article,body .business-grid>article{background:#111718;color:#e7eee6;border-color:#2a3334}
+body .sam-calculation,body .expansion-atlas,body .sizing-equation article,body .formula-result,body .category-prompt,body .detail-total,body .feature-example,body .strategy-step,body .strategy-footer{background:#152022;color:#c2d2c9;border-color:#2d4140}
+body .member-bio,body .member-summary,body .member-details>summary{background:transparent;color:#d6e0d9}
+body .member-summary strong,body .member-details h3,body .member-bio h2{color:#e9eee6}
+body .member-photo{filter:saturate(.55)}
+body input,body select,body textarea,body .calculator-input{background:#101819;color:#f3f0e9;border-color:#3b4d49}
+body button:not(.button):not(.menu-toggle):not(.capability-tabs>button):not(.hero-film-control){color:var(--ink)}
+body .calculator-reset,body .home-year-tabs button,body .home-month-button,body .finance-year,body .revenue-year,body .scenario-tabs button,body .year-filter button,body .timeline-filters button{background:#111c1d;color:#c4d6ce;border-color:#344440}
+body button[aria-pressed=true],body .finance-year[aria-expanded=true],body .home-year-tabs button[aria-selected=true]{background:#243d39;color:#e5f2e8;border-color:#8dc8b9}
+body .category-bar:hover,body .category-bar[aria-pressed=true],body .sam-segments button[aria-pressed=true]{background:#1c302e;color:#d7e4db}
+body table{color:#bdcbc2;background:#0f1718}
+body table th,body table td,body table thead th,body table tbody th,body .finance-table tbody tr:last-child th{background:#101c1d;color:#c9d8cd;border-color:#2a3936}
+body table th{color:#e7eee6}
+body .finance-table .positive-result,body .finance-table td:nth-child(6) strong{color:#b3d4ba}
+body .finance-table .negative-result{color:#e5a38b}
+body svg text{fill:#c0d1c8}
+body .chart-grid line,body .chart-axis line{stroke:#34473e}
+body .finance-glance-heading h3,body .finance-glance-heading strong,body .finance-glance strong,body .finance-growth-glance strong,body .market-context strong{color:#eff0e7}
+body .text-link,body .source-note a{color:#a5d5c7}
+body .floating-booking{background:#c3ded0;color:#0d1716;border:1px solid #c3ded0;box-shadow:0 8px 30px #0005}
+body .footer{border-top:1px solid #2a3334;padding-block:50px}
+body .footer p,body .footer>span{color:#94a69b}
+body .actual-ai-dialog{color:#e9eee6;background:#101819;border-color:#344440}
+body .actual-ai-dialog-header{background:#101819;border-color:#344440}
+body .actual-ai-dialog-header>button{background:#1c2927;color:#e9eee6;border-color:#455951}
+body .feature-screen-dialog>img{background:#101819}
+body .topbar{background:#0b0e0ff5;color:#f3f0e9;border-color:var(--line)}
+@media(max-width:900px){body .story-hero{padding-inline:32px;padding-bottom:100px;min-height:900px;min-height:100svh}body .story-hero h1{font-size:clamp(54px,8vw,78px)}body .nav{width:calc(100% - 48px)}body .offering-surface>.business-heading{gap:25px}}
+@media(max-width:760px){body .capability-screens{position:static}body .capability-explorer{gap:24px}body .nav nav.is-open{background:#101819;border-color:#344440;color:#f3f0e9}body .hero-film{object-position:65% center}.hero-film-control{right:24px;bottom:23px}body .pilot-result-card{padding:8px 14px}body .section{padding-block:64px}}
+@media(max-width:480px){body .story-hero{padding-inline:24px;padding-top:150px;min-height:860px;min-height:100svh}body .story-hero h1{font-size:clamp(48px,12vw,64px)}body .story-hero .story-lead{font-size:15px;line-height:1.7}body .story-hero .stage-label{font-size:8px;letter-spacing:.11em}body .hero-actions{flex-wrap:wrap}body .nav{height:78px;width:calc(100% - 40px)}body .pilot-results h2{font-size:28px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body .header{transition:none}}
+/* Carry the palette through legacy planning and calculator panels. */
+body .calculator-grid,body .expansion-rationale,body .rationale-grid>article,body .annual-insight,body .home-metric,body .home-month-detail,body .home-chart,body .home-risk-grid>article,body .home-crisis,body .home-crisis-event{background:#111b1c;color:#d4e0d7;border-color:#2b3b36}
+body .home-metric strong,body .rationale-grid strong,body .rationale-grid h3,body .annual-insight strong{color:#e8eee4}
+body .rationale-grid p,body .rationale-grid li,body .expansion-rationale p,body .calculator-grid label,body .home-crisis p,body .home-crisis-event p,body .home-metric p{color:#a9b9ae}
+body main :is(.source-note,.business-intro,.story-detail-body,.finance-optional-body,.market-context,.team-surface,.team-section,.home-forecast) p{color:#a5b5aa}
+body .home-chart svg text,body .home-month-detail svg text{fill:#b6c9bc}
+body .calculator-result .calculator-total{color:#e8eee4}
+body .capacity-track,body .category-track,body .year-spark{background:#25352e}
+body .home-chart-header,body .home-chart-footer{color:#b6c9bc}
+
+:root{--blue:#9ddbd1;--muted:#a5aeae;--paper:#0b0e0f}
+body .hero{background:#0b0e0f}
+body .chart-card,body .risk-card,body .caveat,body .metric,body .crisis-list p{background:#111b1c;color:#b8cbbd;border-color:#30463c}
+body .risk-card p,body .risk-card li{color:#b8cbbd}
+body .period-toggle button,body .year-tabs button{background:#111b1c;color:#b8cbbd;border-color:#30463c}
+body .year-tabs button[aria-selected=true],body .period-toggle button[aria-pressed=true]{background:#28443a;color:#e6efdf;border-color:#8dc8b9}
+body .actions a:first-child{color:#0b1713}
+body footer:not(.footer){background:#101819;color:#acbcae}
+
+body .atlas-story>div p,body .expansion-gate p,body .rationale-grid article p,body .rationale-grid article li,body .market-sizing-grid p,body .perspectives p{color:#aebdb2}
+
+/* Market sequence: readable text on the existing dark surfaces. */
+body .expansion-rationale>h3,
+body .expansion-rationale .rationale-grid h4,
+body .expansion-rationale .rationale-grid strong{color:#f3f0e9}
+body .expansion-rationale .rationale-grid article p,
+body .expansion-rationale>.source-note{color:#bdc8c4}
+body .expansion-rationale>.section-label,
+body .expansion-rationale .rationale-grid article>span,
+body .expansion-rationale a,
+body .expansion-rationale .expansion-gate>span{color:#9ddbd1}
+body .expansion-rationale .expansion-gate p{color:#f3f0e9}
