@@ -76,7 +76,7 @@ export function AiHubView() {
 
       {error && <ErrorState message={error} />}
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <AiCard>
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-accent-600">
             <AiMark className="h-3.5 w-3.5 text-accent-500" />
@@ -139,6 +139,12 @@ export function AiHubView() {
               Sohbete başla
             </Link>
           </div>
+        </AiCard>
+        <AiCard>
+          <p className="text-xs font-semibold uppercase tracking-wide text-accent-600">Sufle</p>
+          <h2 className="mt-2 text-lg font-semibold text-navy-900">Görüşmede doğru soruyu yakalayın</h2>
+          <p className="mt-1 text-sm leading-6 text-navy-500">Mikrofon veya metinle görüşme desteği: eksik bilgiler, deliller, takip soruları ve görüşme sonu özeti.</p>
+          <div className="mt-auto pt-5"><Link href={AI_ROUTES.sufle} className={PRIMARY}>Sufle'yi aç</Link></div>
         </AiCard>
       </div>
 

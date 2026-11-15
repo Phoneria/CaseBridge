@@ -663,3 +663,26 @@ export async function openChatStream(
   if (!response.ok) await throwApiError(response, `/chat/conversations/${conversationId}/messages`);
   return response;
 }
+
+export interface SufleTurn { id: number; speaker: "Avukat" | "Müvekkil" | "Görüşme"; text: string }
+export interface SufleCard {
+  priority: "urgent" | "important" | "normal";
+  category: "safety" | "question" | "evidence" | "contradiction" | "deadline";
+  title: string; reason: string; question: string; source_id: number; source_quote: string;
+}
+export interface SufleAdvice {
+  cards: SufleCard[]; summary: string; open_questions: string[]; documents: string[]; model: string; total_tokens: number;
+}
+export function getSufleStatus() {
+  return request<{ configured: boolean; model: string; transcription_model: string }>("/sufle/status");
+}
+export function analyzeSufle(body: { turns: SufleTurn[]; focus: string; previous_questions: string[]; mode: "live" | "summary"; acknowledged: true }, signal?: AbortSignal) {
+  return request<SufleAdvice>("/sufle/analyze", { method: "POST", body: JSON.stringify(body), signal });
+}
+export function transcribeSufle(audio: Blob, signal?: AbortSignal) {
+  const data = new FormData();
+  const extension = audio.type.includes("mp4") ? "mp4" : audio.type.includes("ogg") ? "ogg" : "webm";
+  data.append("file", audio, `sufle.${extension}`);
+  data.append("acknowledged", "true");
+  return request<{ text: string }>("/sufle/transcribe", { method: "POST", body: data, signal });
+}

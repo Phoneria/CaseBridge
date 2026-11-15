@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     ai_secrets_encryption_key: str = Field(default="", repr=False)
     openai_model: str = "gpt-4o-mini"
+    sufle_model: str = ""  # Empty uses this bureau connection's CHAT_MODEL.
     voice_transcription_model: str = "gpt-4o-mini-transcribe"
     voice_speech_model: str = "gpt-4o-mini-tts"
 

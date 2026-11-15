@@ -25,6 +25,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/ai/analiz": "Dosya Analizi",
   "/ai/durusma": "Canlı Duruşma",
   "/ai/sohbet": "Hukuk Asistanı",
+  "/ai/sufle": "Sufle",
 };
 
 function sectionForPath(pathname: string): { href: string; title: string } | null {
