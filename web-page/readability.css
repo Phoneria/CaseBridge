@@ -141,3 +141,8 @@ body .roadmap-grid>article:nth-child(n){background:#111718}
   body .nav{position:relative}
   body .nav nav,html[lang="tr"] body .nav nav{position:absolute;left:50%;transform:translateX(-50%);font-size:17px;gap:36px}
 }
+/* v.0.40: dark-theme colours for the selected seed-allocation row and its note
+   (they kept the light theme's pale background, hiding the white share). */
+body .finance-glance-legend>div[aria-pressed=true]{background:#1c302e;color:#f3f0e9}
+body .finance-glance-legend>div[aria-pressed=true] strong{color:#9ddbd1}
+body .allocation-selection{background:#152022;color:#dce7e1;border-left-color:#9ddbd1}

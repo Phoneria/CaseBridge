@@ -86,6 +86,7 @@
     const key = squash(value);
     if (!key || !/[A-Za-z]/.test(key)) return numbers(key);
     if (Object.prototype.hasOwnProperty.call(dictionary, key)) return dictionary[key] === null ? key : dictionary[key];
+    if (/^[−-]?\$[\d.,]+(?:k|m|bn|tn)?\+?$/.test(key)) return numbers(key);
     for (const [pattern, format] of patterns) {
       const match = key.match(pattern);
       if (!match) continue;

@@ -256,11 +256,13 @@
     svg?.setAttribute('role', 'group');
     const note = document.createElement('p'); note.className = 'allocation-selection'; note.hidden = true;
     allocation.after(note);
+    // Name and share with a separator (the row's raw text runs them together).
+    const label = row => [row.querySelector('span'), row.querySelector('strong')].filter(Boolean).map(node => node.textContent.trim()).join(' · ');
     function selectAllocation(index) {
       slices.forEach((slice, i) => { slice.style.opacity = i === index ? '1' : '.25'; slice.setAttribute('aria-pressed', String(i === index)); });
       rows.forEach((row, i) => row.setAttribute('aria-pressed', String(i === index)));
       // The legend is translated in place; use its current rendered label.
-      note.textContent = rows[index].textContent;
+      note.textContent = label(rows[index]);
       note.hidden = false;
       note.dataset.selected = index;
     }
@@ -277,7 +279,7 @@
       });
     });
     window.addEventListener('casebridge:languagechange', () => {
-      if (!note.hidden) note.textContent = rows[Number(note.dataset.selected)].textContent;
+      if (!note.hidden) note.textContent = label(rows[Number(note.dataset.selected)]);
     });
   }
 
