@@ -20,6 +20,7 @@ Bu iş üç şey ekler:
 - **Dava formunda seçim:** müvekkil aranır ve seçilir; bulunamazsa aynı yerden yeni müvekkil eklenir.
 - **Mevcut veri:** geçişte, büro içinde aynı normalleştirilmiş ada sahip müvekkil tarafları tek müvekkil kaydında birleştirilir.
 - **Müvekkil ekranı:** liste ve arama, detay ve davalar, özet sayılar.
+- **Emsal kararlar** (`is_precedent = true` olan davalar) müvekkile bağlanmaz. Bu davaların tarafları "Davacı (anonim)" gibi adlar taşır; geçiş, içe aktarma ve sayımlar bu davaları dışarıda bırakır.
 - **Kapsam dışı:** müvekkil birleştirme, genel aramada müvekkiller, müvekkile özel belge veya not sekmesi.
 
 ## 1. Veri modeli
@@ -47,7 +48,7 @@ Tek bir Alembic migration'ı eklenir. Hem şemayı hem veriyi taşır.
 ### `case_parties.client_id`
 
 - `String(36)`, FK `clients.id`, NULL olabilir, indeksli.
-- Değişmez kural: `is_client = true` olan tarafın `client_id` değeri doludur; `is_client = false` olan tarafınki boştur. Kuralı servis katmanı uygular. `is_client` sütunu uyumluluk için yerinde kalır.
+- Değişmez kural (emsal olmayan davalarda): `is_client = true` olan tarafın `client_id` değeri doludur; `is_client = false` olan tarafınki boştur. Kuralı servis katmanı uygular. `is_client` sütunu uyumluluk için yerinde kalır.
 - Bağlı tarafın `name` değeri her zaman müvekkilin `name` değerinin kopyasıdır. Müvekkilin adı değişince bağlı tarafların adı ve bu tarafların davalarındaki `client_name` aynı işlemde yeniden yazılır. `client_name` alanı mevcut `derive_client_name` yardımcısıyla üretilir. Böylece `client_name` ve `opposing_party` alanlarını okuyan dava listesi, arama, raporlar, emsaller, duruşma, AI bağlamı ve devir raporu değişmeden çalışır.
 
 ### Ad normalleştirme (`client_name_key`)
@@ -70,7 +71,7 @@ Bu fonksiyon `app/services/client_service.py` içindedir. Büro kimliği ve ad a
 ### Geçiş
 
 1. `clients` tablosu ve `case_parties.client_id` sütunu oluşturulur.
-2. Her büroda `is_client = true` olan taraflar `name_key` değerine göre gruplanır.
+2. Her büroda, emsal olmayan davalarda `is_client = true` olan taraflar `name_key` değerine göre gruplanır.
 3. Her grup için bir müvekkil açılır:
    - `name`: grupta en sık geçen özgün yazım; eşitlikte en eski tarafın yazımı.
    - `client_type`: `person`. İletişim alanları boş kalır.
@@ -151,7 +152,7 @@ Müvekkil eklemeyi ve düzenlemeyi büronun her kullanıcısı yapabilir. Bürod
 
 Bu bileşen hem `NewCaseView` hem `CasePartiesCard` tarafından kullanılır.
 
-- `PartyRow` tipine `client_id: string | null` ve `client_name: string | null` (seçili müvekkilin adı) eklenir.
+- `PartyRow` tipine `client_id: string | null` eklenir. Seçili müvekkilin adı satırın `name` alanında tutulur.
 - **Müvekkil işaretli satırda** Ad alanı yerine `ClientPicker` gösterilir:
   - Yazıldıkça `GET /clients?q=&limit=10` çağrılır. Öneri satırında ad, tür ve telefon görünür.
   - Listenin sonunda her zaman **"+ '…' adıyla yeni müvekkil ekle"** seçeneği bulunur. Bu seçenek `POST /clients` ile yalnızca adı dolu, `person` türünde bir müvekkil açar ve onu seçer. Hata olursa satırda mesaj gösterilir ve yazılan metin korunur.
@@ -181,7 +182,9 @@ Bu bileşen hem `NewCaseView` hem `CasePartiesCard` tarafından kullanılır.
 ## 5. Diğer kod değişiklikleri
 
 - `seed.py`, `demo_template.py`, `import_cases.py`: taraflar `find_or_create_client` üzerinden bağlanır. Birkaç demo müvekkile telefon ve e-posta eklenir.
-- `purge.py`, `demo_cleanup.py`: büro verisi silinirken taraflar silindikten sonra müvekkiller de silinir.
+- `import_cases.py`: emsal davaların tarafları müvekkile bağlanmaz.
+- `demo_cleanup.py`: büro silinmeden önce, artık hiçbir tarafa bağlı olmayan müvekkiller silinir. `purge.py` yalnızca davaları siler; davası kalmayan müvekkil geçerli bir kayıttır ve yerinde kalır.
+- Sayımlar (`case_count`, `open_case_count`, `stats`, `cases`) ve `GET /cases?client_id=` emsal davaları saymaz.
 - Frontend `types` ve `lib/api` dosyalarına `Client`, `ClientDetail` tipleri ve `listClients`, `getClient`, `createClient`, `updateClient`, `deleteClient` fonksiyonları eklenir.
 
 ## 6. Testler
