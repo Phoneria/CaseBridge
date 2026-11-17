@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { PartiesFields } from "@/components/case-form/PartiesFields";
@@ -123,7 +124,13 @@ export function CasePartiesCard({ caseDetail, onSaved, canEdit }: Props) {
         <ul className="divide-y divide-surface-border">
           {parties.map((party) => (
             <li key={party.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
-              <span className="text-sm font-medium text-navy-800">{party.name}</span>
+              {party.client_id ? (
+                <Link href={`/muvekkiller/${party.client_id}`} className="text-sm font-medium text-accent-700 hover:underline">
+                  {party.name}
+                </Link>
+              ) : (
+                <span className="text-sm font-medium text-navy-800">{party.name}</span>
+              )}
               <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-navy-600">
                 {PARTY_ROLE_LABELS[party.role]}
               </span>

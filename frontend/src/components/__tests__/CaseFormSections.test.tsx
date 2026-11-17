@@ -1,7 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+
+const listClients = vi.fn();
+const createClient = vi.fn();
+vi.mock("@/lib/api", () => ({
+  listClients: (...args: unknown[]) => listClients(...args),
+  createClient: (...args: unknown[]) => createClient(...args),
+}));
 
 import { BasicInfoFields } from "@/components/case-form/BasicInfoFields";
 import { DisputeFields } from "@/components/case-form/DisputeFields";
@@ -26,6 +33,11 @@ function BasicHarness({ ai = new Set<string>(), errors = {} }: { ai?: Set<string
     />
   );
 }
+
+beforeEach(() => {
+  listClients.mockReset().mockResolvedValue([]);
+  createClient.mockReset();
+});
 
 describe("BasicInfoFields", () => {
   it("shows the spec's labels with required markers on case number, name and type", () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { AiBadge } from "@/components/ai/AiBadge";
+import { ClientPicker } from "@/components/case-form/ClientPicker";
 import { INPUT_CLASS } from "@/components/case-form/Field";
 import { FIELD_LIMITS, PARTY_ROLES, PARTY_ROLE_LABELS, type PartyRow } from "@/lib/caseIntake";
 import type { PartyRole } from "@/types";
@@ -53,16 +54,30 @@ export function PartiesFields({ parties, ai, error, partyErrors, counselErrors =
                 </label>
                 {ai.has(`party:${party.key}`) && <AiBadge />}
               </div>
-              <input
-                id={`party-name-${party.key}`}
-                maxLength={FIELD_LIMITS.party_name}
-                className={INPUT_CLASS}
-                value={party.name}
-                aria-invalid={Boolean(nameError)}
-                aria-required="true"
-                aria-describedby={nameError ? `party-name-${party.key}-hata` : undefined}
-                onChange={(e) => onUpdate(party.key, { name: e.target.value })}
-              />
+              {party.is_client ? (
+                <ClientPicker
+                  inputId={`party-name-${party.key}`}
+                  query={party.name}
+                  clientId={party.client_id}
+                  maxLength={FIELD_LIMITS.party_name}
+                  invalid={Boolean(nameError)}
+                  describedBy={nameError ? `party-name-${party.key}-hata` : undefined}
+                  onQueryChange={(text) => onUpdate(party.key, { name: text })}
+                  onSelect={(client) => onUpdate(party.key, { name: client.name, client_id: client.id })}
+                  onClear={() => onUpdate(party.key, { client_id: null })}
+                />
+              ) : (
+                <input
+                  id={`party-name-${party.key}`}
+                  maxLength={FIELD_LIMITS.party_name}
+                  className={INPUT_CLASS}
+                  value={party.name}
+                  aria-invalid={Boolean(nameError)}
+                  aria-required="true"
+                  aria-describedby={nameError ? `party-name-${party.key}-hata` : undefined}
+                  onChange={(e) => onUpdate(party.key, { name: e.target.value })}
+                />
+              )}
               {nameError && (
                 <p id={`party-name-${party.key}-hata`} className="mt-1 text-xs text-red-600">
                   {nameError}
@@ -110,7 +125,7 @@ export function PartiesFields({ parties, ai, error, partyErrors, counselErrors =
                 <input
                   type="checkbox"
                   checked={party.is_client}
-                  onChange={(e) => onUpdate(party.key, { is_client: e.target.checked })}
+                  onChange={(e) => onUpdate(party.key, e.target.checked ? { is_client: true } : { is_client: false, client_id: null })}
                   className="h-4 w-4 rounded border-surface-border text-accent-600"
                 />
                 Müvekkilimiz
