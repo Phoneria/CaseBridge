@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { BasicInfoFields, type SetField } from "@/components/case-form/BasicInfoFields";
 import { DisputeFields } from "@/components/case-form/DisputeFields";
@@ -26,7 +26,7 @@ import {
   type SectionId,
   type SuggestedEvent,
 } from "@/lib/caseIntake";
-import { addCaseEvent, createCase, getMe, listAdminLawyers, uploadDocument } from "@/lib/api";
+import { addCaseEvent, createCase, getClient, getMe, listAdminLawyers, uploadDocument } from "@/lib/api";
 import { ApiError } from "@/lib/apiError";
 import type { AppUser, CaseIntakeResult } from "@/types";
 
@@ -47,6 +47,28 @@ function errorMessage(error: unknown): string {
 export function NewCaseView() {
   const router = useRouter();
   const [form, setForm] = useState<CaseFormState>(emptyCaseForm);
+  const clientParam = useSearchParams().get("muvekkil");
+  useEffect(() => {
+    if (!clientParam) return;
+    let active = true;
+    // From a client page: the first party row becomes that client.
+    getClient(clientParam)
+      .then((client) => {
+        if (!active) return;
+        setForm((current) => ({
+          ...current,
+          // Keep the row's key so its DOM node is reused instead of remounted.
+          parties: [
+            { ...(current.parties[0] ?? newPartyRow("plaintiff")), name: client.name, is_client: true, client_id: client.id },
+            ...current.parties.slice(1),
+          ],
+        }));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [clientParam]);
   const [ai, setAi] = useState<ReadonlySet<string>>(new Set());
   const [events, setEvents] = useState<SuggestedEvent[]>([]);
   const [files, setFiles] = useState<File[]>([]);

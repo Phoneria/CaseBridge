@@ -11,6 +11,7 @@ const getMe = vi.fn();
 const listAdminLawyers = vi.fn();
 const listClients = vi.fn();
 const createClient = vi.fn();
+const getClient = vi.fn();
 vi.mock("@/lib/api", () => ({
   extractCaseIntake: (...args: unknown[]) => extractCaseIntake(...args),
   createCase: (...args: unknown[]) => createCase(...args),
@@ -20,9 +21,10 @@ vi.mock("@/lib/api", () => ({
   listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
   listClients: (...args: unknown[]) => listClients(...args),
   createClient: (...args: unknown[]) => createClient(...args),
+  getClient: (...args: unknown[]) => getClient(...args),
 }));
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
-import { nav, resetNav } from "@/test/navigation";
+import { nav, resetNav, setUrl } from "@/test/navigation";
 
 import { ApiError } from "@/lib/apiError";
 
@@ -58,7 +60,7 @@ const RESULT: CaseIntakeResult = {
 const scrollIntoView = vi.fn();
 
 beforeEach(() => {
-  for (const mock of [extractCaseIntake, createCase, addCaseEvent, uploadDocument, getMe, listAdminLawyers, scrollIntoView]) {
+  for (const mock of [extractCaseIntake, createCase, addCaseEvent, uploadDocument, getMe, listAdminLawyers, getClient, scrollIntoView]) {
     mock.mockReset();
   }
   getMe.mockResolvedValue({ id: "u1", role: "lawyer" });
@@ -545,5 +547,17 @@ describe("NewCaseView create flow safeguards", () => {
     render(<NewCaseView />);
     await submit();
     expect(screen.getByRole("heading", { name: "Temel bilgiler ve mahkeme" })).toHaveFocus();
+  });
+});
+
+describe("NewCaseView from a client page", () => {
+  it("opens with the client chosen in the first party row", async () => {
+    setUrl("/davalar/yeni?muvekkil=cl-7");
+    getClient.mockResolvedValue({ id: "cl-7", name: "Nova Yazılım A.Ş.", client_type: "company" });
+    render(<NewCaseView />);
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    expect(await within(first).findByRole("link", { name: "Nova Yazılım A.Ş." })).toHaveAttribute("href", "/muvekkiller/cl-7");
+    expect(within(first).getByLabelText("Müvekkilimiz")).toBeChecked();
+    expect(getClient).toHaveBeenCalledWith("cl-7");
   });
 });
