@@ -26,7 +26,9 @@ from app.db.courtroom_showcase_seed import seed_courtroom_showcases
 from app.db.demo_cleanup import remove_demo_data
 from app.db.demo_case_detail_seed import CASE_EVIDENCE
 from app.db.purge import delete_cases
-from app.services.case_parties import legacy_parties, party_models
+from app.models.client import Client
+from app.services.case_parties import derive_client_name, legacy_parties, party_models
+from app.services.client_service import resolve_party_clients
 from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
 from app.services.platform_service import PLATFORM_FIRM_NAME, get_or_create_platform_firm
 
@@ -40,6 +42,12 @@ DEMO_LAWYERS = (
 )
 DEMO_PASSWORD = "demo1234"
 PLATFORM_DEMO_EMAIL = "platform@demo.casebridge.dev"
+# Contact details of a few demo clients, filled only where the field is empty.
+DEMO_CLIENT_CONTACTS = {
+    "Yılmaz Tekstil Ltd. Şti.": ("company", "0212 555 10 20", "info@yilmaztekstil.example"),
+    "Nova Yazılım A.Ş.": ("company", "0216 555 30 40", "hukuk@novayazilim.example"),
+    "Ahmet Yılmaz": ("person", "0532 555 11 22", "ahmet.yilmaz@example.com"),
+}
 
 
 def _get_or_create_firm(db) -> LawFirm:
@@ -84,8 +92,9 @@ def _get_or_create_case(db, firm: LawFirm, lawyer: User, **kwargs) -> Case:
     )
     if existing:
         return existing
-    demo_case = Case(law_firm_id=firm.id, assigned_lawyer_id=lawyer.id, **kwargs)
-    demo_case.parties = party_models(legacy_parties(kwargs["client_name"], kwargs.get("opposing_party")), firm.id)
+    parties = resolve_party_clients(db, firm.id, legacy_parties(kwargs["client_name"], kwargs.get("opposing_party")))
+    demo_case = Case(law_firm_id=firm.id, assigned_lawyer_id=lawyer.id, **{**kwargs, "client_name": derive_client_name(parties)})
+    demo_case.parties = party_models(parties, firm.id)
     db.add(demo_case)
     db.flush()
     if kwargs.get("next_hearing_date") is not None:
@@ -93,6 +102,17 @@ def _get_or_create_case(db, firm: LawFirm, lawyer: User, **kwargs) -> Case:
         ensure_all_day_hearing(db, demo_case, kwargs["next_hearing_date"], lawyer.id)
         recompute_next_hearing(db, demo_case, local_today())
     return demo_case
+
+
+def _fill_demo_client_contacts(db, firm: LawFirm) -> None:
+    for name, (client_type, phone, email) in DEMO_CLIENT_CONTACTS.items():
+        client = db.query(Client).filter(Client.law_firm_id == firm.id, Client.name == name).first()
+        if client is None:
+            continue
+        if not client.phone and not client.email:
+            client.client_type = client_type
+            client.phone = phone
+            client.email = email
 
 
 def _get_or_create_task(db, case: Case, lawyer: User, **kwargs) -> Task:
@@ -735,6 +755,7 @@ def seed() -> None:
             if legacy_lawyer and case.assigned_lawyer_id == lawyer.id:
                 case.assigned_lawyer_id = assigned.id
             demo_cases[case_kwargs["case_number"]] = case
+        _fill_demo_client_contacts(db, firm)
 
 
         for case_number, title, due_in_days, status in DEMO_TASKS:

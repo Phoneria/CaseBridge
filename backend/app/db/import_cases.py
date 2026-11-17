@@ -46,6 +46,7 @@ from app.services.case_parties import (
     legacy_parties,
     party_models,
 )
+from app.services.client_service import resolve_party_clients
 from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
 from app.services.text_extraction import extract_text
 
@@ -112,6 +113,10 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
     if is_precedent:
         case.assigned_lawyer_id = None
 
+    # Set before client lookups: those flush the session, and a new case needs its NOT NULL columns.
+    case.case_type = _enum(CaseType, item.get("case_type"), CaseType.DIGER)
+    case.status = _enum(CaseStatus, item.get("status"), CaseStatus.DEVAM_EDEN)
+    case.outcome = _enum(CaseOutcome, item.get("outcome"), CaseOutcome.ONGOING)
     names_before = (case.client_name, case.opposing_party)
     untouched = False if created else _is_untouched_legacy(case)
     for field in _CASE_FIELDS:
@@ -121,14 +126,16 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
         # Manifests only know client_name / opposing_party; parties edited in
         # the app survive a re-import, only untouched legacy parties follow
         # a change of those names.
-        case.parties = party_models(legacy_parties(case.client_name, case.opposing_party), firm.id)
+        parties = legacy_parties(case.client_name, case.opposing_party)
+        if not is_precedent:
+            # Firm cases link their client party to a client; precedents never do.
+            parties = resolve_party_clients(db, firm.id, parties)
+            case.client_name = derive_client_name(parties) or case.client_name
+        case.parties = party_models(parties, firm.id)
     elif not untouched:
         kept = [PartyData(p.name, p.role, p.is_client, p.counsel_name) for p in case.parties]
         case.client_name = derive_client_name(kept) or case.client_name
         case.opposing_party = derive_opposing_party(kept, case.client_role)
-    case.case_type = _enum(CaseType, item.get("case_type"), CaseType.DIGER)
-    case.status = _enum(CaseStatus, item.get("status"), CaseStatus.DEVAM_EDEN)
-    case.outcome = _enum(CaseOutcome, item.get("outcome"), CaseOutcome.ONGOING)
     if item.get("opening_date"):
         case.opening_date = _date(item["opening_date"])
     hearing_day = _date(item.get("next_hearing_date"))
