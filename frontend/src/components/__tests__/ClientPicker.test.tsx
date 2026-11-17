@@ -54,6 +54,7 @@ describe("ClientPicker", () => {
     expect(screen.getByTestId("chosen")).toHaveTextContent("cl-1");
     expect(screen.getByRole("link", { name: "Acme Ltd." })).toHaveAttribute("href", "/muvekkiller/cl-1");
     expect(screen.queryByRole("combobox")).toBeNull();
+    expect(screen.getByRole("button", { name: "Müvekkili değiştir" })).toHaveFocus();
   });
 
   it("always offers to add the typed name as a new client", async () => {
@@ -101,5 +102,98 @@ describe("ClientPicker", () => {
     await userEvent.click(screen.getByRole("button", { name: "Müvekkili değiştir" }));
     expect(screen.getByRole("combobox")).toHaveValue("Acme Ltd.");
     expect(screen.getByTestId("chosen")).toHaveTextContent("");
+    expect(screen.getByRole("combobox")).toHaveFocus();
+  });
+
+  it("closes the list on a click outside the picker, even without focus", async () => {
+    listClients.mockResolvedValue([ACME]);
+    render(
+      <>
+        <button type="button">Dışarıda</button>
+        <Harness initial="Acme" />
+      </>,
+    );
+    await screen.findByRole("option", { name: /Acme Ltd\./ });
+    expect(screen.getByRole("combobox")).toHaveAttribute("aria-expanded", "true");
+    await userEvent.click(screen.getByRole("button", { name: "Dışarıda" }));
+    expect(screen.getByRole("combobox")).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("listbox")).toBeNull();
+  });
+
+  it("resets the highlighted option when new results arrive", async () => {
+    const BETA = { ...ACME, id: "cl-2", name: "Acme Beta" };
+    let resolveSecond!: (items: unknown[]) => void;
+    listClients.mockResolvedValueOnce([ACME, BETA]).mockReturnValueOnce(new Promise((r) => (resolveSecond = r)));
+    render(<Harness />);
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "ac");
+    await screen.findByRole("option", { name: /Acme Ltd\./ });
+    await userEvent.type(input, "m");
+    await waitFor(() => expect(listClients).toHaveBeenCalledTimes(2));
+    await userEvent.keyboard("{ArrowDown}");
+    expect(input).toHaveAttribute("aria-activedescendant");
+    resolveSecond([BETA]);
+    await waitFor(() => expect(screen.queryByRole("option", { name: /Acme Ltd\./ })).toBeNull());
+    expect(input).not.toHaveAttribute("aria-activedescendant");
+    await userEvent.keyboard("{Enter}");
+    expect(screen.getByTestId("chosen")).toHaveTextContent("");
+  });
+
+  it("ignores option clicks while a client is being added", async () => {
+    listClients.mockResolvedValue([ACME]);
+    let resolve!: (value: { id: string; name: string }) => void;
+    createClient.mockReturnValue(new Promise((r) => (resolve = r)));
+    render(<Harness />);
+    await userEvent.type(screen.getByRole("combobox"), "Acme");
+    const acme = await screen.findByRole("option", { name: /Acme Ltd\./ });
+    await userEvent.click(screen.getByRole("option", { name: /adıyla yeni müvekkil ekle/ }));
+    expect(screen.getByRole("option", { name: /adıyla yeni müvekkil ekle/ })).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(acme);
+    expect(screen.getByTestId("chosen")).toHaveTextContent("");
+    resolve({ id: "cl-9", name: "Acme" });
+    await waitFor(() => expect(screen.getByTestId("chosen")).toHaveTextContent("cl-9"));
+    expect(createClient).toHaveBeenCalledTimes(1);
+  });
+
+  it("links the error to the input and clears it when the text is edited", async () => {
+    createClient.mockRejectedValue(new ApiError("Sunucu hatası.", 500));
+    render(<Harness />);
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "Acme");
+    await userEvent.click(screen.getByRole("option", { name: /adıyla yeni müvekkil ekle/ }));
+    const alert = await screen.findByRole("alert");
+    expect(input.getAttribute("aria-describedby")).toContain(alert.id);
+    await userEvent.type(input, "x");
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(input.getAttribute("aria-describedby") ?? "").toBe("");
+  });
+
+  it("keeps the incoming describedBy next to the error id", async () => {
+    createClient.mockRejectedValue(new ApiError("Sunucu hatası.", 500));
+    render(
+      <ClientPicker inputId="n" query="Acme" clientId={null} maxLength={255} describedBy="hata-1" onQueryChange={() => {}} onSelect={() => {}} onClear={() => {}} />,
+    );
+    await userEvent.click(await screen.findByRole("option", { name: /adıyla yeni müvekkil ekle/ }));
+    const alert = await screen.findByRole("alert");
+    expect(screen.getByRole("combobox").getAttribute("aria-describedby")?.split(" ")).toEqual(["hata-1", alert.id]);
+  });
+
+  it("does not let Escape that closes the list reach a surrounding dialog", async () => {
+    listClients.mockResolvedValue([ACME]);
+    const onKeyDown = vi.fn();
+    render(
+      <div onKeyDown={onKeyDown}>
+        <Harness />
+      </div>,
+    );
+    const input = screen.getByRole("combobox");
+    await userEvent.type(input, "ac");
+    await screen.findByRole("option", { name: /Acme Ltd\./ });
+    onKeyDown.mockClear();
+    await userEvent.keyboard("{Escape}");
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    expect(onKeyDown).not.toHaveBeenCalled();
+    await userEvent.keyboard("{Escape}");
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
   });
 });

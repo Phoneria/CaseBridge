@@ -36,6 +36,12 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const changeRef = useRef<HTMLButtonElement>(null);
+  // Which control to focus once the picker has switched between its two views.
+  const focusNext = useRef<"change" | "input" | null>(null);
+  const errorId = `${listId}-error`;
   const inFlight = useRef(false);
   const trimmed = query.trim();
 
@@ -53,6 +59,35 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
     return () => clearTimeout(timer);
   }, [trimmed, clientId]);
 
+  // A new result list starts without a highlighted option.
+  useEffect(() => setActive(-1), [results]);
+
+  useEffect(() => {
+    if (clientId && focusNext.current === "change") changeRef.current?.focus();
+    else if (!clientId && focusNext.current === "input") inputRef.current?.focus();
+    else return;
+    focusNext.current = null;
+  });
+
+  const options: Option[] = [
+    ...results.map((client) => ({ kind: "client" as const, client })),
+    ...(trimmed ? [{ kind: "new" as const }] : []),
+  ];
+  const expanded = open && options.length > 0;
+
+  // The list can be open without ever having had focus, so blur and Escape alone cannot dismiss it.
+  useEffect(() => {
+    if (!expanded) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+        setActive(-1);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [expanded]);
+
   if (clientId) {
     return (
       <div className="flex min-h-[38px] items-center justify-between gap-2 rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5">
@@ -61,8 +96,10 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
         </Link>
         <button
           type="button"
+          ref={changeRef}
           aria-label="Müvekkili değiştir"
           onClick={() => {
+            focusNext.current = "input";
             setOpen(true);
             onClear();
           }}
@@ -74,12 +111,6 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
     );
   }
 
-  const options: Option[] = [
-    ...results.map((client) => ({ kind: "client" as const, client })),
-    ...(trimmed ? [{ kind: "new" as const }] : []),
-  ];
-  const expanded = open && options.length > 0;
-
   async function addNew() {
     if (inFlight.current || !trimmed) return;
     inFlight.current = true;
@@ -87,6 +118,7 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
     setError(null);
     try {
       const client = await createClient({ name: trimmed, client_type: "person", phone: null, email: null, address: null, notes: null });
+      focusNext.current = "change";
       onSelect({ id: client.id, name: client.name });
     } catch (err) {
       setError(userMessage(err, "Müvekkil eklenemedi."));
@@ -98,9 +130,12 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
 
   function choose(index: number) {
     const option = options[index];
-    if (!option) return;
+    if (!option || inFlight.current) return;
     if (option.kind === "new") void addNew();
-    else onSelect({ id: option.client.id, name: option.client.name });
+    else {
+      focusNext.current = "change";
+      onSelect({ id: option.client.id, name: option.client.name });
+    }
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -116,14 +151,17 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
       event.preventDefault();
       if (active >= 0) choose(active);
     } else if (event.key === "Escape") {
+      // Closing the list must not also close a surrounding dialog.
+      if (expanded) event.stopPropagation();
       setOpen(false);
       setActive(-1);
     }
   }
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <input
+        ref={inputRef}
         id={inputId}
         role="combobox"
         aria-expanded={expanded}
@@ -132,13 +170,14 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
         aria-activedescendant={expanded && active >= 0 ? `${listId}-${active}` : undefined}
         aria-invalid={Boolean(invalid)}
         aria-required="true"
-        aria-describedby={describedBy}
+        aria-describedby={[describedBy, error ? errorId : null].filter(Boolean).join(" ") || undefined}
         autoComplete="off"
         maxLength={maxLength}
         className={INPUT_CLASS}
         value={query}
         onChange={(event) => {
           onQueryChange(event.target.value);
+          setError(null);
           setOpen(true);
           setActive(-1);
         }}
@@ -159,6 +198,7 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
               id={`${listId}-${index}`}
               role="option"
               aria-selected={index === active}
+              aria-disabled={option.kind === "new" && creating ? true : undefined}
               // Keep the input focused so the click lands before the list closes on blur.
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => choose(index)}
@@ -185,7 +225,7 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-1 text-xs text-red-600">
+        <p id={errorId} role="alert" className="mt-1 text-xs text-red-600">
           {error}
         </p>
       )}

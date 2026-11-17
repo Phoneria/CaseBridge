@@ -141,6 +141,20 @@ describe("PartiesFields", () => {
     expect(within(screen.getByRole("group", { name: "Taraf 2" })).getByLabelText("Rol")).toHaveValue("defendant");
   });
 
+  it("unchecking Müvekkilimiz after choosing a client gives back a plain name input", async () => {
+    listClients.mockResolvedValue([{ id: "cl-1", name: "Acme Ltd.", client_type: "company", phone: null, case_count: 0, open_case_count: 0 }]);
+    render(<PartiesHarness />);
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+    await userEvent.type(within(first).getByLabelText(/^Ad/), "acme");
+    await userEvent.click(await screen.findByRole("option", { name: /Acme Ltd\./ }));
+    expect(within(first).getByRole("link", { name: "Acme Ltd." })).toBeInTheDocument();
+    await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+    expect(within(first).queryByRole("link")).toBeNull();
+    expect(within(first).getByLabelText(/^Ad/)).toHaveValue("Acme Ltd.");
+    expect(within(first).getByLabelText(/^Ad/)).not.toHaveAttribute("role", "combobox");
+  });
+
   it("edits a row, marks the client and adds and removes rows", async () => {
     const onChange = vi.fn();
     render(<PartiesHarness onChange={onChange} />);
