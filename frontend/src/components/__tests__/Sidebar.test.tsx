@@ -19,9 +19,10 @@ beforeEach(() => {
 describe("Sidebar", () => {
   it("renders the main navigation without the old Simülasyonlar item", () => {
     render(<Sidebar />);
-    for (const label of ["Dashboard", "Davalar", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
+    for (const label of ["Dashboard", "Davalar", "Müvekkiller", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
+    expect(screen.getByRole("link", { name: "Müvekkiller" })).toHaveAttribute("href", "/muvekkiller");
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 
@@ -79,6 +80,7 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: /Büro Yönetimi/ })).toHaveAttribute("href", "/platform");
     expect(screen.getByRole("link", { name: /Hesabım/ })).toHaveAttribute("href", "/hesabim");
     expect(screen.queryByRole("link", { name: /Davalar/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Müvekkiller/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Admin Paneli/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("group", { name: "CaseBridge AI" })).not.toBeInTheDocument();
   });
