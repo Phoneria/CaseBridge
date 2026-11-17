@@ -3,6 +3,7 @@ on the shared declarative Base so Base.metadata.create_all() sees them."""
 from app.models.law_firm import LawFirm  # noqa: F401
 from app.models.user import User, UserRole, UserStatus  # noqa: F401
 from app.models.user_token import TokenPurpose, UserToken  # noqa: F401
+from app.models.client import Client, ClientType  # noqa: F401
 from app.models.case import (  # noqa: F401
     Case,
     CaseEvent,
