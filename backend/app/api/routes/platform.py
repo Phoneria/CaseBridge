@@ -1,8 +1,11 @@
 """The platform panel's API: customer firms and their administrators
 (platform admins only)."""
 import logging
+from datetime import date, datetime, timezone
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -18,6 +21,7 @@ from app.schemas.platform import (
     PlatformFirmCreatedOut,
     PlatformFirmOut,
 )
+from app.services.audit_export import AuditRangeError, iter_chunks, resolve_range, write_audit_csv
 from app.services.platform_service import (
     add_firm_admin,
     check_can_invite,
@@ -152,3 +156,27 @@ def activate(firm_id: str, actor: User = Depends(get_current_platform_admin), db
         _audit("büro_aktifleştirildi", firm.id, None, actor)
     db.refresh(firm)
     return _firm_out(firm)
+
+
+@router.get("/audit-events.csv")
+def export_audit_events(
+    firm_id: Optional[str] = None,
+    start: Optional[date] = Query(default=None, alias="from"),
+    end: Optional[date] = Query(default=None, alias="to"),
+    actor: User = Depends(get_current_platform_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        start, end = resolve_range(start, end, datetime.now(timezone.utc).date())
+    except AuditRangeError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from None
+    if firm_id is not None:
+        _firm(db, firm_id)
+    spool = write_audit_csv(db, start, end, firm_id)
+    logger.info("Hareket kaydı dışa aktarıldı: işlemi yapan=%s büro=%s aralık=%s..%s",
+                actor.id, firm_id or "tümü", start.isoformat(), end.isoformat())
+    return StreamingResponse(
+        iter_chunks(spool),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="casebridge-hareketler-{start}-{end}.csv"'},
+    )
