@@ -7,7 +7,7 @@ from app.api.case_access import NOT_NOTE_CHANGER, can_change_note, require_case_
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
-from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType
+from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole
 from app.models.user import User, UserRole
 from app.schemas.calendar import CaseHearingOut
 from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseNoteUpdate, CaseOut, CaseUpdate
@@ -27,6 +27,14 @@ def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str,
     if case is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     return case
+
+
+_TRANSITION_ENUMS = {"status": CaseStatus, "outcome": CaseOutcome, "case_type": CaseType, "client_role": ClientRole}
+
+
+def _as_enum(name: str, value):
+    """client_role is a plain string column; the audit log only takes enum members."""
+    return None if value is None else _TRANSITION_ENUMS[name](value)
 
 
 def _party_counts(case) -> dict:
@@ -159,7 +167,7 @@ def update_case(
     changed = changed_fields(updated, before)
     if changed:
         transitions = {
-            name: (before[name], getattr(updated, name))
+            name: (_as_enum(name, before[name]), _as_enum(name, getattr(updated, name)))
             for name in ("status", "outcome", "case_type", "client_role")
             if name in changed
         }

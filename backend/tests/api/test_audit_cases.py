@@ -53,6 +53,15 @@ def test_an_update_that_changes_nothing_records_nothing(client, db_session, offi
     assert audit_rows(db_session, "case.updated") == []
 
 
+def test_a_client_role_change_is_a_transition(client, db_session, office, auth_headers):
+    headers = auth_headers(office.lawyer_a1)
+    case = _create(client, headers)
+    response = client.patch(f"/cases/{case['id']}", json={"parties": PARTIES, "client_role": "defendant"}, headers=headers)
+    assert response.status_code == 200, response.text
+    [row] = audit_rows(db_session, "case.updated")
+    assert row.details == {"fields": ["client_role"], "transitions": {"client_role": ["plaintiff", "defendant"]}}
+
+
 def test_party_changes_are_their_own_action(client, db_session, office, auth_headers):
     headers = auth_headers(office.lawyer_a1)
     case = _create(client, headers)
