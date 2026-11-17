@@ -87,7 +87,8 @@ def test_removing_the_demo_firm_removes_its_clients(db_session, monkeypatch, tmp
     from app.db.demo_cleanup import remove_demo_data
 
     seed_module = _seed(db_session, monkeypatch, tmp_path)
-    firm = db_session.query(LawFirm).filter_by(name=seed_module.DEMO_FIRM_NAME).one()
+    firm_id = db_session.query(LawFirm).filter_by(name=seed_module.DEMO_FIRM_NAME).one().id
+    assert db_session.query(Client).filter_by(law_firm_id=firm_id).count() > 0
     result = remove_demo_data(
         db_session,
         firm_name=seed_module.DEMO_FIRM_NAME,
@@ -97,8 +98,7 @@ def test_removing_the_demo_firm_removes_its_clients(db_session, monkeypatch, tmp
     )
     db_session.commit()
     assert result.cases > 0
-    # The firm goes only when nothing but its clients still points at it.
-    if result.firm_removed:
-        assert db_session.query(Client).filter_by(law_firm_id=firm.id).count() == 0
-    else:
-        assert db_session.query(Client).filter_by(law_firm_id=firm.id).count() > 0
+    # Clients alone do not keep the firm: they go with it.
+    assert result.firm_removed is True
+    assert db_session.query(LawFirm).filter_by(id=firm_id).count() == 0
+    assert db_session.query(Client).filter_by(law_firm_id=firm_id).count() == 0
