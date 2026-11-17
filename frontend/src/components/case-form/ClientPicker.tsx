@@ -91,7 +91,7 @@ export function ClientPicker({ inputId, query, clientId, maxLength, invalid, des
   if (clientId) {
     return (
       <div className="flex min-h-[38px] items-center justify-between gap-2 rounded-lg border border-accent-200 bg-accent-50 px-3 py-1.5">
-        <Link href={`/muvekkiller/${clientId}`} className="truncate text-sm font-medium text-accent-700 hover:underline">
+        <Link href={`/muvekkiller/${clientId}`} target="_blank" rel="noopener noreferrer" className="truncate text-sm font-medium text-accent-700 hover:underline">
           {query}
         </Link>
         <button

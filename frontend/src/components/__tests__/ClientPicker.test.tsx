@@ -53,6 +53,8 @@ describe("ClientPicker", () => {
     await userEvent.click(option);
     expect(screen.getByTestId("chosen")).toHaveTextContent("cl-1");
     expect(screen.getByRole("link", { name: "Acme Ltd." })).toHaveAttribute("href", "/muvekkiller/cl-1");
+    expect(screen.getByRole("link", { name: "Acme Ltd." })).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("link", { name: "Acme Ltd." })).toHaveAttribute("rel", "noopener noreferrer");
     expect(screen.queryByRole("combobox")).toBeNull();
     expect(screen.getByRole("button", { name: "Müvekkili değiştir" })).toHaveFocus();
   });

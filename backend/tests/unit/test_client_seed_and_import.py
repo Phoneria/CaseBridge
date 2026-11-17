@@ -102,3 +102,19 @@ def test_removing_the_demo_firm_removes_its_clients(db_session, monkeypatch, tmp
     assert result.firm_removed is True
     assert db_session.query(LawFirm).filter_by(id=firm_id).count() == 0
     assert db_session.query(Client).filter_by(law_firm_id=firm_id).count() == 0
+
+
+def test_precedent_reimport_of_a_firm_case_unlinks_its_clients(db_session, tmp_path):
+    _firm(db_session)
+    anon = {**CASE, "client_name": "Davacı (anonim)"}
+    _write(tmp_path, [anon])
+    import_folder(str(tmp_path), db=db_session)
+    assert db_session.query(CaseParty).filter(CaseParty.client_id.isnot(None)).count() == 1
+
+    _write(tmp_path, [anon], record_kind="precedent")
+    assert import_folder(str(tmp_path), db=db_session)["updated"] == 1
+    db_session.expire_all()
+    case = db_session.query(Case).one()
+    assert case.is_precedent is True
+    assert case.parties
+    assert all(p.client_id is None for p in case.parties)
