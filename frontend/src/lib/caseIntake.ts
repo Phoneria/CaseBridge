@@ -31,6 +31,7 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export const NO_CLIENT_MESSAGE = "En az bir taraf müvekkil olarak işaretlenmeli.";
+export const CLIENT_NOT_CHOSEN = "Müvekkili listeden seçin veya yeni ekleyin.";
 export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 export const DOCUMENT_EXTENSIONS = [".pdf", ".docx", ".txt"];
 
@@ -42,6 +43,7 @@ export interface PartyRow {
   role: PartyRole;
   counsel_name: string;
   is_client: boolean;
+  client_id: string | null;
 }
 
 export interface CaseFormState {
@@ -103,7 +105,7 @@ export function addedPartyRole(parties: PartyRow[]): PartyRole {
 }
 
 export function newPartyRow(role: PartyRole = "other", init: Partial<Omit<PartyRow, "key" | "role">> = {}): PartyRow {
-  return { key: nextKey("party"), name: "", role, counsel_name: "", is_client: false, ...init };
+  return { key: nextKey("party"), name: "", role, counsel_name: "", is_client: false, client_id: null, ...init };
 }
 
 export function emptyCaseForm(): CaseFormState {
@@ -160,6 +162,7 @@ export function validateParties(parties: PartyRow[]): { partyNames: Record<strin
   for (const party of parties) {
     const nameError = !party.name.trim() && party.counsel_name.trim() ? "Taraf adı gerekli." : tooLong(party.name, FIELD_LIMITS.party_name);
     if (nameError) partyNames[party.key] = nameError;
+    else if (party.is_client && party.name.trim() && !party.client_id) partyNames[party.key] = CLIENT_NOT_CHOSEN;
     const counselError = tooLong(party.counsel_name, FIELD_LIMITS.counsel_name);
     if (counselError) partyCounsel[party.key] = counselError;
   }
@@ -212,6 +215,7 @@ export function buildPartiesPayload(parties: PartyRow[]): CasePartyPayload[] {
       role: party.role,
       is_client: party.is_client,
       counsel_name: trimmed(party.counsel_name) || null,
+      client_id: party.is_client ? party.client_id : null,
     }));
 }
 
@@ -333,6 +337,7 @@ export function partyRowFromParty(party: CaseParty): PartyRow {
     name: party.name,
     counsel_name: party.counsel_name ?? "",
     is_client: party.is_client,
+    client_id: party.client_id ?? null,
   });
 }
 
