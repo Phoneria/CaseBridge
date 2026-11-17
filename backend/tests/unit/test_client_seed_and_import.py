@@ -118,3 +118,28 @@ def test_precedent_reimport_of_a_firm_case_unlinks_its_clients(db_session, tmp_p
     assert case.is_precedent is True
     assert case.parties
     assert all(p.client_id is None for p in case.parties)
+
+
+def test_audit_rows_do_not_keep_demo_users_or_the_demo_firm(db_session, monkeypatch, tmp_path):
+    from app.db.demo_cleanup import remove_demo_data
+    from app.models.audit import AuditEvent
+    from app.models.user import User
+
+    seed_module = _seed(db_session, monkeypatch, tmp_path)
+    firm_id = db_session.query(LawFirm).filter_by(name=seed_module.DEMO_FIRM_NAME).one().id
+    lawyer = db_session.query(User).filter_by(email=seed_module.LAWYER_EMAIL).one()
+    db_session.add(AuditEvent(law_firm_id=firm_id, actor_user_id=lawyer.id, actor_role="lawyer",
+                              action="case.reopened", details={}))
+    db_session.commit()
+
+    result = remove_demo_data(
+        db_session,
+        firm_name=seed_module.DEMO_FIRM_NAME,
+        case_numbers=[c["case_number"] for c in seed_module.DEMO_CASES],
+        emails=[seed_module.ADMIN_EMAIL, *(email for email, *_ in seed_module.DEMO_LAWYERS)],
+        demo_password=seed_module.DEMO_PASSWORD,
+    )
+    db_session.commit()
+    assert seed_module.LAWYER_EMAIL in result.users_removed
+    assert result.firm_removed is True
+    assert db_session.query(AuditEvent).filter_by(law_firm_id=firm_id).count() == 0
