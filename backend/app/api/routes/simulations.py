@@ -16,6 +16,7 @@ from app.models.simulation import SimulationStatus
 from app.models.user import User
 from app.schemas.simulation import SimulationOut, SimulationWithCaseOut
 from app.repositories.simulation_repository import SimulationRepository
+from app.services.audit import record_audit
 from app.services.case_service import CaseService
 from app.services.simulation_service import SimulationService
 
@@ -46,6 +47,7 @@ def start_simulation(
     case = _get_owned_case_or_404(db, case_id, law_firm_id)
     service = SimulationService(db, provider)
     simulation = service.create_pending_simulation(case, requested_by=current_user.id)
+    record_audit(db, current_user, "ai.analysis_started", case=case, target_type="simulation", target_id=simulation.id)
     return SimulationService.to_out(simulation)
 
 
@@ -104,6 +106,7 @@ def retry_simulation(
 
     service = SimulationService(db, provider)
     retried = service.retry_simulation(failed_simulation, case, requested_by=current_user.id)
+    record_audit(db, current_user, "ai.analysis_retried", case=case, target_type="simulation", target_id=retried.id)
     return SimulationService.to_out(retried)
 
 
