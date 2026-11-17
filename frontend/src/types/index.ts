@@ -82,6 +82,8 @@ export interface CasePayload {
   defendant_position?: string;
   description?: string;
   assigned_lawyer_id?: string;
+  /** Audit only: where the new-case form was filled from. Never stored on the case. */
+  source?: "form" | "ai_intake" | "client_page";
 }
 
 /** PATCH /cases/{id}: any subset; null clears an optional field. The status is one of the open statuses and is not sent for a closed case. */

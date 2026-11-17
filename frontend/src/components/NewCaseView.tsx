@@ -28,7 +28,7 @@ import {
 } from "@/lib/caseIntake";
 import { addCaseEvent, createCase, getClient, getMe, listAdminLawyers, uploadDocument } from "@/lib/api";
 import { ApiError } from "@/lib/apiError";
-import type { AppUser, CaseIntakeResult } from "@/types";
+import type { AppUser, CaseIntakeResult, CasePayload } from "@/types";
 
 const SECTIONS: { id: SectionId; title: string }[] = [
   { id: "temel", title: "Temel bilgiler ve mahkeme" },
@@ -186,7 +186,11 @@ export function NewCaseView() {
     inFlight.current = true;
     setSubmitting(true);
     // Snapshot what to send now; the form stays editable while requests run.
-    const payload = buildCasePayload(form);
+    // Audit only: where the form was filled from. An AI fill wins over the client-page prefill.
+    const payload: CasePayload = {
+      ...buildCasePayload(form),
+      source: source ? "ai_intake" : clientParam ? "client_page" : "form",
+    };
     const chosenEvents = events.filter((item) => item.checked);
     const documents = [...(source && includeSource ? [source.file] : []), ...files];
     let created;

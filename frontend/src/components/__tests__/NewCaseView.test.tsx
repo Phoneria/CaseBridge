@@ -327,6 +327,7 @@ describe("NewCaseView create flow", () => {
       case_type: "diger",
       status: "devam_eden",
       parties: [{ name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, client_id: "cl-Alfa Ticaret A.Ş.", counsel_name: null }],
+      source: "form",
     });
     expect(addCaseEvent).not.toHaveBeenCalled();
     expect(uploadDocument).not.toHaveBeenCalled();
@@ -357,6 +358,7 @@ describe("NewCaseView create flow", () => {
     await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/c9"));
     expect(calls).toEqual(["case", "event:Dava açıldı", "event:İlk duruşma", "doc:yapistirilan-metin.txt", "doc:ek-belge.pdf"]);
     expect(createCase.mock.calls[0][0]).toMatchObject({
+      source: "ai_intake",
       case_number: "2026/145",
       case_name: "Alacak Davası",
       case_type: "ticaret_hukuku",
@@ -559,5 +561,18 @@ describe("NewCaseView from a client page", () => {
     expect(await within(first).findByRole("link", { name: "Nova Yazılım A.Ş." })).toHaveAttribute("href", "/muvekkiller/cl-7");
     expect(within(first).getByLabelText("Müvekkilimiz")).toBeChecked();
     expect(getClient).toHaveBeenCalledWith("cl-7");
+  });
+
+  it("sends the client page as the form's source", async () => {
+    setUrl("/davalar/yeni?muvekkil=cl-7");
+    getClient.mockResolvedValue({ id: "cl-7", name: "Nova Yazılım A.Ş.", client_type: "company" });
+    render(<NewCaseView />);
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    await within(first).findByRole("link", { name: "Nova Yazılım A.Ş." });
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/10 E.");
+    await userEvent.type(screen.getByLabelText(/^Dava adı/), "Hizmet Alacağı");
+    await submit();
+    await waitFor(() => expect(createCase).toHaveBeenCalled());
+    expect(createCase.mock.calls[0][0]).toMatchObject({ source: "client_page" });
   });
 });
