@@ -235,9 +235,12 @@ def add_case_event(
     case = _get_owned_case_or_404(service, case_id, law_firm_id)
     require_case_writable(case)
     try:
-        return service.add_event(case, payload, created_by=current_user.id)
+        event = service.add_event(case, payload, created_by=current_user.id)
     except CaseEventInputError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail) from exc
+    record_audit(db, current_user, "case_event.created", case=case, target_type="event", target_id=event.id,
+                 transitions={"event_type": (None, event.event_type)})
+    return event
 
 
 NOTE_NOT_FOUND = "Kayıt bulunamadı."
@@ -268,6 +271,7 @@ def update_case_note(
     db: Session = Depends(get_db),
 ):
     events, event = _changeable_note(db, case_id, event_id, current_user)
+    before = snapshot(event, ["description", "event_date"])
     if payload.description is not None:
         try:
             text = clean_note_text(payload.description)
@@ -277,7 +281,12 @@ def update_case_note(
         event.title = note_title(text)
     if payload.event_date is not None:
         event.event_date = payload.event_date
-    return events.save(event)
+    saved = events.save(event)
+    changed = changed_fields(saved, before)
+    if changed:
+        record_audit(db, current_user, "case_event.updated", case=saved.case, target_type="event", target_id=saved.id,
+                     fields=changed)
+    return saved
 
 
 @router.delete("/{case_id}/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -288,4 +297,7 @@ def delete_case_note(
     db: Session = Depends(get_db),
 ):
     events, event = _changeable_note(db, case_id, event_id, current_user)
+    case, event_id, event_type = event.case, event.id, event.event_type
     events.delete(event)
+    record_audit(db, current_user, "case_event.deleted", case=case, target_type="event", target_id=event_id,
+                 transitions={"event_type": (event_type, None)})

@@ -6,8 +6,10 @@ from app.api.case_access import require_case_id_writable, require_case_writable
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.config import settings
 from app.db.session import get_db
+from app.models.case import Case
 from app.models.user import User
 from app.schemas.document import DocumentOut, DocumentWithCaseOut
+from app.services.audit import record_audit
 from app.services.case_service import CaseService
 from app.services.document_service import DocumentService
 
@@ -20,6 +22,11 @@ def _get_owned_case_or_404(db: Session, case_id: str, law_firm_id: str):
     if case is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     return case
+
+
+def _file_flags(document) -> dict:
+    kind = document.file_type.value if document.file_type.value in {"pdf", "docx", "txt"} else "other"
+    return {"file_kind": kind, "text_extracted": "yes" if (document.extracted_text or "").strip() else "no"}
 
 
 @cases_router.post("/{case_id}/documents", response_model=DocumentOut, status_code=status.HTTP_201_CREATED)
@@ -38,13 +45,16 @@ async def upload_document(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File exceeds the {settings.max_upload_size_bytes} byte upload limit.",
         )
-    return DocumentService(db).upload(
+    document = DocumentService(db).upload(
         case_id=case_id,
         law_firm_id=law_firm_id,
         filename=file.filename,
         raw_bytes=raw_bytes,
         uploaded_by=current_user.id,
     )
+    record_audit(db, current_user, "document.uploaded", case=case, target_type="document", target_id=document.id,
+                 counts={"size_kb": max(1, len(raw_bytes) // 1024)}, flags=_file_flags(document))
+    return document
 
 
 @cases_router.get("/{case_id}/documents", response_model=list[DocumentOut])
@@ -103,6 +113,7 @@ def download_document(
 def delete_document(
     document_id: str,
     law_firm_id: str = Depends(get_current_law_firm_id),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     service = DocumentService(db)
@@ -110,4 +121,8 @@ def delete_document(
     if document is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     require_case_id_writable(db, document.case_id, law_firm_id)
+    case = db.get(Case, document.case_id)
+    flags = _file_flags(document)
     service.delete(document)
+    record_audit(db, current_user, "document.deleted", case=case, target_type="document", target_id=document_id,
+                 flags=flags)
