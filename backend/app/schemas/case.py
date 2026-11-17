@@ -43,6 +43,7 @@ class CasePartyIn(BaseModel):
     role: PartyRole
     is_client: bool = False
     counsel_name: Optional[str] = Field(default=None, max_length=255)
+    client_id: Optional[str] = Field(default=None, max_length=36)
 
     @field_validator("counsel_name")
     @classmethod
@@ -59,6 +60,7 @@ class CasePartyOut(BaseModel):
     role: str
     is_client: bool
     counsel_name: Optional[str] = None
+    client_id: Optional[str] = None
     sort_order: int
 
 

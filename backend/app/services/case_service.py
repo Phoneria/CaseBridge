@@ -18,6 +18,7 @@ from app.services.case_parties import (
     party_models,
     require_client,
 )
+from app.services.client_service import resolve_party_clients
 from app.services.hearing_dates import add_all_day_hearing, recompute_next_hearing
 
 
@@ -34,14 +35,16 @@ class CaseService:
         self.cases = CaseRepository(db)
         self.events = CaseEventRepository(db)
 
-    @staticmethod
-    def _party_data(parties: list[CasePartyIn]) -> list[PartyData]:
+    def _resolved_parties(self, law_firm_id: str, parties: list[CasePartyIn], actor_id: Optional[str]) -> list[PartyData]:
         data = [
-            PartyData(name=p.name, role=p.role.value, is_client=p.is_client, counsel_name=p.counsel_name)
+            PartyData(
+                name=p.name, role=p.role.value, is_client=p.is_client,
+                counsel_name=p.counsel_name, client_id=p.client_id,
+            )
             for p in parties
         ]
         require_client(data)
-        return data
+        return resolve_party_clients(self.db, law_firm_id, data, actor_id)
 
     def create_case(self, law_firm_id: str, payload: CaseCreate, created_by: str, today: date) -> Case:
         """With `parties` the legacy client_name / opposing_party / client_role
@@ -55,12 +58,15 @@ class CaseService:
         hearing_day = fields.pop("next_hearing_date", None)
         client_role = payload.client_role.value if payload.client_role else None
         if payload.parties is not None:
-            parties = self._party_data(payload.parties)
+            parties = self._resolved_parties(law_firm_id, payload.parties, created_by)
             client_role = client_role or derive_client_role(parties)
             fields["client_name"] = derive_client_name(parties)
             fields["opposing_party"] = derive_opposing_party(parties, client_role)
         else:
-            parties = legacy_parties(fields["client_name"], fields.get("opposing_party"))
+            parties = resolve_party_clients(
+                self.db, law_firm_id, legacy_parties(fields["client_name"], fields.get("opposing_party")), created_by
+            )
+            fields["client_name"] = derive_client_name(parties)
         case = Case(law_firm_id=law_firm_id, client_role=client_role, **fields)
         case.parties = party_models(parties, law_firm_id)
         try:
@@ -94,6 +100,7 @@ class CaseService:
         outcome: Optional[CaseOutcome] = None,
         active: Optional[bool] = None,
         hearing_within_days: Optional[int] = None,
+        client_id: Optional[str] = None,
     ) -> list[Case]:
         return self.cases.list_in_firm(
             law_firm_id,
@@ -107,13 +114,14 @@ class CaseService:
             outcome=outcome,
             active=active,
             hearing_within_days=hearing_within_days,
+            client_id=client_id,
         )
 
-    def update_case(self, case: Case, payload: CaseUpdate) -> Case:
+    def update_case(self, case: Case, payload: CaseUpdate, actor_id: Optional[str] = None) -> Case:
         """`parties`, when given, replaces the whole list and re-derives the
         legacy names and (unless sent explicitly) client_role; when omitted the
         parties stay as they are."""
-        parties = self._party_data(payload.parties) if payload.parties is not None else None
+        parties = self._resolved_parties(case.law_firm_id, payload.parties, actor_id) if payload.parties is not None else None
         for field, value in payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"}).items():
             setattr(case, field, value)
         explicit_role = "client_role" in payload.model_fields_set

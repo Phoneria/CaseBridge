@@ -23,6 +23,8 @@ class PartyData:
     role: str
     is_client: bool
     counsel_name: Optional[str] = None
+    # Set by app.services.client_service.resolve_party_clients for client parties.
+    client_id: Optional[str] = None
 
 
 def require_client(parties: Sequence[PartyData]) -> None:
@@ -77,6 +79,7 @@ def party_models(parties: Sequence[PartyData], law_firm_id: str) -> list[CasePar
             name=party.name,
             role=party.role,
             is_client=party.is_client,
+            client_id=party.client_id,
             counsel_name=party.counsel_name,
             sort_order=index,
         )
