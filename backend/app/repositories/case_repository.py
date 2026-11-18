@@ -11,7 +11,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.timeutil import local_today
-from app.models.case import Case, CaseOutcome, CaseStatus, CaseType, case_is_active
+from app.models.case import Case, CaseParty, CaseOutcome, CaseStatus, CaseType, case_is_active
 
 # GET /cases?assigned_lawyer_id=none lists the cases nobody is responsible for.
 UNASSIGNED = "none"
@@ -59,6 +59,7 @@ class CaseRepository:
         outcome: Optional[CaseOutcome] = None,
         active: Optional[bool] = None,
         hearing_within_days: Optional[int] = None,
+        client_id: Optional[str] = None,
     ) -> list[Case]:
         """The single search entry point for both everyday case list
         filtering and institutional-memory historical search (section
@@ -101,6 +102,9 @@ class CaseRepository:
                 Case.next_hearing_date >= today,
                 Case.next_hearing_date <= today + timedelta(days=hearing_within_days),
             )
+
+        if client_id is not None:
+            query = query.filter(Case.parties.any(CaseParty.client_id == client_id))
 
         if search:
             pattern = f"%{search}%"

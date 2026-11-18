@@ -1,7 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+
+const listClients = vi.fn();
+const createClient = vi.fn();
+vi.mock("@/lib/api", () => ({
+  listClients: (...args: unknown[]) => listClients(...args),
+  createClient: (...args: unknown[]) => createClient(...args),
+}));
 
 import { BasicInfoFields } from "@/components/case-form/BasicInfoFields";
 import { DisputeFields } from "@/components/case-form/DisputeFields";
@@ -26,6 +33,11 @@ function BasicHarness({ ai = new Set<string>(), errors = {} }: { ai?: Set<string
     />
   );
 }
+
+beforeEach(() => {
+  listClients.mockReset().mockResolvedValue([]);
+  createClient.mockReset();
+});
 
 describe("BasicInfoFields", () => {
   it("shows the spec's labels with required markers on case number, name and type", () => {
@@ -127,6 +139,20 @@ describe("PartiesFields", () => {
     expect([...role.options].map((option) => option.text)).toEqual(["Davacı", "Davalı", "Fer'i müdahil", "Diğer"]);
     expect(role).toHaveValue("plaintiff");
     expect(within(screen.getByRole("group", { name: "Taraf 2" })).getByLabelText("Rol")).toHaveValue("defendant");
+  });
+
+  it("unchecking Müvekkilimiz after choosing a client gives back a plain name input", async () => {
+    listClients.mockResolvedValue([{ id: "cl-1", name: "Acme Ltd.", client_type: "company", phone: null, case_count: 0, open_case_count: 0 }]);
+    render(<PartiesHarness />);
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+    await userEvent.type(within(first).getByLabelText(/^Ad/), "acme");
+    await userEvent.click(await screen.findByRole("option", { name: /Acme Ltd\./ }));
+    expect(within(first).getByRole("link", { name: "Acme Ltd." })).toBeInTheDocument();
+    await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+    expect(within(first).queryByRole("link")).toBeNull();
+    expect(within(first).getByLabelText(/^Ad/)).toHaveValue("Acme Ltd.");
+    expect(within(first).getByLabelText(/^Ad/)).not.toHaveAttribute("role", "combobox");
   });
 
   it("edits a row, marks the client and adds and removes rows", async () => {

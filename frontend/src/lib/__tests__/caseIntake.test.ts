@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CLIENT_NOT_CHOSEN,
   MAX_DOCUMENT_BYTES,
   NO_CLIENT_MESSAGE,
   addedPartyRole,
@@ -23,6 +24,7 @@ import {
   pastedTextFile,
   positionLabels,
   validateCaseForm,
+  validateParties,
   type CaseFormState,
 } from "@/lib/caseIntake";
 import type { Case, CaseIntakeDraft } from "@/types";
@@ -47,7 +49,7 @@ function validForm(): CaseFormState {
   const form = emptyCaseForm();
   form.case_number = "2026/1";
   form.case_name = "Alacak Davası";
-  form.parties = [newPartyRow("plaintiff", { name: "A Ltd.", is_client: true }), newPartyRow("defendant", { name: "B A.Ş." })];
+  form.parties = [newPartyRow("plaintiff", { name: "A Ltd.", is_client: true, client_id: "cl-1" }), newPartyRow("defendant", { name: "B A.Ş." })];
   return form;
 }
 
@@ -202,8 +204,8 @@ describe("buildCasePayload", () => {
       case_type: "diger",
       status: "devam_eden",
       parties: [
-        { name: "A Ltd.", role: "plaintiff", is_client: true, counsel_name: "Av. Ece" },
-        { name: "B A.Ş.", role: "defendant", is_client: false, counsel_name: null },
+        { name: "A Ltd.", role: "plaintiff", is_client: true, counsel_name: "Av. Ece", client_id: "cl-1" },
+        { name: "B A.Ş.", role: "defendant", is_client: false, counsel_name: null, client_id: null },
       ],
     });
     expect(payload).not.toHaveProperty("client_name");
@@ -358,8 +360,8 @@ describe("case detail editors", () => {
     description: "Not",
     client_role: "plaintiff",
     parties: [
-      { id: "p2", name: "Kiracı", role: "defendant", is_client: false, counsel_name: null, sort_order: 1 },
-      { id: "p1", name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece", sort_order: 0 },
+      { id: "p2", name: "Kiracı", role: "defendant", is_client: false, counsel_name: null, sort_order: 1, client_id: null },
+      { id: "p1", name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece", sort_order: 0, client_id: null },
     ],
   } as unknown as Case;
 
@@ -400,11 +402,11 @@ describe("case detail editors", () => {
 
   it("builds the parties payload without blank rows", () => {
     const rows = [
-      newPartyRow("plaintiff", { name: " Ev Sahibi ", is_client: true, counsel_name: " Av. Ece " }),
+      newPartyRow("plaintiff", { name: " Ev Sahibi ", is_client: true, counsel_name: " Av. Ece ", client_id: "cl-1" }),
       newPartyRow("defendant", { name: "  " }),
     ];
     expect(buildPartiesPayload(rows)).toEqual([
-      { name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece" },
+      { name: "Ev Sahibi", role: "plaintiff", is_client: true, counsel_name: "Av. Ece", client_id: "cl-1" },
     ]);
   });
 
@@ -502,5 +504,33 @@ describe("unparseable case value (validity.badInput)", () => {
     const form: CaseFormState = { ...emptyCaseForm(), case_value_bad_input: true };
     const { form: next } = applyDraft(form, { ...EMPTY_DRAFT, case_value: 1000 });
     expect(next).toMatchObject({ case_value: "1000", case_value_bad_input: false });
+  });
+});
+
+describe("client links of party rows", () => {
+  it("asks to choose a client for a client row without one", () => {
+    const row = newPartyRow("plaintiff", { name: "Acme", is_client: true });
+    expect(validateParties([row]).partyNames[row.key]).toBe(CLIENT_NOT_CHOSEN);
+    const chosen = newPartyRow("plaintiff", { name: "Acme", is_client: true, client_id: "cl-1" });
+    expect(validateParties([chosen]).partyNames[chosen.key]).toBeUndefined();
+    const opposing = newPartyRow("defendant", { name: "Beta" });
+    expect(validateParties([opposing]).partyNames[opposing.key]).toBeUndefined();
+  });
+
+  it("sends client_id for client rows only", () => {
+    expect(
+      buildPartiesPayload([
+        newPartyRow("plaintiff", { name: "Acme", is_client: true, client_id: "cl-1" }),
+        newPartyRow("defendant", { name: "Beta", client_id: "stale" }),
+      ]),
+    ).toEqual([
+      { name: "Acme", role: "plaintiff", is_client: true, counsel_name: null, client_id: "cl-1" },
+      { name: "Beta", role: "defendant", is_client: false, counsel_name: null, client_id: null },
+    ]);
+  });
+
+  it("keeps the client link of a saved party", () => {
+    const row = partyRowFromParty({ id: "p1", name: "Acme", role: "plaintiff", is_client: true, counsel_name: null, sort_order: 0, client_id: "cl-1" });
+    expect(row.client_id).toBe("cl-1");
   });
 });

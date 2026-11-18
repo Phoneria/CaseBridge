@@ -28,6 +28,8 @@ test("full case lifecycle: create, upload document, run simulation, create from 
   const firstParty = page.getByRole("group", { name: "Taraf 1" });
   await firstParty.getByLabel(/^Ad/).fill("E2E Müvekkil");
   await firstParty.getByLabel("Müvekkilimiz").check();
+  await firstParty.getByRole("option", { name: /adıyla yeni müvekkil ekle/ }).click();
+  await expect(firstParty.getByRole("button", { name: "Müvekkili değiştir" })).toBeVisible();
   await page.getByRole("group", { name: "Taraf 2" }).getByLabel(/^Ad/).fill("E2E Karşı Taraf");
   await page.getByRole("button", { name: "Davayı oluştur" }).click();
 
@@ -61,6 +63,9 @@ test("full case lifecycle: create, upload document, run simulation, create from 
 
   await page.locator("#case_number").fill(`${caseNumber}-AI`);
   await page.getByRole("group", { name: "Taraf 1" }).getByLabel("Müvekkilimiz").check();
+  const draftClient = page.getByRole("group", { name: "Taraf 1" });
+  await draftClient.getByRole("option", { name: /adıyla yeni müvekkil ekle/ }).click();
+  await expect(draftClient.getByRole("button", { name: "Müvekkili değiştir" })).toBeVisible();
   await page.getByRole("button", { name: "Davayı oluştur" }).click();
 
   await expect(page).toHaveURL(DETAIL_URL);
