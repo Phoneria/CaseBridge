@@ -600,6 +600,32 @@ async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {
   return response.blob();
 }
 
+export interface AuditCsvParams {
+  firmId?: string;
+  from: string;
+  to: string;
+}
+
+/** The platform audit CSV. Unlike fetchBlob, a failure carries the server's Turkish `detail`. */
+export async function downloadAuditCsv(params: AuditCsvParams): Promise<Blob> {
+  const query = new URLSearchParams({ from: params.from, to: params.to });
+  if (params.firmId) query.set("firm_id", params.firmId);
+  const token = getToken();
+  const headers = new Headers();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(`${API_BASE_URL}/platform/audit-events.csv?${query}`, { headers });
+  if (!response.ok) {
+    let detail: unknown = null;
+    try {
+      detail = (await response.json())?.detail;
+    } catch {
+      detail = null;
+    }
+    throw new ApiError(typeof detail === "string" ? detail : `Kayıtlar indirilemedi (${response.status}).`, response.status);
+  }
+  return response.blob();
+}
+
 export async function downloadReportCsv(kind: ReportKind): Promise<Blob> {
   return fetchBlob(`/reports/${kind}.csv`, "Rapor indirilemedi");
 }

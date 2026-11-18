@@ -2,12 +2,15 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
 
 from app.ai.providers.base import LLMProvider
 from app.api.deps import get_case_intake_provider_dep, get_current_user
 from app.core.config import settings
+from app.db.session import get_db
 from app.models.user import User
 from app.schemas.case_intake import CaseIntakeExtractOut
+from app.services.audit import record_audit
 from app.services.case_intake_service import CaseIntakeError, CaseIntakeService
 from app.services.document_service import resolve_document_type
 from app.services.text_extraction import extract_text
@@ -23,8 +26,9 @@ NOT_READABLE = "Bu belgeden metin çıkarılamadı (taranmış olabilir). Metni 
 def extract_case_draft(
     file: Optional[UploadFile] = File(default=None),
     text: Optional[str] = Form(default=None),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     provider: LLMProvider = Depends(get_case_intake_provider_dep),
+    db: Session = Depends(get_db),
 ):
     if file is not None and text is not None:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Dosya ve metinden yalnızca biri gönderilebilir.")
@@ -53,4 +57,8 @@ def extract_case_draft(
         result = CaseIntakeService(provider).extract(document_text)
     except CaseIntakeError as exc:
         raise HTTPException(exc.status_code, exc.detail)
-    return CaseIntakeExtractOut(draft=result.draft, truncated=result.truncated, source_chars=result.source_chars)
+    out = CaseIntakeExtractOut(draft=result.draft, truncated=result.truncated, source_chars=result.source_chars)
+    filled = sum(1 for value in out.draft.model_dump().values() if value not in (None, "", [], {}))
+    record_audit(db, current_user, "ai.case_intake", flags={"source": "file" if file is not None else "text"},
+                 counts={"filled_fields": filled})
+    return out

@@ -18,6 +18,7 @@ vi.mock("@/lib/api", () => ({
   resendPlatformAdminInvite: (...a: unknown[]) => api.resendPlatformAdminInvite(...a),
   suspendPlatformFirm: (...a: unknown[]) => api.suspendPlatformFirm(...a),
   activatePlatformFirm: (...a: unknown[]) => api.activatePlatformFirm(...a),
+  downloadAuditCsv: vi.fn(),
 }));
 
 import { ApiError } from "@/lib/apiError";
@@ -58,6 +59,7 @@ describe("PlatformView", () => {
     expect(row).toHaveTextContent("3");
     expect(row).toHaveTextContent("Bekleyen Kişi");
     expect(row).toHaveTextContent("Davet bekliyor");
+    expect(screen.getByRole("heading", { name: "Hareket kayıtları" })).toBeInTheDocument();
   });
 
   it("reads the backend's offset-less timestamps as UTC", async () => {

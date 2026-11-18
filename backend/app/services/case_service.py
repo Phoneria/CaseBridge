@@ -54,7 +54,7 @@ class CaseService:
         A next_hearing_date becomes an all-day hearing event of the new case in the
         same transaction (a past date too: it is history); next_hearing_date itself
         is then computed from the events like everywhere else."""
-        fields = payload.model_dump(exclude_unset=True, exclude={"parties", "client_role"})
+        fields = payload.model_dump(exclude_unset=True, exclude={"parties", "client_role", "source"})
         hearing_day = fields.pop("next_hearing_date", None)
         client_role = payload.client_role.value if payload.client_role else None
         if payload.parties is not None:

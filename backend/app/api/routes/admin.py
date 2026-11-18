@@ -12,6 +12,7 @@ from app.models.user import User, UserRole
 from app.schemas.case import CaseAssignment, CaseOut, PrecedentReviewAssignment
 from app.repositories.case_repository import CaseRepository
 from app.schemas.user import UserOut
+from app.services.audit import record_audit
 from app.services.hearing_dates import move_upcoming_hearings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -67,6 +68,7 @@ def assign_case_lawyer(
     db.commit()
     db.refresh(case)
     db.expire(case, ["assigned_lawyer"])  # the view-only relationship still points at the previous lawyer
+    record_audit(db, admin, "case.lawyer_changed", case=case, transitions={"assigned_lawyer_id": (previous, lawyer.id)})
     return case
 
 
