@@ -1,4 +1,4 @@
-/* v.0.42: restore the original background film within the existing theme.
+/* v.0.43: restore the original background film within the existing theme.
    Keep the white veil behind the unchanged blue copy for legibility. */
-body .story-hero:before{display:block;background:linear-gradient(90deg,#fffffff5 0%,#ffffffe6 40%,#ffffff66 75%,#ffffff33 100%)}
-@media(max-width:760px){body .story-hero:before{background:#ffffffd9}}
+body .story-hero:before{display:block;background:linear-gradient(90deg,#ffffffe0 0%,#ffffffc7 40%,#ffffff47 75%,#ffffff1f 100%)}
+@media(max-width:760px){body .story-hero:before{background:#ffffffc7}}

@@ -196,3 +196,12 @@ Internal development pushes may continue while the customer-release gate remains
 - [x] Kaynak commit 52a7bdc0b6689ec4518b500caa6549f8040dbb93 GitHub main’e force kullanmadan gönderildi ve uzak ref doğrulandı. Yayımlanan 21 tanıtım dosyası bu commit ile aynı; diğer yüklenen bağımlılıklar ve özgün video da main kaynaklarıyla aynı. Yayın öncesi mevcut 16 dosya /var/backups/casebridge-marketing-20261122-v042/previous-files.tar.gz altında yedeklendi ve her arşiv girdisi okunarak doğrulandı; yeni 5 dosya ayrıca listelendi. Ana sayfa son sırada atomik değiştirildi; uygulama servisleri yeniden başlatılmadı.
 
 Uygulama servisi veya gerçek kimlik bilgileri değiştirilmez; müşteri onboarding yapılmaz. Mevcut müşteri release gereksinimleri olduğu gibi korunur. Yerel bağımsız çalışmaların üzerine yazılmaz; commit/push temiz ayrı çalışma alanından yapılır. Ayrıntılı kanıtlar yerel artifacts/marketing-v042/ altındadır.
+
+## Daha görünür arka plan videosu — v.0.43, 22 Kasım 2026
+
+- Kullanıcının dar takip isteğiyle yalnız beyaz video katmanının opaklığı azaltıldı: masaüstünde soldan sağa yaklaşık %96/%90/%40/%20 yerine %88/%78/%28/%12; mobilde yaklaşık %85 yerine %78. Özgün video, tema, yazı renkleri, yerleşim ve tüm içerikler korundu. HTML gövdesinin önceki sürümle aynı olduğu, yalnız sürüm/CSS cache anahtarının değiştiği doğrulandı.
+- Yerel Chromium kontrolleri 1440/768/390/320px genişliklerde geçti: v.0.43, gerçek video zamanının ilerlemesi, özgün muted/loop/playsinline/metadata/cover/konum, ekran dışında durdurma/geri gelince devam, hareket azaltma, mevcut beyaz/mavi tema ve sol hizalama, taşma ve tarayıcı hataları. Masaüstü ve mobil ekran görüntülerinde videonun daha görünür olduğu ve yazıların okunabilirliği görsel olarak kontrol edildi; bu tam bir erişilebilirlik denetimi değildir. Whitespace kontrolü geçti. Uygulama/backend paketleri bu CSS değişikliği için çalıştırılmadı.
+- [ ] Public sürüm, overlay kodu, video oynatma ve health doğrulaması.
+- [ ] GitHub main ve canlı dosyaların son eşleşmesi.
+
+Önceki uygulama/kimlik bilgisi ve müşteri release gereksinimleri değişmedi; yeni müşteri onboarding yapılmadı. Kanıtlar yerel artifacts/marketing-v043/ altında tutulur.
