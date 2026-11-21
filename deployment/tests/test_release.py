@@ -86,7 +86,7 @@ class ReleaseTests(unittest.TestCase):
     def test_failed_activation_restores_prior_verified_main_and_health(self):
         with tempfile.TemporaryDirectory() as work:
             root = Path(work); r.write_json(root / 'current.json', {'commit': A, 'operation': 'activate'})
-            with patch.object(r, 'INVENTORY', root), patch.object(r, 'verify') as verify, patch.object(r, '_activate', side_effect=[r.ReleaseError('canary/public failed'), None]) as activate:
+            with patch.object(r, 'INVENTORY', root), patch.object(r, 'load_release', return_value=(root, {'state':'staged'})), patch.object(r, 'verify') as verify, patch.object(r, '_activate', side_effect=[r.ReleaseError('canary/public failed'), None]) as activate:
                 with self.assertRaisesRegex(r.ReleaseError, 'restored'): r.activate(B)
                 self.assertEqual(verify.call_count, 2)
                 self.assertEqual(activate.call_args_list[1].args, (A,)); self.assertTrue(activate.call_args_list[1].kwargs['rollback'])
@@ -94,9 +94,16 @@ class ReleaseTests(unittest.TestCase):
     def test_live_drift_stops_before_mutation_or_rollback(self):
         with tempfile.TemporaryDirectory() as work:
             root = Path(work); r.write_json(root / 'current.json', {'commit': A, 'operation': 'activate'})
-            with patch.object(r, 'INVENTORY', root), patch.object(r, 'verify', side_effect=r.ReleaseError('code mismatch')), patch.object(r, '_activate') as activate:
+            with patch.object(r, 'INVENTORY', root), patch.object(r, 'load_release', return_value=(root, {'state':'staged'})), patch.object(r, 'verify', side_effect=r.ReleaseError('code mismatch')), patch.object(r, '_activate') as activate:
                 with self.assertRaisesRegex(r.ReleaseError, 'mismatch'): r.activate(B)
                 activate.assert_not_called()
+
+    def test_unverified_public_rollback_does_not_trigger_recovery(self):
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work); r.write_json(root/'current.json', {'commit': A, 'operation':'activate'})
+            with patch.object(r, 'INVENTORY', root), patch.object(r, 'load_release', return_value=(root, {'state':'staged'})), patch.object(r, 'verify') as verify, patch.object(r, '_activate') as activate:
+                with self.assertRaisesRegex(r.ReleaseError, 'previously verified'): r.activate(B, rollback=True)
+                activate.assert_not_called(); verify.assert_not_called()
 
     def test_frontend_only_activation_leaves_backend_running(self):
         with tempfile.TemporaryDirectory() as work:

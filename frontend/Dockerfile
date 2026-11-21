@@ -28,6 +28,10 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
+# Runtime assets must be readable by node regardless of source directory modes
+# or cached COPY metadata. The root filesystem remains read-only in production.
+RUN chmod -R a+rX /app/public /app/.next
+
 EXPOSE 3000
 USER node
 CMD ["node", "node_modules/next/dist/bin/next", "start"]

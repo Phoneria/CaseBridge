@@ -28,3 +28,7 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 - [x] T007 [US2] Validate production Compose syntax and merged runtime config before image builds; add a no-secret Docker Compose CI validation after the staging gate caught invalid dependency indentation.
 
 - [x] T008 [US2] Normalize clean archive permissions independent of caller umask; verify private umask 077 still yields readable code/assets for the nonroot frontend.
+
+- [ ] T009 [US2] Normalize runtime asset read permissions in frontend/Dockerfile and prove nonroot startup on the built image, including public/sufle.
+
+- [x] T010 [US2] Reject invalid or unverified rollback candidates before entering recovery, so rejected caller input cannot restart the previous release.

@@ -1,6 +1,6 @@
 {
   "version": "v.0.20",
-  "sourceHash": "72cf289aa904789373da61b278e5d210c4f2d1ebafd01240053a5434ddfefbdf",
+  "sourceHash": "13f7c8352023418a05f6a44ee864781df8bdcd483ca68f8f7ed02ee97f1a758d",
   "mode": "actual local production build; synthetic seed + demo-template; no UI overrides",
   "captures": [
     {
@@ -46,7 +46,7 @@
         "width": 1600,
         "height": 1100
       },
-      "sha256": "c4584cf0b8b421894b72e44a8b216769059aa8c4eea81b677437f5b11729f92c"
+      "sha256": "6bcd7696ad5f5f796394133baac50d2ba8822ad1ce546b145be25c4528efb830"
     },
     {
       "name": "case-documents",

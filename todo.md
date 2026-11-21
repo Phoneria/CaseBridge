@@ -414,3 +414,5 @@ Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uy
 - Runtime overlay birleşiminde yinelenen security_opt listeleri de gerçek Compose denetimiyle yakalandı. Yeni kaynak güvenlik listelerini base dosyasından alıyor; legacy geri dönüşe hardening ayrıca uygulanıyor. Gerçek base+overlay merge, sır içermeyen sentetik konfigürasyonla geçti; 12 release testi tekrar geçti. Bu düzeltmeler sırasında canlı uygulama etkinleştirilmedi.
 
 - Nonroot canary, private umask 077 ile güvenli tar açılımının 0700 bıraktığı asset dizinini EACCES olarak reddetti. Git export izinleri açıkça normalize edildi; yayın komutu kendi umask’ını sabitliyor. 077 regresyonu dahil 13 release testi geçti. Bu aday da canlıya alınmadı; son kaynakla tekrar üretilecek.
+
+- Son nonroot paketleme düzeltmesi: imajda public/sufle 0750 kalabildiği için Dockerfile runtime public/Next dosyalarında okuma/traverse izinlerini ayrıca açıkça ayarlıyor. Root sahipliği ve production read-only korunur. Kaynak/yerel production derleme ve 12 gerçek capture son fingerprint ile yenilendi. Geçersiz rollback isteği recovery sınırından önce reddedilir; 14 release testi geçti.

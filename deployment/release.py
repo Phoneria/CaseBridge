@@ -388,6 +388,11 @@ def _activate(sha, *, rollback=False, scope=None):
 
 
 def activate(sha, *, rollback=False, recover=True):
+    # Invalid/unverified artifacts must fail before the recovery boundary: no
+    # service action is warranted when no valid activation has even started.
+    _, candidate = load_release(sha)
+    if rollback and candidate.get('state') != 'verified':
+        raise ReleaseError('Rollback may select only a previously verified main artifact')
     # Cover compose failures and marketing switches as well as HTTP failures.
     state = INVENTORY / 'current.json'
     previous = json.loads(state.read_text()) if state.exists() else None

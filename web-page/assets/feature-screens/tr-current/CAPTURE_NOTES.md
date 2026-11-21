@@ -1,6 +1,6 @@
 # Gerçek ürün ekranları — 22 Kasım 2026, tanıtım v.0.44
 
-Bu dizindeki 12 JPEG, aynı v.0.20 uygulamasının **production build** sürümünden doğrudan alındı. UI çizimi, görüntü üzerinde çeviri/boyama, birleştirme veya önizlemeye özel kaynak override yoktur. Kaynak fingerprint’i `72cf289aa904789373da61b278e5d210c4f2d1ebafd01240053a5434ddfefbdf`; bu manifest `frontend/app-version.json` içindedir. Yakalama sonrası app kaynakları değişmezse main sürümüyle aynı davranış ve görünüm korunur. Main/public commit kaydı yayın doğrulamasında ayrıca tutulur.
+Bu dizindeki 12 JPEG, aynı v.0.20 uygulamasının **production build** sürümünden doğrudan alındı. UI çizimi, görüntü üzerinde çeviri/boyama, birleştirme veya önizlemeye özel kaynak override yoktur. Kaynak fingerprint’i `13f7c8352023418a05f6a44ee864781df8bdcd483ca68f8f7ed02ee97f1a758d`; bu manifest `frontend/app-version.json` içindedir. Yakalama sonrası app kaynakları değişmezse main sürümüyle aynı davranış ve görünüm korunur. Main/public commit kaydı yayın doğrulamasında ayrıca tutulur.
 
 - Kaynak: temiz `codex/spec-driven-rollout` çalışma ağacı; uygulama v.0.20. `next build` + `next start` (yerel 3044); API yerel 8044.
 - Dil: gerçek Türkçe ürün metinleri. Genel Bakış, rapor/değerlendirme metinleri ve duruşma tutanak türleri ürün kaynağında Türkçeleştirildi. CaseBridge AI marka adıdır; Enter/Shift tuş adlarıdır.

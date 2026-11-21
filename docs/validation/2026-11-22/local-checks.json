@@ -16,7 +16,7 @@
     "passed": 17
   },
   "releaseSecurityAndRecovery": {
-    "passed": 12
+    "passed": 14
   },
   "versionScript": {
     "passed": 2
@@ -35,5 +35,6 @@
     "largeThreshold": 3
   },
   "independentLegalExpertReview": "not performed or claimed; latest explicit user technical/capture acceptance is recorded; no new release gate",
-  "publicRelease": "pending"
+  "publicRelease": "pending",
+  "composeBaseAndRuntime": "passed with synthetic configuration"
 }
