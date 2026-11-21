@@ -20,3 +20,5 @@ VPS bootstrap, actual isolated old/new/old canary, normal-user write probes and 
 Preimplementation spec/plan/task consistency checked. Actual implementation traced against each FR; unfinished external/public checks remain open. No unchecked requirement is treated as satisfied by generated documents.
 
 First stage rejected invalid Compose dependency indentation after successful image builds/canaries; no application activation occurred. Corrected base YAML now passes real Docker Compose with synthetic configuration. Added no-secret CI validation and base config validation before build; merged runtime configuration remains a separate gate.
+
+Merged-config verification caught duplicate security_opt lists across base/overlay. New-source overlays now inherit base security lists; legacy rollback overlays still add hardening explicitly. Real Docker Compose base+runtime merge passed with synthetic configuration; 12 release regression tests passed again. No live activation took place during these failed gates.

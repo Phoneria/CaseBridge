@@ -58,7 +58,7 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(r.ReleaseError): r.validate_manifest(manifest,A)
 
     def test_runtime_separates_backend_identity_and_has_no_code_mount(self):
-        config = r.runtime_config({'cb-backend': 'sha256:a', 'cb-frontend': 'sha256:b'}, A, '0.20', {'commit': B, 'version': '0.19'})['services']
+        config = r.runtime_config({'cb-backend': 'sha256:a', 'cb-frontend': 'sha256:b'}, A, '0.20', {'commit': B, 'version': '0.19'}, legacy=True)['services']
         for service in config.values():
             self.assertTrue(service['read_only']); self.assertEqual(service['cap_drop'], ['ALL']); self.assertNotIn('volumes', service)
         self.assertEqual(config['cb-frontend']['user'], '1000:1000')

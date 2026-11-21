@@ -211,16 +211,20 @@ def canary(images, sha, legacy=False):
         run([DOCKER, 'rm', '-f', cid])
 
 
-def runtime_config(images, sha, app_version, backend_identity=None):
+def runtime_config(images, sha, app_version, backend_identity=None, legacy=False):
     backend_identity = backend_identity or {"commit": sha, "version": app_version}
-    security = {'read_only': True, 'cap_drop': ['ALL'], 'security_opt': ['no-new-privileges:true']}
+    # New main Compose declares security lists; legacy rollback source does not.
+    # Repeating these lists across Compose files is invalid rather than a union.
+    security = {'read_only': True}
+    if legacy:
+        security.update(cap_drop=['ALL'], security_opt=['no-new-privileges:true'])
     return {'services': {
         'cb-backend': {**security, 'image': images['cb-backend'], 'pull_policy': 'never',
-            'tmpfs': ['/tmp:rw,nosuid,nodev,size=128m'],
+            **({'tmpfs': ['/tmp:rw,nosuid,nodev,size=128m']} if legacy else {}),
             'environment': {'CASEBRIDGE_RELEASE_COMMIT': backend_identity['commit'], 'CASEBRIDGE_APP_VERSION': backend_identity['version'], 'PYTHONDONTWRITEBYTECODE': '1'}},
         'cb-frontend': {**security, 'image': images['cb-frontend'], 'pull_policy': 'never', 'user': '1000:1000',
             'command': ['node', 'node_modules/next/dist/bin/next', 'start'],
-            'tmpfs': ['/tmp:rw,nosuid,nodev,size=64m', '/app/.next/cache:rw,nosuid,nodev,size=64m,uid=1000,gid=1000'],
+            **({'tmpfs': ['/tmp:rw,nosuid,nodev,size=64m', '/app/.next/cache:rw,nosuid,nodev,size=64m,uid=1000,gid=1000']} if legacy else {}),
             'environment': {'NEXT_TELEMETRY_DISABLED': '1'}}}}
 
 

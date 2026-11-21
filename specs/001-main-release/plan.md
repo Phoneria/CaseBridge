@@ -29,3 +29,5 @@ spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks
 ## Complexity Tracking
 
 Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.
+
+Runtime overlays distinguish legacy rollback source from new main Compose: security/tmpfs lists are supplied only for legacy source, while new source already declares them. Actual merged config is validated with synthetic env in CI before deployment; scalars and pinned image/identity remain in the runtime overlay.

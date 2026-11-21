@@ -62,7 +62,7 @@ def baseline():
             raise r.ReleaseError('Existing public frontend differs from its baseline image')
     r.canary(images, sha, legacy=True)
     r.write_json(target / 'manifest.json', manifest)
-    r.write_json(target / 'runtime.json', r.runtime_config(images, sha, app_version))
+    r.write_json(target / 'runtime.json', r.runtime_config(images, sha, app_version, legacy=True))
     r.protect_tree(target)
     public = r.MARKETING / 'releases' / sha; public.parent.mkdir(mode=0o755, exist_ok=True)
     shutil.copytree(static, public); r.protect_tree(public)

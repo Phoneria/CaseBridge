@@ -410,3 +410,5 @@ Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uy
 
 - Yayın öncesi CI bir ses kaydı yarışını yakaladı: conversation modunda ilk render opening eylemi kayıtta tutulabiliyordu. Gönderimde yalnız geçerli konuşma eylemi seçiliyor; 753 test son düzeltmeyle tekrar geçti. Salt sentetik local production build ve 12 capture yeniden alındı.
 - Artefakt kapısı, Compose bağımlılık bloğuna yanlış giren hardening satırlarını reddetti; canlı v.0.19/v.0.43 değişmedi. Girinti düzeltildi; gerçek Docker Compose sentetik konfigürasyonla doğrulandı. Aynı denetim CI’ye ve imaj build öncesine eklendi. Başarısız stage yayın/artefakt tamamlandı diye kaydedilmedi.
+
+- Runtime overlay birleşiminde yinelenen security_opt listeleri de gerçek Compose denetimiyle yakalandı. Yeni kaynak güvenlik listelerini base dosyasından alıyor; legacy geri dönüşe hardening ayrıca uygulanıyor. Gerçek base+overlay merge, sır içermeyen sentetik konfigürasyonla geçti; 12 release testi tekrar geçti. Bu düzeltmeler sırasında canlı uygulama etkinleştirilmedi.
