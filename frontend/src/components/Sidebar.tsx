@@ -87,7 +87,6 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
 
 export function Sidebar({ role, platform = false, restricted = false }: { role?: "admin" | "lawyer"; platform?: boolean; restricted?: boolean }) {
   const pathname = usePathname();
-  const inAi = isActive(pathname, AI_ROUTES.hub);
   const hubActive = pathname === AI_ROUTES.hub;
 
   return (
@@ -128,7 +127,7 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
         <div
           role="group"
           aria-label="CaseBridge AI"
-          className={`relative overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2 ${inAi ? "ring-2 ring-accent-400" : ""}`}
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2"
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <Link

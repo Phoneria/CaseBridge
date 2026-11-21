@@ -205,3 +205,13 @@ Uygulama servisi veya gerçek kimlik bilgileri değiştirilmez; müşteri onboar
 - [x] Kaynak commit d3f2e13446ea0b492d5572549b9c7253946154a8 GitHub main’e force olmadan gönderildi. Canlıdaki 47 kaynak/varlık dosyası (özgün video ve poster dahil) main kaynaklarıyla SHA-256 düzeyinde aynı. Yalnız index.html, hero-video-restoration.css ve website-version.json yayımlandı; önceki üç dosya /var/backups/casebridge-marketing-20261122-v043/previous-files.tar.gz altında yedeklendi ve arşivde her dosya okunarak doğrulandı. Ana sayfa son sırada atomik değiştirildi; uygulama servisi yeniden başlatılmadı.
 
 Önceki uygulama/kimlik bilgisi ve müşteri release gereksinimleri değişmedi; yeni müşteri onboarding yapılmadı. Kanıtlar yerel artifacts/marketing-v043/ altında tutulur.
+
+## CaseBridge AI grup çerçevesi — uygulama v.0.19, 22 Kasım 2026
+
+- Kullanıcının istediği dar uygulama UI düzeltmesi: /ai altındaki rotalarda Sidebar grubuna koşullu eklenen `ring-2 ring-accent-400` kaldırıldı. Bu bir focus göstergesi değildi; rota vurgusuydu. Grubun temel kenarlığı/teması, seçili alt bağlantı arka planı ve bağlantıların `focus-visible` halkaları aynı kaldı. Genel focus kuralları değiştirilmedi. Kullanılmayan inAi değişkeni kaldırıldı.
+- Mevcut 9 Sidebar testi geçti. Yalıtılmış mevcut uygulama ve yalnız sentetik demo API/verileriyle Chromium kontrolleri 1440/390px, koyu/açık temada geçti: Raporlar’dan Dosya Analizi’ne fareyle geçişte grup box-shadow/outline/border/background değişmiyor; grup ring sınıfı yok, seçili link ve aria-current korunuyor. Shift+Tab/Tab ile linke klavye odağı görünür; grubun dış halkası oluşmuyor. Mobil menü, v.0.19 etiketi, taşma ve tarayıcı hataları kontrol edildi; ekran görüntüleri incelendi. İlk testlerde menü düğmesi seçicisi ve yerel demo giriş hız limiti düzenlendi; uygulama davranışı bu test düzenlemeleriyle değiştirilmedi. Whitespace kontrolü geçti.
+- [ ] Sunucu ön yüz üretim derlemesi/tip kontrolü ve yalnız frontend yayını.
+- [ ] Kamuya açık v.0.19/servis edilen güncel kod, sentetik API ile fare/klavye koyu/açık masaüstü/mobil tarayıcı kontrolleri ve health doğrulaması.
+- [ ] GitHub main son eşleşmesi ve backend/veritabanı container kimliklerinin değişmediği doğrulaması.
+
+Tanıtım sitesi v.0.43 olarak kalır. Backend, şema, sağlayıcı/gerçek kimlik bilgileri ve onboarding kapsam dışıdır. Yerel bağımsız çalışmalar korunur; commit/push temiz ayrı çalışma alanından yapılır. Kanıtlar yerel artifacts/app-v019/ altındadır.
