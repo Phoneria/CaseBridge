@@ -22,3 +22,5 @@ Preimplementation spec/plan/task consistency checked. Actual implementation trac
 First stage rejected invalid Compose dependency indentation after successful image builds/canaries; no application activation occurred. Corrected base YAML now passes real Docker Compose with synthetic configuration. Added no-secret CI validation and base config validation before build; merged runtime configuration remains a separate gate.
 
 Merged-config verification caught duplicate security_opt lists across base/overlay. New-source overlays now inherit base security lists; legacy rollback overlays still add hardening explicitly. Real Docker Compose base+runtime merge passed with synthetic configuration; 12 release regression tests passed again. No live activation took place during these failed gates.
+
+Nonroot canary caught EACCES on /app/public/sufle: tar safe extraction omits directory modes, so inherited private umask 077 produced 0700 build inputs. Clean Git exports now normalize directory/file read permissions; the entrypoint fixes its own umask. A regression under umask 077 verifies 0755 directories/0644 assets; 13 release tests passed. Failed candidate was not activated.

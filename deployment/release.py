@@ -70,6 +70,11 @@ def export_source(sha, destination):
             if not (member.isfile() or member.isdir()):
                 raise ReleaseError('Source archive must not contain links/devices')
         archive.extractall(destination, filter='data')
+    # The safe tar filter intentionally ignores directory modes. Normalize the
+    # clean Git export so a caller's private umask cannot break the nonroot image.
+    for path in destination.rglob('*'):
+        path.chmod(0o755 if path.is_dir() or path.stat().st_mode & 0o111 else 0o644)
+    destination.chmod(0o755)
 
 
 def run(args, *, binary=False, log=None):
@@ -414,6 +419,7 @@ def main():
     parser.add_argument('scope', nargs='?', choices=['app', 'marketing', 'all'], default='all')
     args = parser.parse_args()
     os.environ.clear(); os.environ.update(ENV)
+    os.umask(0o022)
     if os.geteuid() != 0:
         raise ReleaseError('Use the root-owned restricted release entrypoint')
     if args.operation == 'status':

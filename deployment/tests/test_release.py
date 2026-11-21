@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import tarfile
 import tempfile
@@ -38,6 +39,19 @@ class ReleaseTests(unittest.TestCase):
                 member = tarfile.TarInfo(name); member.type = kind; member.linkname = '/etc/hosts'; archive.addfile(member)
             with tempfile.TemporaryDirectory() as work, patch.object(r, 'run', return_value=data.getvalue()):
                 with self.assertRaises(r.ReleaseError): r.export_source(A, Path(work))
+
+    def test_private_operator_umask_cannot_make_export_unreadable(self):
+        data = io.BytesIO()
+        with tarfile.open(fileobj=data, mode='w') as archive:
+            directory = tarfile.TarInfo('frontend/public/sufle'); directory.type = tarfile.DIRTYPE; directory.mode = 0o755; archive.addfile(directory)
+            member = tarfile.TarInfo('frontend/public/sufle/example.svg'); member.mode = 0o644; member.size = 6; archive.addfile(member, io.BytesIO(b'<svg/>'))
+        with tempfile.TemporaryDirectory() as work, patch.object(r, 'run', return_value=data.getvalue()):
+            root = Path(work) / 'source'; root.mkdir()
+            previous = os.umask(0o077)
+            try: r.export_source(A, root)
+            finally: os.umask(previous)
+            self.assertEqual((root/'frontend/public/sufle').stat().st_mode & 0o777, 0o755)
+            self.assertEqual((root/'frontend/public/sufle/example.svg').stat().st_mode & 0o777, 0o644)
 
     def test_stage_rejects_non_main_before_build_or_export(self):
         with patch.object(r, 'owned'), patch.object(r, 'run', side_effect=['https://github.com/Phoneria/CaseBridge.git', '', B]) as command, patch.object(r, 'export_source') as export:
