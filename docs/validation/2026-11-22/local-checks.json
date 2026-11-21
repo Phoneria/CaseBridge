@@ -27,13 +27,13 @@
   "specKitManagedIntegration": "ok",
   "governanceContracts": 8,
   "marketingFAQ": 12,
-  "galleryChecks": 44,
+  "galleryChecks": 48,
   "contrast": {
     "samples": 64,
     "minimum": 5.64,
     "normalThreshold": 4.5,
     "largeThreshold": 3
   },
-  "independentLegalExpertReview": "pending; scenario screenshot not marketed",
+  "independentLegalExpertReview": "not performed or claimed; latest explicit user technical/capture acceptance is recorded; no new release gate",
   "publicRelease": "pending"
 }

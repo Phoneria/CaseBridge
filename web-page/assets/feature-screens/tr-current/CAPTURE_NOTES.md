@@ -24,4 +24,4 @@ Bu dizindeki 12 JPEG, aynı v.0.20 uygulamasının **production build** sürüm�
 | directed-trial.jpg | `/ai/yonetmen`, aynı kurgusal özet ve örnek mod |
 | scenario-tree.jpg | `/ai/olasilik?dava=<sentetik-id>`, aynı rapordan üç senaryo, dayanak/belirsizlik ve Hesaplanmadı etiketleri |
 
-Son görsel teknik inceleme için yakalandı; bağımsız hukuk uzmanı incelemesi açık kaldığı sürece tanıtım sekmesine bağlanmaz ve yayın paketine dahil edilmez. İlk 11 görünür sekme güncel gerçek ürüne eşlenmiştir. Büyütme aynı dosyayı açar.
+Kullanıcı teknik uygulamayı ve gerçek ürün görsellerini onayladı; Olasılık Ağacı 12. ürün sekmesine ve gerçek uygulama rotasına bağlandı. Bağımsız hukuk uzmanı incelemesinin yapıldığına dair iddia yoktur. Tüm 12 sekme güncel gerçek ürüne eşlenmiştir; büyütme aynı dosyayı açar.

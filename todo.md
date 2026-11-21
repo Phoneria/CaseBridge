@@ -235,7 +235,7 @@ Bu bölüm kullanıcı kapsamını ve kabul şartlarını korur. Aşağıdaki i�
 
 - [x] **Yapay zekâ erişimlerini header’a taşı:** Uygulamadaki yapay zekâ menü/erişimlerini sidebar’dan header’a taşı. Kullanıcının açık tercihi header’dır; sidebar’a yeniden yerleştirme.
 - [x] **Bilgi Haritası uyumu:** Emin’in güncel Bilgi Haritası kaynağını mevcut uygulamadaki Bilgi Haritası ile karşılaştır. Kullanıcının bildirdiği görünüm farkını doğrula, nedenini belirle ve mevcut uygulamayı güncel kaynakla uyumlu hale getir.
-- [ ] **Olasılık Haritası / olasılık ağacı:** Bilgi Haritası’na ek olarak, davadaki mevcut olay ve bulgulardan olası sonraki gelişmelere, alternatif senaryolara ve bunların olasılık değerlendirmelerine dallanan benzer bir görsel yapı planla. Önce Emin’in güncel çalışmasında bu özelliğin zaten bulunup bulunmadığını kontrol et; varsa yeniden üretmek yerine mevcut yapıyı değerlendir. Olasılık değerlendirmelerinin gerekçelerini ve belirsizliklerini göster; gerçekte hesaplanmamış yüzdeleri doğrulanmış veri gibi sunma.
+- [x] **Olasılık Haritası / olasılık ağacı:** Bilgi Haritası’na ek olarak, davadaki mevcut olay ve bulgulardan olası sonraki gelişmelere, alternatif senaryolara ve bunların olasılık değerlendirmelerine dallanan benzer bir görsel yapı planla. Önce Emin’in güncel çalışmasında bu özelliğin zaten bulunup bulunmadığını kontrol et; varsa yeniden üretmek yerine mevcut yapıyı değerlendir. Olasılık değerlendirmelerinin gerekçelerini ve belirsizliklerini göster; gerçekte hesaplanmamış yüzdeleri doğrulanmış veri gibi sunma.
 - [x] **Açık/koyu temada logo tutarlılığı:** Koyu temaya geçildiğinde CaseBridge logosunun değişmesi sorununu incele ve tema geçişleri arasında tutarlı logo kullanımını sağla.
 
 ### Tanıtım sitesi
@@ -391,10 +391,19 @@ Bir iş ancak kendi kabul ölçütleri için gerçek sonuç, test/sürüm/veri k
 - Header, logo, ağaç/metin ve mobil: 1440/768/390/320 × açık/koyu tarayıcı matrisi geçti. Dokuz AI erişimi yalnız header’dan açılıyor; Escape/Tab/odak dönüşü, aktif rota, arama/bildirim/hesap menüsü ve kayıtlı tema sınandı. Büro izolasyonu, restricted/platform 403, başka büro 404 ve bozuk cross-tenant alt kayıt negatifleri geçti.
 - Emin `134e881` ve başlangıç main `fdf7333` Bilgi Haritası kaynakları aynı. TMK m.6 / 1600×1100 seçili SVG hash’i aynı; açık/koyu kanıtlar `docs/map-comparison.md` ve `docs/validation/2026-11-22/` içinde. Geometriye dayanaksız uyarlama yapılmadı; ürün kaynak notu Türkçeleşti.
 - Yeni `/ai/olasilik` teknik uygulaması hazır: kayıtlı senaryolar veya açık koşullu hazırlık dalları, dayanak/belirsizlik, `probability=null`, içerik sürümü ve bellekte önceki görüntü. Harita oranları veya analiz skoru olasılığa dönüştürülmez.
-- [ ] S05 bağımsız hukuk uzmanı incelemesi: bu teknik çalışma dış inceleme yapılmış sayılmaz. Sentetik örnek `scenario-tree.jpg` ile incelemeye hazır; tamamlanmadan yeni ağacın ekranı/özellik iddiası tanıtıma bağlanmaz. İlgili soru kullanıcıya iletildi; yanıt yokluğu kabul değildir.
+- S05 bağımsız hukuk uzmanı incelemesi yapılmış sayılmaz. Son açık kullanıcı talimatıyla bu asistan plan yorumu yeni bir yayın/tanıtım kapısı değildir; teknik kabul verilmiştir. Sentetik örnek `scenario-tree.jpg` gerçek uygulamadan alınmıştır.
 - 12 gerçek v.0.20 production-build ekranı sentetik SQLite seed/template verisiyle doğrudan yakalandı. Görünür ilk 11 sekme yenilendi; ağaç görseli inceleme için tutulur. Üründe gereken çeviriler gerçek kaynağa işlendi; önizlemeye özgü override ve gerçek müşteri/sır yok. Rota/viewport/hash provenance `CAPTURE_NOTES.md` ve JSON kanıtında.
 - Video v.0.43’e göre genel alpha 88/78/28/12 → 82/70/18/6, mobil 78 → 72. Kullanıcının ek kontrast yetkisiyle yalnız kopyada koyu marka tonu ve lokal yumuşak zemin kullanıldı; genel video/tema/hizalama korunur. Dört viewport × 0/5/12s + ilk hareket-azaltma posteri kontrol edildi; normal 4.5 ve büyük başlık 3 eşiğini 64 örnekte geçti, minimum **5.64:1**. Video ilerleme, sessiz döngü/satır içi, ekran dışı durdurma ve hareket azaltma geçti.
 - SSS dört asıl + sekiz yeni = 12 ürün dayanaklı Türkçe soru. Klavye, mobil ve JavaScript kapalı native details kontrolleri geçti. Kesin sonuç, fiyat/saklama veya dış uzman onayı vaadi eklenmedi.
 - [ ] Main push, VPS artefakt/canary/rollback ve public commit/sürüm/kod/hash/health doğrulaması. Yayın tamamlandığında gerçek sonuç ayrıca eklenecek; çalışan build tamamlanmış yayın sayılmaz.
 
 - Tanıtım görsel son kontrolü: dört viewport × 11 sekme = **44** yükleme/büyütme/Escape/odak kontrolü geçti; doğal görsel genişliği 1600 px, aynı kaynak tam ekran, bozuk görsel/taşma/page error yok. Yeni ağacın bağımsız uzman incelemesi açık olduğundan ilk 11 sekmeyle sınırlı; ağaç capture kaydı tanıtım bağımlılık paketine alınmıyor.
+
+
+### Son kullanıcı açıklaması — teknik kabul ve tanıtım
+
+Kullanıcı teknik uygulamayı ve gerçek ürün görsellerini onayladı; plan sırasında asistanın eklediği bağımsız hukuk uzmanı incelemesinin yeni bir canlı/tanıtım engeli yapılmamasını, test edilmiş Olasılık Ağacı’nın sentetik örnekle ilgili ürün bölümüne bağlanmasını açıkça istedi. AGENTS.md içindeki bağlayıcı ek müşteri-release şartları ayrı büro anahtarları, staged test/aktivasyon, sır koruması ve gerçek public doğrulamadır; bağımsız hukuki inceleme yayın kapısı olarak yer almaz. Bu son açık talimat önceki plan yorumunu değiştirir. Önceki “tanıtıma bağlanmaz” ara kaydı artık geçerli değildir. Bağımsız hukuki inceleme yapıldığı iddiası yoktur.
+
+Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uygulama rotasına bağlandı. Hesaplanmamış olasılıklar açıkça etiketlenir; analiz skoru ve atıf oranı olasılığa çevrilmez. Public doğrulama kapısı aynen sürer.
+
+- Son 12 sekmeli tanıtım kontrolü: 1440/768/390/320 × 12 = **48** görsel/tam ekran/Escape/odak denetimi geçti; uygulama bağlantısı gerçek `/ai/olasilik` rotasıdır. Önceki 11 sekme sınırı son kullanıcı talimatıyla kaldırıldı.

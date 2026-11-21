@@ -33,3 +33,5 @@ feature's verification.md; unimplemented tasks remain unchecked.
 ## Local implementation verification
 
 Actual test/build/browser/capture results are recorded per feature and in `docs/validation/2026-11-22/local-checks.json`. Independent S05 legal-expert review and public rollout verification remain open. Technical tree capture is withheld from marketing until the review; unchanged current product features are verified and captured directly.
+
+Latest user clarification: technical implementation/captures accepted; no assistant-created independent legal review publication gate. The tested tree is shown as the 12th product feature with explicit no-computed-probability labels. No external review is claimed.

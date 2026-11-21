@@ -8,7 +8,7 @@ Mevcut dört soru korunur. Yeni sekiz yanıt yalnız yürürlükteki davranış�
 | Analiz ve duruşma farkı / hedef kullanıcı | `AiHubView.tsx`, `/ai/analiz`, `/ai/durusma`; mevcut ürün metni |
 | AI menüsü | `AiNavigation.tsx`, `aiNavigation.ts`; platform/kısıtlı hesaplar hariç |
 | Bilgi Haritası | `MapView.tsx`, `legal_graph.json`, `docs/map-comparison.md`; betimleyici oranlar |
-| Analiz puanı / eksik ve çelişkili bilgi | `SimulationResultCard.tsx`, `AIAnalysis`; değerlendirme puanı kazanma olasılığı değildir, eksik bilgi/karşı argüman/soru alanları |
+| Olasılık Ağacı / yenileme | `scenario_tree.py`, `ScenarioTreeView.tsx`, `test_scenario_tree.py`; sayısal tahmin yok, değişen kayıtlar ve bellekte önceki görüntü |
 | Karşı taraf analizi | `CounterAnalysisView.tsx`, `/legal-lab/counter`; verilen özet ve seçili taraf |
 | Yönetilen duruşma | `DirectedTrialView.tsx`, `/legal-lab/trial/*`; dosya özetinden aşamalı prova |
 | Örnek mod | `MockProvider`, `AiStatusIndicator.tsx`; örnek/eğitim etiketi korunur |

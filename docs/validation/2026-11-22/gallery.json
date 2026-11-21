@@ -2,7 +2,7 @@
   "results": [
     {
       "width": 1440,
-      "tabs": 11,
+      "tabs": 12,
       "images": "loaded",
       "expanded": "same source",
       "escapeFocus": "passed",
@@ -10,7 +10,7 @@
     },
     {
       "width": 768,
-      "tabs": 11,
+      "tabs": 12,
       "images": "loaded",
       "expanded": "same source",
       "escapeFocus": "passed",
@@ -18,7 +18,7 @@
     },
     {
       "width": 390,
-      "tabs": 11,
+      "tabs": 12,
       "images": "loaded",
       "expanded": "same source",
       "escapeFocus": "passed",
@@ -26,7 +26,7 @@
     },
     {
       "width": 320,
-      "tabs": 11,
+      "tabs": 12,
       "images": "loaded",
       "expanded": "same source",
       "escapeFocus": "passed",
