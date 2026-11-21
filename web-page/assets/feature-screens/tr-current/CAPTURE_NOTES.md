@@ -25,3 +25,9 @@ Bu dizindeki 12 JPEG, aynı v.0.20 uygulamasının **production build** sürüm�
 | scenario-tree.jpg | `/ai/olasilik?dava=<sentetik-id>`, aynı rapordan üç senaryo, dayanak/belirsizlik ve Hesaplanmadı etiketleri |
 
 Kullanıcı teknik uygulamayı ve gerçek ürün görsellerini onayladı; Olasılık Ağacı 12. ürün sekmesine ve gerçek uygulama rotasına bağlandı. Bağımsız hukuk uzmanı incelemesinin yapıldığına dair iddia yoktur. Tüm 12 sekme güncel gerçek ürüne eşlenmiştir; büyütme aynı dosyayı açar.
+
+## Son kabul ve public eşleme
+
+Kullanıcı teknik/görsel kabulünü takiben “İncelemeyi tamamladım ve kabul ediyorum” beyanını verdi. Bağımsız audit/model kalibrasyonu asistan tarafından yapılmış diye sunulmaz. Public uygulama v.0.20 ve tanıtım v.0.44, main `70fabd06f695f03477203a3fc86291f06e3e2f7c` kaynaklıdır; 12 capture dosyasının public SHA-256 eşleşmesi ve tam ekran/mobil kullanımı doğrulandı.
+
+İnceleme beyanının kaynağı, S05 için ayrı gönderilen soruya kullanıcının doğrudan verdiği “İncelemeyi tamamladım ve kabul ediyorum” yanıtıdır; önceki uygulamaya başlama onayıyla karıştırılmaz. Bu yalnız kullanıcı beyanı/kabulüdür. İncelemeyi yapan kişinin uzmanlığı/bağımsızlığı ve inceleme bulguları tarafımızca doğrulanmadı; bağımsız hukuki doğrulama ve model kalibrasyonu yapılmış sayılmaz. Teknik yayın tekrarlanmadı.

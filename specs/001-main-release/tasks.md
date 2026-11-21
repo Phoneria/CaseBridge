@@ -11,15 +11,15 @@
 ## Phase 3: User Story 1 (P1)
 
 - [x] T003 [US1] Implement data-model.md#featurecontract Release.commit, Release.scope, Release.state and file digest validation; Implement FR-001 through FR-004 in deployment/release.py, deployment/install-release.py, deployment/compose.production.yml, deployment/README.md.
-- [ ] T004 [US1] Verify primary acceptance scenario and record real evidence in specs/001-main-release/verification.md.
+- [x] T004 [US1] Verify primary acceptance scenario and record real evidence in specs/001-main-release/verification.md.
 
 ## Phase 4: User Story 2 (P2)
 
-- [ ] T005 [US2] Verify error/permission/accessibility boundaries in specs/001-main-release/quickstart.md and record failures/limits.
+- [x] T005 [US2] Verify error/permission/accessibility boundaries in specs/001-main-release/quickstart.md and record failures/limits.
 
 ## Phase 5: Release and Convergence
 
-- [ ] T006 Verify source/main/public release consistency where applicable and record convergence in specs/001-main-release/verification.md.
+- [x] T006 Verify source/main/public release consistency where applicable and record convergence in specs/001-main-release/verification.md.
 
 ## Dependencies and Execution
 
@@ -29,6 +29,6 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 
 - [x] T008 [US2] Normalize clean archive permissions independent of caller umask; verify private umask 077 still yields readable code/assets for the nonroot frontend.
 
-- [ ] T009 [US2] Normalize runtime asset read permissions in frontend/Dockerfile and prove nonroot startup on the built image, including public/sufle.
+- [x] T009 [US2] Normalize runtime asset read permissions in frontend/Dockerfile and prove nonroot startup on the built image, including public/sufle.
 
 - [x] T010 [US2] Reject invalid or unverified rollback candidates before entering recovery, so rejected caller input cannot restart the previous release.

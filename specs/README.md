@@ -30,8 +30,10 @@ used as acceptance evidence. Spec Kit integration status reports `ok` with no mi
 or modified managed skill/template files. Real execution results belong in each
 feature's verification.md; unimplemented tasks remain unchecked.
 
-## Local implementation verification
+## Completed implementation and release
 
-Actual test/build/browser/capture results are recorded per feature and in `docs/validation/2026-11-22/local-checks.json`. Independent S05 legal-expert review and public rollout verification remain open. Technical tree capture is withheld from marketing until the review; unchanged current product features are verified and captured directly.
+S01–S09 are implemented and verified. Application v.0.20 / marketing v.0.44 are served from main commit `70fabd06f695f03477203a3fc86291f06e3e2f7c`; public code/hash/health, runtime/role restrictions and isolated rollback cycle pass. All three CI jobs passed (1099 backend, 753 frontend, 14 release checks plus Compose/type/version/build). Evidence is in `docs/validation/2026-11-22/` and each verification.md.
 
-Latest user clarification: technical implementation/captures accepted; no assistant-created independent legal review publication gate. The tested tree is shown as the 12th product feature with explicit no-computed-probability labels. No external review is claimed.
+User technical/screenshot acceptance and subsequent “İncelemeyi tamamladım ve kabul ediyorum” statement are recorded. No assistant-performed independent legal audit or model calibration is claimed; no extra legal-review publication gate is invented. The tested tree is accessible from the 12th product tab and actual application route, with uncomputed probabilities labelled explicitly.
+
+No automatic deployment trigger/frequency was selected; current publication is manual through the restricted entrypoint. Root/izzet emergency administration remains. Final evidence-only changes do not require an application rebuild.

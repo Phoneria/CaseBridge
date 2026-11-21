@@ -1,6 +1,6 @@
 # Feature Specification: S05 Dosyaya özgü olasılık ağacı
 
-**Created**: 2026-11-22 | **Status**: Approved user scope; implementation pending
+**Created**: 2026-11-22 | **Status**: Implemented and verified; user acceptance recorded
 
 ## User Scenarios & Testing *(mandatory)*
 

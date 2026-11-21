@@ -19,7 +19,7 @@
 
 ## Phase 5: Release and Convergence
 
-- [ ] T006 Verify source/main/public release consistency where applicable and record convergence in specs/007-video-visibility/verification.md.
+- [x] T006 Verify source/main/public release consistency where applicable and record convergence in specs/007-video-visibility/verification.md.
 
 ## Dependencies and Execution
 

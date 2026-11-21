@@ -19,7 +19,7 @@
 
 ## Phase 5: Release and Convergence
 
-- [ ] T006 Verify source/main/public release consistency where applicable and record convergence in specs/004-scenario-tree/verification.md.
+- [x] T006 Verify source/main/public release consistency where applicable and record convergence in specs/004-scenario-tree/verification.md.
 
 ## Dependencies and Execution
 

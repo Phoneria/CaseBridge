@@ -1,0 +1,30 @@
+[
+  {
+    "state": "normal",
+    "text": "Uygulamaya giriş yap →",
+    "color": "rgb(255, 255, 255)",
+    "background": "rgb(0, 126, 172)",
+    "contrast": 4.59
+  },
+  {
+    "state": "hover",
+    "text": "Uygulamaya giriş yap →",
+    "color": "rgb(255, 255, 255)",
+    "background": "rgb(0, 102, 140)",
+    "contrast": 6.4
+  },
+  {
+    "state": "normal",
+    "text": "Görüşme planlayın",
+    "color": "rgb(0, 126, 172)",
+    "background": "rgb(255, 255, 255)",
+    "contrast": 4.59
+  },
+  {
+    "state": "hover",
+    "text": "Görüşme planlayın",
+    "color": "rgb(0, 126, 172)",
+    "background": "rgb(255, 255, 255)",
+    "contrast": 4.59
+  }
+]

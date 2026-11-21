@@ -1,24 +1,20 @@
 # Verification: 006-product-captures
 
-## Local results — 2026-11-22
+## Result — completed, 2026-11-22
 
-12 actual production-build v.0.20 screenshots captured with fresh synthetic SQLite demo/template data; source hash and route/viewport/file hash provenance in docs/validation/2026-11-22/product-captures.json and CAPTURE_NOTES. Existing 11 visible marketing tabs use current captures. No preview-only overrides, painted labels, real provider calls, real customers or secrets.
+Twelve JPEGs were taken directly from actual v.0.20 production-build UI using fresh isolated SQLite demo/template records, no real customers/keys/provider calls, no preview-only localization, painting or constructed UI. Route/viewport/source fingerprint/file SHA-256 provenance is recorded. Eleven 1600×1100 views and one 1600×1400 scenario tree retain example/training labels. Actual product text was localized in source. Twelve visible tabs and expanded views point to the same current files. Local four-viewport gallery checks (48 flows) and public three-viewport checks (36 flows) passed load/dimensions/Escape/focus/overflow. Public served file hashes match the immutable package. User screenshot acceptance is recorded; no independent legal audit is claimed.
 
-## Outstanding acceptance / release
+## Public release
 
-48 checks across 12 visible tabs at 1440/768/390/320 passed: image load/natural dimensions, same expanded source, Escape and trigger focus, no overflow or page errors. Public hash verification pending. The accepted scenario-tree capture is included in the 12th product tab and served dependency closure.
+Application **v.0.20**, marketing **v.0.44**; deployed main commit `70fabd06f695f03477203a3fc86291f06e3e2f7c`. Public release markers and health report this commit; updated code/file/image hashes match the immutable artifact. All three CI jobs passed: https://github.com/Phoneria/CaseBridge/actions/runs/44960991593 (1099 backend / 753 frontend tests, governance/14 release tests, Compose, type/version/build).
 
 ## Evidence
 
-- `docs/validation/2026-11-22/browser.json`
-- `docs/validation/2026-11-22/product-captures.json`
-- `docs/validation/2026-11-22/contrast.json`
-- `todo.md` current release record (public proof appended only after verification).
+- `docs/validation/2026-11-22/release.json`, `ci.json`
+- `public-browser.json`, `runtime.json`, `release-permissions.json`, `isolated-rollback.json`
+- `browser.json`, `gallery.json`, `contrast.json`, `cta-contrast.json`, `product-captures.json`
+- `todo.md` final release record; `deployment/immutable-release.md`
 
 ## Convergence
 
-Preimplementation spec/plan/task consistency checked. Actual implementation traced against each FR; unfinished external/public checks remain open. No unchecked requirement is treated as satisfied by generated documents.
-
-## User clarification and technical acceptance — 2026-11-22
-
-The user explicitly accepted the technical implementation and actual product captures, and instructed that an assistant-added independent legal review must not become a new publication gate. AGENTS.md has no independent-legal-review release requirement; its binding bureau-key/customer gates remain intact. The tested tree and its synthetic capture are included in marketing with computed-values explicitly unavailable. No independent legal-expert approval is claimed. Public technical verification remains required.
+Every scoped requirement maps to implemented code and actual verification. All feature tasks are complete; missing checks were added append-only as discovered and completed only after evidence. External/legal-model validation was not invented as a new release gate or claimed as performed by the assistant. This final documentation commit does not change released application behavior. Existing customer onboarding/key gates remain governed by AGENTS.md/todo.md.

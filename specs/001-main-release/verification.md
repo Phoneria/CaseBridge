@@ -1,28 +1,22 @@
 # Verification: 001-main-release
 
-## Local results — 2026-11-22
+## Result — completed, 2026-11-22
 
-12 release boundary/recovery unit tests; strict SHA/main/image/file digest rejection, live drift stop, frontend-only backend preservation, old-artifact recovery. Installer dry-run and Python compile passed.
+Main commit was exported to an immutable, root-owned artifact; pinned image IDs, 897 source files, 54 frontend JS/CSS and 48 marketing files were verified. The restricted role staged/activated it. Actual normal-account code writes, general sudo and Docker access were denied; status was allowed, non-main SHA and unverified rollback rejected without restarting services. Both running app containers have read-only root, ALL capabilities dropped, no-new-privileges; frontend UID 1000. Actual runtime code-write attempts failed. Protected configuration and encrypted credential versions are unchanged. Existing root/izzet administrator access remains, explicitly outside the ordinary-role restriction. No automatic deployment trigger was added.
 
-## Outstanding acceptance / release
+Actual isolated old → new → old image cycle passed synthetic backend health, frontend HTTP and read-only checks; production rollback was not performed. Previous b640c54 images/manifests remain available and a paired configuration/encrypted-version/DB backup is protected on the server. No schema changes. Failed preflight candidates were never activated: Compose syntax/duplicate-list and nonroot asset-permission problems were fixed and regression checks added. Fourteen release unit tests and actual base+runtime Docker Compose checks pass.
 
-VPS bootstrap, actual isolated old/new/old canary, normal-user write probes and public commit/hash verification pending.
+## Public release
+
+Application **v.0.20**, marketing **v.0.44**; deployed main commit `70fabd06f695f03477203a3fc86291f06e3e2f7c`. Public release markers and health report this commit; updated code/file/image hashes match the immutable artifact. All three CI jobs passed: https://github.com/Phoneria/CaseBridge/actions/runs/44960991593 (1099 backend / 753 frontend tests, governance/14 release tests, Compose, type/version/build).
 
 ## Evidence
 
-- `docs/validation/2026-11-22/browser.json`
-- `docs/validation/2026-11-22/product-captures.json`
-- `docs/validation/2026-11-22/contrast.json`
-- `todo.md` current release record (public proof appended only after verification).
+- `docs/validation/2026-11-22/release.json`, `ci.json`
+- `public-browser.json`, `runtime.json`, `release-permissions.json`, `isolated-rollback.json`
+- `browser.json`, `gallery.json`, `contrast.json`, `cta-contrast.json`, `product-captures.json`
+- `todo.md` final release record; `deployment/immutable-release.md`
 
 ## Convergence
 
-Preimplementation spec/plan/task consistency checked. Actual implementation traced against each FR; unfinished external/public checks remain open. No unchecked requirement is treated as satisfied by generated documents.
-
-First stage rejected invalid Compose dependency indentation after successful image builds/canaries; no application activation occurred. Corrected base YAML now passes real Docker Compose with synthetic configuration. Added no-secret CI validation and base config validation before build; merged runtime configuration remains a separate gate.
-
-Merged-config verification caught duplicate security_opt lists across base/overlay. New-source overlays now inherit base security lists; legacy rollback overlays still add hardening explicitly. Real Docker Compose base+runtime merge passed with synthetic configuration; 12 release regression tests passed again. No live activation took place during these failed gates.
-
-Nonroot canary caught EACCES on /app/public/sufle: tar safe extraction omits directory modes, so inherited private umask 077 produced 0700 build inputs. Clean Git exports now normalize directory/file read permissions; the entrypoint fixes its own umask. A regression under umask 077 verifies 0755 directories/0644 assets; 13 release tests passed. Failed candidate was not activated.
-
-The next image still retained public/sufle mode 0750 and correctly failed the nonroot canary. Frontend Dockerfile now explicitly grants read/traverse to runtime public/Next assets while keeping root ownership and production read-only filesystem. Actual image canary remains required; source-directory normalization alone was not treated as proof of image startup.
+Every scoped requirement maps to implemented code and actual verification. All feature tasks are complete; missing checks were added append-only as discovered and completed only after evidence. External/legal-model validation was not invented as a new release gate or claimed as performed by the assistant. This final documentation commit does not change released application behavior. Existing customer onboarding/key gates remain governed by AGENTS.md/todo.md.

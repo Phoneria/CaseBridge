@@ -1,24 +1,20 @@
 # Verification: 008-turkish-faq
 
-## Local results — 2026-11-22
+## Result — completed, 2026-11-22
 
-Four original questions preserved plus eight distinct product-backed Turkish questions. Answer/source table in docs/faq-evidence.md. Twelve native details pass keyboard Enter, 320/390/768/1440 layouts and no-JavaScript access. The technically accepted scenario tree is described with explicit uncomputed-probability limits.
+Four original questions plus eight distinct Turkish product-backed questions. Evidence table maps every answer to delivered behavior. Tree answers explain source/conditional paths/uncomputed values and refresh; no legal-result guarantee, invented pricing/retention or external-review claim. Twelve native details passed keyboard, four local widths and no-JS access; public three-width FAQ/gallery checks passed. The actual tree and its application link are accessible from the relevant product section.
 
-## Outstanding acceptance / release
+## Public release
 
-Final screenshot dialog/FAQ regression and public source verification pending; no claim of external legal-expert approval.
+Application **v.0.20**, marketing **v.0.44**; deployed main commit `70fabd06f695f03477203a3fc86291f06e3e2f7c`. Public release markers and health report this commit; updated code/file/image hashes match the immutable artifact. All three CI jobs passed: https://github.com/Phoneria/CaseBridge/actions/runs/44960991593 (1099 backend / 753 frontend tests, governance/14 release tests, Compose, type/version/build).
 
 ## Evidence
 
-- `docs/validation/2026-11-22/browser.json`
-- `docs/validation/2026-11-22/product-captures.json`
-- `docs/validation/2026-11-22/contrast.json`
-- `todo.md` current release record (public proof appended only after verification).
+- `docs/validation/2026-11-22/release.json`, `ci.json`
+- `public-browser.json`, `runtime.json`, `release-permissions.json`, `isolated-rollback.json`
+- `browser.json`, `gallery.json`, `contrast.json`, `cta-contrast.json`, `product-captures.json`
+- `todo.md` final release record; `deployment/immutable-release.md`
 
 ## Convergence
 
-Preimplementation spec/plan/task consistency checked. Actual implementation traced against each FR; unfinished external/public checks remain open. No unchecked requirement is treated as satisfied by generated documents.
-
-## User clarification and technical acceptance — 2026-11-22
-
-The user explicitly accepted the technical implementation and actual product captures, and instructed that an assistant-added independent legal review must not become a new publication gate. AGENTS.md has no independent-legal-review release requirement; its binding bureau-key/customer gates remain intact. The tested tree and its synthetic capture are included in marketing with computed-values explicitly unavailable. No independent legal-expert approval is claimed. Public technical verification remains required.
+Every scoped requirement maps to implemented code and actual verification. All feature tasks are complete; missing checks were added append-only as discovered and completed only after evidence. External/legal-model validation was not invented as a new release gate or claimed as performed by the assistant. This final documentation commit does not change released application behavior. Existing customer onboarding/key gates remain governed by AGENTS.md/todo.md.

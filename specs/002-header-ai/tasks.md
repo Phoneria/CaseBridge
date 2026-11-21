@@ -19,10 +19,10 @@
 
 ## Phase 5: Release and Convergence
 
-- [ ] T006 Verify source/main/public release consistency where applicable and record convergence in specs/002-header-ai/verification.md.
+- [x] T006 Verify source/main/public release consistency where applicable and record convergence in specs/002-header-ai/verification.md.
 
 ## Dependencies and Execution
 
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
 
-- [ ] T008 [US2] Verify FR-007: normalize a stale initial action at the courtroom submit boundary; keep explicit valid conversation choices, then rerun microphone and full frontend regression/CI.
+- [x] T008 [US2] Verify FR-007: normalize a stale initial action at the courtroom submit boundary; keep explicit valid conversation choices, then rerun microphone and full frontend regression/CI.

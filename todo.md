@@ -229,7 +229,7 @@ Bu bölüm kullanıcı kapsamını ve kabul şartlarını korur. Aşağıdaki i�
 ### Geliştirme iş akışı
 
 - [x] **GitHub Spec Kit:** Projeye GitHub Spec Kit entegrasyonunu planla ve gerçekleştir. Mevcut açık işler dahil tüm CaseBridge çalışmalarını (uygulama, tanıtım sitesi ve sunucu/yayın süreci) GitHub Spec Kit iş akışına göre düzenle. Kullanıcının kesinleştirdiği proje GitHub Spec Kit’tir; bu kayıt entegrasyonun yapıldığı anlamına gelmez.
-- [ ] **Main kaynaklı yayın düzeni:** REST sunucusu/VPS üzerinde elle, sunucuya özgü uygulama kodu değişikliklerini önleyecek bir yayın düzeni planla. GitHub main tek kod kaynağı olsun; her dağıtımda main’deki belirli sürüm/commit alınsın ve canlı kodun bu sürümle eşleştiği doğrulansın. Bu süreci de GitHub Spec Kit’e göre düzenle. Gizli yapılandırmayı Git’e taşıma; otomatik dağıtım tetikleyicisi veya sıklığı belirlenmiş varsayma.
+- [x] **Main kaynaklı yayın düzeni:** REST sunucusu/VPS üzerinde elle, sunucuya özgü uygulama kodu değişikliklerini önleyecek bir yayın düzeni planla. GitHub main tek kod kaynağı olsun; her dağıtımda main’deki belirli sürüm/commit alınsın ve canlı kodun bu sürümle eşleştiği doğrulansın. Bu süreci de GitHub Spec Kit’e göre düzenle. Gizli yapılandırmayı Git’e taşıma; otomatik dağıtım tetikleyicisi veya sıklığı belirlenmiş varsayma.
 
 ### Uygulama
 
@@ -395,7 +395,7 @@ Bir iş ancak kendi kabul ölçütleri için gerçek sonuç, test/sürüm/veri k
 - 12 gerçek v.0.20 production-build ekranı sentetik SQLite seed/template verisiyle doğrudan yakalandı. Görünür ilk 11 sekme yenilendi; ağaç görseli inceleme için tutulur. Üründe gereken çeviriler gerçek kaynağa işlendi; önizlemeye özgü override ve gerçek müşteri/sır yok. Rota/viewport/hash provenance `CAPTURE_NOTES.md` ve JSON kanıtında.
 - Video v.0.43’e göre genel alpha 88/78/28/12 → 82/70/18/6, mobil 78 → 72. Kullanıcının ek kontrast yetkisiyle yalnız kopyada koyu marka tonu ve lokal yumuşak zemin kullanıldı; genel video/tema/hizalama korunur. Dört viewport × 0/5/12s + ilk hareket-azaltma posteri kontrol edildi; normal 4.5 ve büyük başlık 3 eşiğini 64 örnekte geçti, minimum **5.64:1**. Video ilerleme, sessiz döngü/satır içi, ekran dışı durdurma ve hareket azaltma geçti.
 - SSS dört asıl + sekiz yeni = 12 ürün dayanaklı Türkçe soru. Klavye, mobil ve JavaScript kapalı native details kontrolleri geçti. Kesin sonuç, fiyat/saklama veya dış uzman onayı vaadi eklenmedi.
-- [ ] Main push, VPS artefakt/canary/rollback ve public commit/sürüm/kod/hash/health doğrulaması. Yayın tamamlandığında gerçek sonuç ayrıca eklenecek; çalışan build tamamlanmış yayın sayılmaz.
+- [x] Main push, VPS artefakt/canary/rollback ve public commit/sürüm/kod/hash/health doğrulaması. Yayın tamamlandığında gerçek sonuç ayrıca eklenecek; çalışan build tamamlanmış yayın sayılmaz.
 
 - Tanıtım görsel son kontrolü: dört viewport × 11 sekme = **44** yükleme/büyütme/Escape/odak kontrolü geçti; doğal görsel genişliği 1600 px, aynı kaynak tam ekran, bozuk görsel/taşma/page error yok. Yeni ağacın bağımsız uzman incelemesi açık olduğundan ilk 11 sekmeyle sınırlı; ağaç capture kaydı tanıtım bağımlılık paketine alınmıyor.
 
@@ -416,3 +416,19 @@ Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uy
 - Nonroot canary, private umask 077 ile güvenli tar açılımının 0700 bıraktığı asset dizinini EACCES olarak reddetti. Git export izinleri açıkça normalize edildi; yayın komutu kendi umask’ını sabitliyor. 077 regresyonu dahil 13 release testi geçti. Bu aday da canlıya alınmadı; son kaynakla tekrar üretilecek.
 
 - Son nonroot paketleme düzeltmesi: imajda public/sufle 0750 kalabildiği için Dockerfile runtime public/Next dosyalarında okuma/traverse izinlerini ayrıca açıkça ayarlıyor. Root sahipliği ve production read-only korunur. Kaynak/yerel production derleme ve 12 gerçek capture son fingerprint ile yenilendi. Geçersiz rollback isteği recovery sınırından önce reddedilir; 14 release testi geçti.
+
+
+## Tamamlanan yayın — uygulama v.0.20 / tanıtım v.0.44
+
+- Main kaynak commit’i **70fabd06f695f03477203a3fc86291f06e3e2f7c**. Uygulama ve tanıtım public release.json aynı commit’i, /api/health status=ok ve app version 0.20 döndürüyor. 54 frontend JS/CSS, 48 tanıtım dosyası ve çalışan backend/frontend kod hash’leri imaj/manifest ile birebir doğrulandı; kaynak artefaktı 897 dosya içeriyor. Son belge commit’i uygulama/tanıtım kodunu değiştirmez; çalışan kaynak commit’i bu kayıttır.
+- CI’nin **üç işi de geçti**: https://github.com/Phoneria/CaseBridge/actions/runs/44960991593 . Backend **1099** test (Python 3.11, 715.67s), frontend **753** test, TypeScript, sürüm ve production build; Spec Kit governance, **14** release sınır/geri dönüş testi ve sentetik base+runtime Compose denetimi başarılı.
+- Normal proje-agent/cb-release hesapları kod yazamıyor, genel sudo/Docker çalıştıramıyor. Kısıtlı status çalışıyor; main dışı SHA ve doğrulanmamış rollback reddediliyor, reddedilen işlemler servisleri yeniden başlatmıyor. Yeni frontend UID 1000; her iki app root filesystem read-only, ALL caps dropped, no-new-privileges. Gerçek runtime kod yazma denemeleri reddedildi. Yalnız storage/tmp/cache yazılabilir. Root ve izzet yönetici/kurtarma erişimleri korundu; yöneticiyi mutlak engellediği iddiası yok.
+- Önceki doğrulanmış **b640c54** imaj/manifestleri tutuldu. Gerçek yalıtılmış eski → yeni → eski imaj çevriminde backend sentetik health/auth, frontend HTTP ve read-only kontrolleri geçti; üretimde gereksiz rollback yapılmadı. Şema değişikliği yok. Korumalı yapılandırma, şifreli anahtar sürümleri ve DB için sunucuda eşleşen yedek var; yapılandırma/şifreli anahtar sürümleri yayın öncesiyle aynı. Gerçek sırlar kayda veya browser storage’a yazılmadı.
+- Public uygulama JS’i 1440/390 ve açık/koyu temalarda sentetik API yönlendirmesiyle sınandı; gerçek müşteri verisi kullanılmadı. Dokuz header AI bağlantısı, focus/Escape, ağaç/metin/sources/uncertainties ve taşma kontrolleri geçti. Production ağaç API’si kimliksiz isteğe 401 verdi. Public tanıtımda 1440/390/320 × 12 = 36 görsel/dialog/odak akışı, SSS ve uygulama bağlantısı geçti; page error ve bozuk statik varlık yok.
+- Video normal/büyük yazı eşikleri geçti: 64 hero örneklemi min **5.64:1**, CTA normal/hover renkleri ayrıca min **4.58:1**. Özgün film/poster, tema ve hareket davranışı korundu; genel örtü artırılmadan yalnız kopyada lokal yumuşak zemin ve koyu marka tonu uygulandı.
+- Kullanıcı son yanıtında **“İncelemeyi tamamladım ve kabul ediyorum”** dedi. Kullanıcı inceleme/kabul beyanı kaydedildi. Asistan bağımsız hukuki audit veya model kalibrasyonu yapmış gibi sunulmuyor. Ağaç; kaynak, gerekçe, koşul ve belirsizlikleriyle 12. tanıtım sekmesinden ve /ai/olasilik rotasından erişilebilir; olasılıklar Hesaplanmadı.
+- S01–S09 görevleri kendi gerçek kanıtlarıyla kapatıldı. Otomatik yayın tetikleyicisi/sıklığı eklenmedi. Ek müşteri teslim/onboarding bu çalışmanın parçası değildir; AGENTS.md’deki ayrı büro anahtarı ve staged test/aktivasyon kapıları korunur.
+
+Kanıtlar: `docs/validation/2026-11-22/`, özellik bazında `specs/*/verification.md`, yayın/geri dönüş için `deployment/immutable-release.md`.
+
+İnceleme beyanının kaynağı, S05 için ayrı gönderilen soruya kullanıcının doğrudan verdiği “İncelemeyi tamamladım ve kabul ediyorum” yanıtıdır; önceki uygulamaya başlama onayıyla karıştırılmaz. Bu yalnız kullanıcı beyanı/kabulüdür. İncelemeyi yapan kişinin uzmanlığı/bağımsızlığı ve inceleme bulguları tarafımızca doğrulanmadı; bağımsız hukuki doğrulama ve model kalibrasyonu yapılmış sayılmaz. Teknik yayın tekrarlanmadı.

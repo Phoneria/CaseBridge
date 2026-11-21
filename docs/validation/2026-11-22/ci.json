@@ -1,0 +1,26 @@
+{
+  "commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/Phoneria/CaseBridge/actions/runs/44960991593",
+  "jobs": [
+    {
+      "name": "spec-governance",
+      "conclusion": "success",
+      "startedAt": "2026-11-21T23:16:46Z",
+      "completedAt": "2026-11-21T23:16:52Z"
+    },
+    {
+      "name": "frontend",
+      "conclusion": "success",
+      "startedAt": "2026-11-21T23:16:45Z",
+      "completedAt": "2026-11-21T23:18:50Z"
+    },
+    {
+      "name": "backend",
+      "conclusion": "success",
+      "startedAt": "2026-11-21T23:16:45Z",
+      "completedAt": "2026-11-21T23:29:01Z"
+    }
+  ]
+}

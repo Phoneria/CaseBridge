@@ -34,7 +34,20 @@
     "normalThreshold": 4.5,
     "largeThreshold": 3
   },
-  "independentLegalExpertReview": "not performed or claimed; latest explicit user technical/capture acceptance is recorded; no new release gate",
-  "publicRelease": "pending",
-  "composeBaseAndRuntime": "passed with synthetic configuration"
+  "independentLegalExpertReview": "Unverified independently. A separate direct user reply states İncelemeyi tamamladım ve kabul ediyorum; recorded only as user declaration/acceptance, not independent expert verification or model calibration.",
+  "publicRelease": "verified 70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "composeBaseAndRuntime": "passed with synthetic configuration",
+  "backendCI": {
+    "passed": 1099,
+    "warnings": 2,
+    "seconds": 715.67,
+    "python": "3.11"
+  },
+  "frontendCI": {
+    "passed": 753,
+    "typescript": "passed",
+    "versionCheck": "passed",
+    "productionBuild": "passed"
+  },
+  "ctaContrastMinimum": 4.59
 }
