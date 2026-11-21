@@ -35,12 +35,12 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
         "weak_points": [],
         "opposing_arguments": [],
         "missing_information": [
-            "Gerçek bir AI değerlendirmesi için LLM_PROVIDER=qwen veya openai yapılandırılmalıdır."
+            "Gerçek bir AI değerlendirmesi için LLM_PROVIDER=anthropic (Claude) ve ANTHROPIC_API_KEY yapılandırılmalıdır."
         ],
         "possible_scenarios": [],
         "questions": [],
         "recommended_actions": [
-            "Gerçek AI analizi için ortam değişkenlerinde bir sağlayıcı (Qwen veya OpenAI) yapılandırın."
+            "Gerçek AI analizi için ortam değişkenlerinde Claude için LLM_PROVIDER=anthropic ve ANTHROPIC_API_KEY ayarlayın."
         ],
         "assessment": {"score": 0, "confidence": "low"},
         "ai_disclaimer": (
