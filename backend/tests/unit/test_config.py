@@ -115,9 +115,16 @@ def test_qwen_enable_thinking_defaults_to_false(monkeypatch):
     assert settings.qwen_enable_thinking is False
 
 
+def test_anthropic_llm_provider_is_accepted(monkeypatch):
+    from app.core.config import Settings
+
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    assert Settings().llm_provider == "anthropic"
+
+
 def test_invalid_llm_provider_value_is_rejected(monkeypatch):
     monkeypatch.setenv("JWT_SECRET", "some-secret")
-    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
+    monkeypatch.setenv("LLM_PROVIDER", "unsupported-provider")
 
     from app.core.config import Settings
     from pydantic import ValidationError
