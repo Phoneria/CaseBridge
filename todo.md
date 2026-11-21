@@ -1,6 +1,12 @@
 # CaseBridge release TODO
 
-Updated: 10 November 2026.
+Updated: 22 November 2026.
+
+## Geçerli çalışma ve yayın ilkeleri — 22 Kasım 2026
+
+**Tüm CaseBridge çalışmaları GitHub Spec Kit iş akışına uymalıdır.** Bu zorunluluk mevcut açık iş listesinin tamamını, uygulamayı, tanıtım sitesini ve sunucu/yayın sürecini kapsar; yalnız gelecekte açılacak yeni işler veya entegrasyon sonrasındaki işler ile sınırlı değildir. GitHub Spec Kit 1.4.3 Codex entegrasyonu, constitution ve S02–S09 gereksinim/plan/görev/doğrulama kayıtları bu çalışma kapsamında kuruldu; tamamlanma yalnız gerçek kabul kanıtıyla işaretlenir.
+
+**GitHub main tek uygulama ve tanıtım kodu kaynağıdır.** Her dağıtımda main’deki belirli sürüm/commit alınmalı ve canlıda çalışan kodun o sürümle eşleştiği doğrulanmalıdır. REST sunucusu/VPS üzerinde elle, yalnız sunucuya özgü uygulama kodu değişiklikleri yapılmasını önleyecek yayın düzeni planlanmalıdır. Gizli yapılandırma ve kimlik bilgileri Git’e taşınmaz; korunan yapılandırma olarak koddan ayrı tutulur. Otomatik dağıtım tetikleyicisi veya sıklığı bu kayıtla belirlenmemiştir.
 
 ## Current update — option 1
 
@@ -215,3 +221,180 @@ Uygulama servisi veya gerçek kimlik bilgileri değiştirilmez; müşteri onboar
 - [x] Kaynak b640c54 GitHub main’e force olmadan gönderildi; sunucu temiz checkout’u bu commit ile eşleşiyor ve uygulama manifesti aynı kaynak hash’iyle 0.19. Backend ve veritabanı container ID, image ID ve başlangıç zamanları önceki kayıtla birebir aynı. Public tanıtım sürümü v.0.43 olarak kaldı; tanıtım yayını yapılmadı.
 
 Tanıtım sitesi v.0.43 olarak kalır. Backend, şema, sağlayıcı/gerçek kimlik bilgileri ve onboarding kapsam dışıdır. Yerel bağımsız çalışmalar korunur; commit/push temiz ayrı çalışma alanından yapılır. Kanıtlar yerel artifacts/app-v019/ altındadır.
+
+## Yeni planlanan işler — kullanıcı talepleri, 22 Kasım 2026
+
+Bu bölüm kullanıcı kapsamını ve kabul şartlarını korur. Aşağıdaki işlerin güncel uygulama/test/yayın durumu son doğrulama kaydındadır; önceki tamamlanmış yayınlar ve zorunlu müşteri-release kapıları değiştirilmez.
+
+### Geliştirme iş akışı
+
+- [x] **GitHub Spec Kit:** Projeye GitHub Spec Kit entegrasyonunu planla ve gerçekleştir. Mevcut açık işler dahil tüm CaseBridge çalışmalarını (uygulama, tanıtım sitesi ve sunucu/yayın süreci) GitHub Spec Kit iş akışına göre düzenle. Kullanıcının kesinleştirdiği proje GitHub Spec Kit’tir; bu kayıt entegrasyonun yapıldığı anlamına gelmez.
+- [ ] **Main kaynaklı yayın düzeni:** REST sunucusu/VPS üzerinde elle, sunucuya özgü uygulama kodu değişikliklerini önleyecek bir yayın düzeni planla. GitHub main tek kod kaynağı olsun; her dağıtımda main’deki belirli sürüm/commit alınsın ve canlı kodun bu sürümle eşleştiği doğrulansın. Bu süreci de GitHub Spec Kit’e göre düzenle. Gizli yapılandırmayı Git’e taşıma; otomatik dağıtım tetikleyicisi veya sıklığı belirlenmiş varsayma.
+
+### Uygulama
+
+- [x] **Yapay zekâ erişimlerini header’a taşı:** Uygulamadaki yapay zekâ menü/erişimlerini sidebar’dan header’a taşı. Kullanıcının açık tercihi header’dır; sidebar’a yeniden yerleştirme.
+- [x] **Bilgi Haritası uyumu:** Emin’in güncel Bilgi Haritası kaynağını mevcut uygulamadaki Bilgi Haritası ile karşılaştır. Kullanıcının bildirdiği görünüm farkını doğrula, nedenini belirle ve mevcut uygulamayı güncel kaynakla uyumlu hale getir.
+- [ ] **Olasılık Haritası / olasılık ağacı:** Bilgi Haritası’na ek olarak, davadaki mevcut olay ve bulgulardan olası sonraki gelişmelere, alternatif senaryolara ve bunların olasılık değerlendirmelerine dallanan benzer bir görsel yapı planla. Önce Emin’in güncel çalışmasında bu özelliğin zaten bulunup bulunmadığını kontrol et; varsa yeniden üretmek yerine mevcut yapıyı değerlendir. Olasılık değerlendirmelerinin gerekçelerini ve belirsizliklerini göster; gerçekte hesaplanmamış yüzdeleri doğrulanmış veri gibi sunma.
+- [x] **Açık/koyu temada logo tutarlılığı:** Koyu temaya geçildiğinde CaseBridge logosunun değişmesi sorununu incele ve tema geçişleri arasında tutarlı logo kullanımını sağla.
+
+### Tanıtım sitesi
+
+- [x] **Güncel gerçek ürün görselleri:** Tanıtım sitesindeki ürün görsellerini güncel gerçek uygulama ekranlarıyla karşılaştır; uyumsuz olanları güncelle. Gerçek uygulama ekranlarını kullan, gerçek kullanıcı verilerini ifşa etme; gerekli gösterimleri kurgusal/sentetik verilerle hazırla.
+- [x] **Videoyu daha da görünür yap:** Arka plan videosu üzerindeki beyaz katmanın şeffaflığını yeniden artır. Bu, tamamlanmış v.0.43 ayarından ayrı, daha fazla video görünürlüğü isteyen yeni taleptir. Mevcut video ve temayı koru; masaüstü/mobil yazı okunabilirliğini kontrol et.
+- [x] **Sık Sorulan Sorular:** Tanıtım sitesinin Sık Sorulan Sorular bölümünü genişlet. Bu madde kullanıcının son eklemesidir.
+
+
+### Ayrıntılı uygulama planı ve kabul ölçütleri
+
+**Durum:** Aşağıdaki bölüm bir uygulama planıdır. Dokuz açık işin hiçbiri bu belge güncellemesiyle tamamlanmış sayılmaz. Spec Kit kurulumu, özellik geliştirme, sunucu ayarı, sürüm artırımı, commit/push veya dağıtım bu görevde yapılmadı. Yukarıdaki geçmiş doğrulamalar, bu yeni işlerin kabul kanıtı olarak kullanılamaz.
+
+#### Dayanaklar ve doğrulanmamış noktalar
+
+22 Kasım 2026’da incelenen yayımlanmış kaynak kopyası `fdf7333` uygulama `v.0.19`, tanıtım `v.0.43` temelindedir; bağımsız yerel çalışma ağacında yayımlanmamış değişiklikler vardır. Uygulamaya geçerken main, canlı sürüm ve yerel farklar yeniden kaydedilecek; mevcut çalışma silinmeyecek veya körlemesine üzerine yazılmayacak.
+
+- **Doğrulanmış kod:** `frontend/src/components/Sidebar.tsx` içindeki `AI_ITEMS`, Sufle, Dosya Analizi, Canlı Duruşma, Hukuk Asistanı, Karşı Taraf Analizi, Yönetilen Duruşma ve Bilgi Haritası bağlantılarını taşır. Hub bağlantısı `/ai`’dır. Sidebar ayrıca `platform` ve `restricted` durumlarını ayırır. `WorkspaceHeader.tsx` mevcut header bileşenidir.
+- **Doğrulanmış kod:** `/ai/harita`, `components/lab/MapView.tsx` bileşenini kullanır. `backend/app/api/routes/legal_lab.py` içindeki `/legal-lab/map`, `backend/app/legal_lab/graph.py` üzerinden statik `legal_graph.json` verisini döndürür. Kaynak açıklaması bu istatistiklerin betimleyici olduğunu, dava sonucu tahmini olmadığını belirtir. Bu veri bir davaya özgü olasılık ağacı olarak kabul edilemez.
+- **Doğrulanmış kod:** `BrandLogo.tsx` `/casebridge-logo.png` kullanır; `frontend/src/app/theme.css` koyu temada bu görseli `content:url('/casebridge-logo-dark.svg')` ile değiştirir. Tema tercihi `lib/theme.ts` içindeki `casebridge-theme` anahtarıyla tutulur. Logo farkının kapsamı görsel karşılaştırmayla ayrıca doğrulanacak.
+- **Doğrulanmış kod:** Tanıtım ürün alanında 11 sekme vardır. `assets/feature-screens/tr-current/CAPTURE_NOTES.md`, eski ekranlar için uygulama v.0.17, son üç ekran için v.0.18 önizleme kaynağını kaydeder; güncel ürünle eşitlik henüz yeni iş kapsamında doğrulanmış değildir. `hero-video-restoration.css` v.0.43’te beyaz video katmanını tanımlar. `index.html` içindeki SSS’de dört soru bulunur.
+- **Doğrulanmış kod:** `deployment/publish.sh` sunucudaki checkout’tan build yapar ve backend/frontend servislerini birlikte hedefler. Bu betiğin varlığı, sunucuda elle kod değişikliğini teknik olarak önlediği veya aşağıdaki yeni yayın düzeninin kurulu olduğu anlamına gelmez.
+- **Henüz doğrulanmadı:** Emin’in şu anki en güncel kaynak/branch/commit’i, kullanıcı tarafından görülen harita farkının nedeni ve bir Olasılık Haritası’nın zaten geliştirilmiş olup olmadığı. Bunlar S04/S05’in inceleme çıktılarıdır. Sunucudaki hesapların yazma/Docker yetkileri ve yeni dağıtım düzeninin teknik uygulanabilirliği S02’de ayrıca incelenecek.
+
+#### Sıra ve bağımlılıklar
+
+| Kimlik | Açık iş | Bağımlılık ve yürütme sırası |
+| --- | --- | --- |
+| S01 | GitHub Spec Kit entegrasyonu ve ortak çalışma kuralları | İlk iş; diğer sekiz işin gereksinim/plan/görev kayıtları buna bağlanır. |
+| S02 | Main kaynaklı, sunucuda elle kod değişikliğini önleyen yayın düzeni | S01’den sonra; sonraki canlı yayınlar bu düzenin kabulünden sonra yapılır. |
+| S03 | Yapay zekâ erişimlerini header’a taşıma | S01’den sonra; izin ve gezinme davranışları önce belirlenir. Yayın S02’ye bağlıdır. |
+| S04 | Emin’in Bilgi Haritası ile uyum | S01’den sonra; ortak örnek ve kaynak karşılaştırması, değişiklikten önce tamamlanır. |
+| S05 | Olasılık Haritası / olasılık ağacı | S01 ve S04’ün kaynak/veri ayrımı çıktısından sonra; önce Emin’de mevcut iş aranır. |
+| S06 | Tema geçişlerinde logo tutarlılığı | S01’den sonra; görsel kimlik kararından sonra S03 ile birlikte görünüm kontrolü yapılır. |
+| S07 | Güncel gerçek ürün ekran görüntüleri | S03/S04/S06’nın kabul edilmiş hedef görünümünden sonra; S05’ten yalnız gerçekten mevcut/tamamlanmış ve doğrulanmış ekranlar alınır. |
+| S08 | Videonun daha fazla görünür olması | S01’den sonra bağımsız dar görsel iş; S02 yayın kapısına tabidir. |
+| S09 | Türkçe SSS’yi genişletme | S03–S05’te doğrulanan ürün yetenekleri temel alınır; S07’deki görsellerle çelişki kontrolü yapılır. |
+
+Bu sıra bir otomatik dağıtım takvimi veya işler tamamlanmış gibi bir beyan değildir. Bağımsız işler ayrı değişiklikler olarak hazırlanabilir; bir işin beklemesi, diğerinde doğrulanmamış özelliğin varmış gibi anlatılmasına gerekçe olamaz.
+
+#### S01 — GitHub Spec Kit entegrasyonu
+
+**Uygulama adımları:**
+
+1. Yerel yayımlanmamış değişikliklerin envanterini ve güvenli çalışma kopyasını oluştur; mevcut AGENTS.md, todo.md, sürüm araçları, test/CI ve yayın kurallarını oku. Kurulum için kullanılacak Spec Kit sürümünü kaydet ve sabitle; Codex entegrasyonunu resmi belgelerle doğrula. Başka bir site/proje oluşturma veya mevcut uygulamayı baştan üretme. Mevcut projede kurulum dosyalarının çakışmasını incelemek için ayrı, gözden geçirilebilir bir çalışma alanı kullan. Resmi mevcut-proje rehberi, yerinde başlatmanın var olan davranışları kendiliğinden spesifikasyona çevirmediğini açıklar. [Resmi mevcut proje rehberi](https://github.github.io/spec-kit/how-to/existing-projects.html)
+2. Proje kurallarını constitution kaydına aktar: tüm CaseBridge kapsamı, büro/veri/anahtar izolasyonu, aday anahtarı ayrı test ve açık aktivasyon, önceki anahtarın korunması, sırların Git/log/browser storage’a girmemesi, main kaynaklı yayın, ayrı uygulama/tanıtım sürümleri ve `v.` etiketi, gerçek test kanıtı ve müşteri-release kapıları. Bu kuralların mevcut talimatlarla çatışmadığını kontrol et.
+3. S02–S09 için ayrı gereksinim kayıtları oluştur: amaç, kapsam dışı işler, kullanıcı senaryoları, izinler, veri kaynakları, bağımlılıklar ve bu belgedeki kabul ölçütleri. Ardından teknik plan ve bağımlılık sıralı görev listesi üret; gereksinim, plan ve görevlerin birbirine izlenebilir bağlarını tut. Hataları/eksikleri uygulamadan önce gidermek için açıklığa kavuşturma ve tutarlılık kontrollerini kullan. Uygulama bittiğinde gereksinimlere karşı doğrulama ve kalan işlerin kaydını tamamla. Bu eşleme resmi SDD akışına dayanır. [Resmi SDD akışı](https://github.github.io/spec-kit/quickstart.html)
+4. Kurulum aşamasında `.specify/` ve seçilen entegrasyonun ürettiği dosyaları gözden geçir; onaylı proje kayıtlarını izlenebilir tut, kullanıcıya özgü/sır içeren ayarları dışarıda bırak. Codex için belgelerdeki `$speckit-...` çağrı biçimini kurulu sürümle doğrula; constitution/specify/clarify/plan/checklist/tasks/analyze/implement/converge adımlarını terminal kurulum komutlarıyla karıştırma. Bu komutlar bu plan yazılırken çalıştırılmayacak. [Resmi çağrı biçimleri](https://github.github.io/spec-kit/integrations/cli.html#command-invocation)
+5. Önce dar bir açık işi bu akışla ele al; tüm eski sistemi yeniden belgelemeyi entegrasyonun zorunlu ilk adımı yapma. İş sonunda hangi gereksinimin hangi değişiklik/test/yayın kanıtıyla karşılandığını kaydet; SDD kontrol listesindeki bir işaretin tek başına özellik tamamlandı anlamına gelmediğini koru.
+
+**Kabul ölçütleri:** Seçilen CLI/entegrasyon sürümü ve kurulum farkı kayıtlı; mevcut kod/bağımsız çalışmalar korunmuş; constitution tüm kapsamı ve repo gereksinimlerini içeriyor; dokuz işin kimlik/bağımlılık ve kabul kayıtları izlenebilir. Seçilen ilk işte gereksinim → plan → görev → gerçek doğrulama zinciri gösterilebiliyor; salt belge/şablon üretilmesi tamamlanma sayılmıyor.
+
+#### S02 — Main kaynaklı yayın ve sunucuda elle kod değişikliğini teknik olarak önleme
+
+**Uygulama adımları:**
+
+1. Mevcut uygulama ve tanıtım yayın yollarını, checkout’ları, Compose/Caddy yapılandırmasını, servis hesaplarını, dosya sahipliklerini ve Docker/sudo erişimini envanterle. Kod, sırlar, şifrelenmiş büro anahtarları, veritabanı, yüklenen belgeler ve günlükler için ayrı konumları belirle; gerçek değerleri envantere/loglara koyma. Ortak sunucudaki diğer servisleri koru.
+2. Yayına alınacak main commit’ini seçip tam SHA ile sabitle. Temiz kaynak ağacından test edilmiş bir artefakt üret: uygulama için commit/sürüm etiketli imaj ve değişmez digest, tanıtım için dosya hash manifesti içeren sürüm paketi. Canlı sunucuda serbestçe düzenlenmiş checkout’tan build etmeyi kaldıracak hedef düzeni tasarla. Kaynağın main’den geldiği ve artefaktın aynı commit’e ait olduğu doğrulanmadan etkinleştirme yapma.
+3. Rutin operatör hesabından kod/release dizinine yazmayı ve genel Docker/serbest root komutu çalıştırmayı kaldıracak yetki modelini belirle. Dağıtımı yalnız sabit, gözden geçirilmiş artefakt/commit kabul eden kısıtlı yayın komutuna ver. Uygulama kodunu yazılabilir host bind mount ile servis etme; uygun servislerde salt okunur kök dosya sistemi ve yalnız gerekli geçici/veri dizinlerine yazma hakkı kullan. Tanıtım paketlerini salt okunur sürüm dizininde sun ve etkin sürümü atomik değiştir. Ayrı build/deploy görevleri ve kullanıcılarıyla kod yazma, artefakt seçme ve servis çalıştırma yetkilerini sınırla. Root yöneticisini mutlak olarak engellediğini iddia etme; olağanüstü yönetici müdahalesi denetlenebilir olmalı ve kalıcı sunucuya özgü kod farkı yaratmamalı.
+4. Sırları depoya, imaja veya tanıtım paketine katma. Korumalı sunucu yapılandırması/secret mekanizması ve kalıcı veri volume’larını sürüm artefaktından ayrı bağla. Mevcut büro anahtarı sürümleri ve eşleşen kurtarma yedekleri için repo şartlarını koru. Ön yüz değişikliği için gereksiz backend/DB restart veya migration yapma.
+5. Etkinleştirmeden önce beklenen commit/sürüm/hash ile artefaktı karşılaştır; canlı servis kodundaki beklenmedik farkta yayın işlemini durdur. Yayın sonrası public sürüm, değişen kod/varlık hash’leri, health ve değişikliğe özel kullanıcı akışını doğrula. Ayrı uygulama/tanıtım sürümlerini ve çalışan commit/imaj digest’ini sır içermeyen yayın kaydına yaz.
+6. Önceki doğrulanmış main sürümünün artefaktını, manifestini ve gerekli korumalı yapılandırma eşleşmesini tut. Geri alma komutu önceki artefaktı seçmeli; main’e force push veya sunucuda dosya yaması gerektirmemeli. Şema değişikliği varsa ayrı veri/migration geri alma ve kurtarma planını önce doğrula; yalnız kod imajını geri çevirmek veri geri alma sayılmaz.
+7. Elle başlatılan veya otomatik başlatılan yayın seçeneklerini, yetki ve kontrol farklarıyla karara açık bırak. Kullanıcı seçimi olmadan webhook, her push’ta yayın, zamanlanmış tetikleyici veya dağıtım sıklığı varsayma. Bu karar, main’den izlenebilir artefakt alma zorunluluğunu değiştirmez.
+
+**Kabul ölçütleri:** Rutin servis/operatör hesabıyla uygulama dosyasına yazma denemesi başarısız; uygulama kodu için yazılabilir mount yok; kısıtlı yayın yolu dışında serbest kod değiştirme/servis çalıştırma yetkisi yok. Main dışı veya hash/digest’i uyuşmayan artefakt etkinleştirilemiyor. Test ortamında önceki main artefaktına geri alma ve ardından public/health doğrulaması geçiyor. Her yayın kaydında tam commit, sürüm, artefakt kimliği ve doğrulama sonucu var; sır/veri kod artefaktında değil. Otomatik tetikleyici seçilmediyse belge bunu açıkça kararsız gösteriyor. Bunlar önce test ortamında kanıtlanmadan canlı güvenliği tamamlanmış sayılmıyor.
+
+#### S03 — Yapay zekâ menülerini sidebar’dan header’a taşıma
+
+**Uygulama adımları:**
+
+1. Yukarıdaki yedi AI bağlantısı ve hub için mevcut rota/aktiflik, rol, platform ve kısıtlı hesap davranışını kaydet. Header’da hangi hesapta hangi erişimin görüneceğine dair izin tablosu oluştur; mevcut erişimi genişletme. İstemcide gizlemek tek başına yetkilendirme sayılmasın; sunucudaki büro sınırları aynı kalsın.
+2. Mevcut header içinde yerleşimi planla; masaüstü ve dar ekranda aynı header erişimini koru. Mobilde alan daralırsa header içinden açılan uygun bir menü kullan; erişimleri yeniden sidebar’a taşıma. Tek ortak rota/bağlantı tanımı kullanarak kopya ve sapmayı önle; mevcut arama, bildirim ve kullanıcı menüsünü koru.
+3. Aktif sayfa, doğrudan URL, geri/ileri gezinme ve alt rota aktifliğini koru. Klavye ile açma, Tab sırası, görünür odak, Escape ile kapatma ve odağı açan düğmeye iade etme davranışlarını belirle. Menü açılması yanlışlıkla özellik/analiz başlatmasın.
+4. Rol/izin tablosunu, fare/dokunma/klavyeyi ve ilgili mevcut testleri uygula; en az 1440, 768 ve 390/320px ile açık/koyu tema kontrolü yap.
+
+**Kabul ölçütleri:** Yetkili hesabın tüm mevcut AI erişimleri header’dan ulaşılabilir; sidebar’da ikinci AI grubu kalmamış. Platform/kısıtlı hesapların önceki erişim sınırları korunuyor; bürolar arası erişim açılmamış. Tüm bağlantılar doğru rotaya gidiyor, aktif link ve alt rota durumu doğru. Klavye odağı kaybolmuyor veya tuzak oluşturmuyor; mobilde taşma/menü çakışması yok; arama/bildirim/kullanıcı menüsü çalışıyor.
+
+#### S04 — Emin’in Bilgi Haritası ile mevcut görünümü karşılaştırma ve uyum
+
+**Uygulama adımları:**
+
+1. Emin’in ilgili en güncel kaynağını ve bunun main’e alınan karşılığını tam commit’lerle tespit et. Karşılaştırılan uygulama derlemesi, veri dosyası/şeması ve tema/viewport sürümlerini kaydet. Kullanıcının fark gördüğü ekranı bu temele eşleştir; hangi kaynağın hedef olacağını kanıta göre belirle, “Emin’in güncel hali” diye tahmin yürütme.
+2. Aynı sentetik örnek dosya/özet, aynı seçili kanun maddesi, aynı harita verisi, aynı tema ve ekran boyutunda karşılaştırma yap. Bilgi Haritası mevcut haliyle dosya girişi almıyorsa bunu açıkça kaydet; ona dosyaya özgü analiz özelliği atfetme. Ortak örnek dosya bağlamını sabit tutarken harita için asıl karşılaştırma anahtarlarını veri hash’i ve seçili madde oluşturur.
+3. Farkları veri, grafik yerleşimi, filtre/arama, düğüm seçimi, ilişki ağırlığı, sağ detay paneli ve istatistik açıklaması olarak listele. Kaynak sürüm farkıyla tema/veri farkını ayır. Uyarlamayı yalnız doğrulanmış farklara ve kararlaştırılan hedefe uygula.
+4. Madde arama/seçme, yakınlaştırma/kaydırma, bağlantı vurgusu, madde ve karar detayları, boş/başarısız veri durumları ve dar ekranı kontrol et. Veri kaynağı/lisans notunu ve oranların betimleyici niteliğini koru.
+
+**Kabul ölçütleri:** Aynı örneğin iki taraftaki commit/veri/viewport bilgileri ve önce/sonra fark tablosu kayıtlı. Her uyarlama fark tablosundaki bir gerekçeye bağlı; kalan fark varsa açıkça açıklanmış. Aynı seçili madde için ilişkiler ve detaylar hedef kaynağa uyuyor. Düğüm etiketleri/bağlar okunabilir, etkileşimler çalışıyor; hata durumları anlaşılır. Bozulma/atıf oranı hiçbir yerde davanın kazanma olasılığı gibi sunulmuyor.
+
+#### S05 — Olasılık Haritası / olasılık ağacı
+
+**Uygulama adımları:**
+
+1. Önce Emin’in mevcut kaynak, branch, prototip ve gereksinimlerinde olası örtüşmeyi araştır; ad/rota/API/veri modeli ve varsa örnek çıktıyı kaydet. “Mevcut”, “kısmen mevcut” veya “doğrulanamadı” sonucunu kanıtıyla yaz. Aynı işi yeniden üretmeden önce kullanılabilir kısmı ve eksik kapsamı belirle.
+2. Varsa mevcut yapıyı aynı sentetik dosya üzerinde değerlendir; yoksa yeni geliştirme gereksinimini ayrı açık kapsam olarak netleştir. Bilgi Haritası’ndaki kanun bağlantılarıyla bu dosyaya özgü olay/senaryo dallanmasını karıştırma.
+3. Kök olay/bulgu, dayanak belge, olası sonraki gelişme, alternatif dal ve sonuç senaryosu arasındaki ilişkileri tanımla. Her dalın hangi bilgi, varsayım ve eksik veri üzerine kurulduğunu; kaynak ve değerlendirme sürümünü gösterecek veri sözleşmesi planla. Erişim, saklama, güncelleme ve büro izolasyonunu kapsamla ilişkilendir.
+4. Olasılık değerlendirmesinin nitel mi sayısal mı olacağını ve nasıl üretileceğini belirle. Hesaplama/kanıt yoksa “hesaplanmadı” veya açık nitel değerlendirme kullan; bilinmeyeni %0 yapma, boşluğu uydurma yüzdeyle doldurma. Sayısal oran düşünülüyorsa yöntem, veri yeterliliği, kalibrasyon ve belirsizlik kanıtını ayrıca kabul şartı yap. Tarihsel sıklık, model değerlendirmesi ve koşullu senaryo olasılığını ayrı adlandır; ilişkisiz/örtüşen dalları keyfen %100’e toplamayı hedefleme.
+5. Dalların gerekçesini, karşı bulguları ve belirsizliklerini görünür kılan erişilebilir grafik ve metin alternatifini planla. Yeni belge/olgu geldiğinde önceki değerlendirmeyi sessizce ezmeden hangi dalların neden değiştiğini göster. Sentetik eksik/çelişkili veri örnekleriyle ve hukuk uzmanı incelemesiyle doğrula; sonuç veya başarı garantisi verme.
+
+**Kabul ölçütleri:** Emin’de örtüşme kontrolünün kaydı ve yeniden kullanım kararı var. Sentetik bir dosyanın mevcut bulgularından en az iki alternatif gelişme/senaryoya dallanma gösterilebiliyor; her dalın dayanağı ve belirsizliği görülebiliyor. Hesaplanmamış/kalibre edilmemiş değerler doğrulanmış yüzde gibi gösterilmiyor. Yetersiz veri ve çelişkili bulgu açıkça gösteriliyor; karar destek niteliği korunuyor. Grafik/metin görünümü klavye ve mobilde kullanılabilir; büro/veri izolasyonu ilgili negatif kontrollerle doğrulanıyor. Varlığı doğrulanmayan veya kabulü bitmeyen özellik tanıtıma alınmıyor.
+
+#### S06 — Koyu/açık temada logo tutarlılığı
+
+**Uygulama adımları:**
+
+1. `BrandLogo.tsx`, PNG, koyu SVG ve CSS `content` değişimini aynı boyutta karşılaştır; şekil, yazı, slogan, oran ve renk farklarını kaydet. Kullanıcının korumak istediği logo kimliğini mevcut sağlanan varlıklarla tanımla; yeni bir logo tasarlama.
+2. Tek tutarlı logo bileşeni/varlık kullanımını planla. Koyu zeminde gerekli kontrast ile ürün kimliğini ayır; farklı şekil/slogan veya izinsiz marka değişimi yaratma. CSS ile görünmeyen kaynak değişimi, ölçekleme ve blend-mode etkilerini giderme kapsamını somutlaştır.
+3. Giriş ekranı, header/sidebar ve mobil menüde açık/koyu geçişi, sayfa yenileme ve kayıtlı tema tercihinin yüklenmesini kontrol et; ilk yüklemede yanlış logo parlamasını ve bozuk görsel isteğini izle.
+
+**Kabul ölçütleri:** Tema değişince farklı logo kimliği/şekli/sloganı ortaya çıkmıyor; oran ve hizalama tutarlı. Her iki zeminde okunabilirlik korunuyor, mobilde kırpılma/taşma yok. Yenileme ve tema tercihinin geri yüklenmesinde sonuç tutarlı; istekler başarılı ve alt metin mevcut. Önce/sonra görsel kanıt, kullanılan nihai varlık ve gerekçe kayıtlı.
+
+#### S07 — Tanıtım ürün görsellerinin güncel gerçek uygulamayla eşleşmesi
+
+**Uygulama adımları:**
+
+1. Mevcut 11 sekmeyi ve büyütülen/ek ürün görsellerini listele; her biri için gerçek uygulama rotası, kaynak commit/sürüm, ekran dili, tema, sentetik örnek ve dosya yolunu eşleştir. Önizlemede yerelleştirilmiş veya eski sürümden alınmış kayıtları güncel çalışan ürünle ayrıca karşılaştır.
+2. S03/S04/S06 sonrası kabul edilmiş ürün görünümünü temel al; Olasılık Haritası yalnız gerçekten mevcut ve kabul edilmişse kapsama ekle. Aynı sentetik veri/örnek dosya ve uygun viewport ile gerçek uygulamadan doğrudan yakala. Gerçek kullanıcı verisini, gerçek anahtarları ve özel dosyaları kullanma; sahte UI üretme veya görsel üzerine Türkçe etiket boyama. Üründeki İngilizce alan varsa görselde gizlemek yerine ilgili ürün yerelleştirme ihtiyacını gereksinim kaydına geçir.
+3. Küçük görsel, tam boy bağlantı/dialog, açıklama ve alt metni birlikte güncelle; ekran ile açıklanan özellik uyuşsun. Kullanılan örnek veri, kaynak sürüm ve yakalama yöntemini CAPTURE_NOTES içinde kaydet; örnek mod/eğitim etiketlerini silme.
+4. Tüm sekmelerde görüntü yüklenmesi, büyütme, Escape/odak iadesi, doğal boyutlar ve mobil ölçeklenmeyi denetle. Gerekiyorsa teslim kopyalarını içerik değiştirmeden optimize et.
+
+**Kabul ölçütleri:** Kapsamdaki her görsel için çalışan ürünle güncel eşleme kaydı var; eski görünümü temsil eden uyumsuz görsel kalmamış veya gerçek engel açık iş olarak yazılmış. Türkçe açıklama ve görsel içeriği birbirini doğruluyor; büyütme aynı güncel dosyayı açıyor. Gerçek müşteri verisi/sır yok, ekranlar gerçek uygulama kaydı ve provenance kayıtlı. Masaüstü/mobilde bozuk resim, çarpılma veya sayfa taşması yok.
+
+#### S08 — Beyaz video katmanını yeniden azaltma
+
+**Uygulama adımları:**
+
+1. Tamamlanmış v.0.43 katmanını yeni talep için başlangıç ölçümü olarak kaydet; önceki yayın kaydını açık işe çevirmeden koru. Masaüstü gradient durakları ve mobil katman için yeni değerleri karşılaştırmalı seç; kullanıcı ek video görünürlüğü istiyor.
+2. Yalnız beyaz katmanın alpha/gradient değerlerini değiştir. Özgün video/poster, genel tema, metin renkleri, hizalama ve içerikleri koru. Okunabilirliği azaltan noktalar için aynı katmanın dağılımını değerlendir; bu işi genel tasarım yenilemesine genişletme.
+3. Aynı video zaman noktalarında önce/sonra görüntü al; yalnız parlak ilk karede değil, daha koyu ve hareketli birkaç bölümde metin/CTA görünürlüğünü incele. Masaüstü/mobil ve hareket azaltma tercihinde poster görünümünü kontrol et.
+
+**Kabul ölçütleri:** Video v.0.43’e göre belirgin biçimde daha görünür; kullanılan alpha değerleri önce/sonra kayıtlı. Başlık, açıklama ve düğmeler videonun denetlenen açık/koyu karelerinde okunabilir; uygun kontrast kontrolü ve görsel sonuç kaydı mevcut. Metinleri gizleyerek veya genel temayı değiştirerek elde edilmiş bir sonuç yok. Video oynatma, döngü, sessiz/satır içi davranış, ekran dışı durdurma ve hareket azaltma korunuyor; mobil taşma yok.
+
+#### S09 — Ürünle doğrulanan Türkçe SSS genişletmesi
+
+**Uygulama adımları:**
+
+1. Mevcut dört soruyu koruyup eksikleri çıkar: dava analizi/duruşma farkı, Bilgi Haritası ve sınırları, karşı taraf analizi, yönetilen duruşma, hedef kullanıcı, çıktıların doğrulanması ve örnek mod gibi konular için aday soru listesi hazırla. Olasılık Haritası yalnız S05’te varlığı/teslimi doğrulanmışsa ürün özelliği olarak anlatılsın.
+2. Her yanıtı doğrulanmış ürün rotası, davranış veya mevcut politika kaydıyla eşleştir; bu eşleme için kısa kaynak tablosu tut. Planlanan özellikleri mevcutmuş gibi, istatistikleri kazanma garantisi gibi veya doğrulanmamış fiyat/güvenlik/veri saklama koşullarını kesin vaat gibi yazma. Belirsiz konuyu yanıtlamadan önce ilgili gereksinimde açıklığa kavuştur.
+3. Türkçe, kullanıcıya yönelik kısa ve anlaşılır yanıtlar yaz; görünür İngilizce arayüz metni ve görsellerle çelişki kontrolü yap. Yerleşimi mevcut temada koru; soru açma/kapama ve klavye davranışını bozma.
+4. Yeni soruların ürün doğruluğunu ilgili sorumluyla gözden geçir; mevcut soruların da güncelliğini kontrol et. Açık/kapalı SSS, klavye/odak, JavaScript kapalı içerik ve 320/390px düzenini doğrula.
+
+**Kabul ölçütleri:** Mevcut dört soruya eklenen, birbirini tekrar etmeyen sorular ve her cevabın ürün/politika dayanağı kayıtlı. Sayısal artış tek başına başarı sayılmıyor; seçilen eksik konular açıklanıyor. Tamamlanmamış özelliğe mevcut ürün vaadi veya garantili hukuki sonuç iddiası yok. Tüm görünür sorular/yanıtlar Türkçe ve ekranlarla uyumlu; mobilde okunabilir, klavye ve JavaScript kapalı kullanımda erişilebilir.
+
+#### Her işin kapanış ve yayın kapısı
+
+Bir iş ancak kendi kabul ölçütleri için gerçek sonuç, test/sürüm/veri kapsamı ve varsa kalan engel yazıldığında tamamlanmış işaretlenecek. Spec Kit gereksinim/plan/görev kayıtları bu sonuçlara bağlanacak. Yayın yapılacaksa önce S02’nin main kaynaklı artefakt kuralı, ardından uygulama/tanıtım için ilgili ayrı `v.` sürümü, değişiklik kapsamına uygun kontroller, korumalı geri dönüş kaydı, public commit/kod/sürüm ve health doğrulaması uygulanacak. Kod derlenmesi veya dağıtımın başlaması tek başına yayın tamamlandı kanıtı değildir. Yeni müşteri teslim/onboarding için yukarıdaki zorunlu müşteri-release maddeleri ayrıca tamamlanmış ve kanıtlı olmalıdır; bu plan onları değiştirmez veya otomatik tamamlamaz.
+
+
+## Spec Kit ile v.0.20 / tanıtım v.0.44 — yerel doğrulama, yayın bekliyor
+
+- Spec Kit CLI **1.4.3**, Codex entegrasyonu; resmi managed skills/templates korunur. Constitution 1.0.0 tüm projeyi kapsar. S02–S09 için sekiz bounded spec/plan/task/verification kaydı; governance kontrolü geçti. Otomatik dağıtım tetikleyicisi/sıklığı seçilmedi.
+- Backend tam süit: **1098 geçti** (4 bağımsız pytest worker, 371.67s). Son ek health metadata testiyle birlikte 12 odaklı health/ağaç testi ayrıca geçti. Ön yüz: **753 geçti**; duruşma tutanak türlerinin gerçek Türkçe ürün metnine çevrilmesinden sonra 17 ilgili test ayrıca geçti. TypeScript ve production build geçti. Sürümün değişmeden doğrulanması için iki version-script testi ve `--check` geçti.
+- Değişmez yayın aracı: 12 negatif/yetki/manifest/drift/geri dönüş testi geçti; kurulum dry-run ve Python compile geçti. Gerçek VPS kurulumu, yalıtılmış eski→yeni→eski imaj/health provası ve public doğrulama henüz bu satırda tamamlandı sayılmaz.
+- Header, logo, ağaç/metin ve mobil: 1440/768/390/320 × açık/koyu tarayıcı matrisi geçti. Dokuz AI erişimi yalnız header’dan açılıyor; Escape/Tab/odak dönüşü, aktif rota, arama/bildirim/hesap menüsü ve kayıtlı tema sınandı. Büro izolasyonu, restricted/platform 403, başka büro 404 ve bozuk cross-tenant alt kayıt negatifleri geçti.
+- Emin `134e881` ve başlangıç main `fdf7333` Bilgi Haritası kaynakları aynı. TMK m.6 / 1600×1100 seçili SVG hash’i aynı; açık/koyu kanıtlar `docs/map-comparison.md` ve `docs/validation/2026-11-22/` içinde. Geometriye dayanaksız uyarlama yapılmadı; ürün kaynak notu Türkçeleşti.
+- Yeni `/ai/olasilik` teknik uygulaması hazır: kayıtlı senaryolar veya açık koşullu hazırlık dalları, dayanak/belirsizlik, `probability=null`, içerik sürümü ve bellekte önceki görüntü. Harita oranları veya analiz skoru olasılığa dönüştürülmez.
+- [ ] S05 bağımsız hukuk uzmanı incelemesi: bu teknik çalışma dış inceleme yapılmış sayılmaz. Sentetik örnek `scenario-tree.jpg` ile incelemeye hazır; tamamlanmadan yeni ağacın ekranı/özellik iddiası tanıtıma bağlanmaz. İlgili soru kullanıcıya iletildi; yanıt yokluğu kabul değildir.
+- 12 gerçek v.0.20 production-build ekranı sentetik SQLite seed/template verisiyle doğrudan yakalandı. Görünür ilk 11 sekme yenilendi; ağaç görseli inceleme için tutulur. Üründe gereken çeviriler gerçek kaynağa işlendi; önizlemeye özgü override ve gerçek müşteri/sır yok. Rota/viewport/hash provenance `CAPTURE_NOTES.md` ve JSON kanıtında.
+- Video v.0.43’e göre genel alpha 88/78/28/12 → 82/70/18/6, mobil 78 → 72. Kullanıcının ek kontrast yetkisiyle yalnız kopyada koyu marka tonu ve lokal yumuşak zemin kullanıldı; genel video/tema/hizalama korunur. Dört viewport × 0/5/12s + ilk hareket-azaltma posteri kontrol edildi; normal 4.5 ve büyük başlık 3 eşiğini 64 örnekte geçti, minimum **5.64:1**. Video ilerleme, sessiz döngü/satır içi, ekran dışı durdurma ve hareket azaltma geçti.
+- SSS dört asıl + sekiz yeni = 12 ürün dayanaklı Türkçe soru. Klavye, mobil ve JavaScript kapalı native details kontrolleri geçti. Kesin sonuç, fiyat/saklama veya dış uzman onayı vaadi eklenmedi.
+- [ ] Main push, VPS artefakt/canary/rollback ve public commit/sürüm/kod/hash/health doğrulaması. Yayın tamamlandığında gerçek sonuç ayrıca eklenecek; çalışan build tamamlanmış yayın sayılmaz.
+
+- Tanıtım görsel son kontrolü: dört viewport × 11 sekme = **44** yükleme/büyütme/Escape/odak kontrolü geçti; doğal görsel genişliği 1600 px, aynı kaynak tam ekran, bozuk görsel/taşma/page error yok. Yeni ağacın bağımsız uzman incelemesi açık olduğundan ilk 11 sekmeyle sınırlı; ağaç capture kaydı tanıtım bağımlılık paketine alınmıyor.

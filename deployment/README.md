@@ -1,5 +1,7 @@
 # CaseBridge — Natro + Hetzner yayın ve ajan devir rehberi
 
+**22 Kasım 2026 güncel yayın yolu:** [Main kaynaklı değişmez yayın rehberi](immutable-release.md). Rutin güncellemede aşağıdaki tarihsel checkout/build örnekleri kullanılmaz; sabit main commit, kısıtlı yayın rolü, salt okunur artefakt, canary ve public hash kontrolü zorunludur. Sunucuda `git pull` ile kaynak düzenlemek veya serbest checkout’tan build etmek geçerli yayın yolu değildir. Mevcut yönetici erişimi korunur; otomatik tetikleyici seçilmedi.
+
 Hazırlanma: 31 Ekim 2026; aynı gün `main` dalındaki güncel koda göre düzenlendi (platform paneli, e-posta ile davet, OpenAI).
 
 Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/compose.production.yml`, `deployment/Caddyfile.app-block`, `deployment/production.env.example`) repoda hazırdır. Panel menüleri zamanla değişebilir; resmi bağlantılar en sonda bulunur.
@@ -14,7 +16,7 @@ Bu belge bir kurulum planı ve komut rehberidir. Yayın dosyaları (`deployment/
 - Analiz ve sohbet OpenAI'ye bağlı. Mevcut anahtar sağlayıcı tarafından **401 / expired_secret_key** ile reddedildi. Entegrasyon eksik değil; anahtar yenilenmeli. Anahtarın kendisi kayda veya rapora alınmadı.
 - Büro anahtarları Ayarlar üzerinden eklenir ve sunucuda şifreli saklanır; sohbete veya GitHub'a eklenmez. `/etc/casebridge/production.env` içindeki `OPENAI_API_KEY` yalnızca eski platform bağlantısı içindir; müşteri büroları bu ortak anahtara geri dönmez.
 - Yeni uygulama sürümü sol altta görünür. `frontend/app-version.json` sürüm ve kaynak parmak izini saklar. Aynı kaynak tekrar derlenince sürüm değişmez; uygulama kaynağı değişirse sonraki hazırlamada `0.1 → 0.2 → 0.3` ilerler. Dosya sürümle birlikte korunmalıdır.
-- Bundan sonraki yayınlarda sürümü tüm frontend/backend kaynağından hazırlayıp önce imajları derlemek, ardından yalnızca uygulama servislerini yenilemek için `bash deployment/publish.sh` kullanılır. Docker frontend derlemesi bu hazırlanan sürümü korur.
+- Güncel yayınlarda sürüm tam frontend/backend kaynağından yerelde hazırlanıp commit edilir. `deployment/publish.sh FULL_MAIN_SHA [app|marketing|all]` kısıtlı değişmez yayın aracını çağırır; sunucuda sürüm veya kaynak yazmaz.
 
 OpenAI hata sınıfları için [resmi hata belgeleri](https://developers.openai.com/api/docs/guides/error-codes) esas alınır. Bağlantı kontrolünün başarılı olması, yanıt üretiminin kota/bakiye açısından çalıştığını tek başına kanıtlamaz.
 
@@ -778,11 +780,9 @@ git fetch --prune origin
 `git status` temiz değilse durup değişiklikleri değerlendirin. Hazır olduğunuzda:
 
 ```bash
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml stop cb-frontend cb-backend
-git pull --ff-only
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml build cb-backend cb-frontend
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml up -d
-sudo docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml logs --tail=100 cb-backend
+sudo -u cb-release sudo -n /usr/local/sbin/casebridge-release stage FULL_MAIN_SHA all
+sudo -u cb-release sudo -n /usr/local/sbin/casebridge-release activate FULL_MAIN_SHA
+sudo -u cb-release sudo -n /usr/local/sbin/casebridge-release verify FULL_MAIN_SHA
 curl --fail --show-error https://app.casebridge.com.tr/api/health
 ```
 

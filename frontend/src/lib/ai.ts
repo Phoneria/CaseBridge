@@ -10,6 +10,7 @@ export const AI_ROUTES = {
   chat: "/ai/sohbet",
   sufle: "/ai/sufle",
   map: "/ai/harita",
+  scenarios: "/ai/olasilik",
   counter: "/ai/karsi-taraf",
   directed: "/ai/yonetmen",
 } as const;

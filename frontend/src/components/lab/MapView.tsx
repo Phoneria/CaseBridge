@@ -245,7 +245,7 @@ export function MapView() {
         <SidePanel sel={sel} nb={focus?.nb ?? null} byId={model.byId} onPick={pick} />
       </div>
       <p className="text-[11px] text-navy-500">
-        Veri: {graph.meta.source}. Oranlar betimleyicidir: bir maddeye atıf yapan kararların kaçının bozulduğunu gösterir; nedensellik veya sonuç tahmini değildir.
+        Veri: {graph.meta.source.replace('(PoC, descriptive stats only)', '(kavram kanıtı, yalnızca betimleyici istatistik)')}. Oranlar betimleyicidir: bir maddeye atıf yapan kararların kaçının bozulduğunu gösterir; nedensellik veya sonuç tahmini değildir.
       </p>
     </div>
   );

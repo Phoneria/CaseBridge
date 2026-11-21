@@ -13,16 +13,21 @@ RUN mkdir -p public
 # NEXT_PUBLIC_* vars must be present at build time - they're inlined
 # into the client bundle, not read at runtime. Pass via --build-arg.
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ARG NEXT_PUBLIC_RELEASE_COMMIT=development
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_RELEASE_COMMIT=$NEXT_PUBLIC_RELEASE_COMMIT
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+USER node
+CMD ["node", "node_modules/next/dist/bin/next", "start"]

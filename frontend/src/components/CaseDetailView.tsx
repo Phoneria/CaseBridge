@@ -636,7 +636,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           </div>
           {simulationError && <ErrorState message={simulationError} />}
           {simulations.length === 0 ? (
-            <EmptyState message="Bu dava için henüz AI analizi yapılmadı." />
+            <EmptyState message="Bu dava için henüz yapay zekâ analizi yapılmadı." />
           ) : (
             simulations.map((sim) =>
               sim.result ? (

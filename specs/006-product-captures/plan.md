@@ -1,0 +1,31 @@
+# Implementation Plan: S07 Güncel gerçek ürün görselleri
+
+## Summary
+
+Ziyaretçi tanıtımda güncel çalışan uygulamanın doğru Türkçe ekranlarını görür.
+
+## Technical Context
+
+Existing Next.js 14/React 18/TypeScript/Tailwind and FastAPI/SQLAlchemy architecture. No unrelated feature or provider/credential change.
+Decision: Capture actual final source with synthetic isolated backend; use delivered Turkish UI (no preview-only substitutions). Add scenario-tree tab only once implemented and verified. Sync image/link/description and capture metadata.
+
+## Constitution Check
+
+PASS before design: source traceability, tenant isolation, no secrets, honest probabilities, accessibility, main-only artifacts and rollback. PASS after design: same constraints retained; dangerous access removal is excluded and would require review.
+
+## Project Structure
+
+### Documentation (this feature)
+
+spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks.md, verification.md.
+
+### Source Code (repository root)
+
+- `web-page/index.html`
+- `web-page/assets/feature-screens/tr-current`
+- `web-page/assets/feature-screens/tr-current/CAPTURE_NOTES.md`
+- `tests/e2e/marketing`
+
+## Complexity Tracking
+
+Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.

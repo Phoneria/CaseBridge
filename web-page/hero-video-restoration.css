@@ -1,4 +1,9 @@
-/* v.0.43: restore the original background film within the existing theme.
-   Keep the white veil behind the unchanged blue copy for legibility. */
-body .story-hero:before{display:block;background:linear-gradient(90deg,#ffffffe0 0%,#ffffffc7 40%,#ffffff47 75%,#ffffff1f 100%)}
-@media(max-width:760px){body .story-hero:before{background:#ffffffc7}}
+/* v.0.44: reduce the v.0.43 white veil; retain the original film, copy and theme.
+   Desktop alpha: 88/78/28/12% -> 82/70/18/6%; mobile: 78% -> 72%. */
+body .story-hero:before{display:block;background:linear-gradient(90deg,#ffffffd1 0%,#ffffffb3 40%,#ffffff2e 75%,#ffffff0f 100%)}
+@media(max-width:760px){body .story-hero:before{background:#ffffffb8}}
+/* Keep contrast local to the copy; the rest of the film retains the lower veil. */
+body .story-hero-copy{position:relative;isolation:isolate}
+body .story-hero-copy:after{content:"";position:absolute;inset:-20px;border-radius:20px;background:#ffffffb3;filter:blur(18px);z-index:-1;pointer-events:none}
+body .story-hero .stage-label,body .story-hero .story-lead{color:#123f50!important}
+body .story-hero h1 span{color:#006184}

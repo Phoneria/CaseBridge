@@ -6,9 +6,6 @@ import type { ReactNode } from "react";
 
 import { BrandLogo } from "@/components/BrandLogo";
 import { APP_VERSION } from "@/lib/appVersion";
-import { AiMark } from "@/components/ai/AiMark";
-import { AiStatusIndicator } from "@/components/AiStatusIndicator";
-import { AI_ROUTES } from "@/lib/ai";
 
 interface NavItem {
   label: string;
@@ -25,7 +22,7 @@ function Icon({ d }: { d: string }) {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: <Icon d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
+  { label: "Genel Bakış", href: "/dashboard", icon: <Icon d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
   { label: "Davalar", href: "/davalar", icon: <Icon d="M4 6h16M4 6v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /> },
   { label: "Emsal Kararlar", href: "/emsaller", icon: <Icon d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /> },
   { label: "Takvim", href: "/takvim", icon: <Icon d="M7 3v3M17 3v3M4 9h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" /> },
@@ -53,15 +50,7 @@ const ACCOUNT_ITEM: NavItem = {
   icon: <Icon d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0" />,
 };
 
-const AI_ITEMS = [
-  { label: "Sufle", href: AI_ROUTES.sufle },
-  { label: "Dosya Analizi", href: AI_ROUTES.analysis },
-  { label: "Canlı Duruşma", href: AI_ROUTES.courtroom },
-  { label: "Hukuk Asistanı", href: AI_ROUTES.chat },
-  { label: "Karşı Taraf Analizi", href: AI_ROUTES.counter },
-  { label: "Yönetilen Duruşma", href: AI_ROUTES.directed },
-  { label: "Bilgi Haritası", href: AI_ROUTES.map },
-];
+
 
 function isActive(pathname: string | null, href: string): boolean {
   return pathname === href || !!pathname?.startsWith(`${href}/`);
@@ -87,7 +76,6 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
 
 export function Sidebar({ role, platform = false, restricted = false }: { role?: "admin" | "lawyer"; platform?: boolean; restricted?: boolean }) {
   const pathname = usePathname();
-  const hubActive = pathname === AI_ROUTES.hub;
 
   return (
     <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-5">
@@ -123,45 +111,10 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
         ))}
         </div>
 
-        <div className="mt-auto shrink-0 pt-4">
-        <div
-          role="group"
-          aria-label="CaseBridge AI"
-          className="relative overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2"
-        >
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
-          <Link
-            href={AI_ROUTES.hub}
-            aria-current={hubActive ? "page" : undefined}
-            className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
-              hubActive ? "bg-white/15" : "hover:bg-white/10"
-            }`}
-          >
-            <AiMark className="h-4 w-4 text-accent-300" />
-            CaseBridge AI
-          </Link>
-          {AI_ITEMS.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={`relative flex items-center rounded-xl py-1.5 pl-9 pr-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
-                  active ? "bg-white/15 font-medium text-white" : "text-accent-100 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
 
         </div>
         </div>
-        </div>
         <div className="mt-auto flex shrink-0 flex-col gap-2 pt-4">
-          <AiStatusIndicator />
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>

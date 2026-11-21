@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "tabs": 11,
+      "images": "loaded",
+      "expanded": "same source",
+      "escapeFocus": "passed",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "tabs": 11,
+      "images": "loaded",
+      "expanded": "same source",
+      "escapeFocus": "passed",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "tabs": 11,
+      "images": "loaded",
+      "expanded": "same source",
+      "escapeFocus": "passed",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "tabs": 11,
+      "images": "loaded",
+      "expanded": "same source",
+      "escapeFocus": "passed",
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

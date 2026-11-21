@@ -24,52 +24,27 @@ describe("Sidebar", () => {
   });
   it("renders the main navigation without the old Simülasyonlar item", () => {
     render(<Sidebar />);
-    for (const label of ["Dashboard", "Davalar", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
+    for (const label of ["Genel Bakış", "Davalar", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 
-  it("renders the CaseBridge AI block", () => {
+  it("keeps AI entry points exclusively in the header", () => {
     render(<Sidebar />);
-    expect(screen.getByRole("group", { name: "CaseBridge AI" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("href", "/ai");
-    expect(screen.getByRole("link", { name: "Dosya Analizi" })).toHaveAttribute("href", "/ai/analiz");
-    expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("href", "/ai/durusma");
-    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("href", "/ai/sohbet");
-    expect(screen.getByRole("link", { name: "Sufle" })).toHaveAttribute("href", "/ai/sufle");
+    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", {name:"Dosya Analizi"})).not.toBeInTheDocument();
   });
 
   it("marks the current route as active", () => {
     render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Genel Bakış" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("marks AI routes as active, including session pages", () => {
-    pathname = "/ai/durusma/oturum/x1";
-    const { unmount } = render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).not.toHaveAttribute("aria-current");
-    unmount();
-
-    pathname = "/ai";
-    render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("aria-current", "page");
-  });
-
-  it("marks the chat route as active with a conversation open", () => {
-    pathname = "/ai/sohbet";
-    render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("aria-current", "page");
-  });
-
-  it("renders the AI connection indicator", () => {
-    render(<Sidebar />);
-    const indicator = screen.getByRole("button", { name: /AI kontrol ediliyor/ });
-    const settings = screen.getByRole("link", { name: "Ayarlar" });
-
-    expect(indicator).toBeInTheDocument();
-    expect(indicator.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  it.each(["/ai", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("does not duplicate AI links on %s", path => {
+    pathname = path; render(<Sidebar />);
+    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", {name:/AI kontrol/})).not.toBeInTheDocument();
   });
 
   it("renders the CaseBridge brand name", () => {

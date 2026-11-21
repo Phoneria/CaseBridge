@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-# Run on the live server after reviewing the release checkout. Build before
-# replacing running services; never touch the shared Autosense stack or DB.
-repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$repo_dir"
-docker run --rm -v "$repo_dir:/workspace" -w /workspace/frontend node:20-slim node scripts/update-version.mjs
-compose=(docker compose --env-file /etc/casebridge/production.env -f deployment/compose.production.yml)
-"${compose[@]}" config --quiet
-"${compose[@]}" build cb-backend cb-frontend
-"${compose[@]}" up -d --no-deps --wait cb-backend cb-frontend
-curl --fail --show-error --silent https://app.casebridge.com.tr/api/health
+# Manual publication of an immutable artifact from current origin/main only.
+# No automatic trigger or schedule is configured here. See immutable-release.md.
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+  echo "Usage: $0 FULL_MAIN_SHA [app|marketing|all]" >&2
+  exit 2
+fi
+commit="$1"
+scope="${2:-all}"
+entrypoint=/usr/local/sbin/casebridge-release
+sudo -n "$entrypoint" stage "$commit" "$scope"
+sudo -n "$entrypoint" activate "$commit"
+sudo -n "$entrypoint" verify "$commit"

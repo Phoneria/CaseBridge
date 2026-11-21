@@ -749,3 +749,8 @@ export async function trialAsk(
 ): Promise<{ answer: string; law: import("@/types/legalLab").LawRef[]; mode: string; note: string | null }> {
   return request("/legal-lab/trial/ask", { method: "POST", body: JSON.stringify(body) });
 }
+
+/** A read-only, scoped view of existing case material; does not call a model. */
+export async function getScenarioTree(caseId: string): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/cases/${encodeURIComponent(caseId)}/scenario-tree`);
+}

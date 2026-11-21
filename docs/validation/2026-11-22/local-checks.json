@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-22",
+  "backendFull": {
+    "passed": 1098,
+    "workers": 4,
+    "seconds": 371.67
+  },
+  "backendFinalHealthAndTree": {
+    "passed": 12
+  },
+  "frontendFull": {
+    "files": 82,
+    "passed": 753
+  },
+  "frontendFinalAffected": {
+    "passed": 17
+  },
+  "releaseSecurityAndRecovery": {
+    "passed": 12
+  },
+  "versionScript": {
+    "passed": 2
+  },
+  "typescript": "passed",
+  "productionBuild": "passed",
+  "specKitVersion": "1.4.3",
+  "specKitManagedIntegration": "ok",
+  "governanceContracts": 8,
+  "marketingFAQ": 12,
+  "galleryChecks": 44,
+  "contrast": {
+    "samples": 64,
+    "minimum": 5.64,
+    "normalThreshold": 4.5,
+    "largeThreshold": 3
+  },
+  "independentLegalExpertReview": "pending; scenario screenshot not marketed",
+  "publicRelease": "pending"
+}

@@ -146,6 +146,12 @@ export function AiHubView() {
           <p className="mt-1 text-sm leading-6 text-navy-500">Mikrofon veya metinle görüşme desteği: eksik bilgiler, deliller, takip soruları ve görüşme sonu özeti.</p>
           <div className="mt-auto pt-5"><Link href={AI_ROUTES.sufle} className={PRIMARY}>Sufle'yi aç</Link></div>
         </AiCard>
+        <AiCard>
+          <p className="text-xs font-semibold uppercase tracking-wide text-accent-600">Olasılık Ağacı</p>
+          <h2 className="mt-2 text-lg font-semibold text-navy-900">Olası gelişmeleri dayanaklarıyla inceleyin</h2>
+          <p className="mt-1 text-sm leading-6 text-navy-500">Dosya kayıtları ve mevcut analiz senaryoları; koşullu yollar, eksik bilgiler ve belirsizlikler. Hesaplanmış veri yoksa yüzde gösterilmez.</p>
+          <div className="mt-auto pt-5"><Link href={AI_ROUTES.scenarios} className={PRIMARY}>Ağacı aç</Link></div>
+        </AiCard>
       </div>
 
       <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">

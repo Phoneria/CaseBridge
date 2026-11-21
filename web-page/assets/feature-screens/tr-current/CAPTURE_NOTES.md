@@ -1,24 +1,27 @@
-# Türkçe uygulama ekranları — 22 Kasım 2026, tanıtım sitesi v.0.41
+# Gerçek ürün ekranları — 22 Kasım 2026, tanıtım v.0.44
 
-Sekiz görsel, mevcut CaseBridge uygulama kaynaklarının yalıtılmış yerel önizlemesinden doğrudan alınmış 1600 × 1100 tarayıcı ekran görüntüleridir. Görsel üretimi, resim üzerinde çeviri, birleştirme veya kullanıcı arayüzü çizimi yapılmadı.
+Bu dizindeki 12 JPEG, aynı v.0.20 uygulamasının **production build** sürümünden doğrudan alındı. UI çizimi, görüntü üzerinde çeviri/boyama, birleştirme veya önizlemeye özel kaynak override yoktur. Kaynak fingerprint’i `cdd1e452f3a18d57b18b05f4073ec8b2a6976d4871633959888fe0f975cdfa18`; bu manifest `frontend/app-version.json` içindedir. Yakalama sonrası app kaynakları değişmezse main sürümüyle aynı davranış ve görünüm korunur. Main/public commit kaydı yayın doğrulamasında ayrıca tutulur.
 
-Uygulamanın açık tema seçeneği kullanıldı. Yalnızca bu yalıtılmış önizlemede görünen AI kısaltmaları “Yapay zekâ”, sohbet alanındaki tuş açıklamaları Türkçe olarak yerelleştirildi. Asıl uygulama kaynakları ve canlı uygulama değiştirilmedi. Kaynak sürüm etiketi v.0.17; önizleme, mevcut yerel çalışma ağacındaki uygulama bileşenlerini kullanır.
+- Kaynak: temiz `codex/spec-driven-rollout` çalışma ağacı; uygulama v.0.20. `next build` + `next start` (yerel 3044); API yerel 8044.
+- Dil: gerçek Türkçe ürün metinleri. Genel Bakış, rapor/değerlendirme metinleri ve duruşma tutanak türleri ürün kaynağında Türkçeleştirildi. CaseBridge AI marka adıdır; Enter/Shift tuş adlarıdır.
+- Tema: ürünün açık tema tercihi; viewport 1600×1100. Yeni ağaç örneği 1600×1400.
+- Veri: bu görev için sıfırdan oluşturulmuş `/tmp/casebridge-spec-validation/demo.db`, mevcut demo seed ve büroya örnek şablon ekleme işlevi. Kişiler, şirketler, dosyalar, analiz ve sohbet içerikleri kurgusaldır. Gerçek müşteri verisi, üretim DB’si, gerçek API anahtarı veya dış sağlayıcı çağrısı yoktur.
+- Analiz örnekleri `demo-template / fictional-presentation`; çalışma araçları `LLM_PROVIDER=mock`, `CHAT_PROVIDER=mock`. Örnek/eğitim açıklamaları korunur. Eğitim puanı 74/100’dür; analiz değerlendirme puanı kaynak verideki 70 olarak korunur. Hiçbiri kazanma olasılığı sayılmaz; ağaçta sayısal olasılık yoktur.
+- `scripts/capture-product.cjs` yalnız açık sentetik veri onayıyla çalışır; auth token yalnız tarayıcı belleği/test localStorage oturumunda kullanılır, audit’e veya depoya yazılmaz. `docs/validation/2026-11-22/product-captures.json` rota, viewport ve dosya SHA-256 eşlemesini tutar.
 
-Veriler bu çalışma için yeni oluşturulan, yalnızca yerel SQLite veritabanındadır. Mevcut demo seed ile oluşturulan kişiler, şirketler, dosyalar ve duruşmalar kurgusaldır. Dava raporu ile sohbet yanıtı, açıkça “Kurgusal gösterim” olarak işaretlenmiş sunum örnekleridir; gerçek model çıktısı veya hukuki görüş değildir. Raporun örnek sağlayıcı puanı değiştirilmedi. Duruşma değerlendirmesindeki 73/100 mevcut eğitim verisidir. Gerçek müşteri verisi, üretim veritabanı veya gerçek API anahtarı kullanılmadı; dış yapay zekâ çağrısı yapılmadı.
+| Dosya | Gerçek ürün rotası ve örnek |
+| --- | --- |
+| analysis.jpg | `/davalar/<sentetik-id>?sekme=ai`, ÖRNEK-2025/240 Ticari Alacak Davası raporu |
+| conversation.jpg | `/ai/durusma/oturum/<sentetik-id>`, tamamlanmış kurgusal kira provası tutanağı |
+| evidence.jpg | Aynı prova, açılmış dosya notu/deliller |
+| evaluation.jpg | Aynı prova, kurgusal karar ve eğitim değerlendirmesi |
+| assistant.jpg | `/ai/sohbet`, ÖRNEK · Delil ve süre kontrolü sohbeti |
+| case-documents.jpg | Aynı sentetik alacak dosyası, Genel Bakış ve belge erişimi |
+| calendar.jpg | `/takvim`, aynı sentetik büronun duruşma/görev takvimi |
+| reports.jpg | `/raporlar`, yalnız sentetik büro analitiği |
+| knowledge-map.jpg | `/ai/harita`, TMK m.6 / İspat yükü seçili; statik kanun/karar verisi, dosya tahmini değil |
+| counter-analysis.jpg | `/ai/karsi-taraf`, açık kurgusal uyuşmazlık özeti ve örnek sağlayıcı yanıtı |
+| directed-trial.jpg | `/ai/yonetmen`, aynı kurgusal özet ve örnek mod |
+| scenario-tree.jpg | `/ai/olasilik?dava=<sentetik-id>`, aynı rapordan üç senaryo, dayanak/belirsizlik ve Hesaplanmadı etiketleri |
 
-- analysis.jpg: Ticari Alacak Davası, Dosya Analizi sekmesi.
-- conversation.jpg: tamamlanmış kurgusal kira uyarlama duruşmasının açık tutanağı.
-- evidence.jpg: aynı duruşmanın dosya notları, delilleri ve tutanağı.
-- evaluation.jpg: aynı duruşmanın kurgusal karar ve eğitim değerlendirmesi.
-- assistant.jpg: kurgusal delil düzenleme sohbeti.
-- case-documents.jpg: dava özeti ve belge erişimi.
-- calendar.jpg: demo duruşma ve görev takvimi.
-- reports.jpg: demo dava, duruşma, görev ve performans raporları.
-
-Yakalama ve örnek veri hazırlama betikleri ile metin denetimi artifacts/marketing-v041/ altındadır. Bu varlıklar canlı uygulamanın dil, tema veya özellik yayını anlamına gelmez.
-
-## Emin’in mevcut yenilikleri — v.0.42
-
-knowledge-map.jpg, counter-analysis.jpg ve directed-trial.jpg; Emin’in ad047d2 commit’iyle eklenen, 5e79e0d main sürümünde bulunan Bilgi Haritası, Karşı Taraf Analizi ve Yönetilen Duruşma ekranlarının doğrudan tarayıcı kayıtlarıdır. Kaynak uygulama etiketi v.0.18’dir. Ayrı bir yerel demo veritabanı ve mevcut örnek sağlayıcı yanıtları kullanılmıştır. Karşı taraf analizi ile yönetilen duruşmada görünür “Örnek mod” açıklamaları korunmuştur. Haritanın veri kaynağı ve oranların sonuç tahmini olmadığı açıklaması korunmuş, kaynak adının yanındaki İngilizce açıklama yalnız yalıtılmış önizleme kaynağında Türkçeleştirilmiştir. Yapay zekâ kısaltmaları ve tuş açıklamaları da aynı şekilde yerelleştirilmiştir; ekran görüntüsüne sonradan yazı eklenmemiştir.
-
-Yalnız kurgusal uyuşmazlık özeti girilmiştir; gerçek müşteri verileri veya gerçek API anahtarları kullanılmamıştır. Harita ekranı uygulamanın mevcut kanun/karar bağlantı verisini göstermektedir. Uygulama özellikleri değiştirilmemiş veya bu tanıtım görevi kapsamında yeniden yayımlanmamıştır.
+Son görsel teknik inceleme için yakalandı; bağımsız hukuk uzmanı incelemesi açık kaldığı sürece tanıtım sekmesine bağlanmaz ve yayın paketine dahil edilmez. İlk 11 görünür sekme güncel gerçek ürüne eşlenmiştir. Büyütme aynı dosyayı açar.

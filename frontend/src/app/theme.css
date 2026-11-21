@@ -53,7 +53,6 @@
 :root[data-theme="dark"] .recharts-cartesian-grid line { stroke:#2a3334; }
 :root[data-theme="dark"] .recharts-text { fill:#a5aeae; }
 :root[data-theme="dark"] .recharts-default-tooltip { background-color:#172022 !important; border-color:#36514b !important; color:#f3f0e9; }
-:root[data-theme="dark"] img[src="/casebridge-logo.png"] { content:url('/casebridge-logo-dark.svg'); mix-blend-mode:normal; }
 :root[data-theme="dark"] [class~="bg-accent-50/40"] {background-color:rgb(23 42 40 / .4);}
 :root[data-theme="dark"] [class~="bg-accent-50/50"] {background-color:rgb(23 42 40 / .5);}
 :root[data-theme="dark"] [class~="bg-accent-50/60"] {background-color:rgb(23 42 40 / .6);}

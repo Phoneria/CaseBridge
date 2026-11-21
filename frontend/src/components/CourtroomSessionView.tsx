@@ -28,6 +28,12 @@ export function isFinishCommand(value: string): boolean {
   return ["done", "bitir", "bitti", "bit"].includes(value.trim().toLowerCase().replace(/i\u0307/g, "i").replace(/^[ .!?]+|[ .!?]+$/g, ""));
 }
 
+const TURN_LABELS: Record<string, string> = {
+  instruction: "Yönerge", opening: "Açılış", argument: "Argüman", rebuttal: "Karşı cevap",
+  evidence: "Delil", objection: "İtiraz", question: "Soru", answer: "Yanıt", ruling: "Ara karar",
+  closing: "Kapanış", verdict: "Karar", feedback: "Geri bildirim", error: "Hata",
+};
+
 const CONVERSATION_ACTIONS: Array<{ value: CourtroomAction; label: string }> = [
   { value: "argument", label: "Savunma / beyan" }, { value: "rebuttal", label: "Karşı cevap" },
   { value: "evidence", label: "Delil sun" }, { value: "objection", label: "İtiraz" },
@@ -484,7 +490,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
             {session.turns.map((turn) => {
               const meta = ACTOR_META[turn.actor];
               return <div key={turn.id} className={`rounded-xl border p-4 sm:p-5 ${meta.bubble}`}>
-                <div className="mb-2 flex items-center justify-between gap-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${meta.badge}`}>{meta.label}</span><span className="text-[10px] text-navy-500">{turn.turn_type.replace("_", " ")}</span></div>
+                <div className="mb-2 flex items-center justify-between gap-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${meta.badge}`}>{meta.label}</span><span className="text-[10px] text-navy-500">{TURN_LABELS[turn.turn_type] ?? "Tutanak kaydı"}</span></div>
                 <p className="whitespace-pre-wrap text-[15px] leading-7 text-navy-800">{turn.content}</p>
                 {(turn.actor === "opponent" || turn.actor === "judge") && (
                   <button type="button" onClick={() => playTurn(turn.id).catch(() => setError("AI sesi oynatılamadı."))} disabled={speakingTurnId === turn.id} className="mt-2 text-xs font-medium text-accent-700 hover:underline disabled:opacity-50">{speakingTurnId === turn.id ? "Ses oynatılıyor…" : "🔊 Dinle"}</button>

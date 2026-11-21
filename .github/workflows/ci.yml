@@ -7,6 +7,15 @@ on:
     branches: [main]
 
 jobs:
+  spec-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Spec Kit contracts and task traceability
+        run: python3 scripts/check-specs.py
+      - name: Verify immutable release boundaries and recovery
+        run: python3 -m unittest discover -s deployment/tests -v
+
   backend:
     runs-on: ubuntu-latest
     defaults:
@@ -59,6 +68,9 @@ jobs:
 
       - name: Run component tests
         run: npm run test
+
+      - name: Verify committed application version
+        run: node scripts/update-version.mjs --check
 
       - name: Production build
         env:

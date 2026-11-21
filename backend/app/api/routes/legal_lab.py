@@ -17,6 +17,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.legal_lab import mock, service
 from app.legal_lab.graph import get_graph
+from app.legal_lab.scenario_tree import ScenarioTree, build_tree
 from app.models.user import User
 from app.services.case_service import CaseService
 
@@ -131,3 +132,14 @@ def trial_ask(body: AskBody, user: User = Depends(get_current_user), db: Session
               provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     summary = _summary(db, body, user.law_firm_id)
     return service.trial_ask(provider, summary, body.side, [t.model_dump() for t in body.transcript], body.question)
+
+
+@router.get('/cases/{case_id}/scenario-tree', response_model=ScenarioTree)
+def case_scenario_tree(case_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Read existing scoped case material; never starts an AI/provider request."""
+    if user.is_platform_admin:
+        raise HTTPException(status_code=403, detail='Bu araç hukuk bürosu çalışma alanına aittir.')
+    case = CaseService(db).get_case(case_id, user.law_firm_id)
+    if case is None:
+        raise HTTPException(status_code=404, detail='Case not found')
+    return build_tree(db, case, user.law_firm_id)

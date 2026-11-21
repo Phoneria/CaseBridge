@@ -1,0 +1,31 @@
+# Implementation Plan: S03 Header yapay zekâ gezinmesi
+
+## Summary
+
+Yetkili kullanıcı AI araçlarına masaüstü ve mobil header üzerinden erişir.
+
+## Technical Context
+
+Existing Next.js 14/React 18/TypeScript/Tailwind and FastAPI/SQLAlchemy architecture. No unrelated feature or provider/credential change.
+Decision: Shared AI route metadata, native dialog opened from header for all widths; session-derived role filtering; pathname closes dialog; preserve existing AppShell guards.
+
+## Constitution Check
+
+PASS before design: source traceability, tenant isolation, no secrets, honest probabilities, accessibility, main-only artifacts and rollback. PASS after design: same constraints retained; dangerous access removal is excluded and would require review.
+
+## Project Structure
+
+### Documentation (this feature)
+
+spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks.md, verification.md.
+
+### Source Code (repository root)
+
+- `frontend/src/components/AiNavigation.tsx`
+- `frontend/src/lib/aiNavigation.ts`
+- `frontend/src/components/Sidebar.tsx`
+- `frontend/src/components/WorkspaceHeader.tsx`
+
+## Complexity Tracking
+
+Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.

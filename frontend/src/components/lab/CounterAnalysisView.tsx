@@ -86,7 +86,7 @@ export function CounterAnalysisView() {
       ))}
       {result && (
         <p className="text-[11px] text-navy-500">
-          AI tarafından üretilmiş tahmindir; kesin hukuki sonuç veya garanti değildir, avukat denetimi gerekir.
+          Yapay zekâ tarafından üretilmiş tahmindir; kesin hukuki sonuç veya garanti değildir, avukat denetimi gerekir.
         </p>
       )}
     </div>
