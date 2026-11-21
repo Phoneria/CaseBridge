@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import { getMe, getNotificationStatus, importDemoTemplate, sendTestEmail } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 import type { AppUser, NotificationStatus } from "@/types";
 import { AiConnectionPanel } from "@/components/AiConnectionPanel";
+import { AppearanceSettings } from "@/components/AppearanceSettings";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { UsersPanel } from "@/components/users/UsersPanel";
@@ -22,6 +24,7 @@ export function SettingsView() {
   const [me, setMe] = useState<AppUser | null>(null);
   const [notifications, setNotifications] = useState<NotificationStatus | null>(null);
   const [testEmail, setTestEmail] = useState<TestEmailState>({ kind: "idle" });
+  const [demoCoverage, setDemoCoverage] = useState<Record<string, number> | null>(null);
   const [demoTemplate, setDemoTemplate] = useState<TestEmailState>({ kind: "idle" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +73,10 @@ export function SettingsView() {
     setDemoTemplate({ kind: "sending" });
     try {
       const result = await importDemoTemplate();
-      setDemoTemplate({ kind: "done", message: result.added_cases
+      setDemoCoverage(result.coverage ?? null);
+      setDemoTemplate({ kind: "done", message: result.added_records !== undefined
+        ? result.added_records > 0 ? `${result.added_records} kayıt eklendi; gösterim verileri hazır.` : "Gösterim verileri kontrol edildi; eksik kayıt yok, örnek tarihler güncellendi."
+        : result.added_cases
         ? `${result.added_cases} örnek dava ve ilişkili veriler büronuza eklendi.`
         : "Örnek veriler zaten mevcut; yeni kayıt eklenmedi." });
     } catch (err) {
@@ -80,14 +86,15 @@ export function SettingsView() {
     }
   }
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  if (loading) return <div className="space-y-5"><AppearanceSettings /><LoadingState /></div>;
+  if (error) return <div className="space-y-5"><AppearanceSettings /><ErrorState message={error} /></div>;
 
   const isAdmin = me?.role === "admin";
 
   if (me?.is_platform_admin) return (
     <div className="space-y-5">
       <div><h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1><p className="text-sm text-navy-500">Uygulamanın ortak AI bağlantısını yönetin.</p></div>
+      <AppearanceSettings />
       <AiConnectionPanel canManageSecrets />
     </div>
   );
@@ -98,16 +105,18 @@ export function SettingsView() {
         <h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1>
         <p className="text-sm text-navy-500">Büro ve kullanıcı ayarlarınızı yönetin.</p>
       </div>
+      <AppearanceSettings />
 
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
           <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek veriler</h2>
-          <p className="mb-4 text-sm text-navy-500">Kurgusal davaları, görevleri, belgeleri ve olayları bu büroya ekleyin. Mevcut kayıtlar korunur.</p>
+          <p className="mb-4 text-sm text-navy-500">Davalar, indirilebilir belgeler, emsaller, takvim, mali işler, müvekkil takibi, ekip, onaylar, kritik süreler, kontrol listeleri, analizler, sohbet ve duruşma örneklerini yükleyin. Tekrar yükleme eksikleri tamamlar ve örnek tarihleri günceller; gerçek kayıtları değiştirmez. Örnek ekip için ortak şifre veya otomatik davet oluşturulmaz; örneklerin e-posta hatırlatmaları kapalıdır.</p>
           <button type="button" onClick={addExamples} disabled={demoTemplate.kind === "sending"}
             className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
             {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek verileri yükle"}
           </button>
           {demoTemplate.kind === "done" && <p role="status" className="mt-3 text-sm text-emerald-700">{demoTemplate.message}</p>}
+          {demoCoverage && <div className="mt-4"><h3 className="text-sm font-medium text-navy-800">Büroda gösterime hazır veriler</h3><dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{Object.entries(demoCoverage).map(([label,count]) => <div key={label} className="flex justify-between gap-2 rounded-lg bg-surface-muted px-3 py-2 text-sm"><dt>{label}</dt><dd className="font-semibold tabular-nums">{count}</dd></div>)}</dl><div className="mt-3 flex flex-wrap gap-4 text-sm text-accent-700"><Link href="/buro">Büro yönetimine git →</Link><Link href="/ai">AI örneklerine git →</Link></div></div>}
           {demoTemplate.kind === "error" && <p role="alert" className="mt-3 text-sm text-red-700">{demoTemplate.message}</p>}
         </section>
       )}

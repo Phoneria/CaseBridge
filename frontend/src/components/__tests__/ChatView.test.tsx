@@ -362,3 +362,13 @@ describe("ChatView", () => {
     expect(streamChatMessage.mock.calls[0][2]).not.toHaveProperty("level");
   });
 });
+
+
+it("opens an imported example on first entry but preserves the new-chat action", async () => {
+  api.listChatConversations.mockResolvedValue([{ ...CONVERSATION, title: "ÖRNEK · Hazırlık" }]);
+  render(<ChatView />);
+  expect(await screen.findByText("TÜFE")).toBeInTheDocument();
+  expect(api.getChatConversation).toHaveBeenCalledWith("c1");
+  await userEvent.click(screen.getByRole("button", { name: "Yeni sohbet" }));
+  await waitFor(() => expect(screen.queryByText("TÜFE")).not.toBeInTheDocument());
+});

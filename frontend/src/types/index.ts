@@ -315,6 +315,7 @@ export interface AppUser {
   is_active: boolean;
   /** CaseBridge team member who manages customer firms (/platform). */
   is_platform_admin?: boolean;
+  workspace_position?: string | null;
 }
 
 export type UserStatus = "pending" | "active" | "inactive";
@@ -393,6 +394,7 @@ export type ManagedUserUpdate = Partial<ManagedUserPayload>;
 export interface UserWorkload {
   open_cases: { id: string; case_number: string; case_name: string }[];
   pending_tasks: { id: string; title: string; case_name: string }[];
+  management_work?: { id: string; title: string; case_name: string }[];
   precedents_reviewing: number;
   /** Calendar events assigned to the user that start today or later. */
   upcoming_events: number;

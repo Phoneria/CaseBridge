@@ -180,7 +180,7 @@ describe("sample data import", () => {
     render(<SettingsView />);
     await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Örnek veriler eklenemedi. Lütfen tekrar deneyin.");
-    await userEvent.click(screen.getByRole("button", { name: "Örnek verileri yükle" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
     expect(await screen.findByText("Örnek veriler zaten mevcut; yeni kayıt eklenmedi.")).toBeInTheDocument();
   });
 
@@ -190,4 +190,17 @@ describe("sample data import", () => {
     await screen.findByRole("heading", { name: "Ayarlar" });
     expect(screen.queryByRole("button", { name: "Örnek verileri yükle" })).not.toBeInTheDocument();
   });
+});
+
+
+it("shows per-area presentation coverage even when only missing modules were added", async () => {
+  getMe.mockResolvedValue(adminUser);
+  listManagedUsers.mockResolvedValue([]);
+  importDemoTemplate.mockResolvedValue({ total_cases: 20, added_cases: 0, added_records: 80, coverage: { Davalar: 20, Emsaller: 3, "Büro iş akışları": 70, Sohbetler: 3 } });
+  render(<SettingsView />);
+  await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+  expect(await screen.findByText("80 kayıt eklendi; gösterim verileri hazır.")).toHaveAttribute("role", "status");
+  expect(screen.getByText("Büroda gösterime hazır veriler")).toBeInTheDocument();
+  expect(screen.getByText("Büro iş akışları")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "AI örneklerine git →" })).toHaveAttribute("href", "/ai");
 });
