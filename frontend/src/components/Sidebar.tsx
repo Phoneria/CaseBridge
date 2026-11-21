@@ -58,6 +58,9 @@ const AI_ITEMS = [
   { label: "Dosya Analizi", href: AI_ROUTES.analysis },
   { label: "Canlı Duruşma", href: AI_ROUTES.courtroom },
   { label: "Hukuk Asistanı", href: AI_ROUTES.chat },
+  { label: "Karşı Taraf Analizi", href: AI_ROUTES.counter },
+  { label: "Yönetilen Duruşma", href: AI_ROUTES.directed },
+  { label: "Bilgi Haritası", href: AI_ROUTES.map },
 ];
 
 function isActive(pathname: string | null, href: string): boolean {
