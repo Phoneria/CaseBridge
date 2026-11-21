@@ -93,10 +93,6 @@ services:
       - edge
     depends_on:
       cb-backend:
-    read_only: true
-    cap_drop: [ALL]
-    security_opt: ["no-new-privileges:true"]
-    tmpfs: ["/tmp:rw,nosuid,nodev,size=128m"]
         condition: service_healthy
     logging: *default-logging
 

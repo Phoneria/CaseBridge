@@ -24,3 +24,5 @@
 ## Dependencies and Execution
 
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
+
+- [x] T007 [US2] Validate production Compose syntax and merged runtime config before image builds; add a no-secret Docker Compose CI validation after the staging gate caught invalid dependency indentation.

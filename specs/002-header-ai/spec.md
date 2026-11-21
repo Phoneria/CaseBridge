@@ -31,6 +31,8 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 - **FR-003**: Aktif alt rota, görünür klavye odağı, Escape ve odağın açan düğmeye iadesi çalışır.
 - **FR-004**: 320px dâhil mobilde header menüsünden aynı araçlara erişilir; arama/bildirim/kullanıcı menüsü korunur.
 
+- **FR-007**: Yayın regresyonunda hızlı sesli beyan, conversation modunda ilk render’daki eski opening değerini göndermez; geçerli seçilmiş konuşma eylemi korunur, varsayılan argument olur.
+
 ### Key Entities
 
 Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gösterdiği kayıtlar.

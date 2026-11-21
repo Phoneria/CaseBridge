@@ -29,3 +29,7 @@ spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks
 ## Complexity Tracking
 
 Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.
+
+## CI regression resolution
+
+CI exposed an existing passive-effect/recording closure race: a fast recording could capture initial `opening` before conversation default became `argument`. Resolve the effective action at submit boundary from the session mode and permitted conversation actions; retain evidence/rebuttal/objection choices. No voice/provider API or tenant change. Existing microphone regression plus full suite verify this.

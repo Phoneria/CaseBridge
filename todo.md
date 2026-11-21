@@ -407,3 +407,6 @@ Kullanıcı teknik uygulamayı ve gerçek ürün görsellerini onayladı; plan s
 Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uygulama rotasına bağlandı. Hesaplanmamış olasılıklar açıkça etiketlenir; analiz skoru ve atıf oranı olasılığa çevrilmez. Public doğrulama kapısı aynen sürer.
 
 - Son 12 sekmeli tanıtım kontrolü: 1440/768/390/320 × 12 = **48** görsel/tam ekran/Escape/odak denetimi geçti; uygulama bağlantısı gerçek `/ai/olasilik` rotasıdır. Önceki 11 sekme sınırı son kullanıcı talimatıyla kaldırıldı.
+
+- Yayın öncesi CI bir ses kaydı yarışını yakaladı: conversation modunda ilk render opening eylemi kayıtta tutulabiliyordu. Gönderimde yalnız geçerli konuşma eylemi seçiliyor; 753 test son düzeltmeyle tekrar geçti. Salt sentetik local production build ve 12 capture yeniden alındı.
+- Artefakt kapısı, Compose bağımlılık bloğuna yanlış giren hardening satırlarını reddetti; canlı v.0.19/v.0.43 değişmedi. Girinti düzeltildi; gerçek Docker Compose sentetik konfigürasyonla doğrulandı. Aynı denetim CI’ye ve imaj build öncesine eklendi. Başarısız stage yayın/artefakt tamamlandı diye kaydedilmedi.

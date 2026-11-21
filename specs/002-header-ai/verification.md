@@ -18,3 +18,5 @@ Public served-code/user-flow check pending.
 ## Convergence
 
 Preimplementation spec/plan/task consistency checked. Actual implementation traced against each FR; unfinished external/public checks remain open. No unchecked requirement is treated as satisfied by generated documents.
+
+CI caught an existing recording closure retaining initial opening action. Effective action now derives from permitted conversation actions at submit; 753 full frontend tests passed again. Current production-build captures refreshed; UI styling unchanged. New CI run will confirm the regression.

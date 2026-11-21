@@ -241,6 +241,7 @@ def stage(sha, scope):
     try:
         source = work / 'source'; source.mkdir(); export_source(sha, source)
         run([DOCKER, 'run', '--rm', '--network', 'none', '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true', '-v', str(source) + ':/workspace:ro', '-w', '/workspace/frontend', 'node:20-slim', 'node', 'scripts/update-version.mjs', '--check'])
+        run([DOCKER, 'compose', '--project-name', 'cb-config-check', '--env-file', str(ENV_FILE), '-f', str(source / 'deployment/compose.production.yml'), 'config', '--quiet'])
         app_version = json.loads((source / 'frontend/app-version.json').read_text())['version']
         marketing_version = json.loads((source / 'web-page/website-version.json').read_text())['version']
         images = {}

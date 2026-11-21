@@ -347,7 +347,9 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
   async function submitText(text: string) {
     if (!session || text.trim().length < 2 || text.length > 4000 || submissionBusy.current) return;
     if (session.conversation_mode && isFinishCommand(text)) { await finish(); return; }
-    if (action === "evidence" && !evidenceCode) {
+    // Recorder callbacks may retain the initial render before the phase effect runs.
+    const effectiveAction = session.conversation_mode && !CONVERSATION_ACTIONS.some(item => item.value === action) ? "argument" : action;
+    if (effectiveAction === "evidence" && !evidenceCode) {
       setError("Delil sunmak için üstteki 'Dosya notu ve deliller' alanından bir delil seçin.");
       return;
     }
@@ -357,8 +359,8 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     try {
       const next = await sendCourtroomMove(session.id, {
         content: text.trim(),
-        action_type: action,
-        evidence_code: action === "evidence" ? evidenceCode : undefined,
+        action_type: effectiveAction,
+        evidence_code: effectiveAction === "evidence" ? evidenceCode : undefined,
         client_request_id: typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(16).slice(2)}`,

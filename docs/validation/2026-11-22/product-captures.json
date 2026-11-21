@@ -1,6 +1,6 @@
 {
   "version": "v.0.20",
-  "sourceHash": "cdd1e452f3a18d57b18b05f4073ec8b2a6976d4871633959888fe0f975cdfa18",
+  "sourceHash": "72cf289aa904789373da61b278e5d210c4f2d1ebafd01240053a5434ddfefbdf",
   "mode": "actual local production build; synthetic seed + demo-template; no UI overrides",
   "captures": [
     {
@@ -82,7 +82,7 @@
         "width": 1600,
         "height": 1100
       },
-      "sha256": "82607eb3a11b73bd854f5067e73f302238d94e12d71f8244d1e8e3c3d22666a9"
+      "sha256": "ccd5fac44092bde6a8978c668b89370c4c5be9ad7a7a4ba20ad4f1cb35b8a89e"
     },
     {
       "name": "counter-analysis",

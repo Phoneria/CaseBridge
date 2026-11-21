@@ -24,3 +24,5 @@
 ## Dependencies and Execution
 
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
+
+- [ ] T008 [US2] Verify FR-007: normalize a stale initial action at the courtroom submit boundary; keep explicit valid conversation choices, then rerun microphone and full frontend regression/CI.
