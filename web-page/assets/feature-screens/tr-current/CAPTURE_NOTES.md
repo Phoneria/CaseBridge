@@ -31,3 +31,7 @@ Kullanıcı teknik uygulamayı ve gerçek ürün görsellerini onayladı; Olası
 Kullanıcı teknik/görsel kabulünü takiben “İncelemeyi tamamladım ve kabul ediyorum” beyanını verdi. Bağımsız audit/model kalibrasyonu asistan tarafından yapılmış diye sunulmaz. Public uygulama v.0.20 ve tanıtım v.0.44, main `70fabd06f695f03477203a3fc86291f06e3e2f7c` kaynaklıdır; 12 capture dosyasının public SHA-256 eşleşmesi ve tam ekran/mobil kullanımı doğrulandı.
 
 İnceleme beyanının kaynağı, S05 için ayrı gönderilen soruya kullanıcının doğrudan verdiği “İncelemeyi tamamladım ve kabul ediyorum” yanıtıdır; önceki uygulamaya başlama onayıyla karıştırılmaz. Bu yalnız kullanıcı beyanı/kabulüdür. İncelemeyi yapan kişinin uzmanlığı/bağımsızlığı ve inceleme bulguları tarafımızca doğrulanmadı; bağımsız hukuki doğrulama ve model kalibrasyonu yapılmış sayılmaz. Teknik yayın tekrarlanmadı.
+
+## v.0.21 takip görseli / tanıtım v.0.45
+
+Yalnız scenario-tree.jpg bu takip işinde gerçek v.0.21 production build üzerinden yenilendi; diğer 11 görselin v.0.20 kaydı yukarıda korunur. Yeni rota `/ai/olasilik?ornek=belge-dogrulama`; tamamen kod sahipli sentetik fatura örneği, belge=destekleyici, ödeme=belirsiz varsayımı; 1600×1100. Dallar Demo tahmini %50,0 / %16,7 / %33,3 gösterir. Görsel doğrudan ekran kaydıdır, düzenleme/üretim katmanı yok. Hash: `00ffb6331a15b9f6bd554112376f8fa709ec75e46b5e27fa5605bae2dae5077e`. Kaynak fingerprint: `ebd9564f5bbf1821056e9f973b1b138396bfc955f5f8d34bd2de9d79adc8cea2`. Şirket/müşteri verisi veya gerçek anahtar kullanılmadı.

@@ -3,6 +3,7 @@
 Works without an AI key (predetermined mock content, labelled as such); with a key the same
 endpoints call the firm's model.
 """
+import json
 from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18,6 +19,7 @@ from app.db.session import get_db
 from app.legal_lab import mock, service
 from app.legal_lab.graph import get_graph
 from app.legal_lab.scenario_tree import ScenarioTree, build_tree
+from app.legal_lab.scenario_demo import build_demo, DocumentAssumption, PaymentAssumption
 from app.models.user import User
 from app.services.case_service import CaseService
 
@@ -135,11 +137,27 @@ def trial_ask(body: AskBody, user: User = Depends(get_current_user), db: Session
 
 
 @router.get('/cases/{case_id}/scenario-tree', response_model=ScenarioTree)
-def case_scenario_tree(case_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def case_scenario_tree(case_id: str, assumptions: str = "{}", user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Read existing scoped case material; never starts an AI/provider request."""
     if user.is_platform_admin:
         raise HTTPException(status_code=403, detail='Bu araç hukuk bürosu çalışma alanına aittir.')
     case = CaseService(db).get_case(case_id, user.law_firm_id)
     if case is None:
         raise HTTPException(status_code=404, detail='Case not found')
-    return build_tree(db, case, user.law_firm_id)
+    try:
+        if len(assumptions) > 2000:
+            raise ValueError('Too many assumptions')
+        values = json.loads(assumptions)
+        if not isinstance(values, dict) or len(values) > 6:
+            raise ValueError('Invalid assumptions')
+        return build_tree(db, case, user.law_firm_id, values)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail='Geçersiz senaryo varsayımı.')
+
+
+@router.get('/scenario-demo', response_model=ScenarioTree)
+def synthetic_scenario_demo(document: DocumentAssumption = 'unreviewed', payment: PaymentAssumption = 'unknown', user: User = Depends(get_current_user)):
+    """Code-owned fixture only: no real case/firm/analysis input or provider call."""
+    if user.is_platform_admin:
+        raise HTTPException(status_code=403, detail='Bu araç hukuk bürosu çalışma alanına aittir.')
+    return build_demo(document, payment)

@@ -751,6 +751,10 @@ export async function trialAsk(
 }
 
 /** A read-only, scoped view of existing case material; does not call a model. */
-export async function getScenarioTree(caseId: string): Promise<import('@/types/scenarioTree').ScenarioTree> {
-  return request(`/legal-lab/cases/${encodeURIComponent(caseId)}/scenario-tree`);
+export async function getScenarioTree(caseId: string, assumptions: Record<string, import('@/types/scenarioTree').SupportAssumption> = {}): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/cases/${encodeURIComponent(caseId)}/scenario-tree?assumptions=${encodeURIComponent(JSON.stringify(assumptions))}`);
+}
+
+export async function getScenarioDemo(document: import('@/types/scenarioTree').DocumentAssumption = 'unreviewed', payment: import('@/types/scenarioTree').PaymentAssumption = 'unknown'): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/scenario-demo?document=${document}&payment=${payment}`);
 }

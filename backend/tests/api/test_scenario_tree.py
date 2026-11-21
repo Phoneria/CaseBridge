@@ -33,8 +33,9 @@ def test_fallback_is_conditional_not_calculated(client,data):
     r=client.get(url(data),headers=data['headers']);assert r.status_code==200;tree=r.json()
     assert tree['source_mode']=='conditional_preparation'
     assert len([n for n in tree['nodes'] if n['kind']=='development'])>=2
-    assert all(n['probability'] is None and n['assessment_label']=='Hesaplanmadı' and n['reasoning'] and n['uncertainties'] for n in tree['nodes'])
-    assert tree['current_facts'] and 'sonuç' in tree['disclaimer'].lower()
+    assert all(n['probability'] is None and n['reasoning'] and n['uncertainties'] for n in tree['nodes'])
+    assert all(n['support_weight']==50 and n['assessment_label']=='Demo tahmini' for n in tree['nodes'] if n['kind']=='development')
+    assert tree['current_facts'] and 'kazanma' in tree['disclaimer'].lower()
 
 def test_latest_completed_analysis_and_no_score_conversion(client,db_session,data):
     d=data;now=datetime.now(timezone.utc)
@@ -88,3 +89,62 @@ def test_bounded_history_and_scenarios_are_explicit(client,db_session,data):
     assert len([s for s in tree['sources'] if s['kind']=='event'])==60
     assert len([s for s in tree['sources'] if s['kind']=='document'])==60
     assert len(tree['sources'])<=144 and len(tree['current_facts'])<=80
+
+
+def test_case_support_assumptions_scope_determinism_and_empty(client, db_session, data):
+    d=data
+    before=client.get(url(d),headers=d['headers']).json()
+    empty=client.get(url(d),headers=d['headers'],params={'assumptions':'{"confirm":"supports"}'}).json()
+    assert next(n for n in empty['nodes'] if n['id']=='confirm')['support_weight']==50
+    assert empty['context_version'] != before['context_version']
+    analysis(db_session,d)
+    counts={model:db_session.query(model).count() for model in [Case, CaseEvent, Document, Simulation, AIAnalysis]}
+    for assumption, expected in [('neutral',50),('supports',62),('contradicts',38)]:
+        params={'assumptions':'{"scenario-0":"'+assumption+'"}'}
+        response=client.get(url(d),headers=d['headers'],params=params)
+        assert response.status_code==200
+        tree=response.json()
+        assert next(n for n in tree['nodes'] if n['id']=='scenario-0')['support_weight']==expected
+        assert next(n for n in tree['nodes'] if n['id']=='scenario-1')['support_weight']==50
+        assert tree['context_version']==client.get(url(d),headers=d['headers'],params=params).json()['context_version']
+        assert all(n['probability'] is None for n in tree['nodes'])
+    assert counts=={model:db_session.query(model).count() for model in counts}
+    for value in ['null','[]','{','{"root":"supports"}','{"scenario-0":"forged"}','{"scenario-0":{}}','x'*2001]:
+        assert client.get(url(d),headers=d['headers'],params={'assumptions':value}).status_code==422
+    assert client.get(f"/legal-lab/cases/{d['b'].id}/scenario-tree",headers=d['headers'],params={'assumptions':'{"scenario-0":"supports"}'}).status_code==404
+
+
+def test_demo_combinations_and_arithmetic(client,data):
+    from app.legal_lab.scenario_demo import build_demo, percentage_tenths
+    from app.legal_lab.scenario_tree import ScenarioTree
+    from pydantic import ValidationError
+    assert percentage_tenths([1,1,1])==[334,333,333]
+    for doc in ['unreviewed','supports','contradicts','missing']:
+        for payment in ['unknown','supports','contradicts','missing']:
+            tree=build_demo(doc,payment)
+            assert tree.context_version==build_demo(doc,payment).context_version
+            weights=tree.demo.groups[0].weights
+            assert sum(w.percentage_tenths for w in weights)==1000
+            assert all(n.assessment_label=='Demo tahmini' and n.probability is not None for n in tree.nodes if n.kind=='scenario')
+            if 'missing' in [doc,payment]:
+                assert [w.percentage_tenths for w in weights]==[334,333,333]
+                assert tree.demo.missing_reason
+    supportive=build_demo('supports','supports'); contrary=build_demo('contradicts','contradicts')
+    assert supportive.nodes[1].probability>contrary.nodes[1].probability
+    payload=supportive.model_dump();payload['case_id']=data['a'].id
+    with pytest.raises(ValidationError):ScenarioTree.model_validate(payload)
+    payload=supportive.model_dump();payload['nodes'][1]['probability']=float('nan')
+    with pytest.raises(ValidationError):ScenarioTree.model_validate(payload)
+    endpoint='/legal-lab/scenario-demo'
+    assert client.get(endpoint).status_code==401
+    assert client.get(endpoint,headers=data['headers']).status_code==200
+    assert client.get(endpoint,headers=data['headers'],params={'document':'forged'}).status_code==422
+
+
+def test_real_schema_rejects_probability_and_tampered_support(client,data):
+    from app.legal_lab.scenario_tree import ScenarioTree
+    from pydantic import ValidationError
+    tree=client.get(url(data),headers=data['headers']).json()
+    for key,value in [('probability',0.5),('support_weight',99)]:
+        payload=__import__('copy').deepcopy(tree);payload['nodes'][1][key]=value
+        with pytest.raises(ValidationError):ScenarioTree.model_validate(payload)

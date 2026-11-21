@@ -37,3 +37,7 @@ S01–S09 are implemented and verified. Application v.0.20 / marketing v.0.44 ar
 User technical/screenshot acceptance and subsequent “İncelemeyi tamamladım ve kabul ediyorum” statement are recorded. No assistant-performed independent legal audit or model calibration is claimed; no extra legal-review publication gate is invented. The tested tree is accessible from the 12th product tab and actual application route, with uncomputed probabilities labelled explicitly.
 
 No automatic deployment trigger/frequency was selected; current publication is manual through the restricted entrypoint. Root/izzet emergency administration remains. Final evidence-only changes do not require an application rebuild.
+
+## Follow-up 009 — Demo scenario weights
+
+`009-demo-scenario-weights/` implements the latest explicitly authorized numerical POC: same-question synthetic partition totals 100; scoped normal cases have independent 0–100 support weights with visible neutral starting assumptions. All numeric output says Demo tahmini; neither model is calibrated or a legal success probability. Local targeted checks/build/browser pass; public release evidence is recorded in its verification.md when complete. This follow-up supersedes the prior uncomputed POC presentation, without changing tenant or key policies.

@@ -1,0 +1,7 @@
+# HTTP/UI contract
+
+GET /legal-lab/scenario-demo?document=unreviewed&payment=unknown returns the server-owned fixture only. Enum-invalid input ->422, no auth ->401, platform/restricted ->403. No case_id/firm input influences this fixture. Existing GET /legal-lab/cases/{id}/scenario-tree always remains null-valued for probabilities, including example/mock data and forged demo query parameters.
+
+Actual entry /ai/olasilik exposes Örnek davayı aç and deep link ?ornek=belge-dogrulama. Real selection clears demo state and requests only the scoped real endpoint. All numeric text says Demo tahmini; all views share formatting. Explain base/contribution/total/rounding, normalization question and uncalibrated meaning. Missing selection uses equal [1,1,1] starting scores, rounds to 33.4/33.3/33.3 and announces why other contributions are ignored. Assumption changes update the group; old snapshot and changed assumptions are inspectable.
+
+Latest authorized scope supersedes the initial synthetic-only/null plan: all normal scenario branches expose independent Demo tahmini support_weight. Base 50; linked eligible records >0 allow ±[10+min(10,2×distinct direct references)] for support/contradiction. No eligible records always yields 50; neutral always 50. Source count is illustrative sensitivity, not truth, independence or evidence strength. Case lookup is tenant scoped before parsing/evaluating assumptions. Inputs are enum-only branch mapping (max six), unknown IDs/invalid values rejected 422. No domain write/provider call.

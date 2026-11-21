@@ -432,3 +432,20 @@ Ağaç 12. ürün sekmesine, aynı gerçek v.0.20 ekranına ve `/ai/olasilik` uy
 Kanıtlar: `docs/validation/2026-11-22/`, özellik bazında `specs/*/verification.md`, yayın/geri dönüş için `deployment/immutable-release.md`.
 
 İnceleme beyanının kaynağı, S05 için ayrı gönderilen soruya kullanıcının doğrudan verdiği “İncelemeyi tamamladım ve kabul ediyorum” yanıtıdır; önceki uygulamaya başlama onayıyla karıştırılmaz. Bu yalnız kullanıcı beyanı/kabulüdür. İncelemeyi yapan kişinin uzmanlığı/bağımsızlığı ve inceleme bulguları tarafımızca doğrulanmadı; bağımsız hukuki doğrulama ve model kalibrasyonu yapılmış sayılmaz. Teknik yayın tekrarlanmadı.
+
+
+## Onaylanan takip işi — Olasılık Ağacı POC demo ağırlıkları
+
+Kullanıcı “Demo tahmini, tamam, yazabilirsin, okey, hadi devam edelim” diyerek örnek/sentetik davada tahmini senaryo ağırlığını açıkça onayladı. `specs/009-demo-scenario-weights/` kapsamında ilerlenir. Bu kural gerçek dosya kazanma olasılığı değildir, kalibrasyon iddiası yoktur; kayıtlı skor/harita oranı yüzdeye çevrilmez.
+
+- [x] Ayrı, server-owned sentetik örnek; gerçek dosya/example/provider bayraklarından oran etkinleştirme yok.
+- [x] Denetlenebilir puan kuralı, varsayım değişimi, görünür katkılar ve yalnız tek MECE soruda %100.
+- [x] Son kullanıcı yönlendirmesi: örnek ve normal dosya senaryo dallarında sayısal Demo tahmini; eksik örnek kayıtta eşit dağılım, normal dosyada dayanak yoksa 50/100 nötr başlangıç. Normal dosya puanları bağımsız/toplamlanmaz; probability null kalır.
+- [x] Keşfedilebilir gerçek giriş/deep link; grafik/metin, mobil/klavye ve eski yanıt yarışları doğrulanacak.
+- [ ] Tanıtım/SSS ve gerçek örnek görseli doğru olacak; v. sürüm artışı, main kaynaklı VPS ve public doğrulama tamamlanmadan yayın bitmiş sayılmayacak.
+
+No new customer delivery, no real key operation or automatic deployment trigger is authorized by this follow-up. Existing staged bureau key and release rules remain.
+
+Son kapsam açıklaması: Kullanıcı demo değerlerinin normal büro dosyalarında da görünmesini ve POC senaryo sunumunda Hesaplanmadı yerine görünür nötr/eşit başlangıç kullanılmasını açıkça istedi. Önceki sentetik-only/null ara planı bu takip işinde geçersizdir. Yalnız aynı sorunun MECE örnek grubu %100’e tamamlanır. Normal dosyalarda kullanıcı varsayımı ve doğrudan bağlı kayıt sayısıyla açıklanan bağımsız 0–100 destek ağırlığı vardır; hukuki kazanma olasılığı değildir. İnceleme/kabul beyanı yukarıdaki doğrudan kullanıcı yanıtıdır.
+
+Takip işi yerel sonuç: 12 hedefli backend + 7 arayüz testi geçti; ek health ile backend 15/15. TypeScript, üretim build, 14 release testi, sentetik Compose ve Spec Kit governance geçti. 1600/390/320 × açık/koyu temada gerçek örnek/normal dosya akışı geçti; page error/taşma yok. Tam süitler son kritik-test talimatıyla durduruldu ve başarılı sayılmaz. App v.0.21 / tanıtım v.0.45 hazırlanmıştır; public doğrulama aşağıda ayrıca kaydedilmeden yayın tamamlandı sayılmaz.

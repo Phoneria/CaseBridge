@@ -5,21 +5,21 @@ import type { ScenarioTree, ScenarioNode } from '@/types/scenarioTree';
 import { ApiError } from '@/lib/apiError';
 vi.mock('next/navigation', async () => (await import('@/test/navigation')).navigationModule);
 import { resetNav, setUrl } from '@/test/navigation';
-const getCases=vi.fn(),getScenarioTree=vi.fn();
-vi.mock('@/lib/api',()=>({getCases:(...a:unknown[])=>getCases(...a),getScenarioTree:(...a:unknown[])=>getScenarioTree(...a)}));
+const getCases=vi.fn(),getScenarioTree=vi.fn(),getScenarioDemo=vi.fn();
+vi.mock('@/lib/api',()=>({getCases:(...a:unknown[])=>getCases(...a),getScenarioTree:(...a:unknown[])=>getScenarioTree(...a),getScenarioDemo:(...a:unknown[])=>getScenarioDemo(...a)}));
 import { ScenarioTreeView } from '@/components/lab/ScenarioTreeView';
-const node=(id:string,parent_id:string|null,label:string,kind:ScenarioNode['kind']):ScenarioNode=>({id,parent_id,label,kind,description:'Koşullu inceleme',reasoning:'Kayıtlar doğrulanmalı.',source_ids:['case'],uncertainties:['Belge aslı eksik.'],probability:null,assessment_label:'Hesaplanmadı'});
+const node=(id:string,parent_id:string|null,label:string,kind:ScenarioNode['kind']):ScenarioNode=>({id,parent_id,label,kind,description:'Koşullu inceleme',reasoning:'Kayıtlar doğrulanmalı.',source_ids:['case'],uncertainties:['Belge aslı eksik.'],probability:null,support_weight:kind==='development'?50:null,assessment_label:kind==='development'?'Demo tahmini':'Hesaplanmadı'});
 const tree=(id='c1',version='a'.repeat(64)):ScenarioTree=>({case_id:id,title:id==='c1'?'Örnek A':'Örnek B',case_closed:false,context_version:version,generated_at:'2026-11-22T00:00:00Z',source_mode:'conditional_preparation',analysis_id:null,analysis_created_at:null,is_example:false,nodes:[node('root',null,'Dosya bağlamı','context'),node('confirm','root','Belgeler doğrulanırsa','development'),node('outcome','confirm','Hazırlık gözden geçirilir','outcome')],sources:[{id:'case',kind:'case',label:'Dosya kaydı',detail:'Sentetik bağlam',recorded_at:null}],current_facts:['Teslim tarihi kaydı'],uncertainties:['Belge aslı eksik.'],truncated:false,limits_note:'Gösterim sınırı',disclaimer:'Hukuki sonuç garantisi değildir.'});
 beforeEach(()=>{vi.clearAllMocks();resetNav();setUrl('/ai/olasilik');getCases.mockResolvedValue([{id:'c1',case_name:'Örnek A',case_number:'A',client_name:'Sentetik'},{id:'c2',case_name:'Örnek B',case_number:'B',client_name:'Sentetik'}]);getScenarioTree.mockImplementation((id:string)=>Promise.resolve(tree(id)));});
 describe('Scenario tree data boundaries',()=>{
- it('uses the same source in graph/text and never displays a guessed percentage',async()=>{
+ it('uses the same source in graph/text and displays independent demo weights consistently',async()=>{
   render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');
   expect(screen.getByRole('group',{name:'Dosya senaryo ağacı'})).toBeVisible();await userEvent.click(screen.getByRole('button',{name:'Metin alternatifi'}));
-  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText(/Hesaplanmadı/).length).toBeGreaterThan(0);expect(screen.queryByText(/%\d/)).not.toBeInTheDocument();
+  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText('Demo tahmini: 50/100').length).toBeGreaterThan(0);expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();expect(screen.queryByText(/%\d/)).not.toBeInTheDocument();
  });
  it('announces changed source content without browser persistence',async()=>{
   const storage=vi.spyOn(Storage.prototype,'setItem');render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');getScenarioTree.mockResolvedValue(tree('c1','b'.repeat(64)));
-  await userEvent.click(screen.getByRole('button',{name:'Kaynakları yenile'}));expect(await screen.findByRole('status')).toHaveTextContent('Kaynaklar önceki görüntülemeye göre değişti');expect(storage).not.toHaveBeenCalled();storage.mockRestore();
+  await userEvent.click(screen.getByRole('button',{name:'Kaynakları yenile'}));expect(await screen.findByRole('status')).toHaveTextContent('Kaynaklar veya varsayımlar önceki görüntülemeye göre değişti');expect(storage).not.toHaveBeenCalled();storage.mockRestore();
  });
  it('ignores stale responses after a different case is selected',async()=>{
   let resolveA:(value:ScenarioTree)=>void=()=>{};getScenarioTree.mockImplementation((id:string)=>id==='c1'?new Promise<ScenarioTree>(r=>{resolveA=r;}):Promise.resolve(tree(id)));
@@ -29,4 +29,24 @@ describe('Scenario tree data boundaries',()=>{
  it('renders a scoped Turkish error without an old tree',async()=>{
   getScenarioTree.mockRejectedValue(new ApiError('Case not found',404));render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));expect(await screen.findByRole('alert')).toHaveTextContent('Dosya bulunamadı veya bu dosyaya erişiminiz yok.');expect(screen.queryByRole('group',{name:'Dosya senaryo ağacı'})).not.toBeInTheDocument();
  });
+});
+
+function demo(): ScenarioTree {
+ const t=tree('demo:invoice-evidence-v1');t.source_mode='synthetic_demo';t.title='Sentetik fatura';t.nodes[1].support_weight=null;t.nodes[1].probability=.334;
+ t.demo={method:'Eşit başlangıç, en büyük kalan.',missing_reason:'Gerekli kayıt eksik: eşit başlangıç.',assumptions:[{id:'document',label:'Belge',value:'missing',value_label:'Yok',explanation:'Eksik kayıt eşit başlangıç kullanır.'}],groups:[{question:'Aynı sorunun alternatifleri',definition:'Birbirini dışlayan üç alternatif.',total_points:3,weights:[{node_id:'confirm',score:1,percentage_tenths:334}]}]};return t;
+}
+it('discovers the detached demo and updates assumptions without persistence',async()=>{
+ getScenarioDemo.mockResolvedValue(demo());render(<ScenarioTreeView/>);await userEvent.click(screen.getByRole('button',{name:'Örnek davayı aç — Demo tahmini'}));await screen.findByText('Sentetik örnek — Demo tahmini');
+ expect(screen.getAllByText(/Demo tahmini: %33,4/).length).toBeGreaterThan(0);
+ await userEvent.selectOptions(screen.getByLabelText('Belge varsayımı'),'missing');await waitFor(()=>expect(getScenarioDemo).toHaveBeenLastCalledWith('missing','unknown'));
+ expect(screen.queryByText('Dosya analizini aç')).not.toBeInTheDocument();expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();
+});
+it('opens a demo deep link without bureau cases and ignores its late response after returning',async()=>{
+ setUrl('/ai/olasilik?ornek=belge-dogrulama');getCases.mockResolvedValue([]);let resolve:(t:ScenarioTree)=>void=()=>{};getScenarioDemo.mockImplementation(()=>new Promise<ScenarioTree>(r=>{resolve=r;}));
+ render(<ScenarioTreeView/>);await waitFor(()=>expect(getScenarioDemo).toHaveBeenCalled());await userEvent.click(screen.getByRole('button',{name:'Büro dosyalarına dön'}));await act(async()=>resolve(demo()));
+ expect(screen.queryByText('Sentetik örnek — Demo tahmini')).not.toBeInTheDocument();expect(screen.getByText('Bir dava seçin')).toBeInTheDocument();
+});
+it('sends branch assumptions for only the selected case',async()=>{
+ const t=tree();t.support_model={method:'Bağımsız ölçek',assumptions:[{node_id:'confirm',value:'neutral',linked_records:0,delta:0,explanation:'50 nötr başlangıç'}]};getScenarioTree.mockResolvedValue(t);
+ render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');await userEvent.selectOptions(screen.getByLabelText('Varsayım: Belgeler doğrulanırsa'),'supports');await waitFor(()=>expect(getScenarioTree).toHaveBeenLastCalledWith('c1',{confirm:'supports'}));
 });
