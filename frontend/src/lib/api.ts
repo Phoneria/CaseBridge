@@ -701,3 +701,51 @@ export function transcribeSufle(audio: Blob, signal?: AbortSignal) {
   data.append("acknowledged", "true");
   return request<{ text: string }>("/sufle/transcribe", { method: "POST", body: data, signal });
 }
+
+// ---- Legal lab (knowledge map, counter-side analysis, directed courtroom) ----
+export async function getLabStatus(): Promise<import("@/types/legalLab").LabStatus> {
+  return request("/legal-lab/status");
+}
+
+export async function getLegalMap(): Promise<import("@/types/legalLab").LegalGraph> {
+  return request("/legal-lab/map");
+}
+
+export async function runCounterAnalysis(
+  ref: import("@/types/legalLab").CaseRef,
+  side: "davaci" | "davali",
+): Promise<import("@/types/legalLab").CounterAnalysis> {
+  return request("/legal-lab/counter-analysis", { method: "POST", body: JSON.stringify({ ...ref, side }) });
+}
+
+export async function trialBeat(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+    interv: import("@/types/legalLab").Intervention | null;
+    manual: string[];
+  },
+): Promise<import("@/types/legalLab").BeatResult> {
+  return request("/legal-lab/trial/beat", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialGuide(
+  body: import("@/types/legalLab").CaseRef & {
+    role: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<import("@/types/legalLab").GuideResult> {
+  return request("/legal-lab/trial/guide", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialAsk(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    question: string;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<{ answer: string; law: import("@/types/legalLab").LawRef[]; mode: string; note: string | null }> {
+  return request("/legal-lab/trial/ask", { method: "POST", body: JSON.stringify(body) });
+}
