@@ -1,6 +1,6 @@
 """Single place the rest of the app asks for "the current LLM
 provider". LLM_PROVIDER is the explicit, config-driven selector
-(section 27) - qwen/openai/ollama/mock. Nothing here silently substitutes one
+(section 27) - qwen/openai/anthropic/ollama/mock. Nothing here silently substitutes one
 provider for another: a selected-but-misconfigured real provider
 raises AIProviderConfigError rather than quietly degrading to
 MockProvider, so startup / the AI health status can report it clearly.
@@ -13,6 +13,7 @@ from app.ai.errors import AIProviderConfigError
 from app.ai.llm_levels import level_for_task
 from app.ai.providers.base import LLMProvider
 from app.ai.providers.mock_provider import MockProvider
+from app.ai.providers.anthropic_provider import AnthropicProvider
 from app.ai.providers.openai_provider import OpenAIProvider
 from app.ai.providers.qwen_provider import QwenProvider
 from app.ai.providers.ollama_provider import OllamaProvider
@@ -90,6 +91,21 @@ def build_llm_provider(model: str, *, law_firm_id=None) -> LLMProvider:
             )
         return OpenAIProvider(api_key=api_key, model=model)
 
+    if provider_name == "anthropic":
+        key = settings.anthropic_api_key
+        if not key or not key.strip():
+            raise AIProviderConfigError(
+                "LLM_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set. "
+                "Set ANTHROPIC_API_KEY in your environment, or set "
+                "LLM_PROVIDER=mock to run without a real AI provider."
+            )
+        return AnthropicProvider(
+            api_key=key,
+            model=model,
+            timeout_seconds=settings.anthropic_timeout_seconds,
+            max_tokens=settings.anthropic_max_output_tokens,
+        )
+
     if provider_name == "ollama":
         return OllamaProvider(
             base_url=settings.ollama_base_url,
@@ -110,6 +126,8 @@ def standard_llm_model() -> str:
         return settings.openai_model
     if name == "ollama":
         return settings.ollama_model
+    if name == "anthropic":
+        return settings.anthropic_model
     return "mock"
 
 
@@ -172,7 +190,7 @@ class _TrackedProvider(LLMProvider):
 
 
 def get_llm_provider(law_firm_id=None) -> LLMProvider:
-    if settings.llm_provider in ("qwen", "openai", "ollama"):
+    if settings.llm_provider in ("qwen", "openai", "ollama", "anthropic"):
         build = partial(build_llm_provider, law_firm_id=law_firm_id) if law_firm_id is not None else build_llm_provider
         return LevelRoutedProvider(build=build, model_for_level=llm_model_for_level)
     return MockProvider(default_response=_MOCK_DISABLED_RESPONSE)
