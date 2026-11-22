@@ -1,4 +1,4 @@
-export type CaseType = "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
+export type CaseType = "ceza" | "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
 export type CaseStatus = "devam_eden" | "durusma_bekleyen" | "karar_bekleyen" | "kapali";
 export type CaseOutcome = "ongoing" | "won" | "lost" | "settled";
 /** The statuses a case can be edited between; "kapali" is reached only by closing. */

@@ -21,6 +21,7 @@ const FONT_SIZES = ["text-[13px]", "text-sm", "text-[15px]", "text-base", "text-
 
 interface Props {
   documents: DocumentItem[];
+  initialDocumentId?: string | null;
   uploading: boolean;
   uploadError: string | null;
   onUpload: (file: File) => void;
@@ -29,8 +30,8 @@ interface Props {
   readOnly?: boolean;
 }
 
-export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload, onDeleted, readOnly = false }: Props) {
-  const [selectedId, setSelectedId] = useState<string | null>(documents[0]?.id ?? null);
+export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, uploadError, onUpload, onDeleted, readOnly = false }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(initialDocumentId ?? documents[0]?.id ?? null);
   const [listFilter, setListFilter] = useState("");
   const [query, setQuery] = useState("");
   const [activeMatch, setActiveMatch] = useState(0);

@@ -270,8 +270,8 @@ export async function listAdminLawyers(includeDemo = false): Promise<AppUser[]> 
   return request(includeDemo ? "/admin/lawyers?include_demo=true" : "/admin/lawyers");
 }
 
-export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
-  return request("/admin/demo-template", { method: "POST" });
+export async function importDemoTemplate(pack: "bureau" | "dossiers" = "bureau"): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
+  return request(pack === "dossiers" ? "/admin/demo-template?package=dossiers" : "/admin/demo-template", { method: "POST" });
 }
 
 export async function assignCaseLawyer(caseId: string, lawyerId: string): Promise<Case> {

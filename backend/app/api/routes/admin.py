@@ -1,4 +1,6 @@
 """Firm-scoped administration of case ownership."""
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -18,10 +20,15 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.post("/demo-template")
-def import_demo_template(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+def import_demo_template(package: Literal["bureau", "dossiers"] = "bureau", admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     """Populate the current firm with fictional sample records once."""
     try:
-        result = add_demo_template(db, admin)
+        if package == "dossiers":
+            from app.db.dossier_pack import add_dossiers
+            _removal_firm(db, admin)
+            result = add_dossiers(db, admin)
+        else:
+            result = add_demo_template(db, admin)
         db.commit()
         return result
     except Exception:
@@ -29,7 +36,6 @@ def import_demo_template(admin: User = Depends(get_current_admin), db: Session =
         raise
 
 
-from typing import Literal
 from pydantic import BaseModel, Field
 
 

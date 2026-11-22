@@ -11,6 +11,7 @@ from app.db.types import str_enum
 
 
 class CaseType(str, enum.Enum):
+    CEZA = "ceza"
     IS_HUKUKU = "is_hukuku"
     TICARET_HUKUKU = "ticaret_hukuku"
     SOZLESME = "sozlesme"

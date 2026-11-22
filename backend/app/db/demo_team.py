@@ -37,7 +37,8 @@ def demo_case_ids(db: Session, user: User) -> list[str] | None:
     grant = db.query(WorkspaceAccess).filter_by(law_firm_id=user.law_firm_id, user_id=user.id, position="lawyer").first()
     if grant is None:
         return None
-    allowed = {case.id for case in sample_cases(db, user.law_firm_id)}
+    from app.db.dossier_pack import package_cases
+    allowed = {case.id for case in sample_cases(db, user.law_firm_id) + package_cases(db, user.law_firm_id)}
     return sorted(allowed.intersection(grant.case_ids))
 
 

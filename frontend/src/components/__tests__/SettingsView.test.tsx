@@ -234,3 +234,14 @@ it("shows removal errors and allows a fresh preview", async () => {
   await user.click(screen.getByRole("button",{name:"Örnek verileri kaldır"}));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
 });
+
+it("loads the twenty complete case files from settings", async () => {
+  getMe.mockResolvedValue(adminUser);
+  listManagedUsers.mockResolvedValue([]);
+  importDemoTemplate.mockResolvedValue({ total_cases: 20, added_cases: 20, coverage: { "PDF evrak": 458 } });
+  render(<SettingsView />);
+  await userEvent.click(await screen.findByRole("button", { name: "20 örnek dava dosyasını yükle" }));
+  expect(importDemoTemplate).toHaveBeenCalledWith("dossiers");
+  expect(await screen.findByText(/458 evrakı Davalar bölümünde/)).toHaveAttribute("role", "status");
+  expect(screen.getByRole("link", {name: "Dava dosyalarını aç →"})).toHaveAttribute("href", "/davalar");
+});

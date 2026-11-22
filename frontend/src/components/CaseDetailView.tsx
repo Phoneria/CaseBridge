@@ -366,6 +366,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       : null;
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
+  const dossierClosure = documents.filter(d => /^[CH]\d{2}-\d{2} · /.test(d.filename)).sort((a,b) => b.filename.localeCompare(a.filename, "tr"))[0];
   const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
   const orderedTasks = [...tasks].sort((a, b) => {
     if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
@@ -446,6 +447,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           </section>
 
           {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
 
           {caseDetail.status === "kapali" && caseDetail.outcome === "ongoing" && canEditDetails &&
             <button type="button" className="rounded-xl bg-accent-600 px-4 py-2 text-sm text-white" onClick={() => setDialog("close")}>Dava sonucunu kaydet</button>}
@@ -534,12 +537,16 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
       {activeTab === "Olasılık Ağacı" && <div className="space-y-4">
         {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
         <ScenarioTreeView key={caseId} fixedCaseId={caseId} />
       </div>}
 
       {activeTab === "Belgeler" && (
         <CaseDocumentsPanel
-          documents={documents}
+          key={params.get("belge") ?? "all"}
+          initialDocumentId={params.get("belge")}
+          documents={caseDetail.case_number.match(/^ÖRNEK-[CH]\d{2}$/) ? [...documents].sort((a,b) => a.filename.localeCompare(b.filename, "tr")) : documents}
           uploading={uploading}
           uploadError={uploadError}
           onUpload={uploadFile}
@@ -551,6 +558,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       {activeTab === "Gelişmeler" && (
         <CaseTimelinePanel
           caseId={caseId}
+          documentIds={new Set(documents.map(d => d.id))}
           timeline={caseDetail.timeline}
           readOnly={archived}
           onAdded={(created) => setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, created] } : prev))}

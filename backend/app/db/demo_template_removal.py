@@ -38,6 +38,9 @@ def removal_plan(db, admin):
     cases = sample_cases(db, firm)
     cases += db.query(Case).filter(Case.law_firm_id == firm, Case.case_number.in_([f'ÖRNEK-EMSAL-{i}' for i in range(1,4)]), Case.description.startswith('[ÖRNEK ŞABLON] '), Case.is_precedent.is_(True)).all()
     case_ids = {c.id for c in cases}
+    from app.db.dossier_pack import removable_dossiers
+    removable, protected = removable_dossiers(db, firm)
+    case_ids.update(removable)
     add('cases', case_ids)
     keys = seed_record_keys()
     records = db.query(ManagementRecord).filter(ManagementRecord.law_firm_id == firm, ManagementRecord.id.in_([identity(firm, 'record:'+key) for key in keys])).all()
@@ -113,6 +116,8 @@ def removal_plan(db, admin):
     add('workspace_access', [r.id for r in access])
     fingerprint = json.dumps({k:sorted(v) for k,v in selected.items()},sort_keys=True)+json.dumps(sorted(kept_users))
     counts = {'Davalar ve emsaller':len(case_ids), 'Örnek kullanıcılar':len(removed_users), 'Büro iş akışları':len(selected.get('management_records',[])), 'Belgeler':len(selected.get('documents',[])), 'Sohbetler':len(selected.get('chat_conversations',[])), 'Duruşma provaları':len(selected.get('courtroom_sessions',[]))}
+    if protected:
+        counts['Kullanıcı içeriği nedeniyle korunan dava dosyaları'] = len(protected)
     return selected, {'token':hashlib.sha256(fingerprint.encode()).hexdigest(),'counts':counts,'kept_users':len(kept_users),'total_records':sum(map(len, selected.values()))}
 
 
