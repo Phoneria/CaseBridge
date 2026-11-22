@@ -6,6 +6,6 @@
 - [x] T004 Verify all assumption combinations, arithmetic/partition/missing data and HTTP/schema/tenant/domain-write negatives.
 - [x] T005 Verify discovery/deep link, visible assumption changes, graph/text parity, race protection, memory-only state and desktop/mobile browser flow.
 - [x] T006 Align marketing/FAQ/current tree capture and documentation with the delivered limited demo; increment appropriate v. releases.
-- [ ] T007 Run appropriate suites/build, stage pinned main, canary/rollback and public code/version/health/demo verification; record real results and converge.
+- [x] T007 Run appropriate suites/build, stage pinned main, canary/rollback and public code/version/health/demo verification; record real results and converge.
 
 Dependencies: T001 → T002/T003 → T004/T005 → T006 → T007. No independent legal audit or numerical calibration is claimed.

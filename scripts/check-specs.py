@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate adopted Spec Kit artifacts; never treats task completion as test evidence."""
+"""Validate adopted Spec Kit artifacts (behavior diff gate runs alongside this in CI); never treats task completion as test evidence."""
 import json
 import re
 from pathlib import Path
