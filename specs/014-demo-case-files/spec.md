@@ -24,6 +24,8 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 
 20 dosyanın tamamında kronoloji, içerik ve gezinme kontrolleri geçer. Her evrak türünün kapsam tablosunda en az bir açılabilir örneği vardır. Tekrar yükleme, temizleme ve bürolar arası erişim testleri geçer.
 
+- **FR-011**: Ayarlar'da yönetici kaydedilmiş ve etkinleştirilmiş OpenAI veya Claude bağlantısını tekrar anahtar girmeden açıkça seçebilir. Seçim yalnızca kendi bürosuna uygulanır. Test başarısızsa çalışan bağlantı ve bekleyen aday korunur.
+
 - **FR-012**: Dava ekranındaki ve ana menüdeki olasılık ağacının ölçeği değiştirilebilir. Seçili düğüm, yüzdeler ve belge bağlantıları korunur.
 
 - **FR-013**: Her iki ağaçta tekerlek ve izleme dörtgeni işaretçi çevresinde ölçekler. Tüm dosyalarda olası adımlarda koşullu ve birikimli senaryo yüzdeleri görünür. Kapanışta doğrulanmış geçmiş kalıcı renk ve metin ile ayırt edilir.

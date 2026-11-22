@@ -57,3 +57,16 @@ describe("AI key entry", () => {
     expect(screen.getByRole("button", { name: "Gizli anahtar ekle" })).toBeDisabled();
   });
 });
+
+it("switches between connected providers without asking for another key", async () => {
+  const status = {configured: true, managed: true, can_save: true, pending: true, available_providers: ["openai", "anthropic"]};
+  api.getAiKeyStatus.mockResolvedValueOnce({...status, active_provider:"openai"}).mockResolvedValueOnce({...status, active_provider:"anthropic"});
+  api.activateAiKey.mockResolvedValue({connected:true, checks:[], checked_at:1});
+  render(<AiKeySettings onSaved={vi.fn()} />);
+  expect(await screen.findByRole("button",{name:"OpenAI · Etkin"})).toBeDisabled();
+  await userEvent.click(screen.getByRole("button",{name:"Claude"}));
+  expect(await screen.findByRole("button",{name:"Claude · Etkin"})).toBeDisabled();
+  expect(api.activateAiKey).toHaveBeenCalledWith("anthropic");
+  expect(api.saveAiKey).not.toHaveBeenCalled();
+  expect(screen.getByRole("button",{name:"Yeni anahtarı etkinleştir"})).toBeEnabled();
+});

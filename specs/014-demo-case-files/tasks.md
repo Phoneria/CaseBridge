@@ -14,6 +14,8 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T009 Renkli bağlantılar, vurgulanan yol, seçili düğüm paneli ve gezinme (FR-008).
 - [ ] T010 Yerinde tekrar yükleme, ekip ve dava içerikleri, belgeler ve büro sunumları (FR-009).
 - [ ] T011 Sağlayıcıların izin verdiği bağlantı yöntemlerini test et ve etkin bağlantıya yönlendir (FR-010).
+- [x] T012 Kayıtlı API sağlayıcıları arasında açık seçim, büro kapsamı ve bekleyen adayın korunmasını doğrula (FR-011).
+
 - [x] T013 Grafik ölçeği, sınırlar, sıfırlama ve seçim sürekliliğini doğrula (FR-012).
 - [x] T014 Fare ve izleme dörtgeni ölçeğini, tüm dosyalarda senaryo yüzdelerini ve kayıtlı kapanış yolunu doğrula (FR-013).
 - [x] T015 Kökün dikey merkezini, dosya başına en az 20 düğümü, kaynak yüzdelerinin önceliğini ve sabit rastgele dağılımı doğrula (FR-014).

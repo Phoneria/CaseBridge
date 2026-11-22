@@ -14,6 +14,8 @@ class AIKeyStatusOut(BaseModel):
     managed: bool
     pending: bool
     can_save: bool
+    active_provider: Optional[str] = None
+    available_providers: List[str] = []
 
 
 class AIConnectivityCheck(BaseModel):
