@@ -45,6 +45,35 @@
         "backend/tests/unit/test_anonymizer.py::test_restore_roundtrip"
       ],
       "reason": "Opt-in masking of prompts sent to external LLM providers with response restoration; off by default. Application version manifest is bumped because backend source changed."
+    },
+    {
+      "files": [
+        "backend/app/privacy/policy.py",
+        "backend/app/privacy/policy.json"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_policy_city_flag_keeps_text_but_reports",
+        "backend/tests/unit/test_anonymizer.py::test_policy_city_mask_and_off",
+        "backend/tests/unit/test_anonymizer.py::test_policy_invalid_mode_rejected",
+        "backend/tests/unit/test_anonymizer.py::test_report_has_no_original_values"
+      ],
+      "reason": "Configurable masking policy per category and a value-free report of what was masked or flagged."
+    },
+    {
+      "files": [
+        "backend/app/privacy/names.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_court_names_not_taken_as_address",
+        "backend/tests/unit/test_anonymizer.py::test_uppercase_names_and_surname_propagation"
+      ],
+      "reason": "Name heuristics found necessary on real UYAP documents: upper-case names, role words, court names, surname propagation."
     }
   ]
 }

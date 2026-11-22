@@ -17,6 +17,9 @@ import re
 from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
+from app.privacy import names
+from app.privacy.policy import Policy, default_policy
+
 _UP = "A-ZÇĞİÖŞÜ"
 _TR_LOWER = str.maketrans({"İ": "i", "I": "ı"})
 Span = tuple[int, int, str, str]  # start, end, tür, kimlik-anahtarı
@@ -44,7 +47,7 @@ _RULES: list[tuple[str, re.Pattern]] = [
     ("DOĞUM-TARİHİ", re.compile(r"(?i:doğum\s+tarihi|d\.\s?tarihi|doğ\.)\s*[:\-]?\s*\d{1,2}[./]\d{1,2}[./]\d{4}")),
     ("ADRES", re.compile(
         rf"(?:[{_UP}][\wçğıöşü'’.]*\s){{1,3}}"
-        rf"(?:Mah\.?|Mahallesi|Sok\.?|Sokak|Sk\.?|Cad\.?|Caddesi|Bulvarı)"
+        rf"(?:Mah\.?|Mahallesi|Sok\.?|Sokak|Sk\.?|Cad\.?|Caddesi|Bulvarı)(?![a-zçğıöşü])"
         rf"(?:\s?(?:No|Kapı|Kat|Daire|D)\s?[:.]?\s?\d+(?:\s?/\s?\d+)?)*"
         rf"(?:\s[{_UP}][\wçğıöşü]+\s?/\s?[{_UP}][\wçğıöşü]+)?")),
 ]
@@ -65,6 +68,20 @@ class Result:
     leaks: list[str] = field(default_factory=list)  # çıktıda kalan bilinen değer sayısı (değerin kendisi tutulmaz)
     # etiket -> ilk görülen özgün metin. Yalnızca bellekte, yanıtı geri çevirmek için; repr/log'a girmez.
     mapping: dict[str, str] = field(default_factory=dict, repr=False)
+    # Politika sonucu: tür -> {mod, adet, farklı, etiketler}. Değer içermez, yalnızca sayı ve etiket.
+    report: dict[str, dict] = field(default_factory=dict)
+    # Özgün metindeki bulgular (başlangıç, bitiş, tür, mod); değer içermez, işaretleme için konum.
+    spans: list[tuple[int, int, str, str]] = field(default_factory=list, repr=False)
+
+    def report_text(self) -> str:
+        """Neyin maskelendiği/işaretlendiği, değerler olmadan (log ve arayüz için güvenli)."""
+        if not self.report:
+            return "Hiçbir kişisel veri bulunamadı."
+        rows = []
+        for kind, r in sorted(self.report.items()):
+            verb = "maskelendi" if r["mod"] == "maskele" else "işaretlendi (metinde duruyor)"
+            rows.append(f"{kind}: {r['adet']} geçiş, {r['farkli']} farklı değer {verb}")
+        return "\n".join(rows)
 
     def restore(self, text: str) -> str:
         """Yanıttaki etiketleri özgün değerlerle değiştirir (en uzun etiket önce)."""
@@ -127,13 +144,25 @@ def anonymize(
     text: str,
     entities: Iterable[Entity] = (),
     extra_detectors: Iterable[Callable[[str], list[Span]]] = (),
+    policy: Policy | None = None,
 ) -> Result:
+    pol = policy or default_policy()
     low = _lower(text)
     ents = list(entities)
-    spans = _known_spans(text, low, ents) + _rule_spans(text)
+    extra: list[Span] = []
     for det in extra_detectors:  # örn. yerel NER
-        spans += det(text)
-    spans = _resolve(spans)
+        extra += det(text)
+    person_in = [s for s in extra if s[2] == "KİŞİ"]
+    if pol.kisi_sezgisel:
+        person_in += names.heuristic_spans(text, pol)
+    kmap = {_lower(t): f"kisi:{_lower(e.name.strip())}" for e in ents if e.kind == "kisi"
+            for t in e.name.split() if len(t) >= 3}
+    persons = names.normalize(text, person_in, pol, kmap) if person_in else []
+    rules = [s for s in _rule_spans(text)
+             if not (s[2] == "ADRES" and any(w in pol.mahkeme_sozcukleri for w in re.findall(r"[\wçğıöşü]+", text[s[0]:s[1]])))]
+    spans = (_known_spans(text, low, ents) + rules + persons
+             + [s for s in extra if s[2] != "KİŞİ"] + names.city_spans(text, low, pol))
+    spans = _resolve([s for s in spans if pol.mode(s[2]) != "kapalı"])
 
     labels: dict[str, str] = {}
     mapping: dict[str, str] = {}
@@ -141,13 +170,23 @@ def anonymize(
     counts: dict[str, int] = {}
     parts: list[str] = []
     pos = 0
+    report: dict[str, dict] = {}
+    seen: dict[str, set] = {}
     for a, b, kind, key in spans:
+        mode = pol.mode(kind)
+        r = report.setdefault(kind, {"mod": mode, "adet": 0, "farkli": 0, "etiketler": {}})
+        r["adet"] += 1
+        seen.setdefault(kind, set()).add(key)
+        r["farkli"] = len(seen[kind])
+        if mode != "maskele":  # işaretle: metin olduğu gibi kalır
+            continue
         if key not in labels:
             per_kind[kind] = per_kind.get(kind, 0) + 1
             labels[key] = f"[{kind}-{per_kind[kind]}]"
             mapping[labels[key]] = text[a:b]
         parts.append(text[pos:a]); parts.append(labels[key]); pos = b
         counts[kind] = counts.get(kind, 0) + 1
+        r["etiketler"][labels[key]] = r["etiketler"].get(labels[key], 0) + 1
     parts.append(text[pos:])
     clean = "".join(parts)
 
@@ -160,4 +199,5 @@ def anonymize(
     for m in _TC.finditer(clean):
         if tc_valid(m.group()):
             leaks.append("tc")
-    return Result(text=clean, counts=counts, leaks=leaks, mapping=mapping)
+    return Result(text=clean, counts=counts, leaks=leaks, mapping=mapping, report=report,
+                  spans=[(a, b, k, pol.mode(k)) for a, b, k, _ in spans])

@@ -115,3 +115,48 @@ def test_ner_unavailable_falls_back_silently(monkeypatch):
     assert ner.detect_persons("Fatma Kaya geldi") == []
     r = anonymize("Fatma Kaya 0532 123 45 67", [], extra_detectors=[ner.detect_persons])
     assert "[TELEFON-1]" in r.text and "Fatma Kaya" in r.text  # kural katmanı çalışır, NER yok
+
+
+# --- politika (config) ve rapor ---
+from app.privacy.policy import Policy  # noqa: E402
+
+_SEHIR = "Dava Ankara'da görüldü. Ankara Ağır Ceza Mahkemesi karar verdi."
+
+
+def test_policy_city_flag_keeps_text_but_reports():
+    r = anonymize(_SEHIR)
+    assert "Ankara" in r.text
+    assert r.report["ŞEHİR"]["mod"] == "işaretle" and r.report["ŞEHİR"]["adet"] == 2
+    assert "ŞEHİR" not in r.counts and r.spans and r.spans[0][3] == "işaretle"
+
+
+def test_policy_city_mask_and_off():
+    mask = anonymize(_SEHIR, policy=Policy.from_dict({"kategoriler": {"ŞEHİR": "maskele"}, "sehirler": ["Ankara"]}))
+    assert "Ankara" not in mask.text and "[ŞEHİR-1]" in mask.text
+    off = anonymize(_SEHIR, policy=Policy.from_dict({"kategoriler": {"ŞEHİR": "kapalı"}, "sehirler": ["Ankara"]}))
+    assert "ŞEHİR" not in off.report and "Ankara" in off.text
+
+
+def test_policy_invalid_mode_rejected():
+    with pytest.raises(ValueError):
+        Policy.from_dict({"kategoriler": {"KİŞİ": "sil"}})
+
+
+def test_report_has_no_original_values():
+    r = anonymize("Ayşe Yılmaz 0532 123 45 67", [Entity("Ayşe Yılmaz")])
+    txt = r.report_text() + repr(r.report)
+    assert "Ayşe" not in txt and "0532" not in txt
+    assert r.report["KİŞİ"]["farkli"] == 1 and r.report["TELEFON"]["adet"] == 1
+
+
+def test_court_names_not_taken_as_address():
+    r = anonymize("Ankara Bölge Adliye Mahkemesi ve Ağır Ceza Mah. kararı.")
+    assert "ADRES" not in r.report and "Ağır Ceza" in r.text
+
+
+def test_uppercase_names_and_surname_propagation():
+    t = "HAKİM : KAAN ZİLCİ  216681\nVekili Av. Fatih PEKASİL sundu. Pekasil'in beyanı. PEKASİL itiraz etti."
+    r = anonymize(t)
+    for v in ("ZİLCİ", "KAAN", "216681", "PEKASİL", "Pekasil"):
+        assert v.lower() not in r.text.lower(), v
+    assert r.report["KİŞİ"]["farkli"] == 2
