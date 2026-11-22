@@ -56,6 +56,12 @@ class VersionedGalleryTests(unittest.TestCase):
             self.assertFalse(gallery.needed(dict(observed,marketingVersion='v.0.48'),ledger))
             self.assertEqual((root/'web-page/assets/feature-screens/tr-current/scenario-tree.jpg').read_bytes(),data)
             self.assertIn(hashlib.sha256(data).hexdigest(),(root/'scripts/tests/test_generated_gallery.py').read_text())
+            # The candidate reached protected main but activation failed: a new complete
+            # marketing SHA can retry the latched immutable publisher without manual edits.
+            retry=gallery.prepare(root,batch,observed,audit,observed)
+            self.assertEqual(retry['marketingVersion'],'v.0.49')
+            self.assertEqual(retry['sourceMarketingVersion'],'v.0.47')
+            self.assertEqual(json.loads((root/'specs/changes/generated-gallery.json').read_text())['changes'][0]['files'],['web-page/index.html','web-page/website-version.json'])
             audit['productionApiRequests']=['/api/cases']
             with self.assertRaises(ValueError):gallery.validate_batch(gallery.references(html),batch,audit,observed)
 

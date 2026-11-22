@@ -77,7 +77,10 @@ def prepare(root, batch, observed, audit, latest):
     version_file = root/'web-page/website-version.json'
     version = json.loads(version_file.read_text())
     if version['version'] != observed['marketingVersion']:
-        raise ValueError('Main marketing source has not reached public version')
+        prior = json.loads((root/LEDGER).read_text()) if (root/LEDGER).exists() else {}
+        retry_own = prior.get('app') == observed['app'] and prior.get('marketingVersion') == version['version'] and prior.get('sourceMarketingVersion') == observed['marketingVersion']
+        if not retry_own:
+            raise ValueError('Main marketing source has not reached public version')
     output = next_version(version['version'])
     changed_images = [path for path in paths if not (root/'web-page'/path).exists() or (root/'web-page'/path).read_bytes() != (batch/Path(path).name).read_bytes()]
     # No file changes occur until every candidate has passed validation.
@@ -89,7 +92,7 @@ def prepare(root, batch, observed, audit, latest):
     markup = html.read_text().replace(f'content="{old}"',f'content="{output}"')
     markup = re.sub(r'(assets/feature-screens/tr-current/[a-z-]+\.jpg)(?:\?[^" ]*)?', lambda m: m[1]+'?v='+output.removeprefix('v.'), markup)
     html.write_text(markup)
-    ledger = dict(observed, marketingVersion=output, sourceMarketingVersion=old, hashes=hashes,
+    ledger = dict(observed, marketingVersion=output, sourceMarketingVersion=observed['marketingVersion'], hashes=hashes,
                   mode='public-served-frontend-with-isolated-synthetic-api', routes={row['name']:row['route'] for row in audit['audit']})
     (root/LEDGER).write_text(json.dumps(ledger, indent=2, ensure_ascii=False)+'\n')
     # Each generated PR changes a named assertion-bearing acceptance test, binding every output byte.
