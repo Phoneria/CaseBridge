@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useId, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getCases, getScenarioTree, getScenarioDemo } from '@/lib/api';
 import { analysisStartHref } from '@/lib/ai';
@@ -30,6 +30,28 @@ const edgeColors = ['#007eac', '#804ca3', '#aa5710'];
 function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selected: string; onSelect: (id: string) => void }) {
   const marker = useId().replace(/:/g, '');
   const [hovered, setHovered] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(100);
+  const viewport = useRef<HTMLDivElement>(null);
+  const anchor = useRef<{ x: number; y: number } | null>(null);
+
+  function changeZoom(next: number) {
+    const element = viewport.current;
+    if (!element || next === zoom) return;
+    anchor.current = {
+      x: (element.scrollLeft + element.clientWidth / 2) / (zoom / 100),
+      y: (element.scrollTop + element.clientHeight / 2) / (zoom / 100),
+    };
+    setZoom(next);
+  }
+
+  useLayoutEffect(() => {
+    const element = viewport.current;
+    if (!element || !anchor.current) return;
+    element.scrollLeft = anchor.current.x * zoom / 100 - element.clientWidth / 2;
+    element.scrollTop = anchor.current.y * zoom / 100 - element.clientHeight / 2;
+    anchor.current = null;
+  }, [zoom]);
+
   const layout = useMemo(() => {
     const positions = new Map<string, {x: number; y: number; color: number}>();
     const children = new Map<string, ScenarioNode[]>();
@@ -56,8 +78,16 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
     const parent = cursor.parent_id;
     cursor = tree.nodes.find(n => n.id === parent);
   }
-  return <div className="max-h-[38rem] min-w-0 overflow-auto rounded-2xl border border-surface-border bg-surface-muted p-2" role="group" aria-label="Dosya senaryo ağacı">
-    <div className="relative" style={{ width: layout.width, height: layout.height }}>
+  const controlClass = "min-h-10 min-w-10 rounded-lg border border-surface-border px-3 text-sm font-semibold text-navy-800 hover:bg-accent-50 focus-visible:ring-2 focus-visible:ring-accent-500 disabled:opacity-40";
+  return <div className="min-w-0 rounded-2xl border border-surface-border bg-surface-muted" role="group" aria-label="Dosya senaryo ağacı">
+    <div role="group" aria-label="Grafik ölçeği" className="flex items-center justify-end gap-1 rounded-t-2xl border-b border-surface-border bg-white p-2">
+      <button type="button" className={controlClass} aria-label="Uzaklaştır" title="Uzaklaştır" disabled={zoom <= 25} onClick={() => changeZoom(zoom - 25)}>−</button>
+      <button type="button" className={controlClass + " tabular-nums"} aria-label={`Ölçek %${zoom}, normal boyuta dön`} title="Normal boyuta dön" onClick={() => changeZoom(100)}>%{zoom}</button>
+      <button type="button" className={controlClass} aria-label="Yakınlaştır" title="Yakınlaştır" disabled={zoom >= 200} onClick={() => changeZoom(zoom + 25)}>+</button>
+    </div>
+    <div ref={viewport} className="max-h-[38rem] overflow-auto">
+      <div className="relative overflow-hidden" style={{ width: layout.width * zoom / 100, height: layout.height * zoom / 100 }}>
+        <div className="relative origin-top-left" style={{ width: layout.width, height: layout.height, transform: `scale(${zoom / 100})` }}>
       <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
         <defs>{edgeColors.map((color, i) => <marker key={color} id={marker+i} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10z" fill={color}/></marker>)}</defs>
         {tree.nodes.map(node => {
@@ -79,6 +109,8 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
         <span className="text-[11px] text-navy-600">{assessment(node)}</span>
       </button>; })}
+        </div>
+      </div>
     </div>
   </div>;
 }
@@ -200,7 +232,7 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
       </div>
       <p className="text-xs text-navy-500">Grafiği yatay veya dikey kaydırabilirsiniz. Tüm dalları ve dayanakları okumak için metin alternatifini de kullanabilirsiniz.</p>
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        {view === 'graph' ? <TreeDiagram tree={tree} selected={selected} onSelect={setSelected} /> : <section aria-label="Ağacın metin alternatifi" className="space-y-3 rounded-2xl border border-surface-border bg-white p-4">
+        {view === 'graph' ? <TreeDiagram key={tree.case_id} tree={tree} selected={selected} onSelect={setSelected} /> : <section aria-label="Ağacın metin alternatifi" className="space-y-3 rounded-2xl border border-surface-border bg-white p-4">
           {tree.nodes.map(n => <article key={n.id} className={'rounded-xl border border-surface-border p-3 '+(n.parent_id ? 'ml-3' : '')}>
             <button type="button" onClick={() => setSelected(n.id)} aria-pressed={selected === n.id} className="text-left text-sm font-semibold text-accent-800">{n.label}</button>
             <p className="mt-1 text-sm text-navy-700">{n.description}</p><p className="mt-1 text-xs text-navy-500">{assessment(n)}</p>

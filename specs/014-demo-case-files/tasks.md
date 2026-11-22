@@ -14,3 +14,4 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T009 Renkli bağlantılar, vurgulanan yol, seçili düğüm paneli ve gezinme (FR-008).
 - [ ] T010 Yerinde tekrar yükleme, ekip ve dava içerikleri, belgeler ve büro sunumları (FR-009).
 - [ ] T011 Sağlayıcıların izin verdiği bağlantı yöntemlerini test et ve etkin bağlantıya yönlendir (FR-010).
+- [x] T013 Grafik ölçeği, sınırlar, sıfırlama ve seçim sürekliliğini doğrula (FR-012).

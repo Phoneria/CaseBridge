@@ -15,3 +15,7 @@ Canlı arayüzden yapılan yükleme 20 dava ve 478 evrak bildirdi. Hukuk dosyas�
 ## v.0.29 yayın adayı
 
 Yerel entegrasyon 20 dosyanın her birinde en az 50 düğüm, kapanışa kadar en az beş aşama, yol yüzdeleri ve belge bağlantılarını sınadı. Chromium ile 57 düğümlü dosyada fareyle üzerine gelme, düğüm seçme, iki yüzde ve dayanak belgesi sekmesine geçiş doğrulandı. Ön yüz testleri 773/773 geçti.
+
+## Olasılık ağacı ölçeği
+
+Dokuz ağaç bileşen testi ve TypeScript denetimi geçti. Chromium’da dava sekmesinden ve ana menüdeki ağaçtan aynı dosya açıldı. Bir düğümün ölçülen genişliği %75 ve %125 ayarlarıyla eşleşti. Her iki girişte de düğüm seçili kaldı ve dayanak bağlantısı doğru belge sekmesini açtı.
