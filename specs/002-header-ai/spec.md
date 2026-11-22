@@ -7,7 +7,7 @@
 ### User Story 1 - Yetkili kullanıcı AI araçlarına masaüstü ve mobil header üzerinden erişir. (Priority: P1)
 
 **Why this priority**: Kullanıcının açık talebi ve mevcut iş akışını koruma gereksinimi.
-**Independent Test**: Exercise all role states and deep routes; no duplicate sidebar AI links.
+**Independent Test**: Exercise all role states and deep routes; header and expanded sidebar offer the same authorized tools.
 
 **Acceptance Scenarios**:
 1. **Given** yetkili kullanıcı ve doğrulanmış başlangıç, **When** bu işin akışı kullanılır, **Then** Yetkili kullanıcı AI araçlarına masaüstü ve mobil header üzerinden erişir.
@@ -26,12 +26,14 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 
 ### Functional Requirements
 
-- **FR-001**: Hub ve tüm mevcut AI rotaları yalnız header’da bulunur; sidebar AI grubu kaldırılır.
+- **FR-001**: Son kullanıcı yönlendirmesi: hub ve tüm mevcut AI rotaları header’da korunur; aynı yetkili araçlar sidebar’da genişletilmiş, ek tıklama gerektirmeyen ayrı CaseBridge AI grubunda da bulunur. Tek sütun ve tüm satırlar görünür; parlak mavi tüm-grup halkası yoktur.
 - **FR-002**: Platform ve restricted hesapların mevcut sınırları korunur; görünüm server yetkilerini genişletmez.
 - **FR-003**: Aktif alt rota, görünür klavye odağı, Escape ve odağın açan düğmeye iadesi çalışır.
 - **FR-004**: 320px dâhil mobilde header menüsünden aynı araçlara erişilir; arama/bildirim/kullanıcı menüsü korunur.
 
 - **FR-007**: Yayın regresyonunda hızlı sesli beyan, conversation modunda ilk render’daki eski opening değerini göndermez; geçerli seçilmiş konuşma eylemi korunur, varsayılan argument olur.
+
+- **FR-005**: Tam yetkili menü 900px ve 768px masaüstü yüksekliğinde ilk/son bağlantı ve dokuz AI satırı tek bakışta görünür olacak şekilde kompaktlaştırılır; kısa/mobil/yüksek zoom alanında kesilmeden kaydırılabilir. Tek seçili AI bağlantısı, klavye odağı ve rol sınırları korunur.
 
 ### Key Entities
 
@@ -41,7 +43,7 @@ Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gö
 
 ### Measurable Outcomes
 
-- **SC-001**: Exercise all role states and deep routes; no duplicate sidebar AI links.
+- **SC-001**: Exercise all role states and deep routes; header and expanded sidebar offer the same authorized tools.
 - **SC-002**: Keyboard open, Tab, Escape/focus return and mobile pointer navigation in both themes.
 - **SC-003**: Açık kabul maddelerinin tamamında gerçek sonuç kaydı bulunur; eksik sonuç tamamlandı gösterilmez.
 

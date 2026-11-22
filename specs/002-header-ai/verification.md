@@ -18,3 +18,11 @@ Application **v.0.20**, marketing **v.0.44**; deployed main commit `70fabd06f695
 ## Convergence
 
 Every scoped requirement maps to implemented code and actual verification. All feature tasks are complete; missing checks were added append-only as discovered and completed only after evidence. External/legal-model validation was not invented as a new release gate or claimed as performed by the assistant. This final documentation commit does not change released application behavior. Existing customer onboarding/key gates remain governed by AGENTS.md/todo.md.
+
+## Expanded sidebar follow-up: local critical verification
+
+Latest user steering restores the sidebar group while preserving header AI. Fifteen targeted Sidebar/AiNavigation tests passed; production build/typecheck passed. Actual full admin menu has 20 links including nine AI rows and Settings. All are simultaneously visible at 1440×900 and 1280×768 in light/dark themes: first link top 69.58px; last link bottom 855/723px; minimum row height 24px. ScrollHeight does not exceed clientHeight on those desktop viewports. Single active AI link, focus return and unchanged nine header links pass.
+
+390×844 and 320×568 mobile drawers and a 720×384 CSS viewport retain scroll/focus access to first/last AI and Settings. 720×384 models reduced CSS space comparable to 200% zoom on 1440×768; actual browser zoom was not independently set, so no full browser-zoom claim. Platform/restricted role tests pass. The group has no whole-group border/ring; selected link/focus remain distinct. Twelve native v.0.22 product captures refreshed with synthetic data. Main PR/release/public checks pending until recorded below.
+
+Proof: docs/validation/2026-11-22/sidebar-local-results.json and sidebar-capture-provenance.json.

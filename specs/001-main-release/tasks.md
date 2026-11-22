@@ -34,5 +34,5 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 - [x] T010 [US2] Reject invalid or unverified rollback candidates before entering recovery, so rejected caller input cannot restart the previous release.
 
 - [x] T020 Implement data-model.md#featurecontract change record and FR-005 through FR-008 diff-to-requirement/named runnable acceptance validation.
-- [ ] T021 Verify actual effective main rules/provider and negative→fixed same PR without merging probe code.
-- [ ] T022 Merge governance implementation only through the protected PR path and record actual check/merge evidence.
+- [x] T021 Verify actual effective main rules/provider and negative→fixed same PR without merging probe code.
+- [x] T022 Merge governance implementation only through the protected PR path and record actual check/merge evidence.

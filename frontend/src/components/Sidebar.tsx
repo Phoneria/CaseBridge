@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { BrandLogo } from "@/components/BrandLogo";
+import { AI_NAVIGATION, aiLinkActive } from "@/lib/aiNavigation";
+import { AiMark } from "@/components/ai/AiMark";
 import { APP_VERSION } from "@/lib/appVersion";
 
 interface NavItem {
@@ -15,7 +17,7 @@ interface NavItem {
 
 function Icon({ d }: { d: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.75} stroke="currentColor" className="h-5 w-5">
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.75} stroke="currentColor" className="h-4 w-4 shrink-0">
       <path d={d} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -57,12 +59,12 @@ function isActive(pathname: string | null, href: string): boolean {
 }
 
 function NavLink({ item, pathname }: { item: NavItem; pathname: string | null }) {
-  const active = isActive(pathname, item.href);
+  const active = item.href.startsWith("/ai") ? aiLinkActive(pathname ?? "", item.href) : isActive(pathname, item.href);
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+      className={`flex min-h-6 items-center gap-2 rounded-lg px-2 py-0.5 text-[13px] font-medium leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 ${
         active
           ? "bg-accent-600 text-white shadow-card"
           : "text-navy-700 hover:bg-accent-100 hover:text-accent-800"
@@ -78,20 +80,20 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-5">
-      <div className="mb-6 shrink-0 px-2"><BrandLogo /></div>
+    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-3 py-3">
+      <div className="mb-2 shrink-0 px-1 [&_img]:w-36 [&>span]:px-1 [&>span]:py-0.5"><BrandLogo /></div>
 
       <div className="min-h-0 flex flex-1 flex-col">
 
       {restricted ? (
         <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
           <NavLink item={{label:"Çalışma Alanım",href:"/calisma-alanim",icon:<Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2"/>}} pathname={pathname}/>
-          <div className="mt-auto pt-4"><NavLink item={ACCOUNT_ITEM} pathname={pathname}/></div>
+          <div className="mt-auto pt-2"><NavLink item={ACCOUNT_ITEM} pathname={pathname}/></div>
         </nav>
       ) : platform ? (
         <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
           <NavLink item={PLATFORM_ITEM} pathname={pathname} />
-          <div className="mt-auto flex flex-col gap-2 pt-4">
+          <div className="mt-auto flex flex-col gap-1 pt-2">
             <NavLink item={ACCOUNT_ITEM} pathname={pathname} />
             <NavLink item={SETTINGS_ITEM} pathname={pathname} />
           </div>
@@ -100,7 +102,7 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
       <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
         <div className="flex min-h-full flex-col">
-        <div className="shrink-0 space-y-1">
+        <div className="shrink-0 space-y-0">
         {role === "admin" && <NavLink item={{label:"Büro Yönetimi",href:"/buro",icon:<Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2"/>}} pathname={pathname}/>}
         {role === "lawyer" && <NavLink item={{label:"Çalışma Alanım",href:"/calisma-alanim",icon:<Icon d="M9 11.5 11 13.5 15.5 9M5 6h14v14H5z"/>}} pathname={pathname}/>}
         {role === "admin" && (
@@ -110,17 +112,19 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
         </div>
-
-
+        <section role="group" aria-label="CaseBridge AI" className="mt-1 shrink-0 rounded-xl bg-white px-1 py-1">
+          <h2 className="mb-1 flex items-center gap-2 px-2 text-[11px] font-semibold leading-4 tracking-wide text-navy-600"><AiMark className="h-3.5 w-3.5 text-navy-500" />CaseBridge AI</h2>
+          <div className="space-y-0">{AI_NAVIGATION.map(item => <NavLink key={item.href} item={{...item, icon:<AiMark className="h-4 w-4 shrink-0" />}} pathname={pathname} />)}</div>
+        </section>
         </div>
         </div>
-        <div className="mt-auto flex shrink-0 flex-col gap-2 pt-4">
+        <div className="mt-auto flex shrink-0 flex-col gap-1 pt-2">
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>
       )}
       </div>
-      <p className="mt-4 shrink-0 border-t border-accent-200 px-3 pt-3 text-xs font-medium text-navy-500" aria-label={`Uygulama sürümü ${APP_VERSION}`}>v.{APP_VERSION}</p>
+      <p className="mt-2 shrink-0 border-t border-accent-200 px-2 pt-2 text-xs font-medium text-navy-500" aria-label={`Uygulama sürümü ${APP_VERSION}`}>v.{APP_VERSION}</p>
     </aside>
   );
 }

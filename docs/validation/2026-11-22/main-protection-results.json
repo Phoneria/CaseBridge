@@ -1,0 +1,174 @@
+{
+  "ruleset": {
+    "id": 27816126,
+    "name": "main: PR and Spec Kit acceptance gate",
+    "enforcement": "active",
+    "bypass_actors": [],
+    "conditions": {
+      "ref_name": {
+        "exclude": [],
+        "include": [
+          "refs/heads/main"
+        ]
+      }
+    },
+    "rules": [
+      {
+        "type": "non_fast_forward"
+      },
+      {
+        "type": "pull_request",
+        "parameters": {
+          "required_approving_review_count": 0,
+          "dismiss_stale_reviews_on_push": false,
+          "required_reviewers": [],
+          "require_code_owner_review": false,
+          "require_last_push_approval": false,
+          "required_review_thread_resolution": false,
+          "require_extra_approval_for_unattributed_changes": true,
+          "allowed_merge_methods": [
+            "merge",
+            "squash",
+            "rebase"
+          ]
+        }
+      },
+      {
+        "type": "required_status_checks",
+        "parameters": {
+          "strict_required_status_checks_policy": true,
+          "do_not_enforce_on_create": false,
+          "required_status_checks": [
+            {
+              "context": "spec-governance",
+              "integration_id": 15368
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "protected_main": true,
+  "implementation_pr": {
+    "headRefOid": "ae1a59bd12f1b4f725921b459dd7f7191a267c01",
+    "mergeCommit": {
+      "oid": "3b3e0a711130cab82ea3e1265c3b90fd08a88848"
+    },
+    "mergedAt": "2026-11-22T00:04:12Z",
+    "number": 27,
+    "state": "MERGED",
+    "url": "https://github.com/Phoneria/CaseBridge/pull/27"
+  },
+  "probe_negative": {
+    "headRefOid": "c208bc368a76def5ac7441300f546b969690a7d7",
+    "mergeStateStatus": "BLOCKED",
+    "mergeable": "MERGEABLE",
+    "number": 28,
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-22T00:04:47Z",
+        "conclusion": "FAILURE",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964850893/job/137031440891",
+        "name": "spec-governance",
+        "startedAt": "2026-11-22T00:04:43Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964850893/job/137031440707",
+        "name": "backend",
+        "startedAt": "2026-11-22T00:04:43Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964850893/job/137031440823",
+        "name": "frontend",
+        "startedAt": "2026-11-22T00:04:43Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      }
+    ],
+    "url": "https://github.com/Phoneria/CaseBridge/pull/28"
+  },
+  "negative_required_check": [
+    {
+      "app_id": 15368,
+      "app_slug": "github-actions",
+      "conclusion": "failure",
+      "html_url": "https://github.com/Phoneria/CaseBridge/actions/runs/44964850893/job/137031440891",
+      "id": 137031440891,
+      "name": "spec-governance",
+      "status": "completed"
+    }
+  ],
+  "negative_reason": "2026-11-22T00:04:46.4547990Z Spec acceptance failed: Behavior changes lack Spec Kit requirement + changed acceptance test: scripts/spec-gate-probe.py",
+  "probe_positive": {
+    "headRefOid": "085bdb2c8fa419372e26564378ef97813609ce4c",
+    "mergeStateStatus": "UNSTABLE",
+    "mergeable": "MERGEABLE",
+    "number": 28,
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-11-22T00:05:37Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964920034/job/137031650477",
+        "name": "spec-governance",
+        "startedAt": "2026-11-22T00:05:31Z",
+        "status": "COMPLETED",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964920034/job/137031650461",
+        "name": "backend",
+        "startedAt": "2026-11-22T00:05:31Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/Phoneria/CaseBridge/actions/runs/44964920034/job/137031650239",
+        "name": "frontend",
+        "startedAt": "2026-11-22T00:05:31Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "CI"
+      }
+    ],
+    "url": "https://github.com/Phoneria/CaseBridge/pull/28"
+  },
+  "positive_required_check": [
+    {
+      "app_id": 15368,
+      "app_slug": "github-actions",
+      "conclusion": "success",
+      "html_url": "https://github.com/Phoneria/CaseBridge/actions/runs/44964920034/job/137031650477",
+      "id": 137031650477,
+      "name": "spec-governance",
+      "status": "completed"
+    }
+  ],
+  "probe_closed": {
+    "closedAt": "2026-11-22T00:06:25Z",
+    "mergedAt": null,
+    "number": 28,
+    "state": "CLOSED",
+    "url": "https://github.com/Phoneria/CaseBridge/pull/28"
+  },
+  "probe_code_merged": false,
+  "notes": "Required spec-governance passed with app 15368. Positive mergeStateStatus UNSTABLE reflected nonrequired running jobs; MERGEABLE and required check success were observed. No probe merge was attempted; no optional full CI wait added."
+}

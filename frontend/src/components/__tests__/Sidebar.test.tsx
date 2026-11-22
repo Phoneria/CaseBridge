@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 let pathname = "/dashboard";
 vi.mock("next/navigation", () => ({
@@ -10,6 +10,7 @@ vi.mock("@/lib/api", () => ({
   getAiConnectivity: vi.fn(() => new Promise(() => {})),
 }));
 
+import { AI_NAVIGATION } from "@/lib/aiNavigation";
 import { Sidebar } from "@/components/Sidebar";
 
 beforeEach(() => {
@@ -20,6 +21,7 @@ describe("Sidebar", () => {
   it("keeps scoped accounts inside their own workspace", () => {
     render(<Sidebar role="lawyer" restricted />);
     expect(screen.getByRole("link", { name: "Çalışma Alanım" })).toHaveAttribute("href", "/calisma-alanim");
+    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
     for (const label of ["Davalar", "Ayarlar", "Büro Yönetimi", "Dosya Analizi"]) expect(screen.queryByRole("link", {name:label})).not.toBeInTheDocument();
   });
   it("renders the main navigation without the old Simülasyonlar item", () => {
@@ -30,10 +32,14 @@ describe("Sidebar", () => {
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 
-  it("keeps AI entry points exclusively in the header", () => {
-    render(<Sidebar />);
-    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", {name:"Dosya Analizi"})).not.toBeInTheDocument();
+  it("shows every authorized AI tool in an expanded sidebar group", () => {
+    render(<Sidebar role="admin" />);
+    const group=screen.getByRole("group", {name:"CaseBridge AI"});
+    expect(within(group).getAllByRole("link")).toHaveLength(9);
+    for(const item of AI_NAVIGATION) expect(within(group).getByRole("link",{name:item.label})).toHaveAttribute("href",item.href);
+    expect(within(group).queryByRole("button")).not.toBeInTheDocument();
+    expect(group.querySelector("details")).toBeNull();
+    expect(group.className).not.toMatch(/border|ring/);
   });
 
   it("marks the current route as active", () => {
@@ -41,9 +47,12 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "Genel Bakış" })).toHaveAttribute("aria-current", "page");
   });
 
-  it.each(["/ai", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("does not duplicate AI links on %s", path => {
+  it.each(["/ai", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("marks one matching AI tool on %s", path => {
     pathname = path; render(<Sidebar />);
-    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
+    const group=screen.getByRole("group", {name:"CaseBridge AI"});
+    const active=group.querySelectorAll('a[aria-current="page"]');
+    expect(active).toHaveLength(1);
+    expect(active[0]).toHaveAttribute("href",path.startsWith("/ai/durusma/")?"/ai/durusma":path);
     expect(screen.queryByRole("button", {name:/AI kontrol/})).not.toBeInTheDocument();
   });
 

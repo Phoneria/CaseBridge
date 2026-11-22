@@ -18,3 +18,7 @@ Application **v.0.20**, marketing **v.0.44**; deployed main commit `70fabd06f695
 ## Convergence
 
 Every scoped requirement maps to implemented code and actual verification. All feature tasks are complete; missing checks were added append-only as discovered and completed only after evidence. External/legal-model validation was not invented as a new release gate or claimed as performed by the assistant. This final documentation commit does not change released application behavior. Existing customer onboarding/key gates remain governed by AGENTS.md/todo.md.
+
+## Tree-first default and refreshed navigation captures: local checks
+
+Two initial markup/version acceptance tests passed; actual browser first-load/reload and 1440/390/320px JS/no-JS default visibility passed (six flows). Olasılık Ağacı appears once, first and selected; analysis second, remaining order 2..11 preserved. ArrowDown/Home/End/Tab, current image/description/app link, dialog Escape/focus and no overflow passed. All 12 native product images refreshed from actual app v.0.22 after sidebar restoration; raw bytes/source fingerprint/viewport/route are recorded. Marketing v.0.46 prepared, app v.0.22 separate. Protected PR and public release verification pending.
