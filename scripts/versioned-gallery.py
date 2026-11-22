@@ -93,7 +93,7 @@ def prepare(root, batch, observed, audit, latest):
     markup = re.sub(r'(assets/feature-screens/tr-current/[a-z-]+\.jpg)(?:\?[^" ]*)?', lambda m: m[1]+'?v='+output.removeprefix('v.'), markup)
     html.write_text(markup)
     ledger = dict(observed, marketingVersion=output, sourceMarketingVersion=observed['marketingVersion'], hashes=hashes,
-                  mode='public-served-frontend-with-isolated-synthetic-api', routes={row['name']:row['route'] for row in audit['audit']})
+                  mode='public-served-frontend-with-isolated-synthetic-api', captures=[{key:row[key] for key in ('name','route','viewport','sha256') if key in row} for row in audit['audit']], proxied_request_count=len(audit.get('proxyLog',[])), sourceHash=audit.get('sourceHash'), routes={row['name']:row['route'] for row in audit['audit']})
     (root/LEDGER).write_text(json.dumps(ledger, indent=2, ensure_ascii=False)+'\n')
     # Each generated PR changes a named assertion-bearing acceptance test, binding every output byte.
     test_path = root/'scripts/tests/test_generated_gallery.py'

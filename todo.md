@@ -500,5 +500,15 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 ## User-authorized automatic versioned product gallery
 
 - [x] Separate specs/010-versioned-gallery implementation detects either public version, captures all current native public frontend product routes against synthetic-only API, rejects partial/raced batches, preserves tree-first/default, versions normal image/zoom URLs and suppresses the output release loop.
-- [x] Five targeted tests and actual12-route public native capture passed;73 synthetic API requests all200, no browser errors/production API forwarding. Isolated evidence in specs/010-versioned-gallery/verification.md; no current published images changed by this validation.
+- [x] Six targeted tests and local HTTP end-to-end pipeline and actual12-route public native capture passed;73 synthetic API requests all200, no browser errors/production API forwarding. Isolated evidence in specs/010-versioned-gallery/verification.md; no current published images changed by this validation.
 - [ ] Install reviewed protected-main workflow and Actions PR setting, then verify automatically generated protected PR, immutable marketing activation, every public image hash and health. Both-trigger tests are currently isolated unit acceptance; no production application-version trigger is claimed yet.
+## Güncel public ürün görselleri — tanıtım v.0.47
+
+- [x] Canlı frontend v.0.23 / f625960 doğrulandı; tanıtım v.0.46, health ok (değişmeyen backend kendi 1b460a6/0.21 kimliğini korur). Eski galeri provenance22 ve mevcut kabul testi uyumsuzluğu doğrulandı.
+- [x] 12 gerçek public frontend ekranı yalnız yerel sentetik/mock API ile yakalandı; güncel şeffaf logo/mavi AI panel/dengeli sidebar, rota/sürüm/hash kanıtı. Gerçek hesap/büro ve API anahtarı kullanılmaz.
+- [ ] Tree-first/default, sekme-görsel eşleme ve büyütme/klavye/odak masaüstü-mobil korunacak; hedefli test, Spec Kit ve korumalı PR.
+- [ ] Yalnız marketing v.0.47 otomatik tanıtım yolu ile yayımlanacak; public12hash/sürüm/kimlik/health ve galeri kontrolleri kaydedilmeden tamamlandı sayılmaz. Uygulama/backend/VPS kaynaklarına müdahale yok.
+
+Galeri v.0.47 önbellek talimatı: tüm img src/zoom href (ve aynı görselleri tekrar kullanan iki referans) normal URL’lerine yayın sürümü anahtarı eklendi; elle cache-bust yok. Önce eski normal URL’ler cache’e alındı; yayın sonrası aynı profile normal reload ile 12 yeni hash ve Canlı Duruşma v.0.23 kontrol edilecek. Çevrimdışı/açık eski HTML’yi uzaktan zorla değiştirme iddiası yoktur.
+
+Yerel galeri47: 3 hedefli sözleşme testi ve 1440/390/320px ×12=36 görsel/zoom/odak akışı geçti. Yeni normal HTML URL’leri ?v=0.47 taşır, büyütme aynıJPEG/sorgu anahtarını kullanır; tree-first/klavye/taşma kontrolü geçti. Eski normal URL’lerle browsercache12hash ısıtıldı; yayınsonrası doğrulama henüz açık. Kalıcı otomasyonun tamamlanması bu tek-seferlik yayın için bağımlılık yapılmadı.

@@ -32,6 +32,10 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 
 - **FR-004**: Ürün bölümünde mevcut Olasılık Ağacı tek kez ilk sırada ve varsayılan seçili olur; güncel görsel/açıklama/uygulama bağlantısı gösterilir. Analiz ikinci, kalan sıralama aynı kalır. Masaüstü/mobil ilk açılış ve klavye/ARIA eşleşmesi korunur.
 
+- **FR-005**: Galerinin 12 görseli yakalama öncesi/sonrası kimliği doğrulanmış güncel public Türkçe frontend’den, yalnız yalıtılmış sentetik API yanıtlarıyla doğrudan alınır. Şeffaf görünen özgün logo, eski mavi AI paneli ve dengeli sidebar yakalanır; gerçek hesap/büro verisi veya sonradan UI çizimi yoktur. Rota/sürüm/commit/hash/viewport provenance ve public 12 dosya hash eşleşmesi zorunludur.
+
+- **FR-006**: Galerinin normal img src ve aynı dosyayı açan büyütme href URL’leri tanıtım sürümüne bağlı aynı önbellek anahtarını taşır. Ziyaretçi URL’ye elle cache-bust eklemez; önce/sonra önbelleği ısıtılmış tarayıcıda normal yenileme ve Canlı Duruşma görselinin görünür v.0.23 kaydı doğrulanır.
+
 ### Key Entities
 
 Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gösterdiği kayıtlar.
