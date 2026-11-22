@@ -541,3 +541,5 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
 - [x] İlk10 backend testi geçti; geniş25 hedefli kontrolün24ü geçti, örnek hesap için yanlış normal-login test yardımcısı düzeltildi ve kalan1 test geçti. Frontend hedefli testler/build/typecheck ve gerçek yerel backend+UI ile6 masaüstü/mobil/açık-koyu akış geçti. Kanıt specs/012-expanded-demo-team ve docs/validation/2026-11-22/expanded-demo-team-browser.json.
 - [ ] Ayrı korumalı PR incelemesi/main birleşmesi ve main kaynaklı final sürüm/yayın/public doğrulama. Bu çalışma In Review bırakılır; canlı içe aktarma veya yeni müşteri teslimi yapılmaz. Rehber PR55 ayrı korunur.
+
+- [x] Ayrı PR #61 ve iş #60 In Review; 9 davranış dosyasına bağlı4 gerçek kabul testi başarılı çalıştı.32 hedefli frontend testi geçti. Canlı import veya yayın yapılmadı.

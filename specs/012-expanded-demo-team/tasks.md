@@ -9,5 +9,5 @@
 ## Phase 3 Verification
 - [x] T006 [US2] Verify isolation/repeat/legacy/real-data preservation in backend/tests/integration/test_demo_template.py (FR-001 through FR-003).
 - [x] T007 [US1] Verify frontend tests, browser and build, record specs/012-expanded-demo-team/verification.md (FR-004, FR-005).
-- [ ] T008 Record frontend/app-version.json, todo.md, specs/changes/expanded-demo-team.json and separate PR/Projects In Review (FR-005).
+- [x] T008 Record frontend/app-version.json, todo.md, specs/changes/expanded-demo-team.json and separate PR/Projects In Review (FR-005).
 Dependencies T001→T002→T003→T004→T005→T006→T007→T008. No delegation.
