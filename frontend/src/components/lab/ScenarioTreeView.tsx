@@ -27,6 +27,10 @@ function percent(value: number) {
   return (value / 100).toLocaleString('tr-TR', { style: 'percent', maximumFractionDigits: 2 });
 }
 
+function arrivalLabel(node: ScenarioNode) {
+  return node.path_percent == null ? assessment(node) : 'Başlangıçtan ulaşma ' + percent(node.path_percent);
+}
+
 const recordedColor = '#1e40af';
 const edgeColors = ['#007eac', '#804ca3', '#aa5710'];
 
@@ -136,7 +140,7 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
           const color = recorded ? recordedColor : edgeColors[to.color];
           return <g key={node.id}>
             <path d={`M${start} ${from.y+46} C${start+45} ${from.y+46},${end-60} ${cy},${end} ${cy}`} fill="none" stroke={color} strokeWidth={recorded ? 5 : trail.has(node.id) ? 3.5 : 1.8} markerEnd={`url(#${marker}${recorded ? edgeColors.length : to.color})`}/>
-            {node.transition_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={color} fontSize="12" paintOrder="stroke" stroke="white" strokeWidth="3">{percent(node.transition_percent)}</text>}
+            {node.path_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={color} fontSize="12" paintOrder="stroke" stroke="white" strokeWidth="3">{percent(node.path_percent)}</text>}
           </g>;
         })}
       </svg>
@@ -147,7 +151,7 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
         style={{ left: pos.x, top: pos.y }}>
         <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-700">{recorded ? '✓ Gerçekleşen yol' : tree.source_mode === 'dossier_history' ? (!node.parent_id || node.recorded_step ? 'Dosya geçmişi' : 'Alternatif yol') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
-        <span className="text-[11px] text-navy-700">{node.path_percent == null ? assessment(node) : (node.parent_id ? `${node.illustrative ? 'Temsili geçiş' : 'Geçiş'} ${percent(node.transition_percent!)} · ` : '') + `Başlangıçtan ${percent(node.path_percent)}`}</span>
+        <span className="text-[11px] font-semibold text-navy-700">{arrivalLabel(node)}</span>
       </button>; })}
         </div>
       </div>
@@ -276,12 +280,13 @@ export function ScenarioTreeView({ fixedCaseId, caseFile }: { fixedCaseId?: stri
           <button type="button" disabled={loading} onClick={() => void load(tree.case_id, true)} className="rounded-xl border border-accent-200 bg-white px-3 py-2 text-accent-800 disabled:opacity-50">Kaynakları yenile</button>
         </div>
       </div>
-      <p className="text-xs text-navy-500">Fare tekerleği veya izleme dörtgeninde kıstırma hareketiyle işaretçinin bulunduğu noktayı yakınlaştırıp uzaklaştırabilirsiniz.</p>
+      <p className="text-xs text-navy-500">Oklardaki yüzde, başlangıçtan hedef düğüme ulaşma olasılığıdır. Fare tekerleği veya izleme dörtgeninde kıstırma hareketiyle işaretçinin bulunduğu noktayı yakınlaştırıp uzaklaştırabilirsiniz.</p>
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
         {view === 'graph' ? <TreeDiagram key={tree.case_id} tree={tree} selected={selected} onSelect={setSelected} /> : <section aria-label="Ağacın metin alternatifi" className="space-y-3 rounded-2xl border border-surface-border bg-white p-4">
           {tree.nodes.map(n => <article key={n.id} className={'rounded-xl border border-surface-border p-3 '+(n.parent_id ? 'ml-3' : '')}>
             <button type="button" onClick={() => setSelected(n.id)} aria-pressed={selected === n.id} className="text-left text-sm font-semibold text-accent-800">{n.label}</button>
-            <p className="mt-1 text-sm text-navy-700">{n.description}</p>{tree.case_closed && (!n.parent_id || n.recorded_step) && <p>✓ Gerçekleşen yol</p>}<p className="mt-1 text-xs text-navy-500">{assessment(n)}</p>{n.transition_percent != null && <p className="text-xs">Geçiş {percent(n.transition_percent)} · Başlangıçtan {percent(n.path_percent!)}</p>}
+            <p className="mt-1 text-sm text-navy-700">{n.description}</p>{tree.case_closed && (!n.parent_id || n.recorded_step) && <p>✓ Gerçekleşen yol</p>}<p className="mt-1 text-xs font-semibold">{arrivalLabel(n)}</p>
+            {(n.support_weight != null || n.probability != null) && <p className="text-xs text-navy-500">{assessment(n)}</p>}
             <p className="mt-2 text-sm text-navy-600">{n.reasoning}</p>
             <p className="mt-2 text-xs font-semibold text-navy-700">Dayanaklar</p><ul className="mt-1 space-y-1 text-xs text-navy-600">{n.source_ids.map(id => <li key={id}>{exhibitLink(id, sourceById.get(id)?.label ?? id)}: {sourceById.get(id)?.detail}</li>)}</ul>
             <p className="mt-2 text-xs font-semibold text-navy-700">Belirsizlikler</p><ul className="mt-1 list-disc pl-4 text-xs text-navy-600">{n.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul>
@@ -289,10 +294,10 @@ export function ScenarioTreeView({ fixedCaseId, caseFile }: { fixedCaseId?: stri
         </section>}
         <section aria-label="Seçili dalın dayanakları" className="space-y-4 rounded-2xl border border-surface-border bg-white p-5">
           <div><h2 className="text-base font-semibold text-navy-900">{node.label}</h2><p className="mt-2 text-sm leading-6 text-navy-700">{node.description}</p></div>
-          <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{assessment(node)}</strong>{node.transition_percent != null && <p>Önceki adımdan geçiş {percent(node.transition_percent)}</p>}{node.path_percent != null && <p className="mt-1 text-xs">Senaryo varsayımı · <span>Başlangıçtan ulaşma {percent(node.path_percent)}</span></p>}<p className="mt-1 leading-6">{node.reasoning}</p></div>
+          <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{arrivalLabel(node)}</strong>{node.transition_percent != null && <p>Önceki adımdan geçiş {percent(node.transition_percent)}</p>}{(node.support_weight != null || node.probability != null) && <p className="text-xs">{assessment(node)}</p>}<p className="mt-1 leading-6">{node.reasoning}</p></div>
           {node.kind === 'context' && <details><summary className="cursor-pointer text-sm font-semibold text-navy-800">Kayıtlı olaylar ve iddialar</summary><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-navy-600">{tree.current_facts.map((f,i) => <li key={i}>{f}</li>)}</ul></details>}
           <div><h3 className="text-sm font-semibold text-navy-800">Dayanaklar</h3><ul className="mt-2 space-y-2">{node.source_ids.map(id => { const source = sourceById.get(id)!; return <li key={id} className="rounded-lg border border-surface-border p-2 text-xs leading-5 text-navy-600"><strong className="block text-navy-800">{exhibitLink(id, source.label)}</strong>{source.detail}{source.recorded_at && <span className="mt-1 block text-navy-500">Kayıt: {source.recorded_at.slice(0,10)}</span>}</li>; })}</ul></div>
-          {tree.source_mode === "dossier_history" && tree.nodes.some(n => n.parent_id === node.id) && <div><h3 className="text-sm font-semibold text-navy-800">Sonraki adımlar</h3><ul className="mt-2 space-y-2">{tree.nodes.filter(n => n.parent_id === node.id).map(n => <li key={n.id}><button type="button" className="text-left text-sm text-accent-700 underline" onClick={() => setSelected(n.id)}>{n.label} · {percent(n.transition_percent ?? 0)}</button></li>)}</ul></div>}
+          {tree.source_mode === "dossier_history" && tree.nodes.some(n => n.parent_id === node.id) && <div><h3 className="text-sm font-semibold text-navy-800">Sonraki adımlar</h3><ul className="mt-2 space-y-2">{tree.nodes.filter(n => n.parent_id === node.id).map(n => <li key={n.id}><button type="button" className="text-left text-sm text-accent-700 underline" onClick={() => setSelected(n.id)}>{n.label} · {arrivalLabel(n)}</button></li>)}</ul></div>}
           {node.uncertainties.length > 0 && <div><h3 className="text-sm font-semibold text-navy-800">Belirsizlikler ve açık sorular</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{node.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul></div>}
         </section>
       </div>

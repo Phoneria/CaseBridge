@@ -16,7 +16,7 @@ describe('Scenario tree data boundaries',()=>{
  it('uses the same source in graph/text and displays independent demo weights consistently',async()=>{
   render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');
   expect(screen.getByRole('group',{name:'Dosya senaryo ağacı'})).toBeVisible();await userEvent.click(screen.getByRole('button',{name:'Metin alternatifi'}));
-  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText('Demo tahmini: 50/100').length).toBeGreaterThan(0);expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Geçiş %100 · Başlangıçtan %100');
+  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText('Demo tahmini: 50/100').length).toBeGreaterThan(0);expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Başlangıçtan ulaşma %100');
  });
  it('announces changed source content without browser persistence',async()=>{
   const storage=vi.spyOn(Storage.prototype,'setItem');render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');getScenarioTree.mockResolvedValue(tree('c1','b'.repeat(64)));
@@ -119,8 +119,8 @@ it('separates recorded history from simulated percentages', async () => {
   const conditional = graph.getByRole('button',{name:/Belgeler doğrulanırsa/});
   const share = scenarioMap(snapshot).nodes.find(n => n.id === 'confirm')!.path_percent!;
   const label = share.toLocaleString('tr-TR');
-  expect(conditional).toHaveTextContent('Temsili geçiş %' + label + ' · Başlangıçtan %' + label);
-  expect(graph.getByRole('button',{name:/Hazırlık gözden geçirilir/})).toHaveTextContent('Temsili geçiş %100 · Başlangıçtan %' + label);
+  expect(conditional).toHaveTextContent('Başlangıçtan ulaşma %' + label);
+  expect(graph.getByRole('button',{name:/Hazırlık gözden geçirilir/})).toHaveTextContent('Başlangıçtan ulaşma %' + label);
   await userEvent.click(conditional);
   expect(outcome).toHaveTextContent('Gerçekleşen yol');
 });
@@ -158,4 +158,25 @@ it('expands short trees with stable varied illustrative shares and preserves sup
     }
     expect(input.nodes.length).toBe(5);
   }
+});
+
+it('labels arrows and cards with cumulative probability from the root', async () => {
+  const data = tree();
+  const [, first, second] = data.nodes;
+  first.transition_percent = 32.43;
+  second.transition_percent = 68.83;
+  const third = node('continue', second.id, 'Olay sırasını incele', 'outcome');
+  third.transition_percent = 100;
+  data.nodes.push(third);
+  getScenarioTree.mockResolvedValue(data);
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  const graph = await screen.findByRole('group', {name:'Dosya senaryo ağacı'});
+  const labels = Array.from(graph.querySelectorAll('svg text'), el => el.textContent);
+  expect(labels.slice(0,3)).toEqual(['%32,43','%22,32','%22,32']);
+  const card = within(graph).getByRole('button',{name:/Olay sırasını incele.*Başlangıçtan ulaşma %22,32/});
+  expect(card).not.toHaveTextContent('%100');
+  await userEvent.click(card);
+  const detail = screen.getByRole('region',{name:'Seçili dalın dayanakları'});
+  expect(detail).toHaveTextContent('Başlangıçtan ulaşma %22,32');
+  expect(detail).toHaveTextContent('Önceki adımdan geçiş %100');
 });
