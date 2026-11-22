@@ -32,7 +32,7 @@ const session=JSON.parse(fs.readFileSync(`${root}/session.json`));
   if(names.filter(n=>n.startsWith('ÖRNEK · ')).length!==12)throw Error('Missing sample labels');
   const real=page.getByRole('combobox',{name:'Şablon dışı sentetik dosya sorumlu avukatı'});
   await expect(real.locator('option')).toHaveCount(1);
-  const selects=page.getByRole('combobox');const sample=selects.filter({has:page.locator('option', {hasText:'ÖRNEK · Deniz Aydın'})}).first();
+  const sample=page.getByRole('combobox',{name:'Depozito İadesi Davası sorumlu avukatı',exact:true});
   await expect(sample.locator('option')).toHaveCount(13);
   const before=await sample.inputValue();const choices=await sample.locator('option').evaluateAll(x=>x.filter(o=>o.textContent.startsWith('ÖRNEK')).map(o=>o.value));
   const target=choices.find(id=>id!==before);await sample.selectOption(target);await expect(sample).toHaveValue(target);

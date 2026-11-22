@@ -531,8 +531,8 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Büro Yönetimi 17 bölüm; kritik süre, yedek/doğrulama, toplu devir/teslim teyidi, inceleme/onay, açık müvekkil yayını iş akışları kaynakla doğrulandı. Platform, avukat ve kısıtlı kapsam ayrımı korunur.
 - [x] 23 hedefli frontend testi ve final 5 rehber testi; üretim build/typecheck; 30 gerçek Chromium rol/genişlik/tema senaryosu. Rehber okurken sıfır ağ isteği/yazım/URL-storage değişimi, sayfa hatası/taşma yok. Spec 011 ve docs/validation/2026-11-22/workspace-guide-browser.json.
 - [x] İncelemeye hazır PR #55 oluşturuldu; #54 CaseBridge Projects In Review. Diff kabul kapısındaki 4 isimli test gerçekten çalışıp geçti.
-- [ ] İnceleme ve korumalı main birleşmesi; PR açık bırakılır, auto-merge etkinleştirilmez.
-- [ ] Main kaynaklı yayın sonrası public v.0.24 kod/sürüm/health doğrulaması. Canlıya alındı veya yeni müşteriye hazır iddiası yok.
+- [x] Rehber, #55 ile korumalı main dalında birleşti.
+- [x] Rehberin birleşik v.0.26 sürümü genel uygulama adresinde doğrulandı.
 ## Onaylanan ekip içerik güncellemesi — 22 Kasım 2026
 
 - [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
@@ -547,11 +547,12 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 ### Rehber konumu kullanıcı düzeltmesi
 - [x] Son açık talimatla header CaseBridge AI düğmesi kaldırılıp aynı konuma Rehber kondu; tıklamak etkileşimli rehberi açar. AI araçları sol menüde korunur.
 - [x] 22 hedefli test, final production build/typecheck/version check ve 30 Chromium senaryosu geçti; her senaryoda header AI yokluğu ve rehber işlevi doğrulandı. PR #55 güncellenir, In Review kalır. Public yayın yapılmadı.
+
 ## İncelemeye hazırlanan geniş örnek ekip — v.0.24 adayı
 - [x] Örnek verileri yükle:12 farklı isim/uzmanlıkta ÖRNEK avukat, tenant-bağlı sabit kimlikler, yalnız örnek dosya kapsamı; ortak parola/otomatik davet yok. Önceki örnek portföy ilk kez dağıtılır, tekrar yükleme sonradan yapılan atamaları korur.
 - [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
 - [x] İlk10 backend testi geçti; geniş25 hedefli kontrolün24ü geçti, örnek hesap için yanlış normal-login test yardımcısı düzeltildi ve kalan1 test geçti. Frontend hedefli testler/build/typecheck ve gerçek yerel backend+UI ile6 masaüstü/mobil/açık-koyu akış geçti. Kanıt specs/012-expanded-demo-team ve docs/validation/2026-11-22/expanded-demo-team-browser.json.
-- [ ] Ayrı korumalı PR incelemesi/main birleşmesi ve main kaynaklı final sürüm/yayın/public doğrulama. Bu çalışma In Review bırakılır; canlı içe aktarma veya yeni müşteri teslimi yapılmaz. Rehber PR55 ayrı korunur.
+- [x] Örnek ekip #61 ile main dalına alındı ve v.0.26 içinde yayımlandı.
 
 - [x] Ayrı PR #61 ve iş #60 In Review; 9 davranış dosyasına bağlı4 gerçek kabul testi başarılı çalıştı.32 hedefli frontend testi geçti. Canlı import veya yayın yapılmadı.
 
@@ -560,7 +561,7 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Kesin şablon kimlikleri + bilinen işaretli davalar; gerçek/diğer büro kayıtları ve ayarlar korunur. Kullanılmış/değiştirilmiş örnek hesaplar ve gerçek dosya kapsamları tutulur; yalnız silinen örnek erişim kimlikleri temizlenir. Dosya silme DB commit sonrası ve storage/paylaşılan-dosya kontrolüyle.
 - [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
 - [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
-- [ ] Main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.
+- [x] Örnek verileri kaldırma akışı v.0.26 içinde yayımlandı ve yalıtılmış verilerle sınandı.
 
 ## Dava dosyası ve görev panosu · v.0.25 adayı
 
@@ -568,4 +569,6 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Beş aşamalı görev panosunda sürükle bırak ve aşama seçimi, görev notları, dosya kapsamında avukata atama, öncelik ve son tarih.
 - [x] Beş kategoride değişken sonuçlar üreten on ek kurgusal dava ve dört CSV raporunda tablo önizlemesi.
 - [x] Üretim derlemesi, sürüm kontrolü, 14 isimli kabul testi ve masaüstü/mobil tarayıcı akışları geçti. Ayrıntılar specs/013-case-workspace-board/verification.md içinde.
-- [ ] #61 üzerine açılan #63 için inceleme, main birleşmesi ve canlı sürüm/kod/sağlık doğrulaması.
+- [x] #63 ve #55 birlikte 9bfc8a9 revizyonunda birleşti. Üretim kodu, v.0.26 sürümü ve sağlık kontrolü doğrulandı.
+
+Birleşik yayın kaydı ve geri dönüş provası [v.0.26 doğrulamasında](specs/001-main-release/verification.md#workspace-release-v026) bulunur.

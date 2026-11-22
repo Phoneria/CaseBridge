@@ -11,3 +11,5 @@ Application candidate v.0.25, based on the review branch for #61. Tests used syn
 - 13 feature contracts passed Spec Kit governance. The diff gate for application commit ec61b3e executed 14 named acceptance tests binding 31 changed behavior files; all passed.
 - Browser evidence: [local Chromium results](../../docs/validation/2026-11-22/case-workspace-board.json), 1440px light and 390px dark.
 - Pre-release scope: local SQLite and PostgreSQL offline DDL. Public code, version, health and rollout are separate release gates.
+
+The [verified v.0.26 production release](../001-main-release/verification.md#workspace-release-v026) supersedes the earlier review-stage status.
