@@ -26,7 +26,8 @@ describe("CaseDecisionCard", () => {
 
   it("shows a dash for what a case closed before decisions were recorded does not have", () => {
     render(<CaseDecisionCard caseDetail={{ status: "kapali", outcome: "ongoing", decision_date: null, closing_note: null } as unknown as Case} />);
-    for (const label of ["Sonuç", "Karar tarihi", "Karar notu"]) {
+    expect(screen.getByText("Sonuç").nextSibling).toHaveTextContent("Sonuç kaydedilmemiş");
+    for (const label of ["Karar tarihi", "Karar notu"]) {
       expect(screen.getByText(label).nextSibling).toHaveTextContent("—");
     }
   });

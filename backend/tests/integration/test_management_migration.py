@@ -52,3 +52,40 @@ def test_postgres_management_migration_generates_sql_without_connecting(monkeypa
     assert "CREATE TABLE management_records" in sql
     assert "CREATE TABLE work_transfers" in sql
     assert "ADD COLUMN last_seen_at" in sql
+    assert "CREATE TABLE case_precedent_links" in sql
+    assert "ADD COLUMN open_stage" in sql
+
+
+def test_board_migration_preserves_legacy_task_states_through_downgrade(tmp_path):
+    from datetime import date, datetime
+    from sqlalchemy import MetaData, Table, text
+    from app.models.case import Case, CaseType
+    from app.models.task import Task
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'board.db'}")
+    cfg = Config()
+    cfg.set_main_option("script_location", str(ALEMBIC_DIR))
+    with engine.begin() as conn:
+        cfg.attributes["connection"] = conn
+        command.upgrade(cfg, "d8e9f0a1b2c3")
+    with Session(engine) as db:
+        firm = LawFirm(name="Örnek")
+        db.add(firm)
+        db.flush()
+        case = Case(law_firm_id=firm.id, case_number="Ö-1", case_name="Dava",
+                    client_name="Taraf", case_type=CaseType.KIRA, opening_date=date.today())
+        db.add(case)
+        db.flush()
+        tasks = Table("tasks", MetaData(), autoload_with=engine)
+        for state in ("pending", "completed"):
+            db.execute(tasks.insert().values(id=state, law_firm_id=firm.id, case_id=case.id, title="Görev",
+                                             status=state, created_at=datetime.now()))
+        db.commit()
+    upgrade_to_head(engine)
+    with Session(engine) as db:
+        assert [(t.stage.value, t.priority) for t in db.query(Task).order_by(Task.id)] == [("done", "normal"), ("todo", "normal")]
+    with engine.begin() as conn:
+        cfg.attributes["connection"] = conn
+        command.downgrade(cfg, "d8e9f0a1b2c3")
+        assert conn.execute(text("select status from tasks order by id")).scalars().all() == ["completed", "pending"]
+        assert "case_precedent_links" not in inspect(conn).get_table_names()

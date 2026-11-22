@@ -160,7 +160,13 @@ export interface CaseDetail extends Case {
 
 export type TaskStatus = "pending" | "completed";
 
+export type TaskStage = "backlog" | "todo" | "in_progress" | "in_review" | "done";
+export type TaskPriority = "low" | "normal" | "high" | "urgent";
+
 export interface Task {
+  assignee_name?: string | null;
+  stage?: TaskStage;
+  priority?: TaskPriority;
   id: string;
   case_id: string;
   title: string;

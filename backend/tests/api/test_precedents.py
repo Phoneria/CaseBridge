@@ -44,3 +44,42 @@ def test_precedents_are_separate_and_tenant_scoped(client, db_session, two_firms
     documents = client.get(f"/precedents/{precedent.id}/documents", headers=headers_a).json()
     assert [row["filename"] for row in documents] == ["karar.txt"]
     assert client.get(f"/precedents/{precedent.id}/documents", headers=headers_b).status_code == 404
+
+
+def test_related_precedents_use_selected_case_and_bureau(client, db_session, two_firms_two_users):
+    f = two_firms_two_users
+    def row(number, category, precedent, firm):
+        return Case(case_number=number, case_name=number, case_type=category, client_name="Örnek",
+                    is_precedent=precedent, law_firm_id=firm.id)
+    case = row("C", CaseType.KIRA, False, f["firm_a"])
+    match = row("P", CaseType.KIRA, True, f["firm_a"])
+    db_session.add_all([case, match, row("P2", CaseType.ICRA, True, f["firm_a"]),
+                        row("P3", CaseType.KIRA, True, f["firm_b"])])
+    db_session.commit()
+    endpoint = f"/precedents?case_id={case.id}"
+    assert [r["id"] for r in client.get(endpoint, headers=_headers(client,f["user_a"],f["password"])).json()] == [match.id]
+    assert client.get(endpoint, headers=_headers(client,f["user_b"],f["password"])).status_code == 404
+
+
+def test_precedent_links_are_specific_writable_and_isolated(client, office, auth_headers, db_session):
+    def row(number, category, precedent=False, firm=None):
+        return Case(case_name=number, case_number=number, client_name="Taraf", case_type=category,
+                    is_precedent=precedent, law_firm_id=firm or office.firm_a.id)
+    case = row("C1", CaseType.KIRA)
+    other = row("C2", CaseType.KIRA)
+    related = row("P", CaseType.ICRA, True)
+    foreign = row("F", CaseType.ICRA, True, office.firm_b.id)
+    db_session.add_all([case, other, related, foreign])
+    db_session.commit()
+    headers = auth_headers(office.admin_a)
+    path = f"/cases/{case.id}/precedents/"
+    assert client.put(path + foreign.id, headers=headers).status_code == 404
+    assert client.put(path + related.id, headers=auth_headers(office.lawyer_a1)).status_code == 403
+    for _ in range(2):
+        assert client.put(path + related.id, headers=headers).status_code == 204
+    result = client.get(f"/precedents?case_id={case.id}", headers=headers).json()
+    assert [(r["id"], r["linked_to_case"]) for r in result] == [(related.id, True)]
+    assert client.get(f"/precedents?case_id={other.id}", headers=headers).json() == []
+    assert client.delete(path + related.id, headers=headers).status_code == 204
+    assert client.get(f"/precedents?case_id={case.id}", headers=headers).json() == []
+    assert client.get(f"/precedents/{related.id}", headers=headers).status_code == 200

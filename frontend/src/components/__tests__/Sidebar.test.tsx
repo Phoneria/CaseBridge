@@ -26,9 +26,10 @@ describe("Sidebar", () => {
   });
   it("renders the main navigation without the old Simülasyonlar item", () => {
     render(<Sidebar />);
-    for (const label of ["Genel Bakış", "Davalar", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
+    for (const label of ["Genel Bakış", "Davalar", "Takvim", "Görevler", "Analitik", "Raporlar", "Ayarlar"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
+    for (const label of ["Belgeler", "Emsal Kararlar"]) expect(screen.queryByRole("link", { name: label })).not.toBeInTheDocument();
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 

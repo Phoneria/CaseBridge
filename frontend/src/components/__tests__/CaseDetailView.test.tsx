@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
+const getScenarioTree = vi.fn();
+const getPrecedents = vi.fn();
 const getCase = vi.fn();
 const getMe = vi.fn();
 const listSimulations = vi.fn();
@@ -23,6 +25,8 @@ const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  getPrecedents: (...args: unknown[]) => getPrecedents(...args),
+  getScenarioTree: (...args: unknown[]) => getScenarioTree(...args),
   getCase: (...args: unknown[]) => getCase(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   listSimulations: (...args: unknown[]) => listSimulations(...args),
@@ -93,6 +97,20 @@ afterEach(() => {
 });
 
 describe("CaseDetailView", () => {
+  it("opens precedents and the interactive tree for the current case", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getPrecedents.mockResolvedValue([]);
+    getScenarioTree.mockResolvedValue(null);
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "İlgili emsal kararları göster" }));
+    expect(getPrecedents).toHaveBeenCalledWith("c1", false);
+    await userEvent.click(screen.getByRole("tab", { name: "Olasılık Ağacı" }));
+    expect(getScenarioTree).toHaveBeenCalledWith("c1", {});
+    expect(screen.queryByText("Bir dava seçin")).toBeNull();
+  });
+
   it("renders the case overview with the AI card by default", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);

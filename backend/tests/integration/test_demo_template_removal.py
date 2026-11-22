@@ -1,6 +1,7 @@
 """Explicit template removal preserves all non-template/other-firm data."""
 from pathlib import Path
 
+from app.db.demo_outcomes import template_numbers
 from app.models.case import Case, CaseType
 from app.models.document import Document
 from app.models.user import User
@@ -22,7 +23,7 @@ def test_removal_preview_confirm_repeat_and_reload_preserve_real_data(client,db_
     before=db_session.query(Case).count()
     preview=client.get('/admin/demo-template/removal-preview',headers=headers)
     assert preview.status_code==200,preview.text
-    assert preview.json()['counts']['Davalar ve emsaller']==23
+    assert preview.json()['counts']['Davalar ve emsaller'] == len(template_numbers()) + 3
     assert db_session.query(Case).count()==before and all(p.is_file() for p in paths)
     assert client.post('/admin/demo-template/remove',headers=headers,json={'token':preview.json()['token'],'confirm':False}).status_code==422
     removed=client.post('/admin/demo-template/remove',headers=headers,json={'token':preview.json()['token'],'confirm':True})
@@ -57,7 +58,7 @@ def test_removal_rejects_stale_scope_and_preserves_adopted_users(client,db_sessi
     db_session.commit()
     stale=client.post('/admin/demo-template/remove',headers=headers,json={'token':preview['token'],'confirm':True})
     assert stale.status_code==409
-    assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id).count()==24
+    assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers()) + 4
     fresh=client.get('/admin/demo-template/removal-preview',headers=headers).json()
     assert fresh['kept_users']==2
     assert client.post('/admin/demo-template/remove',headers=headers,json={'token':fresh['token'],'confirm':True}).status_code==200
@@ -85,5 +86,5 @@ def test_removal_rolls_back_without_unlinking_files(client,db_session,office,aut
     import pytest
     with pytest.raises(RuntimeError,match='synthetic rollback'):
         client.post('/admin/demo-template/remove',headers=headers,json={'token':preview['token'],'confirm':True})
-    assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id).count()==23
+    assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers()) + 3
     assert all(p.exists() for p in paths)

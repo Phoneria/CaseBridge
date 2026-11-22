@@ -525,6 +525,14 @@ Actual44985580863 SUCCESS:12 fresh native publicapp23 captures with disposable s
 
 Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health checked, capture/publication skipped, no newversion/PR. Standing five-minute polling and app/marketing version-file triggers active; GitHub scheduling may delay. Evidence specs/010-versioned-gallery/verification.md and docs/validation/2026-11-22/gallery48-*.json. Final evidence-only update changes no runtime/version/gallery and requires no policy bootstrap.
 
+## İncelemeye hazırlanan etkileşimli Rehber — v.0.24
+
+- [x] Güncel origin/main c994bb4 üzerinden ayrı dal; oturum header sağ üstünde masaüstü/mobil görünür Rehber, sayfa/sekme/rol bağlamı, konu seçimi, önceki/sonraki/baştan başla/çıkış.
+- [x] Büro Yönetimi 17 bölüm; kritik süre, yedek/doğrulama, toplu devir/teslim teyidi, inceleme/onay, açık müvekkil yayını iş akışları kaynakla doğrulandı. Platform, avukat ve kısıtlı kapsam ayrımı korunur.
+- [x] 23 hedefli frontend testi ve final 5 rehber testi; üretim build/typecheck; 30 gerçek Chromium rol/genişlik/tema senaryosu. Rehber okurken sıfır ağ isteği/yazım/URL-storage değişimi, sayfa hatası/taşma yok. Spec 011 ve docs/validation/2026-11-22/workspace-guide-browser.json.
+- [x] İncelemeye hazır PR #55 oluşturuldu; #54 CaseBridge Projects In Review. Diff kabul kapısındaki 4 isimli test gerçekten çalışıp geçti.
+- [ ] İnceleme ve korumalı main birleşmesi; PR açık bırakılır, auto-merge etkinleştirilmez.
+- [ ] Main kaynaklı yayın sonrası public v.0.24 kod/sürüm/health doğrulaması. Canlıya alındı veya yeni müşteriye hazır iddiası yok.
 ## Onaylanan ekip içerik güncellemesi — 22 Kasım 2026
 
 - [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
@@ -536,6 +544,9 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
 - [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.
 
+### Rehber konumu kullanıcı düzeltmesi
+- [x] Son açık talimatla header CaseBridge AI düğmesi kaldırılıp aynı konuma Rehber kondu; tıklamak etkileşimli rehberi açar. AI araçları sol menüde korunur.
+- [x] 22 hedefli test, final production build/typecheck/version check ve 30 Chromium senaryosu geçti; her senaryoda header AI yokluğu ve rehber işlevi doğrulandı. PR #55 güncellenir, In Review kalır. Public yayın yapılmadı.
 ## İncelemeye hazırlanan geniş örnek ekip — v.0.24 adayı
 - [x] Örnek verileri yükle:12 farklı isim/uzmanlıkta ÖRNEK avukat, tenant-bağlı sabit kimlikler, yalnız örnek dosya kapsamı; ortak parola/otomatik davet yok. Önceki örnek portföy ilk kez dağıtılır, tekrar yükleme sonradan yapılan atamaları korur.
 - [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
@@ -550,3 +561,11 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
 - [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
 - [ ] Main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.
+
+## Dava dosyası ve görev panosu · v.0.25 adayı
+
+- [x] Dava detayında belgeler, dosyaya bağlı emsaller, kayıtlı sonuç ve etkileşimli Olasılık Ağacı. Sonucu eksik kapalı bir davaya yetkili kullanıcı kararını ekleyebilir.
+- [x] Beş aşamalı görev panosunda sürükle bırak ve aşama seçimi, görev notları, dosya kapsamında avukata atama, öncelik ve son tarih.
+- [x] Beş kategoride değişken sonuçlar üreten on ek kurgusal dava ve dört CSV raporunda tablo önizlemesi.
+- [x] Üretim derlemesi, sürüm kontrolü, 14 isimli kabul testi ve masaüstü/mobil tarayıcı akışları geçti. Ayrıntılar specs/013-case-workspace-board/verification.md içinde.
+- [ ] #61 üzerine açılan #63 için inceleme, main birleşmesi ve canlı sürüm/kod/sağlık doğrulaması.
