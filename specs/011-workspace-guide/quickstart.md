@@ -1,4 +1,7 @@
 # Validation
-frontend: npm test -- src/components/__tests__/WorkspaceGuide.test.tsx src/components/__tests__/WorkspaceHeader.test.tsx; npm run build.
-Root: python3 scripts/check-specs.py; python3 scripts/check-spec-changes.py --help.
-Browser: synthetic getMe only with empty data responses; 1440/390/320 light/dark. Open header Rehber; topic/forward/back/restart/exit; Tab wrap/Escape focus return. Verify zero guide network writes, no overflow, roles and /buro?tab context. Record actual results in verification.md. No production session/key.
+
+Run the WorkspaceGuide, WorkspaceHeader and AppShell component tests from frontend, then run the production build. Verify the version with `node frontend/scripts/update-version.mjs --check` from the repository root.
+
+Start the built frontend on port 3015 with the API URL set to http://localhost:8000. Run `node tests/e2e/guide-check.cjs`. GUIDE_ORIGIN and GUIDE_OUTPUT override the frontend address and local proof directory. The browser uses synthetic sessions and intercepts the API. It checks the header link, contextual handbook, role-filtered topics and real controls as the reader moves forward and backward. It also checks returning to the article, narrow viewports, both themes and zero API writes.
+
+From the repository root run `python3 scripts/check-specs.py` and run the bound acceptance selectors for the change. Record real results in verification.md.

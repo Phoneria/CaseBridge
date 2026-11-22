@@ -17,3 +17,6 @@ Dependencies: T001→T002→T003→T004→T005→T006→T007. US2 content and US
 ## Phase 5: Explicit header replacement clarification
 - [x] T009 [US1] Replace header AI entry with guide before user menu in frontend/src/components/WorkspaceHeader.tsx per clarified FR-001; preserve sidebar access.
 - [x] T010 [US1] Verify replacement in frontend/src/components/__tests__/WorkspaceHeader.test.tsx and tests/e2e/guide-check.cjs, rebuild v.0.24 and update specs/011-workspace-guide/verification.md and review PR (FR-001, FR-006, FR-007).
+
+- [ ] T011 [US1] Implement FR-008 in frontend/src/app/rehber/page.tsx, WorkspaceGuide.tsx and AppShell.tsx per data-model.md#featurecontract. Cover role, purpose, location and deep links.
+- [ ] T012 [US1] Implement FR-009 in GuideTour.tsx. Verify real highlights, next/previous, cleanup, absent targets and mobile use.

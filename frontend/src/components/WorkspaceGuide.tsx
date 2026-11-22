@@ -1,63 +1,106 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { ModalFrame } from '@/components/ModalFrame';
-import { contextTopic, guideTopics, type GuideTopic } from '@/lib/workspaceGuide';
-import type { AppUser } from '@/types';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useContext, useState } from 'react';
+import { WorkspaceUserContext } from '@/components/AppShell';
+import { guideTopics, type GuideTopic } from '@/lib/workspaceGuide';
+import { guideTours, topicDestination } from '@/lib/guideTours';
 
-const control = 'min-h-11 rounded-xl border border-surface-border bg-white px-4 py-2 text-sm font-medium text-navy-700 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 disabled:opacity-40';
+const sections = ['Çalışma alanı', 'Büro yönetimi', 'CaseBridge AI', 'Hesap ve ayarlar'];
 
-function GuideReader({ topics, initial, onClose }: { topics: GuideTopic[]; initial: GuideTopic; onClose: () => void }) {
-  const [topicId, setTopicId] = useState(initial.id);
-  const [step, setStep] = useState(0);
-  const heading = useRef<HTMLHeadingElement>(null);
-  const selected = topics.find(t => t.id === topicId) ?? initial;
-  const current = selected.steps[step];
-  const selectId = useId();
-  function move(next: number) { setStep(next); heading.current?.focus(); }
-  return <ModalFrame title="CaseBridge Rehber" onClose={onClose} wide>
-    <div className="space-y-5">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm leading-6 text-navy-600">Adım adım öğrenin. Bu rehber kayıt oluşturmaz, işlem başlatmaz veya sayfanızı değiştirmez.</p>
-        <button type="button" onClick={onClose} className={control}>Çıkış</button>
-      </div>
-      <div><label htmlFor={selectId} className="text-sm font-medium text-navy-800">Konu seçin</label>
-        <select id={selectId} value={selected.id} onChange={e => {setTopicId(e.target.value); setStep(0);}}
-          className="mt-2 min-h-11 w-full min-w-0 rounded-xl border border-surface-border bg-white p-3 text-sm text-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500">
-          {topics.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
-        </select>
-      </div>
-      <section aria-label="Rehber adımı" className="rounded-2xl border border-accent-200 bg-accent-50 p-4 sm:p-5">
-        <p role="status" aria-live="polite" aria-atomic="true" className="text-xs font-semibold text-accent-800">{selected.title} · Adım {step + 1} / {selected.steps.length}</p>
-        <progress aria-label="Konu ilerlemesi" value={step + 1} max={selected.steps.length} className="mt-3 h-1.5 w-full accent-accent-600" />
-        <h3 ref={heading} tabIndex={-1} className="mt-4 text-xl font-semibold text-navy-900 outline-none">{current.title}</h3>
-        <p className="mt-3 text-sm leading-7 text-navy-700">{current.body}</p>
-        <div className="mt-4 rounded-xl border border-surface-border bg-white p-4 text-sm leading-6 text-navy-700"><span className="font-semibold">Kontrol noktası: </span>{current.check}</div>
-      </section>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <button type="button" className={control} disabled={step === 0} onClick={() => move(0)}>Baştan başla</button>
-        <div className="flex gap-2">
-          <button type="button" className={control} disabled={step === 0} onClick={() => move(step - 1)}>Önceki</button>
-          {step < selected.steps.length - 1 ? <button type="button" className={control} onClick={() => move(step + 1)}>Sonraki</button> : <button type="button" className={control} onClick={onClose}>Rehberi bitir</button>}
-        </div>
-      </div>
-      <p className="text-xs leading-5 text-navy-500">İstediğiniz zaman konu değiştirebilir veya Escape ile çıkabilirsiniz. Gerçek işlemleri rehberden çıktıktan sonra ilgili ekranda yapın.</p>
-    </div>
-  </ModalFrame>;
+function section(topic: GuideTopic) {
+  if (topic.tab) return sections[1];
+  if (topic.route.startsWith('/ai')) return sections[2];
+  if (['account', 'settings'].includes(topic.id)) return sections[3];
+  return sections[0];
 }
 
-export function WorkspaceGuide({ user }: { user: AppUser | null }) {
-  const pathname = usePathname() ?? '';
+function location(topic: GuideTopic) {
+  if (topic.id === 'documents') return 'Davalar → İlgili dava → Belgeler';
+  if (topic.id === 'precedents') return 'Davalar → İlgili dava → Genel Bakış → İlgili emsal kararları göster';
+  if (topic.id === 'ai-hub') return 'Sol menü → CaseBridge AI → Genel bakış';
+  if (topic.id === 'account') return 'Sağ üstteki kullanıcı menüsü → Hesabım';
+  const name = topic.title.split(' · ')[0];
+  if (topic.tab) {
+    const label = topic.tab === 'overview' ? 'Yönetim özeti' : topic.tab === 'deadline' ? 'Kritik süreler' : name;
+    return 'Sol menü → Büro Yönetimi → ' + label;
+  }
+  if (topic.id.startsWith('ai-') && topic.id !== 'ai-hub') return 'Sol menü → CaseBridge AI → ' + name;
+  return 'Sol menü → ' + (topic.id === 'platform' ? 'Büro Yönetimi' : name);
+}
+
+const guideHref = (id: string) => '/rehber?konu=' + encodeURIComponent(id);
+const primary = 'inline-flex min-h-11 items-center rounded-xl bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700';
+
+export function WorkspaceGuide() {
+  const user = useContext(WorkspaceUserContext);
   const params = useSearchParams();
-  const tab = params.get('tab');
-  const [open, setOpen] = useState(false);
-  const scope = `${user?.id}:${user?.role}:${user?.workspace_position}:${user?.is_platform_admin}`;
-  useEffect(() => setOpen(false), [pathname, tab, scope]);
+  const router = useRouter();
+  const [search, setSearch] = useState('');
   if (!user) return null;
   const topics = guideTopics(user);
-  return <>
-    <button type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)} className={control}>Rehber</button>
-    {open && <GuideReader topics={topics} initial={contextTopic(topics, pathname, tab)} onClose={() => setOpen(false)} />}
-  </>;
+  const current = topics.find(topic => topic.id === params.get('konu')) ?? topics[0];
+  const term = search.trim().toLocaleLowerCase('tr');
+  const groups = sections.map(label => ({
+    label,
+    topics: topics.filter(topic => section(topic) === label && (topic.title + ' ' + topic.purpose).toLocaleLowerCase('tr').includes(term)),
+  })).filter(group => group.topics.length);
+  const destination = topicDestination(current);
+  return <div className="mx-auto max-w-6xl space-y-5">
+    <header>
+      <h1 className="text-3xl font-bold tracking-tight text-navy-900">Kullanım rehberi</h1>
+      <p className="mt-2 text-sm text-navy-600">Yapmak istediğiniz işi seçip hangi ekranda, hangi adımları izleyeceğinizi öğrenin.</p>
+    </header>
+    <div className="grid items-start gap-5 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <nav aria-label="Rehber konuları" className="min-w-0 rounded-2xl border border-surface-border bg-white p-4 lg:sticky lg:top-0">
+        <label htmlFor="guide-search" className="text-sm font-semibold text-navy-900">Konu ara</label>
+        <input id="guide-search" type="search" value={search} onChange={event => setSearch(event.target.value)}
+          placeholder="Örn. görev, duruşma" className="mt-2 w-full rounded-lg border border-surface-border bg-white px-3 py-2 text-sm text-navy-900" />
+        {!groups.length && <p role="status" className="mt-3 text-sm text-navy-600">Eşleşen konu bulunamadı.</p>}
+        {groups.length > 0 && <>
+          <label className="mt-3 block text-sm text-navy-700 lg:hidden">Konu seçin
+            <select value={groups.some(group => group.topics.includes(current)) ? current.id : ''}
+              onChange={event => router.push(guideHref(event.target.value), { scroll: false })}
+              className="mt-1 min-h-11 w-full rounded-lg border border-surface-border bg-white px-2">
+              <option value="" disabled>Konu seçin</option>
+              {groups.map(group => <optgroup key={group.label} label={group.label}>
+                {group.topics.map(topic => <option key={topic.id} value={topic.id}>{topic.title}</option>)}
+              </optgroup>)}
+            </select>
+          </label>
+          <div className="mt-4 hidden max-h-[60dvh] space-y-4 overflow-y-auto lg:block">
+            {groups.map(group => <section key={group.label}>
+              <h2 className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-navy-500">{group.label}</h2>
+              {group.topics.map(topic => <Link key={topic.id} href={guideHref(topic.id)}
+                aria-current={current.id === topic.id ? 'page' : undefined}
+                className={`block rounded-lg px-2.5 py-2 text-sm ${current.id === topic.id ? 'bg-accent-50 font-semibold text-accent-800' : 'text-navy-700 hover:bg-surface-muted'}`}>{topic.title}</Link>)}
+            </section>)}
+          </div>
+        </>}
+      </nav>
+      <article aria-labelledby="guide-topic" className="min-w-0 rounded-2xl border border-surface-border bg-white p-5 sm:p-8">
+        <h2 id="guide-topic" className="text-2xl font-bold tracking-tight text-navy-900">{current.title}</h2>
+        <p className="mt-2 leading-7 text-navy-700">{current.purpose}</p>
+        <div className="my-5 rounded-xl border border-accent-200 bg-accent-50 px-4 py-3">
+          <h3 className="text-sm font-semibold text-accent-800">Nerede bulurum?</h3>
+          <p className="mt-1 text-sm leading-6 text-navy-800">{location(current)}</p>
+        </div>
+        <h3 className="text-lg font-semibold text-navy-900">Nasıl kullanılır?</h3>
+        <ol className="mt-2 divide-y divide-surface-border">
+          {current.steps.map((step, index) => <li key={step.title} className="flex items-start gap-3 py-4">
+            <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-50 text-sm font-bold text-accent-800">{index + 1}</span>
+            <div><h4 className="font-semibold text-navy-900">{step.title}</h4>
+              <p className="mt-1 text-sm leading-6 text-navy-700">{step.body}</p>
+              <p className="mt-2 border-l-2 border-accent-200 pl-3 text-sm leading-6 text-navy-600">{step.check}</p>
+            </div>
+          </li>)}
+        </ol>
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-surface-border pt-5">
+          <Link href={destination} className={primary}>İlgili ekranı aç</Link>
+          {guideTours[current.id] && <Link href={destination + '?tur=' + current.id} className="inline-flex min-h-11 items-center rounded-xl border border-accent-300 px-4 py-2 text-sm font-semibold text-accent-800">Ekranda adım adım göster</Link>}
+        </div>
+      </article>
+    </div>
+  </div>;
 }

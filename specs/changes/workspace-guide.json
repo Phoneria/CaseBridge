@@ -3,28 +3,41 @@
   "changes": [
     {
       "files": [
-        "frontend/src/components/WorkspaceHeader.tsx",
+        "frontend/src/components/AppShell.tsx",
+        "frontend/src/app/rehber/page.tsx",
         "frontend/src/components/WorkspaceGuide.tsx",
+        "frontend/src/components/WorkspaceHeader.tsx",
         "frontend/src/lib/workspaceGuide.ts",
         "frontend/app-version.json"
       ],
       "requirements": [
-        "specs/011-workspace-guide/spec.md#FR-001",
-        "specs/011-workspace-guide/spec.md#FR-002",
-        "specs/011-workspace-guide/spec.md#FR-003",
         "specs/011-workspace-guide/spec.md#FR-004",
-        "specs/011-workspace-guide/spec.md#FR-005",
-        "specs/011-workspace-guide/spec.md#FR-006",
-        "specs/011-workspace-guide/spec.md#FR-007"
+        "specs/011-workspace-guide/spec.md#FR-008"
       ],
       "acceptance_tests": [
-        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::opens the current bureau topic and navigates without network or storage writes",
-        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::traps keyboard focus and restores it on Escape and finish",
-        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::filters platform restricted and lawyer topics before context matching",
-        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::covers all bureau tabs and main routes with practical sourced steps",
-        "frontend/src/components/__tests__/WorkspaceHeader.test.tsx::replaces the header AI entry with the interactive guide"
+        "frontend/src/components/__tests__/AppShell.test.tsx::admits platform and restricted accounts to the guide route",
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::shows purpose location and all instructions for the selected topic",
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::rejects foreign guide topics and tours for restricted users",
+        "frontend/src/components/__tests__/WorkspaceHeader.test.tsx::links the header guide to the current section on its own page"
       ],
-      "reason": "Add role/context-aware read-only Turkish interactive guide in authenticated header, using existing theme and keyboard dialog."
+      "reason": "Authenticated contextual handbook with purpose, location and ordered instructions."
+    },
+    {
+      "files": [
+        "frontend/src/components/GuideTour.tsx",
+        "frontend/src/lib/guideTours.ts",
+        "frontend/src/app/globals.css",
+        "frontend/src/components/TasksView.tsx",
+        "frontend/src/components/ReportsView.tsx"
+      ],
+      "requirements": [
+        "specs/011-workspace-guide/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::highlights real controls without activating them and cleans up on exit",
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::finds controls added after page loading and tolerates missing targets"
+      ],
+      "reason": "Opt-in inline tour highlights existing controls and releases the highlight on navigation."
     }
   ]
 }

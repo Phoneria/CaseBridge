@@ -47,18 +47,11 @@ describe("WorkspaceHeader", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Bildirimler" })).toBeInTheDocument());
   });
 
-  it("replaces the header AI entry with the interactive guide", async () => {
-    const user = userEvent.setup();
+  it("links the header guide to the current section on its own page", () => {
     render(<WorkspaceHeader user={{id:"guide",email:"guide@example.test",full_name:"Örnek",department:null,gender:null,role:"admin",law_firm_id:"synthetic",is_active:true}} />);
+    expect(screen.getByRole("link", {name:"Rehber"})).toHaveAttribute("href","/rehber?konu=admin");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", {name:/CaseBridge AI/})).not.toBeInTheDocument();
-    const trigger = screen.getByRole("button", { name: "Rehber" });
-    await user.click(trigger);
-    expect(screen.getByRole("dialog", {name:"CaseBridge Rehber"})).toBeInTheDocument();
-    expect(screen.getByRole("combobox", {name:"Konu seçin"})).toHaveValue("admin");
-    await user.click(screen.getByRole("button", {name:"Sonraki"}));
-    expect(screen.getByRole("status")).toHaveTextContent("Adım 2 / 2");
-    await user.keyboard("{Escape}");
-    expect(trigger).toHaveFocus();
   });
 
   it("links the section name to its list from a page inside it", () => {

@@ -32,3 +32,7 @@ Bu bir öğretici okuma panelidir; rehber adımı tamamlamak gerçek işi tamaml
 
 ## Clarification — 22 November 2026
 Kullanıcı ekran görüntüsüyle açıkça “sağ üstte Casebridge AI yerine Rehber” istedi. Önceki header AI korunur varsayımı bu istek için geçersizdir. Constitution VI ve specs/002-header-ai header yerleşim kuralına kullanıcı tarafından açıkça yetkilendirilmiş dar istisna: yalnız header AI girişi kaldırılır; sidebar araçları, roller ve oturum sınırları korunur.
+
+### Güncel kullanıcı akışı
+- **FR-008**: Sağ üstteki Rehber bağlantısı oturum kapsamındaki /rehber sayfasını açar. Açılış konusu mevcut bölümden gelir. Kullanıcı konu seçer ve her aracın amacı, uygulamadaki konumu ve tüm kullanım adımlarını bir sayfada okur. Bu akış önceki modal ve odak kilidi gereksinimlerinin yerini alır.
+- **FR-009**: Desteklenen ekranlarda kullanıcı isteğe bağlı turu başlatır. Önceki/Sonraki gerçek kontrolü görünür kılıp vurgular. Tur hiçbir işlemi kullanıcı adına çalıştırmaz. Eksik hedef ve çıkış durumları erişilebilir biçimde ele alınır.
