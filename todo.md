@@ -533,3 +533,13 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] İncelemeye hazır PR #55 oluşturuldu; #54 CaseBridge Projects In Review. Diff kabul kapısındaki 4 isimli test gerçekten çalışıp geçti.
 - [ ] İnceleme ve korumalı main birleşmesi; PR açık bırakılır, auto-merge etkinleştirilmez.
 - [ ] Main kaynaklı yayın sonrası public v.0.24 kod/sürüm/health doğrulaması. Canlıya alındı veya yeni müşteriye hazır iddiası yok.
+## Onaylanan ekip içerik güncellemesi — 22 Kasım 2026
+
+- [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
+- [x] İzzet: iş geliştirme ve iş ortaklıkları; Emin: yapay zekâ ve veri. Bengü: mevcut belgelenmiş ekosistem ilişkileri katkısı; yatırım ifadesi eklenmez. Hatice ve Ahmet'in ilgili içerikleri korunur.
+- [x] Hedefli kabul ve altı JS açık/kapalı masaüstü/mobil görünüm geçti. Ayrı protected PR #56 → main444c520; mevcut timer marketing v.0.49 yayımladı. Normal public ekip metni ve HTML SHA256 kaynakla aynı, release.json49/444c520 ve restricted verify/health ok. Rehber işiyle birleştirilmedi; yeni müşteri teslimi/anahtar işlemi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/team-*.json.
+
+## Onaylanan Emin portresi takibi — 22 Kasım 2026
+
+- [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
+- [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.

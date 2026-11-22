@@ -1,0 +1,280 @@
+{
+  "url": "https://casebridge.com.tr/",
+  "marker": {
+    "commit": "ebe5f51b18b8d5f8a095e1102a1e921ca01b2b91",
+    "version": "v.0.50",
+    "scope": "marketing"
+  },
+  "htmlSHA256": "4b8b380cdd6acf8e5579e6c78bdfc81904f94c334147ac43c8930d326b4ab435",
+  "app": {
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+    "version": "0.23",
+    "scope": "application"
+  },
+  "health": {
+    "status": "ok",
+    "app": "casebridge",
+    "release_commit": "1b460a691af375da61e18014733ed0ca0c10b1a5",
+    "application_version": "0.21"
+  },
+  "results": [
+    {
+      "width": 1440,
+      "javaScriptEnabled": true,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 1440,
+        "body": 1440,
+        "team": 1200
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          140,
+          148
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": [
+        "https://casebridge.com.tr/script.js?v=0.41",
+        "https://casebridge.com.tr/feature-screens.js?v=0.22",
+        "https://casebridge.com.tr/number-counters.js?v=0.4",
+        "https://casebridge.com.tr/dark-hero.js?v=0.25",
+        "https://casebridge.com.tr/overview.js?v=0.35"
+      ]
+    },
+    {
+      "width": 1440,
+      "javaScriptEnabled": false,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 1440,
+        "body": 1440,
+        "team": 1200
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          140,
+          148
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": []
+    },
+    {
+      "width": 390,
+      "javaScriptEnabled": true,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 390,
+        "body": 390,
+        "team": 350
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          120,
+          126
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": [
+        "https://casebridge.com.tr/script.js?v=0.41",
+        "https://casebridge.com.tr/overview.js?v=0.35",
+        "https://casebridge.com.tr/feature-screens.js?v=0.22",
+        "https://casebridge.com.tr/dark-hero.js?v=0.25",
+        "https://casebridge.com.tr/number-counters.js?v=0.4"
+      ]
+    },
+    {
+      "width": 390,
+      "javaScriptEnabled": false,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 390,
+        "body": 390,
+        "team": 350
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          120,
+          126
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": []
+    },
+    {
+      "width": 320,
+      "javaScriptEnabled": true,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 320,
+        "body": 320,
+        "team": 280
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          120,
+          126
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": [
+        "https://casebridge.com.tr/dark-hero.js?v=0.25",
+        "https://casebridge.com.tr/feature-screens.js?v=0.22",
+        "https://casebridge.com.tr/script.js?v=0.41",
+        "https://casebridge.com.tr/overview.js?v=0.35",
+        "https://casebridge.com.tr/number-counters.js?v=0.4"
+      ]
+    },
+    {
+      "width": 320,
+      "javaScriptEnabled": false,
+      "names": [
+        "İzzet Ahmet",
+        "Emin Merden",
+        "Hatice Çam",
+        "Bengü Özbek",
+        "Ahmet Büyükdağ"
+      ],
+      "roles": [
+        "İş geliştirme ve iş ortaklıkları",
+        "Yapay zekâ ve veri",
+        "Yazılım altyapısı ve sistem mimarisi",
+        "Ekosistem ilişkileri",
+        "Hukuki içerik ve ürün danışmanlığı"
+      ],
+      "dimensions": {
+        "viewport": 320,
+        "body": 320,
+        "team": 280
+      },
+      "photoURL": "https://casebridge.com.tr/assets/team/emin-merden-web.jpg",
+      "photoSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "crop": {
+        "natural": [
+          720,
+          720
+        ],
+        "frame": [
+          120,
+          126
+        ],
+        "objectFit": "cover",
+        "objectPosition": "50% 36%"
+      },
+      "errors": [],
+      "badAssets": [],
+      "loadedScripts": []
+    }
+  ]
+}
