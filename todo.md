@@ -550,3 +550,11 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
 - [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
 - [ ] Main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.
+
+## Dava dosyası ve görev panosu · v.0.25 adayı
+
+- [x] Dava detayında belgeler, dosyaya bağlı emsaller, kayıtlı sonuç ve etkileşimli Olasılık Ağacı. Sonucu eksik kapalı bir davaya yetkili kullanıcı kararını ekleyebilir.
+- [x] Beş aşamalı görev panosunda sürükle bırak ve aşama seçimi, görev notları, dosya kapsamında avukata atama, öncelik ve son tarih.
+- [x] Beş kategoride değişken sonuçlar üreten on ek kurgusal dava ve dört CSV raporunda tablo önizlemesi.
+- [x] Üretim derlemesi, sürüm kontrolü, 14 isimli kabul testi ve masaüstü/mobil tarayıcı akışları geçti. Ayrıntılar specs/013-case-workspace-board/verification.md içinde.
+- [ ] #61 üzerine açılan #63 için inceleme, main birleşmesi ve canlı sürüm/kod/sağlık doğrulaması.
