@@ -758,3 +758,12 @@ export async function getScenarioTree(caseId: string, assumptions: Record<string
 export async function getScenarioDemo(document: import('@/types/scenarioTree').DocumentAssumption = 'unreviewed', payment: import('@/types/scenarioTree').PaymentAssumption = 'unknown'): Promise<import('@/types/scenarioTree').ScenarioTree> {
   return request(`/legal-lab/scenario-demo?document=${document}&payment=${payment}`);
 }
+
+
+export interface DemoRemovalPreview { token: string; counts: Record<string, number>; kept_users: number; total_records: number }
+export async function previewDemoRemoval(): Promise<DemoRemovalPreview> {
+  return request("/admin/demo-template/removal-preview");
+}
+export async function removeDemoTemplate(token: string): Promise<{removed_records: number; kept_users: number}> {
+  return request("/admin/demo-template/remove", {method:"POST", body:JSON.stringify({token,confirm:true})});
+}

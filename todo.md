@@ -543,3 +543,9 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [ ] Ayrı korumalı PR incelemesi/main birleşmesi ve main kaynaklı final sürüm/yayın/public doğrulama. Bu çalışma In Review bırakılır; canlı içe aktarma veya yeni müşteri teslimi yapılmaz. Rehber PR55 ayrı korunur.
 
 - [x] Ayrı PR #61 ve iş #60 In Review; 9 davranış dosyasına bağlı4 gerçek kabul testi başarılı çalıştı.32 hedefli frontend testi geçti. Canlı import veya yayın yapılmadı.
+
+### Kullanıcı ek isteği — Örnek verileri kaldır
+- [x] Ayarlar’da salt okunur sayım önizlemesi, Vazgeç/Escape, açık kalıcı kaldırma onayı; büro kapsamı, değişen planda409, çift işlem kilidi, boş durum ve hata sonrası tekrar. Örnek dosyalara sonradan eklenen içeriğin de silineceği açıkça yazılır.
+- [x] Kesin şablon kimlikleri + bilinen işaretli davalar; gerçek/diğer büro kayıtları ve ayarlar korunur. Kullanılmış/değiştirilmiş örnek hesaplar ve gerçek dosya kapsamları tutulur; yalnız silinen örnek erişim kimlikleri temizlenir. Dosya silme DB commit sonrası ve storage/paylaşılan-dosya kontrolüyle.
+- [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
+- [ ] PR61 güncellemesiyle In Review; main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.

@@ -29,6 +29,49 @@ def import_demo_template(admin: User = Depends(get_current_admin), db: Session =
         raise
 
 
+from typing import Literal
+from pydantic import BaseModel, Field
+
+
+class RemoveDemoRequest(BaseModel):
+    token: str = Field(pattern=r"^[0-9a-f]{64}$")
+    confirm: Literal[True]
+
+
+def _removal_firm(db, admin):
+    from app.models.law_firm import LawFirm
+    firm = db.query(LawFirm).filter_by(id=admin.law_firm_id).with_for_update().one()
+    if firm.is_platform:
+        raise HTTPException(403, "Platform bürosunda örnek veri işlemi yapılamaz.")
+
+
+@router.get("/demo-template/removal-preview")
+def preview_demo_removal(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    from app.db.demo_template_removal import removal_plan
+    _removal_firm(db, admin)
+    return removal_plan(db, admin)[1]
+
+
+@router.post("/demo-template/remove")
+def remove_demo_template(payload: RemoveDemoRequest, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    from app.db.demo_template_removal import removal_plan, remove_template, unlink_removed_files
+    try:
+        _removal_firm(db, admin)
+        selected, preview = removal_plan(db, admin)
+        if preview["token"] != payload.token:
+            raise HTTPException(409, "Örnek kayıtlar değişti. Önizlemeyi yeniden açıp kontrol edin.")
+        paths = remove_template(db, admin, selected)
+        if preview["total_records"]:
+            from app.models.management import ManagementAudit
+            db.add(ManagementAudit(law_firm_id=admin.law_firm_id,actor_id=admin.id,action="demo.template_removed",entity_type="demo",entity_id=admin.law_firm_id,reason="Yönetici örnek veri kaldırma önizlemesini açıkça onayladı.",after={"counts":preview["counts"],"kept_users":preview["kept_users"]}))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    unlink_removed_files(db, paths)
+    return {"removed_records": preview["total_records"], "kept_users": preview["kept_users"]}
+
+
 @router.get("/lawyers", response_model=list[AdminLawyerOut])
 def list_lawyers(include_demo: bool = False, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     """The lawyers cases can be given to: active and past the invitation

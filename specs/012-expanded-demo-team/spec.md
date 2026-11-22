@@ -12,6 +12,8 @@ Acceptance: tekrar yükleme kopya üretmez; örnek ekip gerçek davaya atanamaz,
 - **FR-003**: Tekrar yükleme kullanıcı/dava kopyası oluşturmaz, ilk dağıtım sonrası manuel atamayı değiştirmez; gerçek kayıt, bütçe ve kimlik bilgilerini değiştirmez. Aynı büro ithalatı mevcut kilit ve transaction içinde kalır.
 - **FR-004**: Atama listesi örnek avukatları yalnız örnek dosyalarda sunar. İş yükü grafiğinde tüm 12 isim görünür, mobilde pano yatay kaydırılır; Ayarlar açıklaması 12 avukatı belirtir.
 - **FR-005**: Hedefli izolasyon/idempotence/atama testleri, frontend ve tarayıcı kontrolleri gerçek sonuçla kaydedilir; v. sürümü güncellenir; ayrı PR In Review bırakılır, yayın veya merge yapılmaz.
+- **FR-006**: Yönetici Örnek verileri kaldır ile salt okunur sayım önizlemesi, Vazgeç ve açık kalıcı kaldırma onayı görür. Örnek dosyaların bağlı/sonradan eklenen içeriği de kaldırılacağı açıklanır. Güncel sayım değişirse yeniden onay gerekir; çift tıklama engellenir.
+- **FR-007**: Kaldırma yalnız oturum bürosundaki işaretli bilinen örnek davaları ve kesin şablon kimliklerini kapsar; gerçek/diğer büro kayıtları, profil, bütçe ve anahtarlar korunur. Başka kayıtta kullanılan örnek hesaplar korunur; kapsam daraltılarak genel erişime dönüşmez. Dosyalar yalnız commit sonrası, storage sınırı ve başka kayıt referansı kontrolüyle temizlenir. Tekrar kaldırma güvenli, yeniden yükleme çalışır.
 ## Success Criteria
 12 örnek avukatın tamamı örnek dosya sahibi; tek ve çift import aynı kişi sayısı; manuel atama tekrar importta korunur. Gerçek/diğer-büro atamaları reddedilir. 1440/390/320px iki temada tüm isimler ve atama kontrolleri erişilebilir.
 ## Edge cases and assumptions

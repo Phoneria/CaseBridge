@@ -11,3 +11,8 @@
 - [x] T007 [US1] Verify frontend tests, browser and build, record specs/012-expanded-demo-team/verification.md (FR-004, FR-005).
 - [x] T008 Record frontend/app-version.json, todo.md, specs/changes/expanded-demo-team.json and separate PR/Projects In Review (FR-005).
 Dependencies T001→T002→T003→T004→T005→T006→T007→T008. No delegation.
+
+## Phase 4 Removal refinement
+- [x] T009 [US2] Implement exact tenant-bounded removal planning/deletion in backend/app/db/demo_template_removal.py and admin.py per data-model.md RemovalPreview.token, RemovalPreview.counts, RemoveRequest.token, RemoveRequest.confirm (FR-006, FR-007).
+- [x] T010 [US1] Add preview/cancel/confirm/busy/error/retry controls in frontend/src/components/SettingsView.tsx and lib/api.ts (FR-006).
+- [ ] T011 Verify removal/isolation/stale-confirm/rollback/reload and UI confirmation with backend/tests/integration/test_demo_template_removal.py, SettingsView.test.tsx and browser; record verification.md and update review PR (FR-006, FR-007).

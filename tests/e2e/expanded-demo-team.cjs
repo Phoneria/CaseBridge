@@ -8,9 +8,9 @@ const session=JSON.parse(fs.readFileSync(`${root}/session.json`));
  for(const width of [1440,390,320])for(const theme of ['light','dark']){
   const context=await browser.newContext({viewport:{width,height:900}});
   await context.addInitScript(({token,theme})=>{localStorage.setItem('casebridge_token',token);localStorage.setItem('casebridge-theme',theme);},{token:session.token,theme});
-  let requests=0;const errors=[];
+  let requests=0, removals=0;const errors=[];
   await context.route(/http:\/\/localhost:8000\//,async route=>{
-   const url=new URL(route.request().url());requests++;
+   const url=new URL(route.request().url());requests++;if(url.pathname==='/admin/demo-template/remove')removals++;
    const response=await route.fetch({url:`http://127.0.0.1:8025${url.pathname}${url.search}`});
    await route.fulfill({response});
   });
@@ -45,7 +45,27 @@ const session=JSON.parse(fs.readFileSync(`${root}/session.json`));
   await page.goto('http://localhost:3016/ayarlar');await page.getByRole('button',{name:'Örnek verileri yükle'}).click();
   await expect(page.getByRole('heading',{name:'Büroda gösterime hazır veriler'})).toBeVisible();
   await page.goto('http://localhost:3016/admin');await expect(page.getByLabel('Avukat iş yükü bar grafiği').locator('.recharts-yAxis .recharts-cartesian-axis-tick')).toHaveCount(13);
-  results.push({width,theme,sampleLawyers:12,chartNames:names,realOptions:1,sampleOptions:13,requests,pageErrors:errors,overflow});await context.close();
+
+  await page.goto('http://localhost:3016/ayarlar');
+  const removeTrigger=page.getByRole('button',{name:'Örnek verileri kaldır',exact:true});await removeTrigger.click();
+  const modal=page.getByRole('dialog',{name:'Örnek verileri kaldır'});await expect(modal).toContainText('sonradan eklediğiniz');
+  await expect(modal.getByRole('button',{name:'Vazgeç'})).toBeFocused();
+  await page.keyboard.press('Escape');await expect(removeTrigger).toBeFocused();
+  if(removals!==0)throw Error('Cancellation removed data');
+  await removeTrigger.click();await expect(modal).toBeVisible();
+  await modal.evaluate(e=>e.scrollTop=0);await page.screenshot({path:`${root}/removal-${width}-${theme}.png`});
+  await modal.getByRole('button',{name:'Onayla ve örnekleri kaldır'}).click();
+  await expect(page.getByText(/örnek kayıt kaldırıldı/)).toBeVisible();
+  if(removals!==1)throw Error('Removal request count');
+  await page.goto('http://localhost:3016/admin');
+  await expect(page.getByLabel('Avukat iş yükü bar grafiği').locator('.recharts-yAxis .recharts-cartesian-axis-tick')).toHaveCount(1);
+  await expect(page.getByRole('combobox',{name:'Şablon dışı sentetik dosya sorumlu avukatı'})).toBeVisible();
+  await page.goto('http://localhost:3016/ayarlar');await page.getByRole('button',{name:'Örnek verileri kaldır',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Onayla ve örnekleri kaldır'})).toBeDisabled();await page.getByRole('button',{name:'Vazgeç'}).click();
+  await page.getByRole('button',{name:'Örnek verileri yükle'}).click();await expect(page.getByRole('heading',{name:'Büroda gösterime hazır veriler'})).toBeVisible();
+  await page.goto('http://localhost:3016/admin');await expect(page.getByLabel('Avukat iş yükü bar grafiği').locator('.recharts-yAxis .recharts-cartesian-axis-tick')).toHaveCount(13);
+  if(errors.length)throw Error(errors.join(' '));
+  results.push({width,theme,sampleLawyers:12,chartNames:names,realOptions:1,sampleOptions:13,removalRequests:removals,removedAndReloaded:true,requests,pageErrors:errors,overflow});await context.close();
  }
- await browser.close();fs.writeFileSync(`${root}/results.json`,JSON.stringify(results,null,2));console.log(JSON.stringify({passed:results.length,output:root}));
+ await browser.close();fs.writeFileSync(`${root}/removal-results.json`,JSON.stringify(results,null,2));console.log(JSON.stringify({passed:results.length,output:root}));
 })().catch(e=>{console.error(e);process.exit(1)});

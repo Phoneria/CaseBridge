@@ -27,6 +27,27 @@
         "frontend/src/components/__tests__/AdminView.test.tsx::shows twelve sample lawyers and limits their assignment options to sample cases"
       ],
       "reason": "Add 12 safe tenant-scoped fictional lawyers to sample import; distribute marked portfolio once, preserve manual assignments and show readable bounded options/chart."
+    },
+    {
+      "files": [
+        "backend/app/db/demo_template_removal.py",
+        "backend/app/api/routes/admin.py",
+        "frontend/src/components/SettingsView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-expanded-demo-team/spec.md#FR-006",
+        "specs/012-expanded-demo-team/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_demo_template_removal.py::test_removal_preview_confirm_repeat_and_reload_preserve_real_data",
+        "backend/tests/integration/test_demo_template_removal.py::test_removal_rejects_stale_scope_and_preserves_adopted_users",
+        "backend/tests/integration/test_demo_template_removal.py::test_removal_rolls_back_without_unlinking_files",
+        "frontend/src/components/__tests__/SettingsView.test.tsx::previews sample removal and requires explicit confirmation while cancellation writes nothing",
+        "frontend/src/components/__tests__/SettingsView.test.tsx::shows removal errors and allows a fresh preview"
+      ],
+      "reason": "Add explicit preview-confirmed tenant-only sample removal, safe dependency/storage cleanup, retained adopted accounts and keyboard-safe cancellation."
     }
   ]
 }
