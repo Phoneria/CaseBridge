@@ -150,10 +150,11 @@ def anonymize(
     low = _lower(text)
     ents = list(entities)
     extra: list[Span] = []
-    for det in extra_detectors:  # örn. yerel NER
+    dets = list(extra_detectors)
+    for det in dets:  # örn. yerel NER
         extra += det(text)
     person_in = [s for s in extra if s[2] == "KİŞİ"]
-    if pol.kisi_sezgisel:
+    if pol.kisi_sezgisel == "her_zaman" or (pol.kisi_sezgisel == "yedek" and not dets):
         person_in += names.heuristic_spans(text, pol)
     kmap = {_lower(t): f"kisi:{_lower(e.name.strip())}" for e in ents if e.kind == "kisi"
             for t in e.name.split() if len(t) >= 3}

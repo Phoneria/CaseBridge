@@ -7,6 +7,7 @@ Yalnızca PER (kişi) maskelenir: mahkeme/yer adları hukuki analiz için gerekl
 from __future__ import annotations
 
 import logging
+import re
 import threading
 
 log = logging.getLogger(__name__)
@@ -49,20 +50,46 @@ def _chunks(text: str, size: int = 1200):
         a = b
 
 
-def detect_persons(text: str, min_score: float = 0.85):
+def fold_caps(text: str) -> str:
+    """BÜYÜK HARFLİ kelimeleri (>=3 harf) Title Case yapar; uzunluk ve konumlar aynı kalır.
+    Cased NER, ALL-CAPS isimleri ("MEHMET YILMAZ") kaçırır; belge türünden bağımsız çözüm budur."""
+    from app.privacy.anonymizer import _lower
+
+    def fix(m):
+        w = m.group()
+        return w[0] + _lower(w[1:])
+
+    return re.sub(r"(?<![\wçğıöşü])[A-ZÇĞİÖŞÜ]{3,}(?![\wçğıöşü])", fix, text)
+
+
+_KIND = {"PER": "KİŞİ", "LOC": "YER", "ORG": "KURUM-NER"}
+
+
+def detect(text: str, min_score: float = 0.85, kinds=("PER", "LOC", "ORG")):
+    """PER/LOC/ORG aralıklarını döndürür (özgün metnin konumlarıyla). Model yoksa []."""
     from app.privacy.anonymizer import _lower
 
     pipe = _get()
     if pipe is None:
         return []
+    folded = fold_caps(text)
     spans = []
-    for off, chunk in _chunks(text):
+    for off, chunk in _chunks(folded):
         for e in pipe(chunk):
-            if e["entity_group"] != "PER" or float(e["score"]) < min_score:
+            g = e["entity_group"]
+            if g not in kinds or float(e["score"]) < min_score:
                 continue
             a, b = off + e["start"], off + e["end"]
             name = text[a:b].strip()
             if len(name) < 3:
                 continue
-            spans.append((a, a + len(name), "KİŞİ", "kisi:" + _lower(name)))
+            spans.append((a, a + len(name), _KIND[g], f"{_KIND[g]}:" + _lower(name)))
     return spans
+
+
+def detect_persons(text: str, min_score: float = 0.85):
+    return [(a, b, k, "kisi:" + key.split(":", 1)[1]) for a, b, k, key in detect(text, min_score, ("PER",))]
+
+
+def detect_all(text: str):
+    return detect(text)

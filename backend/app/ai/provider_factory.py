@@ -190,9 +190,9 @@ class _TrackedProvider(LLMProvider):
 
         detectors = []
         if settings.anonymize_use_ner:
-            from app.privacy.ner import detect_persons
+            from app.privacy.ner import detect
 
-            detectors.append(detect_persons)
+            detectors.append(detect)
         res = anonymize(user_prompt, extra_detectors=detectors)
         return res.restore(self._inner.complete(system_prompt, res.text, response_format=response_format))
 

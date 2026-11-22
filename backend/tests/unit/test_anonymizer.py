@@ -161,3 +161,34 @@ def test_uppercase_names_and_surname_propagation():
     for v in ("ZİLCİ", "KAAN", "216681", "PEKASİL", "Pekasil"):
         assert v.lower() not in r.text.lower(), v
     assert r.report["KİŞİ"]["farkli"] == 2
+
+
+def test_fold_caps_preserves_offsets_and_titlecases():
+    from app.privacy.ner import fold_caps
+
+    t = "Sanık MEHMET YILMAZ TCK 5237"
+    f = fold_caps(t)
+    assert len(f) == len(t)
+    assert f == "Sanık Mehmet Yılmaz Tck 5237"
+
+
+def test_ner_kinds_follow_policy_and_heuristic_modes():
+    import dataclasses
+
+    from app.privacy.policy import default_policy
+
+    def fake(text):
+        i = text.find("Ankara")
+        return [(i, i + 6, "YER", "YER:ankara")] if i >= 0 else []
+    r = anonymize("Dosya Ankara 3. Mahkemede.", extra_detectors=[fake])
+    assert "Ankara" in r.text and r.report["YER"]["mod"] == "işaretle"
+    pol = dataclasses.replace(default_policy(), kisi_sezgisel="yedek")
+    hit = anonymize("Davalı Mehmet YILMAZ geldi.", extra_detectors=[fake], policy=pol)
+    assert "YILMAZ" in hit.text  # dedektör varken yedek sezgi çalışmaz
+    assert "YILMAZ" not in anonymize("Davalı Mehmet YILMAZ geldi.", policy=pol).text  # dedektör yokken çalışır
+
+
+def test_policy_invalid_heuristic_mode_rejected():
+    with pytest.raises(ValueError) as exc:
+        Policy.from_dict({"kategoriler": {}, "kisi_sezgisel": "belki"})
+    assert "Geçersiz mod" in str(exc.value)

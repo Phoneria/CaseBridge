@@ -11,9 +11,11 @@
     "ADRES": "maskele",
     "KURUM": "maskele",
     "BİLGİ": "maskele",
-    "ŞEHİR": "işaretle"
+    "ŞEHİR": "işaretle",
+    "YER": "işaretle",
+    "KURUM-NER": "işaretle"
   },
-  "kisi_sezgisel": true,
+  "kisi_sezgisel": "her_zaman",
   "kisi_yoksay": [
     "sanık",
     "sanıklar",

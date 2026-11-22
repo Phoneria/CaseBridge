@@ -16,10 +16,21 @@ MODES = ("maskele", "işaretle", "kapalı")
 _DEFAULT = Path(__file__).with_name("policy.json")
 
 
+def _heur(v) -> str:
+    if v is True:
+        return "her_zaman"
+    if v is False:
+        return "kapalı"
+    if v not in ("yedek", "her_zaman", "kapalı"):
+        raise ValueError(f"Geçersiz mod: kisi_sezgisel={v!r}")
+    return v
+
+
 @dataclass
 class Policy:
     kategoriler: dict[str, str] = field(default_factory=dict)
-    kisi_sezgisel: bool = True
+    # NER varken sezgiler: "yedek" (yalnızca NER yoksa), "her_zaman" ya da "kapalı".
+    kisi_sezgisel: str = "yedek"
     kisi_yoksay: frozenset[str] = frozenset()
     mahkeme_sozcukleri: frozenset[str] = frozenset()
     buyuk_harf_yoksay: frozenset[str] = frozenset()
@@ -37,7 +48,7 @@ class Policy:
             raise ValueError(f"Geçersiz mod: {bad}; geçerli: {MODES}")
         return cls(
             kategoriler=kat,
-            kisi_sezgisel=bool(d.get("kisi_sezgisel", True)),
+            kisi_sezgisel=_heur(d.get("kisi_sezgisel", "yedek")),
             kisi_yoksay=frozenset(x.lower() for x in d.get("kisi_yoksay", [])),
             mahkeme_sozcukleri=frozenset(d.get("mahkeme_sozcukleri", [])),
             buyuk_harf_yoksay=frozenset(d.get("buyuk_harf_yoksay", [])),
