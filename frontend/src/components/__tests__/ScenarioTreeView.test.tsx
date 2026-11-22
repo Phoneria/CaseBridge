@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ScenarioTree, ScenarioNode } from '@/types/scenarioTree';
 import { ApiError } from '@/lib/apiError';
@@ -61,7 +61,8 @@ it('opens the recorded dossier exhibit from its branch', async () => {
   getScenarioTree.mockResolvedValue(snapshot);
   render(<ScenarioTreeView fixedCaseId="c1" />);
   await screen.findByText('Kurgusal dosyanın karar ağacı');
-  await userEvent.click(screen.getByRole('button', {name:/Belgeler doğrulanırsa/}));
+  const graph = screen.getByRole('group', {name:'Dosya senaryo ağacı'});
+  await userEvent.click(within(graph).getByRole('button', {name:/Belgeler doğrulanırsa/}));
   expect(screen.getByRole('link', {name:'Banka dekontları'})).toHaveAttribute('href','/davalar/c1?sekme=belgeler&belge=pdf-1');
   expect(screen.getByText('Önceki adımdan geçiş %60')).toBeInTheDocument();
   expect(screen.getAllByText('Başlangıçtan ulaşma %39').length).toBeGreaterThan(0);
