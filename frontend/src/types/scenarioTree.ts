@@ -15,6 +15,9 @@ export interface ScenarioNode {
   source_ids: string[];
   uncertainties: string[];
   probability: number | null;
+  transition_percent?: number | null;
+  path_percent?: number | null;
+  recorded_step?: boolean;
   support_weight?: number | null;
   probability_group_id?: string | null;
   assessment_label: 'Hesaplanmadı' | 'Demo tahmini';

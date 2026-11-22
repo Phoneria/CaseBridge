@@ -15,37 +15,69 @@ import type { Case } from '@/types';
 import type { ScenarioNode, ScenarioTree, SupportAssumption, DocumentAssumption, PaymentAssumption } from '@/types/scenarioTree';
 
 export function assessment(node: ScenarioNode): string {
+  if (node.path_percent != null) return 'Başlangıçtan ulaşma ' + percent(node.path_percent);
   if (node.support_weight != null) return `Demo tahmini: ${node.support_weight}/100`;
   if (node.probability != null) return `Demo tahmini: %${(node.probability * 100).toLocaleString('tr-TR', {minimumFractionDigits: 1, maximumFractionDigits: 1})}`;
   return node.kind === 'context' ? 'Dosya bağlamı' : 'İzleme adımı';
 }
 
+function percent(value: number) {
+  return (value / 100).toLocaleString('tr-TR', { style: 'percent', maximumFractionDigits: 2 });
+}
+
+const edgeColors = ['#007eac', '#804ca3', '#aa5710'];
+
 function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selected: string; onSelect: (id: string) => void }) {
   const marker = useId().replace(/:/g, '');
-  const branches = tree.nodes.filter(n => n.parent_id === 'root');
-  const height = Math.max(520, branches.length * 200 + 40);
-  const positions = new Map<string, { x: number; y: number }>([['root', { x: 20, y: Math.min(240, height / 2 - 48) }]]);
-  branches.forEach((branch, i) => {
-    const children = tree.nodes.filter(n => n.parent_id === branch.id);
-    positions.set(branch.id, { x: 330, y: i * 200 + 42 });
-    children.forEach((child, j) => positions.set(child.id, { x: 640, y: i * 200 + (children.length > 1 ? j * 100 + 4 : 42) }));
-  });
-  return <div className="max-h-[38rem] overflow-auto rounded-2xl border border-surface-border bg-surface-muted p-2" role="group" aria-label="Dosya senaryo ağacı">
-    <div className="relative" style={{ width: 920, height }}>
-      <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" viewBox={`0 0 920 ${height}`}>
-        <defs><marker id={marker} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10" fill="#007eac" /></marker></defs>
-        {tree.nodes.filter(n => n.parent_id).map(node => {
-          const from = positions.get(node.parent_id!)!, to = positions.get(node.id)!;
-          return <path key={node.id} d={`M${from.x + 250} ${from.y + 43} C${from.x + 285} ${from.y + 43},${to.x - 35} ${to.y + 43},${to.x} ${to.y + 43}`} fill="none" stroke="#007eac" strokeWidth="1.6" markerEnd={`url(#${marker})`} />;
+  const [hovered, setHovered] = useState<string | null>(null);
+  const layout = useMemo(() => {
+    const positions = new Map<string, {x: number; y: number; color: number}>();
+    const children = new Map<string, ScenarioNode[]>();
+    for (const n of tree.nodes) {
+      if (n.parent_id) children.set(n.parent_id, [...(children.get(n.parent_id) ?? []), n]);
+    }
+    let row = 0, width = 0;
+    function place(node: ScenarioNode, depth: number, color: number) {
+      const x = depth * 360 + 16, y = row * 116 + 16;
+      positions.set(node.id, {x, y, color});
+      width = Math.max(width, x + 272);
+      const branches = children.get(node.id) ?? [];
+      if (!branches.length) row++;
+      branches.forEach((branch, i) => place(branch, depth + 1, i === 0 ? color : i % edgeColors.length));
+    }
+    const root = tree.nodes.find(n => !n.parent_id);
+    if (root) place(root, 0, 0);
+    return { positions, width, height: Math.max(230, row * 116 + 32) };
+  }, [tree]);
+  const trail = new Set<string>();
+  let cursor = tree.nodes.find(n => n.id === (hovered ?? selected));
+  while (cursor) {
+    trail.add(cursor.id);
+    const parent = cursor.parent_id;
+    cursor = tree.nodes.find(n => n.id === parent);
+  }
+  return <div className="max-h-[38rem] min-w-0 overflow-auto rounded-2xl border border-surface-border bg-surface-muted p-2" role="group" aria-label="Dosya senaryo ağacı">
+    <div className="relative" style={{ width: layout.width, height: layout.height }}>
+      <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full">
+        <defs>{edgeColors.map((color, i) => <marker key={color} id={marker+i} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10z" fill={color}/></marker>)}</defs>
+        {tree.nodes.map(node => {
+          if (!node.parent_id) return null;
+          const from = layout.positions.get(node.parent_id)!, to = layout.positions.get(node.id)!;
+          const start = from.x + 250, end = to.x - 4, cy = to.y + 46;
+          return <g key={node.id}>
+            <path d={`M${start} ${from.y+46} C${start+45} ${from.y+46},${end-60} ${cy},${end} ${cy}`} fill="none" stroke={edgeColors[to.color]} strokeWidth={trail.has(node.id) ? 3.5 : 1.8} markerEnd={`url(#${marker}${to.color})`}/>
+            {node.transition_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={edgeColors[to.color]} fontSize="12" paintOrder="stroke" stroke="white" strokeWidth="3">{percent(node.transition_percent)}</text>}
+          </g>;
         })}
       </svg>
-      {tree.nodes.map(node => { const pos = positions.get(node.id)!; return <button key={node.id} type="button" aria-pressed={selected === node.id}
+      {tree.nodes.map(node => { const pos = layout.positions.get(node.id)!; return <button key={node.id} type="button" aria-pressed={selected === node.id}
+        onMouseEnter={() => setHovered(node.id)} onMouseLeave={() => setHovered(null)} onFocus={() => setHovered(node.id)} onBlur={() => setHovered(null)}
         onClick={() => onSelect(node.id)} title={node.label}
-        className={'absolute flex min-h-[86px] w-[250px] flex-col justify-center rounded-xl border px-3 py-2 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-accent-400 ' + (selected === node.id ? 'border-accent-500 bg-accent-50 text-accent-900' : 'border-surface-border bg-white text-navy-800')}
+        className={'absolute flex h-[92px] w-[250px] flex-col justify-center rounded-xl border px-3 py-2 text-left shadow-sm motion-safe:transition motion-safe:hover:-translate-y-1 hover:shadow-lg hover:ring-2 hover:ring-accent-400 focus-visible:ring-2 focus-visible:ring-accent-400 ' + (trail.has(node.id) ? 'border-accent-500 bg-accent-50 text-accent-900' : 'border-surface-border bg-white text-navy-800')}
         style={{ left: pos.x, top: pos.y }}>
-        <span className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-accent-700">{tree.source_mode === 'dossier_history' ? (node.id === 'alternative' ? 'Alternatif yol' : 'Dosya geçmişi') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-700">{tree.source_mode === 'dossier_history' ? (!node.parent_id || node.recorded_step ? 'Dosya geçmişi' : 'Alternatif yol') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
-        <span className="mt-1 text-[10px] text-navy-500">{assessment(node)}</span>
+        <span className="text-[11px] text-navy-600">{assessment(node)}</span>
       </button>; })}
     </div>
   </div>;
@@ -121,7 +153,7 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
   const sourceById = useMemo(() => new Map(tree?.sources.map(s => [s.id, s]) ?? []), [tree]);
   return <div className="space-y-5">
     {!fixedCaseId && <><AiHero compact title="Olasılık Ağacı" description="Dosyanızdaki kayıtları, alternatif senaryoları ve koşullu gelişmeleri dayanaklarıyla birlikte inceleyin. Demo tahminlerini, kullanılan varsayımları ve hesaplama yöntemini birlikte inceleyin." />
-    <div className="flex flex-wrap gap-3"><button type="button" onClick={() => switchMode(true)} className="rounded-xl bg-accent-700 px-4 py-2 text-sm font-semibold text-white">Örnek davayı aç — Demo tahmini</button>{demoMode && <button type="button" onClick={() => switchMode(false)} className="rounded-xl border border-surface-border px-4 py-2 text-sm">Büro dosyalarına dön</button>}</div>
+    <div className="flex flex-wrap gap-3"><button type="button" onClick={() => switchMode(true)} className="rounded-xl bg-accent-700 px-4 py-2 text-sm font-semibold text-white">Kurgusal davayı aç — Demo tahmini</button>{demoMode && <button type="button" onClick={() => switchMode(false)} className="rounded-xl border border-surface-border px-4 py-2 text-sm">Büro dosyalarına dön</button>}</div>
     {!demoMode && <AiCard><details open={!tree}><summary className="cursor-pointer text-sm font-semibold text-navy-900">{tree ? `Seçili dosya: ${tree.title} · Dosyayı değiştir` : 'Bir dava seçin'}</summary>
       <div className="mt-3">{casesLoading ? <LoadingState label="Dava listesi yükleniyor…" /> : <CaseSearchSelect cases={cases} value={caseId} onChange={id => switchMode(false, id)} />}</div>
     </details></AiCard>}
@@ -131,8 +163,8 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
     {!demoMode && !caseId && !casesLoading && <p className="rounded-xl border border-surface-border bg-white p-5 text-sm text-navy-600">Ağaç oluşturmak için erişiminiz olan bir dosya seçin. Bu görünüm yeni bir yapay zekâ analizi başlatmaz.</p>}
     {tree && node && <>
       <div className="rounded-xl border border-accent-200 bg-accent-50 px-4 py-3 text-sm text-accent-900">
-        <strong>{tree.source_mode === 'dossier_history' ? 'Kurgusal dosyanın karar ağacı' : tree.source_mode === 'synthetic_demo' ? 'Sentetik örnek — Demo tahmini' : tree.source_mode === 'stored_analysis' ? (tree.is_example ? 'Örnek analiz kaydındaki senaryolar' : 'Kayıtlı analizdeki senaryolar') : 'Koşullu hazırlık yolları'}</strong>
-        <p className="mt-1">{tree.source_mode === 'dossier_history' ? 'Olayı, tartışılan hususu ve gerçekleşen sonucu seçerek dayanak evrakı açabilirsiniz.' : tree.source_mode === 'synthetic_demo' ? 'Tek bir kurgusal inceleme sorusunun birbirini dışlayan ve tüm seçenekleri kapsayan üç alternatifidir.' : tree.source_mode === 'stored_analysis' ? 'Dallar son tamamlanmış analiz kaydından alınmıştır; sıraları olasılık derecesi değildir.' : 'Kayıtlı, kullanılabilir analiz senaryosu bulunamadı. Genel hazırlık dalları dosyaya özgü bir tahmin değildir.'}</p>
+        <strong>{tree.source_mode === 'dossier_history' ? 'Kurgusal dosyanın karar ağacı' : tree.source_mode === 'synthetic_demo' ? 'Kurgusal dosya — Demo tahmini' : tree.source_mode === 'stored_analysis' ? (tree.is_example ? 'Gösterim analiz kaydındaki senaryolar' : 'Kayıtlı analizdeki senaryolar') : 'Koşullu hazırlık yolları'}</strong>
+        <p className="mt-1">{tree.source_mode === 'dossier_history' ? 'Bir aşama seçerek dayanak evrakı, önceki adımdan geçişi ve başlangıçtan ulaşma yüzdesini inceleyin. Yüzdeler bu kurgusal senaryonun varsayımlarıdır.' : tree.source_mode === 'synthetic_demo' ? 'Tek bir kurgusal inceleme sorusunun birbirini dışlayan ve tüm seçenekleri kapsayan üç alternatifidir.' : tree.source_mode === 'stored_analysis' ? 'Dallar son tamamlanmış analiz kaydından alınmıştır; sıraları olasılık derecesi değildir.' : 'Kayıtlı, kullanılabilir analiz senaryosu bulunamadı. Genel hazırlık dalları dosyaya özgü bir tahmin değildir.'}</p>
         {tree.source_mode !== "dossier_history" && <p className="mt-1 font-medium">{tree.demo ? 'Demo tahmini yüzdeleri yalnız bu aynı sorunun alternatifleri arasında toplam %100’dür.' : 'Demo tahmini destek ağırlığı: her dal bağımsız 0–100 ölçeğindedir; örtüşebilen dallar toplamlanmaz. Başlangıç 50/100 nötr varsayımdır.'}</p>}
       </div>
       {tree.source_mode !== "dossier_history" && <section aria-label="Demo hesaplama yöntemi" className="space-y-3 rounded-xl border border-surface-border bg-white p-4 text-sm text-navy-700">
@@ -179,10 +211,11 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
         </section>}
         <section aria-label="Seçili dalın dayanakları" className="space-y-4 rounded-2xl border border-surface-border bg-white p-5">
           <div><h2 className="text-base font-semibold text-navy-900">{node.label}</h2><p className="mt-2 text-sm leading-6 text-navy-700">{node.description}</p></div>
-          <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{assessment(node)}</strong><p className="mt-1 leading-6">{node.reasoning}</p></div>
+          <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{assessment(node)}</strong>{node.transition_percent != null && <p>Önceki adımdan geçiş {percent(node.transition_percent)}</p>}{node.path_percent != null && <p className="mt-1 text-xs">Kurgusal senaryo varsayımı · Yol boyunca geçiş yüzdeleri çarpılır.</p>}<p className="mt-1 leading-6">{node.reasoning}</p></div>
           {node.kind === 'context' && <details><summary className="cursor-pointer text-sm font-semibold text-navy-800">Kayıtlı olaylar ve iddialar</summary><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-navy-600">{tree.current_facts.map((f,i) => <li key={i}>{f}</li>)}</ul></details>}
           <div><h3 className="text-sm font-semibold text-navy-800">Dayanaklar</h3><ul className="mt-2 space-y-2">{node.source_ids.map(id => { const source = sourceById.get(id)!; return <li key={id} className="rounded-lg border border-surface-border p-2 text-xs leading-5 text-navy-600"><strong className="block text-navy-800">{exhibitLink(id, source.label)}</strong>{source.detail}{source.recorded_at && <span className="mt-1 block text-navy-500">Kayıt: {source.recorded_at.slice(0,10)}</span>}</li>; })}</ul></div>
-          <div><h3 className="text-sm font-semibold text-navy-800">Belirsizlikler ve açık sorular</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{node.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul></div>
+          {tree.source_mode === "dossier_history" && tree.nodes.some(n => n.parent_id === node.id) && <div><h3 className="text-sm font-semibold text-navy-800">Sonraki adımlar</h3><ul className="mt-2 space-y-2">{tree.nodes.filter(n => n.parent_id === node.id).map(n => <li key={n.id}><button type="button" className="text-left text-sm text-accent-700 underline" onClick={() => setSelected(n.id)}>{n.label} · {percent(n.transition_percent ?? 0)}</button></li>)}</ul></div>}
+          {node.uncertainties.length > 0 && <div><h3 className="text-sm font-semibold text-navy-800">Belirsizlikler ve açık sorular</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{node.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul></div>}
         </section>
       </div>
       <p className="text-xs leading-6 text-navy-500">{tree.disclaimer}</p>

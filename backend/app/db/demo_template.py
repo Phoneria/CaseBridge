@@ -20,8 +20,8 @@ from app.models.law_firm import LawFirm
 from app.models.task import TaskPriority, TaskStage, TaskStatus
 from app.models.user import User
 
-PREFIX = "ÖRNEK-"
-MARKER = "[ÖRNEK ŞABLON] "
+PREFIX = "CB-"
+MARKER = "[Gösterim] "
 
 
 def add_demo_template(db: Session, admin: User) -> dict:
@@ -29,13 +29,15 @@ def add_demo_template(db: Session, admin: User) -> dict:
     # Serialize imports by two admins of the same firm before checking numbers.
     firm = db.query(LawFirm).filter(LawFirm.id == admin.law_firm_id).with_for_update().one()
     if firm.is_platform:
-        raise HTTPException(status_code=403, detail="Platform bürosuna örnek dava eklenemez.")
+        raise HTTPException(status_code=403, detail="Platform bürosuna gösterim davası eklenemez.")
+    from app.db.demo_upgrade import retire_old_roster, upgrade_numbers
+    upgrade_numbers(db, firm.id, template_numbers() + [f"EMSAL-{i}" for i in range(1, 4)])
     expected_numbers = [PREFIX + number for number in template_numbers()]
     existing = db.query(Case).filter(
         Case.law_firm_id == firm.id, Case.case_number.in_(expected_numbers)
     ).all()
     if any(not (case.description or "").startswith(MARKER) for case in existing):
-        raise HTTPException(status_code=409, detail="Örnek numarası gerçek bir davada kullanılıyor; hiçbir kayıt eklenmedi.")
+        raise HTTPException(status_code=409, detail="Gösterim dosyasının numarası gerçek bir davada kullanılıyor; hiçbir kayıt eklenmedi.")
     before = len(existing)
     counts_before = presentation_counts(db, firm.id)
 
@@ -57,13 +59,13 @@ def add_demo_template(db: Session, admin: User) -> dict:
                   "description": MARKER + (source.get("description") or "")}
         demo_cases[source["case_number"]] = _get_or_create_case(db, firm, assigned, **fields)
 
-    scope_and_distribute(db, admin, owners, list(demo_cases.values()))
+    scope_and_distribute(db, admin, owners, list(demo_cases.values()), [case.id for case in existing])
 
     open_stages = (TaskStage.TODO, TaskStage.IN_PROGRESS, TaskStage.IN_REVIEW, TaskStage.BACKLOG)
     priorities = (TaskPriority.NORMAL, TaskPriority.HIGH, TaskPriority.URGENT, TaskPriority.LOW)
     for index, (case_number, title, due_in_days, status) in enumerate(DEMO_TASKS):
         _get_or_create_task(
-            db, demo_cases[case_number], author,
+            db, demo_cases[case_number], db.get(User, demo_cases[case_number].assigned_lawyer_id) or author,
             title=title, description="Demo görev kaydı",
             open_stage=open_stages[index % len(open_stages)], priority=priorities[index % len(priorities)],
             due_date=date.today() + timedelta(days=due_in_days), status=status,
@@ -114,5 +116,6 @@ def add_demo_template(db: Session, admin: User) -> dict:
     seed_courtroom_scenarios(db)
     seed_courtroom_showcases(db, admin)
     seed_ai_history(db, admin, list(demo_cases.values()))
+    retire_old_roster(db, admin)
     coverage = presentation_counts(db, firm.id)
     return {"total_cases": len(portfolio), "added_cases": len(portfolio) - before, "added_records": sum(coverage.values()) - sum(counts_before.values()), "coverage": coverage}

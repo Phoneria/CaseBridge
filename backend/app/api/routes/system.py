@@ -48,10 +48,13 @@ async def update_openai_key(request: Request, response: Response, actor: User = 
         if not isinstance(api_key, str):
             raise ValueError()
         api_key = api_key.strip()
+        provider = payload.get("provider", "openai")
+        if provider not in ("anthropic", "openai") or (provider == "anthropic") != api_key.startswith("sk-ant-api") or (provider == "openai" and api_key.startswith("sk-ant-")):
+            raise ValueError()
         if not (20 <= len(api_key) <= 512 and api_key.startswith("sk-") and not any(c.isspace() for c in api_key)):
             raise ValueError()
     except (ValueError, UnicodeError):
-        raise HTTPException(400, "Geçerli bir OpenAI API anahtarı girin.") from None
+        raise HTTPException(400, "Seçtiğiniz sağlayıcı için geçerli bir API anahtarı girin.") from None
     scope = ai_credential_scope(actor)
     if not key_status(scope)["can_save"]:
         raise HTTPException(503, "Güvenli anahtar yönetimi sunucuda etkinleştirilmemiş.")

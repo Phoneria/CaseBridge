@@ -46,6 +46,9 @@ class TreeNode(BaseModel):
     source_ids: list[str] = Field(max_length=64)
     uncertainties: list[str] = Field(max_length=20)
     probability: float | None = Field(default=None, ge=0, le=1, allow_inf_nan=False)
+    transition_percent: int | None = Field(default=None, ge=0, le=100)
+    path_percent: float | None = Field(default=None, ge=0, le=100, allow_inf_nan=False)
+    recorded_step: bool = False
     assessment_label: Literal['Hesaplanmadı', 'Demo tahmini'] = 'Hesaplanmadı'
     probability_group_id: str | None = None
     support_weight: int | None = Field(default=None, ge=0, le=100)
@@ -117,7 +120,7 @@ class ScenarioTree(BaseModel):
     is_example: bool = False
     demo: DemoModel | None = None
     support_model: SupportModel | None = None
-    nodes: list[TreeNode] = Field(max_length=25)
+    nodes: list[TreeNode] = Field(max_length=96)
     sources: list[TreeSource] = Field(max_length=144)
     current_facts: list[str] = Field(max_length=80)
     uncertainties: list[str] = Field(max_length=20)
@@ -147,6 +150,22 @@ class ScenarioTree(BaseModel):
                 parent = ancestor.parent_id
             if not set(node.source_ids).issubset(sources):
                 raise ValueError('Unknown source')
+        if self.source_mode != 'dossier_history' and any(n.transition_percent is not None or n.path_percent is not None or n.recorded_step for n in self.nodes):
+            raise ValueError('Path weights belong only to fictional dossier histories')
+        if self.source_mode == 'dossier_history':
+            by_id = {n.id: n for n in self.nodes}
+            totals = {}
+            for n in self.nodes:
+                if n.parent_id is None:
+                    if n.path_percent != 100 or n.transition_percent is not None:
+                        raise ValueError('Invalid starting percentage')
+                    continue
+                parent = by_id[n.parent_id]
+                if n.transition_percent is None or n.path_percent is None or parent.path_percent is None or abs(n.path_percent - parent.path_percent * n.transition_percent / 100) > 1e-9:
+                    raise ValueError('Invalid path percentage')
+                totals[parent.id] = totals.get(parent.id, 0) + n.transition_percent
+            if any(total != 100 for total in totals.values()):
+                raise ValueError('Sibling transitions must sum to 100')
         if self.source_mode != 'synthetic_demo':
             if self.demo is not None or any(n.probability is not None or n.probability_group_id is not None for n in self.nodes):
                 raise ValueError('Real case trees cannot contain normalized probabilities')
@@ -276,39 +295,18 @@ def build_tree(db: Session, case: Case, firm_id: str, assumptions: dict[str, Sup
     version = hashlib.sha256(json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
     common_sources = [s.id for s in sources if s.kind in {'case', 'event', 'document'}][:16]
     nodes = [TreeNode(id='root', parent_id=None, kind='context', label=text(case.case_name), description='Dosyada kaydedilen olay, iddia ve belge bağlamı.', reasoning='Bu kök dosyadaki kayıtları özetler; kayıtların doğruluğu veya hukuki sonucu bu görünümle doğrulanmış sayılmaz.', source_ids=common_sources, uncertainties=uncertainties)]
-    from app.db.dossier_pack import case_key, document_key
-    from app.db.dossier_documents import entries
+    from app.db.dossier_pack import case_key
     from app.db.dossier_stories import STORIES
-    story = next((s for s in STORIES if case.case_number == "ÖRNEK-" + s.code and case.id == case_key(firm_id, s)), None)
-    if story and not has_analysis:
-        from app.db.dossier_exhibits import EXHIBITS
-        exhibit_titles = {title for title, _, _ in EXHIBITS[story.code]}
-        available = {s.id for s in sources if s.kind == 'document'}
-        records = entries(story)
-        def references(matches):
-            return [ref for e in records if matches(e.title)
-                    and (ref := "document:" + document_key(case.id, e.key)) in available]
-        groups = [
-            ("evidence", "Olay ve dayanak kayıtlar", story.facts, story.finding,
-             references(lambda title: title in exhibit_titles or any(t in title for t in ("Delil eki", "raporu", "Müzekkere cevabı", "Keşif", "Tanık dinleme")))),
-            ("dispute", "Tartışılan husus", story.response, story.challenge,
-             references(lambda title: any(t in title.lower() for t in ("itiraz", "beyan", "savunma", "dilekçesi", "tartışıldığı")))),
-            ("recorded", "Gerçekleşen sonuç", story.judgment, story.end,
-             references(lambda title: any(t in title.lower() for t in ("karar", "kapanış", "kyok")) and title != "Ara karar evrakı")),
-        ]
-        for key, label, description, reasoning, refs in groups:
-            nodes.append(TreeNode(id=key, parent_id="root", kind="outcome" if key == "recorded" else "development",
-                                  label=label, description=description, reasoning=reasoning, source_ids=refs,
-                                  uncertainties=[] if refs else ["İlgili örnek evrak bu dosyada bulunamadı."]))
-        nodes.append(TreeNode(id="alternative", parent_id="dispute", kind="scenario", label="Olası alternatif",
-                              description="Karşı açıklama doğrulansaydı aynı kayıtlar yeniden değerlendirilirdi.",
-                              reasoning=story.response, source_ids=groups[1][4], uncertainties=["Bu dal kurgusal dosyada gerçekleşmedi."]))
+    story = next((s for s in STORIES if case.id == case_key(firm_id, s)), None)
+    if story:
+        from app.legal_lab.dossier_tree import history_nodes
+        nodes = history_nodes(case.id, story, sources)
         return ScenarioTree(case_id=case.id, title=case.case_name, case_closed=case.status == CaseStatus.KAPALI,
                             context_version=version, generated_at=datetime.now(timezone.utc), source_mode="dossier_history",
                             analysis_id=None, analysis_created_at=None, is_example=True, nodes=nodes, sources=sources,
                             current_facts=facts[:80], uncertainties=uncertainties, truncated=truncated,
                             limits_note="Evrak bağlantıları seçili dosyaya aittir.",
-                            disclaimer="Bu geçmiş, kurgusal dosyadaki belgeleri izler. Olasılık hesaplanmadı.")
+                            disclaimer="Yüzdeler bu kurgusal çalışmadaki senaryo varsayımlarıdır. Ulaşma yüzdesi, izlenen yoldaki geçiş yüzdelerinin çarpımıdır.")
     if has_analysis:
         for i, scenario in enumerate(scenarios):
             sid = f'scenario-{i}'

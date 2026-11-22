@@ -48,7 +48,7 @@ def _removal_firm(db, admin):
     from app.models.law_firm import LawFirm
     firm = db.query(LawFirm).filter_by(id=admin.law_firm_id).with_for_update().one()
     if firm.is_platform:
-        raise HTTPException(403, "Platform bürosunda örnek veri işlemi yapılamaz.")
+        raise HTTPException(403, "Platform bürosunda gösterim verisi işlemi yapılamaz.")
 
 
 @router.get("/demo-template/removal-preview")
@@ -65,11 +65,11 @@ def remove_demo_template(payload: RemoveDemoRequest, admin: User = Depends(get_c
         _removal_firm(db, admin)
         selected, preview = removal_plan(db, admin)
         if preview["token"] != payload.token:
-            raise HTTPException(409, "Örnek kayıtlar değişti. Önizlemeyi yeniden açıp kontrol edin.")
+            raise HTTPException(409, "Gösterim kayıtları değişti. Önizlemeyi yeniden açıp kontrol edin.")
         paths = remove_template(db, admin, selected)
         if preview["total_records"]:
             from app.models.management import ManagementAudit
-            db.add(ManagementAudit(law_firm_id=admin.law_firm_id,actor_id=admin.id,action="demo.template_removed",entity_type="demo",entity_id=admin.law_firm_id,reason="Yönetici örnek veri kaldırma önizlemesini açıkça onayladı.",after={"counts":preview["counts"],"kept_users":preview["kept_users"]}))
+            db.add(ManagementAudit(law_firm_id=admin.law_firm_id,actor_id=admin.id,action="demo.template_removed",entity_type="demo",entity_id=admin.law_firm_id,reason="Yönetici gösterim verisi kaldırma önizlemesini açıkça onayladı.",after={"counts":preview["counts"],"kept_users":preview["kept_users"]}))
         db.commit()
     except Exception:
         db.rollback()
@@ -91,8 +91,8 @@ def list_lawyers(include_demo: bool = False, admin: User = Depends(get_current_a
         User.password_set_at.isnot(None),
     ).order_by(User.full_name).all()
 
-    from app.db.demo_team import demo_case_ids, roster_ids
-    sample_ids = roster_ids(admin.law_firm_id)
+    from app.db.demo_team import demo_case_ids, scoped_lawyer_ids
+    sample_ids = scoped_lawyer_ids(admin.law_firm_id)
     restricted_ids = {row[0] for row in restricted.all()}
     result = []
     for lawyer in candidates:
@@ -129,9 +129,9 @@ def assign_case_lawyer(
     if lawyer is None:
         raise HTTPException(status_code=422, detail="Bu büroda aktif bir avukat seçin.")
     from app.services.management_service import access_for, audit
-    from app.db.demo_team import demo_case_ids, roster_ids
+    from app.db.demo_team import demo_case_ids, scoped_lawyer_ids
     scope = demo_case_ids(db, lawyer)
-    if lawyer.id in roster_ids(admin.law_firm_id):
+    if lawyer.id in scoped_lawyer_ids(admin.law_firm_id):
         if not scope or case.id not in scope:
             raise HTTPException(422, "Örnek avukat yalnız yetkili olduğu örnek davalara atanabilir.")
     elif access_for(db, lawyer):
@@ -168,8 +168,8 @@ def assign_precedent_reviewer(
     ).first()
     if reviewer is None:
         raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")
-    from app.db.demo_team import roster_ids
-    if reviewer.id in roster_ids(admin.law_firm_id):
+    from app.db.demo_team import scoped_lawyer_ids
+    if reviewer.id in scoped_lawyer_ids(admin.law_firm_id):
         raise HTTPException(422, "Örnek avukat emsal inceleyicisi olarak atanamaz.")
     precedent.reviewer_lawyer_id = reviewer.id
     db.commit()

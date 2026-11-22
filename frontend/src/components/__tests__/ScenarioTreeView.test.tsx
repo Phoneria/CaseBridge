@@ -36,7 +36,7 @@ function demo(): ScenarioTree {
  t.demo={method:'Eşit başlangıç, en büyük kalan.',missing_reason:'Gerekli kayıt eksik: eşit başlangıç.',assumptions:[{id:'document',label:'Belge',value:'missing',value_label:'Yok',explanation:'Eksik kayıt eşit başlangıç kullanır.'}],groups:[{question:'Aynı sorunun alternatifleri',definition:'Birbirini dışlayan üç alternatif.',total_points:3,weights:[{node_id:'confirm',score:1,percentage_tenths:334}]}]};return t;
 }
 it('discovers the detached demo and updates assumptions without persistence',async()=>{
- getScenarioDemo.mockResolvedValue(demo());render(<ScenarioTreeView/>);await userEvent.click(screen.getByRole('button',{name:'Örnek davayı aç — Demo tahmini'}));await screen.findByText('Sentetik örnek — Demo tahmini');
+ getScenarioDemo.mockResolvedValue(demo());render(<ScenarioTreeView/>);await userEvent.click(screen.getByRole('button',{name:'Kurgusal davayı aç — Demo tahmini'}));await screen.findByText('Kurgusal dosya — Demo tahmini');
  expect(screen.getAllByText(/Demo tahmini: %33,4/).length).toBeGreaterThan(0);
  await userEvent.selectOptions(screen.getByLabelText('Belge varsayımı'),'missing');await waitFor(()=>expect(getScenarioDemo).toHaveBeenLastCalledWith('missing','unknown'));
  expect(screen.queryByText('Dosya analizini aç')).not.toBeInTheDocument();expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ it('discovers the detached demo and updates assumptions without persistence',asy
 it('opens a demo deep link without bureau cases and ignores its late response after returning',async()=>{
  setUrl('/ai/olasilik?ornek=belge-dogrulama');getCases.mockResolvedValue([]);let resolve:(t:ScenarioTree)=>void=()=>{};getScenarioDemo.mockImplementation(()=>new Promise<ScenarioTree>(r=>{resolve=r;}));
  render(<ScenarioTreeView/>);await waitFor(()=>expect(getScenarioDemo).toHaveBeenCalled());await userEvent.click(screen.getByRole('button',{name:'Büro dosyalarına dön'}));await act(async()=>resolve(demo()));
- expect(screen.queryByText('Sentetik örnek — Demo tahmini')).not.toBeInTheDocument();expect(screen.getByText('Bir dava seçin')).toBeInTheDocument();
+ expect(screen.queryByText('Kurgusal dosya — Demo tahmini')).not.toBeInTheDocument();expect(screen.getByText('Bir dava seçin')).toBeInTheDocument();
 });
 it('sends branch assumptions for only the selected case',async()=>{
  const t=tree();t.support_model={method:'Bağımsız ölçek',assumptions:[{node_id:'confirm',value:'neutral',linked_records:0,delta:0,explanation:'50 nötr başlangıç'}]};getScenarioTree.mockResolvedValue(t);
@@ -56,10 +56,14 @@ it('opens the recorded dossier exhibit from its branch', async () => {
   snapshot.source_mode = 'dossier_history';
   snapshot.sources.push({id:'document:pdf-1', kind:'document', label:'Banka dekontları', detail:'Delil eki', recorded_at:null});
   snapshot.nodes[1].source_ids = ['document:pdf-1'];
+  snapshot.nodes[1].transition_percent = 60;
+  snapshot.nodes[1].path_percent = 39;
   getScenarioTree.mockResolvedValue(snapshot);
   render(<ScenarioTreeView fixedCaseId="c1" />);
   await screen.findByText('Kurgusal dosyanın karar ağacı');
   await userEvent.click(screen.getByRole('button', {name:/Belgeler doğrulanırsa/}));
   expect(screen.getByRole('link', {name:'Banka dekontları'})).toHaveAttribute('href','/davalar/c1?sekme=belgeler&belge=pdf-1');
+  expect(screen.getByText('Önceki adımdan geçiş %60')).toBeInTheDocument();
+  expect(screen.getAllByText('Başlangıçtan ulaşma %39').length).toBeGreaterThan(0);
   expect(screen.queryByLabelText('Demo hesaplama yöntemi')).not.toBeInTheDocument();
 });

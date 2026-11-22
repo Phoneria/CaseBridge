@@ -30,6 +30,18 @@ def test_complete_files_resolve_evidence_and_protect_user_additions(client, db_s
         assert detail["closing_note"] == story.end and detail["opening_date"] == str(history[0].day)
         tree = client.get(f"/legal-lab/cases/{cid}/scenario-tree", headers=admin).json()
         assert tree["source_mode"] == "dossier_history"
+        nodes = {node["id"]: node for node in tree["nodes"]}
+        assert len(nodes) >= 50
+        current = nodes["recorded"]
+        depth, cumulative = 0, 100
+        while current["parent_id"]:
+            depth += 1
+            cumulative *= current["transition_percent"] / 100
+            current = nodes[current["parent_id"]]
+        assert depth >= 5 and abs(cumulative - nodes["recorded"]["path_percent"]) < 1e-8
+        assert len(detail["parties"]) == 2
+        from app.models.task import Task
+        assert db_session.query(Task).filter_by(case_id=cid).count() == 2
         branch = next(n for n in tree["nodes"] if n["id"] == "recorded")
         assert branch["source_ids"] and branch["probability"] is None
         documents = client.get(f"/cases/{cid}/documents", headers=admin).json()
@@ -39,7 +51,7 @@ def test_complete_files_resolve_evidence_and_protect_user_additions(client, db_s
         url_pdf = f"/documents/{branch['source_ids'][0][9:]}/download"
         response = client.get(url_pdf, headers=admin)
         assert response.headers["content-type"] == "application/pdf"
-        assert "Kurgusal örnek" in PdfReader(BytesIO(response.content)).pages[0].extract_text()
+        assert "Kurgusal dosya" in PdfReader(BytesIO(response.content)).pages[0].extract_text()
         assert client.get(url_pdf, headers=other).status_code == 404
     first_id = case_key(office.firm_a.id, STORIES[0])
     addition = client.post(f"/cases/{first_id}/documents", files={"file": ("Kullanıcı.txt", b"test")}, headers=admin)

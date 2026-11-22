@@ -27,7 +27,7 @@ def _limit(user, kind):
 @router.get("/status")
 def status(user: User = Depends(get_current_user)):
     firm = _bureau(user)
-    return {"configured": sufle_service.configured(firm), "model": sufle_service.model_name(),
+    return {"configured": sufle_service.configured(firm), "model": sufle_service.model_name(firm),
             "transcription_model": settings.voice_transcription_model}
 
 

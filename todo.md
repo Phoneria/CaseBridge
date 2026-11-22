@@ -2,6 +2,21 @@
 
 Updated: 22 November 2026.
 
+## Gösterim bürosu için bekleyen düzenlemeler
+
+- [ ] Olasılık ağacında aşamaları dava türüne uygun sırada göster. Fare düğümün üzerine geldiğinde düğüm hafifçe yükselsin ve parlasın, izlenen yol belirginleşsin. Dalları ayırt edilebilir renklerle çiz. Bağlantı okları kaynak düğümden hedef düğüme açıkça yönelsin ve yüzde etiketlerini örtmesin. Bir düğüm seçildiğinde o aşamanın açıklaması, ilgili adımları ve doğrudan açılabilen dava belgeleri gösterilsin. Aynı seçim klavye ve dokunmayla da yapılabilsin.
+- [ ] Genel Bakış’taki dava durumu halka grafiğinin merkezinde grafiğe dahil toplam dava sayısını göster. Dava dağılımı çubuklarının üstüne her çubuğun temsil ettiği dava sayısını yaz.
+- [ ] 20 gösterim davasının her birinde tarafları, duruşma bilgilerini ve dosyayla ilgili görevleri dava detayında görünür yap. Görevlerde açık ve tamamlanmış işleri dosyanın aşamasına uygun göster. Duruşmasız sonuçlanan dosyada (örneğin KYOK) bu bölümde sebebini ve dosyayı sonuçlandıran işlemi göster.
+- [ ] Davalar → Belgeler içinde belge önizlemesini tam sayfaya yayılan, başlıkları, paragrafları ve listeleri belirgin bir Markdown okuma görünümüne dönüştür. İndirilebilir PDF ile aynı belgenin içeriğini göster.
+- [ ] 20 davanın her biri için ayrı bir olasılık ağacı hazırla. Her ağaçta en az 50 anlamlı düğüm ve en az 5 farklı aşama olsun (hedef 5–10 aşama). Kullanıcının paylaştığı “Ceza Davaları Aşamaları” ve “Hukuk Davaları Aşamaları” listelerini esas al. İlk müvekkil görüşmesinden başlayarak müvekkil onayı, başvuru, deliller, duruşmalar, karar ve dosyaya uygun kanun yollarındaki alternatifleri adım adım dallandır. Her dalda o aşamadan geçiş yüzdesini, her yolda başlangıçtan itibaren o yolun gerçekleşme yüzdesini göster. Gösterim yüzdelerini senaryo varsayımı olarak belirt. Gerçekleşen yolu ilgili dava evrakına bağla.
+- [ ] İş Hukuku, Kira ve Ticaret Hukuku örneklerinde kazanılan ve kaybedilen davalara yer ver. Analitikteki yüzdeler kayıtlı sonuçlardan hesaplansın.
+- [ ] Gösterim ekibini İzzet ve dört avukatla sınırla.
+- [ ] Davalar, finans ve ekip kartları dahil uygulama genelinde kullanıcıya görünen “örnek” ibarelerini kaldır.
+- [ ] Finans ekranında gelir ve giderlerin dönem içindeki değişimini ve dağılımını uygun grafiklerle göster.
+- [ ] Müvekkilleri “Gerçek kişi” ve “Tüzel kişi” olarak ayır. Gösterim kayıtlarına gerçekçi görünümlü kurgusal telefon (ör. 0538 ile başlayan) ve e-posta bilgileri ekle.
+- [ ] Örnek aktif davaları ve görevleri ekipteki avukatlara dağıt. Her birinde iki veya üç güncel iş bulunsun. Sonuçlanmış örnek davaları da dağıt ve her avukatın kazandığı ve kaybettiği dava sayılarını ekip ekranında göster.
+- [ ] Ayarlar → Gizli anahtar ekle bölümünde büro yöneticisinin AI bağlantı yöntemini seçebilmesini ve AI işlemlerinin etkin bağlantıyı kullanmasını sağla. İstenen yöntemler OpenAI API anahtarı, OpenAI hesabıyla giriş (OAuth), Claude API anahtarı ve Claude setup token. Hesap bağlantısı ve setup token için CaseBridge'de izin verilen sunucu kullanımını sağlayıcının belgelerinden doğrula. Yönetici gizli değerleri yalnız uygulamada girer. Büro bazında şifreli saklama, maskeli gösterim, adayı ayrı test etme ve açıkça etkinleştirme akışını koru.
+
 ## Geçerli çalışma ve yayın ilkeleri — 22 Kasım 2026
 
 **Tüm CaseBridge çalışmaları GitHub Spec Kit iş akışına uymalıdır.** Bu zorunluluk mevcut açık iş listesinin tamamını, uygulamayı, tanıtım sitesini ve sunucu/yayın sürecini kapsar; yalnız gelecekte açılacak yeni işler veya entegrasyon sonrasındaki işler ile sınırlı değildir. GitHub Spec Kit 1.4.3 Codex entegrasyonu, constitution ve S02–S09 gereksinim/plan/görev/doğrulama kayıtları bu çalışma kapsamında kuruldu; tamamlanma yalnız gerçek kabul kanıtıyla işaretlenir.

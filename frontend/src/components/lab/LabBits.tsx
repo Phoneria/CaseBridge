@@ -13,7 +13,7 @@ export function ModeBanner({ mode, note }: { mode?: "mock" | "ai"; note?: string
     <div role="status" className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
       <span aria-hidden className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-500" />
       <span>
-        <span className="font-semibold">Örnek mod. </span>
+        <span className="font-semibold">Gösterim modu. </span>
         {note}
       </span>
     </div>
