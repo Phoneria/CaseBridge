@@ -42,7 +42,7 @@ DECISIONS = {
     ]),
     "C07": ("Vardiya amiri mahkûm edildi, bakım sorumlusu beraat etti", [
         A("Amirin üretim emri bakım tamamlandı bildirisine dayanıyorsa", "P-4 teslim formundaki onayı kimin verdiği araştırılır", "Bakım sorumlusu arızayı bilerek güvenli teslim onayı vermiş ve amirce görülebilir uyarı bırakmamışsa", "Çalıştırmaya neden olan kusurlu teslim bakım sorumlusuna yüklenir", "Bakım sorumlusu mahkûm, kusuru ispatlanamayan amir beraat"),
-        A("Arızalı presi çalıştırma kararını ikisi birlikte verdiyse", "Etiketin kaldırılması ve üretim talimatının zamanları karşılaştırılır", "İkisinin de açık arızayı bildiği ve hattı birlikte devreye aldığı doğrulanırsa", "Her iki görevlinin müdahalesi yaralanmayla ilişkilendirilir", "P-4 yaralanmasında iki görevli hakkında mahkûmiyet"),
+        A("Arızalı presi çalıştırma kararını birlikte verdikleri ileri sürülürse", "Etiketin kaldırılması ve üretim talimatının zamanları karşılaştırılır", "İkisinin de açık arızayı bildiği ve hattı birlikte devreye aldığı doğrulanırsa", "Her iki görevlinin müdahalesi yaralanmayla ilişkilendirilir", "P-4 yaralanmasında iki görevli hakkında mahkûmiyet"),
     ]),
     "C08": ("Senedin bedelini değiştirdiği ispatlanamayan sanık beraat etti", [
         A("Bedel satırındaki yetkisiz ekleme sanığa bağlanırsa", "Asıl senet, karşılaştırma yazıları ve kullanım kaydı incelenir", "Yetkisiz değişikliği sanığın yapıp senedi takibe verdiği doğrulanırsa", "Salt teslimin ötesinde değiştirme ve kullanma fiilleri belirlenir", "Değiştirilmiş senede ilişkin isnattan mahkûmiyet"),

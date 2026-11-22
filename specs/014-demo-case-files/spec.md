@@ -37,3 +37,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-016**: Her dava ağacı 20–100 düğüm içerir. Bu aralık FR-008’deki eski katalog alt sınırının yerini alır. Her yaprak dosyanın talebine ve izlenen dalın bulgusuna bağlı gerekçeli karardır. Tüm yapraklar aynı son sütunda görünür. Varsayımsal dal ve kayıtlı kapanış ayrı gösterilir.
 
 - **FR-017**: Kayıtlı analizde tarafların uzlaşması senaryosu varsa anlaşmanın doğrulandığı dal sulh veya uzlaştırmaya uygun sonuçla biter. Anlaşma sağlanmayan dalda esas uyuşmazlık değerlendirilir.
+
+- **FR-018**: Yirmi katalog dosyasının her birinde deliller birlikte incelendiğinde ve itiraz değerlendirildiğinde ayrı dallar açılır. Ek kararın hangi dosya belgesine ve varsayımsal bulguya dayandığı görülebilir. Dosyanın gerektirdiği yerde alternatif bir yol da dallanabilir. FR-016 sınırı, kayıtlı kapanış ve kökten ulaşma hesabı korunur.

@@ -91,3 +91,5 @@ FR-015 mevcut birikimli yol değerini kullanır. Yüzde biçimlendirme çarpıml
 
 FR-016 için yirmi dosyanın çekişmeli olgusuna ayrı karşı olgular ve hükümler yaz. Kayıtlı delil, itiraz ve sonucu dosyanın evrakıyla bağla. Diğer dosyalarda dosyanın kendi talebi ve mevcut kaynaklarla koşullu sonuçlar kur. Uzun tarihçede ilk ve son işlemler arasında özet kullan. Dava ekranı ve AI menüsündeki ortak çizimde yalnız yaprakları son sütuna taşı.
 FR-017 için dosya analizindeki uzlaşma senaryosunun doğrulama ve değişim dallarını ayır. Kayıtlı kapanışta dosyanın kendi sonuç metnini kart başlığında göster.
+
+FR-018 için yeni bulgu, dayanak belgesi, gerekçe, karar ve koşullu payı ilgili ara düğümle eşleştir. Her ayrımın önceki devam yoluna kalan payı ver. Kaynak doğrulamasını yirmi dosyada, yüzdeleri her ayrım ve son kartta kontrol et.

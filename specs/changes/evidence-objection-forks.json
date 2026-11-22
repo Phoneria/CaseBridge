@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "changes": [{
+    "files": [
+      "backend/app/legal_lab/dossier_tree.py",
+      "backend/app/legal_lab/dossier_forks.py",
+      "backend/app/legal_lab/dossier_decisions.py",
+      "frontend/app-version.json"
+    ],
+    "requirements": ["specs/014-demo-case-files/spec.md#FR-018"],
+    "acceptance_tests": ["backend/tests/integration/test_dossier_pack.py::test_every_dossier_path_ends_in_a_grounded_decision"],
+    "reason": "Branch each case at the evidence and objection that can change its reasoned decision."
+  }]
+}
