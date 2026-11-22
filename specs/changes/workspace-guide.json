@@ -21,7 +21,8 @@
         "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::opens the current bureau topic and navigates without network or storage writes",
         "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::traps keyboard focus and restores it on Escape and finish",
         "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::filters platform restricted and lawyer topics before context matching",
-        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::covers all bureau tabs and main routes with practical sourced steps"
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::covers all bureau tabs and main routes with practical sourced steps",
+        "frontend/src/components/__tests__/WorkspaceHeader.test.tsx::replaces the header AI entry with the interactive guide"
       ],
       "reason": "Add role/context-aware read-only Turkish interactive guide in authenticated header, using existing theme and keyboard dialog."
     }

@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { UpcomingNotifications } from "@/components/UpcomingNotifications";
-import { AiNavigation } from "@/components/AiNavigation";
 import { UserMenu } from "@/components/UserMenu";
 import type { AppUser } from "@/types";
 
@@ -82,9 +81,8 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
             </nav>
           </>
         )}
-        <AiNavigation user={user} />
-        <UserMenu user={user} />
         <Suspense fallback={null}><WorkspaceGuide user={user} /></Suspense>
+        <UserMenu user={user} />
       </div>
     </header>
   );

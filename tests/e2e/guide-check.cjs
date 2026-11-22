@@ -15,7 +15,7 @@ const out=process.env.GUIDE_OUTPUT||'/tmp/casebridge-guide-browser';fs.mkdirSync
    const data=p==='/users/me'?me:p==='/bureau/overview'?{today:'2026-11-22',active_cases:0,pending_tasks:0,overdue_tasks:0,unassigned_cases:0,pending_approvals:0,upcoming_hearings:0,alerts:[],capacity:[],finance:[]}:p==='/bureau/workspace'?{position:me.workspace_position||'lawyer',cases:[],documents:[],publications:[],records:[],tasks:[],finance:[]}:p==='/ai/status'?{configured:false}:[];
    await route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(data)});
   });
-  await page.goto('http://localhost:3015'+path);const trigger=page.getByRole('button',{name:'Rehber',exact:true});await expect(trigger).toBeVisible();
+  await page.goto('http://localhost:3015'+path);const trigger=page.getByRole('button',{name:'Rehber',exact:true});await expect(trigger).toBeVisible();await expect(page.locator('header').getByRole('button',{name:/CaseBridge AI/})).toHaveCount(0);
   await page.waitForTimeout(300);
   const rect=await trigger.boundingBox();if(!rect||rect.x+rect.width>width||rect.y+rect.height>250)throw Error('Header guide geometry');
   if(role==='admin')await page.screenshot({path:`${out}/header-${width}-${theme}.png`});

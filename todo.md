@@ -543,3 +543,7 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 
 - [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
 - [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.
+
+### Rehber konumu kullanıcı düzeltmesi
+- [x] Son açık talimatla header CaseBridge AI düğmesi kaldırılıp aynı konuma Rehber kondu; tıklamak etkileşimli rehberi açar. AI araçları sol menüde korunur.
+- [x] 22 hedefli test, final production build/typecheck/version check ve 30 Chromium senaryosu geçti; her senaryoda header AI yokluğu ve rehber işlevi doğrulandı. PR #55 güncellenir, In Review kalır. Public yayın yapılmadı.

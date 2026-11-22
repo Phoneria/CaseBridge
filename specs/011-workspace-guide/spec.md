@@ -14,7 +14,7 @@ Acceptance: platform/kısıtlı hesaplarda büro veya AI konusu yok; avukatta y�
 Bilinmeyen yol/sekme ilk yetkili konuya döner. Eksik kullanıcı için giriş gösterilmez. Sayfa veya hesap değişimi rehberi kapatır. Uzun konu ve küçük ekran kaydırılabilir; Escape, Tab ve Shift+Tab çalışır.
 
 ### Functional Requirements
-- **FR-001**: Header sağ üstünde masaüstü/mobil görünür metin tam “Rehber”; mevcut AI ve kullanıcı erişimi korunur.
+- **FR-001**: Header sağ üstünde masaüstü/mobil görünür metin tam “Rehber”; kullanıcının 22 Kasım ekranlı düzeltmesiyle header CaseBridge AI düğmesinin yerini alır; tıklamak doğrudan etkileşimli rehberi açar. AI araçları sol menüde, kullanıcı menüsü header’da kalır.
 - **FR-002**: Güncel yol ve büro sekmesine uygun başlangıç, konu seçimi, numaralı ilerleme, ileri/geri, yeniden başlama ve çıkış sağlanır.
 - **FR-003**: Büro Yönetimi sekmelerini kapsayan detaylı Türkçe iş akışları kaynakta doğrulanır; kritik süre, devir, onay, müvekkil yayını ayrıntılıdır.
 - **FR-004**: Konular oturum rolüne göre filtrelenir; platform ve kısıtlı hesap sınırları korunur. Diğer ana bölümler erişime uygun anlatılır.
@@ -29,3 +29,6 @@ Bilinmeyen yol/sekme ilk yetkili konuya döner. Eksik kullanıcı için giriş g
 
 ## Assumptions
 Bu bir öğretici okuma panelidir; rehber adımı tamamlamak gerçek işi tamamlamak anlamına gelmez. Yerel sentetik UI doğrulaması üretim yayını değildir.
+
+## Clarification — 22 November 2026
+Kullanıcı ekran görüntüsüyle açıkça “sağ üstte Casebridge AI yerine Rehber” istedi. Önceki header AI korunur varsayımı bu istek için geçersizdir. Constitution VI ve specs/002-header-ai header yerleşim kuralına kullanıcı tarafından açıkça yetkilendirilmiş dar istisna: yalnız header AI girişi kaldırılır; sidebar araçları, roller ve oturum sınırları korunur.
