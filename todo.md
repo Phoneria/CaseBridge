@@ -548,4 +548,5 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Ayarlar’da salt okunur sayım önizlemesi, Vazgeç/Escape, açık kalıcı kaldırma onayı; büro kapsamı, değişen planda409, çift işlem kilidi, boş durum ve hata sonrası tekrar. Örnek dosyalara sonradan eklenen içeriğin de silineceği açıkça yazılır.
 - [x] Kesin şablon kimlikleri + bilinen işaretli davalar; gerçek/diğer büro kayıtları ve ayarlar korunur. Kullanılmış/değiştirilmiş örnek hesaplar ve gerçek dosya kapsamları tutulur; yalnız silinen örnek erişim kimlikleri temizlenir. Dosya silme DB commit sonrası ve storage/paylaşılan-dosya kontrolüyle.
 - [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
-- [ ] PR61 güncellemesiyle In Review; main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.
+- [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
+- [ ] Main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.

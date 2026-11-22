@@ -4,6 +4,8 @@ const fs=require('fs');
 const root='/tmp/casebridge-expanded-team-browser';
 const session=JSON.parse(fs.readFileSync(`${root}/session.json`));
 (async()=>{
+ const healthy=await fetch('http://127.0.0.1:8025/health').then(r=>r.ok).catch(()=>false);
+ if(!healthy)throw Error('Start the disposable backend and wait for its health check before browser validation');
  const browser=await chromium.launch({headless:true});const results=[];
  for(const width of [1440,390,320])for(const theme of ['light','dark']){
   const context=await browser.newContext({viewport:{width,height:900}});
@@ -11,8 +13,10 @@ const session=JSON.parse(fs.readFileSync(`${root}/session.json`));
   let requests=0, removals=0;const errors=[];
   await context.route(/http:\/\/localhost:8000\//,async route=>{
    const url=new URL(route.request().url());requests++;if(url.pathname==='/admin/demo-template/remove')removals++;
-   const response=await route.fetch({url:`http://127.0.0.1:8025${url.pathname}${url.search}`});
-   await route.fulfill({response});
+   try {
+    const response=await route.fetch({url:`http://127.0.0.1:8025${url.pathname}${url.search}`});
+    await route.fulfill({response});
+   } catch {errors.push('Disposable backend unavailable');await route.abort();}
   });
   const page=await context.newPage();page.on('pageerror',e=>errors.push(String(e)));
   await page.goto('http://localhost:3016/ayarlar');

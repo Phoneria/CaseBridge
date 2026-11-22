@@ -15,4 +15,4 @@ Dependencies T001→T002→T003→T004→T005→T006→T007→T008. No delegatio
 ## Phase 4 Removal refinement
 - [x] T009 [US2] Implement exact tenant-bounded removal planning/deletion in backend/app/db/demo_template_removal.py and admin.py per data-model.md RemovalPreview.token, RemovalPreview.counts, RemoveRequest.token, RemoveRequest.confirm (FR-006, FR-007).
 - [x] T010 [US1] Add preview/cancel/confirm/busy/error/retry controls in frontend/src/components/SettingsView.tsx and lib/api.ts (FR-006).
-- [ ] T011 Verify removal/isolation/stale-confirm/rollback/reload and UI confirmation with backend/tests/integration/test_demo_template_removal.py, SettingsView.test.tsx and browser; record verification.md and update review PR (FR-006, FR-007).
+- [x] T011 Verify removal/isolation/stale-confirm/rollback/reload and UI confirmation with backend/tests/integration/test_demo_template_removal.py, SettingsView.test.tsx and browser; record verification.md and update review PR (FR-006, FR-007).
