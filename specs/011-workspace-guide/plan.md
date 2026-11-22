@@ -7,3 +7,5 @@ Phases: kaynak araştırması → statik sözleşme/içerik → erişilebilir pa
 Data contracts: data-model.md#featurecontract. No new dependencies, remote services or persistent data.
 
 22 Kasım kullanıcı düzeltmesi: WorkspaceHeader içindeki AiNavigation çağrısını kaldır; aynı konuma WorkspaceGuide koy, ardından UserMenu kalsın. Sidebar ve AI araç rotaları değişmez. Constitution VI header AI ilkesi, daha yeni açık kullanıcı isteğiyle bu kapsamda geçersizdir; diğer erişim ve odak sınırları korunur. Henüz yayımlanmamış PR v.0.24 içinde revize edilir.
+
+Güncel uygulama: AppShell oturumundaki kullanıcıyla /rehber sayfasını oluştur. Sabit konuları amaç, konum ve sıralı tam metinle sun. Konu kimliğini izinli listede çöz. Tur desteği olan sayfalarda ana içerikten ayrı, sayfa düzeni içinde adım kontrolleri göster. Gerçek hedefi kaydırıp vurgula, ayrılırken temizle. Masaüstü/mobil, rol sınırları ve doğrudan URL ile doğrula.

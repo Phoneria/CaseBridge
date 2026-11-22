@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { createContext, Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { GuideTour } from "@/components/GuideTour";
 import { Sidebar } from "@/components/Sidebar";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
@@ -15,7 +16,8 @@ import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
 /** Pages a platform admin may open besides the platform panel. */
-const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar"];
+const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar", "/rehber"];
+export const WorkspaceUserContext = createContext<AppUser | null>(null);
 
 /** `platform`: the page is the platform panel (platform admins only). A
  * platform admin is kept out of the firm pages: they belong to no customer firm. */
@@ -53,7 +55,7 @@ export function AppShell({ children, platform = false }: { children: React.React
         router.replace("/dashboard");
         return;
       }
-      if (result.workspace_position && !["/calisma-alanim", "/hesabim"].includes(pathname ?? "")) {
+      if (result.workspace_position && !["/calisma-alanim", "/hesabim", "/rehber"].includes(pathname ?? "")) {
         router.replace("/calisma-alanim");
         return;
       }
@@ -95,10 +97,11 @@ export function AppShell({ children, platform = false }: { children: React.React
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <WorkspaceHeader user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
+        <Suspense fallback={null}><GuideTour user={user} /></Suspense>
         <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
           <ErrorBoundary>
-            <Suspense fallback={null}>{children}</Suspense>
+            <WorkspaceUserContext.Provider value={user}><Suspense fallback={null}>{children}</Suspense></WorkspaceUserContext.Provider>
           </ErrorBoundary>
           </div>
         </main>

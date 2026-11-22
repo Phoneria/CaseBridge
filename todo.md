@@ -572,3 +572,9 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] #63 ve #55 birlikte 9bfc8a9 revizyonunda birleşti. Üretim kodu, v.0.26 sürümü ve sağlık kontrolü doğrulandı.
 
 Birleşik yayın kaydı ve geri dönüş provası [v.0.26 doğrulamasında](specs/001-main-release/verification.md#workspace-release-v026) bulunur.
+
+## Ayrı rehber sayfası ve ekran turu · v.0.27 adayı
+
+- [x] Sağ üstteki Rehber, ilgili konuyu /rehber sayfasında açar. Her konuda amaç, menü konumu, ayrıntılı adımlar ve ekran bağlantısı bulunur.
+- [x] Davalar, Görevler, Raporlar, Admin Paneli ve Hesabım turları ekrandaki kontrolü vurgular. 771 arayüz testi, 34 sentetik Chromium senaryosu, üretim derlemesi ve Spec Kit kontrolleri geçti.
+- [ ] Korumalı main birleşmesi ve canlı yayın doğrulaması. İnceleme [PR 65](https://github.com/Phoneria/CaseBridge/pull/65) üzerinden yürütülür.

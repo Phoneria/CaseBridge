@@ -22,3 +22,13 @@ User screenshot and text require the header CaseBridge AI button to be replaced 
 Current origin/main b8038f9 merged while retaining both independent todo entries. App v.0.24 remains the unreleased review candidate. 22 targeted Header/Guide/Sidebar tests passed. Final production build/typecheck and version source check passed. Updated real Chromium harness explicitly asserts no header CaseBridge AI button; all 30 role/width/theme scenarios passed again, with zero guide network/write/URL/storage effects or page errors/overflow. Native screenshots reviewed at 320px light and 1440px light; prior two-theme checks retained. Evidence: docs/validation/2026-11-22/workspace-guide-replacement-results.json; screenshots /tmp/casebridge-guide-replacement. No release or merge is claimed.
 
 The [verified v.0.26 production release](../001-main-release/verification.md#workspace-release-v026) supersedes the earlier review-stage status.
+
+## Standalone handbook and screen tours
+
+The v.0.27 candidate implements FR-008 and FR-009. From a workspace screen the header link opens the matching article on /rehber. Each role gets a permitted directory, searchable titles and purposes, location instructions, ordered steps and an application link. Cases, tasks, reports, admin and account have opt-in inline tours.
+
+The production build passed, including /rehber, and the final frontend suite passed 771 tests across 84 files. Spec Kit validated 14 feature contracts and executed six bound acceptance tests for 11 changed behavior files.
+
+Chromium passed 34 synthetic scenarios on the built application. Five session roles ran at 1440, 390 and 320 pixels in both themes, with four additional desktop/mobile checks for the admin and reports tours. Checks covered opening the full page, matching context, permission filtering, visible real targets, moving forward and backward, returning to the article, horizontal overflow and zero API writes. Desktop and mobile screenshots were inspected.
+
+An initial browser attempt preceded server readiness. A missing win-rate field in the synthetic report response was corrected. The reports tour also exposed a real layout shift after the summary loaded. The final build rechecks the highlighted control after asynchronous rendering and resizing. The final run exercised all five tours successfully. PR 65 tracks review.

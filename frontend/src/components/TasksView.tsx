@@ -128,6 +128,7 @@ export function TasksView() {
         </div>
         <button
           type="button"
+          data-guide="new-task"
           onClick={() => setFormOpen(true)}
           className="shrink-0 rounded-xl bg-accent-600 px-4 py-2 text-sm font-medium text-white hover:bg-accent-700"
         >

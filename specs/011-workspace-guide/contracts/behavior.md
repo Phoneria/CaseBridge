@@ -1,2 +1,1 @@
-# Behavior contract
-Rehber giriş düğmesi dialog açar; yalnız statik talimatları gösterir. Kullanıcı mevcut uygulama adımlarını kendi açık eylemiyle rehber dışında yapar. Konu seçimi ve ileri/geri uygulama durumuna veya route'a etki etmez. Yetki filtrelemesi erişim veren bir güvenlik mekanizması değildir; mevcut sunucu izinleri aynen kalır.
+Rehber bağlantısı aynı sekmede /rehber sayfasını açar. Konu kimliği yalnız kullanıcının yetkili kataloğunda çözülür. Okuyucu amacı, konumu, adımları ve ipuçlarını görür. Ekrana gitmek ve tur başlatmak açık gezinme işlemleridir. Tur hedefleri önceden tanımlıdır. Adım değiştirmek hiçbir formu, sağlayıcıyı veya kayıt işlemini çalıştırmaz.

@@ -33,3 +33,9 @@ body {
     outline-offset: 3px;
   }
 }
+
+[data-guide-current] {
+  outline: 3px solid #0585ae;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgb(5 133 174 / 22%);
+}

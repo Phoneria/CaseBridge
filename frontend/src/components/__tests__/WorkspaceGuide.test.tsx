@@ -1,47 +1,54 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 vi.mock('next/navigation', async () => (await import('@/test/navigation')).navigationModule);
 import { resetNav, setUrl } from '@/test/navigation';
+import { WorkspaceUserContext } from '@/components/AppShell';
+import { GuideTour } from '@/components/GuideTour';
 import { WorkspaceGuide } from '@/components/WorkspaceGuide';
 import { contextTopic, guideTopics } from '@/lib/workspaceGuide';
 import type { AppUser } from '@/types';
 const admin: AppUser = { id:'a',email:'guide@example.test',full_name:'Örnek Yönetici',department:null,gender:null,role:'admin',law_firm_id:'synthetic',is_active:true };
 beforeEach(() => { resetNav(); setUrl('/buro?tab=deadline'); });
 describe('WorkspaceGuide', () => {
-  it('opens the current bureau topic and navigates without network or storage writes', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch');
-    const storage = vi.spyOn(Storage.prototype, 'setItem');
-    const user = userEvent.setup(); render(<WorkspaceGuide user={admin}/>);
-    const trigger = screen.getByRole('button', {name:'Rehber'}); await user.click(trigger);
-    expect(screen.getByRole('combobox', {name:'Konu seçin'})).toHaveValue('bureau-deadline');
-    expect(screen.getByRole('heading', {name:'Dosya ve sorumluyu belirleyin'})).toBeInTheDocument();
-    expect(screen.getByRole('button', {name:'Önceki'})).toBeDisabled();
-    await user.click(screen.getByRole('button', {name:'Sonraki'}));
-    expect(screen.getByRole('heading', {name:'Yedek ve doğrulamayı ekleyin'})).toHaveFocus();
-    await user.click(screen.getByRole('button', {name:'Önceki'}));
-    expect(screen.getByRole('status')).toHaveTextContent('Adım 1 / 4');
-    await user.selectOptions(screen.getByRole('combobox'), 'bureau-publication');
-    expect(screen.getByRole('status')).toHaveTextContent('Adım 1 / 4');
-    for(let i=0;i<3;i++) await user.click(screen.getByRole('button', {name:'Sonraki'}));
-    expect(screen.getByRole('heading', {name:'Açıkça yayımlayın'})).toBeInTheDocument();
-    await user.click(screen.getByRole('button', {name:'Baştan başla'}));
-    expect(screen.getByRole('status')).toHaveTextContent('Adım 1 / 4');
-    await user.click(screen.getByRole('button', {name:'Çıkış'}));
-    expect(trigger).toHaveFocus(); expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(fetchSpy).not.toHaveBeenCalled(); expect(storage).not.toHaveBeenCalled();
-    fetchSpy.mockRestore(); storage.mockRestore();
+  it('shows purpose location and all instructions for the selected topic', async () => {
+    setUrl('/rehber?konu=tasks');
+    render(<WorkspaceUserContext.Provider value={admin}><WorkspaceGuide /></WorkspaceUserContext.Provider>);
+    expect(screen.getByRole('article')).toHaveTextContent('hangi aşamada beklediğini');
+    expect(screen.getByRole('article')).toHaveTextContent('Sol menü → Görevler');
+    expect(screen.getByRole('heading',{name:'Kartı taşıyın'})).toBeVisible();
+    expect(screen.getByRole('link',{name:'Ekranda adım adım göster'})).toHaveAttribute('href','/gorevler?tur=tasks');
+    await userEvent.type(screen.getByRole('searchbox'), 'kritik süre');
+    expect(screen.getByRole('link',{name:/Kritik süre ·/})).toHaveAttribute('href','/rehber?konu=bureau-deadline');
+    expect(screen.queryByRole('link',{name:'Görevler · Proje panosu'})).toBeNull();
   });
-  it('traps keyboard focus and restores it on Escape and finish', async () => {
-    const user=userEvent.setup(); render(<WorkspaceGuide user={admin}/>);
-    const trigger=screen.getByRole('button',{name:'Rehber'}); await user.click(trigger);
-    expect(screen.getByRole('button',{name:'Çıkış'})).toHaveFocus();
-    await user.tab({shift:true}); expect(screen.getByRole('button',{name:'Sonraki'})).toHaveFocus();
-    await user.tab(); expect(screen.getByRole('button',{name:'Çıkış'})).toHaveFocus();
-    await user.keyboard('{Escape}'); expect(trigger).toHaveFocus();
-    await user.click(trigger); await user.selectOptions(screen.getByRole('combobox'),'account');
-    await user.click(screen.getByRole('button',{name:'Sonraki'}));
-    await user.click(screen.getByRole('button',{name:'Rehberi bitir'})); expect(trigger).toHaveFocus();
+  it('highlights real controls without activating them and cleans up on exit', async () => {
+    setUrl('/raporlar?tur=reports');
+    const action = vi.fn();
+    const page = (show: boolean) => <><main id="main-content">
+      <button onClick={action} data-guide="preview-cases">Önizle</button>
+      <button onClick={action} data-guide="download-cases">CSV</button>
+    </main>{show && <GuideTour user={admin} />}</>;
+    const view = render(page(true));
+    const preview = screen.getByRole('button',{name:'Önizle'});
+    expect(preview).toHaveAttribute('data-guide-current');
+    await userEvent.click(screen.getByRole('button',{name:'Sonraki'}));
+    expect(preview).not.toHaveAttribute('data-guide-current');
+    expect(screen.getByRole('button',{name:'CSV'})).toHaveAttribute('data-guide-current');
+    expect(screen.getByRole('link',{name:'Turu bitir'})).toHaveAttribute('href','/rehber?konu=reports');
+    await userEvent.click(screen.getByRole('button',{name:'Önceki'}));
+    expect(preview).toHaveAttribute('data-guide-current');
+    view.rerender(page(false));
+    expect(preview).not.toHaveAttribute('data-guide-current');
+    expect(action).not.toHaveBeenCalled();
+  });
+  it('finds controls added after page loading and tolerates missing targets', async () => {
+    setUrl('/gorevler?tur=tasks');
+    const page = (loaded: boolean) => <><main id="main-content">{loaded && <button data-guide="new-task">Yeni görev</button>}</main><GuideTour user={admin} /></>;
+    const view = render(page(false));
+    expect(screen.getByText(/Bu kontrol şu anda görünmüyor/)).toBeVisible();
+    view.rerender(page(true));
+    await waitFor(() => expect(screen.getByRole('button',{name:'Yeni görev'})).toHaveAttribute('data-guide-current'));
   });
   it('filters platform restricted and lawyer topics before context matching', () => {
     const platform=guideTopics({...admin,is_platform_admin:true});
@@ -77,16 +84,14 @@ describe('WorkspaceGuide', () => {
     expect(topics.find(t=>t.id==='bureau-approval')?.steps[3].body).toContain('değiştirilemez');
     expect(topics.find(t=>t.id==='bureau-publication')?.steps[3].body).toContain('Kaydet ve yayımla');
   });
-  it('closes on route or account scope change and hides the entry without a session', async () => {
-    const user=userEvent.setup(); const view=render(<WorkspaceGuide user={admin}/>);
-    await user.click(screen.getByRole('button',{name:'Rehber'}));
-    setUrl('/buro?tab=team');view.rerender(<WorkspaceGuide user={admin}/>);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button',{name:'Rehber'}));
-    view.rerender(<WorkspaceGuide user={{...admin,workspace_position:'client'}}/>);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button',{name:'Rehber'}));
-    expect(within(screen.getByRole('combobox')).getAllByRole('option')).toHaveLength(2);
-    view.rerender(<WorkspaceGuide user={null}/>);expect(screen.queryByRole('button',{name:'Rehber'})).not.toBeInTheDocument();
+  it('rejects foreign guide topics and tours for restricted users', () => {
+    const client = {...admin,workspace_position:'client'};
+    setUrl('/rehber?konu=admin');
+    const view = render(<WorkspaceUserContext.Provider value={client}><WorkspaceGuide /></WorkspaceUserContext.Provider>);
+    expect(screen.getByRole('article')).toHaveTextContent('Çalışma Alanım · Müvekkil');
+    expect(within(screen.getByRole('combobox')).getAllByRole('option').filter(option => option.getAttribute('value'))).toHaveLength(2);
+    setUrl('/admin?tur=admin');
+    view.rerender(<GuideTour user={client} />);
+    expect(screen.queryByRole('region',{name:'Ekran turu'})).toBeNull();
   });
 });

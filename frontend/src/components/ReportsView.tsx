@@ -219,9 +219,10 @@ export function ReportsView() {
                   </Link>
                 )}
               </div>
-              <button type="button" onClick={() => setPreview(report)} className="ml-auto rounded-xl border border-surface-border px-3 py-2 font-medium text-accent-700">Önizle</button>
+              <button type="button" data-guide={`preview-${report.id}`} onClick={() => setPreview(report)} className="ml-auto rounded-xl border border-surface-border px-3 py-2 font-medium text-accent-700">Önizle</button>
               <button
                 type="button"
+                data-guide={`download-${report.id}`}
                 onClick={() => handleDownload(report)}
                 disabled={downloading !== null}
                 className="rounded-xl bg-accent-600 px-3.5 py-2 font-medium text-white transition hover:bg-accent-700 disabled:opacity-60"
