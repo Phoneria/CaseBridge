@@ -23,3 +23,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 ## Success Criteria
 
 20 dosyanın tamamında kronoloji, içerik ve gezinme kontrolleri geçer. Her evrak türünün kapsam tablosunda en az bir açılabilir örneği vardır. Tekrar yükleme, temizleme ve bürolar arası erişim testleri geçer.
+
+- **FR-012**: Dava ekranındaki ve ana menüdeki olasılık ağacının ölçeği değiştirilebilir. Seçili düğüm, yüzdeler ve belge bağlantıları korunur.

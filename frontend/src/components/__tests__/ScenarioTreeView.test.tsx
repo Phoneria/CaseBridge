@@ -68,3 +68,22 @@ it('opens the recorded dossier exhibit from its branch', async () => {
   expect(screen.getAllByText('Başlangıçtan ulaşma %39').length).toBeGreaterThan(0);
   expect(screen.queryByLabelText('Demo hesaplama yöntemi')).not.toBeInTheDocument();
 });
+
+it('zooms the graph within limits and retains the selected branch', async () => {
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  const graph = within(await screen.findByRole('group', {name:'Dosya senaryo ağacı'}));
+  const branch = graph.getByRole('button', {name:/Belgeler doğrulanırsa/});
+  await userEvent.click(branch);
+  const smaller = graph.getByRole('button', {name:'Uzaklaştır'});
+  const larger = graph.getByRole('button', {name:'Yakınlaştır'});
+  for (let i = 0; i < 3; i++) await userEvent.click(smaller);
+  expect(smaller).toBeDisabled();
+  expect(branch.parentElement).toHaveStyle({transform:'scale(0.25)'});
+  await userEvent.click(graph.getByRole('button', {name:'Ölçek %25, normal boyuta dön'}));
+  expect(branch.parentElement).toHaveStyle({transform:'scale(1)'});
+  for (let i = 0; i < 4; i++) await userEvent.click(larger);
+  expect(larger).toBeDisabled();
+  expect(branch.parentElement).toHaveStyle({transform:'scale(2)'});
+  expect(branch).toHaveAttribute('aria-pressed','true');
+  expect(getScenarioTree).toHaveBeenCalledTimes(1);
+});
