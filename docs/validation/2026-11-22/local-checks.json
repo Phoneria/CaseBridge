@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-22",
+  "backendFull": {
+    "passed": 1098,
+    "workers": 4,
+    "seconds": 371.67
+  },
+  "backendFinalHealthAndTree": {
+    "passed": 12
+  },
+  "frontendFull": {
+    "files": 82,
+    "passed": 753
+  },
+  "frontendFinalAffected": {
+    "passed": 17
+  },
+  "releaseSecurityAndRecovery": {
+    "passed": 14
+  },
+  "versionScript": {
+    "passed": 2
+  },
+  "typescript": "passed",
+  "productionBuild": "passed",
+  "specKitVersion": "1.4.3",
+  "specKitManagedIntegration": "ok",
+  "governanceContracts": 8,
+  "marketingFAQ": 12,
+  "galleryChecks": 48,
+  "contrast": {
+    "samples": 64,
+    "minimum": 5.64,
+    "normalThreshold": 4.5,
+    "largeThreshold": 3
+  },
+  "independentLegalExpertReview": "Unverified independently. A separate direct user reply states İncelemeyi tamamladım ve kabul ediyorum; recorded only as user declaration/acceptance, not independent expert verification or model calibration.",
+  "publicRelease": "verified 70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "composeBaseAndRuntime": "passed with synthetic configuration",
+  "backendCI": {
+    "passed": 1099,
+    "warnings": 2,
+    "seconds": 715.67,
+    "python": "3.11"
+  },
+  "frontendCI": {
+    "passed": 753,
+    "typescript": "passed",
+    "versionCheck": "passed",
+    "productionBuild": "passed"
+  },
+  "ctaContrastMinimum": 4.59
+}

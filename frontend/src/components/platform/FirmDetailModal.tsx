@@ -1,6 +1,7 @@
 "use client";
 
 import { ModalFrame } from "@/components/ModalFrame";
+import Link from "next/link";
 import { NoticeLine, type Notice } from "@/components/platform/NoticeLine";
 import type { PlatformAdmin, PlatformFirm, UserStatus } from "@/types";
 
@@ -36,6 +37,7 @@ export function FirmDetailModal({
       <p className="mb-3 text-sm text-navy-600">
         Durum: {firm.is_active ? "Aktif" : "Askıda"} · Aktif kullanıcı: {firm.active_user_count}
       </p>
+      <Link href={`/platform/${firm.id}`} className="mb-4 inline-block rounded-xl bg-accent-50 px-3 py-2 text-sm font-medium text-accent-800 hover:bg-accent-100">Büro profili, kurulum ve destek →</Link>
       {notice && <NoticeLine notice={notice} />}
 
       <h3 className="mb-2 text-sm font-medium text-navy-700">Yöneticiler</h3>

@@ -161,9 +161,10 @@ describe("PlatformView", () => {
     await userEvent.click(within(screen.getByRole("dialog", { name: "Kaya Hukuk" })).getByRole("button", { name: "Büroyu askıya al" }));
     const confirm = screen.getByRole("dialog", { name: "Büroyu askıya al" });
     expect(confirm).toHaveTextContent("Veriler silinmez");
+    await userEvent.type(within(confirm).getByLabelText("İşlem gerekçesi *"), "Sözleşme durduruldu");
     await userEvent.click(within(confirm).getByRole("button", { name: "Askıya al" }));
 
-    expect(api.suspendPlatformFirm).toHaveBeenCalledWith("f2");
+    expect(api.suspendPlatformFirm).toHaveBeenCalledWith("f2", "Sözleşme durduruldu");
     const panel = await screen.findByRole("dialog", { name: "Kaya Hukuk" });
     expect(within(panel).getByRole("status")).toHaveTextContent("Büro askıya alındı.");
     expect(within(panel).getByRole("button", { name: "Büroyu aktifleştir" })).toBeInTheDocument();

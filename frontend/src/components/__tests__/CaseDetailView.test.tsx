@@ -272,7 +272,7 @@ describe("CaseDetailView", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Raporu aç" }));
     expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument();
+    expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument();
   });
 
   it("resumes polling an in-flight simulation found on load (refresh-safe)", async () => {
@@ -286,7 +286,7 @@ describe("CaseDetailView", () => {
 
     await waitFor(() => expect(getSimulation).toHaveBeenCalledWith("c1", "sim1"));
     await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
-    await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument());
   });
 
   it("offers a retry button for a failed simulation and re-polls after retrying", async () => {
@@ -307,7 +307,7 @@ describe("CaseDetailView", () => {
     await userEvent.click(screen.getByRole("button", { name: /tekrar dene/i }));
 
     await waitFor(() => expect(retrySimulation).toHaveBeenCalledWith("c1", "sim2"));
-    await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument());
   });
 
   it("shows an analysis (not simulation) error when starting fails", async () => {
@@ -527,7 +527,7 @@ describe("CaseDetailView", () => {
     setUrl("/davalar/c1?sekme=ai");
     const { unmount } = render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
-    expect(screen.getByText("Bu dava için henüz AI analizi yapılmadı.")).toBeInTheDocument();
+    expect(screen.getByText("Bu dava için henüz yapay zekâ analizi yapılmadı.")).toBeInTheDocument();
     unmount();
 
     setUrl("/davalar/c1?sekme=simulasyonlar");
@@ -587,7 +587,7 @@ describe("CaseDetailView", () => {
       await userEvent.click(await screen.findByRole("button", { name: "Tarafları düzenle" }));
       await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
 
-      await waitFor(() => expect(screen.getByText(/Deniz Arslan Yeni vs\. Mavi Yapı A\.Ş\./)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText(/Deniz Arslan Yeni ile Mavi Yapı A\.Ş\./)).toBeInTheDocument());
       expect(updateCase).toHaveBeenCalledWith("c1", expect.objectContaining({ parties: expect.any(Array) }));
       expect(screen.getByText("Dava açıldı")).toBeInTheDocument();
     });

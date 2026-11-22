@@ -1,0 +1,1 @@
+Capture rejects unknown/missing references, public source races, browser errors and incomplete batches. API interception never continues to production. Generated marketing version recorded in ledger suppresses only its own gallery output.

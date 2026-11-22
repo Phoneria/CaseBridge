@@ -5,8 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.security_headers import SecurityHeadersMiddleware
+from app.api.routes import legal_lab, platform_management
 
-from app.api.routes import activity, admin, admin_users, analytics, auth, calendar, case_intake, cases, chat, clients, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, system, tasks, users
+from app.api.routes import activity, admin, admin_users, analytics, auth, bureau, calendar, case_intake, cases, chat, clients, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, sufle, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
 from app.core.config import settings
 from app.core.log_redaction import install_access_log_redaction
@@ -92,6 +93,8 @@ app.include_router(users.router)
 app.include_router(admin.router)
 app.include_router(admin_users.router)
 app.include_router(platform.router)
+app.include_router(platform_management.router)
+app.include_router(bureau.router)
 app.include_router(cases.router)
 app.include_router(clients.router)
 app.include_router(case_intake.router)
@@ -111,3 +114,7 @@ app.include_router(system.router)
 app.include_router(calendar.router)
 app.include_router(chat.router)
 app.include_router(notifications.router)
+
+app.include_router(sufle.router)
+
+app.include_router(legal_lab.router)

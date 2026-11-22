@@ -2,7 +2,7 @@ import logging
 from functools import partial
 from typing import Callable, Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
@@ -32,6 +32,7 @@ _CREDENTIALS_EXCEPTION = HTTPException(
 
 
 def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     db: Session = Depends(get_db),
 ) -> User:
@@ -65,6 +66,24 @@ def get_current_user(
         # 403, not 401: the session is valid, the firm is suspended. The
         # frontend shows the message on the login page.
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=FIRM_SUSPENDED)
+    # A restricted workspace is enforced at the shared dependency, including
+    # direct requests to legacy case/search/export/AI endpoints.
+    from app.models.management import WorkspaceAccess
+    grant = db.query(WorkspaceAccess).filter(
+        WorkspaceAccess.user_id == user.id,
+        WorkspaceAccess.law_firm_id == user.law_firm_id,
+    ).first()
+    user.workspace_position = grant.position if grant and user.role != UserRole.ADMIN else None
+    if grant and user.role != UserRole.ADMIN:
+        path = request.url.path.rstrip("/")
+        if not (path == "/users/me" or path in {"/auth/logout", "/auth/change-password"} or path == "/bureau/workspace" or path.startswith("/bureau/workspace/")):
+            raise HTTPException(403, "Bu hesap yalnızca kendisine ayrılan çalışma alanına erişebilir.")
+    from app.core.timeutil import utc_now
+    from datetime import timedelta
+    seen = utc_now().replace(tzinfo=None)
+    if user.last_seen_at is None or user.last_seen_at.replace(tzinfo=None) < seen - timedelta(minutes=5):
+        user.last_seen_at = seen
+        db.commit()
     return user
 
 

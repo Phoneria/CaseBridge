@@ -8,6 +8,11 @@ export const AI_ROUTES = {
   analysis: "/ai/analiz",
   courtroom: "/ai/durusma",
   chat: "/ai/sohbet",
+  sufle: "/ai/sufle",
+  map: "/ai/harita",
+  scenarios: "/ai/olasilik",
+  counter: "/ai/karsi-taraf",
+  directed: "/ai/yonetmen",
 } as const;
 
 export const AI_PERSPECTIVES = ["Hakim", "Davacı vekili", "Davalı vekili", "Araştırmacı"] as const;

@@ -75,10 +75,17 @@ export function ChatView() {
   // on screen (optimistic + streaming), so it must not be reloaded.
   const skipLoadRef = useRef<string | null>(null);
 
+  const initialHistoryLoaded = useRef(false);
   const refreshConversations = useCallback(
     () =>
       listChatConversations()
-        .then(setConversations)
+        .then(rows => {
+          setConversations(rows);
+          if (!initialHistoryLoaded.current) {
+            initialHistoryLoaded.current = true;
+            if (!activeRef.current && !paramRef.current && rows[0]?.title.startsWith("ÖRNEK · ")) setActiveId(rows[0].id);
+          }
+        })
         .catch(() => setError("Sohbetler yüklenemedi.")),
     [],
   );

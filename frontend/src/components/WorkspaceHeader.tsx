@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { UpcomingNotifications } from "@/components/UpcomingNotifications";
+import { AiNavigation } from "@/components/AiNavigation";
 import { UserMenu } from "@/components/UserMenu";
 import type { AppUser } from "@/types";
 
 const PAGE_TITLES: Record<string, string> = {
+  "/buro": "Büro Yönetimi",
+  "/calisma-alanim": "Çalışma Alanım",
   "/admin": "Admin Paneli",
   "/platform": "Büro Yönetimi",
-  "/dashboard": "Dashboard",
+  "/dashboard": "Genel Bakış",
   "/davalar": "Davalar",
   "/emsaller": "Emsal Kararlar",
   "/takvim": "Takvim",
@@ -25,6 +28,11 @@ const PAGE_TITLES: Record<string, string> = {
   "/ai/analiz": "Dosya Analizi",
   "/ai/durusma": "Canlı Duruşma",
   "/ai/sohbet": "Hukuk Asistanı",
+  "/ai/sufle": "Sufle",
+  "/ai/harita": "Bilgi Haritası",
+  "/ai/karsi-taraf": "Karşı Taraf Analizi",
+  "/ai/yonetmen": "Yönetilen Duruşma",
+  "/ai/olasilik": "Olasılık Ağacı",
 };
 
 function sectionForPath(pathname: string): { href: string; title: string } | null {
@@ -62,7 +70,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         {/* Firm workspace widgets: the platform firm has no firm data or pages. */}
-        {!user?.is_platform_admin && (
+        {!user?.is_platform_admin && !user?.workspace_position && (
           <>
             <GlobalSearch />
             <UpcomingNotifications />
@@ -72,6 +80,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
             </nav>
           </>
         )}
+        <AiNavigation user={user} />
         <UserMenu user={user} />
       </div>
     </header>

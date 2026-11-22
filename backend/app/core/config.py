@@ -31,12 +31,19 @@ class Settings(BaseSettings):
     # config-driven: no provider is ever silently substituted for
     # another. Defaults to "mock" so a fresh checkout / the default
     # automated test suite never accidentally calls a real provider.
-    llm_provider: Literal["qwen", "openai", "ollama", "mock"] = "mock"
+    llm_provider: Literal["qwen", "openai", "ollama", "anthropic", "mock"] = "mock"
+
+    # Claude (Anthropic). LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY.
+    anthropic_api_key: Optional[str] = None
+    anthropic_model: str = "claude-sonnet-5-5"
+    anthropic_timeout_seconds: float = 90
+    anthropic_max_output_tokens: int = 4096
 
     # OpenAI (optional at startup - MVP can run entirely on mocks)
     openai_api_key: Optional[str] = None
     ai_secrets_encryption_key: str = Field(default="", repr=False)
     openai_model: str = "gpt-4o-mini"
+    sufle_model: str = ""  # Empty uses this bureau connection's CHAT_MODEL.
     voice_transcription_model: str = "gpt-4o-mini-transcribe"
     voice_speech_model: str = "gpt-4o-mini-tts"
 

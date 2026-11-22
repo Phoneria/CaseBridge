@@ -1,0 +1,83 @@
+{
+  "commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "application": {
+    "commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+    "version": "0.20",
+    "scope": "application"
+  },
+  "health": {
+    "status": "ok",
+    "app": "casebridge",
+    "release_commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+    "application_version": "0.20"
+  },
+  "marketing": {
+    "commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+    "version": "v.0.44",
+    "scope": "marketing"
+  },
+  "productionUnauthTree": 401,
+  "results": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "tree": "sources/uncertainties/uncomputed labels visible",
+      "api": "all browser API requests proxied to isolated synthetic backend"
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "tree": "sources/uncertainties/uncomputed labels visible",
+      "api": "all browser API requests proxied to isolated synthetic backend"
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "tree": "sources/uncertainties/uncomputed labels visible",
+      "api": "all browser API requests proxied to isolated synthetic backend"
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "tree": "sources/uncertainties/uncomputed labels visible",
+      "api": "all browser API requests proxied to isolated synthetic backend"
+    },
+    {
+      "surface": "marketing",
+      "width": 1440,
+      "tabs": 12,
+      "faq": 12,
+      "images": "loaded",
+      "modalFocus": "passed",
+      "treeAppLink": "passed"
+    },
+    {
+      "surface": "marketing",
+      "width": 390,
+      "tabs": 12,
+      "faq": 12,
+      "images": "loaded",
+      "modalFocus": "passed",
+      "treeAppLink": "passed"
+    },
+    {
+      "surface": "marketing",
+      "width": 320,
+      "tabs": 12,
+      "faq": 12,
+      "images": "loaded",
+      "modalFocus": "passed",
+      "treeAppLink": "passed"
+    }
+  ],
+  "pageErrors": [],
+  "badAssets": []
+}

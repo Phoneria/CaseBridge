@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json",
+        "web-page/assets/feature-screens/tr-current/analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/evaluation.jpg",
+        "web-page/assets/feature-screens/tr-current/conversation.jpg",
+        "web-page/assets/feature-screens/tr-current/evidence.jpg",
+        "web-page/assets/feature-screens/tr-current/assistant.jpg",
+        "web-page/assets/feature-screens/tr-current/case-documents.jpg",
+        "web-page/assets/feature-screens/tr-current/calendar.jpg",
+        "web-page/assets/feature-screens/tr-current/reports.jpg",
+        "web-page/assets/feature-screens/tr-current/knowledge-map.jpg",
+        "web-page/assets/feature-screens/tr-current/counter-analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/directed-trial.jpg",
+        "web-page/assets/feature-screens/tr-current/scenario-tree.jpg"
+      ],
+      "requirements": [
+        "specs/006-product-captures/spec.md#FR-001",
+        "specs/006-product-captures/spec.md#FR-002",
+        "specs/006-product-captures/spec.md#FR-003",
+        "specs/006-product-captures/spec.md#FR-004",
+        "specs/006-product-captures/spec.md#FR-005",
+        "specs/006-product-captures/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_current_gallery_matches_native_capture_provenance",
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_tree_is_unique_first_selected_with_matching_current_panel",
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_visible_marketing_version_matches_release_source"
+      ],
+      "reason": "Replace all twelve stale v.0.22 screenshots with raw current public v.0.23 UI and synthetic data; bind exact tab/image bytes and release-keyed normal URLs while preserving default tree, modal and matching marketing version."
+    }
+  ]
+}

@@ -92,7 +92,13 @@ async function throwApiError(response: Response, path: string): Promise<never> {
   let detail = `İstek başarısız oldu (${response.status}).`;
   try {
     const body = await response.json();
-    if (body?.detail) detail = typeof body.detail === "string" ? body.detail : detail;
+    if (body?.detail) {
+      if (typeof body.detail === "string") detail = body.detail;
+      else if ((path.startsWith("/bureau/") || path.startsWith("/platform/")) && Array.isArray(body.detail)) {
+        // Show validation messages without reflecting the submitted data.
+        detail = body.detail.map((item: {msg?: string}) => item.msg?.replace(/^Value error, /, "")).filter(Boolean).join(" ") || detail;
+      }
+    }
   } catch {
     // response had no JSON body - keep the generic message
   }
@@ -134,6 +140,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/** Shared authenticated transport for the bureau/platform workflow modules. */
+export function managementRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return request<T>(path, {...options, cache: "no-store"});
 }
 
 export async function login(email: string, password: string): Promise<{ access_token: string }> {
@@ -245,12 +256,12 @@ export async function resendPlatformAdminInvite(firmId: string, userId: string):
   return request(`/platform/firms/${firmId}/admins/${userId}/invite`, { method: "POST" });
 }
 
-export async function suspendPlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/suspend`, { method: "POST" });
+export async function suspendPlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/suspend`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
-export async function activatePlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/activate`, { method: "POST" });
+export async function activatePlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/activate`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
 export async function listUsers(): Promise<AppUser[]> {
@@ -261,7 +272,7 @@ export async function listAdminLawyers(): Promise<AppUser[]> {
   return request("/admin/lawyers");
 }
 
-export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number }> {
+export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
   return request("/admin/demo-template", { method: "POST" });
 }
 
@@ -616,6 +627,10 @@ export async function downloadDocument(documentId: string): Promise<Blob> {
   return fetchBlob(`/documents/${documentId}/download`, "Belge indirilemedi");
 }
 
+export async function downloadWorkspaceDocument(documentId: string): Promise<Blob> {
+  return fetchBlob(`/bureau/workspace/documents/${encodeURIComponent(documentId)}`, "Belge indirilemedi");
+}
+
 // ---------- CaseBridge AI chat (Hukuk Asistanı) ----------
 
 export async function getChatStatus(): Promise<ChatStatus> {
@@ -699,4 +714,84 @@ export async function updateClient(id: string, payload: Partial<ClientPayload>):
 
 export async function deleteClient(id: string): Promise<void> {
   return request(`/clients/${id}`, { method: "DELETE" });
+}
+
+export interface SufleTurn { id: number; speaker: "Avukat" | "Müvekkil" | "Görüşme"; text: string }
+export interface SufleCard {
+  priority: "urgent" | "important" | "normal";
+  category: "safety" | "question" | "evidence" | "contradiction" | "deadline";
+  title: string; reason: string; question: string; source_id: number; source_quote: string;
+}
+export interface SufleAdvice {
+  cards: SufleCard[]; summary: string; open_questions: string[]; documents: string[]; model: string; total_tokens: number;
+}
+export function getSufleStatus() {
+  return request<{ configured: boolean; model: string; transcription_model: string }>("/sufle/status");
+}
+export function analyzeSufle(body: { turns: SufleTurn[]; focus: string; previous_questions: string[]; mode: "live" | "summary"; acknowledged: true }, signal?: AbortSignal) {
+  return request<SufleAdvice>("/sufle/analyze", { method: "POST", body: JSON.stringify(body), signal });
+}
+export function transcribeSufle(audio: Blob, signal?: AbortSignal) {
+  const data = new FormData();
+  const extension = audio.type.includes("mp4") ? "mp4" : audio.type.includes("ogg") ? "ogg" : "webm";
+  data.append("file", audio, `sufle.${extension}`);
+  data.append("acknowledged", "true");
+  return request<{ text: string }>("/sufle/transcribe", { method: "POST", body: data, signal });
+}
+
+// ---- Legal lab (knowledge map, counter-side analysis, directed courtroom) ----
+export async function getLabStatus(): Promise<import("@/types/legalLab").LabStatus> {
+  return request("/legal-lab/status");
+}
+
+export async function getLegalMap(): Promise<import("@/types/legalLab").LegalGraph> {
+  return request("/legal-lab/map");
+}
+
+export async function runCounterAnalysis(
+  ref: import("@/types/legalLab").CaseRef,
+  side: "davaci" | "davali",
+): Promise<import("@/types/legalLab").CounterAnalysis> {
+  return request("/legal-lab/counter-analysis", { method: "POST", body: JSON.stringify({ ...ref, side }) });
+}
+
+export async function trialBeat(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+    interv: import("@/types/legalLab").Intervention | null;
+    manual: string[];
+  },
+): Promise<import("@/types/legalLab").BeatResult> {
+  return request("/legal-lab/trial/beat", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialGuide(
+  body: import("@/types/legalLab").CaseRef & {
+    role: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<import("@/types/legalLab").GuideResult> {
+  return request("/legal-lab/trial/guide", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialAsk(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    question: string;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<{ answer: string; law: import("@/types/legalLab").LawRef[]; mode: string; note: string | null }> {
+  return request("/legal-lab/trial/ask", { method: "POST", body: JSON.stringify(body) });
+}
+
+/** A read-only, scoped view of existing case material; does not call a model. */
+export async function getScenarioTree(caseId: string, assumptions: Record<string, import('@/types/scenarioTree').SupportAssumption> = {}): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/cases/${encodeURIComponent(caseId)}/scenario-tree?assumptions=${encodeURIComponent(JSON.stringify(assumptions))}`);
+}
+
+export async function getScenarioDemo(document: import('@/types/scenarioTree').DocumentAssumption = 'unreviewed', payment: import('@/types/scenarioTree').PaymentAssumption = 'unknown'): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/scenario-demo?document=${document}&payment=${payment}`);
 }

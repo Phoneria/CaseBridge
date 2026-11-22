@@ -1,0 +1,126 @@
+{
+  "before": {
+    "version": "0.23",
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3"
+  },
+  "after": {
+    "version": "0.23",
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3"
+  },
+  "errors": [],
+  "productionApiRequests": [],
+  "proxied_request_count": 73,
+  "statuses": [
+    200
+  ],
+  "captures": [
+    {
+      "name": "analysis",
+      "route": "/davalar/4d383cd4-0975-4b5f-8497-05b7ef7d3f5b?sekme=ai",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "fb22271720fb6401dd7b2b33106c58f3754bdd61195771cd6c2b8fb2c44d9656"
+    },
+    {
+      "name": "evaluation",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "444fac49f1541d9a4062e595e7d0150b4a7ba75727d4c6345485ef8accbdb43a"
+    },
+    {
+      "name": "conversation",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "b502f119d5b3d8fa768c95b359b8c9baf664977d3749705a4d66ce60a3646526"
+    },
+    {
+      "name": "evidence",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "c81a21b896a377ae72300aeffbc75e91a1ef2cc7c4b70fd7fae8ec2edc568104"
+    },
+    {
+      "name": "assistant",
+      "route": "/ai/sohbet?sohbet=9392f8e6-ac86-5cf6-9b2e-b373676aed31",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "47bd8ecf977da13ac67ba2df4442cefd1828dfd519e36631229682494aaf0920"
+    },
+    {
+      "name": "case-documents",
+      "route": "/davalar/4d383cd4-0975-4b5f-8497-05b7ef7d3f5b",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "5439f44b171200045c4fd4ae7a109270ce44af71c9a4c80bc581041d22c83551"
+    },
+    {
+      "name": "calendar",
+      "route": "/takvim",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "f0fb8c7d9f2919fc14c6bdc3c170fe6ec0e68951750562422d2ba563079541f8"
+    },
+    {
+      "name": "reports",
+      "route": "/raporlar",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "0c089d5c056112e8eee9707bdee0f6f6e4a932e20f986f05065c44e6daefa8c5"
+    },
+    {
+      "name": "knowledge-map",
+      "route": "/ai/harita",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "f4b85bd5187f832f85c6e10ce6430e1ce3d7662a907ebbd87b4e75addcf7cfa5"
+    },
+    {
+      "name": "counter-analysis",
+      "route": "/ai/karsi-taraf",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "35a6e3aae7c8730261bad06940cd0ef69d7980c76042410762d5408280a90152"
+    },
+    {
+      "name": "directed-trial",
+      "route": "/ai/yonetmen",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "007b03c3c33f55fc8cc80d21c1a2337b965028d64ab36cd2b61af45bcb434768"
+    },
+    {
+      "name": "scenario-tree",
+      "route": "/ai/olasilik?ornek=belge-dogrulama",
+      "viewport": {
+        "width": 1600,
+        "height": 1400
+      },
+      "sha256": "07ea58f6031466063612f8b565028f8407c889c49cc8f87a60c68075a75ec9ff"
+    }
+  ]
+}

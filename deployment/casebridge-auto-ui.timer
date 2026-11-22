@@ -1,0 +1,10 @@
+[Unit]
+Description=Check protected main for UI releases
+
+[Timer]
+OnBootSec=25s
+OnUnitInactiveSec=25s
+AccuracySec=2s
+
+[Install]
+WantedBy=timers.target

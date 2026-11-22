@@ -1,0 +1,2 @@
+# Development/governance tooling only; not an application runtime dependency.
+specify-cli==1.4.3

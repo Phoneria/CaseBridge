@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Persist this manifest with the release so repeat builds keep the same version.
-export function updateVersion(root) {
+export function updateVersion(root, { check = false } = {}) {
   const manifestPath = path.join(root, "app-version.json");
   const previous = JSON.parse(readFileSync(manifestPath, "utf8"));
   const hasBackend = existsSync(path.join(root, "../backend/app"));
@@ -38,6 +38,7 @@ export function updateVersion(root) {
     if (hasBackend && existsSync(path.join(root, name))) hash.update(name).update("\0").update(readFileSync(path.join(root, name))).update("\0");
   }
   const sourceHash = hash.digest("hex");
+  if (check && (previous.sourceHash !== sourceHash || previous.sourceScope !== sourceScope)) throw new Error("Application source changed; prepare and commit its version before staging");
   let version = previous.version;
   if (previous.sourceHash && previous.sourceHash !== sourceHash) {
     const [major, minor] = version.split(".").map(Number);
@@ -49,5 +50,5 @@ export function updateVersion(root) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  console.log(`CaseBridge v${updateVersion(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."))}`);
+  console.log(`CaseBridge v${updateVersion(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), { check: process.argv.includes("--check") })}`);
 }

@@ -28,6 +28,12 @@ export function isFinishCommand(value: string): boolean {
   return ["done", "bitir", "bitti", "bit"].includes(value.trim().toLowerCase().replace(/i\u0307/g, "i").replace(/^[ .!?]+|[ .!?]+$/g, ""));
 }
 
+const TURN_LABELS: Record<string, string> = {
+  instruction: "Yönerge", opening: "Açılış", argument: "Argüman", rebuttal: "Karşı cevap",
+  evidence: "Delil", objection: "İtiraz", question: "Soru", answer: "Yanıt", ruling: "Ara karar",
+  closing: "Kapanış", verdict: "Karar", feedback: "Geri bildirim", error: "Hata",
+};
+
 const CONVERSATION_ACTIONS: Array<{ value: CourtroomAction; label: string }> = [
   { value: "argument", label: "Savunma / beyan" }, { value: "rebuttal", label: "Karşı cevap" },
   { value: "evidence", label: "Delil sun" }, { value: "objection", label: "İtiraz" },
@@ -341,7 +347,9 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
   async function submitText(text: string) {
     if (!session || text.trim().length < 2 || text.length > 4000 || submissionBusy.current) return;
     if (session.conversation_mode && isFinishCommand(text)) { await finish(); return; }
-    if (action === "evidence" && !evidenceCode) {
+    // Recorder callbacks may retain the initial render before the phase effect runs.
+    const effectiveAction = session.conversation_mode && !CONVERSATION_ACTIONS.some(item => item.value === action) ? "argument" : action;
+    if (effectiveAction === "evidence" && !evidenceCode) {
       setError("Delil sunmak için üstteki 'Dosya notu ve deliller' alanından bir delil seçin.");
       return;
     }
@@ -351,8 +359,8 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
     try {
       const next = await sendCourtroomMove(session.id, {
         content: text.trim(),
-        action_type: action,
-        evidence_code: action === "evidence" ? evidenceCode : undefined,
+        action_type: effectiveAction,
+        evidence_code: effectiveAction === "evidence" ? evidenceCode : undefined,
         client_request_id: typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -484,7 +492,7 @@ export function CourtroomSessionView({ sessionId }: { sessionId: string }) {
             {session.turns.map((turn) => {
               const meta = ACTOR_META[turn.actor];
               return <div key={turn.id} className={`rounded-xl border p-4 sm:p-5 ${meta.bubble}`}>
-                <div className="mb-2 flex items-center justify-between gap-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${meta.badge}`}>{meta.label}</span><span className="text-[10px] text-navy-500">{turn.turn_type.replace("_", " ")}</span></div>
+                <div className="mb-2 flex items-center justify-between gap-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${meta.badge}`}>{meta.label}</span><span className="text-[10px] text-navy-500">{TURN_LABELS[turn.turn_type] ?? "Tutanak kaydı"}</span></div>
                 <p className="whitespace-pre-wrap text-[15px] leading-7 text-navy-800">{turn.content}</p>
                 {(turn.actor === "opponent" || turn.actor === "judge") && (
                   <button type="button" onClick={() => playTurn(turn.id).catch(() => setError("AI sesi oynatılamadı."))} disabled={speakingTurnId === turn.id} className="mt-2 text-xs font-medium text-accent-700 hover:underline disabled:opacity-50">{speakingTurnId === turn.id ? "Ses oynatılıyor…" : "🔊 Dinle"}</button>

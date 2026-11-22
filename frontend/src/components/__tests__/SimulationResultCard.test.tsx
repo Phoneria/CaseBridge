@@ -21,7 +21,7 @@ const result: AIAnalysisResult = {
 describe("SimulationResultCard", () => {
   it("renders the assessment as a labeled AI estimate, never a certainty claim", () => {
     render(<SimulationResultCard result={result} />);
-    expect(screen.getByText("AI Değerlendirmesi: %72")).toBeInTheDocument();
+    expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %72")).toBeInTheDocument();
     expect(screen.queryByText(/kesinlikle/i)).not.toBeInTheDocument();
   });
 

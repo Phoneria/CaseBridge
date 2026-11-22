@@ -24,13 +24,13 @@ export function SimulationResultCard({ result }: { result: AIAnalysisResult }) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-accent-600">
-            AI Karar Destek Raporu
+            Yapay Zekâ Karar Destek Raporu
           </p>
           <p className="mt-1 text-sm text-navy-700">{result.summary}</p>
         </div>
         <div className="shrink-0 rounded-xl bg-accent-50 px-4 py-3 text-center">
           <p className="text-lg font-semibold text-accent-700">
-            AI Değerlendirmesi: %{result.assessment.score}
+            Yapay Zekâ Değerlendirmesi: %{result.assessment.score}
           </p>
           <p className="text-xs text-accent-600">{CONFIDENCE_LABELS[result.assessment.confidence]}</p>
         </div>

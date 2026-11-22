@@ -1,0 +1,66 @@
+{
+  "site": "https://casebridge.com.tr",
+  "results": [
+    {
+      "width": 1440,
+      "javaScript": true,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "ArrowDown/Home/End/Tab passed",
+      "dialog": "Escape/focus passed",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "javaScript": false,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "native default visible",
+      "dialog": "native image link",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "javaScript": true,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "ArrowDown/Home/End/Tab passed",
+      "dialog": "Escape/focus passed",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "javaScript": false,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "native default visible",
+      "dialog": "native image link",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "javaScript": true,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "ArrowDown/Home/End/Tab passed",
+      "dialog": "Escape/focus passed",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "javaScript": false,
+      "initialDefault": "tree",
+      "tabCount": 12,
+      "remainingOrder": "analysis then 2..11",
+      "keyboard": "native default visible",
+      "dialog": "native image link",
+      "overflow": false
+    }
+  ],
+  "errors": []
+}
