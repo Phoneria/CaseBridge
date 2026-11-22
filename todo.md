@@ -530,5 +530,6 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 - [x] Güncel origin/main c994bb4 üzerinden ayrı dal; oturum header sağ üstünde masaüstü/mobil görünür Rehber, sayfa/sekme/rol bağlamı, konu seçimi, önceki/sonraki/baştan başla/çıkış.
 - [x] Büro Yönetimi 17 bölüm; kritik süre, yedek/doğrulama, toplu devir/teslim teyidi, inceleme/onay, açık müvekkil yayını iş akışları kaynakla doğrulandı. Platform, avukat ve kısıtlı kapsam ayrımı korunur.
 - [x] 23 hedefli frontend testi ve final 5 rehber testi; üretim build/typecheck; 30 gerçek Chromium rol/genişlik/tema senaryosu. Rehber okurken sıfır ağ isteği/yazım/URL-storage değişimi, sayfa hatası/taşma yok. Spec 011 ve docs/validation/2026-11-22/workspace-guide-browser.json.
-- [ ] İnceleme ve korumalı main birleşmesi; bu çalışma PR/In Review aşamasında bırakılır.
+- [x] İncelemeye hazır PR #55 oluşturuldu; #54 CaseBridge Projects In Review. Diff kabul kapısındaki 4 isimli test gerçekten çalışıp geçti.
+- [ ] İnceleme ve korumalı main birleşmesi; PR açık bırakılır, auto-merge etkinleştirilmez.
 - [ ] Main kaynaklı yayın sonrası public v.0.24 kod/sürüm/health doğrulaması. Canlıya alındı veya yeni müşteriye hazır iddiası yok.
