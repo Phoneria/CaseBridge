@@ -75,6 +75,7 @@ class VersionedGalleryTests(unittest.TestCase):
         workflow=(ROOT/'.github/workflows/versioned-gallery.yml').read_text()
         self.assertIn("cron: '*/5 * * * *'",workflow)
         self.assertIn('frontend/app-version.json',workflow)
+        self.assertIn('git merge-base --is-ancestor "$APP_COMMIT" origin/main',workflow)
         self.assertIn('web-page/website-version.json',workflow)
         publisher=(ROOT/'scripts/publish-gallery-pr.py').read_text()
         self.assertIn("'--auto','--merge'",publisher)

@@ -60,6 +60,7 @@ jobs:
           APP_COMMIT: ${{ steps.detect.outputs.app_commit }}
         run: |
           mkdir -p /tmp/gallery-synthetic
+          git merge-base --is-ancestor "$APP_COMMIT" origin/main
           git worktree add --detach /tmp/gallery-synthetic/source "$APP_COMMIT"
           cd /tmp/gallery-synthetic/source/backend
           python -m app.db.seed > /tmp/gallery-synthetic/seed.log
