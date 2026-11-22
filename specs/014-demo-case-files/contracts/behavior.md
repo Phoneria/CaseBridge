@@ -7,3 +7,5 @@ Yetkili kullanıcı bir dosyanın tarih sıralı evrak dizininden önizlemeyi a�
 Örnek verileri kaldır işlemi pakete ait içeriği ve dosya varlıklarını temizler. Kullanıcı eki taşıyan dosyayı koruyan davranış, temizlenen ve korunan kayıtları yöneticiye bildirir.
 
 FR-019: Göz denetiminin basılı durumu sunum görünümünü bildirir. Sunum yalnızca anonim katalog metni taşır; dosya okuması ve PDF üretimi aynı büro ve şablon doğrulamasını kullanır.
+
+FR-020 kapsamında standart büro başlığı maskeli sunuma giriş sunmaz.

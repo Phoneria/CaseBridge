@@ -114,7 +114,7 @@ export function AppShell({ children, platform = false }: { children: React.React
         </dialog>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <WorkspaceHeader onPresentation={() => toggleMask(true)} user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
+        <WorkspaceHeader user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
         <Suspense fallback={null}><GuideTour user={user} /></Suspense>
         <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
