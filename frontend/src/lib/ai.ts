@@ -1,5 +1,5 @@
 /** Pure helpers, labels and routes for the CaseBridge AI area. */
-import { buildHref, caseDetailHref } from "@/lib/filters";
+import { caseDetailHref } from "@/lib/filters";
 import { SIMULATION_STATUS_LABELS } from "@/lib/labels";
 import type { CourtroomRole, CourtroomSessionSummary, CourtroomStatus, Simulation, SimulationWithCase } from "@/types";
 
@@ -40,7 +40,7 @@ export function courtroomSessionHref(sessionId: string): string {
 }
 
 export function analysisStartHref(caseId?: string): string {
-  return buildHref(AI_ROUTES.analysis, { dava: caseId });
+  return caseId ? caseDetailHref(caseId, "ai") : "/davalar";
 }
 
 /** The date an analysis is "about": completion if finished, otherwise start. */

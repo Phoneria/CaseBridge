@@ -31,6 +31,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { SimulationResultCard } from "@/components/SimulationResultCard";
+import { CaseAiTools } from "@/components/ai/CaseAiTools";
 import { AiMark } from "@/components/ai/AiMark";
 import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
@@ -334,7 +335,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   function selectTab(tab: (typeof TABS)[number]) {
     setActiveTab(tab.label);
-    setParams({ sekme: tab.slug === "genel" ? null : tab.slug });
+    setParams({ sekme: tab.slug === "genel" ? null : tab.slug, arac: null });
   }
 
   async function handleGenerateHandover() {
@@ -640,7 +641,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       )}
 
       {activeTab === "CaseBridge AI" && (
-        <div className="space-y-4">
+        <CaseAiTools key={caseId} file={caseDetail} tool={params.get("arac")}>
           <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-navy-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow" />
             <div className="relative">
@@ -692,7 +693,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
               )
             )
           )}
-        </div>
+        </CaseAiTools>
       )}
 
       {activeTab === "Devir Raporu" && (

@@ -100,8 +100,8 @@ describe("sessions", () => {
 describe("links and activity", () => {
   it("builds AI links", () => {
     expect(courtroomSessionHref("o1")).toBe("/ai/durusma/oturum/o1");
-    expect(analysisStartHref()).toBe("/ai/analiz");
-    expect(analysisStartHref("c9")).toBe("/ai/analiz?dava=c9");
+    expect(analysisStartHref()).toBe("/davalar");
+    expect(analysisStartHref("c9")).toBe("/davalar/c9?sekme=ai");
     expect(AI_ROUTES.chat).toBe("/ai/sohbet");
   });
 

@@ -70,11 +70,12 @@ describe('WorkspaceGuide', () => {
     for(const tab of tabs) expect(contextTopic(topics,'/buro',tab).id).toBe(`bureau-${tab}`);
     expect(contextTopic(topics,'/buro',null).id).toBe('bureau-overview');
     expect(contextTopic(topics,'/buro','unknown').id).toBe('bureau-overview');
-    for(const route of ['/dashboard','/davalar','/emsaller','/takvim','/gorevler','/belgeler','/analitik','/raporlar','/admin','/ai','/ai/sufle','/ai/analiz','/ai/durusma','/ai/sohbet','/ai/karsi-taraf','/ai/yonetmen','/ai/harita','/ai/olasilik','/ayarlar','/hesabim']) expect(contextTopic(topics,route,null).route).toBe(route);
+    for(const route of ['/dashboard','/davalar','/emsaller','/takvim','/gorevler','/belgeler','/analitik','/raporlar','/admin','/ai/sufle','/ai/durusma','/ai/sohbet','/ai/karsi-taraf','/ai/harita','/ai/olasilik','/ayarlar','/hesabim']) expect(contextTopic(topics,route,null).route).toBe(route);
     expect(contextTopic(topics,'/davalar/case-id',null).id).toBe('cases');
     const instructions = (id: string) => topics.find(topic => topic.id === id)?.steps.map(step => step.body).join(' ');
     expect(instructions('cases')).toContain('İlgili emsal kararları göster');
     expect(instructions('cases')).toContain('Olasılık Ağacı');
+    expect(instructions('ai-directed')).toContain('CaseBridge AI');
     expect(instructions('tasks')).toContain('İncelemede');
     expect(instructions('reports')).toContain('Önizle');
     expect(new Set(topics.map(t=>t.id)).size).toBe(topics.length);

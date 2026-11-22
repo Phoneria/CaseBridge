@@ -542,6 +542,13 @@ describe("CaseDetailView", () => {
     expect(screen.getByText("Bu dava için henüz yapay zekâ analizi yapılmadı.")).toBeInTheDocument();
     unmount();
 
+    setUrl("/davalar/c1?sekme=ai&arac=durusma");
+    const hearing = render(<CaseDetailView caseId="c1" />);
+    expect(await screen.findByRole("button", { name: "Duruşmayı başlat" })).toBeEnabled();
+    expect(screen.queryByLabelText("Dava ara")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Karşı Taraf Analizi" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=karsi-taraf");
+    expect(screen.getByRole("link", { name: "Yönetilen Duruşma" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=yonetmen");
+    hearing.unmount();
     setUrl("/davalar/c1?sekme=simulasyonlar");
     render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
