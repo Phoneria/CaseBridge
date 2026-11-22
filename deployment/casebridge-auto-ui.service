@@ -1,0 +1,10 @@
+[Unit]
+Description=Publish eligible protected-main UI revisions
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=cb-release
+ExecStart=/usr/bin/sudo -n /usr/local/sbin/casebridge-auto-ui
+TimeoutStartSec=30min

@@ -481,7 +481,7 @@ Public tam admin menüsünde 20 link (9 AI + Ayarlar dahil), 1440×900 ve 1280×
 
 Yapılandırma/şifreli anahtar sürümleri değişmedi; yeni korumalı eşleşen DB/config/şifreli-sürüm yedeği ve önceki doğrulanmış artefakt tutuldu. Main ruleset 27816126 etkin; PR zorunlu/force-push engelli/bypass listesi boş/spec-governance GitHub Actions 15368 zorunlu/ikinci kişi onayı yok. Deneme PR #28 başarısız-BLOCKED → aynı PR düzeltmesinde required SUCCESS/MERGEABLE, opsiyonel işler sürerken UNSTABLE; kapalı ve mergedAt=null, deneme kodu main’de yok. Tam CI geçti iddiası bu probe için yapılmaz. Önceki demo yayını 1b460a6’nın üç CI işi sonradan başarıyla tamamlandı. Yeni manuel tam süit başlatılmadı veya beklenmedi.
 
-Kanıtlar: docs/validation/2026-11-22/main-protection-results.json, sidebar-release-results.json, sidebar-public-results.json, tree-first-public-results.json. Son belge PR’ı uygulama/tanıtım/deployment kodunu değiştirmez ve yeniden yayın gerektirmez. Ayrı büro anahtarları/staged aktivasyon ve ek müşteri teslim kapıları aynen korunur; yeni onboarding yapılmadı.
+Kanıtlar: docs/validation/2026-11-22/main-protection-results.json, sidebar-release-results.json, sidebar-public-results.json, tree-first-public-results.json. Bu v.0.22 kanıt kayıtları uygulama/tanıtım/deployment kodunu değiştirmez; sonraki v.0.23 UI takip değişikliği ayrı yayın gerektirir. Ayrı büro anahtarları/staged aktivasyon ve ek müşteri teslim kapıları aynen korunur; yeni onboarding yapılmadı.
 
 ## Son görsel düzeltme — yüksekliği dolduran menü, eski mavi AI kutusu, platesiz özgün logo
 
@@ -492,3 +492,7 @@ Logo: kaynak PNG’de alpha tamamı 255 ve köşeler beyaz; kapsayıcıda ayrıc
 Bu takip uygulama v.0.23 olarak ayrı korumalı PR/app scope yayınıdır. Tanıtım v.0.46 ve ilk/varsayılan Olasılık Ağacı korunur; değişmeyen tanıtım için tekrar görsel/yayın turu başlatılmaz. Önceki v.0.22 public sonuçları tarihçe olarak saklanır.
 
 Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typecheck geçti. 768/900/1080px × iki temada 20 link kaydırmasız; satırlar 28.39/35.34/44.81px, AI→Ayarlar boşluğu 21px; normal genişlik256px. 10 logo piksel kontrolünde beyaz matte noktaları arka planla ±1RGB, minimum ana-ink kontrast4.24:1; özgün PNG hash/baytları değişmedi. Dar alan ve %200 CSS metin boyutunda scroll/odak geçti. Otomatik altyapı ayrı yürütücüye devredildi; burada hiçbir workflow/deployment düzenlemesi yapılmadı. UI PR’ı güncel main’den yetkili auto-merge/pilot yayını bekleyecek; bu takip için elle VPS yayını yapılmayacak.
+## Hızlı UI yayını — kullanıcı onaylı
+
+- [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
+- [ ] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması.
