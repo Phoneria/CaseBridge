@@ -7,6 +7,7 @@ import { GuideTour } from "@/components/GuideTour";
 import { Sidebar } from "@/components/Sidebar";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
+import dynamic from "next/dynamic";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { LoadingState } from "@/components/LoadingState";
 import { getMe } from "@/lib/api";
@@ -14,6 +15,8 @@ import { ApiError } from "@/lib/apiError";
 import { FIRM_SUSPENDED } from "@/lib/firmStatus";
 import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
+
+const PresentationView = dynamic(() => import("@/components/PresentationView").then(module => module.PresentationView), {ssr: false});
 
 /** Pages a platform admin may open besides the platform panel. */
 const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar", "/rehber"];
@@ -27,6 +30,7 @@ export function AppShell({ children, platform = false }: { children: React.React
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<AppUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [masked,setMasked] = useState(false);
   const menuRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => setMenuOpen(false), [pathname]);
@@ -64,6 +68,7 @@ export function AppShell({ children, platform = false }: { children: React.React
         return;
       }
       setUser(result);
+      setMasked(sessionStorage.getItem("cb.masked." + result.id) === "1");
       setReady(true);
     }).catch((err) => {
       // A suspended firm: api.ts is already loading /login?askida=1; a client
@@ -77,6 +82,19 @@ export function AppShell({ children, platform = false }: { children: React.React
   useEffect(() => subscribeUserUpdated(setUser), []);
 
   if (!ready) return <div className="min-h-screen bg-surface-muted p-6"><LoadingState label="Çalışma alanı yükleniyor…" /></div>;
+
+  function toggleMask(value: boolean) {
+    if (!user) return;
+    if (value) sessionStorage.setItem("cb.masked." + user.id, "1");
+    else sessionStorage.removeItem("cb.masked." + user.id);
+    setMasked(value);
+  }
+  if (masked && user && !user.is_platform_admin && !user.workspace_position) {
+    return <PresentationView onClose={(path) => {
+      if (path) {sessionStorage.removeItem("cb.masked." + user.id); window.location.assign(path);}
+      else toggleMask(false);
+    }}/>;
+  }
 
   // Suspense boundaries: views and the drawer read useSearchParams(), which
   // Next 14 requires to be inside <Suspense> for static prerendering.
@@ -96,7 +114,7 @@ export function AppShell({ children, platform = false }: { children: React.React
         </dialog>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <WorkspaceHeader user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
+        <WorkspaceHeader onPresentation={() => toggleMask(true)} user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
         <Suspense fallback={null}><GuideTour user={user} /></Suspense>
         <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
