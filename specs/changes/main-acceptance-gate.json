@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        ".github/workflows/ci.yml",
+        "scripts/check-specs.py",
+        "scripts/check-spec-changes.py"
+      ],
+      "requirements": [
+        "specs/001-main-release/spec.md#FR-005",
+        "specs/001-main-release/spec.md#FR-006",
+        "specs/001-main-release/spec.md#FR-007",
+        "specs/001-main-release/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_missing_link_blocks_behavior",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_complete_link_allows_same_diff",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_docs_only_requires_no_contract",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_unknown_requirement_or_test_rejected",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_unchanged_or_nonasserting_test_rejected",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_changed_acceptance_is_executed_and_failure_blocks",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_deleted_behavior_still_requires_link",
+        "scripts/tests/test_spec_changes.py::GateAcceptance.test_skipped_acceptance_does_not_count_as_executed"
+      ],
+      "reason": "Enforce main PR changes with explicit Spec Kit requirements and actually executed acceptance tests; preserve docs-only exemption."
+    }
+  ]
+}

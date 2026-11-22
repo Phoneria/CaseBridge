@@ -442,10 +442,21 @@ Kullanıcı “Demo tahmini, tamam, yazabilirsin, okey, hadi devam edelim” diy
 - [x] Denetlenebilir puan kuralı, varsayım değişimi, görünür katkılar ve yalnız tek MECE soruda %100.
 - [x] Son kullanıcı yönlendirmesi: örnek ve normal dosya senaryo dallarında sayısal Demo tahmini; eksik örnek kayıtta eşit dağılım, normal dosyada dayanak yoksa 50/100 nötr başlangıç. Normal dosya puanları bağımsız/toplamlanmaz; probability null kalır.
 - [x] Keşfedilebilir gerçek giriş/deep link; grafik/metin, mobil/klavye ve eski yanıt yarışları doğrulanacak.
-- [ ] Tanıtım/SSS ve gerçek örnek görseli doğru olacak; v. sürüm artışı, main kaynaklı VPS ve public doğrulama tamamlanmadan yayın bitmiş sayılmayacak.
+- [x] Tanıtım/SSS ve gerçek örnek görseli güncellendi; app v.0.21 / tanıtım v.0.45 main 1b460a6 artefaktı public kod/hash/sürüm/health ile doğrulandı.
 
 No new customer delivery, no real key operation or automatic deployment trigger is authorized by this follow-up. Existing staged bureau key and release rules remain.
 
 Son kapsam açıklaması: Kullanıcı demo değerlerinin normal büro dosyalarında da görünmesini ve POC senaryo sunumunda Hesaplanmadı yerine görünür nötr/eşit başlangıç kullanılmasını açıkça istedi. Önceki sentetik-only/null ara planı bu takip işinde geçersizdir. Yalnız aynı sorunun MECE örnek grubu %100’e tamamlanır. Normal dosyalarda kullanıcı varsayımı ve doğrudan bağlı kayıt sayısıyla açıklanan bağımsız 0–100 destek ağırlığı vardır; hukuki kazanma olasılığı değildir. İnceleme/kabul beyanı yukarıdaki doğrudan kullanıcı yanıtıdır.
 
 Takip işi yerel sonuç: 12 hedefli backend + 7 arayüz testi geçti; ek health ile backend 15/15. TypeScript, üretim build, 14 release testi, sentetik Compose ve Spec Kit governance geçti. 1600/390/320 × açık/koyu temada gerçek örnek/normal dosya akışı geçti; page error/taşma yok. Tam süitler son kritik-test talimatıyla durduruldu ve başarılı sayılmaz. App v.0.21 / tanıtım v.0.45 hazırlanmıştır; public doğrulama aşağıda ayrıca kaydedilmeden yayın tamamlandı sayılmaz.
+
+## Onaylanan ek iş — GitHub main koruması ve çalışan Spec Kit kabul kapısı
+
+- [x] Main PR zorunluluğu, force push engeli, boş bypass listesi; ikinci kişi onayı yok. GitHub Actions gerçek spec-governance (15368) zorunlu ruleset etkin (27816126).
+- [ ] Davranış diff’inin gereksinim ve aynı PR’da değişen, gerçekten çalıştırılan isimli kabul testiyle bağını denetleyen uygulama PR üzerinden main’e alınacak. Belge-only iş muaf.
+- [ ] Birleştirilmeyen deneme PR’ında eksik bağla fail/blokeli → aynı PR’da düzeltmeyle pass/aşılabilir akışı kanıtlanacak.
+- [ ] Gerçek kurallar, PR/check sonuçları ve kalan sınırlar kaydedilecek. Demo yayını ayrı sonuçtur; koruma işi uygulama yeniden yayını gerektirmez.
+
+### Demo takip yayını tamamlandı — v.0.21 / v.0.45
+
+Main kaynak `1b460a691af375da61e18014733ed0ca0c10b1a5`; restricted stage/canary, gerçek yalıtılmış eski→yeni→eski, activate/verify geçti. Public app/site release.json ve health aynı commit/sürümü doğruluyor; 917 kaynak, 54 frontend JS/CSS ve 48 tanıtım dosyası manifest/imajla eşleşiyor. Public JS ile 1600/390/320 × açık/koyu temada örnek ve normal dosya varsayım akışları geçti; API yanıtları yalıtılmış sentetik backend’den geldi, müşteri verisi okunmadı. Gerçek üretimde health ve iki kimliksiz API 401 sınırı doğrudan kontrol edildi. Public güncel görsel hash’i ve 1440/390/320 tanıtım görsel/SSS/dialog/odak kontrolleri geçti. Yapılandırma ve şifreli anahtar sürümleri aynı; yeni korumalı DB/yapılandırma/şifreli sürüm yedeği ve önceki doğrulanmış artefakt tutuldu. Yeni müşteri teslimi veya anahtar işlemi yapılmadı. GitHub koruma takip işi ayrı kayıttır.

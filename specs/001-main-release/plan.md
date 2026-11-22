@@ -31,3 +31,7 @@ spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks
 Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.
 
 Runtime overlays distinguish legacy rollback source from new main Compose: security/tmpfs lists are supplied only for legacy source, while new source already declares them. Actual merged config is validated with synthetic env in CI before deployment; scalars and pinned image/identity remain in the runtime overlay.
+
+## Authorized follow-up: main PR acceptance gate
+
+Active repository ruleset, no bypass/force push, zero required external reviews, spec-governance from GitHub Actions 15368. Changes are linked per behavior file to an existing FR and changed assertion-bearing named acceptance test. CI runs bound selectors (unittest/pytest/Vitest), with conditional dependencies. Docs-only changes have no link/test demand. First implementation enters through PR; a separate same-PR negative/fixed probe is never merged. No app redeployment, version increment or deployment/access redesign for governance-only files. Semantic relevance remains reviewable; link checks and test execution do not prove test adequacy or defeat repository admins who can change rules/workflows.
