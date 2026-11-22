@@ -78,7 +78,25 @@ def test_every_dossier_path_ends_in_a_grounded_decision():
         parents = {n.parent_id for n in nodes}
         assert 20 <= len(nodes) == len(by_id) <= 100, story.code
         leaves = [n for n in nodes if n.id not in parents]
-        assert len(leaves) >= 3 and [n.id for n in leaves if n.recorded_step] == ["recorded"]
+        assert [n.id for n in leaves if n.recorded_step] == ["recorded"]
+        for stage in ("evidence", "challenge"):
+            children = [n for n in nodes if n.parent_id == stage]
+            assert len(children) >= 2, (story.code, stage)
+            assert sum(n.recorded_step for n in children) == 1
+            for child in children:
+                if child.recorded_step:
+                    continue
+                assert set(child.source_ids) <= {s.id for s in sources}
+                decisions = [n for n in leaves if n.parent_id == child.id]
+                assert len(decisions) == 1 and decisions[0].source_ids == child.source_ids
+                assert decisions[0].reasoning and decisions[0].reasoning != decisions[0].label
+        nested_stage = {"C07": "alternative-2-1", "H05": "alternative-1-2", "H08": "alternative-2-2"}.get(story.code)
+        if nested_stage:
+            assert sum(n.parent_id == nested_stage for n in nodes) == 2
+        assert len({n.label for n in leaves}) == len(leaves) >= 5
+        for parent in parents - {None}:
+            assert sum(n.transition_percent for n in nodes if n.parent_id == parent) == 100
+        assert abs(sum(n.path_percent for n in leaves) - 100) < 1e-8
         assert story.end in by_id["recorded"].description
         for leaf in leaves:
             assert leaf.kind == "outcome" and leaf.source_ids
