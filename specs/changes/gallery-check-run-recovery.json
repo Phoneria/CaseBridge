@@ -1,0 +1,9 @@
+{
+ "version":1,
+ "changes":[{
+   "files":["scripts/publish-gallery-pr.py"],
+   "requirements":["specs/010-versioned-gallery/spec.md#FR-003"],
+   "acceptance_tests":["scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_exact_head_real_actions_latest_check_cannot_reuse_stale_success"],
+   "reason":"Actual native CI batch and generated47PR passed real spec-governance on its exact head, but workflow_dispatch check-runs are absent from PR statusCheckRollup. Read authentic latest app15368 required check-run at exact candidate SHA; never substitute an older success for latest pending/failure. Protected merge rule remains authoritative."
+ }]
+}
