@@ -176,3 +176,19 @@ class VersionedGalleryTests(unittest.TestCase):
         unrelated=[check(90,head_sha='a'*40),check(91,app={'id':999}),check(92,name='unrelated')]
         self.assertEqual(publisher.required_state([old,pending,failure,current,*unrelated],head),'SUCCESS')
         self.assertEqual(publisher.required_state(unrelated,head),'PENDING')
+
+    def test_own_ci_approval_rejects_other_authors_heads_and_runtime_paths(self):
+        import copy
+        module_spec=importlib.util.spec_from_file_location('approval',ROOT/'scripts/approve-gallery-ci.py')
+        approval=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(approval)
+        refs=['assets/feature-screens/tr-current/scenario-tree.jpg']
+        ledger={'hashes':{refs[0]:'a'*64}}
+        fixed=[gallery.LEDGER,'web-page/index.html','web-page/website-version.json','scripts/tests/test_generated_gallery.py','specs/changes/generated-gallery.json']
+        pr={'state':'OPEN','author':{'login':'app/github-actions'},'isCrossRepository':False,'baseRefName':'main','headRefName':'codex/automatic-product-gallery-1','headRefOid':'b'*40,'files':[{'path':p} for p in fixed]}
+        self.assertTrue(approval.eligible(pr,ledger,'b'*40,refs))
+        for key,value in [('author',{'login':'other'}),('headRefOid','c'*40),('isCrossRepository',True),('baseRefName','other'),('headRefName','arbitrary')]:
+            bad=copy.deepcopy(pr);bad[key]=value
+            with self.assertRaises(ValueError):approval.eligible(bad,ledger,'b'*40,refs)
+        bad=copy.deepcopy(pr);bad['files'].append({'path':'backend/app/main.py'})
+        with self.assertRaises(ValueError):approval.eligible(bad,ledger,'b'*40,refs)
+        with self.assertRaises(ValueError):approval.eligible(pr,{'hashes':{}},'b'*40,refs)

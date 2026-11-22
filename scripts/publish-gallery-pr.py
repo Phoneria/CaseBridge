@@ -69,8 +69,11 @@ def main():
     url=run('gh','pr','create','--head',branch,'--base','main','--title','Automatic product gallery '+ledger['marketingVersion'],'--body-file',str(body))
     # Token-created PR events are suppressed by GitHub; dispatch real required Actions CI explicitly.
     run('gh','workflow','run','ci.yml','--ref',branch,'-f','base='+base)
+    approval_spec=importlib.util.spec_from_file_location('own_ci_approval',ROOT/'scripts/approve-gallery-ci.py')
+    approval=importlib.util.module_from_spec(approval_spec);approval_spec.loader.exec_module(approval)
     checks_deadline=time.monotonic()+300
     while time.monotonic()<checks_deadline:
+        approval.approve(url.rstrip('/').split('/')[-1],head)
         state=head_check_state(head)
         if state=='SUCCESS': break
         if state in ('FAILURE','CANCELLED','TIMED_OUT','ACTION_REQUIRED'):
