@@ -464,11 +464,21 @@ Main kaynak `1b460a691af375da61e18014733ed0ca0c10b1a5`; restricted stage/canary,
 ## Onaylanan tanıtım takibi — Olasılık Ağacı ilk ve varsayılan
 
 - [x] Mevcut ağaç tek kez ilk ve varsayılan; analiz ikinci, diğer sıra/rota/açıklama aynı. 12 gerçek görsel yeni sol menülü app v.0.22 ile güncellendi.
-- [ ] Yerel masaüstü/mobil ilk açılış/ARIA/klavye/dialog geçti; gereksinim/kabul testli korumalı PR ve public kontrol tamamlanınca kapatılacak.
-- [ ] Tanıtım v.0.46 yalnız marketing scope ile main artefaktından yayımlanacak; public varsayılan/kod/sürüm ve app health kontrol edilecek.
+- [x] Yerel ve public masaüstü/mobil ilk açılış/ARIA/klavye/dialog geçti; PR #29 zorunlu kabul testleriyle korumalı main’e alındı.
+- [x] Sonradan açıkça eklenen uygulama sidebar isteğiyle birlikte app v.0.22 / site v.0.46, main 80035ea all artefaktından yayımlandı. Değişmeyen backend imajı yeniden kullanıldı. Public varsayılan içerik/kod/sürüm/health doğrulandı; önceki yalnız-marketing ara kapsamı son uygulama isteğiyle genişledi.
 
 ## Son onay — Sol CaseBridge AI grubu geri, tüm menü tek bakışta
 
 Header AI erişimi korunacak. Dokuz yetkili AI aracı sidebar’da ayrı başlık altında tek sütun, ilk açılışta genişletilmiş ve ek tıklamasız gösterilecek. Parlak mavi tüm-grup çerçevesi yok; seçili satır/klavye odağı ve platform/restricted sınırları korunacak. Tam admin menüsü 900/768px yüksekliğinde DOM geometriyle doğrulanacak; kısa/mobil/yüksek zoom alanında kaydırma erişimi kalacak. Uygulama v.0.22, tanıtım v.0.46 hazırlanacak; ikisi korumalı PR/main artefaktıyla ve gerçek public doğrulamayla yayımlanacak.
 
 Sol menü yerel kanıt: 15 hedefli test, production build/typecheck geçti. Gerçek tam admin menüsü 20 bağlantı; 1440×900 ve 1280×768 × açık/koyu temada tümü tek bakışta görünür, minimum satır 24px; ilk bağlantı top 69.58px, son bottom 855/723px. 390×844, 320×568 ve 720×384 dar CSS alanında scroll/odak erişimi geçti. 720×384 zoom eşdeğeri dar alan testidir; gerçek browser zoom doğrulaması iddia edilmez. Header dokuz AI bağlantısı korunur. Public app v.0.22 / site v.0.46 doğrulaması henüz bu satırla tamamlanmış sayılmaz.
+
+### Son yayın tamamlandı — uygulama v.0.22 / tanıtım v.0.46
+
+Korumalı PR #29 → main `80035eaea87f07445d375d8848ee7e8bee8ae8b5`; zorunlu spec-governance içindeki 6 isimli kabul testi ve otomatik frontend kontrolü geçti. Değişmez stage/canary, yalıtılmış eski→yeni→eski, activate/verify başarılı. Public 929 kaynak/54 frontend JS-CSS/48 tanıtım dosyası manifestle eşleşti. App v.0.22 etiketi/release.json, site v.0.46 ve doğrudan health ok doğrulandı. Backend değişmedi/reuse: kendi health kimliği 1b460a6/0.21 olarak korunur; frontend güncel kimliği 80035ea/0.22’dir.
+
+Public tam admin menüsünde 20 link (9 AI + Ayarlar dahil), 1440×900 ve 1280×768 × açık/koyu temada aynı anda görünür. 390×844, 320×568 ve 720×384 CSS alanında kaydırma/odak ve header dokuz AI erişimi geçti. Gerçek browser zoom iddia edilmez; dar CSS alanı sınandı. Public tanıtımda 1440/390/320 × JavaScript açık/kapalı ilk açılış/yenileme: tek ve ilk seçili Olasılık Ağacı, analiz ikinci, klavye/dialog/odak ve 12 güncel görsel hash’i geçti. Page error/taşma yok. UI akışları actual public JS + sentetik yalıtılmış API ile; gerçek müşteri verisi/sağlayıcı/anahtar kullanımı yok. Doğrudan health ve kimliksiz demo 401 gerçek üretimde sınandı.
+
+Yapılandırma/şifreli anahtar sürümleri değişmedi; yeni korumalı eşleşen DB/config/şifreli-sürüm yedeği ve önceki doğrulanmış artefakt tutuldu. Main ruleset 27816126 etkin; PR zorunlu/force-push engelli/bypass listesi boş/spec-governance GitHub Actions 15368 zorunlu/ikinci kişi onayı yok. Deneme PR #28 başarısız-BLOCKED → aynı PR düzeltmesinde required SUCCESS/MERGEABLE, opsiyonel işler sürerken UNSTABLE; kapalı ve mergedAt=null, deneme kodu main’de yok. Tam CI geçti iddiası bu probe için yapılmaz. Önceki demo yayını 1b460a6’nın üç CI işi sonradan başarıyla tamamlandı. Yeni manuel tam süit başlatılmadı veya beklenmedi.
+
+Kanıtlar: docs/validation/2026-11-22/main-protection-results.json, sidebar-release-results.json, sidebar-public-results.json, tree-first-public-results.json. Son belge PR’ı uygulama/tanıtım/deployment kodunu değiştirmez ve yeniden yayın gerektirmez. Ayrı büro anahtarları/staged aktivasyon ve ek müşteri teslim kapıları aynen korunur; yeni onboarding yapılmadı.

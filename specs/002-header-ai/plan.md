@@ -2,7 +2,7 @@
 
 ## Summary
 
-Yetkili kullanıcı AI araçlarına masaüstü ve mobil header üzerinden erişir.
+Yetkili kullanıcı AI araçlarına header ve açık tek sütun sidebar grubundan erişir. Son kullanıcı isteği sidebar’ı geri ekler; header korunur.
 
 ## Technical Context
 
@@ -33,3 +33,7 @@ Reuse existing architecture; no new service or database migration. New behavior 
 ## CI regression resolution
 
 CI exposed an existing passive-effect/recording closure race: a fast recording could capture initial `opening` before conversation default became `argument`. Resolve the effective action at submit boundary from the session mode and permitted conversation actions; retain evidence/rebuttal/objection choices. No voice/provider API or tenant change. Existing microphone regression plus full suite verify this.
+
+## Final sidebar follow-up
+
+Shared metadata remains the source for both menus. Compact 24px rows and 13px labels plus smaller logo/spacing meet measured 900/768px full-menu visibility; min-h-0/overflow preserve short/mobile reachability. No group disclosure or bright outline. App v.0.22 / site v.0.46 public verification complete; see verification.md.
