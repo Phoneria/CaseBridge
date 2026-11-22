@@ -88,3 +88,5 @@ FR-013, FR-008 kapsamındaki katalog ağırlıklarını korur. Diğer dosyalarda
 FR-014 için yerleşim alt ağaçtaki ilk ve son yaprağın ortasını kullanır. Açılış kaydırması yalnız grafik bağlandığında uygulanır. Kısa ağaçların yaprakları, koşullu hazırlık kararları ve bağlantılı kaynaklarla genişletilir. FR-013'teki eşit pay varsayımını, eksik yüzdelerde deterministik rastgele paylar değiştirir.
 
 FR-015 mevcut birikimli yol değerini kullanır. Yüzde biçimlendirme çarpımlar hesaplandıktan sonra yapılır. Yüzde 100 olan koşullu geçişte birikimli olasılık önceki düğümle aynı kalır.
+
+FR-016 için yirmi dosyanın çekişmeli olgusuna ayrı karşı olgular ve hükümler yaz. Kayıtlı delil, itiraz ve sonucu dosyanın evrakıyla bağla. Diğer dosyalarda dosyanın kendi talebi ve mevcut kaynaklarla koşullu sonuçlar kur. Uzun tarihçede ilk ve son işlemler arasında özet kullan. Dava ekranı ve AI menüsündeki ortak çizimde yalnız yaprakları son sütuna taşı.

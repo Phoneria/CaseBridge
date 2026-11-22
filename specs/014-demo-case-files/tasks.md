@@ -20,3 +20,4 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T014 Fare ve izleme dörtgeni ölçeğini, tüm dosyalarda senaryo yüzdelerini ve kayıtlı kapanış yolunu doğrula (FR-013).
 - [x] T015 Kökün dikey merkezini, dosya başına en az 20 düğümü, kaynak yüzdelerinin önceliğini ve sabit rastgele dağılımı doğrula (FR-014).
 - [x] T016 Grafik, metin ve panelde kökten ulaşma ile son geçişi ayırt et ve yüzde 100 devam dalını doğrula (FR-015).
+- [x] T017 Her yolu ve hükmü yirmi dava üzerinde doğrula, genel dosyaları ve son sütunun konumunu test et (FR-016).

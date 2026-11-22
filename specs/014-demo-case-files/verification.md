@@ -29,3 +29,7 @@ FR-013: 11 ağaç bileşen testi geçti. Chromium ile dava sekmesinde ve AI men�
 FR-014: Yerelde 778 arayüz testi, TypeScript denetimi ve Spec Kit doğrulaması geçti. Chromium ölçümünde her iki girişte kökün merkezden dikey sapması 0 pikseldi. Açık dosyanın 22 düğümü ve 18 farklı geçiş yüzdesi vardı. Yeniden yüklemede oranlar birebir eşleşti.
 
 FR-015: 14 ağaç bileşeni testi geçti. 32,43 → 68,83 → 100 koşullu yüzdelerinde oklar 32,43 → 22,32 → 22,32 gösterdi. Chromium ile her iki girişte 56 okun metni ayrı ayrı hedef kartıyla eşleşti. Seçim, fare ölçeği ve belgeye geçiş doğrulandı.
+
+## Gerekçeli sonuç düğümleri
+
+Yerel API entegrasyonunda 20 dosyanın her yolu köke kadar yüründü. Belge bağlantıları, yalnızca yaprakların sonuç olması, kayıtlı kapanış ve birikimli yüzdeler kontrol edildi. Chromium’da 10 dava ekranı ve 10 AI menüsü bağlantısından toplam 418 düğüm ve 60 son kart doğrulandı. Her karar aynı son sütundaydı, seçildiğinde gerekçesi ve dosyaya ait evrak bağlantısı açıldı. Katalogda dosya başına 20–24 düğüm ve üç karar var. 16 arayüz testi içinde borçlu yönünden kabul/ret, yoğun bir kapalı dosyada 60 olayın korunması ve 100 düğüm üst sınırı da sınandı.
