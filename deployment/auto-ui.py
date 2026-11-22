@@ -44,9 +44,10 @@ def git_paths(repo, base, head):
 
 
 def version(value):
-    if not re.fullmatch(r'v?\d+\.\d+', value):
+    match = re.fullmatch(r'(?:v\.?)?(\d+)\.(\d+)', value)
+    if not match:
         raise ValueError('Unsupported release version')
-    return tuple(map(int, value.lstrip('v').split('.')))
+    return tuple(map(int, match.groups()))
 
 
 def pull(r):

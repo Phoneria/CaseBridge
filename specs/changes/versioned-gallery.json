@@ -24,6 +24,21 @@
         "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_http_end_to_end_both_version_triggers_publish_all_bytes_and_suppress_output"
       ],
       "reason": "User-authorized automatic complete native marketing gallery capture on either public version change, protected-main publication, isolated synthetic API, versioned cache URLs and loop prevention."
+    },
+    {
+      "files": [
+        "deployment/auto-ui.py"
+      ],
+      "requirements": [
+        "specs/001-main-release/spec.md#FR-009",
+        "specs/010-versioned-gallery/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_version_accepts_actual_independent_public_labels_and_rejects_garbage",
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_publish_actual_marketing_labels_stages_verifies_and_advances_cursor",
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_publish_equal_marketing_version_does_not_stage_or_activate"
+      ],
+      "reason": "Unblock actual v. marketing versions in immutable automatic publisher; retain numeric application and optional legacy labels, reject unchanged versions."
     }
   ]
 }

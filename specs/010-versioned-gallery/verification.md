@@ -7,3 +7,5 @@ Real Playwright capture using the committed adapter completed every12 native pub
 Local HTTP end-to-end acceptance executes the full identity→candidate→public-byte/health verification pipeline for both version triggers and verifies own-output suppression, two-image complete coverage and rejection of stale public bytes.
 
 Workflow installation, actual CI synthetic startup, protected generated PR and automatic public-byte publication remain pending. No completed deployment or customer rollout claimed.
+
+Dependency regression discovered during the independent v.0.47 release: the installed automatic publisher rejected `v.0.47` although application `0.23` worked. PR44 repairs parsing of actual independent labels (and optional legacy `v0.47`). Three new executable regressions pass: supported/invalid labels; full marketing47→48 staging/activation/verification/cursor advancement with unchanged backend; equal version rejection before staging. The one-time v47 publication uses the parent's restricted standard fallback and is not claimed as automatic. Installing this exact reviewed main policy remains required before automated gallery cutover.

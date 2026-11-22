@@ -64,3 +64,46 @@ class AutoUiTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'backend image'):
                     auto.publish(release)
                 release.activate.assert_not_called()
+
+    def test_version_accepts_actual_independent_public_labels_and_rejects_garbage(self):
+        self.assertEqual(auto.version('0.23'),(0,23))
+        self.assertEqual(auto.version('v.0.47'),(0,47))
+        self.assertEqual(auto.version('v0.47'),(0,47))
+        self.assertGreater(auto.version('v.0.48'),auto.version('v.0.47'))
+        for invalid in ('v..0.47','v.0.47-rc1','v.0.47\n',' 0.23','0.23.1','v.0'):
+            with self.subTest(invalid=invalid),self.assertRaises(ValueError):auto.version(invalid)
+
+    def test_publish_actual_marketing_labels_stages_verifies_and_advances_cursor(self):
+        from unittest.mock import MagicMock,patch
+        import json
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);base,head='a'*40,'b'*40
+            (root/'current.json').write_text(json.dumps({'application_commit':base,'marketing_commit':base,'operation':'activate'}))
+            (root/'auto-ui.json').write_text(json.dumps({'baseline':base}))
+            release=MagicMock(INVENTORY=root,REPO=root,GIT='git',ReleaseError=ValueError)
+            release.validate_sha.side_effect=lambda value:value
+            release.run.side_effect=lambda cmd:json.dumps({'version':'v.0.48' if cmd[-1]==head+':web-page/website-version.json' else 'v.0.47'})
+            release.load_release.side_effect=[(None,{'scope':'marketing','images':{'cb-backend':'unchanged'}}),(None,{'images':{'cb-backend':'unchanged'}})]
+            release.write_json.side_effect=lambda target,data:target.write_text(json.dumps(data))
+            with patch.object(auto,'pull',return_value=head),patch.object(auto,'git_paths',return_value=['web-page/index.html','web-page/website-version.json']):
+                auto.publish(release)
+            release.stage.assert_called_once_with(head,'marketing')
+            release.activate.assert_called_once_with(head)
+            release.verify.assert_called_once_with(head,scope='marketing')
+            self.assertEqual(json.loads((root/'auto-ui.json').read_text())['baseline'],head)
+            self.assertEqual(json.loads((root/'auto-ui.json').read_text())['last_auto'],head)
+
+    def test_publish_equal_marketing_version_does_not_stage_or_activate(self):
+        from unittest.mock import MagicMock,patch
+        import json
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);base,head='a'*40,'b'*40
+            (root/'current.json').write_text(json.dumps({'application_commit':base,'marketing_commit':base,'operation':'activate'}))
+            (root/'auto-ui.json').write_text(json.dumps({'baseline':base}))
+            release=MagicMock(INVENTORY=root,REPO=root,GIT='git',ReleaseError=ValueError)
+            release.validate_sha.side_effect=lambda value:value
+            release.run.return_value=json.dumps({'version':'v.0.47'})
+            with patch.object(auto,'pull',return_value=head),patch.object(auto,'git_paths',return_value=['web-page/index.html']):
+                with self.assertRaisesRegex(ValueError,'version increment'):auto.publish(release)
+            release.stage.assert_not_called();release.activate.assert_not_called()
+            self.assertEqual(json.loads((root/'auto-ui.json').read_text())['baseline'],base)
