@@ -21,3 +21,4 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T015 Kökün dikey merkezini, dosya başına en az 20 düğümü, kaynak yüzdelerinin önceliğini ve sabit rastgele dağılımı doğrula (FR-014).
 - [x] T016 Grafik, metin ve panelde kökten ulaşma ile son geçişi ayırt et ve yüzde 100 devam dalını doğrula (FR-015).
 - [x] T017 Her yolu ve hükmü yirmi dava üzerinde doğrula, genel dosyaları ve son sütunun konumunu test et (FR-016).
+- [x] T018 Borca itiraz dosyasında anlaşma ve esas hakkında karar yollarının ayrımını sına (FR-017).

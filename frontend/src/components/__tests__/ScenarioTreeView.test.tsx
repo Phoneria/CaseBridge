@@ -215,3 +215,19 @@ it('bounds dense closed files and retains every event reference and decision', (
   expect(map.nodes.filter(n => !parents.has(n.id)).every(n => n.kind === 'outcome')).toBe(true);
   expect(map.nodes.filter(n => n.recorded_step).flatMap(n => n.source_ids).filter(id => id.startsWith('event:'))).toHaveLength(60);
 });
+
+it('ends a confirmed settlement in settlement decisions and a failed negotiation on the merits', () => {
+  const snapshot = tree();
+  snapshot.source_mode = 'stored_analysis';
+  snapshot.title = 'Takip konusu borca itiraz';
+  snapshot.nodes = [snapshot.nodes[0], node('scenario-0','root','Tarafların maliyet ve süreyi değerlendirerek uzlaşması.','scenario'),
+    node('scenario-0-confirm','scenario-0','Koşullar doğrulanırsa','outcome'),
+    node('scenario-0-change','scenario-0','Yeni bulgu çıkarsa','outcome')];
+  const result = scenarioMap(snapshot);
+  const ends = result.nodes.filter(n => n.kind === 'outcome');
+  const agreement = ends.filter(n => n.id.startsWith('scenario-0-confirm:'));
+  expect(agreement.length).toBeGreaterThan(0);
+  expect(agreement.every(n => /sulh/i.test(n.label))).toBe(true);
+  expect(ends.some(n => n.id.startsWith('scenario-0-change:') && n.label.includes('Borçlunun'))).toBe(true);
+  expect(result.nodes.length).toBeGreaterThanOrEqual(20);
+});

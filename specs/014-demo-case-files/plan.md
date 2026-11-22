@@ -90,3 +90,4 @@ FR-014 için yerleşim alt ağaçtaki ilk ve son yaprağın ortasını kullanır
 FR-015 mevcut birikimli yol değerini kullanır. Yüzde biçimlendirme çarpımlar hesaplandıktan sonra yapılır. Yüzde 100 olan koşullu geçişte birikimli olasılık önceki düğümle aynı kalır.
 
 FR-016 için yirmi dosyanın çekişmeli olgusuna ayrı karşı olgular ve hükümler yaz. Kayıtlı delil, itiraz ve sonucu dosyanın evrakıyla bağla. Diğer dosyalarda dosyanın kendi talebi ve mevcut kaynaklarla koşullu sonuçlar kur. Uzun tarihçede ilk ve son işlemler arasında özet kullan. Dava ekranı ve AI menüsündeki ortak çizimde yalnız yaprakları son sütuna taşı.
+FR-017 için dosya analizindeki uzlaşma senaryosunun doğrulama ve değişim dallarını ayır. Kayıtlı kapanışta dosyanın kendi sonuç metnini kart başlığında göster.
