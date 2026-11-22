@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/versioned-gallery.yml",
+        "scripts/versioned-gallery.py",
+        "scripts/capture-public-gallery.cjs",
+        "scripts/publish-gallery-pr.py"
+      ],
+      "requirements": [
+        "specs/010-versioned-gallery/spec.md#FR-001",
+        "specs/010-versioned-gallery/spec.md#FR-002",
+        "specs/010-versioned-gallery/spec.md#FR-003",
+        "specs/010-versioned-gallery/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_both_version_triggers_and_self_generated_release_suppression",
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_missing_corrupt_and_source_race_batches_cannot_change_prior_gallery",
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_every_current_product_reference_is_bound_and_tree_first",
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_successful_complete_candidate_generates_all_byte_acceptance_and_output_ledger",
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_public_capture_routes_all_browser_api_and_blocks_service_workers"
+      ],
+      "reason": "User-authorized automatic complete native marketing gallery capture on either public version change, protected-main publication, isolated synthetic API, versioned cache URLs and loop prevention."
+    }
+  ]
+}

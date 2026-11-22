@@ -1,0 +1,97 @@
+name: Versioned product gallery
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - frontend/app-version.json
+      - web-page/website-version.json
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+concurrency:
+  group: versioned-product-gallery
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DATABASE_URL: sqlite:////tmp/gallery-synthetic/gallery.db
+      JWT_SECRET: ci-gallery-synthetic-fixture
+      ENV: development
+      LLM_PROVIDER: mock
+      CHAT_PROVIDER: mock
+      OPENAI_API_KEY: ''
+      EMAIL_BACKEND: file
+      EMAIL_FILE_DIR: /tmp/gallery-synthetic/mail
+      STORAGE_DIR: /tmp/gallery-synthetic/storage
+      REMINDERS_ENABLED: 'false'
+      LOGIN_RATE_LIMIT_PER_MINUTE: '1000'
+      GALLERY_BATCH: /tmp/gallery-native-batch
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect public version changes
+        id: detect
+        run: python3 scripts/versioned-gallery.py detect
+      - uses: actions/setup-python@v5
+        if: steps.detect.outputs.needed == 'true'
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        if: steps.detect.outputs.needed == 'true'
+        with:
+          node-version: '20'
+      - name: Install isolated capture dependencies
+        if: steps.detect.outputs.needed == 'true'
+        run: |
+          pip install -r backend/requirements.txt
+          npm install --prefix /tmp/gallery-playwright @playwright/test@1.56.1
+          /tmp/gallery-playwright/node_modules/.bin/playwright install --with-deps chromium
+      - name: Start disposable synthetic backend from served application source
+        if: steps.detect.outputs.needed == 'true'
+        env:
+          APP_COMMIT: ${{ steps.detect.outputs.app_commit }}
+        run: |
+          mkdir -p /tmp/gallery-synthetic
+          git worktree add --detach /tmp/gallery-synthetic/source "$APP_COMMIT"
+          cd /tmp/gallery-synthetic/source/backend
+          python -m app.db.seed > /tmp/gallery-synthetic/seed.log
+          python - <<'PY'
+          from app.db.session import SessionLocal
+          from app.models.user import User
+          from app.db.demo_template import add_demo_template
+          with SessionLocal() as db:
+              admin = db.query(User).filter_by(email='admin@demo.casebridge.dev').one()
+              add_demo_template(db, admin)
+              db.commit()
+          PY
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8044 > /tmp/gallery-synthetic/backend.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8044/health && exit 0; sleep 1; done
+          exit 1
+      - name: Capture every native public product route
+        if: steps.detect.outputs.needed == 'true'
+        env:
+          PLAYWRIGHT_MODULE: /tmp/gallery-playwright/node_modules/@playwright/test
+        run: node scripts/capture-public-gallery.cjs
+      - name: Validate and prepare complete atomic candidate
+        if: steps.detect.outputs.needed == 'true'
+        run: |
+          python3 scripts/versioned-gallery.py prepare --batch "$GALLERY_BATCH"
+          python3 -m unittest scripts.tests.test_generated_gallery -v
+      - name: Publish narrowly bounded gallery PR through required CI
+        if: steps.detect.outputs.needed == 'true'
+        run: python3 scripts/publish-gallery-pr.py
+      - name: Retain synthetic provenance and native batch
+        if: always() && steps.detect.outputs.needed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-native-gallery-${{ github.run_id }}
+          path: /tmp/gallery-native-batch
+          retention-days: 14

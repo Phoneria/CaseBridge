@@ -496,3 +496,9 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 
 - [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
 - [x] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması. PR #32 → v.0.23. Birleşmeden 19 sn sonra otomatik başlangıç, 1 dk 46 sn içinde canlı doğrulama. [Kanıt](specs/001-main-release/verification.md#fr-009-automatic-production-ui-pilot).
+
+## User-authorized automatic versioned product gallery
+
+- [x] Separate specs/010-versioned-gallery implementation detects either public version, captures all current native public frontend product routes against synthetic-only API, rejects partial/raced batches, preserves tree-first/default, versions normal image/zoom URLs and suppresses the output release loop.
+- [x] Five targeted tests and actual12-route public native capture passed;73 synthetic API requests all200, no browser errors/production API forwarding. Isolated evidence in specs/010-versioned-gallery/verification.md; no current published images changed by this validation.
+- [ ] Install reviewed protected-main workflow and Actions PR setting, then verify automatically generated protected PR, immutable marketing activation, every public image hash and health. Both-trigger tests are currently isolated unit acceptance; no production application-version trigger is claimed yet.
