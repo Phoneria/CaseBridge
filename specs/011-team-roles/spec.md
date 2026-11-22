@@ -12,7 +12,7 @@ Emin Merden ekibe eklenir. İzzet iş geliştirmeden, Emin yapay zekâ ve veride
 **Acceptance**: Masaüstü, mobil, erişilebilir adlar ve JavaScript kapalı görünüm aynı isimleri/rolleri sunar. Eski rolü yeniden yazan çalışan başka görünüm bulunmaz.
 
 ### Edge Cases
-Fotoğraf sağlanmadı: gerçek portre izlenimi vermeyen dekoratif baş harfler kullanılır. PDF ve iletişim bilgileri yayımlanmaz. Sürüm yarışı varsa güncel main yeniden değerlendirilir; Rehber işi bu PR'a alınmaz.
+İlk yayında fotoğraf sağlanmadığı için baş harfler kullanıldı; onaylanan portre sağlandığında FR-005 uygulanır. PDF ve iletişim bilgileri yayımlanmaz. Sürüm yarışı varsa güncel main yeniden değerlendirilir; Rehber işi bu PR'a alınmaz.
 
 ## Requirements
 ### Functional Requirements
@@ -20,6 +20,8 @@ Fotoğraf sağlanmadı: gerçek portre izlenimi vermeyen dekoratif baş harfler 
 - **FR-002**: İzzet Ahmet iş geliştirme ve iş ortaklıklarından sorumlu gösterilir; Bengü Özbek'in ilgili katkısı ekosistem ilişkileri olarak netleştirilir; Hatice Çam ve Ahmet Büyükdağ'ın içerikleri korunur.
 - **FR-003**: Gerçek sunulan tüm ekip görünümlerinde, JS kapalı, masaüstü/mobil ve erişilebilir metinde aynı bilgiler bulunur; mevcut tema ve bağlantılar korunur.
 - **FR-004**: Ayrı marketing sürümü korumalı main ve mevcut immutable otomatik VPS akışından yayımlanır; normal public URL'de yeni metin/kod/sürüm ve health doğrulanmadan tamamlanmış sayılmaz.
+
+- **FR-005**: Kullanıcının onayladığı hazır Emin portresi yalnız web boyutuna küçültülerek mevcut EM alanının yerine gerçek img dosyasıyla eklenir; yüz/renk/içerik yeniden üretilmez. Mevcut ekip kadrajı, doğru alt metni, Emin unvanı ve tüm ekip metinleri korunur. Normal canlı URL, dosya hash/decode, masaüstü/mobil kadraj, sürüm ve health doğrulanır.
 
 ## Success Criteria
 - **SC-001**: Beş üyenin adı ve tekil sorumlulukları normal sayfadan okunur.

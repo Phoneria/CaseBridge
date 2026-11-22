@@ -12,3 +12,9 @@
 - [x] T006 Protected PR/main/timer marketing-only publication; verify public source/version/health and record specs/011-team-roles/verification.md and todo.md.
 
 Dependencies: T001 → T002 → T003 → T004 → T005(local) → T006 → T005(public). No shared-source parallel work.
+
+## Approved portrait follow-up
+- [x] T007 [US1] Implement FR-005 using TeamMember.portrait from data-model.md#featurecontract in assets/team/emin-merden-web.jpg and index.html; preserve every card text and other members, bump only marketing version.
+- [x] T008 [US2] Verify portrait source/hash/alt/decode and existing team roles contract, local desktop/mobile crop and JS-disabled image; record verification.md.
+- [ ] T009 Protected main marketing timer release; verify normal public portrait file/hash, desktop/mobile crop, version and health, record verification.md and todo.md.
+Dependencies: T007 → T008 → T009. Prior T001–T006 evidence is historical and remains valid.
