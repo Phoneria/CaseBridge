@@ -45,17 +45,41 @@ function routesFor(subject: string, criminal: boolean): Route[] {
   ];
 }
 
+function settlementRoutes(criminal: boolean): Route[] {
+  if (criminal) return [
+    ['Uzlaştırma kapsamındaki isnatta taraflar edimsiz uzlaşırsa', 'Taraf iradeleri ve rapor incelenir', 'Geçerli edimsiz uzlaşma doğrulanırsa', 'İsnat bakımından uzlaştırma tamamlanır', 'Soruşturmada uzlaşma nedeniyle KYOK, kovuşturmada düşme kararı'],
+    ['Taraflar bir edim kararlaştırırsa', 'Uzlaştırma raporu ve ifa kaydı karşılaştırılır', 'Edimin tamamının yerine getirildiği doğrulanırsa', 'Uzlaşma konusu yükümlülük tamamlanır', 'Edimin ifası üzerine soruşturmada KYOK, kovuşturmada düşme kararı'],
+  ];
+  return [
+    ['Taraflar sulh hükümlerine göre karar verilmesini isterse', 'İmzalı sulh metni ile tarafların istemleri karşılaştırılır', 'Sulh şartları ve bu yöndeki ortak istem doğrulanırsa', 'Mahkeme uyuşmazlığı tarafların üzerinde anlaştığı koşullarla sonuçlandırır', 'Sulh sözleşmesindeki koşullara göre karar verilir'],
+    ['Taraflar sulhun kayda geçirilmesini yeterli görürse', 'Sulhun kapsamı ve dosyaya sunulan beyanlar incelenir', 'Sulh bütün uyuşmazlığı kapsar ve şartlara göre hüküm istenmezse', 'Uyuşmazlık tarafların anlaşmasıyla sona erer', 'Sulh nedeniyle esas hakkında karar verilmesine yer olmadığına karar verilir'],
+  ];
+}
+
 export function addCaseDecisions(nodes: ScenarioNode[], tree: ScenarioTree, file?: Case) {
   const parents = new Set(nodes.map(node => node.parent_id));
   const leaves = nodes.filter(node => !parents.has(node.id));
   const claimSource = tree.sources.find(source => source.id === 'case:claim');
   const claim = file?.claim?.trim() || claimSource?.detail || tree.title;
   const subject = claim === tree.title ? claim : claim + ' · ' + tree.title;
-  const routes = routesFor(subject, file?.case_type === 'ceza');
+  const criminal = file?.case_type === 'ceza';
+  const merits = routesFor(subject, criminal);
+  const byId = new Map(nodes.map(node => [node.id, node]));
   // 12 tips for the largest six-scenario analysis. Expand the reasoning in
   // sparse files, and keep the same reasoning in the panel for compact trees.
   const detailed = nodes.length + leaves.length * 6 < 20;
   for (const leaf of leaves) {
+    const parent = byId.get(leaf.parent_id ?? '');
+    const negotiation = tree.source_mode === 'stored_analysis' && parent?.kind === 'scenario' &&
+      /uzlaşması|uzlaşmaya var|sulh yoluyla|sulhla (sona|kapan)|sulh ile sonuç/iu.test(parent.label);
+    const agreement = negotiation && leaf.id === parent.id + '-confirm';
+    const routes = agreement ? settlementRoutes(criminal) : merits;
+    if (negotiation) {
+      leaf.label = agreement ? 'Taraflar anlaşmayı doğrularsa' : 'Görüşmeler anlaşmayla sonuçlanmazsa';
+      leaf.description = parent.label;
+      leaf.reasoning = agreement ? 'İmzalanan anlaşmanın kapsamı ve tarafların talepleri kararı belirler.' :
+        'Tarafların anlaşamaması üzerine dosyanın esasına ilişkin deliller değerlendirilir.';
+    }
     if (leaf.kind === 'outcome') leaf.kind = 'development';
     const sourceIds = Array.from(new Set([...leaf.source_ids, ...(claimSource ? [claimSource.id] : [])]));
     const base = {source_ids: sourceIds, uncertainties: leaf.uncertainties, probability: null,

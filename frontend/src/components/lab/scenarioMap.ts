@@ -77,7 +77,9 @@ export function scenarioMap(snapshot: ScenarioTree, caseFile?: Case): ScenarioTr
       history[0].source_ids = summarized.map(e => e.id);
     }
     for (const event of events.slice(summarized.length)) append('history:' + event.id, event.label, event.detail, event.id);
-    append('history:closure', outcome ? 'Dosya sonucu · ' + outcome : 'Dosya kapandı',
+    const closure = file?.closing_note?.trim();
+    const resultLabel = outcome ? 'Dosya sonucu · ' + outcome : 'Dosya kapandı';
+    append('history:closure', closure ? closure + ' · ' + resultLabel : resultLabel,
       [file?.decision_date && formatDate(file.decision_date), file?.closing_note?.trim() ||
         (outcome ? outcome : 'Kapanış sonucu belirtilmemiş.')].filter(Boolean).join(' · '), 'case');
     history[history.length - 1].kind = 'outcome';

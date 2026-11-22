@@ -35,3 +35,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-015**: Oklar, düğüm kartları, metin görünümü ve sonraki adım bağlantıları hedefe kökten ulaşma olasılığını gösterir. Seçili düğümün ayrıntısında son koşullu geçiş ayrıca etiketlenir. Kayıtlı geçmişte varsayımsal oran icat edilmez.
 
 - **FR-016**: Her dava ağacı 20–100 düğüm içerir. Bu aralık FR-008’deki eski katalog alt sınırının yerini alır. Her yaprak dosyanın talebine ve izlenen dalın bulgusuna bağlı gerekçeli karardır. Tüm yapraklar aynı son sütunda görünür. Varsayımsal dal ve kayıtlı kapanış ayrı gösterilir.
+
+- **FR-017**: Kayıtlı analizde tarafların uzlaşması senaryosu varsa anlaşmanın doğrulandığı dal sulh veya uzlaştırmaya uygun sonuçla biter. Anlaşma sağlanmayan dalda esas uyuşmazlık değerlendirilir.

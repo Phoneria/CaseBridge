@@ -33,3 +33,5 @@ FR-015: 14 ağaç bileşeni testi geçti. 32,43 → 68,83 → 100 koşullu yüzd
 ## Gerekçeli sonuç düğümleri
 
 Yerel API entegrasyonunda 20 dosyanın her yolu köke kadar yüründü. Belge bağlantıları, yalnızca yaprakların sonuç olması, kayıtlı kapanış ve birikimli yüzdeler kontrol edildi. Chromium’da 10 dava ekranı ve 10 AI menüsü bağlantısından toplam 418 düğüm ve 60 son kart doğrulandı. Her karar aynı son sütundaydı, seçildiğinde gerekçesi ve dosyaya ait evrak bağlantısı açıldı. Katalogda dosya başına 20–24 düğüm ve üç karar var. 16 arayüz testi içinde borçlu yönünden kabul/ret, yoğun bir kapalı dosyada 60 olayın korunması ve 100 düğüm üst sınırı da sınandı.
+
+Takip konusu borca itiraz dosyasındaki kayıtlı uzlaşma senaryosunun onaylanan dalı sulh kararına, sonuçsuz görüşme dalı esas hakkında karara gidiyor. Bu ayrımı da içeren 17 hedefli arayüz testi ve TypeScript kontrolü geçti.
