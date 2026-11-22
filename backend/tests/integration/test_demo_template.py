@@ -241,6 +241,8 @@ def test_demo_roster_assignment_cannot_escape_sample_scope(client, db_session, o
     grant = db_session.query(WorkspaceAccess).filter_by(user_id=member).one()
     db_session.delete(grant); db_session.commit()
     assert member not in {r["id"] for r in client.get("/admin/lawyers?include_demo=true",headers=headers).json()}
+    assert member not in {r["id"] for r in client.get(f"/users?task_case_id={real.id}", headers=headers).json()}
+    assert client.post(f"/cases/{real.id}/tasks", headers=headers, json={"title":"Gerçek görev","assigned_to":member}).status_code == 422
     assert client.patch(f"/admin/cases/{real.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member}).status_code == 422
 
 

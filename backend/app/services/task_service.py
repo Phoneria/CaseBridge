@@ -8,11 +8,10 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case
-from app.models.management import WorkspaceAccess
 from app.models.task import Task, TaskStage, TaskStatus
 from app.repositories.task_repository import TaskRepository
 from app.schemas.task import TaskCreate, TaskUpdate
-from app.services.assignees import AssigneeNotAssignable, find_assignable_in_firm
+from app.services.assignees import AssigneeNotAssignable, excluded_task_assignees, find_assignable_in_firm
 
 
 class AssigneeNotFound(Exception):
@@ -33,8 +32,7 @@ class TaskService:
             return
         if find_assignable_in_firm(self.db, assigned_to, law_firm_id) is None:
             raise AssigneeNotFound()
-        grant = self.db.query(WorkspaceAccess).filter_by(law_firm_id=law_firm_id, user_id=assigned_to).first()
-        if grant and (grant.position == "accountant" or case_id not in grant.case_ids):
+        if assigned_to in excluded_task_assignees(self.db, law_firm_id, case_id):
             raise AssigneeNotAssignable()
 
     def create_task(self, case: Case, payload: TaskCreate, created_by: Optional[str]) -> Task:

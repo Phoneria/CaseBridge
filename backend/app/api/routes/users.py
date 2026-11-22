@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.db.session import get_db
-from app.models.management import WorkspaceAccess
+from app.services.assignees import excluded_task_assignees
 from app.models.user import User
 from app.services.case_service import CaseService
 from app.repositories.user_repository import UserRepository
@@ -48,8 +48,7 @@ def list_users(
         return users
     if CaseService(db).get_case(task_case_id, law_firm_id) is None:
         raise HTTPException(404, detail="Dava bulunamadı")
-    grants = db.query(WorkspaceAccess).filter_by(law_firm_id=law_firm_id).all()
-    excluded = {g.user_id for g in grants if g.position == "accountant" or task_case_id not in g.case_ids}
+    excluded = excluded_task_assignees(db, law_firm_id, task_case_id)
     return [user for user in users if user.id not in excluded]
 
 

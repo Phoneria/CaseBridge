@@ -39,7 +39,8 @@
         "frontend/src/components/TasksView.tsx",
         "frontend/src/components/tasks/TaskFormModal.tsx",
         "frontend/src/lib/taskBoard.ts",
-        "frontend/src/types/index.ts"
+        "frontend/src/types/index.ts",
+        "backend/app/services/assignees.py"
       ],
       "requirements": [
         "specs/013-case-workspace-board/spec.md#FR-001",
@@ -49,7 +50,8 @@
         "backend/tests/integration/test_management_migration.py::test_board_migration_preserves_legacy_task_states_through_downgrade",
         "backend/tests/api/test_tasks.py::test_board_stages_and_details_round_trip",
         "backend/tests/api/test_tasks.py::test_restricted_lawyer_can_only_receive_tasks_in_granted_cases",
-        "frontend/src/components/__tests__/TasksView.test.tsx::moves a card by drag and edits its priority notes and deadline"
+        "frontend/src/components/__tests__/TasksView.test.tsx::moves a card by drag and edits its priority notes and deadline",
+        "backend/tests/integration/test_demo_template.py::test_demo_roster_assignment_cannot_escape_sample_scope"
       ],
       "reason": "Preserve old task status consumers and persist editable board data with case-scoped assignment."
     },
