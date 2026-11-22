@@ -8,4 +8,4 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T004 Diğer 18 dosya ve eklerini üret, atıf ve tarih tutarlılığını kontrol et (FR-001–FR-004, FR-007).
 - [x] T005 Kategori, dava ekranları ve ağacın kaynak bağlantılarını bütün sete bağla (FR-005).
 - [x] T006 Eski örnekler, büro sınırları, tekrarlı yükleme ve temizlik davranışlarını uygula (FR-006).
-- [ ] T007 Belge kapsamı ve gezinme dahil tüm kabul sonuçlarını dosya bazında kaydet (FR-001–FR-007).
+- [x] T007 Belge kapsamı ve gezinme dahil tüm kabul sonuçlarını dosya bazında kaydet (FR-001–FR-007).
