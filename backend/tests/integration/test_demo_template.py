@@ -15,9 +15,9 @@ def test_admin_imports_sample_portfolio_only_into_own_firm(client, db_session, o
     assert all(first.json()["coverage"].values())
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
     assert len(cases) == len(template_numbers())
-    assert all(case.case_number.startswith("ÖRNEK-") for case in cases)
+    assert all(case.case_number.startswith("CB-") for case in cases)
     from app.db.demo_team import roster_ids
-    assert all(case.assigned_lawyer_id in roster_ids(office.firm_a.id) for case in cases)
+    assert {case.assigned_lawyer_id for case in cases} == roster_ids(office.firm_a.id) | {office.admin_a.id}
     assert db_session.query(Case).filter(Case.law_firm_id == office.firm_b.id).count() == 0
 
     counts = tuple(db_session.query(model).filter(model.law_firm_id == office.firm_a.id).count()
@@ -58,7 +58,7 @@ def test_new_firm_with_only_admin_can_import_examples(client, db_session, office
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
     assert len(cases) == len(template_numbers())
     from app.db.demo_team import roster_ids
-    assert {case.assigned_lawyer_id for case in cases} == roster_ids(office.firm_a.id)
+    assert {case.assigned_lawyer_id for case in cases} == roster_ids(office.firm_a.id) | {office.admin_a.id}
 
 
 def test_presentation_covers_workflows_and_readable_ai_history(client, db_session, office, auth_headers, monkeypatch):
@@ -98,14 +98,14 @@ def test_presentation_covers_workflows_and_readable_ai_history(client, db_sessio
     assert {r.data["entry_type"] for r in rows if r.kind == "finance"} == {"fee","payment","expense","reimbursement","advance","advance_spend"}
     assert any(r.due_date and r.due_date < local_today() for r in rows)
     assert any(r.due_date and r.due_date > local_today() for r in rows)
-    assert db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).count() == 18
+    assert db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).count() == 9
     from app.models.user import User
-    demo_lawyer = db_session.get(User, identity(office.firm_a.id,"member:lawyer"))
+    demo_lawyer = db_session.get(User, identity(office.firm_a.id,"team-lawyer:0"))
     assert demo_lawyer.is_platform_admin is False
     assert AuthService(db_session).authenticate(demo_lawyer.email, "demo1234") is None
     assert demo_lawyer.invited_at is None
     grants=db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).all()
-    sample_ids={c.id for c in db_session.query(Case).filter(Case.law_firm_id==office.firm_a.id,Case.case_number.like("ÖRNEK-%"))}
+    sample_ids={c.id for c in db_session.query(Case).filter(Case.law_firm_id==office.firm_a.id,Case.case_number.like("CB-%"))}
     assert all(set(g.case_ids) <= sample_ids for g in grants)
     assert db_session.query(Simulation).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers())
     assert db_session.query(AIAnalysis).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers())
@@ -191,11 +191,11 @@ def test_expanded_demo_roster_is_visible_scoped_and_idempotent(client, db_sessio
     roster = roster_ids(office.firm_a.id)
     lawyers = client.get("/admin/lawyers?include_demo=true", headers=headers).json()
     samples = [row for row in lawyers if row["id"] in roster]
-    assert len(samples) == 12
+    assert len(samples) == 4
     assert not roster.intersection({row["id"] for row in client.get("/admin/lawyers", headers=headers).json()})
-    assert all(row["full_name"].startswith("ÖRNEK · ") for row in samples)
+    assert all(not row["full_name"].startswith("ÖRNEK · ") for row in samples)
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
-    assert {case.assigned_lawyer_id for case in cases} == roster
+    assert {case.assigned_lawyer_id for case in cases} == {row["id"] for row in samples} | {office.admin_a.id}
     for member in samples:
         assert set(member["demo_case_ids"]) == {case.id for case in cases}
         saved = db_session.get(User, member["id"])
@@ -206,7 +206,7 @@ def test_expanded_demo_roster_is_visible_scoped_and_idempotent(client, db_sessio
     again = client.post("/admin/demo-template", headers=headers)
     assert again.status_code == 200 and again.json()["added_records"] == 0
     assert db_session.query(User).count() == before
-    assert db_session.query(WorkspaceAccess).filter(WorkspaceAccess.user_id.in_(roster)).count() == 12
+    assert db_session.query(WorkspaceAccess).filter(WorkspaceAccess.user_id.in_(roster)).count() == 4
 
 
 def test_demo_roster_assignment_cannot_escape_sample_scope(client, db_session, office, auth_headers):
@@ -221,7 +221,7 @@ def test_demo_roster_assignment_cannot_escape_sample_scope(client, db_session, o
     denied = client.patch(f"/admin/cases/{real.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member})
     assert denied.status_code == 422
     db_session.refresh(real); assert real.assigned_lawyer_id == office.lawyer_a1.id
-    sample = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.case_number.like("ÖRNEK-%"), Case.is_archived.is_(False)).first()
+    sample = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.case_number.like("CB-%"), Case.is_archived.is_(False)).first()
     assert client.patch(f"/admin/cases/{sample.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member}).status_code == 200
     sample_user = db_session.get(User, member)
     from app.services.auth_service import AuthService

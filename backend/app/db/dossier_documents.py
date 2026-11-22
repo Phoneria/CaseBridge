@@ -37,7 +37,7 @@ def _history(s: Story) -> list[Entry]:
         if day.weekday() > 4:
             day += timedelta(days=7 - day.weekday())
         number = f"{s.code}-{len(result) + 1:02}"
-        parts = [title, f"Kurgusal örnek · {s.code} · Evrak {number}",
+        parts = [title, f"Kurgusal dosya · {s.code} · Evrak {number}",
                  f"{day:%d.%m.%Y}   |   Düzenleyen: {author}", s.title, body]
         if links:
             parts.append("Dosyada başvurulan evrak\n" + "\n".join(
@@ -52,7 +52,7 @@ def _history(s: Story) -> list[Entry]:
 
     add("meeting", "İlk görüşme tutanağı", counsel, 0,
         f"Görüşmeye katılan: {s.client}. Karşı taraf: {s.opponent}.\n\nMüvekkilin aktardığı olay\n{s.facts}\n\nGörüşme sonunda belirlenen çalışma\n{s.claim} İlk inceleme için şu kayıtlar talep edildi: {s.exhibit}.")
-    add("mandate", "Vekâletname örneği", s.client, 1,
+    add("mandate", "Vekâletname", s.client, 1,
         f"Vekâlet veren: {s.client}\nDosya konusu: {s.title}\nKarşı taraf: {s.opponent}\n\nBu dosyada dilekçe ve delil sunulması, dosyanın incelenmesi, tebligatların teslim alınması ve kanun yolu işlemlerinin izlenmesi için temsil kapsamı kaydedilmiştir.\n\nBu kurgusal nüsha temsil veya noterlik işlemi için kullanılamaz.")
     if "handwritten" in route:
         account = ("Kapının yanında duruyordum. Çubuğu kaldırdığını gördüm. Kolunu kendimden uzaklaştırmak için ittim. Merdivendeki kişinin o sırada bizi görebildiğini sanmıyorum."
@@ -216,7 +216,7 @@ def entries(s: Story) -> list[Entry]:
             notes.append(note)
     lines = [f"{e.key}   {e.day:%d.%m.%Y}   {e.title} · {e.author}" for e in history]
     index = Entry(s.code + "-00", "Kronolojik evrak dizini", "Dosya sorumlusu", history[-1].day,
-                  "Kronolojik evrak dizini\n\nKurgusal örnek · " + s.code + " · " + s.title +
+                  "Kronolojik evrak dizini\n\nKurgusal dosya · " + s.code + " · " + s.title +
                   "\n\nMüvekkil: " + s.client + "\nKarşı taraf: " + s.opponent +
                   "\n\n" + "\n".join(lines) + "\n\nUygulanmayan işlemler\n" + "\n".join(notes) + "\n\nSonuç\n" + s.end)
     return [index, *history]

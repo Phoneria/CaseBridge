@@ -39,7 +39,7 @@ def test_removal_preview_confirm_repeat_and_reload_preserve_real_data(client,db_
     assert empty['total_records']==0
     assert client.post('/admin/demo-template/remove',headers=headers,json={'token':empty['token'],'confirm':True}).json()['removed_records']==0
     assert client.post('/admin/demo-template',headers=headers).status_code==200
-    assert client.get('/admin/demo-template/removal-preview',headers=headers).json()['counts']['Örnek kullanıcılar']==18
+    assert client.get('/admin/demo-template/removal-preview',headers=headers).json()['counts']['Gösterim kullanıcıları']==9
 
 
 def test_removal_rejects_stale_scope_and_preserves_adopted_users(client,db_session,office,auth_headers):

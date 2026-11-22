@@ -9,3 +9,8 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T005 Kategori, dava ekranları ve ağacın kaynak bağlantılarını bütün sete bağla (FR-005).
 - [x] T006 Eski örnekler, büro sınırları, tekrarlı yükleme ve temizlik davranışlarını uygula (FR-006).
 - [x] T007 Belge kapsamı ve gezinme dahil tüm kabul sonuçlarını dosya bazında kaydet (FR-001–FR-007).
+
+- [x] T008 Katalogda çok aşamalı yol, geçiş ve ulaşma yüzdeleri, belge bağlantıları; diğer dosyaların sınırlarını test et (FR-008).
+- [x] T009 Renkli bağlantılar, vurgulanan yol, seçili düğüm paneli ve gezinme (FR-008).
+- [ ] T010 Yerinde tekrar yükleme, ekip ve dava içerikleri, belgeler ve büro sunumları (FR-009).
+- [ ] T011 Sağlayıcıların izin verdiği bağlantı yöntemlerini test et ve etkin bağlantıya yönlendir (FR-010).

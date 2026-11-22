@@ -1,5 +1,6 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { deleteDocument, downloadDocument } from "@/lib/api";
@@ -92,7 +93,7 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
     setActiveSection(id);
     const container = viewerRef.current;
     const el = container?.querySelector(`#${id}`) as HTMLElement | null;
-    if (container && el) container.scrollTo({ top: el.offsetTop - container.offsetTop - 8, behavior: "smooth" });
+    if (container && el) el.scrollIntoView({ block: "center", behavior: "smooth" });
   }
 
   async function handleDownload() {
@@ -199,9 +200,9 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="min-w-0 space-y-4">
       {/* Left: upload + document list */}
-      <aside className="space-y-3 rounded-2xl border border-surface-border bg-white p-4 shadow-card lg:sticky lg:top-4 lg:self-start">
+      <aside className="space-y-3 rounded-2xl border border-surface-border bg-white p-4 shadow-card">
         {uploadZone}
         {uploadError && <ErrorState message={uploadError} />}
         <div className="flex items-center justify-between px-1">
@@ -218,7 +219,7 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
             className="w-full rounded-lg border border-surface-border px-3 py-1.5 text-sm outline-none focus:border-accent-400"
           />
         )}
-        <ul className="max-h-[60vh] space-y-1.5 overflow-y-auto">
+        <ul className="grid max-h-44 gap-1.5 overflow-y-auto md:grid-cols-2 xl:grid-cols-3">
           {visibleDocs.map((doc) => {
             const p = parsedById.get(doc.id)!;
             const active = doc.id === selectedId;
@@ -361,11 +362,11 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
             {actionError && <ErrorState message={actionError} />}
           </header>
 
-          <div className="grid xl:grid-cols-[200px_minmax(0,1fr)]">
+          <div className="min-w-0">
             {parsed.sections.length > 0 && (
               <nav aria-label="Bölümler" className="border-b border-surface-border p-4 xl:border-b-0 xl:border-r">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-navy-500">Bölümler</p>
-                <ol className="flex gap-1 overflow-x-auto xl:flex-col">
+                <ol className="flex gap-1 overflow-x-auto">
                   {parsed.sections.map((s) => (
                     <li key={s.id}>
                       <button
@@ -383,11 +384,15 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
               </nav>
             )}
 
-            <div ref={viewerRef} className={`relative max-h-[70vh] overflow-y-auto p-5 leading-relaxed text-navy-800 ${FONT_SIZES[fontIdx]}`}>
+            <div ref={viewerRef} className={`relative min-w-0 px-5 py-7 sm:px-8 leading-relaxed text-navy-800 ${FONT_SIZES[fontIdx]}`}>
               {!selected.extracted_text ? (
                 <EmptyState message="Bu belge için metin çıkarılamadı." hint="Dosyayı indirerek görüntüleyebilirsiniz." />
+              ) : !query.trim() && !parsed.sections.length ? (
+                <article className="chat-markdown w-full break-words">
+                  <ReactMarkdown skipHtml components={{img: ({alt}) => <span>{alt}</span>}}>{readingMarkdown(selected.extracted_text)}</ReactMarkdown>
+                </article>
               ) : (
-                <article className="max-w-3xl space-y-3">
+                <article className="w-full space-y-3">
                   {parsed.preamble.map((line, i) => (
                     <p key={`p${i}`}>{renderText(line)}</p>
                   ))}
@@ -443,4 +448,14 @@ function MetaCard({ label, children }: { label: string; children: React.ReactNod
       <dd className="mt-0.5 truncate text-xs text-navy-800">{children}</dd>
     </div>
   );
+}
+
+function readingMarkdown(text: string) {
+  if (!/Kurgusal (?:örnek|dosya|belge) · [CH]\d{2}/u.test(text)) return text;
+  return text.split(/\n\s*\n/).map((block, index) => {
+    if (index === 0) return '# ' + block;
+    const [heading, ...lines] = block.split('\n');
+    if (!lines.length || heading.length > 65 || /[:.!?]/.test(heading)) return block;
+    return '## ' + heading + '\n\n' + lines.join('  \n');
+  }).join('\n\n');
 }

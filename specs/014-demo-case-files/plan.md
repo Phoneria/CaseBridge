@@ -75,3 +75,6 @@ Onay için önerilen bütün, yukarıdaki 20 hikâye ve sonuç dağılımıdır.
 ## Teknik dayanak
 
 Mevcut FastAPI, SQLAlchemy ve Next.js dava ekranları kullanılır. Tasarımın veri ilişkileri, büro sınırları ve kullanıcı akışları [veri modelinde](data-model.md) ve [davranış sözleşmesinde](contracts/behavior.md) tanımlıdır. Geçiş ve silme davranışları [doğrulama senaryolarında](quickstart.md) yer alır. Ürün ilkeleriyle tasarım kontrolü büro izolasyonu, kurgusal veri ve kanıta bağlı ağaç açısından yapıldı. Uygulama doğrulaması onay sonrasına aittir.
+
+## Etkileşimli büro gösterimi
+Sabit büro/dava kimliğinden doğrulanan katalog ağacını belge kaynaklarıyla üret. Kardeş geçişlerin ağırlıklarını toplam 100 olarak tanımla. Başlangıçtan ulaşma değerini yol ağırlıklarının çarpımıyla hesapla. Diğer dosyalarda varsayımsal yol hesabını etkinleştirme. Eklenen taraf ve görevleri sahiplik kimlikleriyle güvenli biçimde uzlaştır. Finansal tutarları yalnız aynı para biriminde topla. Mevcut bağlantı yönetiminde aday testi ve ayrı etkinleştirmeyi koru.

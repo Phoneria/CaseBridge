@@ -6,7 +6,7 @@ from pathlib import Path
 from sqlalchemy import or_, select
 from app.db.base import Base
 from app.db.demo_presentation_seed import identity
-from app.db.demo_team import DEMO_LAWYERS, roster_ids, sample_cases
+from app.db.demo_team import DEMO_LAWYERS, sample_cases
 from app.models.case import Case
 from app.models.courtroom import CourtroomScenario, CourtroomSession
 from app.models.document import Document
@@ -36,7 +36,7 @@ def removal_plan(db, admin):
         selected.setdefault(table, set()).update(ids)
 
     cases = sample_cases(db, firm)
-    cases += db.query(Case).filter(Case.law_firm_id == firm, Case.case_number.in_([f'ÖRNEK-EMSAL-{i}' for i in range(1,4)]), Case.description.startswith('[ÖRNEK ŞABLON] '), Case.is_precedent.is_(True)).all()
+    cases += db.query(Case).filter(Case.law_firm_id == firm, Case.case_number.in_([f"{prefix}EMSAL-{i}" for i in range(1,4) for prefix in ("CB-", "ÖRNEK-")]), (Case.description.startswith('[ÖRNEK ŞABLON] ') | Case.description.startswith('[Gösterim] ')), Case.is_precedent.is_(True)).all()
     case_ids = {c.id for c in cases}
     from app.db.dossier_pack import removable_dossiers
     removable, protected = removable_dossiers(db, firm)
@@ -46,7 +46,7 @@ def removal_plan(db, admin):
     records = db.query(ManagementRecord).filter(ManagementRecord.law_firm_id == firm, ManagementRecord.id.in_([identity(firm, 'record:'+key) for key in keys])).all()
     # An example subsequently adopted by a non-template case is no longer removed.
     add('management_records', [r.id for r in records if r.case_id is None or r.case_id in case_ids])
-    add('management_audits', [r.id for r in db.query(ManagementAudit).filter(ManagementAudit.law_firm_id == firm, ManagementAudit.id.in_([identity(firm,'audit:'+key) for key in keys]+[identity(firm,'archive-initialized'), identity(firm,'team-distribution:v1')])).all()])
+    add('management_audits', [r.id for r in db.query(ManagementAudit).filter(ManagementAudit.law_firm_id == firm, ManagementAudit.id.in_([identity(firm,'audit:'+key) for key in keys]+[identity(firm,'archive-initialized'), identity(firm,'team-distribution:v1'),identity(firm,'team-distribution:v2')])).all()])
     user_ids = [row.id for row in db.query(User).filter_by(law_firm_id=firm).all()]
     chats = [identity(firm,f'chat:{uid}:{i}') for uid in user_ids for i in range(3)]
     chat_table = tables['chat_conversations']
@@ -86,7 +86,7 @@ def removal_plan(db, admin):
             add(table.name, found)
             changed |= len(selected[table.name]) != before
 
-    sample_ids = roster_ids(firm) | {identity(firm, 'member:'+p) for p in POSITIONS}
+    sample_ids = {identity(firm, f"team-lawyer:{i}") for i in range(len(DEMO_LAWYERS))} | {identity(firm, 'member:'+p) for p in POSITIONS}
     removed_users, kept_users = set(), set()
     expected = {identity(firm,f'team-lawyer:{i}'):(f'ÖRNEK · {name}',f"sample-{identity(firm, f'team-email:{i}')}@example.invalid") for i,(name,_) in enumerate(DEMO_LAWYERS)}
     names = ('Deniz Kaya','Ece Yalın','Selin Akın','Can Erdem','Arda Ekin','Ada Örnek Müvekkil')
@@ -106,7 +106,8 @@ def removal_plan(db, admin):
                 if db.execute(query.limit(1)).first():
                     referenced = True
         original_password_stamp = user.password_set_at is not None and abs((user.password_set_at.replace(tzinfo=None)-user.created_at.replace(tzinfo=None)).total_seconds()) <= 2
-        unchanged = (user.full_name,user.email) == expected.get(user.id) and user.invited_at is None and original_password_stamp
+        name, email = expected[user.id]
+        unchanged = user.full_name in (name, name.removeprefix("ÖRNEK · "), "Ada Müvekkil" if name.endswith("Ada Örnek Müvekkil") else name) and user.email == email and user.invited_at is None and original_password_stamp
         if referenced or not unchanged or user.role.value != 'lawyer' or user.is_platform_admin:
             kept_users.add(user.id)
         else:
@@ -115,7 +116,7 @@ def removal_plan(db, admin):
     access = db.query(WorkspaceAccess).filter(WorkspaceAccess.law_firm_id == firm,WorkspaceAccess.user_id.in_(removed_users)).all()
     add('workspace_access', [r.id for r in access])
     fingerprint = json.dumps({k:sorted(v) for k,v in selected.items()},sort_keys=True)+json.dumps(sorted(kept_users))
-    counts = {'Davalar ve emsaller':len(case_ids), 'Örnek kullanıcılar':len(removed_users), 'Büro iş akışları':len(selected.get('management_records',[])), 'Belgeler':len(selected.get('documents',[])), 'Sohbetler':len(selected.get('chat_conversations',[])), 'Duruşma provaları':len(selected.get('courtroom_sessions',[]))}
+    counts = {'Davalar ve emsaller':len(case_ids), 'Gösterim kullanıcıları':len(removed_users), 'Büro iş akışları':len(selected.get('management_records',[])), 'Belgeler':len(selected.get('documents',[])), 'Sohbetler':len(selected.get('chat_conversations',[])), 'Duruşma provaları':len(selected.get('courtroom_sessions',[]))}
     if protected:
         counts['Kullanıcı içeriği nedeniyle korunan dava dosyaları'] = len(protected)
     return selected, {'token':hashlib.sha256(fingerprint.encode()).hexdigest(),'counts':counts,'kept_users':len(kept_users),'total_records':sum(map(len, selected.values()))}

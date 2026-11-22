@@ -283,6 +283,8 @@ def overview(db, actor):
         user_tasks = [t for t in tasks if t.assigned_to == user.id]
         week_events = [e for e in events if e.assignee_id == user.id]
         capacity.append({"id": user.id, "name": user.full_name, "department": user.department, "position": grant.position if grant else user.role.value,
+            "won_cases": sum(c.assigned_lawyer_id == user.id and c.outcome == "won" for c in cases),
+            "lost_cases": sum(c.assigned_lawyer_id == user.id and c.outcome == "lost" for c in cases),
             "active_cases": sum(c.assigned_lawyer_id == user.id for c in active_cases), "pending_tasks": len(user_tasks),
             "overdue_tasks": sum(bool(t.due_date and t.due_date < today) for t in user_tasks),
             "due_this_week": sum(bool(t.due_date and today <= t.due_date <= week_end) for t in user_tasks),
@@ -309,7 +311,7 @@ def conflict_search(db, firm_id, term):
     matches = []
     for party in db.query(CaseParty).filter(CaseParty.case_id.in_(cases)).all():
         if needle in normalized(party.name) or normalized(party.name) in needle:
-            matches.append({"name": party.name, "role": party.role.value, "is_client": party.is_client, "case_id": party.case_id, "case_name": cases[party.case_id].case_name})
+            matches.append({"name": party.name, "role": party.role, "is_client": party.is_client, "case_id": party.case_id, "case_name": cases[party.case_id].case_name})
     # Include older cases without a populated parties relationship.
     for c in cases.values():
         for name, client in [(c.client_name, True), (c.opposing_party, False)]:

@@ -143,12 +143,12 @@ export function DashboardView() {
           ) : (
             <>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={categoryData}>
+                <BarChart data={categoryData} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
                   <Tooltip cursor={{ fill: "#edf9fc" }} />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]} fill={BRAND_ACCENT[600]} cursor="pointer" onClick={openFromChart} />
+                  <Bar dataKey="total" label={{ position: "top", fontSize: 12, fill: "#31465a" }} radius={[6, 6, 0, 0]} fill={BRAND_ACCENT[600]} cursor="pointer" onClick={openFromChart} />
                 </BarChart>
               </ResponsiveContainer>
               <ChartLegendLinks
@@ -167,6 +167,8 @@ export function DashboardView() {
             <>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
+                  <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" fill="#192d43" fontSize="24" fontWeight="650">{statusData.reduce((total, row) => total + row.value, 0)}</text>
+                  <text x="50%" y="58%" textAnchor="middle" fill="#466178" fontSize="11">Toplam dava</text>
                   <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} cursor="pointer" onClick={openFromChart}>
                     {statusData.map((row) => (
                       <Cell key={row.key} fill={row.color} />

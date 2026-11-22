@@ -15,7 +15,7 @@ export interface FinanceSummary {
   expense_balance: string; advance_balance: string; estimated_margin: string;
 }
 export interface CapacityRow {
-  id: string; name: string; department: string | null; position: string; active_cases: number;
+  id: string; name: string; department: string | null; position: string; won_cases?: number; lost_cases?: number; active_cases: number;
   pending_tasks: number; overdue_tasks: number; due_this_week: number; hearings: number;
   scheduled_minutes: number; leaves: ManagementRecord[];
 }

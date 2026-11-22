@@ -18,7 +18,7 @@ pdfmetrics.registerFont(TTFont("OlayYazisi", str(Path(__file__).with_name("fonts
 def render_dossier(text):
     out = BytesIO()
     sections = text.split("\n\n")
-    pdf = SimpleDocTemplate(out, pagesize=A4, title=sections[0], author="CaseBridge · Kurgusal örnek",
+    pdf = SimpleDocTemplate(out, pagesize=A4, title=sections[0], author="CaseBridge · Kurgusal dosya",
                             leftMargin=46, rightMargin=46, topMargin=48, bottomMargin=45)
     story = []
     for index, paragraph in enumerate(sections):
@@ -31,7 +31,7 @@ def render_dossier(text):
 
     def footer(canvas, doc):
         canvas.setFont("Dossier", 8)
-        canvas.drawString(46, 25, f"CaseBridge · Kurgusal örnek     |     {doc.page}")
+        canvas.drawString(46, 25, f"CaseBridge · Kurgusal dosya     |     {doc.page}")
 
     pdf.build(story, onFirstPage=footer, onLaterPages=footer)
     return out.getvalue()

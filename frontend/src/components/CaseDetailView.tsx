@@ -546,7 +546,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         <CaseDocumentsPanel
           key={params.get("belge") ?? "all"}
           initialDocumentId={params.get("belge")}
-          documents={caseDetail.case_number.match(/^ÖRNEK-[CH]\d{2}$/) ? [...documents].sort((a,b) => a.filename.localeCompare(b.filename, "tr")) : documents}
+          documents={caseDetail.case_number.match(/^(?:CB|ÖRNEK)-[CH]\d{2}$/) ? [...documents].sort((a,b) => a.filename.localeCompare(b.filename, "tr")) : documents}
           uploading={uploading}
           uploadError={uploadError}
           onUpload={uploadFile}

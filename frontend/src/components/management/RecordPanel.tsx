@@ -1,5 +1,6 @@
 "use client";
 
+import { FinanceCharts } from "./FinanceCharts";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { ModalFrame } from "@/components/ModalFrame";
@@ -18,7 +19,7 @@ function RecordDetails({row,context}: {row:ManagementRecord;context:RecordContex
   return <div className="mt-3 space-y-2 text-sm leading-6 text-navy-600">
     {row.kind==="finance"&&<p className="text-lg font-semibold text-navy-900">{money(s("amount"),s("currency"))}<span className="ml-2 text-xs font-normal text-navy-500">{FINANCE_LABELS[s("entry_type")]} · {dateLabel(s("entry_date"))}</span></p>}
     {row.kind==="time"&&<p>{s("minutes")} dakika · {dateLabel(s("work_date"))} · Saatlik iç maliyet: {money(s("hourly_cost"),s("currency"))}</p>}
-    {row.kind==="client"&&<><p>{[s("company"),s("email"),s("phone")].filter(Boolean).join(" · ")||"İletişim bilgisi eklenmedi."}</p><p>Son iletişim: {dateLabel(s("contact_date"))} · Sonraki: {dateLabel(s("next_contact_date"))}</p><div className="flex flex-wrap gap-2">{context.cases.filter(c=>((d.case_ids??[]) as string[]).includes(c.id)||c.id===row.case_id).map(c=><Link className="text-xs text-accent-700 underline" key={c.id} href={`/davalar/${c.id}`}>{c.case_number}</Link>)}</div></>}
+    {row.kind==="client"&&<><p className="font-medium">{d.client_type==="organization"?"Tüzel kişi":d.client_type==="individual"?"Gerçek kişi":"Tür belirtilmedi"}</p><p>{[s("company"),s("email"),s("phone")].filter(Boolean).join(" · ")||"İletişim bilgisi eklenmedi."}</p><p>Son iletişim: {dateLabel(s("contact_date"))} · Sonraki: {dateLabel(s("next_contact_date"))}</p><div className="flex flex-wrap gap-2">{context.cases.filter(c=>((d.case_ids??[]) as string[]).includes(c.id)||c.id===row.case_id).map(c=><Link className="text-xs text-accent-700 underline" key={c.id} href={`/davalar/${c.id}`}>{c.case_number}</Link>)}</div></>}
     {row.kind==="communication"&&<><p>{context.records.find(r=>r.id===d.client_id)?.title??"Müvekkil"} · {dateLabel(s("contact_date"))}</p>{!!d.promise&&<p className="whitespace-pre-wrap">Sonraki adım: {s("promise")}</p>}</>}
     {row.kind==="lead"&&<><p>{s("client_name")} {!!d.opposing_party&&`· Karşı taraf: ${s("opposing_party")}`}</p><p>Taraf kontrolü: {({pending:"Değerlendirme bekliyor",clear:"Devam edilebilir",blocked:"Devam edilmemeli"})[s("conflict_decision")]}</p>{!!d.waiting_reason&&<p>Bekleme nedeni: {s("waiting_reason")}</p>}{!!d.conflict_reason&&<p>Değerlendirme: {s("conflict_reason")}</p>}</>}
     {row.kind==="approval"&&<><p>Sürüm {s("revision")} {!!d.document_id&&`· ${context.documents.find(x=>x.id===d.document_id)?.filename??"Belge"}`}</p><p className="whitespace-pre-wrap rounded-xl bg-surface-muted p-3">{s("content")}</p>{!!d.review_note&&<p className="whitespace-pre-wrap">İnceleme: {s("review_note")}</p>}</>}
@@ -32,11 +33,14 @@ function RecordDetails({row,context}: {row:ManagementRecord;context:RecordContex
 }
 
 export function RecordPanel({kind,context,refresh,base,allowTrash=true}: {kind:RecordKind;context:RecordContext;refresh:()=>Promise<void>;base?:string;allowTrash?:boolean}) {
+  const [clientType,setClientType]=useState("");
   const [query,setQuery]=useState(""); const [state,setState]=useState("");
   const [editor,setEditor]=useState<ManagementRecord|"new"|null>(null);
   const [trash,setTrash]=useState<ManagementRecord|null>(null);
-  const rows=useMemo(()=>context.records.filter(r=>r.kind===kind&&(!state||r.status===state)&&(`${r.title} ${context.cases.find(c=>c.id===r.case_id)?.case_name??""} ${JSON.stringify(r.data)}`).toLocaleLowerCase("tr-TR").includes(query.toLocaleLowerCase("tr-TR"))),[context,kind,query,state]);
+  const rows=useMemo(()=>context.records.filter(r=>r.kind===kind&&(!clientType||r.data.client_type===clientType)&&(!state||r.status===state)&&(`${r.title} ${context.cases.find(c=>c.id===r.case_id)?.case_name??""} ${JSON.stringify(r.data)}`).toLocaleLowerCase("tr-TR").includes(query.toLocaleLowerCase("tr-TR"))),[context,kind,query,state,clientType]);
   return <section className="space-y-4">
+    {kind==="finance" && <FinanceCharts records={context.records}/>}
+    {kind==="client" && <label className="block text-sm">Müvekkil türü <select className={INPUT} value={clientType} onChange={e=>setClientType(e.target.value)}><option value="">Tümü</option><option value="individual">Gerçek kişi</option><option value="organization">Tüzel kişi</option></select></label>}
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-semibold text-navy-900">{KIND_LABELS[kind]}</h2><p className="mt-1 text-xs text-navy-500">{rows.length} kayıt · Değişiklikler işlem geçmişine kaydedilir.</p></div><button type="button" className={BUTTON} onClick={()=>setEditor("new")}>Yeni kayıt</button></div>
     <div className="grid gap-3 sm:grid-cols-[1fr_220px]"><label className="text-xs text-navy-500">Kayıtlarda ara<input className={INPUT} placeholder="Başlık, dava veya kayıt içeriği" value={query} onChange={e=>setQuery(e.target.value)}/></label><label className="text-xs text-navy-500">Durum filtresi<select className={INPUT} value={state} onChange={e=>setState(e.target.value)}><option value="">Tüm durumlar</option>{KIND_STATES[kind].map(s=><option key={s} value={s}>{STATE_LABELS[s]}</option>)}</select></label></div>
     {!rows.length&&<div className={`${CARD} py-12 text-center`}><p className="font-medium text-navy-700">{query||state?"Bu filtrelere uygun kayıt yok.":"Henüz kayıt yok."}</p><p className="mt-2 text-sm text-navy-500">{query||state?"Aramayı veya durum filtresini değiştirin.":"Yeni kayıt ile ilk bilgiyi ekleyin."}</p></div>}

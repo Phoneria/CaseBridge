@@ -9,7 +9,7 @@ from app.ai.chat.ollama_provider import OllamaChatProvider
 from app.ai.chat.openai_provider import OpenAIChatProvider
 from app.ai.errors import AIProviderConfigError
 from app.core.config import settings
-from app.services.ai_credentials import get_openai_api_key
+from app.services.ai_credentials import get_claude_api_key, get_openai_api_key
 
 
 def get_chat_provider(
@@ -25,6 +25,10 @@ def get_chat_provider(
     timeout = timeout_seconds if timeout_seconds is not None else settings.chat_timeout_seconds
     name = settings.chat_provider
     if name == "openai":
+        claude = get_claude_api_key(law_firm_id)
+        if claude:
+            from app.ai.chat.anthropic_provider import ClaudeChatProvider
+            return ClaudeChatProvider(claude, settings.anthropic_model, timeout, cap, max_retries)
         api_key = get_openai_api_key(law_firm_id)
         if not api_key or not api_key.strip():
             if law_firm_id is not None:

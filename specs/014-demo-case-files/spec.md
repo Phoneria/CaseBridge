@@ -16,6 +16,10 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-006**: Büroya özgü yükleme tekrar çalıştırılabilir. Temizlik eski sürüm ve kullanıcı eklerini gözetir.
 - **FR-007**: Kurgusal evrak belirgin biçimde işaretlenir. Gerçek emsal kullanılırsa kaynak bağlantısı ayrı tutulur.
 
+- **FR-008**: Her katalog dosyası ilk görüşmeden belgeli sonuca kadar en az beş aşama ve elli anlamlı düğüm sunar. Yalnız katalogda tanımlanan dosyalarda her koşullu geçişin ve o noktaya ulaşmanın varsayımsal yüzdesi görünür. Renkli yollar fare, klavye ve dokunmayla izlenebilir.
+- **FR-009**: Dosyalarda taraflar, tarihli işlemler, görevler ve okunabilir tam genişlikte evrak gösterilir. Gösterim bürosunun ekip, müvekkil, finans ve grafik gereksinimleri todo.md içindeki onaylı listeye uyar.
+- **FR-010**: Büro yöneticisi OpenAI veya Claude API anahtarını kaydeder, ayrı test ve açık etkinleştirmeyle kendi bürosuna bağlar. Sağlayıcı yetkisi gerektiren hesap bağlantıları gizli değer kabul etmez.
+
 ## Success Criteria
 
 20 dosyanın tamamında kronoloji, içerik ve gezinme kontrolleri geçer. Her evrak türünün kapsam tablosunda en az bir açılabilir örneği vardır. Tekrar yükleme, temizleme ve bürolar arası erişim testleri geçer.

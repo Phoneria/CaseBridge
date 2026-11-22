@@ -151,7 +151,7 @@ STORIES += [
           "Müvekkil raporu istinaf aşamasında gördüğünü ve iki bakım penceresinin hesap dışında kalması gerektiğini belirtti.",
           "İlk hüküm tazminat talebini reddetti. İstinaf ve temyizde bu sonuç korundu. Bireysel başvuru ek rapora yanıt verme imkânına odaklandı.",
           "Kurgusal ihlal kararından sonra yeniden yargılamada rapor tebliğ edildi. İki bakım penceresi çıkarılarak 510.000 TL kabul edildi ve yeni hüküm kesinleşti.", "won", "mediation exchange expert appeal cassation constitutional retrial"),
-    Story("H10", "Kıyı parselinde geçiş şeridi", "Günay Işın", "Örnek Kıyı Belediyesi", "Asliye Hukuk Mahkemesi", "diger",
+    Story("H10", "Kıyı parselinde geçiş şeridi", "Günay Işın", "Kıyı Belediyesi", "Asliye Hukuk Mahkemesi", "diger",
           "Belediyenin yürüyüş yolu taşınmazın kenarından geçti. Malik, fiilen kullanılan şeridin 240 metrekare olduğunu ileri sürdü.",
           "Kullanıma alınan alanın tamamı için bedel istendi.", "Belediye yürüyüş yüzeyinin 155 metrekare olduğunu, kalan bölümün kamusal kullanıma açılmadığını bildirdi.",
           "Tapu krokisi, koordinatlı ölçüm ve değerleme cetveli", "Yürüyüş yüzeyi 155 metrekare ölçüldü. Kalan 85 metrekareye erişim devam ediyordu. İki bölümün değeri ayrı hesaplandı.",

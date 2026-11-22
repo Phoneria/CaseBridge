@@ -306,8 +306,8 @@ export async function getAiKeyStatus(): Promise<AIKeyStatus> {
   return request("/system/openai-key", { cache: "no-store" });
 }
 
-export async function saveAiKey(apiKey: string): Promise<AIKeyStatus> {
-  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey }), cache: "no-store" });
+export async function saveAiKey(apiKey: string, provider: "openai" | "anthropic" = "openai"): Promise<AIKeyStatus> {
+  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey, provider }), cache: "no-store" });
 }
 
 export async function activateAiKey(): Promise<AIConnectivity> {

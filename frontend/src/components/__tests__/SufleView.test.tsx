@@ -17,15 +17,15 @@ async function ready() {
 }
 async function loadDemo() {
   await ready();
-  fireEvent.click(screen.getByRole("button", { name: "Kurgu örneği yükle" }));
+  fireEvent.click(screen.getByRole("button", { name: "Kurgu kaydı yükle" }));
 }
 describe("Sufle", () => {
   it("requires acknowledgement and offers the complete examples", async () => {
     render(<SufleView />);
     await screen.findByText(/GPT bağlantısı hazır/);
     expect(screen.getByRole("button", { name: "Mikrofonu başlat" })).toBeDisabled();
-    expect(screen.getByRole("link", { name: /20 örnek/ })).toHaveAttribute("href", "/sufle/ornekler.html");
-    expect(screen.getByRole("link", { name: /Örnek dosyasını indir/ })).toHaveAttribute("download");
+    expect(screen.getByRole("link", { name: /20 kurgusal/ })).toHaveAttribute("href", "/sufle/ornekler.html");
+    expect(screen.getByRole("link", { name: /Gösterim dosyasını indir/ })).toHaveAttribute("download");
     expect(api.analyzeSufle).not.toHaveBeenCalled();
   });
   it("loads six synthetic turns without making a paid request, then calls GPT explicitly", async () => {
@@ -76,7 +76,7 @@ describe("Sufle", () => {
     render(<SufleView />);
     await screen.findByText("Büronuzun GPT bağlantısı hazır değil.");
     fireEvent.click(screen.getByRole("checkbox"));
-    expect(screen.getByRole("button", { name: "Kurgu örneği yükle" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Kurgu kaydı yükle" })).toBeDisabled();
     expect(api.analyzeSufle).not.toHaveBeenCalled();
   });
   it("aborts an in-flight analysis when leaving the page", async () => {
@@ -84,7 +84,7 @@ describe("Sufle", () => {
     const { unmount } = render(<SufleView />);
     await screen.findByText(/GPT bağlantısı hazır/);
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: "Kurgu örneği yükle" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kurgu kaydı yükle" }));
     fireEvent.click(screen.getByRole("button", { name: "Sufle iste" }));
     const signal = api.analyzeSufle.mock.calls[0][1] as AbortSignal;
     unmount();

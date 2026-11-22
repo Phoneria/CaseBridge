@@ -88,12 +88,12 @@ export function SettingsView() {
       const result = await importDemoTemplate(pack);
       setDemoCoverage(result.coverage ?? null);
       setDemoTemplate({ kind: "done", message: pack === "dossiers" ? `20 dava dosyası hazır. ${result.coverage?.["PDF evrak"] ?? 0} evrakı Davalar bölümünde inceleyebilirsiniz.` : result.added_records !== undefined
-        ? result.added_records > 0 ? `${result.added_records} kayıt eklendi; gösterim verileri hazır.` : "Gösterim verileri kontrol edildi; eksik kayıt yok, örnek tarihler güncellendi."
+        ? result.added_records > 0 ? `${result.added_records} kayıt eklendi; gösterim verileri hazır.` : "Gösterim verileri kontrol edildi; eksik kayıt yok, tarihler güncellendi."
         : result.added_cases
-        ? `${result.added_cases} örnek dava ve ilişkili veriler büronuza eklendi.`
-        : "Örnek veriler zaten mevcut; yeni kayıt eklenmedi." });
+        ? `${result.added_cases} dava ve ilişkili veriler büronuza eklendi.`
+        : "Gösterim verileri zaten mevcut; yeni kayıt eklenmedi." });
     } catch (err) {
-      setDemoTemplate({ kind: "error", message: userMessage(err, "Örnek veriler eklenemedi. Lütfen tekrar deneyin.") });
+      setDemoTemplate({ kind: "error", message: userMessage(err, "Gösterim verileri eklenemedi. Lütfen tekrar deneyin.") });
     } finally {
       importingDemo.current = false;
     }
@@ -104,7 +104,7 @@ export function SettingsView() {
     if (importingDemo.current) return;
     importingDemo.current = true; returnRemovalFocus.current = true; setRemoving(true); setDemoTemplate({kind:"idle"});
     try { setRemovalPreview(await previewDemoRemoval()); }
-    catch(err) { setDemoTemplate({kind:"error",message:userMessage(err,"Örnek veri önizlemesi yüklenemedi. Yeniden deneyin.")}); }
+    catch(err) { setDemoTemplate({kind:"error",message:userMessage(err,"Gösterim verisi önizlemesi yüklenemedi. Yeniden deneyin.")}); }
     finally { importingDemo.current = false; setRemoving(false); }
   }
   async function confirmRemoval() {
@@ -113,10 +113,10 @@ export function SettingsView() {
     try {
       const result = await removeDemoTemplate(removalPreview.token);
       setRemovalPreview(null); setDemoCoverage(null); setUsersRevision(n=>n+1);
-      setDemoTemplate({kind:"done",message:`${result.removed_records} örnek kayıt kaldırıldı.${result.kept_users ? ` Kullanılmış veya değiştirilmiş ${result.kept_users} örnek hesap korundu.` : ""}`});
+      setDemoTemplate({kind:"done",message:`${result.removed_records} gösterim kaydı kaldırıldı.${result.kept_users ? ` Kullanılmış veya değiştirilmiş ${result.kept_users} hesap korundu.` : ""}`});
     } catch(err) {
       setRemovalPreview(null);
-      setDemoTemplate({kind:"error",message:userMessage(err,"Örnek veriler kaldırılamadı. Önizlemeyi yeniden açıp deneyin.")});
+      setDemoTemplate({kind:"error",message:userMessage(err,"Gösterim verileri kaldırılamadı. Önizlemeyi yeniden açıp deneyin.")});
     } finally { importingDemo.current = false; setRemoving(false); }
   }
 
@@ -143,23 +143,23 @@ export function SettingsView() {
 
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
-          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek veriler</h2>
-          <p className="mb-4 text-sm text-navy-500">Davalar, indirilebilir belgeler, emsaller, takvim, mali işler, müvekkil takibi, 12 kurgusal avukattan oluşan örnek ekip, onaylar, kritik süreler, kontrol listeleri, analizler, sohbet ve duruşma örneklerini yükleyin. Tekrar yükleme eksikleri tamamlar ve örnek tarihleri günceller; gerçek kayıtları değiştirmez. İlk ekip yüklemesi yalnız örnek davaları avukatlara dağıtır; sonraki yüklemeler yaptığınız atamaları korur. Örnek avukatlar yalnız örnek dosyalara atanabilir. Örnek ekip için ortak şifre veya otomatik davet oluşturulmaz; örneklerin e-posta hatırlatmaları kapalıdır.</p>
+          <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Gösterim verileri</h2>
+          <p className="mb-4 text-sm text-navy-500">Dava dosyaları paketinde ceza ve hukuk davalarının evrakları bulunur. Büro verileri paketi dört avukat, aktif işler, mali kayıtlar ve takvim etkinlikleri içerir. Daha önce yüklediğiniz paketi yeniden seçerek eksik kayıtları tamamlayabilirsiniz.</p>
           <button type="button" onClick={() => addExamples("dossiers")} disabled={demoTemplate.kind === "sending" || removing || !!removalPreview}
-            className="mr-2 mb-2 rounded-xl bg-accent-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60">20 örnek dava dosyasını yükle</button>
+            className="mr-2 mb-2 rounded-xl bg-accent-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60">20 dava dosyasını yükle</button>
           <button type="button" onClick={() => addExamples("bureau")} disabled={demoTemplate.kind === "sending" || removing || !!removalPreview}
             className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
-            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek verileri yükle"}
+            {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Gösterim verilerini yükle"}
           </button>
-          <button ref={removalTrigger} type="button" onClick={previewRemoval} disabled={demoTemplate.kind === "sending" || removing || !!removalPreview} className="ml-2 mt-2 rounded-xl border border-red-300 px-4 py-2 text-sm font-medium text-red-700 disabled:opacity-60">{removing ? "İşleniyor…" : "Örnek verileri kaldır"}</button>
-          {removalPreview && <ModalFrame title="Örnek verileri kaldır" onClose={() => {if(!removing)setRemovalPreview(null);}} busy={removing}>
-            <p className="text-sm leading-6 text-navy-700">Yalnız bu büroya yüklenen örnek şablon kayıtları kalıcı olarak kaldırılacak. 20 davalık pakette kullanıcı içeriği eklenmiş dava dosyaları korunur. Eski büro şablonundaki örnek davalar, sonradan eklediğiniz belgelerle birlikte kaldırılır. Bu işlem geri alınamaz; örnek şablonu yeniden yükleyebilirsiniz.</p>
+          <button ref={removalTrigger} type="button" onClick={previewRemoval} disabled={demoTemplate.kind === "sending" || removing || !!removalPreview} className="ml-2 mt-2 rounded-xl border border-red-300 px-4 py-2 text-sm font-medium text-red-700 disabled:opacity-60">{removing ? "İşleniyor…" : "Gösterim verilerini kaldır"}</button>
+          {removalPreview && <ModalFrame title="Gösterim verilerini kaldır" onClose={() => {if(!removing)setRemovalPreview(null);}} busy={removing}>
+            <p className="text-sm leading-6 text-navy-700">Yalnız bu büroya yüklenen şablon kayıtları kalıcı olarak kaldırılacak. 20 davalık pakette kullanıcı içeriği eklenmiş dava dosyaları korunur. Eski büro şablonundaki davalar, sonradan eklediğiniz belgelerle birlikte kaldırılır. Bu işlem geri alınamaz; şablonu yeniden yükleyebilirsiniz.</p>
             <dl className="my-4 space-y-2 text-sm text-navy-700">{Object.entries(removalPreview.counts).map(([label,count])=><div className="flex justify-between gap-3" key={label}><dt>{label}</dt><dd>{count}</dd></div>)}</dl>
-            <p className="text-sm leading-6 text-navy-600">Şablon dışı dosyalarınız, gerçek kullanıcılarınız, büro ayarları ve AI anahtarları korunur. {removalPreview.kept_users > 0 && `${removalPreview.kept_users} örnek hesap kullanıldığı veya değiştirildiği için korunacak.`}</p>
-            <div className="mt-5 flex flex-wrap justify-end gap-2"><button type="button" data-autofocus disabled={removing} onClick={()=>setRemovalPreview(null)} className="rounded-xl border border-surface-border px-4 py-2 text-sm text-navy-700 disabled:opacity-50">Vazgeç</button><button type="button" disabled={removing || removalPreview.total_records === 0} onClick={confirmRemoval} className="rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{removing ? "Kaldırılıyor…" : "Onayla ve örnekleri kaldır"}</button></div>
+            <p className="text-sm leading-6 text-navy-600">Şablon dışı dosyalarınız, gerçek kullanıcılarınız, büro ayarları ve AI anahtarları korunur. {removalPreview.kept_users > 0 && `${removalPreview.kept_users} hesap kullanıldığı veya değiştirildiği için korunacak.`}</p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2"><button type="button" data-autofocus disabled={removing} onClick={()=>setRemovalPreview(null)} className="rounded-xl border border-surface-border px-4 py-2 text-sm text-navy-700 disabled:opacity-50">Vazgeç</button><button type="button" disabled={removing || removalPreview.total_records === 0} onClick={confirmRemoval} className="rounded-xl bg-red-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{removing ? "Kaldırılıyor…" : "Onayla ve verileri kaldır"}</button></div>
           </ModalFrame>}
           {demoTemplate.kind === "done" && <p role="status" className="mt-3 text-sm text-emerald-700">{demoTemplate.message}</p>}
-          {demoCoverage && <div className="mt-4"><h3 className="text-sm font-medium text-navy-800">Büroda gösterime hazır veriler</h3><dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{Object.entries(demoCoverage).map(([label,count]) => <div key={label} className="flex justify-between gap-2 rounded-lg bg-surface-muted px-3 py-2 text-sm"><dt>{label}</dt><dd className="font-semibold tabular-nums">{count}</dd></div>)}</dl><div className="mt-3 flex flex-wrap gap-4 text-sm text-accent-700"><Link href="/davalar">Dava dosyalarını aç →</Link><Link href="/buro">Büro yönetimine git →</Link><Link href="/ai">AI örneklerine git →</Link></div></div>}
+          {demoCoverage && <div className="mt-4"><h3 className="text-sm font-medium text-navy-800">Büroda gösterime hazır veriler</h3><dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">{Object.entries(demoCoverage).map(([label,count]) => <div key={label} className="flex justify-between gap-2 rounded-lg bg-surface-muted px-3 py-2 text-sm"><dt>{label}</dt><dd className="font-semibold tabular-nums">{count}</dd></div>)}</dl><div className="mt-3 flex flex-wrap gap-4 text-sm text-accent-700"><Link href="/davalar">Dava dosyalarını aç →</Link><Link href="/buro">Büro yönetimine git →</Link><Link href="/ai">AI araçlarına git →</Link></div></div>}
           {demoTemplate.kind === "error" && <p role="alert" className="mt-3 text-sm text-red-700">{demoTemplate.message}</p>}
         </section>
       )}

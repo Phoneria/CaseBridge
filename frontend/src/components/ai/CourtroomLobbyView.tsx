@@ -147,8 +147,8 @@ export function CourtroomLobbyView() {
 
       {examples.length > 0 && (
         <section>
-          <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold text-navy-900">Tamamlanmış örnek duruşmalar</h2><span className="text-xs text-navy-500">{examples.length} kurgusal eğitim oturumu</span></div>
-          <ul aria-label="Tamamlanmış örnek duruşmalar" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{examples.map((session) => <li key={session.id}><Link href={courtroomSessionHref(session.id)} className="block h-full rounded-2xl border border-accent-200 bg-white p-4 shadow-card transition hover:border-accent-400"><span className="rounded-full bg-accent-50 px-2 py-1 text-[10px] font-bold text-accent-700">EĞİTİM ÖRNEĞİ · TAMAMLANDI</span><p className="mt-3 text-sm font-semibold text-navy-900">{session.scenario_title}</p><p className="mt-2 text-xs text-navy-500">Üç rolün konuşmaları, tutanak ve kurgusal sonuç hazır</p><p className="mt-3 text-xs font-semibold text-accent-700">Tutanağı incele →</p></Link></li>)}</ul>
+          <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold text-navy-900">Tamamlanmış kurgusal duruşmalar</h2><span className="text-xs text-navy-500">{examples.length} kurgusal eğitim oturumu</span></div>
+          <ul aria-label="Tamamlanmış kurgusal duruşmalar" className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{examples.map((session) => <li key={session.id}><Link href={courtroomSessionHref(session.id)} className="block h-full rounded-2xl border border-accent-200 bg-white p-4 shadow-card transition hover:border-accent-400"><span className="rounded-full bg-accent-50 px-2 py-1 text-[10px] font-bold text-accent-700">EĞİTİM DURUŞMASI · TAMAMLANDI</span><p className="mt-3 text-sm font-semibold text-navy-900">{session.scenario_title}</p><p className="mt-2 text-xs text-navy-500">Üç rolün konuşmaları, tutanak ve kurgusal sonuç hazır</p><p className="mt-3 text-xs font-semibold text-accent-700">Tutanağı incele →</p></Link></li>)}</ul>
         </section>
       )}
 
@@ -188,7 +188,7 @@ export function CourtroomLobbyView() {
       )}
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-navy-900">Bir örnek dava seç</h2>
+        <h2 className="mb-3 text-sm font-semibold text-navy-900">Bir kurgusal dava seç</h2>
         {scenarios.length === 0 ? (
           <EmptyState message="Henüz duruşma senaryosu yok." hint="Backend seed komutunu çalıştırın." />
         ) : (

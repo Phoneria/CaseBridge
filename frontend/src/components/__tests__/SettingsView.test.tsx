@@ -167,13 +167,13 @@ describe("sample data import", () => {
     let resolve: (value: unknown) => void = () => {};
     importDemoTemplate.mockReturnValue(new Promise((r) => { resolve = r; }));
     render(<SettingsView />);
-    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Gösterim verilerini yükle" }));
     const busy = screen.getByRole("button", { name: "Ekleniyor..." });
     expect(busy).toBeDisabled();
     await userEvent.click(busy);
     expect(importDemoTemplate).toHaveBeenCalledTimes(1);
     resolve({ total_cases: 20, added_cases: 20 });
-    expect(await screen.findByText("20 örnek dava ve ilişkili veriler büronuza eklendi.")).toBeInTheDocument();
+    expect(await screen.findByText("20 dava ve ilişkili veriler büronuza eklendi.")).toBeInTheDocument();
   });
 
   it("reports an existing import and lets the user retry after an error", async () => {
@@ -182,17 +182,17 @@ describe("sample data import", () => {
     importDemoTemplate.mockRejectedValueOnce(new Error("internal detail"));
     importDemoTemplate.mockResolvedValueOnce({ total_cases: 20, added_cases: 0 });
     render(<SettingsView />);
-    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Örnek veriler eklenemedi. Lütfen tekrar deneyin.");
-    await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
-    expect(await screen.findByText("Örnek veriler zaten mevcut; yeni kayıt eklenmedi.")).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: "Gösterim verilerini yükle" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Gösterim verileri eklenemedi. Lütfen tekrar deneyin.");
+    await userEvent.click(await screen.findByRole("button", { name: "Gösterim verilerini yükle" }));
+    expect(await screen.findByText("Gösterim verileri zaten mevcut; yeni kayıt eklenmedi.")).toBeInTheDocument();
   });
 
   it("hides the import for lawyers", async () => {
     getMe.mockResolvedValue(lawyerUser);
     render(<SettingsView />);
     await screen.findByRole("heading", { name: "Ayarlar" });
-    expect(screen.queryByRole("button", { name: "Örnek verileri yükle" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Gösterim verilerini yükle" })).not.toBeInTheDocument();
   });
 });
 
@@ -202,11 +202,11 @@ it("shows per-area presentation coverage even when only missing modules were add
   listManagedUsers.mockResolvedValue([]);
   importDemoTemplate.mockResolvedValue({ total_cases: 20, added_cases: 0, added_records: 80, coverage: { Davalar: 20, Emsaller: 3, "Büro iş akışları": 70, Sohbetler: 3 } });
   render(<SettingsView />);
-  await userEvent.click(await screen.findByRole("button", { name: "Örnek verileri yükle" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Gösterim verilerini yükle" }));
   expect(await screen.findByText("80 kayıt eklendi; gösterim verileri hazır.")).toHaveAttribute("role", "status");
   expect(screen.getByText("Büroda gösterime hazır veriler")).toBeInTheDocument();
   expect(screen.getByText("Büro iş akışları")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "AI örneklerine git →" })).toHaveAttribute("href", "/ai");
+  expect(screen.getByRole("link", { name: "AI araçlarına git →" })).toHaveAttribute("href", "/ai");
 });
 
 
@@ -215,12 +215,12 @@ it("previews sample removal and requires explicit confirmation while cancellatio
   previewDemoRemoval.mockResolvedValue({token:"a".repeat(64),counts:{"Davalar ve emsaller":23,"Örnek kullanıcılar":18},kept_users:0,total_records:200});
   removeDemoTemplate.mockResolvedValue({removed_records:200,kept_users:0});
   const user=userEvent.setup();render(<SettingsView/>);
-  const trigger=await screen.findByRole("button",{name:"Örnek verileri kaldır"});await user.click(trigger);
-  expect(screen.getByRole("dialog",{name:"Örnek verileri kaldır"})).toHaveTextContent("sonradan eklediğiniz");
+  const trigger=await screen.findByRole("button",{name:"Gösterim verilerini kaldır"});await user.click(trigger);
+  expect(screen.getByRole("dialog",{name:"Gösterim verilerini kaldır"})).toHaveTextContent("sonradan eklediğiniz");
   expect(screen.getByRole("button",{name:"Vazgeç"})).toHaveFocus();
   await user.click(screen.getByRole("button",{name:"Vazgeç"}));expect(removeDemoTemplate).not.toHaveBeenCalled();expect(trigger).toHaveFocus();
-  await user.click(trigger);await user.click(screen.getByRole("button",{name:"Onayla ve örnekleri kaldır"}));
-  expect(removeDemoTemplate).toHaveBeenCalledWith("a".repeat(64));expect(await screen.findByText("200 örnek kayıt kaldırıldı.")).toHaveAttribute("role","status");
+  await user.click(trigger);await user.click(screen.getByRole("button",{name:"Onayla ve verileri kaldır"}));
+  expect(removeDemoTemplate).toHaveBeenCalledWith("a".repeat(64));expect(await screen.findByText("200 gösterim kaydı kaldırıldı.")).toHaveAttribute("role","status");
 });
 
 it("shows removal errors and allows a fresh preview", async () => {
@@ -228,10 +228,10 @@ it("shows removal errors and allows a fresh preview", async () => {
   previewDemoRemoval.mockResolvedValue({token:"b".repeat(64),counts:{Davalar:2},kept_users:1,total_records:4});
   removeDemoTemplate.mockRejectedValue(new ApiError("Örnek kayıtlar değişti. Önizlemeyi yeniden açıp kontrol edin.",409));
   const user=userEvent.setup();render(<SettingsView/>);
-  await user.click(await screen.findByRole("button",{name:"Örnek verileri kaldır"}));
-  await user.click(screen.getByRole("button",{name:"Onayla ve örnekleri kaldır"}));
+  await user.click(await screen.findByRole("button",{name:"Gösterim verilerini kaldır"}));
+  await user.click(screen.getByRole("button",{name:"Onayla ve verileri kaldır"}));
   expect(await screen.findByRole("alert")).toHaveTextContent("Örnek kayıtlar değişti");
-  await user.click(screen.getByRole("button",{name:"Örnek verileri kaldır"}));
+  await user.click(screen.getByRole("button",{name:"Gösterim verilerini kaldır"}));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
 });
 
@@ -240,7 +240,7 @@ it("loads the twenty complete case files from settings", async () => {
   listManagedUsers.mockResolvedValue([]);
   importDemoTemplate.mockResolvedValue({ total_cases: 20, added_cases: 20, coverage: { "PDF evrak": 458 } });
   render(<SettingsView />);
-  await userEvent.click(await screen.findByRole("button", { name: "20 örnek dava dosyasını yükle" }));
+  await userEvent.click(await screen.findByRole("button", { name: "20 dava dosyasını yükle" }));
   expect(importDemoTemplate).toHaveBeenCalledWith("dossiers");
   expect(await screen.findByText(/458 evrakı Davalar bölümünde/)).toHaveAttribute("role", "status");
   expect(screen.getByRole("link", {name: "Dava dosyalarını aç →"})).toHaveAttribute("href", "/davalar");

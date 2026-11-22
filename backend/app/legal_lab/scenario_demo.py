@@ -41,7 +41,7 @@ def build_demo(document: DocumentAssumption = 'unreviewed', payment: PaymentAssu
         calculated=True, total_points=sum(scores),
         weights=[DemoWeight(node_id=id, score=scores[i], percentage_tenths=units[i]) for i,id in enumerate(MEMBERS)])
     demo = DemoModel(method=METHOD, assumptions=assumptions, groups=[group], missing_reason=missing)
-    sources = [TreeSource(id='demo:case',kind='case',label='Kurgusal alacak dosyası',detail='ÖRNEK-POC-001. Fatura, teslim ve ödeme eşleştirmesi üzerine tamamen sentetik bir eğitim örneği; büro kaydı değildir.'),
+    sources = [TreeSource(id='demo:case',kind='case',label='Kurgusal alacak dosyası',detail='POC-001. Fatura, teslim ve ödeme eşleştirmesi üzerine tamamen sentetik bir eğitim örneği; büro kaydı değildir.'),
         TreeSource(id='demo:document',kind='document',label='Sentetik fatura / teslim dayanağı',detail='Örnek metinde fatura ve teslim tarihi eşleştirilecek. Gerçek belge veya kişi içermez.'),
         TreeSource(id='demo:payment',kind='document',label='Sentetik ödeme kaydı',detail='Örnek ödeme açıklamasının hangi faturaya ait olduğu incelenecek. Gerçek banka veya hesap verisi yoktur.'),
         TreeSource(id='demo:method',kind='analysis',label='Demo tahmin kuralı v1',detail=METHOD)]
