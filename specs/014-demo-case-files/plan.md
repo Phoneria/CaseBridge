@@ -80,3 +80,9 @@ Mevcut FastAPI, SQLAlchemy ve Next.js dava ekranları kullanılır. Tasarımın 
 Sabit büro/dava kimliğinden doğrulanan katalog ağacını belge kaynaklarıyla üret. Kardeş geçişlerin ağırlıklarını toplam 100 olarak tanımla. Başlangıçtan ulaşma değerini yol ağırlıklarının çarpımıyla hesapla. Diğer dosyalarda varsayımsal yol hesabını etkinleştirme. Eklenen taraf ve görevleri sahiplik kimlikleriyle güvenli biçimde uzlaştır. Finansal tutarları yalnız aynı para biriminde topla. Mevcut bağlantı yönetiminde aday testi ve ayrı etkinleştirmeyi koru.
 
 FR-011 için etkin ve önceki şifreli anahtarları geriye uyumlu oku. Sağlayıcıya özgü son etkin anahtarı koru. Yalnız doğrulama başarılı olursa etkin dosyayı atomik olarak güncelle. Arayüz sadece sağlayıcı adlarını ve seçimi gösterir.
+
+FR-012 için grafiğin düğümlerini ve oklarını birlikte ölçekle. Kaydırılan alanı çizim boyutlarına uyarla. Denetimleri grafiğin dışında ve klavye ile erişilebilir tut.
+
+FR-013, FR-008 kapsamındaki katalog ağırlıklarını korur. Diğer dosyalarda olası bir sonraki adım seçiminde belirtilmemiş pay için eşit seçim varsayımı kullanılır. Puanlar ve hukuki sonuç olasılığı bu hesaba girmez. Kayıtlı olaylar ve kapanış ayrı bir tarihçe dalıdır.
+
+FR-014 için yerleşim alt ağaçtaki ilk ve son yaprağın ortasını kullanır. Açılış kaydırması yalnız grafik bağlandığında uygulanır. Kısa ağaçların yaprakları, koşullu hazırlık kararları ve bağlantılı kaynaklarla genişletilir. FR-013'teki eşit pay varsayımını, eksik yüzdelerde deterministik rastgele paylar değiştirir.

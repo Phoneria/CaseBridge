@@ -18,6 +18,7 @@ export interface ScenarioNode {
   transition_percent?: number | null;
   path_percent?: number | null;
   recorded_step?: boolean;
+  illustrative?: boolean;
   support_weight?: number | null;
   probability_group_id?: string | null;
   assessment_label: 'Hesaplanmadı' | 'Demo tahmini';
