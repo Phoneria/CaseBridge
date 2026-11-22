@@ -1,37 +1,7 @@
+import { addCaseDecisions } from './caseDecisions';
 import { CASE_OUTCOME_LABELS, formatDate } from '@/lib/labels';
 import type { Case } from '@/types';
 import type { ScenarioNode, ScenarioTree } from '@/types/scenarioTree';
-
-// A short tree gains review decisions, never fabricated events in the case history.
-// Each review joins an existing branch and inherits its links to the case records.
-const reviews = [
-  ['Olay sırasını incele', 'Tarihlerin uyuşması halinde kronolojiyi doğrula', 'Tarihler çelişirse açıklama iste'],
-  ['Belgenin kaynağını incele', 'Asıl nüsha varsa dayanakla eşleştir', 'Asıl nüsha eksikse temin yolunu belirle'],
-  ['Taraf beyanlarını karşılaştır', 'Ortak anlatımları dosyada işaretle', 'Çelişen anlatımlar için soru hazırla'],
-  ['Talebin kapsamını kontrol et', 'Talep açıksa ilgili delilleri sırala', 'Talep belirsizse müvekkilden ayrıntı iste'],
-  ['Tebliğ kaydını incele', 'Teslim kaydı varsa tarihini karşılaştır', 'Teslim belirsizse tebliğ evrakını incele'],
-  ['Uzman görüşü ihtiyacını değerlendir', 'Teknik uyuşmazlık varsa inceleme sorularını yaz', 'Mevcut rapor yeterliyse dayanaklarını özetle'],
-  ['İzlenecek işlemi değerlendir', 'Yeni bulgu varsa çalışma planını güncelle', 'Kayıtlar yeterliyse değerlendirmeyi tamamla'],
-];
-
-function extendShortTree(nodes: ScenarioNode[]) {
-  const parents = new Set(nodes.map(node => node.parent_id));
-  const leaves = nodes.filter(node => !parents.has(node.id));
-  for (let i = 0; i < reviews.length && nodes.length < 20; i++) {
-    const leaf = leaves[i % leaves.length];
-    const [review, first, second] = reviews[i];
-    const id = 'review:' + leaf.id + ':' + i;
-    const step = {description: 'Bu dalda incelenebilecek konu: ' + review + '.',
-      reasoning: 'Bu inceleme, “' + leaf.label + '” dalı için olası bir hazırlık adımıdır.',
-      source_ids: leaf.source_ids, uncertainties: leaf.uncertainties, probability: null,
-      assessment_label: 'Hesaplanmadı' as const};
-    nodes.push({ ...step, id, parent_id: leaf.id, kind: 'development', label: review });
-    for (const [index, label] of [first, second].entries()) {
-      nodes.push({...step, id: id + ':' + index, parent_id: id, kind: 'outcome', label,
-        description: label + '. Bu koşulun dosyada karşılanıp karşılanmadığı dayanaklarla incelenir.'});
-    }
-  }
-}
 
 function stableHash(key: string) {
   let hash = 2166136261;
@@ -70,7 +40,8 @@ export function scenarioMap(snapshot: ScenarioTree, caseFile?: Case): ScenarioTr
   const root = nodes.find(node => !node.parent_id);
   if (!root) return snapshot;
   root.path_percent = 100;
-  extendShortTree(nodes);
+  const file = caseFile?.id === snapshot.case_id ? caseFile : undefined;
+  if (snapshot.source_mode !== 'dossier_history') addCaseDecisions(nodes, snapshot, file);
   const children = new Map<string, ScenarioNode[]>();
   for (const node of nodes) {
     if (!node.parent_id) continue;
@@ -87,12 +58,7 @@ export function scenarioMap(snapshot: ScenarioTree, caseFile?: Case): ScenarioTr
     }
   }
   assign(root);
-  const file = caseFile?.id === snapshot.case_id ? caseFile : undefined;
   const outcome = file?.outcome && file.outcome !== 'ongoing' ? CASE_OUTCOME_LABELS[file.outcome] : undefined;
-  if (snapshot.case_closed && snapshot.source_mode === 'dossier_history' && outcome) {
-    const end = nodes.find(node => node.id === 'recorded' && node.recorded_step);
-    if (end) end.label = 'Gerçekleşen sonuç · ' + outcome;
-  }
   if (snapshot.case_closed && snapshot.source_mode !== 'dossier_history') {
     const events = snapshot.sources.filter(source => source.kind === 'event' && source.recorded_at &&
       (!file?.decision_date || source.recorded_at.slice(0, 10) <= file.decision_date))
@@ -104,10 +70,17 @@ export function scenarioMap(snapshot: ScenarioTree, caseFile?: Case): ScenarioTr
         recorded_step: true, source_ids: [sourceId], uncertainties: [], probability: null,
         assessment_label: 'Hesaplanmadı'});
     }
-    for (const event of events) append('history:' + event.id, event.label, event.detail, event.id);
+    const available = 100 - nodes.length - 1;
+    const summarized = events.length > available ? events.slice(0, events.length - available + 1) : [];
+    if (summarized.length) {
+      append('history:summary', summarized.length + ' önceki gelişme', summarized.map(e => e.label).join(' · '), summarized[0].id);
+      history[0].source_ids = summarized.map(e => e.id);
+    }
+    for (const event of events.slice(summarized.length)) append('history:' + event.id, event.label, event.detail, event.id);
     append('history:closure', outcome ? 'Dosya sonucu · ' + outcome : 'Dosya kapandı',
       [file?.decision_date && formatDate(file.decision_date), file?.closing_note?.trim() ||
         (outcome ? outcome : 'Kapanış sonucu belirtilmemiş.')].filter(Boolean).join(' · '), 'case');
+    history[history.length - 1].kind = 'outcome';
     // Recorded history is a separate lane independent of all hypothetical forks.
     nodes.splice(nodes.indexOf(root) + 1, 0, ...history);
   }

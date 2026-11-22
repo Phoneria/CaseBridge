@@ -100,6 +100,9 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
     }
     const root = tree.nodes.find(n => !n.parent_id);
     if (root) place(root, 0, 0);
+    for (const node of tree.nodes) {
+      if (node.parent_id && !children.has(node.id)) positions.get(node.id)!.x = width - 272;
+    }
     const height = Math.max(230, row * 116);
     const padding = (height - row * 116) / 2;
     for (const position of positions.values()) position.y += padding;
@@ -139,7 +142,8 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
           const recorded = tree.case_closed && node.recorded_step;
           const color = recorded ? recordedColor : edgeColors[to.color];
           return <g key={node.id}>
-            <path d={`M${start} ${from.y+46} C${start+45} ${from.y+46},${end-60} ${cy},${end} ${cy}`} fill="none" stroke={color} strokeWidth={recorded ? 5 : trail.has(node.id) ? 3.5 : 1.8} markerEnd={`url(#${marker}${recorded ? edgeColors.length : to.color})`}/>
+            <title>{node.reasoning}</title>
+            <path pointerEvents="stroke" d={`M${start} ${from.y+46} C${start+45} ${from.y+46},${end-60} ${cy},${end} ${cy}`} fill="none" stroke={color} strokeWidth={recorded ? 5 : trail.has(node.id) ? 3.5 : 1.8} markerEnd={`url(#${marker}${recorded ? edgeColors.length : to.color})`}/>
             {node.path_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={color} fontSize="12" paintOrder="stroke" stroke="white" strokeWidth="3">{percent(node.path_percent)}</text>}
           </g>;
         })}
@@ -149,7 +153,7 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
         onClick={() => onSelect(node.id)} title={node.label}
         className={'absolute flex h-[92px] w-[250px] flex-col justify-center rounded-xl border px-3 py-2 text-left shadow-sm motion-safe:transition motion-safe:hover:-translate-y-1 hover:shadow-lg hover:ring-2 hover:ring-accent-400 focus-visible:ring-2 focus-visible:ring-accent-400 ' + (recorded ? 'border-2 border-blue-800 bg-blue-100 text-blue-950' : trail.has(node.id) ? 'border-accent-500 bg-accent-50 text-accent-900' : 'border-surface-border bg-white text-navy-800')}
         style={{ left: pos.x, top: pos.y }}>
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-700">{recorded ? '✓ Gerçekleşen yol' : tree.source_mode === 'dossier_history' ? (!node.parent_id || node.recorded_step ? 'Dosya geçmişi' : 'Alternatif yol') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-700">{node.kind === 'outcome' ? (recorded ? '✓ Gerçekleşen yol · Kayıtlı karar' : 'Olası karar') : recorded ? '✓ Gerçekleşen yol' : tree.source_mode === 'dossier_history' ? (!node.parent_id || node.recorded_step ? 'Dosya geçmişi' : 'Alternatif yol') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
         <span className="text-[11px] font-semibold text-navy-700">{arrivalLabel(node)}</span>
       </button>; })}
@@ -192,8 +196,9 @@ export function ScenarioTreeView({ fixedCaseId, caseFile }: { fixedCaseId?: stri
       const snapshot = demo ? await getScenarioDemo(doc, pay) : await getScenarioTree(id, values);
       if (seq !== request.current) return;
       let file = caseFile ?? cases.find(item => item.id === id);
-      if (snapshot.case_closed && !file)
+      if (!demo && !file && snapshot.source_mode !== 'dossier_history') {
         file = await getCase(id);
+      }
       if (seq !== request.current) return;
       const next = scenarioMap(snapshot, file);
       setChanged(!!previous.current && previous.current.case_id === next.case_id && previous.current.context_version !== next.context_version);
@@ -293,7 +298,7 @@ export function ScenarioTreeView({ fixedCaseId, caseFile }: { fixedCaseId?: stri
           </article>)}
         </section>}
         <section aria-label="Seçili dalın dayanakları" className="space-y-4 rounded-2xl border border-surface-border bg-white p-5">
-          <div><h2 className="text-base font-semibold text-navy-900">{node.label}</h2><p className="mt-2 text-sm leading-6 text-navy-700">{node.description}</p></div>
+          <div><h2 className="text-base font-semibold text-navy-900">{node.label}</h2><p className="mt-2 whitespace-pre-line text-sm leading-6 text-navy-700">{node.description}</p></div>
           <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{arrivalLabel(node)}</strong>{node.transition_percent != null && <p>Önceki adımdan geçiş {percent(node.transition_percent)}</p>}{(node.support_weight != null || node.probability != null) && <p className="text-xs">{assessment(node)}</p>}<p className="mt-1 leading-6">{node.reasoning}</p></div>
           {node.kind === 'context' && <details><summary className="cursor-pointer text-sm font-semibold text-navy-800">Kayıtlı olaylar ve iddialar</summary><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-navy-600">{tree.current_facts.map((f,i) => <li key={i}>{f}</li>)}</ul></details>}
           <div><h3 className="text-sm font-semibold text-navy-800">Dayanaklar</h3><ul className="mt-2 space-y-2">{node.source_ids.map(id => { const source = sourceById.get(id)!; return <li key={id} className="rounded-lg border border-surface-border p-2 text-xs leading-5 text-navy-600"><strong className="block text-navy-800">{exhibitLink(id, source.label)}</strong>{source.detail}{source.recorded_at && <span className="mt-1 block text-navy-500">Kayıt: {source.recorded_at.slice(0,10)}</span>}</li>; })}</ul></div>

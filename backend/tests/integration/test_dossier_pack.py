@@ -31,7 +31,7 @@ def test_complete_files_resolve_evidence_and_protect_user_additions(client, db_s
         tree = client.get(f"/legal-lab/cases/{cid}/scenario-tree", headers=admin).json()
         assert tree["source_mode"] == "dossier_history"
         nodes = {node["id"]: node for node in tree["nodes"]}
-        assert len(nodes) >= 50
+        assert 20 <= len(nodes) <= 100
         current = nodes["recorded"]
         depth, cumulative = 0, 100
         while current["parent_id"]:
@@ -63,3 +63,34 @@ def test_complete_files_resolve_evidence_and_protect_user_additions(client, db_s
     assert db_session.get(Document, addition.json()["id"]) and db_session.get(Case, first_id)
     assert db_session.query(Case).filter_by(law_firm_id=office.firm_a.id).count() == 1
     assert client.post(url, headers=admin).json()["added_cases"] == 19
+
+
+def test_every_dossier_path_ends_in_a_grounded_decision():
+    from app.legal_lab.dossier_tree import history_nodes
+    from app.legal_lab.scenario_tree import TreeSource
+    for story in STORIES:
+        cid = case_key("fixture-bureau", story)
+        sources = [TreeSource(id="document:" + document_key(cid, entry.key),
+                              kind="document", label=entry.title, detail="")
+                   for entry in entries(story)]
+        nodes = history_nodes(cid, story, sources)
+        by_id = {n.id: n for n in nodes}
+        parents = {n.parent_id for n in nodes}
+        assert 20 <= len(nodes) == len(by_id) <= 100, story.code
+        leaves = [n for n in nodes if n.id not in parents]
+        assert len(leaves) >= 3 and [n.id for n in leaves if n.recorded_step] == ["recorded"]
+        assert story.end in by_id["recorded"].description
+        for leaf in leaves:
+            assert leaf.kind == "outcome" and leaf.source_ids
+            assert leaf.label and leaf.reasoning and story.claim in leaf.description
+            current = leaf
+            visited = set()
+            while current.parent_id:
+                assert current.id not in visited
+                visited.add(current.id)
+                parent = by_id[current.parent_id]
+                assert current.source_ids and current.reasoning
+                assert abs(current.path_percent - parent.path_percent * current.transition_percent / 100) < 1e-8
+                current = parent
+            assert current.id == "root" and len(visited) >= 5
+        assert all(n.kind != "outcome" for n in nodes if n.id in parents)

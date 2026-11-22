@@ -33,3 +33,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-014**: Açılışta kök görünür alanın dikey merkezindedir. Her dava ağacı en az 20 düğüm sunar. Eksik koşullu oranlara dosya ve dala özgü kararlı rastgele sunum payları verilir. Kardeş payları yüzde 100 eder. Kaynak oranları ve gerçek dosya geçmişi ayrı tutulur.
 
 - **FR-015**: Oklar, düğüm kartları, metin görünümü ve sonraki adım bağlantıları hedefe kökten ulaşma olasılığını gösterir. Seçili düğümün ayrıntısında son koşullu geçiş ayrıca etiketlenir. Kayıtlı geçmişte varsayımsal oran icat edilmez.
+
+- **FR-016**: Her dava ağacı 20–100 düğüm içerir. Bu aralık FR-008’deki eski katalog alt sınırının yerini alır. Her yaprak dosyanın talebine ve izlenen dalın bulgusuna bağlı gerekçeli karardır. Tüm yapraklar aynı son sütunda görünür. Varsayımsal dal ve kayıtlı kapanış ayrı gösterilir.

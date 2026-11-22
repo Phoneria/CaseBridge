@@ -6,7 +6,7 @@ import { ApiError } from '@/lib/apiError';
 vi.mock('next/navigation', async () => (await import('@/test/navigation')).navigationModule);
 import { resetNav, setUrl } from '@/test/navigation';
 const getCases=vi.fn(),getScenarioTree=vi.fn(),getScenarioDemo=vi.fn();
-vi.mock('@/lib/api',()=>({getCases:(...a:unknown[])=>getCases(...a),getScenarioTree:(...a:unknown[])=>getScenarioTree(...a),getScenarioDemo:(...a:unknown[])=>getScenarioDemo(...a)}));
+vi.mock('@/lib/api',()=>({getCase:async(id:string)=>({id}),getCases:(...a:unknown[])=>getCases(...a),getScenarioTree:(...a:unknown[])=>getScenarioTree(...a),getScenarioDemo:(...a:unknown[])=>getScenarioDemo(...a)}));
 import { scenarioMap } from '@/components/lab/scenarioMap';
 import { ScenarioTreeView } from '@/components/lab/ScenarioTreeView';
 const node=(id:string,parent_id:string|null,label:string,kind:ScenarioNode['kind']):ScenarioNode=>({id,parent_id,label,kind,description:'Koşullu inceleme',reasoning:'Kayıtlar doğrulanmalı.',source_ids:['case'],uncertainties:['Belge aslı eksik.'],probability:null,support_weight:kind==='development'?50:null,assessment_label:kind==='development'?'Demo tahmini':'Hesaplanmadı'});
@@ -179,4 +179,39 @@ it('labels arrows and cards with cumulative probability from the root', async ()
   const detail = screen.getByRole('region',{name:'Seçili dalın dayanakları'});
   expect(detail).toHaveTextContent('Başlangıçtan ulaşma %22,32');
   expect(detail).toHaveTextContent('Önceki adımdan geçiş %100');
+});
+
+it('places every reasoned decision in the last column and opens its case rationale', async () => {
+  const snapshot = tree();
+  snapshot.title = 'Takip konusu borca itiraz';
+  snapshot.nodes.push(node('other','root','Ek ödeme kaydı sunulursa','development'));
+  getScenarioTree.mockResolvedValue(snapshot);
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  const graph = await screen.findByRole('group', {name:'Dosya senaryo ağacı'});
+  const cards = Array.from(graph.querySelectorAll<HTMLButtonElement>('button[aria-pressed]'));
+  const last = Math.max(...cards.map(c => parseFloat(c.style.left)));
+  const ends = cards.filter(c => c.textContent?.includes('Olası karar'));
+  expect(ends.length).toBeGreaterThanOrEqual(3);
+  expect(cards.filter(c => parseFloat(c.style.left) === last)).toEqual(ends);
+  const partial = ends.find(c => c.title.includes('ödenen kısım için kabul'))!;
+  await userEvent.click(partial);
+  const panel = screen.getByRole('region',{name:'Seçili dalın dayanakları'});
+  expect(panel).toHaveTextContent(snapshot.title);
+  expect(panel).toHaveTextContent('Kısmi ödeme aynı borca bağlanırsa');
+});
+
+it('bounds dense closed files and retains every event reference and decision', () => {
+  const snapshot = tree();
+  snapshot.case_closed = true;
+  snapshot.nodes = [snapshot.nodes[0]];
+  for (let i = 0; i < 6; i++) {
+    const id = 'scenario-' + i;
+    snapshot.nodes.push(node(id,'root',id,'scenario'), node(id+'a',id,'Doğrulama','outcome'), node(id+'b',id,'Çelişki','outcome'));
+  }
+  for (let i = 0; i < 60; i++) snapshot.sources.push({id:'event:'+i, kind:'event', label:'Celse '+i, detail:'', recorded_at:'2025-01-01'});
+  const map = scenarioMap(snapshot);
+  expect(map.nodes.length).toBeLessThanOrEqual(100);
+  const parents = new Set(map.nodes.map(n => n.parent_id));
+  expect(map.nodes.filter(n => !parents.has(n.id)).every(n => n.kind === 'outcome')).toBe(true);
+  expect(map.nodes.filter(n => n.recorded_step).flatMap(n => n.source_ids).filter(id => id.startsWith('event:'))).toHaveLength(60);
 });
