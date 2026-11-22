@@ -63,6 +63,14 @@ class Result:
     text: str
     counts: dict[str, int] = field(default_factory=dict)
     leaks: list[str] = field(default_factory=list)  # çıktıda kalan bilinen değer sayısı (değerin kendisi tutulmaz)
+    # etiket -> ilk görülen özgün metin. Yalnızca bellekte, yanıtı geri çevirmek için; repr/log'a girmez.
+    mapping: dict[str, str] = field(default_factory=dict, repr=False)
+
+    def restore(self, text: str) -> str:
+        """Yanıttaki etiketleri özgün değerlerle değiştirir (en uzun etiket önce)."""
+        for label in sorted(self.mapping, key=len, reverse=True):
+            text = text.replace(label, self.mapping[label])
+        return text
 
     @property
     def ok(self) -> bool:
@@ -128,6 +136,7 @@ def anonymize(
     spans = _resolve(spans)
 
     labels: dict[str, str] = {}
+    mapping: dict[str, str] = {}
     per_kind: dict[str, int] = {}
     counts: dict[str, int] = {}
     parts: list[str] = []
@@ -136,6 +145,7 @@ def anonymize(
         if key not in labels:
             per_kind[kind] = per_kind.get(kind, 0) + 1
             labels[key] = f"[{kind}-{per_kind[kind]}]"
+            mapping[labels[key]] = text[a:b]
         parts.append(text[pos:a]); parts.append(labels[key]); pos = b
         counts[kind] = counts.get(kind, 0) + 1
     parts.append(text[pos:])
@@ -150,4 +160,4 @@ def anonymize(
     for m in _TC.finditer(clean):
         if tc_valid(m.group()):
             leaks.append("tc")
-    return Result(text=clean, counts=counts, leaks=leaks)
+    return Result(text=clean, counts=counts, leaks=leaks, mapping=mapping)

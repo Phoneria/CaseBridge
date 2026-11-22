@@ -35,6 +35,9 @@ class Settings(BaseSettings):
 
     # Emsal arama indeksi (lab/build_index.py ciktisi). Bos = backend/data/precedent_index.
     precedent_index_dir: str = ""
+    # Dış LLM sağlayıcılarına (qwen/openai/anthropic) giden istemlerde kişisel verileri maskele.
+    anonymize_llm_input: bool = False
+    anonymize_use_ner: bool = True
 
     # Claude (Anthropic). LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY.
     anthropic_api_key: Optional[str] = None
