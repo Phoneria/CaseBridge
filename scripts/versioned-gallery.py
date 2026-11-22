@@ -76,6 +76,7 @@ def prepare(root, batch, observed, audit, latest):
     if version['version'] != observed['marketingVersion']:
         raise ValueError('Main marketing source has not reached public version')
     output = next_version(version['version'])
+    changed_images = [path for path in paths if not (root/'web-page'/path).exists() or (root/'web-page'/path).read_bytes() != (batch/Path(path).name).read_bytes()]
     # No file changes occur until every candidate has passed validation.
     for path in paths:
         (root/'web-page'/path).write_bytes((batch/Path(path).name).read_bytes())
@@ -91,7 +92,7 @@ def prepare(root, batch, observed, audit, latest):
     # Each generated PR changes a named assertion-bearing acceptance test, binding every output byte.
     test_path = root/'scripts/tests/test_generated_gallery.py'
     test_path.write_text('''import hashlib\nimport json\nfrom pathlib import Path\nimport unittest\n\nclass GeneratedGalleryTests(unittest.TestCase):\n    def test_complete_versioned_gallery_bytes(self):\n        root = Path(__file__).resolve().parents[2]\n        expected = '''+repr(hashes)+'''\n        ledger = json.loads((root/'''+repr(LEDGER)+''').read_text())\n        self.assertEqual(ledger['hashes'], expected)\n        self.assertEqual(json.loads((root/'web-page/website-version.json').read_text())['version'], '''+repr(output)+''')\n        for name, digest in expected.items():\n            self.assertEqual(hashlib.sha256((root/'web-page'/name).read_bytes()).hexdigest(), digest)\n''')
-    contract = {'version':1,'changes':[{'files':['web-page/'+path for path in paths]+['web-page/index.html','web-page/website-version.json'], 'requirements':['specs/010-versioned-gallery/spec.md#FR-003'], 'acceptance_tests':['scripts/tests/test_generated_gallery.py::GeneratedGalleryTests.test_complete_versioned_gallery_bytes'], 'reason':'Complete atomic native public-frontend capture for both version triggers; synthetic API only.'}]}
+    contract = {'version':1,'changes':[{'files':['web-page/'+path for path in changed_images]+['web-page/index.html','web-page/website-version.json'], 'requirements':['specs/010-versioned-gallery/spec.md#FR-003'], 'acceptance_tests':['scripts/tests/test_generated_gallery.py::GeneratedGalleryTests.test_complete_versioned_gallery_bytes'], 'reason':'Complete atomic native public-frontend capture for both version triggers; synthetic API only.'}]}
     (root/'specs/changes/generated-gallery.json').write_text(json.dumps(contract,indent=2)+'\n')
     return ledger
 

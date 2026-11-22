@@ -74,3 +74,50 @@ class VersionedGalleryTests(unittest.TestCase):
         self.assertIn("'--auto','--merge'",publisher)
         self.assertIn("'ci.yml','--ref',branch",publisher)
         self.assertIn('set(staged)-set(paths)',publisher)
+
+    def test_http_end_to_end_both_version_triggers_publish_all_bytes_and_suppress_output(self):
+        import hashlib
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        import threading
+        from unittest.mock import patch
+        public={'app':{'version':'0.23','commit':'a'*40},'site':{'version':'v.0.47'},'files':{}}
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self,*args): pass
+            def do_GET(self):
+                path=self.path.split('?')[0]
+                if path=='/app/release.json': data=json.dumps(public['app']).encode()
+                elif path=='/site/release.json': data=json.dumps(public['site']).encode()
+                elif path=='/app/api/health': data=b'{"status":"ok"}'
+                else: data=public['files'].get(path,b'')
+                self.send_response(200 if data else 404);self.end_headers();self.wfile.write(data)
+        server=ThreadingHTTPServer(('127.0.0.1',0),Handler);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        try:
+            origin='http://127.0.0.1:'+str(server.server_port)
+            with patch.object(gallery,'APP',origin+'/app'),patch.object(gallery,'SITE',origin+'/site'),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);(root/'web-page/assets/feature-screens/tr-current').mkdir(parents=True);(root/'scripts/tests').mkdir(parents=True);(root/'specs/changes').mkdir(parents=True)
+                html='<meta content="v.0.47"><div class="capability-screens"><img src="assets/feature-screens/tr-current/scenario-tree.jpg?v=0.47"><img src="assets/feature-screens/tr-current/analysis.jpg?v=0.47"><dialog id="feature-screen-dialog">'
+                (root/'web-page/index.html').write_text(html);(root/'web-page/website-version.json').write_text('{"version":"v.0.47"}')
+                baseline=gallery.identity();ledger=baseline
+                batch=root/'batch';batch.mkdir()
+                for trigger in ['app','marketing']:
+                    if trigger=='app':public['app']={'version':'0.24','commit':'b'*40}
+                    else:
+                        public['site']['version']=gallery.next_version(public['site']['version'])
+                        (root/'web-page/website-version.json').write_text(json.dumps(public['site']))
+                    observed=gallery.identity()
+                    self.assertTrue(gallery.needed(observed,ledger))
+                    captures=[]
+                    for index,name in enumerate(['scenario-tree','analysis']):
+                        data=b'\xff\xd8\xff'+(trigger+name).encode()*2000;(batch/(name+'.jpg')).write_bytes(data)
+                        captures.append({'name':name,'route':'/route/'+name,'sha256':hashlib.sha256(data).hexdigest()})
+                    audit={'before':observed['app'],'after':observed['app'],'errors':[],'productionApiRequests':[],'audit':captures}
+                    ledger=gallery.prepare(root,batch,observed,audit,gallery.identity())
+                    public['site']['version']=ledger['marketingVersion']
+                    public['files']={'/site/':(root/'web-page/index.html').read_bytes()}
+                    for name in ledger['hashes']:public['files']['/site/'+name]=(root/'web-page'/name).read_bytes()
+                    gallery.verify(root)
+                    self.assertFalse(gallery.needed(gallery.identity(),ledger))
+                    corrupt=next(iter(ledger['hashes']));public['files']['/site/'+corrupt]=b'stale cached version'
+                    with self.assertRaisesRegex(ValueError,'Public image bytes differ'):gallery.verify(root)
+        finally:
+            server.shutdown();server.server_close();thread.join()

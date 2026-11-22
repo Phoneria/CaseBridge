@@ -20,7 +20,8 @@
         "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_missing_corrupt_and_source_race_batches_cannot_change_prior_gallery",
         "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_every_current_product_reference_is_bound_and_tree_first",
         "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_successful_complete_candidate_generates_all_byte_acceptance_and_output_ledger",
-        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_public_capture_routes_all_browser_api_and_blocks_service_workers"
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_public_capture_routes_all_browser_api_and_blocks_service_workers",
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_http_end_to_end_both_version_triggers_publish_all_bytes_and_suppress_output"
       ],
       "reason": "User-authorized automatic complete native marketing gallery capture on either public version change, protected-main publication, isolated synthetic API, versioned cache URLs and loop prevention."
     }
