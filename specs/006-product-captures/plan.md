@@ -33,3 +33,9 @@ Reuse existing architecture; no new service or database migration. New behavior 
 ## Final tree-first follow-up
 
 Move the existing tab/panel pair without renumbering IDs or changing other relative order; default visibility exists in HTML. Refresh all twelve native captures after sidebar restoration. Targeted markup/version/provenance and actual browser keyboard/default checks; app v.0.22/site v.0.46 public release verified. See verification.md.
+
+## Public v.0.23 gallery refresh
+
+Read actual app/site release markers and health first. Reuse capture-product.cjs with public app origin and a browser-wide /api proxy to the existing isolated synthetic/mock backend. No real production session or customer data, no application/backend/VPS-source changes. Freeze capture identity before/after, retain raw JPEGs and per-tab hashes/route/viewport/brand/sidebar metadata. Preserve tree-first order/default and image dialog behavior. Increment marketing only to v.0.47, bind images/version to named acceptance checks, use protected PR and existing automatic marketing release. Verify all 12 public bytes, 1440/390/320px gallery/dialog/keyboard and direct health/version.
+
+Gallery img src and full-size href both use the normal release-bound `?v=0.47` URL; reused conversation/evaluation image references use the same key. Strip query only for filesystem/hash lookup. Validate normal markup URLs and warmed-cache ordinary reload, without a manually appended verification query. An already-open/offline old HTML cannot be remotely replaced; the refreshed release HTML gives distinct image cache keys.

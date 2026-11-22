@@ -1,0 +1,279 @@
+{
+  "application_version": "0.23",
+  "public_app": "https://app.casebridge.com.tr",
+  "public_application_commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+  "sourceHash": "7aa7c3089e82c3737f9c7b1a28b8a36a4d0a596f571be05c4e610f4b4bf4cd24",
+  "captureMode": "public-served-frontend-with-isolated-synthetic-api",
+  "release_before": {
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+    "version": "0.23",
+    "scope": "application"
+  },
+  "release_after": {
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+    "version": "0.23",
+    "scope": "application"
+  },
+  "captured_at_utc": "2026-11-22T00:57:02.565312+00:00",
+  "fixture": "isolated synthetic SQLite demo seed/template, mock providers; no production session, records or API keys",
+  "browser_api_boundary": "All public frontend /api/** requests fulfilled from isolated localhost:8044; no route.continue or production API forwarding",
+  "proxied_request_count": 73,
+  "proxy_statuses": [
+    200
+  ],
+  "captures": [
+    {
+      "name": "analysis",
+      "route": "/davalar/4d383cd4-0975-4b5f-8497-05b7ef7d3f5b?sekme=ai",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "fb22271720fb6401dd7b2b33106c58f3754bdd61195771cd6c2b8fb2c44d9656",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "9d69f4d721f53bb81d57c669c698d83548ea76b1eac2482671719d4c5abd0c89"
+    },
+    {
+      "name": "evaluation",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "444fac49f1541d9a4062e595e7d0150b4a7ba75727d4c6345485ef8accbdb43a",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "2c65a42fa76a1ac680783ab903699d9d8ebb987ef02c1b00384fcdfa92cac876"
+    },
+    {
+      "name": "conversation",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "b502f119d5b3d8fa768c95b359b8c9baf664977d3749705a4d66ce60a3646526",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "f7501a96dd2d19070b6ed5eccc885ebfb8bc77d48f1739e6c7987d6a2295e0ce"
+    },
+    {
+      "name": "evidence",
+      "route": "/ai/durusma/oturum/243c7f1f-91fb-5a3c-8d24-f9f0e7d8f2b3",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "c81a21b896a377ae72300aeffbc75e91a1ef2cc7c4b70fd7fae8ec2edc568104",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "a57d746a86c12bd29b70a65c3ef03a28af43683900e8a93dd7f8f47eda97f475"
+    },
+    {
+      "name": "assistant",
+      "route": "/ai/sohbet?sohbet=9392f8e6-ac86-5cf6-9b2e-b373676aed31",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "858309c74fbca5875660f75b6e5efc3bdc3f419f17caaada0dddacd79aea6f35",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "56e16695482a4dbbffb861665136a243be114ed353a8b1defe8092c7ebe48fa7"
+    },
+    {
+      "name": "case-documents",
+      "route": "/davalar/4d383cd4-0975-4b5f-8497-05b7ef7d3f5b",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "5439f44b171200045c4fd4ae7a109270ce44af71c9a4c80bc581041d22c83551",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "884b1a81724b4a46a086cce8c216bc445d70433e08c0fd7f54cccb391e4e7568"
+    },
+    {
+      "name": "calendar",
+      "route": "/takvim",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "f0fb8c7d9f2919fc14c6bdc3c170fe6ec0e68951750562422d2ba563079541f8",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "6694fb1d8bb50a6f11dd955f17995f000b1d9f3f78d6390219c7846f9ccf3d90"
+    },
+    {
+      "name": "reports",
+      "route": "/raporlar",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "0c089d5c056112e8eee9707bdee0f6f6e4a932e20f986f05065c44e6daefa8c5",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "8808e45f93c7adb04bb630f53fe0f6d4d9db90a5c960376426648b66985c68e0"
+    },
+    {
+      "name": "knowledge-map",
+      "route": "/ai/harita",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "3e178babd8b602abeec29fae6929fbe0c0a859ffbbfd7ee7080ccfb5f0fd6652",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "91483f66dd1605cceaa97d19ce93a20ed11c462ff0ef9bf0c08c428e099e9d0b"
+    },
+    {
+      "name": "counter-analysis",
+      "route": "/ai/karsi-taraf",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "35a6e3aae7c8730261bad06940cd0ef69d7980c76042410762d5408280a90152",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "b7e6c95a240f7082b9f9368ece6f2cc8a2b305cd4a6f302c15934b6a6c2277d0"
+    },
+    {
+      "name": "directed-trial",
+      "route": "/ai/yonetmen",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "sha256": "007b03c3c33f55fc8cc80d21c1a2337b965028d64ab36cd2b61af45bcb434768",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1100,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "fce299e7bedd37b81c5077a0209859179b90948b59f37dab62fb5695209075c6"
+    },
+    {
+      "name": "scenario-tree",
+      "route": "/ai/olasilik?ornek=belge-dogrulama",
+      "viewport": {
+        "width": 1600,
+        "height": 1400
+      },
+      "sha256": "07ea58f6031466063612f8b565028f8407c889c49cc8f87a60c68075a75ec9ff",
+      "branding": {
+        "sidebarWidth": 256,
+        "sidebarHeight": 1400,
+        "links": 20,
+        "aiLinks": 9,
+        "bluePanel": true,
+        "logoSrc": "/casebridge-logo.png",
+        "logoBlend": "multiply",
+        "logoWrapperBackground": "rgba(0, 0, 0, 0)"
+      },
+      "visible_application_version": "0.23",
+      "previous_sha256": "a1b14b3d4773ddd7c4a1e6761e852894017fe9a47e0ab1ee2db90e2db4421d46"
+    }
+  ],
+  "errors": []
+}

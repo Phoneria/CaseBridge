@@ -496,3 +496,14 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 
 - [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
 - [x] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması. PR #32 → v.0.23. Birleşmeden 19 sn sonra otomatik başlangıç, 1 dk 46 sn içinde canlı doğrulama. [Kanıt](specs/001-main-release/verification.md#fr-009-automatic-production-ui-pilot).
+
+## Güncel public ürün görselleri — tanıtım v.0.47
+
+- [x] Canlı frontend v.0.23 / f625960 doğrulandı; tanıtım v.0.46, health ok (değişmeyen backend kendi 1b460a6/0.21 kimliğini korur). Eski galeri provenance22 ve mevcut kabul testi uyumsuzluğu doğrulandı.
+- [x] 12 gerçek public frontend ekranı yalnız yerel sentetik/mock API ile yakalandı; güncel şeffaf logo/mavi AI panel/dengeli sidebar, rota/sürüm/hash kanıtı. Gerçek hesap/büro ve API anahtarı kullanılmaz.
+- [ ] Tree-first/default, sekme-görsel eşleme ve büyütme/klavye/odak masaüstü-mobil korunacak; hedefli test, Spec Kit ve korumalı PR.
+- [ ] Yalnız marketing v.0.47 otomatik tanıtım yolu ile yayımlanacak; public12hash/sürüm/kimlik/health ve galeri kontrolleri kaydedilmeden tamamlandı sayılmaz. Uygulama/backend/VPS kaynaklarına müdahale yok.
+
+Galeri v.0.47 önbellek talimatı: tüm img src/zoom href (ve aynı görselleri tekrar kullanan iki referans) normal URL’lerine yayın sürümü anahtarı eklendi; elle cache-bust yok. Önce eski normal URL’ler cache’e alındı; yayın sonrası aynı profile normal reload ile 12 yeni hash ve Canlı Duruşma v.0.23 kontrol edilecek. Çevrimdışı/açık eski HTML’yi uzaktan zorla değiştirme iddiası yoktur.
+
+Yerel galeri47: 3 hedefli sözleşme testi ve 1440/390/320px ×12=36 görsel/zoom/odak akışı geçti. Yeni normal HTML URL’leri ?v=0.47 taşır, büyütme aynıJPEG/sorgu anahtarını kullanır; tree-first/klavye/taşma kontrolü geçti. Eski normal URL’lerle browsercache12hash ısıtıldı; yayınsonrası doğrulama henüz açık. Kalıcı otomasyonun tamamlanması bu tek-seferlik yayın için bağımlılık yapılmadı.
