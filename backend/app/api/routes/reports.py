@@ -2,6 +2,10 @@
 summary - real data pulled from the same services used everywhere else,
 not a separate/duplicated query path.
 """
+import csv
+import io
+from typing import Literal
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
@@ -74,3 +78,14 @@ def report_summary(
     db: Session = Depends(get_db),
 ):
     return ReportService(db).summary(law_firm_id)
+
+@router.get("/{kind}/preview", response_model=list[list[str]])
+def preview_report(
+    kind: Literal["cases", "hearings", "tasks", "performance"],
+    law_firm_id: str = Depends(get_current_law_firm_id),
+    db: Session = Depends(get_db),
+):
+    reports = ReportService(db)
+    render = {"cases": reports.cases_csv, "hearings": reports.hearings_csv,
+              "tasks": reports.tasks_csv, "performance": reports.performance_csv}[kind]
+    return list(csv.reader(io.StringIO(render(law_firm_id).removeprefix("\ufeff"), newline="")))

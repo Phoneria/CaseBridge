@@ -6,7 +6,9 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from app.core.config import settings
-from app.services.ai_credentials import get_openai_api_key
+from app.ai.errors import AIProviderError
+from app.ai.providers.anthropic_provider import AnthropicProvider
+from app.services.ai_credentials import get_claude_api_key, get_openai_api_key
 
 
 class SufleUnavailable(Exception):
@@ -81,18 +83,21 @@ belirsizlikleri ayır; open_questions ve documents için yalnız konuşmaya daya
 ver. Özet taslaktır. Yalnız istenen JSON şemasına uygun yanıt ver."""
 
 
-def model_name():
+def model_name(firm_id=None):
+    if firm_id and get_claude_api_key(firm_id):
+        return settings.anthropic_model
     return settings.sufle_model or settings.chat_model
 
 
 def configured(firm_id):
-    return settings.chat_provider == "openai" and bool(get_openai_api_key(firm_id))
+    return settings.chat_provider == "openai" and bool(get_openai_api_key(firm_id) or get_claude_api_key(firm_id))
 
 
 def analyze(payload: AnalysisRequest, firm_id: str) -> dict:
     key = get_openai_api_key(firm_id)
-    if settings.chat_provider != "openai" or not key:
-        raise SufleUnavailable("Büronuzun GPT bağlantısı hazır değil. Ayarlar'dan büronuza ait anahtarı test edip etkinleştirin.")
+    claude = get_claude_api_key(firm_id)
+    if settings.chat_provider != "openai" or not (key or claude):
+        raise SufleUnavailable("Büronuzun yapay zekâ bağlantısı hazır değil. Ayarlar'dan büronuza ait anahtarı test edip etkinleştirin.")
     # Pydantic constraints are validated locally. Keep the provider schema portable.
     schema = Advice.model_json_schema()
     def strict(node):
@@ -104,25 +109,32 @@ def analyze(payload: AnalysisRequest, firm_id: str) -> dict:
             for child in node: strict(child)
     strict(schema)
     try:
-        response = httpx.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {key}"},
-            json={"model": model_name(), "store": False,
-                  "messages": [{"role": "system", "content": SYSTEM},
-                               {"role": "user", "content": payload.model_dump_json(exclude={"acknowledged"})}],
-                  "max_completion_tokens": 2200,
-                  "response_format": {"type": "json_schema", "json_schema": {
-                      "name": "sufle_advice", "strict": True, "schema": schema}}},
-            timeout=45,
-        )
-        if response.status_code == 429:
-            raise SufleUnavailable("GPT kullanım sınırı veya bakiye nedeniyle yanıt veremedi. Biraz sonra yeniden deneyin.")
-        response.raise_for_status()
-        body = response.json()
-        choice = body["choices"][0]
-        if choice.get("finish_reason") != "stop":
-            raise ValueError("Incomplete response")
-        result = Advice.model_validate_json(choice["message"]["content"])
+        if claude:
+            provider = AnthropicProvider(claude, settings.anthropic_model, timeout_seconds=45, max_tokens=2200)
+            output = provider.complete(SYSTEM + "\n" + json.dumps(schema, ensure_ascii=False),
+                                       payload.model_dump_json(exclude={"acknowledged"}), response_format="json_object")
+            result = Advice.model_validate_json(output)
+            body = {"usage": provider.last_usage}
+        else:
+            response = httpx.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {key}"},
+                json={"model": model_name(), "store": False,
+                      "messages": [{"role": "system", "content": SYSTEM},
+                                   {"role": "user", "content": payload.model_dump_json(exclude={"acknowledged"})}],
+                      "max_completion_tokens": 2200,
+                      "response_format": {"type": "json_schema", "json_schema": {
+                          "name": "sufle_advice", "strict": True, "schema": schema}}},
+                timeout=45,
+            )
+            if response.status_code == 429:
+                raise SufleUnavailable("GPT kullanım sınırı veya bakiye nedeniyle yanıt veremedi. Biraz sonra yeniden deneyin.")
+            response.raise_for_status()
+            body = response.json()
+            choice = body["choices"][0]
+            if choice.get("finish_reason") != "stop":
+                raise ValueError("Incomplete response")
+            result = Advice.model_validate_json(choice["message"]["content"])
         sources = {t.id: t.text for t in payload.turns}
         grounded = []
         for card in result.cards:
@@ -155,9 +167,9 @@ def analyze(payload: AnalysisRequest, firm_id: str) -> dict:
                 seen.add(question)
         result.cards = cards
         usage = body.get("usage") or {}
-        return {**result.model_dump(), "model": model_name(),
+        return {**result.model_dump(), "model": settings.anthropic_model if claude else model_name(),
                 "total_tokens": max(0, int(usage.get("total_tokens", 0)))}
     except SufleUnavailable:
         raise
-    except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError, ValidationError):
+    except (AIProviderError, httpx.HTTPError, ValueError, KeyError, IndexError, TypeError, ValidationError):
         raise SufleUnavailable("GPT yanıtı alınamadı veya doğrulanamadı. Görüşme metniniz korunuyor; yeniden deneyin.") from None

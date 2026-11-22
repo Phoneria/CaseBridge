@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.db.session import get_db
+from app.services.assignees import excluded_task_assignees
 from app.models.user import User
+from app.services.case_service import CaseService
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import ProfileUpdate, UserOut
 
@@ -35,12 +37,19 @@ def update_me(
 
 @router.get("", response_model=list[UserOut])
 def list_users(
+    task_case_id: str | None = None,
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
 ):
     """Colleagues who can be picked as assignee or attendee: active and past
     the invitation. The admin user list is GET /admin/users."""
-    return UserRepository(db).list_in_firm(law_firm_id)
+    users = UserRepository(db).list_in_firm(law_firm_id)
+    if task_case_id is None:
+        return users
+    if CaseService(db).get_case(task_case_id, law_firm_id) is None:
+        raise HTTPException(404, detail="Dava bulunamadı")
+    excluded = excluded_task_assignees(db, law_firm_id, task_case_id)
+    return [user for user in users if user.id not in excluded]
 
 
 @router.get("/{user_id}", response_model=UserOut)

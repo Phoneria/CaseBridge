@@ -1,0 +1,15 @@
+{
+  "sourceSHA256": "1db5d62f4e51a96f76e7db2ae4796eb4123d1ed7da7d769edc88fa540371c3ae",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "outputPath": "web-page/assets/team/emin-merden-web.jpg",
+  "outputSHA256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+  "outputDimensions": [
+    720,
+    720
+  ],
+  "bytes": 60741,
+  "method": "LANCZOS resize only, RGB JPEG quality90 optimize; no retouching/generation/compositing; existing CSS display crop"
+}

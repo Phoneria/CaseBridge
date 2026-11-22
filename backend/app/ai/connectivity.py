@@ -13,7 +13,7 @@ from typing import Optional
 import httpx
 
 from app.core.config import settings
-from app.services.ai_credentials import get_openai_api_key
+from app.services.ai_credentials import CredentialError, get_claude_api_key, get_openai_api_key, validate_candidate
 
 PROBE_TIMEOUT_SECONDS = 4.0
 CACHE_TTL_SECONDS = 20.0
@@ -96,6 +96,16 @@ def _llm_model() -> str:
 
 
 def _compute(law_firm_id=None) -> dict:
+    key = get_claude_api_key(law_firm_id)
+    if key:
+        try:
+            validate_candidate(key, law_firm_id)
+            connected, detail = True, None
+        except CredentialError as exc:
+            connected, detail = False, str(exc)
+        return {"connected": connected, "checked_at": time.time(), "checks": [
+            {"name": name, "provider": "anthropic", "model": settings.anthropic_model,
+             "reachable": connected, "detail": detail} for name in ("Analiz", "Hukuk Asistanı")]}
     targets = [
         ("Analiz", settings.llm_provider, _llm_model()),
         ("Hukuk Asistanı", settings.chat_provider, settings.chat_model),

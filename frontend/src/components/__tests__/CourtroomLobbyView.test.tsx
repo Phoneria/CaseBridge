@@ -136,7 +136,7 @@ describe("CourtroomLobbyView", () => {
   it("keeps completed examples separate from personal sessions", async () => {
     listCourtroomSessions.mockResolvedValue([{ ...session("demo", "completed", "2026-09-03", 73), is_demo: true }, session("mine", "active", "2026-09-04", null)]);
     render(<CourtroomLobbyView />);
-    const examples = await screen.findByRole("list", { name: "Tamamlanmış örnek duruşmalar" });
+    const examples = await screen.findByRole("list", { name: "Tamamlanmış kurgusal duruşmalar" });
     expect(within(examples).getByRole("link")).toHaveAttribute("href", "/ai/durusma/oturum/demo");
     const personal = screen.getByRole("list", { name: "Oturumlarım" });
     expect(within(personal).getByRole("link")).toHaveAttribute("href", "/ai/durusma/oturum/mine");

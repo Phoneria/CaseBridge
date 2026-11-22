@@ -5,7 +5,8 @@ import { BRAND_ACCENT } from "@/lib/brand";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { downloadReportCsv, getAnalyticsOverview, getReportSummary } from "@/lib/api";
+import { ModalFrame } from "@/components/ModalFrame";
+import { previewReport, downloadReportCsv, getAnalyticsOverview, getReportSummary } from "@/lib/api";
 import { saveBlob } from "@/lib/download";
 import { analyticsCaseListHref, caseListHref, taskListHref } from "@/lib/filters";
 import { CASE_STATUS_LABELS, CASE_TYPE_LABELS } from "@/lib/labels";
@@ -126,11 +127,39 @@ function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overv
   </section>;
 }
 
+function ReportPreview({ report, onClose }: { report: ReportCard; onClose: () => void }) {
+  const [rows, setRows] = useState<string[][] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let active = true;
+    previewReport(report.id).then(data => { if (active) setRows(data); })
+      .catch(() => { if (active) setFailed(true); });
+    return () => { active = false; };
+  }, [report.id]);
+  return <ModalFrame title={report.title} onClose={onClose} wide>
+    {failed ? <ErrorState message="Rapor önizlemesi yüklenemedi." /> : !rows ? <p role="status">Önizleme yükleniyor…</p> :
+      <>
+        <div className="max-h-[60vh] overflow-auto rounded-lg border border-surface-border">
+          <table className="w-full text-left text-xs text-navy-800">
+            <caption className="sr-only">{report.title} önizlemesi</caption>
+            <thead className="sticky top-0 bg-surface-muted"><tr>{rows[0]?.map((cell, i) => <th key={i} scope="col" className="p-2">{cell}</th>)}</tr></thead>
+            <tbody>{rows.slice(1).map((row,i) => <tr key={i} className="border-t border-surface-border">
+              {row.map((cell,j) => <td key={j} className="whitespace-pre-wrap p-2 align-top">{cell}</td>)}
+            </tr>)}</tbody>
+          </table>
+        </div>
+        <p className="mt-2 text-xs text-navy-500">{rows.length > 1 ? `${rows.length - 1} kayıt` : "Raporda kayıt yok."}</p>
+      </>}
+    <button type="button" onClick={onClose} className="mt-4 rounded-xl border border-surface-border px-4 py-2 text-sm">Kapat</button>
+  </ModalFrame>;
+}
+
 export function ReportsView() {
   const [summary, setSummary] = useState<ReportSummary | null>(null);
   const [summaryState, setSummaryState] = useState<"loading" | "ready" | "error">("loading");
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
   const [overviewState, setOverviewState] = useState<"loading" | "ready" | "error">("loading");
+  const [preview, setPreview] = useState<ReportCard | null>(null);
   const [downloading, setDownloading] = useState<ReportKind | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -180,7 +209,7 @@ export function ReportsView() {
             </div>
             <h2 className="text-sm font-semibold text-navy-800">{report.title}</h2>
             <p className="mt-1 min-h-10 text-xs leading-5 text-navy-500">{report.description}</p>
-            <div className="mt-4 flex items-center justify-between border-t border-surface-border pt-4 text-xs">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-surface-border pt-4 text-xs">
               <div className="font-medium text-navy-700">
                 {summaryState === "loading" && <span className="text-navy-400">…</span>}
                 {summaryState === "error" && <span>—</span>}
@@ -190,8 +219,10 @@ export function ReportsView() {
                   </Link>
                 )}
               </div>
+              <button type="button" data-guide={`preview-${report.id}`} onClick={() => setPreview(report)} className="ml-auto rounded-xl border border-surface-border px-3 py-2 font-medium text-accent-700">Önizle</button>
               <button
                 type="button"
+                data-guide={`download-${report.id}`}
                 onClick={() => handleDownload(report)}
                 disabled={downloading !== null}
                 className="rounded-xl bg-accent-600 px-3.5 py-2 font-medium text-white transition hover:bg-accent-700 disabled:opacity-60"
@@ -203,6 +234,7 @@ export function ReportsView() {
         ))}
       </div>
 
+      {preview && <ReportPreview key={preview.id} report={preview} onClose={() => setPreview(null)} />}
       {error && <ErrorState message={error} />}
     </div>
   );

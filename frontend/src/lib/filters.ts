@@ -10,7 +10,7 @@ import type { CaseOutcome, CaseStatus, CaseType, DocumentItem, DocumentWithCase,
 
 type ParamSource = { get(name: string): string | null };
 
-export const CASE_TYPES: CaseType[] = ["is_hukuku", "ticaret_hukuku", "sozlesme", "kira", "icra", "diger"];
+export const CASE_TYPES: CaseType[] = ["ceza", "is_hukuku", "ticaret_hukuku", "sozlesme", "kira", "icra", "diger"];
 export const CASE_STATUSES: CaseStatus[] = ["devam_eden", "durusma_bekleyen", "karar_bekleyen", "kapali"];
 /** The statuses a case can be created with and edited between ("kapali" only through the close action). */
 export const OPEN_CASE_STATUSES: OpenCaseStatus[] = ["devam_eden", "durusma_bekleyen", "karar_bekleyen"];
@@ -293,7 +293,7 @@ export function parseCalendarQuery(params: ParamSource): CalendarQuery {
 
 // ---------- Case detail tabs ----------
 
-export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "ai", "devir", "notlar"] as const;
+export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "ai", "olasilik", "devir", "notlar"] as const;
 export type CaseTabSlug = (typeof CASE_TAB_SLUGS)[number];
 
 /** Legacy slugs that still open a tab after a rename. */

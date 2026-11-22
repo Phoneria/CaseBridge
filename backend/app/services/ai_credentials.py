@@ -1,4 +1,4 @@
-"""Encrypted OpenAI credentials isolated by authenticated law firm."""
+"""Encrypted AI credentials isolated by authenticated law firm."""
 import hashlib
 import json
 import logging
@@ -29,18 +29,47 @@ def _cipher():
 
 
 def _path(kind="active", law_firm_id=None) -> Path:
-    name = {"active": "openai-key.enc", "pending": "openai-key.pending.enc", "previous": "openai-key.previous.enc"}[kind]
+    name = {"active": "openai-key.enc", "pending": "openai-key.pending.enc", "previous": "openai-key.previous.enc",
+            "openai": "openai-key.saved.enc", "anthropic": "claude-key.saved.enc"}[kind]
     root = Path(settings.storage_dir) / ".system-secrets"
     if law_firm_id is not None:
         root = root / "firms" / hashlib.sha256(law_firm_id.encode()).hexdigest()
     return root / name
 
 
-def get_openai_api_key(law_firm_id=None):
+def _active_key(law_firm_id=None):
     path = _path(law_firm_id=law_firm_id)
     if not path.exists():
         return settings.openai_api_key if law_firm_id is None else None
     return _read_secret(path, law_firm_id)
+
+
+def get_claude_api_key(law_firm_id):
+    if not law_firm_id:
+        return None
+    key = _active_key(law_firm_id)
+    return key if key and key.startswith("sk-ant-api") else None
+
+
+def get_openai_api_key(law_firm_id=None):
+    key = _active_key(law_firm_id)
+    return key if key and not key.startswith("sk-ant-") else None
+
+
+def validate_candidate(key, firm):
+    if not key.startswith("sk-ant-"):
+        validate_key(key)
+        return
+    if not firm or not key.startswith("sk-ant-api"):
+        raise CredentialError("Büro için Claude API anahtarı girin.")
+    from app.ai.providers.anthropic_provider import AnthropicProvider
+    from app.ai.errors import AIProviderError
+    try:
+        provider = AnthropicProvider(key, settings.anthropic_model, timeout_seconds=15, max_tokens=64)
+        if not provider.complete("Return OK.", "Test"):
+            raise CredentialError("Claude bağlantı testi boş yanıt verdi.")
+    except AIProviderError:
+        raise CredentialError("Claude anahtarı ve seçili model doğrulanamadı.") from None
 
 
 def _read_secret(path, law_firm_id=None):
@@ -56,13 +85,32 @@ def _read_secret(path, law_firm_id=None):
         return None
 
 
+def _provider(key):
+    return "anthropic" if key.startswith("sk-ant-api") else "openai"
+
+
+def _saved_connections(firm):
+    connections = {}
+    for kind in ("active", "previous", "openai", "anthropic"):
+        path = _path(kind, firm)
+        key = _read_secret(path, firm) if path.is_file() else None
+        if key and (kind in ("active", "previous") or kind == _provider(key)):
+            connections.setdefault(_provider(key), key)
+    return connections
+
+
 def key_status(law_firm_id=None) -> dict:
-    return {
-        "configured": bool(get_openai_api_key(law_firm_id)),
+    active = _active_key(law_firm_id)
+    status = {
+        "configured": bool(active),
         "managed": _path(law_firm_id=law_firm_id).exists(),
         "pending": _path("pending", law_firm_id).exists(),
         "can_save": _cipher() is not None and settings.llm_provider == "openai" and settings.chat_provider == "openai",
     }
+    if law_firm_id:
+        status.update(active_provider=_provider(active) if active else None,
+                      available_providers=list(_saved_connections(law_firm_id)))
+    return status
 
 
 def _check_response(response):
@@ -131,24 +179,35 @@ def save_openai_api_key(api_key: str, law_firm_id=None) -> None:
     """Test and stage; never changes what any AI request currently uses."""
     if not key_status()["can_save"]:
         raise CredentialError("Güvenli anahtar yönetimi sunucuda etkinleştirilmemiş.")
-    validate_key(api_key)
+    validate_candidate(api_key, law_firm_id)
     with _rotation_lock:
         _write_secret(_path("pending", law_firm_id), api_key, law_firm_id)
 
 
-def activate_openai_api_key(law_firm_id=None) -> None:
+def activate_openai_api_key(law_firm_id=None, provider=None) -> None:
     with _rotation_lock:
         if not key_status()["can_save"]:
             raise CredentialError("Güvenli anahtar yönetimi sunucuda etkinleştirilmemiş.")
         pending = _path("pending", law_firm_id)
-        candidate = _read_secret(pending, law_firm_id) if pending.exists() else None
+        if provider is not None:
+            if not law_firm_id or provider not in ("openai", "anthropic"):
+                raise CredentialError("Sağlayıcı seçimi bu hesapta kullanılamıyor.")
+            candidate = _saved_connections(law_firm_id).get(provider)
+            if not candidate:
+                raise CredentialError("Bu sağlayıcı için etkinleştirilmiş bir bağlantı yok.")
+        else:
+            candidate = _read_secret(pending, law_firm_id) if pending.exists() else None
         if not candidate:
             raise CredentialError("Önce bir anahtar ekleyip bağlantı testini tamamlayın.")
-        validate_key(candidate)
-        previous = get_openai_api_key(law_firm_id)
-        if previous:
+        validate_candidate(candidate, law_firm_id)
+        previous = _active_key(law_firm_id)
+        if previous and previous != candidate:
+            if law_firm_id:
+                _write_secret(_path(_provider(previous), law_firm_id), previous, law_firm_id)
             _write_secret(_path("previous", law_firm_id), previous, law_firm_id)
         _write_secret(_path(law_firm_id=law_firm_id), candidate, law_firm_id)
+        if provider is not None:
+            return
         try:
             pending.unlink(missing_ok=True)
         except OSError:

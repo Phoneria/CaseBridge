@@ -1,4 +1,4 @@
-export type CaseType = "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
+export type CaseType = "ceza" | "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
 export type CaseStatus = "devam_eden" | "durusma_bekleyen" | "karar_bekleyen" | "kapali";
 export type CaseOutcome = "ongoing" | "won" | "lost" | "settled";
 /** The statuses a case can be edited between; "kapali" is reached only by closing. */
@@ -160,7 +160,13 @@ export interface CaseDetail extends Case {
 
 export type TaskStatus = "pending" | "completed";
 
+export type TaskStage = "backlog" | "todo" | "in_progress" | "in_review" | "done";
+export type TaskPriority = "low" | "normal" | "high" | "urgent";
+
 export interface Task {
+  assignee_name?: string | null;
+  stage?: TaskStage;
+  priority?: TaskPriority;
   id: string;
   case_id: string;
   title: string;
@@ -316,6 +322,8 @@ export interface AppUser {
   /** CaseBridge team member who manages customer firms (/platform). */
   is_platform_admin?: boolean;
   workspace_position?: string | null;
+  /** Admin assignment endpoint: explicit sample-only allowlist; absent/null for ordinary lawyers. */
+  demo_case_ids?: string[] | null;
 }
 
 export type UserStatus = "pending" | "active" | "inactive";

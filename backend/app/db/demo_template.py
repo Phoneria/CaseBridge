@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.demo_presentation_seed import enrich_cases, seed_operations, seed_ai_history, presentation_counts
+from app.db.demo_outcomes import outcome_examples, template_numbers
 from app.db.courtroom_seed import seed_courtroom_scenarios
 from app.db.courtroom_showcase_seed import seed_courtroom_showcases
 from app.db.seed import (
@@ -13,14 +14,14 @@ from app.db.seed import (
     _get_or_create_case, _get_or_create_document, _get_or_create_event,
     _get_or_create_task, _seed_case_detail,
 )
-from app.models.case import Case, CaseType
+from app.models.case import Case
 from app.models.document import DocumentType
 from app.models.law_firm import LawFirm
-from app.models.task import TaskStatus
-from app.models.user import User, UserRole
+from app.models.task import TaskPriority, TaskStage, TaskStatus
+from app.models.user import User
 
-PREFIX = "ÖRNEK-"
-MARKER = "[ÖRNEK ŞABLON] "
+PREFIX = "CB-"
+MARKER = "[Gösterim] "
 
 
 def add_demo_template(db: Session, admin: User) -> dict:
@@ -28,45 +29,45 @@ def add_demo_template(db: Session, admin: User) -> dict:
     # Serialize imports by two admins of the same firm before checking numbers.
     firm = db.query(LawFirm).filter(LawFirm.id == admin.law_firm_id).with_for_update().one()
     if firm.is_platform:
-        raise HTTPException(status_code=403, detail="Platform bürosuna örnek dava eklenemez.")
-    expected_numbers = [PREFIX + row["case_number"] for row in DEMO_CASES]
+        raise HTTPException(status_code=403, detail="Platform bürosuna gösterim davası eklenemez.")
+    from app.db.demo_upgrade import retire_old_roster, upgrade_numbers
+    upgrade_numbers(db, firm.id, template_numbers() + [f"EMSAL-{i}" for i in range(1, 4)])
+    expected_numbers = [PREFIX + number for number in template_numbers()]
     existing = db.query(Case).filter(
         Case.law_firm_id == firm.id, Case.case_number.in_(expected_numbers)
     ).all()
     if any(not (case.description or "").startswith(MARKER) for case in existing):
-        raise HTTPException(status_code=409, detail="Örnek numarası gerçek bir davada kullanılıyor; hiçbir kayıt eklenmedi.")
+        raise HTTPException(status_code=409, detail="Gösterim dosyasının numarası gerçek bir davada kullanılıyor; hiçbir kayıt eklenmedi.")
     before = len(existing)
     counts_before = presentation_counts(db, firm.id)
 
-    from app.models.management import WorkspaceAccess
-    restricted = db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == firm.id)
-    lawyers = db.query(User).filter(
-        User.law_firm_id == firm.id,
-        User.role == UserRole.LAWYER,
-        User.is_active.is_(True),
-        User.password_set_at.isnot(None),
-        User.id.notin_(restricted),
-    ).order_by(User.full_name).all()
-    owners = lawyers or [admin]
+    from app.db.demo_team import seed_demo_lawyers, scope_and_distribute
+    owners = seed_demo_lawyers(db, admin)
     author = owners[0]
     demo_cases: dict[str, Case] = {}
 
-    for index, source in enumerate(DEMO_CASES):
-        case_type = source["case_type"]
-        assigned = (
-            owners[0] if case_type == CaseType.TICARET_HUKUKU
-            else owners[1] if case_type == CaseType.IS_HUKUKU and len(owners) > 1
-            else owners[2] if case_type == CaseType.KIRA and len(owners) > 2
-            else owners[index % len(owners)]
-        )
+    portfolio = [(row["case_number"], row) for row in DEMO_CASES] + list(outcome_examples(firm.id))
+    evidence_sources = {}
+    for index, (source_number, source) in enumerate(portfolio):
+        evidence_sources[source["case_number"]] = source_number
+        assigned = owners[index % len(owners)]
+        # A previous import may have explicitly narrowed the roster grants.
+        # Assign newly introduced cases to the importer until an admin scopes them.
+        if existing and source["case_number"] != source_number:
+            assigned = admin
         fields = {**source, "case_number": PREFIX + source["case_number"],
                   "description": MARKER + (source.get("description") or "")}
         demo_cases[source["case_number"]] = _get_or_create_case(db, firm, assigned, **fields)
 
-    for case_number, title, due_in_days, status in DEMO_TASKS:
+    scope_and_distribute(db, admin, owners, list(demo_cases.values()), [case.id for case in existing])
+
+    open_stages = (TaskStage.TODO, TaskStage.IN_PROGRESS, TaskStage.IN_REVIEW, TaskStage.BACKLOG)
+    priorities = (TaskPriority.NORMAL, TaskPriority.HIGH, TaskPriority.URGENT, TaskPriority.LOW)
+    for index, (case_number, title, due_in_days, status) in enumerate(DEMO_TASKS):
         _get_or_create_task(
-            db, demo_cases[case_number], author,
+            db, demo_cases[case_number], db.get(User, demo_cases[case_number].assigned_lawyer_id) or author,
             title=title, description="Demo görev kaydı",
+            open_stage=open_stages[index % len(open_stages)], priority=priorities[index % len(priorities)],
             due_date=date.today() + timedelta(days=due_in_days), status=status,
             completed_at=(datetime.now(timezone.utc) - timedelta(days=1)
                           if status == TaskStatus.COMPLETED else None),
@@ -109,11 +110,12 @@ def add_demo_template(db: Session, admin: User) -> dict:
     for case_number, case in demo_cases.items():
         if case_number != "2026/153":
             assigned = next((user for user in owners if user.id == case.assigned_lawyer_id), author)
-            _seed_case_detail(db, case, assigned)
+            _seed_case_detail(db, case, assigned, evidence_number=evidence_sources[case_number])
 
     seed_operations(db, admin, list(demo_cases.values()))
     seed_courtroom_scenarios(db)
     seed_courtroom_showcases(db, admin)
     seed_ai_history(db, admin, list(demo_cases.values()))
+    retire_old_roster(db, admin)
     coverage = presentation_counts(db, firm.id)
-    return {"total_cases": len(DEMO_CASES), "added_cases": len(DEMO_CASES) - before, "added_records": sum(coverage.values()) - sum(counts_before.values()), "coverage": coverage}
+    return {"total_cases": len(portfolio), "added_cases": len(portfolio) - before, "added_records": sum(coverage.values()) - sum(counts_before.values()), "coverage": coverage}

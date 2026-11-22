@@ -11,6 +11,7 @@ from app.db.types import str_enum
 
 
 class CaseType(str, enum.Enum):
+    CEZA = "ceza"
     IS_HUKUKU = "is_hukuku"
     TICARET_HUKUKU = "ticaret_hukuku"
     SOZLESME = "sozlesme"
@@ -44,6 +45,16 @@ class ClientRole(str, enum.Enum):
     PLAINTIFF = "plaintiff"
     DEFENDANT = "defendant"
     OTHER = "other"
+
+
+class CasePrecedentLink(Base):
+    __tablename__ = "case_precedent_links"
+    __table_args__ = (UniqueConstraint("case_id", "precedent_id", name="uq_case_precedent"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    law_firm_id: Mapped[str] = mapped_column(ForeignKey("law_firms.id"), nullable=False)
+    case_id: Mapped[str] = mapped_column(ForeignKey("cases.id", ondelete="CASCADE"), nullable=False)
+    precedent_id: Mapped[str] = mapped_column(ForeignKey("cases.id", ondelete="CASCADE"), nullable=False)
 
 
 class Case(Base):

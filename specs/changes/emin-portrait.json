@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json",
+        "web-page/assets/team/emin-merden-web.jpg"
+      ],
+      "requirements": [
+        "specs/011-team-roles/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_team_roles.py::TeamRolesAcceptance.test_five_members_have_nonconflicting_roles_and_public_professional_bios"
+      ],
+      "reason": "User-approved portrait replaces decorative initials; same current name/role/bio and other cards, existing photo frame/crop, real file and accessible alt. Marketing-only version50."
+    }
+  ]
+}

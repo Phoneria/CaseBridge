@@ -13,7 +13,7 @@ export function AiModelStatus({ status, variant }: { status: AIStatus | null; va
         }`}
       >
         <i aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-400" />
-        {status.provider === "mock" ? "Yapay zekâ örnek modu" : "Yapay zekâ hizmeti yapılandırıldı"}
+        {status.provider === "mock" ? "Yapay zekâ gösterim modu" : "Yapay zekâ hizmeti yapılandırıldı"}
       </p>
     );
   }

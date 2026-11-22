@@ -1,0 +1,1 @@
+Rehber bağlantısı aynı sekmede /rehber sayfasını açar. Konu kimliği yalnız kullanıcının yetkili kataloğunda çözülür. Okuyucu amacı, konumu, adımları ve ipuçlarını görür. Ekrana gitmek ve tur başlatmak açık gezinme işlemleridir. Tur hedefleri önceden tanımlıdır. Adım değiştirmek hiçbir formu, sağlayıcıyı veya kayıt işlemini çalıştırmaz.

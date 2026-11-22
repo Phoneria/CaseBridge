@@ -143,9 +143,9 @@ export function ChatThread({
         <AiMark className="h-8 w-8 text-accent-500" />
         <div>
           <h2 className="text-base font-semibold text-navy-900">Bugün size nasıl yardımcı olabilirim?</h2>
-          <p className="mt-1 text-sm text-navy-500">Türk hukukuna dair genel bir soru sorun ya da bir örnekle başlayın.</p>
+          <p className="mt-1 text-sm text-navy-500">Türk hukukuna dair genel bir soru sorun ya da bir önerilen sorulardan birini seçin.</p>
         </div>
-        <ul aria-label="Örnek sorular" className="flex flex-wrap justify-center gap-2">
+        <ul aria-label="Önerilen sorular" className="flex flex-wrap justify-center gap-2">
           {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
             <li key={prompt}>
               <button

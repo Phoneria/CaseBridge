@@ -18,7 +18,7 @@ from app.ai.providers.openai_provider import OpenAIProvider
 from app.ai.providers.qwen_provider import QwenProvider
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.core.config import settings
-from app.services.ai_credentials import get_openai_api_key
+from app.services.ai_credentials import get_claude_api_key, get_openai_api_key
 
 # Used whenever LLM_PROVIDER=mock (the default). Must be valid JSON matching
 # AIAnalysisResult (app/ai/schemas.py) so simulations/analyses still complete
@@ -55,6 +55,9 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
 
 def build_llm_provider(model: str, *, law_firm_id=None) -> LLMProvider:
     """One real provider (LLM_PROVIDER=qwen/openai/ollama) for `model`."""
+    claude = get_claude_api_key(law_firm_id) if settings.llm_provider == "openai" else None
+    if claude:
+        return AnthropicProvider(claude, settings.anthropic_model, settings.anthropic_timeout_seconds, settings.anthropic_max_output_tokens)
     provider_name = settings.llm_provider
 
     if provider_name == "qwen":
@@ -237,4 +240,4 @@ def get_ai_provider_status(law_firm_id=None) -> dict:
         get_llm_provider(law_firm_id)
     except AIProviderConfigError as exc:
         return {"provider": settings.llm_provider, "configured": False, "error": str(exc)}
-    return {"provider": settings.llm_provider, "configured": True, "error": None}
+    return {"provider": "anthropic" if get_claude_api_key(law_firm_id) else settings.llm_provider, "configured": True, "error": None}

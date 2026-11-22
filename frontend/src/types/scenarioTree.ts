@@ -15,6 +15,10 @@ export interface ScenarioNode {
   source_ids: string[];
   uncertainties: string[];
   probability: number | null;
+  transition_percent?: number | null;
+  path_percent?: number | null;
+  recorded_step?: boolean;
+  illustrative?: boolean;
   support_weight?: number | null;
   probability_group_id?: string | null;
   assessment_label: 'Hesaplanmadı' | 'Demo tahmini';
@@ -25,7 +29,7 @@ export interface ScenarioTree {
   case_closed: boolean;
   context_version: string;
   generated_at: string;
-  source_mode: 'stored_analysis' | 'conditional_preparation' | 'synthetic_demo';
+  source_mode: 'stored_analysis' | 'conditional_preparation' | 'synthetic_demo' | 'dossier_history';
   analysis_id: string | null;
   analysis_created_at: string | null;
   is_example: boolean;

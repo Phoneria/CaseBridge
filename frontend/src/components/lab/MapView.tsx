@@ -289,7 +289,7 @@ function SidePanel({
           <p className="text-xs text-navy-600">{trend}</p>
         </div>
       ) : (
-        <p className="text-xs text-navy-500">{sel.tot} kararda anılıyor. Bozulma oranı için örnek sayısı yetersiz.</p>
+        <p className="text-xs text-navy-500">{sel.tot} kararda anılıyor. Bozulma oranı için karar sayısı yetersiz.</p>
       )}
       {sel.text && (
         <div>
@@ -322,7 +322,7 @@ function SidePanel({
       </div>
       {sel.ex.length > 0 && (
         <div>
-          <h3 className="text-xs font-semibold text-navy-800">Örnek kararlar</h3>
+          <h3 className="text-xs font-semibold text-navy-800">İlgili kararlar</h3>
           <ul className="mt-1 space-y-1 text-xs text-navy-600">
             {sel.ex.map((x) => (
               <li key={x.id}>

@@ -2,11 +2,13 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+const previewReport = vi.fn();
 const downloadReportCsv = vi.fn();
 const getReportSummary = vi.fn();
 const getAnalyticsOverview = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  previewReport: (...args: unknown[]) => previewReport(...args),
   downloadReportCsv: (...args: unknown[]) => downloadReportCsv(...args),
   getReportSummary: (...args: unknown[]) => getReportSummary(...args),
   getAnalyticsOverview: (...args: unknown[]) => getAnalyticsOverview(...args),
@@ -46,6 +48,19 @@ describe("ReportsView", () => {
     expect(screen.getByRole("region", { name: "Hızlı rapor özeti" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /Dava durum dağılımı: Devam Eden 12, Kapalı 8/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "İş Hukuku: 9 dava" })).toHaveAttribute("href", "/davalar?kategori=is_hukuku&arsiv=dahil");
+  });
+
+  it("opens all four tabular previews without starting a download", async () => {
+    previewReport.mockResolvedValue([["Başlık"], ["İçerik"]]);
+    render(<ReportsView />);
+    const buttons = await screen.findAllByRole("button", {name:"Önizle"});
+    for (const [index, kind] of ["cases","hearings","tasks","performance"].entries()) {
+      await userEvent.click(buttons[index]);
+      expect(await screen.findByRole("cell",{name:"İçerik"})).toBeVisible();
+      expect(previewReport).toHaveBeenLastCalledWith(kind);
+      await userEvent.keyboard("{Escape}");
+    }
+    expect(downloadReportCsv).not.toHaveBeenCalled();
   });
 
   it("downloads each report as a real CSV", async () => {

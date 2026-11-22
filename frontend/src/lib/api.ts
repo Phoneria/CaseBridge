@@ -51,6 +51,8 @@ import type {
   DocumentWithCase,
   Task,
   TaskStatus,
+  TaskStage,
+  TaskPriority,
   TaskWithCase,
   CourtroomAction,
   CourtroomRole,
@@ -260,16 +262,16 @@ export async function activatePlatformFirm(firmId: string, reason?: string): Pro
   return request(`/platform/firms/${firmId}/activate`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
-export async function listUsers(): Promise<AppUser[]> {
-  return request("/users");
+export async function listUsers(taskCaseId?: string | null): Promise<AppUser[]> {
+  return request(taskCaseId ? `/users?task_case_id=${encodeURIComponent(taskCaseId)}` : "/users");
 }
 
-export async function listAdminLawyers(): Promise<AppUser[]> {
-  return request("/admin/lawyers");
+export async function listAdminLawyers(includeDemo = false): Promise<AppUser[]> {
+  return request(includeDemo ? "/admin/lawyers?include_demo=true" : "/admin/lawyers");
 }
 
-export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
-  return request("/admin/demo-template", { method: "POST" });
+export async function importDemoTemplate(pack: "bureau" | "dossiers" = "bureau"): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
+  return request(pack === "dossiers" ? "/admin/demo-template?package=dossiers" : "/admin/demo-template", { method: "POST" });
 }
 
 export async function assignCaseLawyer(caseId: string, lawyerId: string): Promise<Case> {
@@ -298,18 +300,19 @@ export async function getAiConnectivity(force = false): Promise<AIConnectivity> 
   return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
-export interface AIKeyStatus { configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
+export type AIKeyProvider = "openai" | "anthropic";
+export interface AIKeyStatus { active_provider?: AIKeyProvider | null; available_providers?: AIKeyProvider[]; configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
 
 export async function getAiKeyStatus(): Promise<AIKeyStatus> {
   return request("/system/openai-key", { cache: "no-store" });
 }
 
-export async function saveAiKey(apiKey: string): Promise<AIKeyStatus> {
-  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey }), cache: "no-store" });
+export async function saveAiKey(apiKey: string, provider: "openai" | "anthropic" = "openai"): Promise<AIKeyStatus> {
+  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey, provider }), cache: "no-store" });
 }
 
-export async function activateAiKey(): Promise<AIConnectivity> {
-  return request("/system/openai-key/activate", { method: "POST", cache: "no-store" });
+export async function activateAiKey(provider?: AIKeyProvider): Promise<AIConnectivity> {
+  return request("/system/openai-key/activate" + (provider ? `?provider=${provider}` : ""), { method: "POST", cache: "no-store" });
 }
 
 export interface CaseListFilters {
@@ -337,8 +340,12 @@ export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
   return request(`/cases${query ? `?${query}` : ""}`);
 }
 
-export async function getPrecedents(): Promise<Case[]> {
-  return request("/precedents");
+export async function getPrecedents(caseId?: string, allCategories = false): Promise<(Case & { linked_to_case?: boolean })[]> {
+  return request(caseId ? `/precedents?case_id=${encodeURIComponent(caseId)}${allCategories ? "&all_categories=true" : ""}` : "/precedents");
+}
+
+export function setPrecedentLink(caseId: string, precedentId: string, linked: boolean): Promise<void> {
+  return request(`/cases/${caseId}/precedents/${precedentId}`, { method: linked ? "PUT" : "DELETE" });
 }
 
 export async function getPrecedentDocuments(precedentId: string): Promise<DocumentItem[]> {
@@ -367,6 +374,10 @@ export async function updateCase(id: string, payload: CaseUpdatePayload): Promis
 
 export async function closeCase(id: string, payload: CaseClosePayload): Promise<Case> {
   return request(`/cases/${id}/close`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function completeDecision(id: string, payload: CaseClosePayload): Promise<Case> {
+  return request(`/cases/${id}/decision`, { method: "POST", body: JSON.stringify(payload) });
 }
 
 export async function reopenCase(id: string): Promise<Case> {
@@ -406,9 +417,15 @@ export async function listCaseTasks(caseId: string): Promise<Task[]> {
 
 export async function createTask(
   caseId: string,
-  payload: { title: string; description?: string; due_date?: string; assigned_to?: string; reminder_days?: number[] }
+  payload: { title: string; description?: string; due_date?: string; assigned_to?: string; reminder_days?: number[]; stage?: TaskStage; priority?: TaskPriority }
 ): Promise<Task> {
   return request(`/cases/${caseId}/tasks`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export type TaskPatch = Partial<Pick<Task, "title" | "description" | "due_date" | "assigned_to" | "stage" | "priority" | "reminder_days">>;
+
+export async function updateTask(caseId: string, taskId: string, changes: TaskPatch): Promise<Task> {
+  return request(`/cases/${caseId}/tasks/${taskId}`, { method: "PATCH", body: JSON.stringify(changes) });
 }
 
 export async function updateTaskStatus(caseId: string, taskId: string, status: TaskStatus): Promise<Task> {
@@ -605,6 +622,10 @@ async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {
   return response.blob();
 }
 
+export async function previewReport(kind: ReportKind): Promise<string[][]> {
+  return request(`/reports/${kind}/preview`);
+}
+
 export async function downloadReportCsv(kind: ReportKind): Promise<Blob> {
   return fetchBlob(`/reports/${kind}.csv`, "Rapor indirilemedi");
 }
@@ -757,4 +778,13 @@ export async function getScenarioTree(caseId: string, assumptions: Record<string
 
 export async function getScenarioDemo(document: import('@/types/scenarioTree').DocumentAssumption = 'unreviewed', payment: import('@/types/scenarioTree').PaymentAssumption = 'unknown'): Promise<import('@/types/scenarioTree').ScenarioTree> {
   return request(`/legal-lab/scenario-demo?document=${document}&payment=${payment}`);
+}
+
+
+export interface DemoRemovalPreview { token: string; counts: Record<string, number>; kept_users: number; total_records: number }
+export async function previewDemoRemoval(): Promise<DemoRemovalPreview> {
+  return request("/admin/demo-template/removal-preview");
+}
+export async function removeDemoTemplate(token: string): Promise<{removed_records: number; kept_users: number}> {
+  return request("/admin/demo-template/remove", {method:"POST", body:JSON.stringify({token,confirm:true})});
 }

@@ -47,12 +47,16 @@ import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 import { CaseDecisionCard } from "@/components/CaseDecisionCard";
 import { CaseHearingsCard } from "@/components/CaseHearingsCard";
 
+import { PrecedentsView } from "@/components/PrecedentsView";
+import { ScenarioTreeView } from "@/components/lab/ScenarioTreeView";
+
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
   { slug: "belgeler", label: "Belgeler" },
   { slug: "gelismeler", label: "Gelişmeler" },
   { slug: "gorevler", label: "Görevler" },
   { slug: "ai", label: "CaseBridge AI" },
+  { slug: "olasilik", label: "Olasılık Ağacı" },
   { slug: "devir", label: "Devir Raporu" },
   { slug: "notlar", label: "Notlar" },
 ] as const satisfies ReadonlyArray<{ slug: CaseTabSlug; label: string }>;
@@ -79,6 +83,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const { params, setParams } = useUrlParams();
   const sekmeParam = params.get("sekme");
   const [activeTab, setActiveTab] = useState<Tab>(() => labelForSlug(parseCaseTab(sekmeParam)));
+  const [showPrecedents, setShowPrecedents] = useState(false);
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -311,7 +316,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   function handleClosed({ updated, documentFailed }: CloseResult) {
     handleCaseSaved(updated);
     setDialog(null);
-    if (documentFailed) setActionNotice("Dava kapatıldı ancak karar belgesi yüklenemedi.");
+    if (documentFailed) setActionNotice(caseDetail?.status === "kapali" ? "Sonuç kaydedildi ancak karar belgesi yüklenemedi." : "Dava kapatıldı ancak karar belgesi yüklenemedi.");
     void refreshCaseAndDocuments();
   }
 
@@ -361,6 +366,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       : null;
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
+  const dossierClosure = documents.filter(d => /^[CH]\d{2}-\d{2} · /.test(d.filename)).sort((a,b) => b.filename.localeCompare(a.filename, "tr"))[0];
   const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
   const orderedTasks = [...tasks].sort((a, b) => {
     if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
@@ -389,7 +395,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
 
-      <div role="tablist" className="flex gap-1 border-b border-surface-border">
+      <div role="tablist" className="flex max-w-full gap-1 overflow-x-auto whitespace-nowrap border-b border-surface-border">
         {TABS.map((tab) => (
           <button
             key={tab.slug}
@@ -441,6 +447,19 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           </section>
 
           {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
+
+          {caseDetail.status === "kapali" && caseDetail.outcome === "ongoing" && canEditDetails &&
+            <button type="button" className="rounded-xl bg-accent-600 px-4 py-2 text-sm text-white" onClick={() => setDialog("close")}>Dava sonucunu kaydet</button>}
+
+          <section>
+            <button type="button" aria-expanded={showPrecedents} onClick={() => setShowPrecedents(!showPrecedents)}
+              className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
+              {showPrecedents ? "İlgili emsal kararları gizle" : "İlgili emsal kararları göster"}
+            </button>
+            {showPrecedents && <div className="mt-4"><PrecedentsView key={caseId} caseId={caseId} canLink={canEditDetails} /></div>}
+          </section>
 
           <CaseHearingsCard caseDetail={caseDetail} hearings={hearings} readOnly={archived} onChanged={handleHearingsChanged} />
 
@@ -516,9 +535,18 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
 
+      {activeTab === "Olasılık Ağacı" && <div className="space-y-4">
+        {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
+        <ScenarioTreeView key={caseId} fixedCaseId={caseId} caseFile={caseDetail} />
+      </div>}
+
       {activeTab === "Belgeler" && (
         <CaseDocumentsPanel
-          documents={documents}
+          key={params.get("belge") ?? "all"}
+          initialDocumentId={params.get("belge")}
+          documents={caseDetail.case_number.match(/^(?:CB|ÖRNEK)-[CH]\d{2}$/) ? [...documents].sort((a,b) => a.filename.localeCompare(b.filename, "tr")) : documents}
           uploading={uploading}
           uploadError={uploadError}
           onUpload={uploadFile}
@@ -530,6 +558,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       {activeTab === "Gelişmeler" && (
         <CaseTimelinePanel
           caseId={caseId}
+          documentIds={new Set(documents.map(d => d.id))}
           timeline={caseDetail.timeline}
           readOnly={archived}
           onAdded={(created) => setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, created] } : prev))}
@@ -752,6 +781,9 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         <CaseCloseModal
           caseId={caseId}
           openingDate={caseDetail.opening_date ?? null}
+          missingDecision={caseDetail.status === "kapali"}
+          decisionDate={caseDetail.decision_date}
+          closingNote={caseDetail.closing_note}
           pendingTaskCount={pendingTasks}
           onClose={() => setDialog(null)}
           onClosed={handleClosed}
