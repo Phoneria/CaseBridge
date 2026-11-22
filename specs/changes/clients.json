@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/alembic/versions/c8f2a4e6b0d1_add_clients.py",
+        "backend/alembic/versions/eeb771ad79be_merge_clients_and_bureau_heads.py",
+        "backend/app/models/__init__.py",
+        "backend/app/models/case.py",
+        "backend/app/models/client.py",
+        "backend/app/services/client_names.py"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-001",
+        "specs/012-clients/spec.md#FR-002",
+        "specs/012-clients/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_clients_migration.py::test_migration_links_client_parties_and_downgrades",
+        "backend/tests/unit/test_client_names.py::test_client_name_key_collapses_spaces_and_lowers_the_turkish_way",
+        "backend/tests/unit/test_client_names.py::test_dotted_and_dotless_capital_i_stay_different"
+      ],
+      "reason": "Firm-owned clients table linked through case_parties.client_id; the migration merges existing client parties per firm and normalized name, skips precedents, downgrades without loss, ends in one Alembic head after merging main and states in offline SQL that linking was skipped."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/clients.py",
+        "backend/app/schemas/client.py",
+        "backend/app/services/client_service.py",
+        "backend/app/main.py"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-004",
+        "specs/012-clients/spec.md#FR-005",
+        "specs/012-clients/spec.md#FR-007",
+        "specs/012-clients/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_clients.py::test_create_trims_blanks_and_returns_the_client",
+        "backend/tests/api/test_clients.py::test_create_rejects_a_blank_name_and_a_bad_email",
+        "backend/tests/api/test_clients.py::test_list_searches_name_phone_and_email_within_the_firm_only",
+        "backend/tests/api/test_clients.py::test_list_counts_cases_and_open_cases_without_precedents",
+        "backend/tests/api/test_clients.py::test_detail_has_stats_and_cases_open_first_then_by_hearing",
+        "backend/tests/api/test_clients.py::test_another_firms_client_is_a_404_everywhere",
+        "backend/tests/api/test_clients.py::test_rename_rewrites_party_names_and_client_name_even_on_archived_cases",
+        "backend/tests/api/test_clients.py::test_patch_rejects_a_null_name",
+        "backend/tests/api/test_clients.py::test_only_an_admin_deletes_and_only_a_client_without_cases"
+      ],
+      "reason": "Firm-scoped /clients API: search, counts without precedents, validated create and partial update, stats and case ordering, rename propagation including archived cases, admin-only delete with the 409 rule, 404 across firms; router registered in main."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/cases.py",
+        "backend/app/repositories/case_repository.py",
+        "backend/app/schemas/case.py",
+        "backend/app/services/case_parties.py",
+        "backend/app/services/case_service.py"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-001",
+        "specs/012-clients/spec.md#FR-006",
+        "specs/012-clients/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_case_client_links.py::test_a_client_party_without_client_id_creates_then_reuses_a_client",
+        "backend/tests/api/test_case_client_links.py::test_a_chosen_client_gives_its_name_to_the_party",
+        "backend/tests/api/test_case_client_links.py::test_another_firms_client_is_refused_and_nothing_is_saved",
+        "backend/tests/api/test_case_client_links.py::test_a_non_client_party_never_keeps_a_client_id",
+        "backend/tests/api/test_case_client_links.py::test_the_legacy_client_name_create_links_a_client",
+        "backend/tests/api/test_case_client_links.py::test_updating_parties_moves_the_link",
+        "backend/tests/api/test_case_client_links.py::test_the_case_list_filters_by_client"
+      ],
+      "reason": "The cases API links client parties by client_id or find-or-create, refuses another firm's client with 422 and writes nothing, never keeps client_id on non-client parties, links the legacy client_name path and filters the case list by client."
+    },
+    {
+      "files": [
+        "backend/app/db/demo_cleanup.py",
+        "backend/app/db/import_cases.py",
+        "backend/app/db/seed.py"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-007",
+        "specs/012-clients/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_client_seed_and_import.py::test_seed_links_every_demo_client_party_and_fills_demo_contacts",
+        "backend/tests/unit/test_client_seed_and_import.py::test_seed_keeps_contact_details_a_user_changed",
+        "backend/tests/unit/test_client_seed_and_import.py::test_import_links_firm_case_clients_but_not_precedents",
+        "backend/tests/unit/test_client_seed_and_import.py::test_removing_the_demo_firm_removes_its_clients",
+        "backend/tests/unit/test_client_seed_and_import.py::test_precedent_reimport_of_a_firm_case_unlinks_its_clients"
+      ],
+      "reason": "Seed and import link client parties through find-or-create, keep user-edited demo contacts, never link precedents (a precedent re-import unlinks), and demo firm removal deletes its clients first."
+    },
+    {
+      "files": [
+        "frontend/src/app/muvekkiller/page.tsx",
+        "frontend/src/app/muvekkiller/[id]/page.tsx",
+        "frontend/src/components/ClientListView.tsx",
+        "frontend/src/components/ClientDetailView.tsx",
+        "frontend/src/components/ClientFormModal.tsx",
+        "frontend/src/components/Sidebar.tsx",
+        "frontend/src/lib/clients.ts",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-009",
+        "specs/012-clients/spec.md#FR-010",
+        "specs/012-clients/spec.md#FR-012"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/ClientListView.test.tsx::lists clients with type, contact and case counts",
+        "frontend/src/components/__tests__/ClientListView.test.tsx::searches after the user stops typing",
+        "frontend/src/components/__tests__/ClientListView.test.tsx::shows the empty state of a firm without clients",
+        "frontend/src/components/__tests__/ClientListView.test.tsx::pages through 50 clients at a time",
+        "frontend/src/components/__tests__/ClientListView.test.tsx::creates a client and opens its page",
+        "frontend/src/components/__tests__/ClientListView.test.tsx::keeps the form open with the server's message when saving fails",
+        "frontend/src/components/__tests__/ClientDetailView.test.tsx::shows contact details, stats and the client's cases",
+        "frontend/src/components/__tests__/ClientDetailView.test.tsx::shows the server's message for a client that is not found",
+        "frontend/src/components/__tests__/ClientDetailView.test.tsx::edits the client in place",
+        "frontend/src/components/__tests__/ClientDetailView.test.tsx::hides delete from lawyers",
+        "frontend/src/components/__tests__/ClientDetailView.test.tsx::lets an admin delete only a client without cases",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::renders the main navigation without the old Simülasyonlar item",
+        "frontend/src/lib/__tests__/clients.test.ts::labels the client types in Turkish",
+        "frontend/src/lib/__tests__/clients.test.ts::formats lira without decimals",
+        "frontend/src/lib/__tests__/clients.test.ts::accepts a plain e-mail and rejects obvious mistakes"
+      ],
+      "reason": "Müvekkiller sidebar item and the client list/detail screens with search, paging, states, create/edit form and admin-only delete; client types and API calls; application version incremented to v.0.24."
+    },
+    {
+      "files": [
+        "frontend/src/components/case-form/ClientPicker.tsx",
+        "frontend/src/components/case-form/PartiesFields.tsx",
+        "frontend/src/components/NewCaseView.tsx",
+        "frontend/src/components/CasePartiesCard.tsx",
+        "frontend/src/lib/caseIntake.ts"
+      ],
+      "requirements": [
+        "specs/012-clients/spec.md#FR-011"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::searches as the user types and selects a suggestion",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::always offers to add the typed name as a new client",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::opens with suggestions for a name that is already filled in (AI draft)",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::picks with the keyboard and closes with Escape",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::keeps the typed name and shows the error when adding fails",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::lets the user change a chosen client",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::closes the list on a click outside the picker, even without focus",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::resets the highlighted option when new results arrive",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::ignores option clicks while a client is being added",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::links the error to the input and clears it when the text is edited",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::keeps the incoming describedBy next to the error id",
+        "frontend/src/components/__tests__/ClientPicker.test.tsx::does not let Escape that closes the list reach a surrounding dialog",
+        "frontend/src/components/__tests__/NewCaseView.test.tsx::does not create a case while a client row has no chosen client",
+        "frontend/src/components/__tests__/NewCaseView.test.tsx::opens with the client chosen in the first party row",
+        "frontend/src/components/__tests__/CaseFormSections.test.tsx::unchecking Müvekkilimiz after choosing a client gives back a plain name input",
+        "frontend/src/components/__tests__/CaseDetailIntakeCards.test.tsx::edits the parties, saves them with PATCH and reports the updated case",
+        "frontend/src/lib/__tests__/caseIntake.test.ts::asks to choose a client for a client row without one",
+        "frontend/src/lib/__tests__/caseIntake.test.ts::sends client_id for client rows only",
+        "frontend/src/lib/__tests__/caseIntake.test.ts::keeps the client link of a saved party"
+      ],
+      "reason": "Client picker in the case forms: search, quick add, keyboard and combobox accessibility, AI-draft suggestions, validation that blocks saving without a chosen client, client_id only for client rows, ?muvekkil= prefill and client links on the case page."
+    }
+  ]
+}
