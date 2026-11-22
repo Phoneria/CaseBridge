@@ -19,6 +19,19 @@ def output_paths(ledger):
     return sorted(['web-page/'+name for name in ledger['hashes']]+['web-page/index.html','web-page/website-version.json',gallery.LEDGER,'scripts/tests/test_generated_gallery.py','specs/changes/generated-gallery.json'])
 
 
+def required_state(checks, head):
+    matching=[check for check in checks if check.get('name')=='spec-governance' and check.get('head_sha')==head and check.get('app',{}).get('id')==15368]
+    if not matching: return 'PENDING'
+    latest=max(matching,key=lambda check:check['id'])
+    if latest.get('status')!='completed': return 'PENDING'
+    return (latest.get('conclusion') or 'PENDING').upper()
+
+
+def head_check_state(head):
+    payload=json.loads(run('gh','api','repos/Phoneria/CaseBridge/commits/'+head+'/check-runs?filter=all&per_page=100'))
+    return required_state(payload['check_runs'],head)
+
+
 def runtime_unchanged(base):
     return subprocess.run(['git','diff','--quiet',base,'origin/main','--','frontend','backend','web-page'],cwd=ROOT).returncode == 0
 
@@ -30,13 +43,13 @@ def main():
     base=run('git','rev-parse','HEAD')
     if run('git','rev-parse','origin/main')!=base:
         raise ValueError('Main changed during capture; retry fresh batch next schedule')
-    existing=json.loads(run('gh','pr','list','--state','open','--json','number,headRefName,author,statusCheckRollup'))
+    existing=json.loads(run('gh','pr','list','--state','open','--json','number,headRefName,headRefOid,author'))
     for pending in existing:
         if not pending['headRefName'].startswith('codex/automatic-product-gallery-'):
             continue
         if pending['author']['login'] not in ('app/github-actions','github-actions[bot]'):
             raise ValueError('Reserved gallery branch is not owned by the automation')
-        failed=any(check.get('conclusion') in ('FAILURE','CANCELLED','TIMED_OUT','ACTION_REQUIRED') for check in pending['statusCheckRollup'])
+        failed=head_check_state(pending['headRefOid']) in ('FAILURE','CANCELLED','TIMED_OUT','ACTION_REQUIRED')
         if failed:
             run('gh','pr','close',str(pending['number']),'--delete-branch')
         else:
@@ -58,10 +71,9 @@ def main():
     run('gh','workflow','run','ci.yml','--ref',branch,'-f','base='+base)
     checks_deadline=time.monotonic()+300
     while time.monotonic()<checks_deadline:
-        checks=json.loads(run('gh','pr','view',url,'--json','statusCheckRollup'))['statusCheckRollup']
-        required=[check for check in checks if check.get('name')=='spec-governance']
-        if required and all(check.get('conclusion')=='SUCCESS' for check in required): break
-        if any(check.get('conclusion') in ('FAILURE','CANCELLED','TIMED_OUT') for check in required):
+        state=head_check_state(head)
+        if state=='SUCCESS': break
+        if state in ('FAILURE','CANCELLED','TIMED_OUT','ACTION_REQUIRED'):
             run('gh','pr','close',url,'--delete-branch')
             raise ValueError('Required gallery acceptance failed; next schedule retries cleanly')
         time.sleep(5)

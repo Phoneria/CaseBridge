@@ -160,3 +160,19 @@ class VersionedGalleryTests(unittest.TestCase):
         self.assertIn('runs-on: ubuntu-24.04',workflow)
         self.assertNotIn('runs-on: ubuntu-latest',workflow)
         self.assertIn('@playwright/test@1.56.1',workflow)
+
+    def test_exact_head_real_actions_latest_check_cannot_reuse_stale_success(self):
+        module_spec=importlib.util.spec_from_file_location('publisher',ROOT/'scripts/publish-gallery-pr.py')
+        publisher=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(publisher)
+        head='b'*40
+        def check(id,**kwargs):return dict({'id':id,'name':'spec-governance','head_sha':head,'app':{'id':15368},'status':'completed','conclusion':'success'},**kwargs)
+        old=check(1)
+        self.assertEqual(publisher.required_state([old],head),'SUCCESS')
+        pending=check(2,status='in_progress',conclusion=None)
+        self.assertEqual(publisher.required_state([old,pending],head),'PENDING')
+        failure=check(3,conclusion='failure')
+        self.assertEqual(publisher.required_state([old,pending,failure],head),'FAILURE')
+        current=check(4)
+        unrelated=[check(90,head_sha='a'*40),check(91,app={'id':999}),check(92,name='unrelated')]
+        self.assertEqual(publisher.required_state([old,pending,failure,current,*unrelated],head),'SUCCESS')
+        self.assertEqual(publisher.required_state(unrelated,head),'PENDING')
