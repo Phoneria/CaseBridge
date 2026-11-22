@@ -19,6 +19,10 @@ def output_paths(ledger):
     return sorted(['web-page/'+name for name in ledger['hashes']]+['web-page/index.html','web-page/website-version.json',gallery.LEDGER,'scripts/tests/test_generated_gallery.py','specs/changes/generated-gallery.json'])
 
 
+def runtime_unchanged(base):
+    return subprocess.run(['git','diff','--quiet',base,'origin/main','--','frontend','backend','web-page'],cwd=ROOT).returncode == 0
+
+
 def main():
     ledger=json.loads((ROOT/gallery.LEDGER).read_text())
     paths=output_paths(ledger)
@@ -65,7 +69,8 @@ def main():
         run('gh','pr','close',url,'--delete-branch')
         raise ValueError('Required gallery acceptance timed out; next schedule retries cleanly')
     expected={'app':ledger['app'],'marketingVersion':ledger['sourceMarketingVersion']}
-    if gallery.identity()!=expected:
+    run('git','fetch','origin','main')
+    if gallery.identity()!=expected or not runtime_unchanged(base):
         run('gh','pr','close',url,'--delete-branch')
         raise ValueError('Public versions changed while candidate CI ran; retry current source')
     run('gh','pr','merge',url,'--auto','--merge','--match-head-commit',head)

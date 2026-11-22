@@ -79,6 +79,7 @@ class VersionedGalleryTests(unittest.TestCase):
         publisher=(ROOT/'scripts/publish-gallery-pr.py').read_text()
         self.assertIn("'--auto','--merge'",publisher)
         self.assertIn('gallery.identity()!=expected',publisher)
+        self.assertIn('not runtime_unchanged(base)',publisher)
         self.assertIn("'--match-head-commit',head",publisher)
         self.assertIn("'ci.yml','--ref',branch",publisher)
         self.assertIn('set(staged)-set(paths)',publisher)
@@ -129,3 +130,22 @@ class VersionedGalleryTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError,'Public image bytes differ'):gallery.verify(root)
         finally:
             server.shutdown();server.server_close();thread.join()
+
+    def test_runtime_race_rejects_new_application_or_marketing_even_before_public_cutover(self):
+        import subprocess
+        from unittest.mock import patch
+        module_spec=importlib.util.spec_from_file_location('publisher',ROOT/'scripts/publish-gallery-pr.py')
+        publisher=importlib.util.module_from_spec(module_spec);module_spec.loader.exec_module(publisher)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            def git(*args):return subprocess.check_output(['git','-C',tmp,*args],text=True).strip()
+            git('init','-q');git('config','user.name','Synthetic');git('config','user.email','synthetic@example.invalid')
+            (root/'frontend').mkdir();(root/'frontend/app-version.json').write_text('{"version":"0.23"}')
+            git('add','.');git('commit','-qm','base');base=git('rev-parse','HEAD');git('update-ref','refs/remotes/origin/main',base)
+            with patch.object(publisher,'ROOT',root):
+                self.assertTrue(publisher.runtime_unchanged(base))
+                (root/'docs').mkdir();(root/'docs/check.md').write_text('evidence');git('add','.');git('commit','-qm','docs');git('update-ref','refs/remotes/origin/main',git('rev-parse','HEAD'))
+                self.assertTrue(publisher.runtime_unchanged(base))
+                for folder in ['frontend','backend','web-page']:
+                    (root/folder).mkdir(exist_ok=True);(root/folder/'new-runtime').write_text('new');git('add','.');git('commit','-qm',folder);git('update-ref','refs/remotes/origin/main',git('rev-parse','HEAD'))
+                    self.assertFalse(publisher.runtime_unchanged(base))
