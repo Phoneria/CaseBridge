@@ -7,6 +7,7 @@ vi.mock('next/navigation', async () => (await import('@/test/navigation')).navig
 import { resetNav, setUrl } from '@/test/navigation';
 const getCases=vi.fn(),getScenarioTree=vi.fn(),getScenarioDemo=vi.fn();
 vi.mock('@/lib/api',()=>({getCases:(...a:unknown[])=>getCases(...a),getScenarioTree:(...a:unknown[])=>getScenarioTree(...a),getScenarioDemo:(...a:unknown[])=>getScenarioDemo(...a)}));
+import { scenarioMap } from '@/components/lab/scenarioMap';
 import { ScenarioTreeView } from '@/components/lab/ScenarioTreeView';
 const node=(id:string,parent_id:string|null,label:string,kind:ScenarioNode['kind']):ScenarioNode=>({id,parent_id,label,kind,description:'Koşullu inceleme',reasoning:'Kayıtlar doğrulanmalı.',source_ids:['case'],uncertainties:['Belge aslı eksik.'],probability:null,support_weight:kind==='development'?50:null,assessment_label:kind==='development'?'Demo tahmini':'Hesaplanmadı'});
 const tree=(id='c1',version='a'.repeat(64)):ScenarioTree=>({case_id:id,title:id==='c1'?'Örnek A':'Örnek B',case_closed:false,context_version:version,generated_at:'2026-11-22T00:00:00Z',source_mode:'conditional_preparation',analysis_id:null,analysis_created_at:null,is_example:false,nodes:[node('root',null,'Dosya bağlamı','context'),node('confirm','root','Belgeler doğrulanırsa','development'),node('outcome','confirm','Hazırlık gözden geçirilir','outcome')],sources:[{id:'case',kind:'case',label:'Dosya kaydı',detail:'Sentetik bağlam',recorded_at:null}],current_facts:['Teslim tarihi kaydı'],uncertainties:['Belge aslı eksik.'],truncated:false,limits_note:'Gösterim sınırı',disclaimer:'Hukuki sonuç garantisi değildir.'});
@@ -116,8 +117,45 @@ it('separates recorded history from simulated percentages', async () => {
   await userEvent.click(outcome);
   expect(screen.getByRole('region',{name:'Seçili dalın dayanakları'})).toHaveTextContent('Talep reddedildi.');
   const conditional = graph.getByRole('button',{name:/Belgeler doğrulanırsa/});
-  expect(conditional).toHaveTextContent('Geçiş %50 · Başlangıçtan %50');
-  expect(graph.getByRole('button',{name:/Hazırlık gözden geçirilir/})).toHaveTextContent('Geçiş %100 · Başlangıçtan %50');
+  const share = scenarioMap(snapshot).nodes.find(n => n.id === 'confirm')!.path_percent!;
+  const label = share.toLocaleString('tr-TR');
+  expect(conditional).toHaveTextContent('Temsili geçiş %' + label + ' · Başlangıçtan %' + label);
+  expect(graph.getByRole('button',{name:/Hazırlık gözden geçirilir/})).toHaveTextContent('Temsili geçiş %100 · Başlangıçtan %' + label);
   await userEvent.click(conditional);
   expect(outcome).toHaveTextContent('Gerçekleşen yol');
+});
+
+it('centers the root between the outermost leaves', async () => {
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  const group = await screen.findByRole('group', {name:'Dosya senaryo ağacı'});
+  const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>('button[title][aria-pressed]'));
+  expect(buttons.length).toBeGreaterThanOrEqual(20);
+  const root = buttons.find(button => button.title === 'Dosya bağlamı')!;
+  const offsets = buttons.map(button => parseFloat(button.style.top));
+  expect(parseFloat(root.style.top)).toBe((Math.min(...offsets) + Math.max(...offsets)) / 2);
+});
+
+it('expands short trees with stable varied illustrative shares and preserves supplied weights', () => {
+  for (const mode of ['conditional_preparation', 'stored_analysis', 'synthetic_demo'] as const) {
+    const input = tree();
+    input.source_mode = mode;
+    input.nodes.push(node('second','root','İkinci seçenek','scenario'), node('third','root','Üçüncü seçenek','scenario'));
+    input.nodes[1].transition_percent = 13;
+    const map = scenarioMap(input);
+    expect(map.nodes.length).toBeGreaterThanOrEqual(20);
+    expect(new Set(map.nodes.map(n => n.id)).size).toBe(map.nodes.length);
+    const percentages = (t: ScenarioTree) => t.nodes.filter(n => n.parent_id === 'root').map(n => n.transition_percent!);
+    const shares = percentages(map);
+    expect(shares[0]).toBe(13);
+    expect(shares[1]).not.toBe(shares[2]);
+    expect(shares.reduce((a,b) => a+b,0)).toBeCloseTo(100);
+    expect(percentages(scenarioMap(input))).toEqual(shares);
+    expect(percentages(scenarioMap({...input, case_id:'another-case'}))).not.toEqual(shares);
+    for (const n of map.nodes.filter(n => n.id.startsWith('review:'))) {
+      expect(n.recorded_step).toBeFalsy();
+      expect(n.source_ids).toEqual(['case']);
+      expect(map.nodes.some(parent => parent.id === n.parent_id)).toBe(true);
+    }
+    expect(input.nodes.length).toBe(5);
+  }
 });

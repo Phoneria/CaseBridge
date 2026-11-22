@@ -82,3 +82,5 @@ Sabit büro/dava kimliğinden doğrulanan katalog ağacını belge kaynaklarıyl
 FR-012 için grafiğin düğümlerini ve oklarını birlikte ölçekle. Kaydırılan alanı çizim boyutlarına uyarla. Denetimleri grafiğin dışında ve klavye ile erişilebilir tut.
 
 FR-013, FR-008 kapsamındaki katalog ağırlıklarını korur. Diğer dosyalarda olası bir sonraki adım seçiminde belirtilmemiş pay için eşit seçim varsayımı kullanılır. Puanlar ve hukuki sonuç olasılığı bu hesaba girmez. Kayıtlı olaylar ve kapanış ayrı bir tarihçe dalıdır.
+
+FR-014 için yerleşim alt ağaçtaki ilk ve son yaprağın ortasını kullanır. Açılış kaydırması yalnız grafik bağlandığında uygulanır. Kısa ağaçların yaprakları, koşullu hazırlık kararları ve bağlantılı kaynaklarla genişletilir. FR-013'teki eşit pay varsayımını, eksik yüzdelerde deterministik rastgele paylar değiştirir.
