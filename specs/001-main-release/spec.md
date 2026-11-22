@@ -33,7 +33,7 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 
 - **FR-005**: Main’e değişiklik yalnız PR üzerinden girer; force push engellenir, bypass listesi boştur. İkinci kişi onayı gerekmez. Zorunlu spec-governance check’i GitHub Actions sağlayıcısı 15368’e bağlıdır.
 - **FR-006**: Davranış değiştiren PR diff’indeki her dosya, aynı PR’da eklenen/değişen specs/changes JSON kaydında mevcut Spec Kit FR gereksinimine ve aynı PR’da değişen isimli kabul testine bağlanır. Silinen davranış dosyaları da kapsanır. Belge-only işler muaf olur.
-- **FR-007**: Kabul testi yalnız metin/link değildir: adlandırılmış assertion içeren Python unittest/pytest veya Vitest testi doğrulanır ve spec-governance içinde gerçekten çalışır. Eksik bağ, bilinmeyen gereksinim/test ve başarısız test merge kapısını geçemez.
+- **FR-007**: Kabul testi yalnız metin/link değildir: adlandırılmış assertion içeren Python unittest/pytest veya Vitest testi doğrulanır ve spec-governance içinde gerçekten çalışır; skip/xfail/todo başarılı kabul sayılmaz. Eksik bağ, bilinmeyen gereksinim/test ve başarısız test merge kapısını geçemez.
 - **FR-008**: Koruma gerçek deneme PR’ında eksik bağla başarısız/blokeli, aynı PR’da bağ tamamlanınca başarılı/merge’e uygun gösterilir. Deneme davranış kodu main’e birleştirilmez; asistan kendi kalıcı değişikliğinde de PR yolunu kullanır.
 
 ### Key Entities

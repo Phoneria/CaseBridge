@@ -7,6 +7,8 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,15 +99,27 @@ def run_tests(root, plan):
     env = dict(os.environ, JWT_SECRET='ci-spec-acceptance', ENV='test', LLM_PROVIDER='mock', CHAT_PROVIDER='mock')
     for test in plan['tests']:
         runner, path, name = test['runner'], test['path'], test['name']
-        cwd = root
-        if runner == 'unittest':
-            command = [sys.executable, '-m', 'unittest', path[:-3].replace('/', '.')+'.'+name, '-v']
-        elif runner == 'pytest':
-            command = [sys.executable, '-m', 'pytest', path+'::'+name.replace('.', '::'), '-q']
-        else:
-            cwd = root/'frontend'
-            command = [str(cwd/'node_modules/.bin/vitest'), 'run', path.removeprefix('frontend/'), '-t', re.escape(name)]
-        subprocess.run(command, cwd=cwd, env=env, check=True)
+        with tempfile.TemporaryDirectory(prefix='spec-acceptance-') as directory:
+            report = Path(directory)/'result'
+            cwd = root
+            if runner == 'unittest':
+                selector = path[:-3].replace('/', '.')+'.'+name
+                code = "import sys,unittest; result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromName(sys.argv[1])); sys.exit(0 if result.testsRun and result.wasSuccessful() and not result.skipped and not result.expectedFailures else 1)"
+                command = [sys.executable, '-c', code, selector]
+            elif runner == 'pytest':
+                command = [sys.executable, '-m', 'pytest', path+'::'+name.replace('.', '::'), '-q', '--junitxml='+str(report)]
+            else:
+                cwd = root/'frontend'
+                command = [str(cwd/'node_modules/.bin/vitest'), 'run', path.removeprefix('frontend/'), '-t', re.escape(name), '--reporter=json', '--outputFile='+str(report)]
+            subprocess.run(command, cwd=cwd, env=env, check=True)
+            if runner == 'pytest':
+                cases = list(ET.parse(report).iter('testcase'))
+                if not cases or any(list(case) and any(child.tag in {'skipped', 'failure', 'error'} for child in case) for case in cases):
+                    raise ValueError('Bound pytest acceptance must execute and pass without skips/xfail')
+            if runner == 'vitest':
+                cases = [case for suite in json.loads(report.read_text())['testResults'] for case in suite['assertionResults'] if name in case['fullName']]
+                if not cases or any(case['status'] != 'passed' for case in cases):
+                    raise ValueError('Bound Vitest acceptance must execute and pass without skips/todo')
 
 
 def main():

@@ -65,3 +65,8 @@ class GateAcceptance(unittest.TestCase):
     def test_deleted_behavior_still_requires_link(self):
         (self.root/'app.py').unlink(); head=self.commit()
         with self.assertRaisesRegex(ValueError,'lack Spec Kit'):gate.validate(self.root,self.base,head)
+
+    def test_skipped_acceptance_does_not_count_as_executed(self):
+        self.write('scripts/tests/test_behavior.py', 'import unittest\nclass Acceptance(unittest.TestCase):\n    @unittest.skip("not executed")\n    def test_skipped(self):\n        self.assertTrue(True)\n')
+        plan={'tests':[{'runner':'unittest','path':'scripts/tests/test_behavior.py','name':'Acceptance.test_skipped'}]}
+        with self.assertRaises(subprocess.CalledProcessError):gate.run_tests(self.root,plan)
