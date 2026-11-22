@@ -19,3 +19,5 @@ Final checks:
 - Executable diff gate onb71848f:10 behavior files linked to9 named assertion-bearing tests, all executed successfully with no skip. Governance validates12 feature sets; diff/source checks pass. Browser harness final change is test-only.
 
 Convergence after removal: all7 functional requirements and11 tasks satisfied for implementation/review scope. PR61 remains open/In Review; no merge/auto-merge/deployment or production deletion. Version is a review candidate; source manifest must be reconciled with other pending app work when main is released. File cleanup errors may leave unreferenced storage files for operational cleanup; DB deletion result stays accurate.
+
+The [verified v.0.26 production release](../001-main-release/verification.md#workspace-release-v026) supersedes the earlier review-stage status.
