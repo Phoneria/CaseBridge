@@ -27,7 +27,7 @@ async function check(browser, [role, me, path, topic], width, theme) {
       const responses = {
         '/users/me': me,
         '/ai/status': {configured:false},
-        '/reports/summary': {total_cases:0, upcoming_hearings_30d:0, open_tasks:0, closed_cases:0},
+        '/reports/summary': {total_cases:0, upcoming_hearings_30d:0, open_tasks:0, win_rate:0},
         '/analytics/overview': {total_cases:0, active_cases:0, by_status:[], by_category:[]},
         '/cases': topic === 'admin' ? [{id:'case-demo', case_name:'Kurgusal dosya', case_number:'Örnek 1', opening_date:'2026-11-01', status:'aktif', assigned_lawyer_id:null}] : [],
       };

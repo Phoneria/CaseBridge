@@ -15,22 +15,42 @@ function TourSteps({ topic }: { topic: GuideTopic }) {
   useEffect(() => {
     const main = document.getElementById('main-content');
     if (!main) return;
+    const content = main;
     let target: HTMLElement | null = null;
-    function highlight() {
-      const next = main!.querySelector<HTMLElement>(step.selector);
-      setFound(!!next);
-      if (next === target) return;
-      target?.removeAttribute('data-guide-current');
-      target = next;
-      if (target) {
-        target.setAttribute('data-guide-current', '');
+    let frame = 0;
+    function reveal() {
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const viewport = content.getBoundingClientRect();
+      if (rect.top < viewport.top || rect.bottom > viewport.bottom ||
+          rect.left < viewport.left || rect.right > viewport.right) {
         target.scrollIntoView?.({ block: 'center', inline: 'center' });
       }
     }
+    function highlight() {
+      const next = content.querySelector<HTMLElement>(step.selector);
+      setFound(!!next);
+      if (target !== next) {
+        target?.removeAttribute('data-guide-current');
+        target = next;
+        target?.setAttribute('data-guide-current', '');
+      }
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(reveal);
+    }
     highlight();
     const observer = new MutationObserver(highlight);
-    observer.observe(main, { childList: true, subtree: true });
-    return () => { observer.disconnect(); target?.removeAttribute('data-guide-current'); };
+    observer.observe(content, { childList: true, subtree: true });
+    // Charts and asynchronously loaded sections can move an existing control.
+    const resize = new ResizeObserver(highlight);
+    resize.observe(content);
+    if (content.firstElementChild) resize.observe(content.firstElementChild);
+    return () => {
+      observer.disconnect();
+      resize.disconnect();
+      cancelAnimationFrame(frame);
+      target?.removeAttribute('data-guide-current');
+    };
   }, [step]);
   const back = '/rehber?konu=' + topic.id;
   const button = 'min-h-10 rounded-lg border border-accent-300 bg-white px-3 py-1.5 text-sm font-semibold text-accent-800 disabled:opacity-50';

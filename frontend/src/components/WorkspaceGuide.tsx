@@ -98,7 +98,7 @@ export function WorkspaceGuide() {
         </ol>
         <div className="mt-3 flex flex-wrap gap-2 border-t border-surface-border pt-5">
           <Link href={destination} className={primary}>İlgili ekranı aç</Link>
-          {guideTours[current.id] && <Link href={destination + '?tur=' + current.id} className="inline-flex min-h-11 items-center rounded-xl border border-accent-300 px-4 py-2 text-sm font-semibold text-accent-800">Ekranda adım adım göster</Link>}
+          {guideTours[current.id] && <Link href={destination + '?tur=' + current.id} scroll={false} className="inline-flex min-h-11 items-center rounded-xl border border-accent-300 px-4 py-2 text-sm font-semibold text-accent-800">Ekranda adım adım göster</Link>}
         </div>
       </article>
     </div>
