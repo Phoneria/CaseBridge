@@ -15,13 +15,14 @@ const EMPTY_FORM = { event_date: "", title: "", event_type: "other" as CaseEvent
 interface Props {
   caseId: string;
   timeline: CaseEvent[];
+  documentIds?: Set<string>;
   /** Archived case: the list stays, the form goes. */
   readOnly: boolean;
   onAdded: (event: CaseEvent) => void;
 }
 
 /** "Gelişmeler": the case timeline with a type badge per entry, and a form for typed entries (not notes). */
-export function CaseTimelinePanel({ caseId, timeline, readOnly, onAdded }: Props) {
+export function CaseTimelinePanel({ caseId, timeline, documentIds, readOnly, onAdded }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +105,7 @@ export function CaseTimelinePanel({ caseId, timeline, readOnly, onAdded }: Props
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-medium text-navy-800">{entry.title}</p>
+                  {documentIds?.has(entry.id) && <a className="text-xs font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${entry.id}`}>Evrakı aç</a>}
                   <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-navy-600">
                     {CASE_EVENT_TYPE_LABELS[entry.event_type] ?? entry.event_type}
                   </span>

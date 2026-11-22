@@ -111,7 +111,7 @@ class ScenarioTree(BaseModel):
     case_closed: bool
     context_version: str = Field(pattern=r'^[0-9a-f]{64}$')
     generated_at: datetime
-    source_mode: Literal['stored_analysis', 'conditional_preparation', 'synthetic_demo']
+    source_mode: Literal['stored_analysis', 'conditional_preparation', 'synthetic_demo', 'dossier_history']
     analysis_id: str | None = None
     analysis_created_at: str | None = None
     is_example: bool = False
@@ -276,6 +276,39 @@ def build_tree(db: Session, case: Case, firm_id: str, assumptions: dict[str, Sup
     version = hashlib.sha256(json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
     common_sources = [s.id for s in sources if s.kind in {'case', 'event', 'document'}][:16]
     nodes = [TreeNode(id='root', parent_id=None, kind='context', label=text(case.case_name), description='Dosyada kaydedilen olay, iddia ve belge bağlamı.', reasoning='Bu kök dosyadaki kayıtları özetler; kayıtların doğruluğu veya hukuki sonucu bu görünümle doğrulanmış sayılmaz.', source_ids=common_sources, uncertainties=uncertainties)]
+    from app.db.dossier_pack import case_key, document_key
+    from app.db.dossier_documents import entries
+    from app.db.dossier_stories import STORIES
+    story = next((s for s in STORIES if case.case_number == "ÖRNEK-" + s.code and case.id == case_key(firm_id, s)), None)
+    if story and not has_analysis:
+        from app.db.dossier_exhibits import EXHIBITS
+        exhibit_titles = {title for title, _, _ in EXHIBITS[story.code]}
+        available = {s.id for s in sources if s.kind == 'document'}
+        records = entries(story)
+        def references(matches):
+            return [ref for e in records if matches(e.title)
+                    and (ref := "document:" + document_key(case.id, e.key)) in available]
+        groups = [
+            ("evidence", "Olay ve dayanak kayıtlar", story.facts, story.finding,
+             references(lambda title: title in exhibit_titles or any(t in title for t in ("Delil eki", "raporu", "Müzekkere cevabı", "Keşif", "Tanık dinleme")))),
+            ("dispute", "Tartışılan husus", story.response, story.challenge,
+             references(lambda title: any(t in title.lower() for t in ("itiraz", "beyan", "savunma", "dilekçesi", "tartışıldığı")))),
+            ("recorded", "Gerçekleşen sonuç", story.judgment, story.end,
+             references(lambda title: any(t in title.lower() for t in ("karar", "kapanış", "kyok")) and title != "Ara karar evrakı")),
+        ]
+        for key, label, description, reasoning, refs in groups:
+            nodes.append(TreeNode(id=key, parent_id="root", kind="outcome" if key == "recorded" else "development",
+                                  label=label, description=description, reasoning=reasoning, source_ids=refs,
+                                  uncertainties=[] if refs else ["İlgili örnek evrak bu dosyada bulunamadı."]))
+        nodes.append(TreeNode(id="alternative", parent_id="dispute", kind="scenario", label="Olası alternatif",
+                              description="Karşı açıklama doğrulansaydı aynı kayıtlar yeniden değerlendirilirdi.",
+                              reasoning=story.response, source_ids=groups[1][4], uncertainties=["Bu dal kurgusal dosyada gerçekleşmedi."]))
+        return ScenarioTree(case_id=case.id, title=case.case_name, case_closed=case.status == CaseStatus.KAPALI,
+                            context_version=version, generated_at=datetime.now(timezone.utc), source_mode="dossier_history",
+                            analysis_id=None, analysis_created_at=None, is_example=True, nodes=nodes, sources=sources,
+                            current_facts=facts[:80], uncertainties=uncertainties, truncated=truncated,
+                            limits_note="Evrak bağlantıları seçili dosyaya aittir.",
+                            disclaimer="Bu geçmiş, kurgusal dosyadaki belgeleri izler. Olasılık hesaplanmadı.")
     if has_analysis:
         for i, scenario in enumerate(scenarios):
             sid = f'scenario-{i}'

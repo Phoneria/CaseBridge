@@ -1,6 +1,7 @@
 import type { CaseEventType } from "@/types";
 
 export const CASE_TYPE_LABELS: Record<string, string> = {
+  ceza: "Ceza Hukuku",
   is_hukuku: "İş Hukuku",
   ticaret_hukuku: "Ticaret Hukuku",
   sozlesme: "Sözleşme",

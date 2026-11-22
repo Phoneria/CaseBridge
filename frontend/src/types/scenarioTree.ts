@@ -25,7 +25,7 @@ export interface ScenarioTree {
   case_closed: boolean;
   context_version: string;
   generated_at: string;
-  source_mode: 'stored_analysis' | 'conditional_preparation' | 'synthetic_demo';
+  source_mode: 'stored_analysis' | 'conditional_preparation' | 'synthetic_demo' | 'dossier_history';
   analysis_id: string | null;
   analysis_created_at: string | null;
   is_example: boolean;

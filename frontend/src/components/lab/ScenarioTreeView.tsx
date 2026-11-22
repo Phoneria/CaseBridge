@@ -43,7 +43,7 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
         onClick={() => onSelect(node.id)} title={node.label}
         className={'absolute flex min-h-[86px] w-[250px] flex-col justify-center rounded-xl border px-3 py-2 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-accent-400 ' + (selected === node.id ? 'border-accent-500 bg-accent-50 text-accent-900' : 'border-surface-border bg-white text-navy-800')}
         style={{ left: pos.x, top: pos.y }}>
-        <span className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-accent-700">{node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
+        <span className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-accent-700">{tree.source_mode === 'dossier_history' ? (node.id === 'alternative' ? 'Alternatif yol' : 'Dosya geçmişi') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
         <span className="mt-1 text-[10px] text-navy-500">{assessment(node)}</span>
       </button>; })}
@@ -114,6 +114,10 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
     if (demo !== demoMode || (!demo && id !== caseId)) switchMode(demo, id);
   }, [urlKey]);
   const node = useMemo(() => tree?.nodes.find(n => n.id === selected) ?? tree?.nodes[0], [tree, selected]);
+  function exhibitLink(id: string, label: string) {
+    if (!tree || !id.startsWith('document:')) return label;
+    return <Link className="text-accent-700 underline" href={`/davalar/${tree.case_id}?sekme=belgeler&belge=${encodeURIComponent(id.slice(9))}`}>{label}</Link>;
+  }
   const sourceById = useMemo(() => new Map(tree?.sources.map(s => [s.id, s]) ?? []), [tree]);
   return <div className="space-y-5">
     {!fixedCaseId && <><AiHero compact title="Olasılık Ağacı" description="Dosyanızdaki kayıtları, alternatif senaryoları ve koşullu gelişmeleri dayanaklarıyla birlikte inceleyin. Demo tahminlerini, kullanılan varsayımları ve hesaplama yöntemini birlikte inceleyin." />
@@ -127,11 +131,11 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
     {!demoMode && !caseId && !casesLoading && <p className="rounded-xl border border-surface-border bg-white p-5 text-sm text-navy-600">Ağaç oluşturmak için erişiminiz olan bir dosya seçin. Bu görünüm yeni bir yapay zekâ analizi başlatmaz.</p>}
     {tree && node && <>
       <div className="rounded-xl border border-accent-200 bg-accent-50 px-4 py-3 text-sm text-accent-900">
-        <strong>{tree.source_mode === 'synthetic_demo' ? 'Sentetik örnek — Demo tahmini' : tree.source_mode === 'stored_analysis' ? (tree.is_example ? 'Örnek analiz kaydındaki senaryolar' : 'Kayıtlı analizdeki senaryolar') : 'Koşullu hazırlık yolları'}</strong>
-        <p className="mt-1">{tree.source_mode === 'synthetic_demo' ? 'Tek bir kurgusal inceleme sorusunun birbirini dışlayan ve tüm seçenekleri kapsayan üç alternatifidir.' : tree.source_mode === 'stored_analysis' ? 'Dallar son tamamlanmış analiz kaydından alınmıştır; sıraları olasılık derecesi değildir.' : 'Kayıtlı, kullanılabilir analiz senaryosu bulunamadı. Genel hazırlık dalları dosyaya özgü bir tahmin değildir.'}</p>
-        <p className="mt-1 font-medium">{tree.demo ? 'Demo tahmini yüzdeleri yalnız bu aynı sorunun alternatifleri arasında toplam %100’dür.' : 'Demo tahmini destek ağırlığı: her dal bağımsız 0–100 ölçeğindedir; örtüşebilen dallar toplamlanmaz. Başlangıç 50/100 nötr varsayımdır.'}</p>
+        <strong>{tree.source_mode === 'dossier_history' ? 'Kurgusal dosyanın karar ağacı' : tree.source_mode === 'synthetic_demo' ? 'Sentetik örnek — Demo tahmini' : tree.source_mode === 'stored_analysis' ? (tree.is_example ? 'Örnek analiz kaydındaki senaryolar' : 'Kayıtlı analizdeki senaryolar') : 'Koşullu hazırlık yolları'}</strong>
+        <p className="mt-1">{tree.source_mode === 'dossier_history' ? 'Olayı, tartışılan hususu ve gerçekleşen sonucu seçerek dayanak evrakı açabilirsiniz.' : tree.source_mode === 'synthetic_demo' ? 'Tek bir kurgusal inceleme sorusunun birbirini dışlayan ve tüm seçenekleri kapsayan üç alternatifidir.' : tree.source_mode === 'stored_analysis' ? 'Dallar son tamamlanmış analiz kaydından alınmıştır; sıraları olasılık derecesi değildir.' : 'Kayıtlı, kullanılabilir analiz senaryosu bulunamadı. Genel hazırlık dalları dosyaya özgü bir tahmin değildir.'}</p>
+        {tree.source_mode !== "dossier_history" && <p className="mt-1 font-medium">{tree.demo ? 'Demo tahmini yüzdeleri yalnız bu aynı sorunun alternatifleri arasında toplam %100’dür.' : 'Demo tahmini destek ağırlığı: her dal bağımsız 0–100 ölçeğindedir; örtüşebilen dallar toplamlanmaz. Başlangıç 50/100 nötr varsayımdır.'}</p>}
       </div>
-      <section aria-label="Demo hesaplama yöntemi" className="space-y-3 rounded-xl border border-surface-border bg-white p-4 text-sm text-navy-700">
+      {tree.source_mode !== "dossier_history" && <section aria-label="Demo hesaplama yöntemi" className="space-y-3 rounded-xl border border-surface-border bg-white p-4 text-sm text-navy-700">
         <h2 className="font-semibold text-navy-900">Demo tahmini — varsayımlar ve yöntem</h2>
         <p>{tree.demo?.method ?? tree.support_model?.method}</p>
         {tree.demo ? <>
@@ -143,7 +147,7 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
           {tree.demo.assumptions.map(a => <p key={a.id}>{a.label}: {a.explanation}</p>)}
           <ul>{tree.demo.groups[0].weights.map(w => <li key={w.node_id}>{tree.nodes.find(n => n.id === w.node_id)?.label}: {w.score} / {tree.demo!.groups[0].total_points} puan → {assessment(tree.nodes.find(n => n.id === w.node_id)!)}</li>)}</ul>
         </> : <div className="space-y-3">{tree.support_model?.assumptions.map(a => <label key={a.node_id} className="block rounded-lg border border-surface-border p-3"><span className="block font-medium">{tree.nodes.find(n => n.id === a.node_id)?.label}</span><select aria-label={`Varsayım: ${tree.nodes.find(n => n.id === a.node_id)?.label}`} className="my-2 max-w-full rounded-lg border border-surface-border bg-white p-2" value={assumptions[a.node_id] ?? 'neutral'} onChange={e => {const values = {...assumptions, [a.node_id]: e.target.value as SupportAssumption}; setAssumptions(values); void load(tree.case_id, true, values);}}><option value="neutral">Nötr başlangıç</option><option value="supports">Dayanaklar bu dalı destekliyor varsay</option><option value="contradicts">Dayanaklar bu dalla çelişiyor varsay</option></select><span className="block text-xs leading-5">{a.explanation}</span></label>)}</div>}
-      </section>
+      </section>}
       {changed && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Kaynaklar veya varsayımlar önceki görüntülemeye göre değişti. Ağaç yenilendi; dayanakları ve belirsizlikleri yeniden inceleyin.</p>}
       {comparison && <details className="rounded-xl border border-surface-border bg-white p-4 text-sm text-navy-700"><summary className="cursor-pointer font-semibold">Değişen dayanaklar ve önceki görüntü</summary>
         <p className="mt-2">{comparison.facts ? 'Dosya olayları, belge kayıtları veya analiz dayanakları değişti.' : 'Kaynak içeriğinin sürümü değişti; dal metinleri aynı kalmış olabilir.'}</p>
@@ -169,7 +173,7 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
             <button type="button" onClick={() => setSelected(n.id)} aria-pressed={selected === n.id} className="text-left text-sm font-semibold text-accent-800">{n.label}</button>
             <p className="mt-1 text-sm text-navy-700">{n.description}</p><p className="mt-1 text-xs text-navy-500">{assessment(n)}</p>
             <p className="mt-2 text-sm text-navy-600">{n.reasoning}</p>
-            <p className="mt-2 text-xs font-semibold text-navy-700">Dayanaklar</p><ul className="mt-1 space-y-1 text-xs text-navy-600">{n.source_ids.map(id => <li key={id}>{sourceById.get(id)?.label}: {sourceById.get(id)?.detail}</li>)}</ul>
+            <p className="mt-2 text-xs font-semibold text-navy-700">Dayanaklar</p><ul className="mt-1 space-y-1 text-xs text-navy-600">{n.source_ids.map(id => <li key={id}>{exhibitLink(id, sourceById.get(id)?.label ?? id)}: {sourceById.get(id)?.detail}</li>)}</ul>
             <p className="mt-2 text-xs font-semibold text-navy-700">Belirsizlikler</p><ul className="mt-1 list-disc pl-4 text-xs text-navy-600">{n.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul>
           </article>)}
         </section>}
@@ -177,7 +181,7 @@ export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
           <div><h2 className="text-base font-semibold text-navy-900">{node.label}</h2><p className="mt-2 text-sm leading-6 text-navy-700">{node.description}</p></div>
           <div className="rounded-xl bg-accent-50 p-3 text-sm text-accent-800"><strong>{assessment(node)}</strong><p className="mt-1 leading-6">{node.reasoning}</p></div>
           {node.kind === 'context' && <details><summary className="cursor-pointer text-sm font-semibold text-navy-800">Kayıtlı olaylar ve iddialar</summary><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-navy-600">{tree.current_facts.map((f,i) => <li key={i}>{f}</li>)}</ul></details>}
-          <div><h3 className="text-sm font-semibold text-navy-800">Dayanaklar</h3><ul className="mt-2 space-y-2">{node.source_ids.map(id => { const source = sourceById.get(id)!; return <li key={id} className="rounded-lg border border-surface-border p-2 text-xs leading-5 text-navy-600"><strong className="block text-navy-800">{source.label}</strong>{source.detail}{source.recorded_at && <span className="mt-1 block text-navy-500">Kayıt: {source.recorded_at.slice(0,10)}</span>}</li>; })}</ul></div>
+          <div><h3 className="text-sm font-semibold text-navy-800">Dayanaklar</h3><ul className="mt-2 space-y-2">{node.source_ids.map(id => { const source = sourceById.get(id)!; return <li key={id} className="rounded-lg border border-surface-border p-2 text-xs leading-5 text-navy-600"><strong className="block text-navy-800">{exhibitLink(id, source.label)}</strong>{source.detail}{source.recorded_at && <span className="mt-1 block text-navy-500">Kayıt: {source.recorded_at.slice(0,10)}</span>}</li>; })}</ul></div>
           <div><h3 className="text-sm font-semibold text-navy-800">Belirsizlikler ve açık sorular</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-xs leading-5 text-navy-600">{node.uncertainties.map((u,i) => <li key={i}>{u}</li>)}</ul></div>
         </section>
       </div>

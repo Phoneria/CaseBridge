@@ -50,3 +50,16 @@ it('sends branch assumptions for only the selected case',async()=>{
  const t=tree();t.support_model={method:'Bağımsız ölçek',assumptions:[{node_id:'confirm',value:'neutral',linked_records:0,delta:0,explanation:'50 nötr başlangıç'}]};getScenarioTree.mockResolvedValue(t);
  render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');await userEvent.selectOptions(screen.getByLabelText('Varsayım: Belgeler doğrulanırsa'),'supports');await waitFor(()=>expect(getScenarioTree).toHaveBeenLastCalledWith('c1',{confirm:'supports'}));
 });
+
+it('opens the recorded dossier exhibit from its branch', async () => {
+  const snapshot = tree();
+  snapshot.source_mode = 'dossier_history';
+  snapshot.sources.push({id:'document:pdf-1', kind:'document', label:'Banka dekontları', detail:'Delil eki', recorded_at:null});
+  snapshot.nodes[1].source_ids = ['document:pdf-1'];
+  getScenarioTree.mockResolvedValue(snapshot);
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  await screen.findByText('Kurgusal dosyanın karar ağacı');
+  await userEvent.click(screen.getByRole('button', {name:/Belgeler doğrulanırsa/}));
+  expect(screen.getByRole('link', {name:'Banka dekontları'})).toHaveAttribute('href','/davalar/c1?sekme=belgeler&belge=pdf-1');
+  expect(screen.queryByLabelText('Demo hesaplama yöntemi')).not.toBeInTheDocument();
+});
