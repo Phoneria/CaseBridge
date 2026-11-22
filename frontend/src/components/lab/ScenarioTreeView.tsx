@@ -85,17 +85,30 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
     }
     let row = 0, width = 0;
     function place(node: ScenarioNode, depth: number, color: number) {
-      const x = depth * 360 + 16, y = row * 116 + 16;
-      positions.set(node.id, {x, y, color});
+      const x = depth * 360 + 16;
+      const firstRow = row;
       width = Math.max(width, x + 272);
       const branches = children.get(node.id) ?? [];
       if (!branches.length) row++;
       branches.forEach((branch, i) => place(branch, depth + 1, i === 0 ? color : i % edgeColors.length));
+      const y = (firstRow + row) * 116 / 2 - 46;
+      positions.set(node.id, {x, y, color});
     }
     const root = tree.nodes.find(n => !n.parent_id);
     if (root) place(root, 0, 0);
-    return { positions, width, height: Math.max(230, row * 116 + 32) };
+    const height = Math.max(230, row * 116);
+    const padding = (height - row * 116) / 2;
+    for (const position of positions.values()) position.y += padding;
+    return { positions, width, height };
   }, [tree]);
+  const centered = useRef(false);
+  useLayoutEffect(() => {
+    const element = viewport.current;
+    if (!element || centered.current) return;
+    element.scrollTop = (layout.height - element.clientHeight) / 2;
+    centered.current = true;
+  }, [layout.height]);
+
   const trail = new Set<string>();
   let cursor = tree.nodes.find(n => n.id === (hovered ?? selected));
   while (cursor) {
@@ -134,7 +147,7 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
         style={{ left: pos.x, top: pos.y }}>
         <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-700">{recorded ? '✓ Gerçekleşen yol' : tree.source_mode === 'dossier_history' ? (!node.parent_id || node.recorded_step ? 'Dosya geçmişi' : 'Alternatif yol') : node.kind === 'context' ? 'Kayıtlı dosya' : node.kind === 'scenario' ? 'Analiz senaryosu' : node.kind === 'development' ? 'Koşullu gelişme' : 'Olası izleme yolu'}</span>
         <span className="line-clamp-2 text-sm font-medium leading-5">{node.label}</span>
-        <span className="text-[11px] text-navy-700">{node.path_percent == null ? assessment(node) : (node.parent_id ? `Geçiş ${percent(node.transition_percent!)} · ` : '') + `Başlangıçtan ${percent(node.path_percent)}`}</span>
+        <span className="text-[11px] text-navy-700">{node.path_percent == null ? assessment(node) : (node.parent_id ? `${node.illustrative ? 'Temsili geçiş' : 'Geçiş'} ${percent(node.transition_percent!)} · ` : '') + `Başlangıçtan ${percent(node.path_percent)}`}</span>
       </button>; })}
         </div>
       </div>
@@ -251,7 +264,7 @@ export function ScenarioTreeView({ fixedCaseId, caseFile }: { fixedCaseId?: stri
         <p className="mt-3 font-semibold">Önceki görüntü — bu oturumda korunur</p><ul className="mt-2 list-disc pl-4">{comparison.before.current_facts.map((fact,i) => <li key={i}>{fact}</li>)}</ul>
         {comparison.before.nodes.filter(n => n.parent_id === 'root').map(n => <p className="mt-2" key={n.id}>{n.label}: {assessment(n)} · {n.description}</p>)}
       </details>}
-      {tree.source_mode !== 'dossier_history' && <p className="text-sm text-navy-700">Senaryo yüzdeleri tek bir izleme yolunu canlandırır. Tanımlı yüzde yoksa sıradaki seçeneklere eşit pay verilir. Başlangıçtan ulaşma yüzdesi, yol üzerindeki geçişlerin çarpımıdır. Destek puanı ayrıca gösterilir.</p>}
+      {tree.source_mode !== 'dossier_history' && <p className="text-sm text-navy-700">Senaryo yüzdeleri tek bir izleme yolunu canlandırır. Kayıtlı oranı olmayan dallara sunum için dosyaya özgü, rastgele temsili yüzdeler atanır. Aynı dosya açıldığında bu değerler korunur. Başlangıçtan ulaşma yüzdesi, yol üzerindeki geçişlerin çarpımıdır. Destek puanı ayrıca gösterilir.</p>}
       {tree.case_closed && <p className="rounded-xl border-l-4 border-blue-800 bg-blue-50 p-3 text-sm font-semibold text-blue-900">✓ Gerçekleşen yol · Kalın mavi çizgi dosyada kayıtlı adımları kapanışa kadar izler.</p>}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div role="group" aria-label="Ağaç görünümü" className="inline-flex rounded-xl border border-surface-border bg-white p-1">

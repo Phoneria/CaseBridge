@@ -21,3 +21,5 @@ Yerel entegrasyon 20 dosyanın her birinde en az 50 düğüm, kapanışa kadar e
 Dokuz ağaç bileşen testi ve TypeScript denetimi geçti. Chromium’da dava sekmesinden ve ana menüdeki ağaçtan aynı dosya açıldı. Bir düğümün ölçülen genişliği %75 ve %125 ayarlarıyla eşleşti. Her iki girişte de düğüm seçili kaldı ve dayanak bağlantısı doğru belge sekmesini açtı.
 
 FR-013: 11 ağaç bileşen testi geçti. Chromium ile dava sekmesinde ve AI menüsünde gerçek tekerlek girdisiyle yüzde 100 → 125 → 100, işaretçinin altında sabit düğüm, gerçekleşen yol etiketi ve ilgili evraka geçiş doğrulandı. Ayrı bir kapalı dosya testinde celse ve kayıp sonucu, iki alternatiften ayrı kaldı.
+
+FR-014: Yerelde 778 arayüz testi, TypeScript denetimi ve Spec Kit doğrulaması geçti. Chromium ölçümünde her iki girişte kökün merkezden dikey sapması 0 pikseldi. Açık dosyanın 22 düğümü ve 18 farklı geçiş yüzdesi vardı. Yeniden yüklemede oranlar birebir eşleşti.
