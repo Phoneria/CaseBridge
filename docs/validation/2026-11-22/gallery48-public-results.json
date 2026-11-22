@@ -1,0 +1,154 @@
+{
+  "site": "https://casebridge.com.tr",
+  "marker": {
+    "commit": "da78face86e246b4b9db2e89ca1573269c8f89ca",
+    "version": "v.0.48",
+    "scope": "marketing"
+  },
+  "application": {
+    "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+    "version": "0.23",
+    "scope": "application"
+  },
+  "health": {
+    "status": "ok",
+    "app": "casebridge",
+    "release_commit": "1b460a691af375da61e18014733ed0ca0c10b1a5",
+    "application_version": "0.21"
+  },
+  "hashes": [
+    {
+      "name": "analysis",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/analysis.jpg?v=0.48",
+      "sha256": "441cffb12f028ba22de61a1a7199f8f85aeb61f940e65f0fd1044428d50f9f2a"
+    },
+    {
+      "name": "evaluation",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/evaluation.jpg?v=0.48",
+      "sha256": "87832f4d4b56c6732fb858d30624d2613dea2b4c646065136fd49aeeb8257b80"
+    },
+    {
+      "name": "conversation",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/conversation.jpg?v=0.48",
+      "sha256": "dd960f6b892f018a09274b63bdb1681ee1029ec8aaaaf3cba658719f23dc84cc"
+    },
+    {
+      "name": "evidence",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/evidence.jpg?v=0.48",
+      "sha256": "a4876190f85fb376935f3893a866a7c46c6a25df086afe3655f5e52cf6f643a5"
+    },
+    {
+      "name": "assistant",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/assistant.jpg?v=0.48",
+      "sha256": "17292c6f78c9a83927096a24dc4a382ea36b4670b84c4d4a0b47f944fc9df66b"
+    },
+    {
+      "name": "case-documents",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/case-documents.jpg?v=0.48",
+      "sha256": "cb7eda349fb2d6f568f4c341d3f2b4e4c0e449515b3e9a66d0567b38bcc3538d"
+    },
+    {
+      "name": "calendar",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/calendar.jpg?v=0.48",
+      "sha256": "050c6d2ae42b4a4c7d86e3757d779f78123dc908a864e451f6763bf30cd1cd14"
+    },
+    {
+      "name": "reports",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/reports.jpg?v=0.48",
+      "sha256": "1a05a5278aa5760131fd56a4e860f48a0baa7f018a28aa3b2fe11a72e7330485"
+    },
+    {
+      "name": "knowledge-map",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/knowledge-map.jpg?v=0.48",
+      "sha256": "15762512d38756c621c557d8a61c2c6d5251f7eec9526e2eeb767e5ab0f40ec4"
+    },
+    {
+      "name": "counter-analysis",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/counter-analysis.jpg?v=0.48",
+      "sha256": "e0d0f61d098c45b851a91f2aa6405872216de065a11496e271293b85f13f7aab"
+    },
+    {
+      "name": "directed-trial",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/directed-trial.jpg?v=0.48",
+      "sha256": "f49a1c7f312580935021bf78c193604c38ebf5bcfe9c9666b2c8a6d2cd59b7c7"
+    },
+    {
+      "name": "scenario-tree",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/scenario-tree.jpg?v=0.48",
+      "sha256": "cda3283117faf9c29a28a8fd341c91ff81f4e92f47ba64660e4b0a1510beb5f1"
+    }
+  ],
+  "results": [
+    {
+      "width": 1440,
+      "tabs": 12,
+      "mapping": [
+        "scenario-tree.jpg",
+        "analysis.jpg",
+        "conversation.jpg",
+        "evidence.jpg",
+        "evaluation.jpg",
+        "assistant.jpg",
+        "case-documents.jpg",
+        "calendar.jpg",
+        "reports.jpg",
+        "knowledge-map.jpg",
+        "counter-analysis.jpg",
+        "directed-trial.jpg"
+      ],
+      "default": "tree first",
+      "zoom": "same JPEG",
+      "escapeFocus": true,
+      "keyboard": true,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "tabs": 12,
+      "mapping": [
+        "scenario-tree.jpg",
+        "analysis.jpg",
+        "conversation.jpg",
+        "evidence.jpg",
+        "evaluation.jpg",
+        "assistant.jpg",
+        "case-documents.jpg",
+        "calendar.jpg",
+        "reports.jpg",
+        "knowledge-map.jpg",
+        "counter-analysis.jpg",
+        "directed-trial.jpg"
+      ],
+      "default": "tree first",
+      "zoom": "same JPEG",
+      "escapeFocus": true,
+      "keyboard": true,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "tabs": 12,
+      "mapping": [
+        "scenario-tree.jpg",
+        "analysis.jpg",
+        "conversation.jpg",
+        "evidence.jpg",
+        "evaluation.jpg",
+        "assistant.jpg",
+        "case-documents.jpg",
+        "calendar.jpg",
+        "reports.jpg",
+        "knowledge-map.jpg",
+        "counter-analysis.jpg",
+        "directed-trial.jpg"
+      ],
+      "default": "tree first",
+      "zoom": "same JPEG",
+      "escapeFocus": true,
+      "keyboard": true,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "badAssets": []
+}
