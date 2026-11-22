@@ -29,4 +29,4 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 
 - [x] T021 Read actual public app/site identity, health, constitution and current gallery provenance; confirm outdated v.0.22 captures.
 - [x] T022 Implement FR-001 through FR-006 / data-model.md#featurecontract public v.0.23 native 12 captures with synthetic API boundary and current provenance; verify targeted contracts and gallery browser flows.
-- [ ] T023 Protected PR and marketing v.0.47 publication; verify 12 public hashes, default/mapping/dialog/keyboard, service health and served identity before completion.
+- [x] T023 Protected PR and marketing v.0.47 publication; verify 12 public hashes, default/mapping/dialog/keyboard, service health and served identity before completion.

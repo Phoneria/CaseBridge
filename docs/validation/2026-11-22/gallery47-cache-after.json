@@ -1,0 +1,97 @@
+{
+  "phase": "after",
+  "normalPageURL": "https://casebridge.com.tr/",
+  "initialNavigationVersion": "v.0.47",
+  "afterOrdinaryReloadVersion": "v.0.47",
+  "ordinaryReload": true,
+  "manualCacheBust": false,
+  "cacheCleared": false,
+  "samePersistentProfileAsBefore": true,
+  "method": "Compare browser-rendered natural pixels with decoded new raw JPEG; byte hashes independently verified from normal HTML URLs",
+  "images": [
+    {
+      "name": "scenario-tree",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/scenario-tree.jpg?v=0.47",
+      "renderedPixelSHA256": "b5e42809b1d020137d460692a6d46a56cc9456c36a4b493b60a9ecb44ac876e5",
+      "expectedPixelSHA256": "b5e42809b1d020137d460692a6d46a56cc9456c36a4b493b60a9ecb44ac876e5",
+      "expectedJPEGHash": "07ea58f6031466063612f8b565028f8407c889c49cc8f87a60c68075a75ec9ff"
+    },
+    {
+      "name": "analysis",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/analysis.jpg?v=0.47",
+      "renderedPixelSHA256": "75d9dc3dd57549874915a63dd1194da280a615632693f8f65516e3f1b55bad8c",
+      "expectedPixelSHA256": "75d9dc3dd57549874915a63dd1194da280a615632693f8f65516e3f1b55bad8c",
+      "expectedJPEGHash": "fb22271720fb6401dd7b2b33106c58f3754bdd61195771cd6c2b8fb2c44d9656"
+    },
+    {
+      "name": "conversation",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/conversation.jpg?v=0.47",
+      "renderedPixelSHA256": "2e4f0950e8027208fc053054536a5999bd609007ea5fe4a1bb8a8056356ce889",
+      "expectedPixelSHA256": "2e4f0950e8027208fc053054536a5999bd609007ea5fe4a1bb8a8056356ce889",
+      "expectedJPEGHash": "b502f119d5b3d8fa768c95b359b8c9baf664977d3749705a4d66ce60a3646526"
+    },
+    {
+      "name": "evidence",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/evidence.jpg?v=0.47",
+      "renderedPixelSHA256": "f4b25bc8b0268cab6c5fd7fe622cfabbbed8ab5150497ed1e6b0b499d8a62bbb",
+      "expectedPixelSHA256": "f4b25bc8b0268cab6c5fd7fe622cfabbbed8ab5150497ed1e6b0b499d8a62bbb",
+      "expectedJPEGHash": "c81a21b896a377ae72300aeffbc75e91a1ef2cc7c4b70fd7fae8ec2edc568104"
+    },
+    {
+      "name": "evaluation",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/evaluation.jpg?v=0.47",
+      "renderedPixelSHA256": "b7b22c8dceb53091913ac95b28adcb233b9d3123d75b97a68a706e610c543a8d",
+      "expectedPixelSHA256": "b7b22c8dceb53091913ac95b28adcb233b9d3123d75b97a68a706e610c543a8d",
+      "expectedJPEGHash": "444fac49f1541d9a4062e595e7d0150b4a7ba75727d4c6345485ef8accbdb43a"
+    },
+    {
+      "name": "assistant",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/assistant.jpg?v=0.47",
+      "renderedPixelSHA256": "a0d94244391da2d8060e3efb706ed71fdfe17a5d8f1e4a83e302d749b1c6d94c",
+      "expectedPixelSHA256": "a0d94244391da2d8060e3efb706ed71fdfe17a5d8f1e4a83e302d749b1c6d94c",
+      "expectedJPEGHash": "858309c74fbca5875660f75b6e5efc3bdc3f419f17caaada0dddacd79aea6f35"
+    },
+    {
+      "name": "case-documents",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/case-documents.jpg?v=0.47",
+      "renderedPixelSHA256": "ffdb30d85762d1be4c5a28bf3b4a84a72f1acd9a9f0c1966853e95528df015c4",
+      "expectedPixelSHA256": "ffdb30d85762d1be4c5a28bf3b4a84a72f1acd9a9f0c1966853e95528df015c4",
+      "expectedJPEGHash": "5439f44b171200045c4fd4ae7a109270ce44af71c9a4c80bc581041d22c83551"
+    },
+    {
+      "name": "calendar",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/calendar.jpg?v=0.47",
+      "renderedPixelSHA256": "069341fb68ceb4e616b43bce9b0a4af481605226a886df36dc71d7f447ccb7b8",
+      "expectedPixelSHA256": "069341fb68ceb4e616b43bce9b0a4af481605226a886df36dc71d7f447ccb7b8",
+      "expectedJPEGHash": "f0fb8c7d9f2919fc14c6bdc3c170fe6ec0e68951750562422d2ba563079541f8"
+    },
+    {
+      "name": "reports",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/reports.jpg?v=0.47",
+      "renderedPixelSHA256": "ea9b4d7a3a0750299fe3d4a1abf72bc1a68b844f2d6bac56e5b92c4d78933ef1",
+      "expectedPixelSHA256": "ea9b4d7a3a0750299fe3d4a1abf72bc1a68b844f2d6bac56e5b92c4d78933ef1",
+      "expectedJPEGHash": "0c089d5c056112e8eee9707bdee0f6f6e4a932e20f986f05065c44e6daefa8c5"
+    },
+    {
+      "name": "knowledge-map",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/knowledge-map.jpg?v=0.47",
+      "renderedPixelSHA256": "06c6ca3c907a8359a0af3ac4a80d7b2b97444235b92d6a6bd264a2ff7e244be8",
+      "expectedPixelSHA256": "06c6ca3c907a8359a0af3ac4a80d7b2b97444235b92d6a6bd264a2ff7e244be8",
+      "expectedJPEGHash": "3e178babd8b602abeec29fae6929fbe0c0a859ffbbfd7ee7080ccfb5f0fd6652"
+    },
+    {
+      "name": "counter-analysis",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/counter-analysis.jpg?v=0.47",
+      "renderedPixelSHA256": "7fc45cf5412613771325e938cb23f46acda9bf37954fefd09e54266d3f6b00ae",
+      "expectedPixelSHA256": "7fc45cf5412613771325e938cb23f46acda9bf37954fefd09e54266d3f6b00ae",
+      "expectedJPEGHash": "35a6e3aae7c8730261bad06940cd0ef69d7980c76042410762d5408280a90152"
+    },
+    {
+      "name": "directed-trial",
+      "normalURL": "https://casebridge.com.tr/assets/feature-screens/tr-current/directed-trial.jpg?v=0.47",
+      "renderedPixelSHA256": "d1c0a7e3dc1d7cf202ea9497cc8e1ac68c5391f87a2055d423616f8fe2e69f19",
+      "expectedPixelSHA256": "d1c0a7e3dc1d7cf202ea9497cc8e1ac68c5391f87a2055d423616f8fe2e69f19",
+      "expectedJPEGHash": "007b03c3c33f55fc8cc80d21c1a2337b965028d64ab36cd2b61af45bcb434768"
+    }
+  ]
+}

@@ -512,3 +512,9 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 Galeri v.0.47 önbellek talimatı: tüm img src/zoom href (ve aynı görselleri tekrar kullanan iki referans) normal URL’lerine yayın sürümü anahtarı eklendi; elle cache-bust yok. Önce eski normal URL’ler cache’e alındı; yayın sonrası aynı profile normal reload ile 12 yeni hash ve Canlı Duruşma v.0.23 kontrol edilecek. Çevrimdışı/açık eski HTML’yi uzaktan zorla değiştirme iddiası yoktur.
 
 Yerel galeri47: 3 hedefli sözleşme testi ve 1440/390/320px ×12=36 görsel/zoom/odak akışı geçti. Yeni normal HTML URL’leri ?v=0.47 taşır, büyütme aynıJPEG/sorgu anahtarını kullanır; tree-first/klavye/taşma kontrolü geçti. Eski normal URL’lerle browsercache12hash ısıtıldı; yayınsonrası doğrulama henüz açık. Kalıcı otomasyonun tamamlanması bu tek-seferlik yayın için bağımlılık yapılmadı.
+
+### Public v.0.47 verified — actual restricted standard fallback
+
+PR45 merged as e6d1574fb801730f9ea38905ed26405261d4e89a. The existing automatic publisher rejected the actual v.0.47 marketing label; the reviewed restricted standard marketing stage/activate/verify path published this one-time release. This is not described as an automatic publication. Public app remains0.23/f625960, backend identity remains1b460a6/0.21, health ok.
+
+All12 public normal-HTML image URL SHA256 values match the current native23captures;36 desktop/mobile tab/modal/focus flows, tree-first/default and keyboard checks pass. A persistent profile first warmed on46 then performed ordinary page reload (no cache clear or manually appended query); every12 browser-rendered natural-pixel digest equals the new23 JPEG decoded pixels. Public conversation footer visually showsv.0.23. Evidence: docs/validation/2026-11-22/gallery47-public-results.json and gallery47-cache-after.json. No customer data, real credential operation or additional customer rollout.
