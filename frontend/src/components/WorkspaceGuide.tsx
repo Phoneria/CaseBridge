@@ -11,7 +11,7 @@ const sections = ['Çalışma alanı', 'Büro yönetimi', 'CaseBridge AI', 'Hesa
 
 function section(topic: GuideTopic) {
   if (topic.tab) return sections[1];
-  if (topic.route.startsWith('/ai')) return sections[2];
+  if (topic.id.startsWith('ai-')) return sections[2];
   if (['account', 'settings'].includes(topic.id)) return sections[3];
   return sections[0];
 }
@@ -19,14 +19,16 @@ function section(topic: GuideTopic) {
 function location(topic: GuideTopic) {
   if (topic.id === 'documents') return 'Davalar → İlgili dava → Belgeler';
   if (topic.id === 'precedents') return 'Davalar → İlgili dava → Genel Bakış → İlgili emsal kararları göster';
-  if (topic.id === 'ai-hub') return 'Sol menü → CaseBridge AI → Genel bakış';
+  if (['ai-analysis','ai-directed'].includes(topic.id)) return 'Davalar → İlgili dava → CaseBridge AI → ' + topic.title;
+  if (['ai-counter','ai-courtroom'].includes(topic.id)) return 'CaseBridge AI → Canlı Duruşma ve Karşı Taraf Analizi → ' + topic.title;
+  if (['ai-map','ai-scenarios'].includes(topic.id)) return 'CaseBridge AI → Olasılık Ağacı ve Bilgi Haritası → ' + topic.title;
   if (topic.id === 'account') return 'Sağ üstteki kullanıcı menüsü → Hesabım';
   const name = topic.title.split(' · ')[0];
   if (topic.tab) {
     const label = topic.tab === 'overview' ? 'Yönetim özeti' : topic.tab === 'deadline' ? 'Kritik süreler' : name;
     return 'Sol menü → Büro Yönetimi → ' + label;
   }
-  if (topic.id.startsWith('ai-') && topic.id !== 'ai-hub') return 'Sol menü → CaseBridge AI → ' + name;
+  if (topic.id.startsWith('ai-')) return 'Sol menü → CaseBridge AI → ' + name;
   return 'Sol menü → ' + (topic.id === 'platform' ? 'Büro Yönetimi' : name);
 }
 

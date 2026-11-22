@@ -1,10 +1,7 @@
-import { AppShell } from "@/components/AppShell";
-import { DirectedTrialView } from "@/components/lab/DirectedTrialView";
+import { redirect } from 'next/navigation';
+import { caseDetailHref } from '@/lib/filters';
 
-export default function DirectedTrialPagePage() {
-  return (
-    <AppShell>
-      <DirectedTrialView />
-    </AppShell>
-  );
+export default function LegacyCaseTool({ searchParams }: { searchParams: { dava?: string; onizle?: string } }) {
+  const caseId = searchParams.dava || searchParams.onizle;
+  redirect(typeof caseId === 'string' && caseId ? caseDetailHref(encodeURIComponent(caseId), 'ai') + '&arac=yonetmen' : '/davalar');
 }

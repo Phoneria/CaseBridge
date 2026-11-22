@@ -1,10 +1,6 @@
-import { AppShell } from "@/components/AppShell";
-import { CourtroomLobbyView } from "@/components/ai/CourtroomLobbyView";
+import { AppShell } from '@/components/AppShell';
+import { HearingWorkspace } from '@/components/ai/HearingWorkspace';
 
-export default function CourtroomLobbyPage() {
-  return (
-    <AppShell>
-      <CourtroomLobbyView />
-    </AppShell>
-  );
+export default function HearingPage() {
+  return <AppShell><HearingWorkspace mode="hearing" /></AppShell>;
 }
