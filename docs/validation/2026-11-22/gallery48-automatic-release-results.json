@@ -1,0 +1,209 @@
+{
+  "publication": "actual automatic complete native batch; no manual stage/activate48",
+  "marketing_version": "v.0.48",
+  "marketing_commit": "da78face86e246b4b9db2e89ca1573269c8f89ca",
+  "application_version": "0.23",
+  "application_commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+  "backend_health_identity": {
+    "version": "0.21",
+    "commit": "1b460a691af375da61e18014733ed0ca0c10b1a5",
+    "status": "ok"
+  },
+  "generated_pr": 51,
+  "generated_head": "99a664172de58f0e9acb1e3dc362bd260301f130",
+  "actual_run": 44985580863,
+  "actual_pr_ci": 44985738248,
+  "subsequent_noop_run": 44985846872,
+  "installed_policy_sha256": "bd9ebd6957f4800422c6203566bc5c5ee8cb31dbf7240eaa1e9a0480672b8551",
+  "policy_bootstraps": [
+    {
+      "policy": {
+        "policy_commit": "ad9bd58fe90f2a5e114875611e6032a170839122",
+        "previous_baseline": "80666fa103ccd23818129ddf227a13fad9219a79",
+        "verified_runtime_marketing": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+        "verified_runtime_application": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+        "installed_sha256": "bd9ebd6957f4800422c6203566bc5c5ee8cb31dbf7240eaa1e9a0480672b8551",
+        "at": 1795310058,
+        "reason": "Reviewed policy-only bootstrap: runtime trees identical to verified public gallery47; preserve previous journal and automatic pilot history."
+      },
+      "runtime_before": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "runtime_after": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "timer": "active",
+      "journal_last_auto_preserved": null
+    },
+    {
+      "policy": {
+        "policy_commit": "d5ce487a713550a8039717dc51ea532a2d660921",
+        "previous_baseline": "ad9bd58fe90f2a5e114875611e6032a170839122",
+        "verified_runtime_marketing": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+        "verified_runtime_application": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+        "installed_sha256": "bd9ebd6957f4800422c6203566bc5c5ee8cb31dbf7240eaa1e9a0480672b8551",
+        "at": 1795310210,
+        "reason": "Reviewed policy-only bootstrap: runtime trees identical to verified public gallery47; preserve previous journal and automatic pilot history."
+      },
+      "runtime_before": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "runtime_after": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "timer": "active",
+      "journal_last_auto_preserved": null
+    },
+    {
+      "policy": {
+        "policy_commit": "c980255e3e91a8c11007ddf57b552a8a7c67942b",
+        "previous_baseline": "d5ce487a713550a8039717dc51ea532a2d660921",
+        "verified_runtime_marketing": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+        "verified_runtime_application": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+        "installed_sha256": "bd9ebd6957f4800422c6203566bc5c5ee8cb31dbf7240eaa1e9a0480672b8551",
+        "at": 1795321538,
+        "reason": "Reviewed policy-only bootstrap: runtime trees identical to verified public gallery47; preserve previous journal and automatic pilot history."
+      },
+      "runtime_before": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "runtime_after": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "timer": "active",
+      "journal_last_auto_preserved": null
+    },
+    {
+      "policy": {
+        "policy_commit": "0d18a96786d12063d63cc066699837acd6fc1e4f",
+        "previous_baseline": "c980255e3e91a8c11007ddf57b552a8a7c67942b",
+        "verified_runtime_marketing": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+        "verified_runtime_application": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+        "installed_sha256": "bd9ebd6957f4800422c6203566bc5c5ee8cb31dbf7240eaa1e9a0480672b8551",
+        "at": 1795321926,
+        "reason": "Reviewed policy-only bootstrap: runtime trees identical to verified public gallery47; preserve previous journal and automatic pilot history."
+      },
+      "runtime_before": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "runtime_after": {
+        "application": {
+          "commit": "f625960cadd4e4c29985fa26fcb4914d4ff326b3",
+          "version": "0.23",
+          "scope": "application"
+        },
+        "marketing": {
+          "commit": "e6d1574fb801730f9ea38905ed26405261d4e89a",
+          "version": "v.0.47",
+          "scope": "marketing"
+        },
+        "health": "ok"
+      },
+      "timer": "active",
+      "journal_last_auto_preserved": null
+    }
+  ],
+  "automatic_journal": {
+    "baseline": "da78face86e246b4b9db2e89ca1573269c8f89ca",
+    "last_auto": "da78face86e246b4b9db2e89ca1573269c8f89ca",
+    "scope": "marketing",
+    "started": 1795322191,
+    "finished": 1795322204
+  },
+  "immutable_verification": {
+    "commit": "da78face86e246b4b9db2e89ca1573269c8f89ca",
+    "state": "verified",
+    "scope": "marketing",
+    "health": "ok"
+  },
+  "containers_before": [
+    "cb-prod-cb-frontend-1 65ec71ec0dd4",
+    "cb-prod-cb-backend-1 5ea357eff4da",
+    "autosense-b2c-web-1 47e3c130ee18",
+    "autosense-b2c-backend-1 bfe32c53b7d6",
+    "cb-prod-cb-db-1 7c8c08a04ac5",
+    "autosense-b2c-postgres-1 7d07f7cab028",
+    "autosense-b2c-redis-1 faa160245d87"
+  ],
+  "containers_after": [
+    "cb-prod-cb-frontend-1 65ec71ec0dd4",
+    "cb-prod-cb-backend-1 5ea357eff4da",
+    "autosense-b2c-web-1 47e3c130ee18",
+    "autosense-b2c-backend-1 bfe32c53b7d6",
+    "cb-prod-cb-db-1 7c8c08a04ac5",
+    "autosense-b2c-postgres-1 7d07f7cab028",
+    "autosense-b2c-redis-1 faa160245d87"
+  ],
+  "scope_limit": "Both version-change branches exercised by isolated local-HTTP end-to-end acceptance and CI. Actual production complete cycle uses current app23/site47 to site48; no artificial production app-version bump was created just for testing.",
+  "independent_ui_retry": "Initial End focus matcher failed with correct selected tab; diagnostic rerun confirmed document focus and matching activeId/selectedId across1440/390/320, all36flows passed without product edits."
+}

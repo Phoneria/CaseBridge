@@ -5,4 +5,6 @@
 - [x] T004 Implement public frontend/synthetic API native capture (FR-002).
 - [x] T005 Implement complete candidate and protected publication (FR-003).
 - [x] T006 Execute targeted negative/race tests and real browser capture (FR-001 through FR-004).
-- [ ] T007 Install workflow and verify automatic public publication for both triggers (FR-003).
+- [x] T007 Install workflow and verify automatic public publication for both triggers (FR-003).
+
+- [x] T008 Resolve actual marketing-label, supported-runner and genuine own-PR CI approval dependencies; prove protected51merge, timer48public hashes and self-output no-op (FR-003, FR-004).

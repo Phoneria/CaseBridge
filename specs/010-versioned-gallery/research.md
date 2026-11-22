@@ -1,1 +1,3 @@
 Token-created PR events do not run CI; explicit workflow dispatch creates the required Actions check. Schedule retries failed batches without touching published files.
+
+Current official GitHub docs confirm token-created PR opened/synchronize/reopened runs are approval-required: [workflow triggering](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow). The [workflow-run approval REST endpoint](https://docs.github.com/en/rest/actions/workflow-runs) accepts installation tokens with Actionswrite. Actual bounded44985478297 and publisher44985580863 proved this existing ephemeral token works; no PAT/App private key was introduced.
