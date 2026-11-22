@@ -46,3 +46,61 @@ def test_text_structure_preserved():
 @pytest.mark.xfail(reason="Kayıtlı olmayan kişi adları (tanık) için yerel NER katmanı gerekir", strict=True)
 def test_unregistered_name_is_masked():
     assert "Fatma Kaya" not in _run().text
+
+
+def test_restore_roundtrip():
+    r = anonymize("Ayşe Yılmaz 0532 123 45 67 numarasından aradı.", [Entity("Ayşe Yılmaz")])
+    assert "Ayşe" not in r.text
+    assert r.restore("Özet: " + r.text.split(" numarasından")[0] + " aradı") .startswith("Özet: Ayşe Yılmaz")
+
+
+def test_ner_masks_unregistered_witness():
+    from app.privacy import ner
+    if not ner.available():
+        pytest.skip("NER modeli/torch yok")
+    r = anonymize(FIXTURE.read_text(encoding="utf-8"), KNOWN, extra_detectors=[ner.detect_persons])
+    assert "Fatma" not in r.text and "Kaya" not in r.text
+    assert "gecikme tazminatı" in r.text and "ANKARA 5. ASLİYE HUKUK" in r.text  # mahkeme adı maskelenmedi
+
+
+def test_provider_wrapper_anonymizes_and_restores(monkeypatch):
+    from app.ai import provider_factory as pf
+    from app.core.config import settings
+
+    seen = {}
+
+    class Inner:
+        last_usage = None
+        last_latency_ms = None
+
+        def complete(self, system, user, *, response_format=None):
+            seen["user"] = user
+            return "Özet: " + user.split(" ")[0]
+
+    class Router:
+        _last = None
+
+    monkeypatch.setattr(settings, "anonymize_llm_input", True)
+    monkeypatch.setattr(settings, "anonymize_use_ner", False)
+    monkeypatch.setattr(settings, "llm_provider", "openai")
+    out = pf._TrackedProvider(Router(), Inner()).complete("s", "ayse@ornek.test iletişim kurdu")
+    assert "ayse@ornek.test" not in seen["user"]
+    assert out == "Özet: ayse@ornek.test"  # etiket geri çevrildi
+
+
+def test_provider_wrapper_off_by_default(monkeypatch):
+    from app.ai import provider_factory as pf
+    from app.core.config import settings
+
+    class Inner:
+        last_usage = None
+        last_latency_ms = None
+
+        def complete(self, system, user, *, response_format=None):
+            return user
+
+    class Router:
+        _last = None
+
+    monkeypatch.setattr(settings, "llm_provider", "openai")
+    assert pf._TrackedProvider(Router(), Inner()).complete("s", "ayse@ornek.test") == "ayse@ornek.test"
