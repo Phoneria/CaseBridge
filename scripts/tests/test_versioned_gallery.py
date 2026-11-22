@@ -147,5 +147,7 @@ class VersionedGalleryTests(unittest.TestCase):
                 (root/'docs').mkdir();(root/'docs/check.md').write_text('evidence');git('add','.');git('commit','-qm','docs');git('update-ref','refs/remotes/origin/main',git('rev-parse','HEAD'))
                 self.assertTrue(publisher.runtime_unchanged(base))
                 for folder in ['frontend','backend','web-page']:
+                    baseline=git('rev-parse','HEAD')
+                    self.assertTrue(publisher.runtime_unchanged(baseline))
                     (root/folder).mkdir(exist_ok=True);(root/folder/'new-runtime').write_text('new');git('add','.');git('commit','-qm',folder);git('update-ref','refs/remotes/origin/main',git('rev-parse','HEAD'))
-                    self.assertFalse(publisher.runtime_unchanged(base))
+                    self.assertFalse(publisher.runtime_unchanged(baseline))
