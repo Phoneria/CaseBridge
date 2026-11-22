@@ -539,7 +539,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
           {dossierClosure &&
             <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
-        <ScenarioTreeView key={caseId} fixedCaseId={caseId} />
+        <ScenarioTreeView key={caseId} fixedCaseId={caseId} caseFile={caseDetail} />
       </div>}
 
       {activeTab === "Belgeler" && (
