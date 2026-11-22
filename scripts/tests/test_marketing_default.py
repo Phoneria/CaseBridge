@@ -40,6 +40,28 @@ class MarketingDefaultAcceptance(unittest.TestCase):
         self.assertRegex(version,r'^v\.\d+\.\d+$')
 
     def test_current_gallery_matches_native_capture_provenance(self):
+        ledger_path=ROOT/'web-page/assets/feature-screens/tr-current/AUTO_CAPTURE.md'
+        if ledger_path.exists():
+            ledger=json.loads(ledger_path.read_text())
+            version=json.loads((ROOT/'frontend/app-version.json').read_text())
+            self.assertEqual(ledger['app']['version'],version['version'])
+            self.assertEqual(ledger['sourceHash'],version['sourceHash'])
+            self.assertEqual(ledger['mode'],'public-served-frontend-with-isolated-synthetic-api')
+            self.assertGreater(ledger['proxied_request_count'],0)
+            source=(ROOT/'web-page/index.html').read_text()
+            panels=re.findall(r'<div role="tabpanel" id="capability-panel-\d+".*?</div>',source,re.S)
+            sources=[re.search(r'<img src="([^"]+)"',panel)[1] for panel in panels]
+            self.assertEqual(set(urlsplit(src).path for src in sources),set(ledger['hashes']))
+            self.assertEqual(len(sources),len(ledger['captures']))
+            for panel,src in zip(panels,sources):
+                self.assertEqual(parse_qs(urlsplit(src).query),{'v':[ledger['marketingVersion'].removeprefix('v.')]})
+                self.assertEqual(re.search(r'<a [^>]*data-feature-screen[^>]*href="([^"]+)"',panel)[1],src)
+                self.assertEqual(hashlib.sha256((ROOT/'web-page'/urlsplit(src).path).read_bytes()).hexdigest(),ledger['hashes'][urlsplit(src).path])
+            for capture in ledger['captures']:
+                self.assertEqual(capture['viewport']['width'],1600)
+                self.assertTrue(capture['route'].startswith('/'))
+                self.assertEqual(capture['sha256'],ledger['hashes']['assets/feature-screens/tr-current/'+capture['name']+'.jpg'])
+            return
         proof=json.loads((ROOT/'docs/validation/2026-11-22/public-gallery-provenance.json').read_text())
         version=json.loads((ROOT/'frontend/app-version.json').read_text())
         self.assertEqual(proof['application_version'],version['version'])

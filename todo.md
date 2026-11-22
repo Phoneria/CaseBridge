@@ -497,6 +497,11 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 - [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
 - [x] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması. PR #32 → v.0.23. Birleşmeden 19 sn sonra otomatik başlangıç, 1 dk 46 sn içinde canlı doğrulama. [Kanıt](specs/001-main-release/verification.md#fr-009-automatic-production-ui-pilot).
 
+## User-authorized automatic versioned product gallery
+
+- [x] Separate specs/010-versioned-gallery implementation detects either public version, captures all current native public frontend product routes against synthetic-only API, rejects partial/raced batches, preserves tree-first/default, versions normal image/zoom URLs and suppresses the output release loop.
+- [x] Six targeted tests and local HTTP end-to-end pipeline and actual12-route public native capture passed;73 synthetic API requests all200, no browser errors/production API forwarding. Isolated evidence in specs/010-versioned-gallery/verification.md; no current published images changed by this validation.
+- [ ] Install reviewed protected-main workflow and Actions PR setting, then verify automatically generated protected PR, immutable marketing activation, every public image hash and health. Both-trigger tests are currently isolated unit acceptance; no production application-version trigger is claimed yet.
 ## Güncel public ürün görselleri — tanıtım v.0.47
 
 - [x] Canlı frontend v.0.23 / f625960 doğrulandı; tanıtım v.0.46, health ok (değişmeyen backend kendi 1b460a6/0.21 kimliğini korur). Eski galeri provenance22 ve mevcut kabul testi uyumsuzluğu doğrulandı.
@@ -507,3 +512,9 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 Galeri v.0.47 önbellek talimatı: tüm img src/zoom href (ve aynı görselleri tekrar kullanan iki referans) normal URL’lerine yayın sürümü anahtarı eklendi; elle cache-bust yok. Önce eski normal URL’ler cache’e alındı; yayın sonrası aynı profile normal reload ile 12 yeni hash ve Canlı Duruşma v.0.23 kontrol edilecek. Çevrimdışı/açık eski HTML’yi uzaktan zorla değiştirme iddiası yoktur.
 
 Yerel galeri47: 3 hedefli sözleşme testi ve 1440/390/320px ×12=36 görsel/zoom/odak akışı geçti. Yeni normal HTML URL’leri ?v=0.47 taşır, büyütme aynıJPEG/sorgu anahtarını kullanır; tree-first/klavye/taşma kontrolü geçti. Eski normal URL’lerle browsercache12hash ısıtıldı; yayınsonrası doğrulama henüz açık. Kalıcı otomasyonun tamamlanması bu tek-seferlik yayın için bağımlılık yapılmadı.
+
+### Public v.0.47 verified — actual restricted standard fallback
+
+PR45 merged as e6d1574fb801730f9ea38905ed26405261d4e89a. The existing automatic publisher rejected the actual v.0.47 marketing label; the reviewed restricted standard marketing stage/activate/verify path published this one-time release. This is not described as an automatic publication. Public app remains0.23/f625960, backend identity remains1b460a6/0.21, health ok.
+
+All12 public normal-HTML image URL SHA256 values match the current native23captures;36 desktop/mobile tab/modal/focus flows, tree-first/default and keyboard checks pass. A persistent profile first warmed on46 then performed ordinary page reload (no cache clear or manually appended query); every12 browser-rendered natural-pixel digest equals the new23 JPEG decoded pixels. Public conversation footer visually showsv.0.23. Evidence: docs/validation/2026-11-22/gallery47-public-results.json and gallery47-cache-after.json. No customer data, real credential operation or additional customer rollout.

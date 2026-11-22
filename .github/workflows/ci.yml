@@ -1,6 +1,11 @@
 name: CI
 
 on:
+  workflow_dispatch:
+    inputs:
+      base:
+        required: true
+        type: string
   push:
     branches: [main]
   pull_request:
@@ -17,10 +22,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Bind dispatched acceptance to actual protected-main ancestry
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BASE: ${{ github.event.inputs.base }}
+        run: |
+          test "$BASE" = "$(git merge-base origin/main "$GITHUB_SHA")"
       - name: Classify fast UI checks using the base policy
         id: scope
         env:
-          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE: ${{ github.event.inputs.base || github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           scope=standard
@@ -31,7 +42,7 @@ jobs:
       - name: Validate PR behavior-to-acceptance links
         id: acceptance
         env:
-          SPEC_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SPEC_BASE: ${{ github.event.inputs.base || github.event.pull_request.base.sha || github.event.before }}
           SPEC_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/check-spec-changes.py --base "$SPEC_BASE" --head "$SPEC_HEAD" --plan-output /tmp/spec-acceptance.json
       - uses: actions/setup-python@v5
@@ -54,7 +65,7 @@ jobs:
         run: npm ci --prefix frontend
       - name: Run bound acceptance tests
         env:
-          SPEC_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SPEC_BASE: ${{ github.event.inputs.base || github.event.pull_request.base.sha || github.event.before }}
           SPEC_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/check-spec-changes.py --base "$SPEC_BASE" --head "$SPEC_HEAD" --run
       - name: Validate Spec Kit contracts and task traceability
