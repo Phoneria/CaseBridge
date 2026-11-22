@@ -300,7 +300,8 @@ export async function getAiConnectivity(force = false): Promise<AIConnectivity> 
   return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
-export interface AIKeyStatus { configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
+export type AIKeyProvider = "openai" | "anthropic";
+export interface AIKeyStatus { active_provider?: AIKeyProvider | null; available_providers?: AIKeyProvider[]; configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
 
 export async function getAiKeyStatus(): Promise<AIKeyStatus> {
   return request("/system/openai-key", { cache: "no-store" });
@@ -310,8 +311,8 @@ export async function saveAiKey(apiKey: string, provider: "openai" | "anthropic"
   return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey, provider }), cache: "no-store" });
 }
 
-export async function activateAiKey(): Promise<AIConnectivity> {
-  return request("/system/openai-key/activate", { method: "POST", cache: "no-store" });
+export async function activateAiKey(provider?: AIKeyProvider): Promise<AIConnectivity> {
+  return request("/system/openai-key/activate" + (provider ? `?provider=${provider}` : ""), { method: "POST", cache: "no-store" });
 }
 
 export interface CaseListFilters {

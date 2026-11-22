@@ -23,3 +23,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 ## Success Criteria
 
 20 dosyanın tamamında kronoloji, içerik ve gezinme kontrolleri geçer. Her evrak türünün kapsam tablosunda en az bir açılabilir örneği vardır. Tekrar yükleme, temizleme ve bürolar arası erişim testleri geçer.
+
+- **FR-011**: Ayarlar'da yönetici kaydedilmiş ve etkinleştirilmiş OpenAI veya Claude bağlantısını tekrar anahtar girmeden açıkça seçebilir. Seçim yalnızca kendi bürosuna uygulanır. Test başarısızsa çalışan bağlantı ve bekleyen aday korunur.

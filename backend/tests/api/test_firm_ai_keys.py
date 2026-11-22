@@ -159,3 +159,25 @@ def test_claude_key_switches_only_its_firm_and_never_reaches_openai(client, offi
     for invalid in ({"api_key":key}, {"provider":"anthropic","api_key":"sk-ant-oat-fake-token"}):
         response = client.put(path, headers=headers, json=invalid)
         assert response.status_code == 400 and invalid["api_key"] not in response.text
+
+
+def test_switch_saved_provider_preserves_pending_and_firm_scope(client, office, auth_headers, bureau_keys, monkeypatch):
+    from app.ai.providers.anthropic_provider import AnthropicProvider
+    monkeypatch.setattr(AnthropicProvider, "complete", lambda *args: "OK")
+    firm = office.firm_a.id
+    path = "/system/openai-key"
+    headers = auth_headers(office.admin_a)
+    claude = "sk-ant-api-test-only-provider-choice"
+    for key in (KEY_A, claude):
+        keys.save_openai_api_key(key, firm)
+        keys.activate_openai_api_key(firm)
+    keys.save_openai_api_key(KEY_B, firm)
+    assert client.post(path+"/activate?provider=openai", headers=headers).status_code == 200
+    status = client.get(path, headers=headers).json()
+    assert set(status["available_providers"]) == {"openai", "anthropic"}
+    assert status["active_provider"] == "openai" and status["pending"]
+    assert keys.get_openai_api_key(firm) == KEY_A
+    assert client.post(path+"/activate?provider=anthropic", headers=headers).status_code == 200
+    assert keys.get_claude_api_key(firm) == claude
+    assert client.post(path+"/activate?provider=anthropic", headers=auth_headers(office.admin_b)).status_code == 400
+    assert client.post(path+"/activate?provider=openai", headers=auth_headers(office.lawyer_a1)).status_code == 403

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { activateAiKey, getAiKeyStatus, saveAiKey, type AIKeyStatus } from "@/lib/api";
+import { activateAiKey, getAiKeyStatus, saveAiKey, type AIKeyProvider, type AIKeyStatus } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 import type { AIConnectivity } from "@/types";
 import { ModalFrame } from "@/components/ModalFrame";
@@ -45,17 +45,17 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
     }
   }
 
-  async function activate() {
+  async function activate(selected?: AIKeyProvider) {
     if (busy.current) return;
     busy.current = true;
     setSaving(true);
     setError(null);
     setNotice(null);
     try {
-      const result = await activateAiKey();
+      const result = selected ? await activateAiKey(selected) : await activateAiKey();
       onSaved(result);
-      setStatus({ configured: true, managed: true, pending: false, can_save: true });
-      setNotice(result.connected ? "Yeni anahtar etkinleştirildi. AI bağlantısı doğrulandı. Önceki anahtar korundu." : "Yeni anahtar etkinleştirildi. Güncel bağlantı durumunu kontrol edin. Önceki anahtar korundu.");
+      setStatus(await getAiKeyStatus());
+      setNotice(selected ? "Sağlayıcı seçimi kaydedildi." : result.connected ? "Yeni anahtar etkinleştirildi. AI bağlantısı doğrulandı. Önceki anahtar korundu." : "Yeni anahtar etkinleştirildi. Güncel bağlantı durumunu kontrol edin. Önceki anahtar korundu.");
     } catch (err) {
       setError(userMessage(err, "Anahtar etkinleştirilemedi. Mevcut bağlantı korunuyor."));
     } finally { busy.current = false; setSaving(false); }
@@ -71,6 +71,16 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
         <button type="button" disabled={!status?.can_save || saving} onClick={() => { setOpen(true); setError(null); setNotice(null); }}
           className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700 disabled:opacity-50">Gizli anahtar ekle</button>
       </div>
+      {!!status?.available_providers?.length && <fieldset disabled={saving || !status.can_save} className="mt-4">
+        <legend className="text-sm font-medium text-navy-800">Büroda kullanılacak yapay zekâyı seçin</legend>
+        <div className="mt-2 flex gap-2">{status.available_providers.map(name =>
+          <button key={name} type="button" aria-pressed={status.active_provider === name}
+            disabled={status.active_provider === name}
+            onClick={() => void activate(name)}
+            className="rounded-lg border border-surface-border px-3 py-2 text-sm aria-pressed:bg-accent-50">
+            {name === "anthropic" ? "Claude" : "OpenAI"}{status.active_provider === name ? " · Etkin" : ""}
+          </button>)}</div>
+      </fieldset>}
       {status && !status.can_save && <p className="mt-3 text-sm text-navy-600">Anahtar yönetiminin sunucuda etkinleştirilmesi gerekiyor.</p>}
       {status?.configured && <p className="mt-3 text-xs text-navy-500">Bir anahtar tanımlı. Yeni anahtarı kaydetmek mevcut bağlantıyı değiştirmez.</p>}
       {status?.pending && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent-200 bg-accent-50 p-4">
