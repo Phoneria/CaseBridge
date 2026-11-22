@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/assets/feature-screens/tr-current/scenario-tree.jpg",
+        "web-page/assets/feature-screens/tr-current/analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/conversation.jpg",
+        "web-page/assets/feature-screens/tr-current/evidence.jpg",
+        "web-page/assets/feature-screens/tr-current/evaluation.jpg",
+        "web-page/assets/feature-screens/tr-current/assistant.jpg",
+        "web-page/assets/feature-screens/tr-current/case-documents.jpg",
+        "web-page/assets/feature-screens/tr-current/calendar.jpg",
+        "web-page/assets/feature-screens/tr-current/reports.jpg",
+        "web-page/assets/feature-screens/tr-current/knowledge-map.jpg",
+        "web-page/assets/feature-screens/tr-current/counter-analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/directed-trial.jpg",
+        "web-page/index.html",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/010-versioned-gallery/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_generated_gallery.py::GeneratedGalleryTests.test_complete_versioned_gallery_bytes"
+      ],
+      "reason": "Complete atomic native public-frontend capture for both version triggers; synthetic API only."
+    }
+  ]
+}
