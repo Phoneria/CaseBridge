@@ -32,14 +32,16 @@ describe("Sidebar", () => {
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 
-  it("shows every authorized AI tool in an expanded sidebar group", () => {
+  it("shows every authorized AI tool in the restored expanded blue panel", () => {
     render(<Sidebar role="admin" />);
     const group=screen.getByRole("group", {name:"CaseBridge AI"});
     expect(within(group).getAllByRole("link")).toHaveLength(9);
     for(const item of AI_NAVIGATION) expect(within(group).getByRole("link",{name:item.label})).toHaveAttribute("href",item.href);
     expect(within(group).queryByRole("button")).not.toBeInTheDocument();
     expect(group.querySelector("details")).toBeNull();
-    expect(group.className).not.toMatch(/border|ring/);
+    expect(group.className).toContain("bg-navy-950");
+    expect(group.querySelector(".bg-ai-glow")).not.toBeNull();
+    expect(group.className).not.toMatch(/ring-\d/);
   });
 
   it("marks the current route as active", () => {

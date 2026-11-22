@@ -30,6 +30,8 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 - **FR-002**: Her iki zeminde okunabilirlik, ilk yükleme ve kayıtlı tercih korunur.
 - **FR-003**: Giriş, sidebar ve mobil menüde kırpılma veya bozuk görsel oluşmaz.
 
+- **FR-004**: Son kullanıcı talimatıyla sidebar logosunun beyaz dikdörtgen plate’i görünmez; özgün CaseBridge yazısı ve köprü şekli aynı kaynak/ölçekte doğrudan zeminde görünür. Asset/kapsayıcı beyazlığı ayrı incelenir; gerçek marka şekilleri yeniden çizilmez veya silinmez. Açık/koyu ve farklı sidebar zeminlerinde gerçek tarayıcı/piksel kontrolü yapılır.
+
 ### Key Entities
 
 Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gösterdiği kayıtlar.

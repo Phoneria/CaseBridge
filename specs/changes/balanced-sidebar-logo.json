@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "frontend/src/components/Sidebar.tsx",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/002-header-ai/spec.md#FR-001",
+        "specs/002-header-ai/spec.md#FR-002",
+        "specs/002-header-ai/spec.md#FR-003",
+        "specs/002-header-ai/spec.md#FR-005",
+        "specs/002-header-ai/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/Sidebar.test.tsx::shows every authorized AI tool in the restored expanded blue panel",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::keeps scoped accounts inside their own workspace",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::shows only the platform items to a platform admin"
+      ],
+      "reason": "Restore the explicitly approved historical blue panel while distributing all ordinary navigation rows over the full available height; retain original width, role boundaries, selection and header."
+    },
+    {
+      "files": [
+        "frontend/src/components/BrandLogo.tsx",
+        "frontend/src/app/theme.css"
+      ],
+      "requirements": [
+        "specs/005-logo-theme/spec.md#FR-001",
+        "specs/005-logo-theme/spec.md#FR-002",
+        "specs/005-logo-theme/spec.md#FR-003",
+        "specs/005-logo-theme/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/BrandLogo.test.tsx::keeps the original mark resource and removes the separate white plate"
+      ],
+      "reason": "Remove the separate white plate and render the original opaque logo matte into light/dark surrounding surfaces, preserving original raster geometry and bytes rather than substituting a font-based SVG."
+    }
+  ]
+}

@@ -24,3 +24,5 @@
 ## Dependencies and Execution
 
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
+
+- [ ] T020 Implement FR-001 through FR-004 and data-model.md#featurecontract no-plate original raster rendering, targeted identity test, real light/dark/alternate-surface pixel/geometric checks and public follow-up release.

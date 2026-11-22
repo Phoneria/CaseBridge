@@ -33,7 +33,9 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 
 - **FR-007**: Yayın regresyonunda hızlı sesli beyan, conversation modunda ilk render’daki eski opening değerini göndermez; geçerli seçilmiş konuşma eylemi korunur, varsayılan argument olur.
 
-- **FR-005**: Tam yetkili menü 900px ve 768px masaüstü yüksekliğinde ilk/son bağlantı ve dokuz AI satırı tek bakışta görünür olacak şekilde kompaktlaştırılır; kısa/mobil/yüksek zoom alanında kesilmeden kaydırılabilir. Tek seçili AI bağlantısı, klavye odağı ve rol sınırları korunur.
+- **FR-005**: Tam yetkili menü 768/900/1080px masaüstü yüksekliğinde ilk/son bağlantı ve dokuz AI satırı tek bakışta görünür; logo üstte ve Ayarlar altta, aradaki satırlar kullanılabilir yüksekliği orantılı doldurur ve uzun ekranda büyük boşluk bırakmaz; kısa/mobil/yüksek zoom alanında kesilmeden kaydırılabilir. Tek seçili AI bağlantısı, klavye odağı ve rol sınırları korunur.
+
+- **FR-006**: Önceki b640c54 kaynaklı normal koyu/mavi CaseBridge AI paneli ve ayrı alt seçenek satırları geri gelir; sürekli açık tek sütun ve normal 256px genişlik korunur.
 
 ### Key Entities
 
