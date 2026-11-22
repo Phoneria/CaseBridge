@@ -336,7 +336,9 @@ def test_board_stages_and_details_round_trip(client, two_firms_two_users):
 def test_restricted_lawyer_can_only_receive_tasks_in_granted_cases(client, office, auth_headers, db_session):
     from app.models.management import WorkspaceAccess
     headers = auth_headers(office.admin_a)
-    case = _create_case(client, headers)
+    created = client.post("/cases", headers=headers, json={**VALID_CASE_PAYLOAD, "assigned_lawyer_id": office.lawyer_a2.id})
+    assert created.status_code == 201, created.text
+    case = created.json()
     grant = WorkspaceAccess(law_firm_id=office.firm_a.id, user_id=office.lawyer_a1.id, position="lawyer", case_ids=[])
     db_session.add(grant)
     db_session.commit()
