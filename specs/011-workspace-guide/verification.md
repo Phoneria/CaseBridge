@@ -32,3 +32,11 @@ The production build passed, including /rehber, and the final frontend suite pas
 Chromium passed 34 synthetic scenarios on the built application. Five session roles ran at 1440, 390 and 320 pixels in both themes, with four additional desktop/mobile checks for the admin and reports tours. Checks covered opening the full page, matching context, permission filtering, visible real targets, moving forward and backward, returning to the article, horizontal overflow and zero API writes. Desktop and mobile screenshots were inspected.
 
 An initial browser attempt preceded server readiness. A missing win-rate field in the synthetic report response was corrected. The reports tour also exposed a real layout shift after the summary loaded. The final build rechecks the highlighted control after asynchronous rendering and resizing. The final run exercised all five tours successfully. PR 65 tracks review.
+
+## Production release v.0.27
+
+[PR 65](https://github.com/Phoneria/CaseBridge/pull/65) passed governance and the frontend and backend jobs before merging. The reviewed entrypoint staged, activated and verified application commit `24d576ea0f46202a4a96a5e322cd846ca0658874`. The public application marker returned 0.27. The verifier checked all 57 public JS/CSS assets and the running code. Public health returned ok. The backend and database retained their pre-release container identities. The backend continued to report its expected v.0.26 source. An isolated old → new → old image rehearsal passed.
+
+In an existing authenticated Chrome session on the public application, the reports guide opened as a page. Starting its tour highlighted Önizle. Sonraki moved the visible outline to CSV Olarak İndir and Önceki restored it to Önizle. Turu bitir returned to the reports article. The operator used tour controls only.
+
+The published frontend also passed 34 Chromium scenarios using isolated synthetic API responses. They covered the five supported tours, desktop and mobile layouts, both themes and five roles. Assertions checked each expected control's outline, visibility, step count, backward navigation and return to the matching guide article. The test issued zero application writes.

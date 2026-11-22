@@ -5,6 +5,13 @@ const out = process.env.GUIDE_OUTPUT || '/tmp/casebridge-guide-browser';
 fs.mkdirSync(out, { recursive: true });
 
 const admin = { id:'synthetic', email:'guide@example.test', full_name:'Örnek Yönetici', department:null, gender:null, role:'admin', law_firm_id:'synthetic', is_active:true };
+const targets = {
+  tasks: ['[data-guide="new-task"]', 'section[aria-label="İncelemede"] h2', 'section[aria-label="Tamamlandı"] h2'],
+  cases: ['select[aria-label="Kategori filtresi"]', 'select[aria-label="Durum filtresi"]', 'select[aria-label="Sonuç filtresi"]'],
+  account: ['#account-name', '#account-department', '#current-password'],
+  reports: ['[data-guide="preview-cases"]', '[data-guide="download-cases"]'],
+  admin: ['[aria-label="Yeni dava trend grafiği"]', '[aria-label="Avukat iş yükü bar grafiği"]', 'select[aria-label$="sorumlu avukatı"]'],
+};
 const roles = [
   ['admin', admin, '/gorevler', 'tasks'],
   ['lawyer', {...admin, role:'lawyer'}, '/davalar', 'cases'],
@@ -14,16 +21,24 @@ const roles = [
 ];
 
 async function check(browser, [role, me, path, topic], width, theme) {
-  const context = await browser.newContext({ viewport:{ width, height:width === 1440 ? 900 : 600 } });
+  const context = await browser.newContext({ serviceWorkers:'block', viewport:{ width, height:width === 1440 ? 900 : 600 } });
   try {
     await context.addInitScript(theme => {
       localStorage.setItem('casebridge_token','synthetic-guide-session');
       localStorage.setItem('casebridge-theme',theme);
     }, theme);
     let writes = 0;
-    await context.route(/^https?:\/\/(localhost|127\.0\.0\.1):8000\//, async route => {
-      if (route.request().method() !== 'GET') writes++;
-      const pathname = new URL(route.request().url()).pathname;
+    await context.route('**/*', async route => {
+      const request = route.request();
+      const url = new URL(request.url());
+      let pathname = url.pathname;
+      if (url.origin === origin && pathname.startsWith('/api/')) {
+        pathname = pathname.slice(4);
+      } else if (!['http://localhost:8000', 'http://127.0.0.1:8000'].includes(url.origin)) {
+        if (url.origin === origin && ['GET', 'HEAD'].includes(request.method())) return route.continue();
+        return route.abort();
+      }
+      if (request.method() !== 'GET') writes++;
       const responses = {
         '/users/me': me,
         '/ai/status': {configured:false},
@@ -51,16 +66,22 @@ async function check(browser, [role, me, path, topic], width, theme) {
     await article.getByRole('link', { name:'Ekranda adım adım göster' }).click();
     const tour = page.getByRole('region', { name:'Ekran turu' });
     const target = page.locator('[data-guide-current]');
-    await expect(target).toBeInViewport();
-    const first = await target.evaluate(el => el.outerHTML);
+    async function verifyStep(index) {
+      await expect(target).toHaveCount(1);
+      await expect(page.locator(targets[topic][index]).first()).toHaveAttribute('data-guide-current', '');
+      await expect(target).toBeInViewport();
+      await expect(tour).toContainText('Adım ' + (index + 1) + ' / ' + targets[topic].length);
+      await expect(target).toHaveCSS('outline-style','solid');
+    }
+    await verifyStep(0);
     await tour.getByRole('button', { name:'Sonraki' }).click();
-    await expect(target).toBeInViewport();
-    if (await target.evaluate(el => el.outerHTML) === first) throw Error('Highlight did not move');
+    await verifyStep(1);
     await tour.getByRole('button', { name:'Önceki' }).click();
-    await expect(target).toBeInViewport();
-    await tour.getByRole('button', { name:'Sonraki' }).click();
-    if (topic !== 'reports') await tour.getByRole('button', { name:'Sonraki' }).click();
-    await expect(target).toBeInViewport();
+    await verifyStep(0);
+    for (let i = 1; i < targets[topic].length; i++) {
+      await tour.getByRole('button', { name:'Sonraki' }).click();
+      await verifyStep(i);
+    }
     await tour.getByRole('link', { name:'Turu bitir' }).click();
     await expect(page).toHaveURL(origin + '/rehber?konu=' + topic);
     await expect(target).toHaveCount(0);
