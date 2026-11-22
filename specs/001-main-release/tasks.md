@@ -38,4 +38,4 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 - [x] T022 Merge governance implementation only through the protected PR path and record actual check/merge evidence.
 
 - [x] T023 Implement FR-009 cumulative allowlist, CI routing, timer and guarded activation. Verify classification, renamed paths and runtime boundaries.
-- [ ] T024 Confirm automatic live pilot from protected PR and record release, public health and preservation of backend/DB identity.
+- [x] T024 Confirm automatic live pilot from protected PR and record release, public health and preservation of backend/DB identity.

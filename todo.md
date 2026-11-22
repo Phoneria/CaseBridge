@@ -495,4 +495,4 @@ Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typechec
 ## Hızlı UI yayını — kullanıcı onaylı
 
 - [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
-- [ ] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması.
+- [x] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması. PR #32 → v.0.23. Birleşmeden 19 sn sonra otomatik başlangıç, 1 dk 46 sn içinde canlı doğrulama. [Kanıt](specs/001-main-release/verification.md#fr-009-automatic-production-ui-pilot).

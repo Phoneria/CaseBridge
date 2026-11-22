@@ -30,3 +30,13 @@ Implementation PR #27 merged through the protected path after its required check
 Same probe PR #28: c208bc3 failed the real check with "Behavior changes lack Spec Kit requirement + changed acceptance test: scripts/spec-gate-probe.py" and mergeStateStatus BLOCKED. On 085bdb2, a concrete assertion test and FR-008 binding passed the same required check; mergeable=MERGEABLE. mergeStateStatus remained UNSTABLE while nonrequired full jobs ran; this is not recorded as all CI passing or CLEAN. The required gate was satisfied. PR closed unmerged, mergedAt=null; probe code never entered main. No unsafe actual merge/force-push probe was attempted.
 
 Evidence: docs/validation/2026-11-22/main-protection-results.json. This enforces file/requirement/test existence and actual selected test execution; semantic adequacy still needs review. Repository admins can edit rules/workflows; no claim of absolute administrator prevention or independently audited test relevance. App/marketing deployment permissions were not redesigned.
+
+## FR-009 automatic production UI pilot
+
+[Installer PR #31](https://github.com/Phoneria/CaseBridge/pull/31) merged as `ffea637f95755593e29ee7ad2996aa8b3eb281fe`. The VPS timer was enabled on this verified baseline. The restricted service only fetched the configured GitHub main and held the existing release lock throughout the automatic transaction.
+
+[Application UI pilot PR #32](https://github.com/Phoneria/CaseBridge/pull/32) passed spec-governance and the frontend type/version/build checks. The backend job was skipped. It merged as `f625960cadd4e4c29985fa26fcb4914d4ff326b3` at 00:41:19 UTC on 22 November 2026. At 00:41:38 UTC the timer picked up the revision and selected the application scope. At 00:43:05 UTC the service exited successfully, reporting the same revision, verified activation and health OK. This single pilot took 19 seconds to start and 87 seconds to stage, activate and verify. No manual stage/activate call was used.
+
+- The open application release identity returned version `0.23` at the pilot merge. All 54 public frontend asset digests passed the immutable verifier.
+- Public health returned `ok`. Backend container ID `5ea357eff4da` retained its 2026-11-21 23:57:55 UTC start, and database container ID `7c8c08a04ac5` retained its 2026-11-12 13:40:05 UTC start. Backend health retained its own source revision `1b460a6` and version `0.21`.
+- The marketing marker retained `80035eaea87f07445d375d8848ee7e8bee8ae8b5` and `v.0.46`. The production pilot exercised application UI. Static marketing classification, mixed-path fallback, rename and failed activation handling were checked in the focused automated tests.
