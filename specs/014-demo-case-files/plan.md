@@ -95,3 +95,5 @@ FR-017 için dosya analizindeki uzlaşma senaryosunun doğrulama ve değişim da
 FR-018 için yeni bulgu, dayanak belgesi, gerekçe, karar ve koşullu payı ilgili ara düğümle eşleştir. Her ayrımın önceki devam yoluna kalan payı ver. Kaynak doğrulamasını yirmi dosyada, yüzdeleri her ayrım ve son kartta kontrol et.
 
 FR-019 için sunum görünümünü büronun yüklü katalog kayıtlarından üret. Ekran, ağaç ve PDF aynı maskelenmiş metni kullanır. Sunumdan çıkınca açık çalışma alanına dönülür.
+
+FR-020 için başlıktaki sunum düğmesini ve çağıran bileşendeki giriş bağlantısını kaldır.

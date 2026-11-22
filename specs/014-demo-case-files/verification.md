@@ -38,3 +38,5 @@ Takip konusu borca itiraz dosyasındaki kayıtlı uzlaşma senaryosunun onaylana
 
 ### FR-019 · Maskeli sunum
 İki sunucu kabul testi geçti. Yirmi dosyanın tüm düğüm kaynakları kendi evrakına çözüldü ve 478 katalog belgesinde taraf adı taraması geçti. PDF metni ile önizleme, başka bürodan erişim reddi ve özgün verinin değişmediği kontrol edildi. Başlık, uygulama kabuğu ve sunum için 16 arayüz testi geçti. Yerel Chromium'da açık olasılık ağacından maskeli ilk görüşme tutanağına geçildi, indirilen PDF metninde Kişi 23 ve Kurum 1 okundu. Gözle aynı belgenin özgün görünümüne dönüldü.
+
+FR-020 için standart büro başlığındaki düğmenin kaldırılması ve mevcut menü bağlantıları doğrulandı. Başlık, uygulama kabuğu ve sunum bileşenlerinin 16 testi ve TypeScript kontrolü geçti.

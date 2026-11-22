@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { contextTopic, guideTopics } from "@/lib/workspaceGuide";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { PresentationEye } from "@/components/PresentationEye";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { UpcomingNotifications } from "@/components/UpcomingNotifications";
 import { UserMenu } from "@/components/UserMenu";
@@ -54,7 +53,7 @@ function GuideLink({ user }: { user: AppUser }) {
     className="rounded-xl border border-accent-200 bg-accent-50 px-4 py-2.5 text-sm font-semibold text-accent-800 hover:border-accent-400">Rehber</Link>;
 }
 
-export function WorkspaceHeader({ user, onMenuToggle, onPresentation, menuOpen = false }: { user: AppUser | null; onMenuToggle?: () => void; onPresentation?: () => void; menuOpen?: boolean }) {
+export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user: AppUser | null; onMenuToggle?: () => void; menuOpen?: boolean }) {
   const pathname = usePathname() ?? "";
   const section = sectionForPath(pathname);
   const today = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
@@ -84,7 +83,6 @@ export function WorkspaceHeader({ user, onMenuToggle, onPresentation, menuOpen =
         {/* Firm workspace widgets: the platform firm has no firm data or pages. */}
         {!user?.is_platform_admin && !user?.workspace_position && (
           <>
-            {user && onPresentation && <PresentationEye active={false} onClick={onPresentation}/>}
             <GlobalSearch />
             <UpcomingNotifications />
             <nav aria-label="Hızlı erişim" className="hidden items-center gap-1 text-sm xl:flex">

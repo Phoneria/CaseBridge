@@ -36,6 +36,7 @@ describe("WorkspaceHeader", () => {
       gender: null, role: "admin", law_firm_id: "f1", is_active: true,
     }} />);
 
+    expect(screen.queryByRole("button", { name: "Sunumda kimlikleri gizle" })).not.toBeInTheDocument();
     const section = screen.getByRole("link", { name: "Admin Paneli" });
     expect(section).toHaveAttribute("href", "/admin");
     expect(section).toHaveAttribute("aria-current", "page");
