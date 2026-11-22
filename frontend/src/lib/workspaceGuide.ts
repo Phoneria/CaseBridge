@@ -95,22 +95,24 @@ const commonTopics: GuideTopic[] = [
   ]),
   topic('cases', 'Davalar · Dosya yaşam döngüsü', '/davalar', [
     ['Dosyayı bulun veya oluşturun', 'Davalar listesini arama ve filtrelerle daraltın. Yeni dosyada taraf, mahkeme ve sorumlu bilgilerini doğrulayın.', 'İşleme başlamadan doğru dosya numarasını kontrol edin.'],
+    ['Belgeleri ve emsalleri inceleyin', 'Davayı açın. Dosya belgelerine Belgeler sekmesinden ulaşın. Genel Bakış içinde İlgili emsal kararları göster düğmesi bu davaya bağlanan kararları açar.', 'Kararı ilişkilendirmeden önce mahkeme, tarih ve karar numarasını kontrol edin.'],
+    ['Senaryoları ve sonucu okuyun', 'Olasılık Ağacı sekmesinde seçili dosyanın senaryolarını inceleyin. Sonuçlanan dosyanın kararını Genel Bakış üzerinden okuyun.', 'Senaryoları mahkemenin verdiği karardan ayrı değerlendirin.'],
     ['Dosyanın kaydını tamamlayın', 'Dosya ayrıntısında belge, görev, duruşma, taraf ve notları ilgili bölümlerden yönetin. Sonuç ve arşiv işlemleri öncesi devam eden işleri gözden geçirin.', 'AI çıktısı, doğrulanmış dosya bilgisi yerine geçmez.'],
   ]),
   topic('precedents', 'Emsal Kararlar', '/emsaller', [
-    ['İlgili kararı bulun', 'Emsal listesinde uyuşmazlığa uygun kararları arayın ve karar ayrıntısını açın.', 'Mahkeme, tarih ve karar numarasını kontrol edin.'],
+    ['İlgili kararı bulun', 'Davalar bölümünde ilgili dosyayı açın. Genel Bakış içinde İlgili emsal kararları göster düğmesine basın.', 'Mahkeme, tarih ve karar numarasını kontrol edin.'],
     ['Tam metni değerlendirin', 'Kararın olay ve gerekçesini kendi dosyanızla karşılaştırın; inceleme durumunu güncel tutun.', 'Bir benzerlik veya atıf sayısı davanın kazanılma olasılığı değildir.'],
   ]),
   topic('calendar', 'Takvim · Plan ve takip', '/takvim', [
     ['Dönemi ve görünümü seçin', 'Ay, hafta veya ajanda görünümüyle ilgili tarih aralığını açın; tür ve kişi filtrelerini gözden geçirin.', 'Filtre nedeniyle görünmeyen işleri hesaba katın.'],
     ['Etkinlik ayrıntısını kontrol edin', 'Etkinliği açarak dosya, tarih/saat ve hatırlatmayı inceleyin; duruşmanın dosya kaydını da güncel tutun.', 'Takvim etkinliği bir kritik sürenin hukuki doğrulaması değildir.'],
   ]),
-  topic('tasks', 'Görevler · Atama ve tamamlama', '/gorevler', [
-    ['Açık işleri ayırın', 'Görev listesinde dosya, sorumlu, durum ve son tarihi kontrol edin; ilgili dosyaya girerek bağlamı okuyun.', 'Geciken işleri ve sorumlusu olmayan işleri önce değerlendirin.'],
-    ['Sonucu kaydedin', 'Görev içeriğini yerine getirdikten sonra durumunu güncelleyin. Tarih veya atama değişikliği gerekiyorsa kaydın kendisini düzenleyin.', 'Rehberde Sonraki demek görevi tamamlamaz.'],
+  topic('tasks', 'Görevler · Proje panosu', '/gorevler', [
+    ['Görevi planlayın', 'Görev kartını açıp atanan kişiyi, önceliği ve son tarihi seçin. İşin ayrıntılarını görev notuna yazın.', 'Görevi kimin ne zamana kadar tamamlayacağı belli mi?'],
+    ['Kartı taşıyın', 'Kartı İş Havuzu, Yapılacak, Devam Ediyor, İncelemede veya Tamamlandı sütununa sürükleyin. Klavyeyle işlem yapmak için aşama seçimini kullanın.', 'İnceleme bitince kartı Tamamlandı sütununa taşıyın.'],
   ]),
   topic('documents', 'Belgeler · Doğru dosyaya doğru belge', '/belgeler', [
-    ['Belgeyi dosyayla eşleştirin', 'Belge listesinde dosya ve belge adını kontrol edin. Yükleme için ilgili davanın belge bölümünü kullanın.', 'Aynı isimli dosyalarda içerik ve dava numarasını karşılaştırın.'],
+    ['Belgeyi dosyayla eşleştirin', 'Davalar bölümünden ilgili dosyayı açıp Belgeler sekmesine geçin. Yüklemeden önce dosya numarasını ve belge adını kontrol edin.', 'Aynı isimli dosyalarda içerik ve dava numarasını karşılaştırın.'],
     ['İçeriği gözden geçirin', 'İndirdiğiniz veya analizde kullandığınız belgenin doğru sürüm olduğunu doğrulayın.', 'Belge eklemek müvekkile otomatik yayın yapmaz.'],
   ]),
   topic('analytics', 'Analitik · Veriyi yorumla', '/analitik', [
@@ -119,7 +121,7 @@ const commonTopics: GuideTopic[] = [
   ]),
   topic('reports', 'Raporlar · Paylaşmadan önce', '/raporlar', [
     ['Rapor kapsamını seçin', 'İhtiyacınıza uygun raporu ve ekrandaki filtreleri seçin; sonuçları inceleyin.', 'Doğru dönem ve dosyalar mı?'],
-    ['Çıktıyı kontrol edin', 'Sunulan dışa aktarımı kullanmadan önce içeriği ve paylaşılacak kişiyi doğrulayın.', 'Rapor indirmek müvekkil portalına yayın yapmak değildir.'],
+    ['Çıktıyı kontrol edin', 'Önizle ile raporun satırlarını inceleyin. Dönem ve dosya kapsamını doğruladıktan sonra raporu dışa aktarın.', 'Rapor indirmek müvekkil portalına yayın yapmak değildir.'],
   ]),
 ];
 const aiTopics = [

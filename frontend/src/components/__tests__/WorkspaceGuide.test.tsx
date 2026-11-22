@@ -65,6 +65,11 @@ describe('WorkspaceGuide', () => {
     expect(contextTopic(topics,'/buro','unknown').id).toBe('bureau-overview');
     for(const route of ['/dashboard','/davalar','/emsaller','/takvim','/gorevler','/belgeler','/analitik','/raporlar','/admin','/ai','/ai/sufle','/ai/analiz','/ai/durusma','/ai/sohbet','/ai/karsi-taraf','/ai/yonetmen','/ai/harita','/ai/olasilik','/ayarlar','/hesabim']) expect(contextTopic(topics,route,null).route).toBe(route);
     expect(contextTopic(topics,'/davalar/case-id',null).id).toBe('cases');
+    const instructions = (id: string) => topics.find(topic => topic.id === id)?.steps.map(step => step.body).join(' ');
+    expect(instructions('cases')).toContain('İlgili emsal kararları göster');
+    expect(instructions('cases')).toContain('Olasılık Ağacı');
+    expect(instructions('tasks')).toContain('İncelemede');
+    expect(instructions('reports')).toContain('Önizle');
     expect(new Set(topics.map(t=>t.id)).size).toBe(topics.length);
     for(const t of topics) {expect(t.steps.length).toBeGreaterThanOrEqual(2); for(const s of t.steps) {expect(s.title).toBeTruthy();expect(s.body).toBeTruthy();expect(s.check).toBeTruthy();}}
     expect(topics.find(t=>t.id==='bureau-team')?.steps[3].body).toContain('teslimi teyit');

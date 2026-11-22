@@ -51,15 +51,15 @@ function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selecte
   </div>;
 }
 
-export function ScenarioTreeView() {
+export function ScenarioTreeView({ fixedCaseId }: { fixedCaseId?: string }) {
   const params = useSearchParams();
   const router = useRouter();
-  const [demoMode, setDemoMode] = useState(params.get('ornek') === 'belge-dogrulama');
+  const [demoMode, setDemoMode] = useState(!fixedCaseId && params.get('ornek') === 'belge-dogrulama');
   const [document, setDocument] = useState<DocumentAssumption>('unreviewed');
   const [payment, setPayment] = useState<PaymentAssumption>('unknown');
   const [assumptions, setAssumptions] = useState<Record<string, SupportAssumption>>({});
   const [cases, setCases] = useState<Case[]>([]);
-  const [caseId, setCaseId] = useState<string | null>(params.get('dava'));
+  const [caseId, setCaseId] = useState<string | null>(fixedCaseId ?? params.get('dava'));
   const [tree, setTree] = useState<ScenarioTree | null>(null);
   const [selected, setSelected] = useState('root');
   const [view, setView] = useState<'graph' | 'text'>('graph');
@@ -72,6 +72,7 @@ export function ScenarioTreeView() {
   const previous = useRef<ScenarioTree | null>(null);
   useEffect(() => {
     let active = true;
+    if (fixedCaseId) return () => { request.current += 1; };
     getCases().then(rows => { if (active) setCases(rows); }).catch(() => { if (active) setCases([]); }).finally(() => { if (active) setCasesLoading(false); });
     return () => { active = false; request.current += 1; };
   }, []);
@@ -107,7 +108,7 @@ export function ScenarioTreeView() {
   const urlKey = params.toString();
   const lastUrl = useRef(urlKey);
   useEffect(() => {
-    if (lastUrl.current === urlKey) return;
+    if (fixedCaseId || lastUrl.current === urlKey) return;
     lastUrl.current = urlKey;
     const demo = params.get('ornek') === 'belge-dogrulama', id = params.get('dava');
     if (demo !== demoMode || (!demo && id !== caseId)) switchMode(demo, id);
@@ -115,11 +116,12 @@ export function ScenarioTreeView() {
   const node = useMemo(() => tree?.nodes.find(n => n.id === selected) ?? tree?.nodes[0], [tree, selected]);
   const sourceById = useMemo(() => new Map(tree?.sources.map(s => [s.id, s]) ?? []), [tree]);
   return <div className="space-y-5">
-    <AiHero compact title="Olasılık Ağacı" description="Dosyanızdaki kayıtları, alternatif senaryoları ve koşullu gelişmeleri dayanaklarıyla birlikte inceleyin. Demo tahminlerini, kullanılan varsayımları ve hesaplama yöntemini birlikte inceleyin." />
+    {!fixedCaseId && <><AiHero compact title="Olasılık Ağacı" description="Dosyanızdaki kayıtları, alternatif senaryoları ve koşullu gelişmeleri dayanaklarıyla birlikte inceleyin. Demo tahminlerini, kullanılan varsayımları ve hesaplama yöntemini birlikte inceleyin." />
     <div className="flex flex-wrap gap-3"><button type="button" onClick={() => switchMode(true)} className="rounded-xl bg-accent-700 px-4 py-2 text-sm font-semibold text-white">Örnek davayı aç — Demo tahmini</button>{demoMode && <button type="button" onClick={() => switchMode(false)} className="rounded-xl border border-surface-border px-4 py-2 text-sm">Büro dosyalarına dön</button>}</div>
     {!demoMode && <AiCard><details open={!tree}><summary className="cursor-pointer text-sm font-semibold text-navy-900">{tree ? `Seçili dosya: ${tree.title} · Dosyayı değiştir` : 'Bir dava seçin'}</summary>
       <div className="mt-3">{casesLoading ? <LoadingState label="Dava listesi yükleniyor…" /> : <CaseSearchSelect cases={cases} value={caseId} onChange={id => switchMode(false, id)} />}</div>
     </details></AiCard>}
+    </>}
     {error && <div role="alert"><ErrorState message={error} /></div>}
     {loading && <LoadingState label="Dosya kayıtlarından ağaç hazırlanıyor…" />}
     {!demoMode && !caseId && !casesLoading && <p className="rounded-xl border border-surface-border bg-white p-5 text-sm text-navy-600">Ağaç oluşturmak için erişiminiz olan bir dosya seçin. Bu görünüm yeni bir yapay zekâ analizi başlatmaz.</p>}

@@ -33,3 +33,8 @@ class ProfileUpdate(BaseModel):
     @classmethod
     def _department(cls, value: str | None) -> str | None:
         return clean_department(value)
+
+
+class AdminLawyerOut(UserOut):
+    # null: ordinary eligible full-access lawyer; list: sample-only case scope.
+    demo_case_ids: list[str] | None = None

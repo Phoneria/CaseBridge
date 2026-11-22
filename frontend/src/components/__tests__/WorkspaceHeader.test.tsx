@@ -51,7 +51,7 @@ describe("WorkspaceHeader", () => {
     const user = userEvent.setup();
     render(<WorkspaceHeader user={{id:"guide",email:"guide@example.test",full_name:"Örnek",department:null,gender:null,role:"admin",law_firm_id:"synthetic",is_active:true}} />);
     expect(screen.queryByRole("button", {name:/CaseBridge AI/})).not.toBeInTheDocument();
-    const trigger = screen.getByRole("button", {name:"Rehber", exact:true});
+    const trigger = screen.getByRole("button", { name: "Rehber" });
     await user.click(trigger);
     expect(screen.getByRole("dialog", {name:"CaseBridge Rehber"})).toBeInTheDocument();
     expect(screen.getByRole("combobox", {name:"Konu seçin"})).toHaveValue("admin");

@@ -58,6 +58,14 @@ class CaseLifecycleService:
     def close(self, case: Case, payload: CaseClose, closed_by: str, today: date) -> Case:
         if case.status == CaseStatus.KAPALI:
             raise CaseStateError(409, "Dava zaten kapalı.")
+        return self._record_decision(case, payload, closed_by, today, "Dava kapatıldı")
+
+    def complete_decision(self, case: Case, payload: CaseClose, actor_id: str, today: date) -> Case:
+        if case.is_archived or case.status != CaseStatus.KAPALI or case.outcome != CaseOutcome.ONGOING:
+            raise CaseStateError(409, "Yalnızca sonucu eksik ve arşivlenmemiş kapalı bir davaya sonuç eklenebilir.")
+        return self._record_decision(case, payload, actor_id, today, "Dava sonucu kaydedildi")
+
+    def _record_decision(self, case: Case, payload: CaseClose, closed_by: str, today: date, title: str) -> Case:
         if payload.decision_date > today:
             raise CaseStateError(422, "Karar tarihi ileri bir tarih olamaz.")
         if case.opening_date is not None and payload.decision_date < case.opening_date:
@@ -71,7 +79,7 @@ class CaseLifecycleService:
             case_id=case.id,
             law_firm_id=case.law_firm_id,
             event_date=payload.decision_date,
-            title=f"Dava kapatıldı — {OUTCOME_LABELS[outcome]}",
+            title=f"{title} — {OUTCOME_LABELS[outcome]}",
             description=payload.note,
             event_type=CaseEventType.OTHER,
             created_by=closed_by,

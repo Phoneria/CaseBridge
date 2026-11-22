@@ -8,6 +8,8 @@ const getAiConnectivity = vi.fn();
 const getNotificationStatus = vi.fn();
 const sendTestEmail = vi.fn();
 const importDemoTemplate = vi.fn();
+const previewDemoRemoval = vi.fn();
+const removeDemoTemplate = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getMe: (...args: unknown[]) => getMe(...args),
@@ -17,6 +19,8 @@ vi.mock("@/lib/api", () => ({
   getAiKeyStatus: () => Promise.resolve({ configured: false, managed: false, pending: false, can_save: true }),
   getNotificationStatus: (...args: unknown[]) => getNotificationStatus(...args),
   importDemoTemplate: (...args: unknown[]) => importDemoTemplate(...args),
+  previewDemoRemoval: (...args: unknown[]) => previewDemoRemoval(...args),
+  removeDemoTemplate: (...args: unknown[]) => removeDemoTemplate(...args),
   sendTestEmail: (...args: unknown[]) => sendTestEmail(...args),
 }));
 
@@ -203,4 +207,30 @@ it("shows per-area presentation coverage even when only missing modules were add
   expect(screen.getByText("Büroda gösterime hazır veriler")).toBeInTheDocument();
   expect(screen.getByText("Büro iş akışları")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "AI örneklerine git →" })).toHaveAttribute("href", "/ai");
+});
+
+
+it("previews sample removal and requires explicit confirmation while cancellation writes nothing", async () => {
+  getMe.mockResolvedValue(adminUser);listManagedUsers.mockResolvedValue([]);
+  previewDemoRemoval.mockResolvedValue({token:"a".repeat(64),counts:{"Davalar ve emsaller":23,"Örnek kullanıcılar":18},kept_users:0,total_records:200});
+  removeDemoTemplate.mockResolvedValue({removed_records:200,kept_users:0});
+  const user=userEvent.setup();render(<SettingsView/>);
+  const trigger=await screen.findByRole("button",{name:"Örnek verileri kaldır"});await user.click(trigger);
+  expect(screen.getByRole("dialog",{name:"Örnek verileri kaldır"})).toHaveTextContent("sonradan eklediğiniz");
+  expect(screen.getByRole("button",{name:"Vazgeç"})).toHaveFocus();
+  await user.click(screen.getByRole("button",{name:"Vazgeç"}));expect(removeDemoTemplate).not.toHaveBeenCalled();expect(trigger).toHaveFocus();
+  await user.click(trigger);await user.click(screen.getByRole("button",{name:"Onayla ve örnekleri kaldır"}));
+  expect(removeDemoTemplate).toHaveBeenCalledWith("a".repeat(64));expect(await screen.findByText("200 örnek kayıt kaldırıldı.")).toHaveAttribute("role","status");
+});
+
+it("shows removal errors and allows a fresh preview", async () => {
+  getMe.mockResolvedValue(adminUser);listManagedUsers.mockResolvedValue([]);
+  previewDemoRemoval.mockResolvedValue({token:"b".repeat(64),counts:{Davalar:2},kept_users:1,total_records:4});
+  removeDemoTemplate.mockRejectedValue(new ApiError("Örnek kayıtlar değişti. Önizlemeyi yeniden açıp kontrol edin.",409));
+  const user=userEvent.setup();render(<SettingsView/>);
+  await user.click(await screen.findByRole("button",{name:"Örnek verileri kaldır"}));
+  await user.click(screen.getByRole("button",{name:"Onayla ve örnekleri kaldır"}));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Örnek kayıtlar değişti");
+  await user.click(screen.getByRole("button",{name:"Örnek verileri kaldır"}));
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
 });

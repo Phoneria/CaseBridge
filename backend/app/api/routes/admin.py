@@ -11,7 +11,7 @@ from app.models.case import Case
 from app.models.user import User, UserRole
 from app.schemas.case import CaseAssignment, CaseOut, PrecedentReviewAssignment
 from app.repositories.case_repository import CaseRepository
-from app.schemas.user import UserOut
+from app.schemas.user import UserOut, AdminLawyerOut
 from app.services.hearing_dates import move_upcoming_hearings
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -29,19 +29,77 @@ def import_demo_template(admin: User = Depends(get_current_admin), db: Session =
         raise
 
 
-@router.get("/lawyers", response_model=list[UserOut])
-def list_lawyers(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+from typing import Literal
+from pydantic import BaseModel, Field
+
+
+class RemoveDemoRequest(BaseModel):
+    token: str = Field(pattern=r"^[0-9a-f]{64}$")
+    confirm: Literal[True]
+
+
+def _removal_firm(db, admin):
+    from app.models.law_firm import LawFirm
+    firm = db.query(LawFirm).filter_by(id=admin.law_firm_id).with_for_update().one()
+    if firm.is_platform:
+        raise HTTPException(403, "Platform bürosunda örnek veri işlemi yapılamaz.")
+
+
+@router.get("/demo-template/removal-preview")
+def preview_demo_removal(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    from app.db.demo_template_removal import removal_plan
+    _removal_firm(db, admin)
+    return removal_plan(db, admin)[1]
+
+
+@router.post("/demo-template/remove")
+def remove_demo_template(payload: RemoveDemoRequest, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    from app.db.demo_template_removal import removal_plan, remove_template, unlink_removed_files
+    try:
+        _removal_firm(db, admin)
+        selected, preview = removal_plan(db, admin)
+        if preview["token"] != payload.token:
+            raise HTTPException(409, "Örnek kayıtlar değişti. Önizlemeyi yeniden açıp kontrol edin.")
+        paths = remove_template(db, admin, selected)
+        if preview["total_records"]:
+            from app.models.management import ManagementAudit
+            db.add(ManagementAudit(law_firm_id=admin.law_firm_id,actor_id=admin.id,action="demo.template_removed",entity_type="demo",entity_id=admin.law_firm_id,reason="Yönetici örnek veri kaldırma önizlemesini açıkça onayladı.",after={"counts":preview["counts"],"kept_users":preview["kept_users"]}))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    unlink_removed_files(db, paths)
+    return {"removed_records": preview["total_records"], "kept_users": preview["kept_users"]}
+
+
+@router.get("/lawyers", response_model=list[AdminLawyerOut])
+def list_lawyers(include_demo: bool = False, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     """The lawyers cases can be given to: active and past the invitation
     (a lawyer who has not chosen a password yet is not assignable)."""
     from app.models.management import WorkspaceAccess
     restricted = db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == admin.law_firm_id)
-    return db.query(User).filter(
+    candidates = db.query(User).filter(
         User.law_firm_id == admin.law_firm_id,
         User.role == UserRole.LAWYER,
         User.is_active.is_(True),
         User.password_set_at.isnot(None),
-        User.id.notin_(restricted),
     ).order_by(User.full_name).all()
+
+    from app.db.demo_team import demo_case_ids, roster_ids
+    sample_ids = roster_ids(admin.law_firm_id)
+    restricted_ids = {row[0] for row in restricted.all()}
+    result = []
+    for lawyer in candidates:
+        if lawyer.id in sample_ids and not include_demo:
+            continue
+        scope = demo_case_ids(db, lawyer)
+        if lawyer.id in restricted_ids and not scope:
+            continue
+        # A known sample ID with a removed grant must never become full-access.
+        if lawyer.id in sample_ids and not scope:
+            continue
+        result.append(AdminLawyerOut.model_validate(lawyer).model_copy(update={"demo_case_ids": scope}))
+    return result
 
 
 @router.patch("/cases/{case_id}/lawyer", response_model=CaseOut)
@@ -65,7 +123,12 @@ def assign_case_lawyer(
     if lawyer is None:
         raise HTTPException(status_code=422, detail="Bu büroda aktif bir avukat seçin.")
     from app.services.management_service import access_for, audit
-    if access_for(db, lawyer):
+    from app.db.demo_team import demo_case_ids, roster_ids
+    scope = demo_case_ids(db, lawyer)
+    if lawyer.id in roster_ids(admin.law_firm_id):
+        if not scope or case.id not in scope:
+            raise HTTPException(422, "Örnek avukat yalnız yetkili olduğu örnek davalara atanabilir.")
+    elif access_for(db, lawyer):
         raise HTTPException(422, "Dava sahipliği için tam erişimli bir avukat seçin.")
     previous = case.assigned_lawyer_id
     case.assigned_lawyer_id = lawyer.id
@@ -99,6 +162,9 @@ def assign_precedent_reviewer(
     ).first()
     if reviewer is None:
         raise HTTPException(status_code=422, detail="Choose an active lawyer in this firm")
+    from app.db.demo_team import roster_ids
+    if reviewer.id in roster_ids(admin.law_firm_id):
+        raise HTTPException(422, "Örnek avukat emsal inceleyicisi olarak atanamaz.")
     precedent.reviewer_lawyer_id = reviewer.id
     db.commit()
     db.refresh(precedent)

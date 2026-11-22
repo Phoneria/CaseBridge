@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { listAllTasks, updateTaskStatus } from "@/lib/api";
+import { listAllTasks, updateTask, updateTaskStatus } from "@/lib/api";
 import {
   TASK_LIST_PARAM_KEYS,
   describeTaskListQuery,
@@ -15,13 +15,17 @@ import {
 } from "@/lib/filters";
 import { formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
-import type { Case, Task, TaskWithCase } from "@/types";
+import type { Case, Task, TaskWithCase, TaskStage } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { userMessage } from "@/lib/userMessages";
 import { EmptyState } from "@/components/EmptyState";
 import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { FilterChips, NoFilterResults } from "@/components/FilterChips";
+
+import { STAGES, PRIORITIES, stageOf } from "@/lib/taskBoard";
+
+const STRIPES = { backlog: "border-t-slate-400", todo: "border-t-sky-500", in_progress: "border-t-amber-500", in_review: "border-t-violet-500", done: "border-t-emerald-500" };
 
 type Tone = "navy" | "emerald" | "amber" | "red";
 const TONE_TEXT: Record<Tone, string> = {
@@ -42,6 +46,11 @@ export function TasksView() {
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
+  const [editing, setEditing] = useState<TaskWithCase>();
+  const [dropStage, setDropStage] = useState<TaskStage | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const changing = useRef(new Set<string>());
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -51,19 +60,29 @@ export function TasksView() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleToggle(task: TaskWithCase) {
+  async function move(task: TaskWithCase, stage: TaskStage, toggle = false) {
+    if (changing.current.has(task.id) || stageOf(task) === stage) return;
+    changing.current.add(task.id);
     setToggleError(null);
-    const nextStatus = task.status === "completed" ? "pending" : "completed";
     try {
-      const updated = await updateTaskStatus(task.case_id, task.id, nextStatus);
-      setTasks((prev) => prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
+      const updated = toggle
+        ? await updateTaskStatus(task.case_id, task.id, stage === "done" ? "completed" : "pending")
+        : await updateTask(task.case_id, task.id, { stage });
+      setTasks(prev => prev.map(row => row.id === task.id ? { ...row, ...updated } : row));
     } catch (err) {
       setToggleError(userMessage(err, "Görev güncellenemedi. Lütfen tekrar deneyin."));
+    } finally {
+      changing.current.delete(task.id);
     }
   }
 
-  function handleCreated(task: Task, taskCase: Case) {
-    setTasks((prev) => [{ ...task, case_name: taskCase.case_name, case_number: taskCase.case_number }, ...prev]);
+  function handleSaved(task: Task, taskCase: Case) {
+    if (editing) {
+      setTasks(prev => prev.map(row => row.id === task.id ? { ...row, ...task } : row));
+    } else {
+      setTasks(prev => [{ ...task, case_name: taskCase.case_name, case_number: taskCase.case_number }, ...prev]);
+    }
+    setEditing(undefined);
     setFormOpen(false);
   }
 
@@ -105,7 +124,7 @@ export function TasksView() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-navy-900">Görevler</h1>
-          <p className="text-sm text-navy-500">Büronuzun tüm davalarındaki görevleri tek yerden takip edin.</p>
+          <p className="text-sm text-navy-500">Kartı sürükleyerek veya aşamasını seçerek taşıyın.</p>
         </div>
         <button
           type="button"
@@ -140,55 +159,64 @@ export function TasksView() {
 
       <FilterChips chips={chips} onRemove={(key) => setParams({ [key]: null })} onClear={clearFilters} resultCount={visible.length} />
 
-      {tasks.length === 0 ? (
+      {tasks.length === 0 && (
         <EmptyState message="Henüz görev yok." hint="İlk görevi 'Yeni görev' ile ekleyin." />
-      ) : visible.length === 0 ? (
+      )}
+      {tasks.length > 0 && visible.length === 0 ? (
         <NoFilterResults onClear={clearFilters} />
       ) : (
-        <div className="rounded-2xl border border-surface-border bg-white shadow-card">
-          <ul className="divide-y divide-surface-border text-sm">
-            {visible.map((task) => {
-              const completed = task.status === "completed";
-              const overdue = isOverdue(task, today);
-              return (
-                <li key={task.id} className="flex items-center gap-3 p-4 transition hover:bg-surface-muted">
-                  <input
-                    type="checkbox"
-                    checked={completed}
-                    onChange={() => handleToggle(task)}
-                    className="h-4 w-4 rounded border-surface-border text-accent-600 focus:ring-accent-400"
-                    aria-label={`${task.title} tamamlandı olarak işaretle`}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      href={quickViewHref(task.case_id, { type: "gorev", id: task.id })}
-                      scroll={false}
-                      data-testid="task-title"
-                      className={`block truncate hover:text-accent-700 ${completed ? "text-navy-400 line-through" : "text-navy-800"}`}
-                    >
-                      {task.title}
+        <div aria-label="Görev panosu" className="flex max-w-full items-stretch gap-3 overflow-x-auto pb-3">
+          {(Object.keys(STAGES) as TaskStage[]).map(stage => {
+            const cards = visible.filter(task => stageOf(task) === stage);
+            return <section key={stage} aria-label={STAGES[stage]}
+              className={`min-h-64 min-w-[15rem] flex-1 xl:min-w-[13rem] rounded-xl border border-t-4 p-2.5 ${STRIPES[stage]} ${dropStage === stage ? "border-accent-500 bg-accent-50" : "border-surface-border bg-surface-muted"}`}
+              onDragOver={event => { if (dragging) { event.preventDefault(); setDropStage(stage); } }}
+              onDrop={event => {
+                event.preventDefault();
+                const task = visible.find(row => row.id === dragging);
+                setDragging(null);
+                setDropStage(null);
+                if (task) void move(task, stage);
+              }}>
+              <h2 className="mb-3 flex items-center justify-between px-1 text-sm font-semibold text-navy-800">
+                {STAGES[stage]} <span className="rounded-full bg-white px-2 py-0.5 text-xs">{cards.length}</span>
+              </h2>
+              <ul className="max-h-[65vh] space-y-2 overflow-y-auto">
+                {cards.map(task => <li key={task.id} draggable
+                  onDragStart={event => { event.dataTransfer.setData("text/plain", task.id); event.dataTransfer.effectAllowed = "move"; setDragging(task.id); }}
+                  onDragEnd={() => { setDragging(null); setDropStage(null); }}
+                  className="cursor-grab rounded-xl border border-surface-border bg-white p-3 text-sm shadow-sm active:cursor-grabbing">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <Link href={hrefWith({ dava: task.case_id })} replace scroll={false} className="text-xs text-navy-500 hover:underline">
+                      {task.case_number} - {task.case_name}
                     </Link>
-                    <p className="text-xs text-navy-500">
-                      <Link href={hrefWith({ dava: task.case_id })} replace scroll={false} className="hover:text-accent-700 hover:underline">
-                        {task.case_number} - {task.case_name}
-                      </Link>
-                      {task.due_date && (
-                        <span className={overdue ? "font-medium text-red-600" : ""}>
-                          {" "}
-                          - Son tarih: {formatDate(task.due_date)}
-                          {overdue ? " (gecikmiş)" : ""}
-                        </span>
-                      )}
-                    </p>
+                    <input type="checkbox" checked={task.status === "completed"} aria-label={`${task.title} tamamlandı olarak işaretle`}
+                      onChange={() => void move(task, task.status === "completed" ? "todo" : "done", true)} />
                   </div>
-                </li>
-              );
-            })}
-          </ul>
+                  <Link href={quickViewHref(task.case_id, { type: "gorev", id: task.id })} scroll={false} data-testid="task-title"
+                    className="block break-words font-semibold text-navy-900 hover:underline">{task.title}</Link>
+                  {task.description && <p className="mt-1 line-clamp-2 whitespace-pre-line text-xs text-navy-600">{task.description}</p>}
+                  <div className="my-3 flex flex-wrap items-center gap-2 text-xs text-navy-600">
+                    <span className={`rounded px-1.5 py-0.5 font-medium ${task.priority === "urgent" ? "bg-red-50 text-red-700" : task.priority === "high" ? "bg-amber-50 text-amber-700" : "bg-surface-muted"}`}>{PRIORITIES[task.priority ?? "normal"]}</span>
+                    <span>{task.assignee_name ?? "Atanmadı"}</span>
+                    {task.due_date && <span className={isOverdue(task, today) ? "font-medium text-red-600" : ""}>Son tarih: {formatDate(task.due_date)}{isOverdue(task, today) && " (gecikmiş)"}</span>}
+                  </div>
+                  <div className="flex items-center justify-between gap-1 border-t border-surface-border pt-2">
+                    <select aria-label={`${task.title} aşaması`} value={stage} onChange={e => void move(task, e.target.value as TaskStage)}
+                      className="rounded border border-surface-border bg-white p-1 text-xs">
+                      {Object.entries(STAGES).map(([value,label]) => <option key={value} value={value}>{label}</option>)}
+                    </select>
+                    <button type="button" aria-label={`${task.title} görevini düzenle`} onClick={() => { setEditing(task); setFormOpen(true); }}
+                      className="text-xs font-medium text-accent-700">Düzenle</button>
+                  </div>
+                </li>)}
+              </ul>
+            </section>;
+          })}
         </div>
       )}
 
-      {formOpen && <TaskFormModal initialCaseId={query.dava} onClose={() => setFormOpen(false)} onCreated={handleCreated} />}
+      {formOpen && <TaskFormModal initialCaseId={query.dava} editing={editing} onClose={() => { setEditing(undefined); setFormOpen(false); }} onCreated={handleSaved} />}
     </div>
   );
 }

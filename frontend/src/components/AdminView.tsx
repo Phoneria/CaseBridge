@@ -65,7 +65,7 @@ export function AdminView() {
         if (!cancelled) setDenied(true);
         return;
       }
-      const [lawyerRows, caseRows] = await Promise.all([listAdminLawyers(), getCases({ include_archived: true })]);
+      const [lawyerRows, caseRows] = await Promise.all([listAdminLawyers(true), getCases({ include_archived: true })]);
       if (!cancelled) { setLawyers(lawyerRows); setCases(caseRows); }
     }).catch(() => {
       if (!cancelled) setError("Admin verileri yüklenemedi.");
@@ -170,12 +170,12 @@ export function AdminView() {
           <div><h2 className="text-sm font-semibold text-navy-800">Avukat İş Yükü</h2><p className="mt-1 text-xs text-navy-500">Aktif ve kapanmış davaların sorumlu bazında karşılaştırması</p></div>
           <div className="flex gap-4 text-[11px] text-navy-500"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-600" />Aktif</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-100" />Kapalı</span></div>
         </div>
-        <div className="h-64" aria-label="Avukat iş yükü bar grafiği">
+        <div style={{ height: Math.max(256, workloadData.length * 40) }} aria-label="Avukat iş yükü bar grafiği">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={workloadData} layout="vertical" margin={{ top: 0, right: 18, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" horizontal={false} />
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" interval={0} dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#f7f8fb" }} />
               <Bar dataKey="aktif" name="Aktif" stackId="cases" fill={BRAND_ACCENT[600]} radius={[6, 0, 0, 6]} />
               <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#d7f1f8" radius={[0, 6, 6, 0]} />
@@ -203,7 +203,7 @@ export function AdminView() {
                       <div className="my-2 flex items-center gap-1.5 text-[10px] font-medium text-navy-500"><span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />{status.label}</div>
                       {item.is_archived ? <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Arşivli</span> : <select aria-label={`${item.case_name} sorumlu avukatı`} value={item.assigned_lawyer_id ?? ""} disabled={savingId === item.id} onChange={(event) => assign(item.id, event.target.value)} className={SELECT_CLASS}>
                         {!item.assigned_lawyer_id && <option value="">Atanmamış</option>}
-                        {lawyers.filter((row) => row.is_active || row.id === item.assigned_lawyer_id).map((row) => <option key={row.id} value={row.id}>{row.full_name}</option>)}
+                        {lawyers.filter((row) => (row.is_active || row.id === item.assigned_lawyer_id) && (!row.demo_case_ids || row.demo_case_ids.includes(item.id))).map((row) => <option key={row.id} value={row.id}>{row.full_name}</option>)}
                       </select>}
                     </article>;
                   })}

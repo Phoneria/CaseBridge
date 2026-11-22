@@ -293,7 +293,7 @@ export function parseCalendarQuery(params: ParamSource): CalendarQuery {
 
 // ---------- Case detail tabs ----------
 
-export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "ai", "devir", "notlar"] as const;
+export const CASE_TAB_SLUGS = ["genel", "belgeler", "gelismeler", "gorevler", "ai", "olasilik", "devir", "notlar"] as const;
 export type CaseTabSlug = (typeof CASE_TAB_SLUGS)[number];
 
 /** Legacy slugs that still open a tab after a rename. */
