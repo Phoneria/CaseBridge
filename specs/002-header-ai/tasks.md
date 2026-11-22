@@ -26,3 +26,5 @@
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
 
 - [x] T008 [US2] Verify FR-007: normalize a stale initial action at the courtroom submit boundary; keep explicit valid conversation choices, then rerun microphone and full frontend regression/CI.
+
+- [ ] T020 Implement FR-001 through FR-005 expanded compact sidebar and data-model.md#featurecontract shared AI navigation; critical role/active-state tests, geometry at 900/768px and short/mobile scroll, protected PR and public release.

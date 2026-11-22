@@ -10,7 +10,7 @@
 
 ## Phase 3: User Story 1 (P1)
 
-- [x] T003 [US1] Implement FR-001 through FR-003 in web-page/index.html, web-page/assets/feature-screens/tr-current, web-page/assets/feature-screens/tr-current/CAPTURE_NOTES.md, tests/e2e/marketing.
+- [x] T003 [US1] Implement FR-001 through FR-004 in web-page/index.html, web-page/assets/feature-screens/tr-current, web-page/assets/feature-screens/tr-current/CAPTURE_NOTES.md, tests/e2e/marketing.
 - [x] T004 [US1] Verify primary acceptance scenario and record real evidence in specs/006-product-captures/verification.md.
 
 ## Phase 4: User Story 2 (P2)
@@ -24,3 +24,5 @@
 ## Dependencies and Execution
 
 T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work may proceed separately; shared source edits remain sequential. See todo.md S01–S09 for cross-feature dependencies.
+
+- [ ] T020 Implement FR-004 first/default tree tab and data-model.md#featurecontract selected tab/panel relation; targeted markup/browser acceptance, protected PR and marketing-only v.0.46 public release.

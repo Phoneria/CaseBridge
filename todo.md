@@ -453,10 +453,22 @@ Takip işi yerel sonuç: 12 hedefli backend + 7 arayüz testi geçti; ek health 
 ## Onaylanan ek iş — GitHub main koruması ve çalışan Spec Kit kabul kapısı
 
 - [x] Main PR zorunluluğu, force push engeli, boş bypass listesi; ikinci kişi onayı yok. GitHub Actions gerçek spec-governance (15368) zorunlu ruleset etkin (27816126).
-- [ ] Davranış diff’inin gereksinim ve aynı PR’da değişen, gerçekten çalıştırılan isimli kabul testiyle bağını denetleyen uygulama PR üzerinden main’e alınacak. Belge-only iş muaf.
-- [ ] Birleştirilmeyen deneme PR’ında eksik bağla fail/blokeli → aynı PR’da düzeltmeyle pass/aşılabilir akışı kanıtlanacak.
-- [ ] Gerçek kurallar, PR/check sonuçları ve kalan sınırlar kaydedilecek. Demo yayını ayrı sonuçtur; koruma işi uygulama yeniden yayını gerektirmez.
+- [x] Davranış diff’i gereksinim + değişen isimli/assertion içeren kabul testine bağlandı; seçilen testler gerçekten çalışıyor, skip/xfail/todo kabul edilmiyor. PR #27 korumalı yoldan main’e alındı; belge-only iş muaf.
+- [x] PR #28: eksik bağda spec-governance FAILURE ve BLOCKED; aynı PR’da bağ/test eklenince SUCCESS ve MERGEABLE. İsteğe bağlı işler sürerken UNSTABLE, tüm CI geçti diye sunulmadı. PR kapalı, mergedAt=null; deneme kodu main’de yok.
+- [x] Gerçek kurallar ve provider 15368, PR/check sonuçları/sınırlar docs/validation/2026-11-22/main-protection-results.json ve specs/001-main-release/verification.md içinde. Demo yayını ayrı; koruma app yeniden yayını gerektirmedi.
 
 ### Demo takip yayını tamamlandı — v.0.21 / v.0.45
 
 Main kaynak `1b460a691af375da61e18014733ed0ca0c10b1a5`; restricted stage/canary, gerçek yalıtılmış eski→yeni→eski, activate/verify geçti. Public app/site release.json ve health aynı commit/sürümü doğruluyor; 917 kaynak, 54 frontend JS/CSS ve 48 tanıtım dosyası manifest/imajla eşleşiyor. Public JS ile 1600/390/320 × açık/koyu temada örnek ve normal dosya varsayım akışları geçti; API yanıtları yalıtılmış sentetik backend’den geldi, müşteri verisi okunmadı. Gerçek üretimde health ve iki kimliksiz API 401 sınırı doğrudan kontrol edildi. Public güncel görsel hash’i ve 1440/390/320 tanıtım görsel/SSS/dialog/odak kontrolleri geçti. Yapılandırma ve şifreli anahtar sürümleri aynı; yeni korumalı DB/yapılandırma/şifreli sürüm yedeği ve önceki doğrulanmış artefakt tutuldu. Yeni müşteri teslimi veya anahtar işlemi yapılmadı. GitHub koruma takip işi ayrı kayıttır.
+
+## Onaylanan tanıtım takibi — Olasılık Ağacı ilk ve varsayılan
+
+- [x] Mevcut ağaç tek kez ilk ve varsayılan; analiz ikinci, diğer sıra/rota/açıklama aynı. 12 gerçek görsel yeni sol menülü app v.0.22 ile güncellendi.
+- [ ] Yerel masaüstü/mobil ilk açılış/ARIA/klavye/dialog geçti; gereksinim/kabul testli korumalı PR ve public kontrol tamamlanınca kapatılacak.
+- [ ] Tanıtım v.0.46 yalnız marketing scope ile main artefaktından yayımlanacak; public varsayılan/kod/sürüm ve app health kontrol edilecek.
+
+## Son onay — Sol CaseBridge AI grubu geri, tüm menü tek bakışta
+
+Header AI erişimi korunacak. Dokuz yetkili AI aracı sidebar’da ayrı başlık altında tek sütun, ilk açılışta genişletilmiş ve ek tıklamasız gösterilecek. Parlak mavi tüm-grup çerçevesi yok; seçili satır/klavye odağı ve platform/restricted sınırları korunacak. Tam admin menüsü 900/768px yüksekliğinde DOM geometriyle doğrulanacak; kısa/mobil/yüksek zoom alanında kaydırma erişimi kalacak. Uygulama v.0.22, tanıtım v.0.46 hazırlanacak; ikisi korumalı PR/main artefaktıyla ve gerçek public doğrulamayla yayımlanacak.
+
+Sol menü yerel kanıt: 15 hedefli test, production build/typecheck geçti. Gerçek tam admin menüsü 20 bağlantı; 1440×900 ve 1280×768 × açık/koyu temada tümü tek bakışta görünür, minimum satır 24px; ilk bağlantı top 69.58px, son bottom 855/723px. 390×844, 320×568 ve 720×384 dar CSS alanında scroll/odak erişimi geçti. 720×384 zoom eşdeğeri dar alan testidir; gerçek browser zoom doğrulaması iddia edilmez. Header dokuz AI bağlantısı korunur. Public app v.0.22 / site v.0.46 doğrulaması henüz bu satırla tamamlanmış sayılmaz.

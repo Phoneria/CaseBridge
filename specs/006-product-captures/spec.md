@@ -30,6 +30,8 @@ Eksik veri, yetkisiz hesap, değişmiş kaynak/sürüm, dar ekran ve başarısı
 - **FR-002**: S03/S04/S05/S06 sonrası mevcut kabul edilmiş görünüm doğrudan yakalanır; sahte veya üstüne yazı eklenmiş UI yoktur.
 - **FR-003**: Örnek mod açıklamaları, alt metin ve tam ekran bağlantısı korunur; gerçek müşteri verisi/sır kullanılmaz.
 
+- **FR-004**: Ürün bölümünde mevcut Olasılık Ağacı tek kez ilk sırada ve varsayılan seçili olur; güncel görsel/açıklama/uygulama bağlantısı gösterilir. Analiz ikinci, kalan sıralama aynı kalır. Masaüstü/mobil ilk açılış ve klavye/ARIA eşleşmesi korunur.
+
 ### Key Entities
 
 Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gösterdiği kayıtlar.
