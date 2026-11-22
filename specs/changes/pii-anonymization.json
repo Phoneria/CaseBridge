@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/privacy/__init__.py",
+        "backend/app/privacy/anonymizer.py"
+      ],
+      "requirements": [
+        "specs/011-pii-anonymization/spec.md#FR-001",
+        "specs/011-pii-anonymization/spec.md#FR-002"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_fictional_value_removed",
+        "backend/tests/unit/test_anonymizer.py::test_no_leaks_and_consistent_labels",
+        "backend/tests/unit/test_anonymizer.py::test_same_person_same_label",
+        "backend/tests/unit/test_anonymizer.py::test_tc_checksum"
+      ],
+      "reason": "Anonymize known identities and rule-detectable personal data in case text with consistent placeholders and a leak check (issue #34)."
+    },
+    {
+      "files": [
+        "backend/app/privacy/ner.py"
+      ],
+      "requirements": [
+        "specs/011-pii-anonymization/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_ner_unavailable_falls_back_silently"
+      ],
+      "reason": "Optional local NER for unregistered person names; safe fallback when the model is not installed."
+    },
+    {
+      "files": [
+        "backend/app/ai/provider_factory.py",
+        "backend/app/core/config.py"
+      ],
+      "requirements": [
+        "specs/011-pii-anonymization/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_anonymizes_and_restores",
+        "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_off_by_default",
+        "backend/tests/unit/test_anonymizer.py::test_restore_roundtrip"
+      ],
+      "reason": "Opt-in masking of prompts sent to external LLM providers with response restoration; off by default."
+    }
+  ]
+}

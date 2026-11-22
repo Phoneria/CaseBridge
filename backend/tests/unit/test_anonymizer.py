@@ -104,3 +104,14 @@ def test_provider_wrapper_off_by_default(monkeypatch):
 
     monkeypatch.setattr(settings, "llm_provider", "openai")
     assert pf._TrackedProvider(Router(), Inner()).complete("s", "ayse@ornek.test") == "ayse@ornek.test"
+
+
+def test_ner_unavailable_falls_back_silently(monkeypatch):
+    from app.privacy import ner
+
+    monkeypatch.setattr(ner, "_pipe", None)
+    monkeypatch.setattr(ner, "_failed", True)
+    assert ner.available() is False
+    assert ner.detect_persons("Fatma Kaya geldi") == []
+    r = anonymize("Fatma Kaya 0532 123 45 67", [], extra_detectors=[ner.detect_persons])
+    assert "[TELEFON-1]" in r.text and "Fatma Kaya" in r.text  # kural katmanı çalışır, NER yok
