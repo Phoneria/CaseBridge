@@ -788,3 +788,25 @@ export async function previewDemoRemoval(): Promise<DemoRemovalPreview> {
 export async function removeDemoTemplate(token: string): Promise<{removed_records: number; kept_users: number}> {
   return request("/admin/demo-template/remove", {method:"POST", body:JSON.stringify({token,confirm:true})});
 }
+
+export interface PresentationCase {
+  id: string;
+  title: string;
+  client: string;
+  opponent: string;
+}
+export interface PresentationFile extends PresentationCase {
+  facts: string;
+  closing: string;
+  documents: {id: string; title: string; day: string; text: string}[];
+  nodes: import("@/types/scenarioTree").ScenarioNode[];
+}
+export function getPresentationCatalogue() {
+  return request<{cases: PresentationCase[]; contacts: {name: string; phone: string | null; email: string | null}[]}>("/presentation", {cache:"no-store"});
+}
+export function getPresentationFile(id: string) {
+  return request<PresentationFile>("/presentation/" + encodeURIComponent(id), {cache:"no-store"});
+}
+export function downloadPresentationPdf(cid: string, did: string) {
+  return fetchBlob("/presentation/" + encodeURIComponent(cid) + "/documents/" + encodeURIComponent(did), "Maskeli PDF indirilemedi");
+}

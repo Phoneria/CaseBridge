@@ -17,3 +17,5 @@ FR-013 için görünüm, kaynak yüzdelerine öncelik verir. Sonraki adımı eş
 FR-014 kapsamında temsili paylar ve ek hazırlık düğümleri yalnız görünümde hesaplanır. Büro dosyası ve dal kimlikleri aynı kaldığında paylar sabittir. Ek varsayımlar gerçekleşen yol olarak işaretlenmez.
 
 FR-016 kapsamında yalnız yaprak düğüm outcome türündedir. Katalogdaki karşı olgular bir koşul, inceleme, bulgu, gerekçe ve olası hüküm taşır. Kayıtlı sonuç ayrı bir daldır ve dosyadaki karar evrakına bağlanır. Genel dosyaların koşullu görünümleri ilgili dosyanın istemini kullanır.
+
+FR-019 sunum projeksiyonu yalnız büroya ait, bilinen şablon kimliklerini kabul eder. Özel ekler kapsam dışıdır. Kategori bazında numaralanan etiketler dosya sırası, görünüm ve indirme arasında kararlıdır.
