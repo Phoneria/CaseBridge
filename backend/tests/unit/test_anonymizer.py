@@ -138,8 +138,9 @@ def test_policy_city_mask_and_off():
 
 
 def test_policy_invalid_mode_rejected():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc:
         Policy.from_dict({"kategoriler": {"KİŞİ": "sil"}})
+    assert "Geçersiz mod" in str(exc.value)
 
 
 def test_report_has_no_original_values():
