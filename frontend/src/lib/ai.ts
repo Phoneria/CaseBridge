@@ -11,6 +11,7 @@ export const AI_ROUTES = {
   map: "/ai/harita",
   counter: "/ai/karsi-taraf",
   directed: "/ai/yonetmen",
+  precedents: "/ai/emsal",
 } as const;
 
 export const AI_PERSPECTIVES = ["Hakim", "Davacı vekili", "Davalı vekili", "Araştırmacı"] as const;

@@ -217,3 +217,47 @@ DAVA ÖZETİ:\n{summary}\n\nSAHNE:\n{_transcript(transcript)}\n\nSORU: {question
         return {"answer": str(d.get("answer", ""))[:1200], "law": _refs(d.get("basis"), allowed)}
 
     return _run(provider, ai, lambda: mock.ask(question))
+
+
+# ------------------------------------------------------------ Emsal açıklaması
+def _explain_mock(query: str, items: list[dict]) -> dict:
+    """Kural tabanlı, modelsiz açıklama: ortak terimler, ortak madde atıfları ve sonuç."""
+    out = []
+    for it in items:
+        bits = []
+        if it.get("matched"):
+            bits.append("Dava anlatımında ortak anahtar sözcükler: " + ", ".join(it["matched"]) + ".")
+        if it.get("laws"):
+            bits.append("Kararda atıf yapılan maddeler: " + ", ".join(it["laws"][:4]) + ".")
+        bits.append(f"Karar türü: {it['kind_label']}; sonuç: {it['outcome_label']}.")
+        out.append({"doc_id": it["doc_id"], "why": " ".join(bits), "takeaway": None})
+    return {"explanations": out}
+
+
+def precedent_explain(provider: Optional[LLMProvider], query: str, items: list[dict]) -> dict:
+    items = items[:8]
+
+    def ai():
+        block = "\n\n".join(
+            f"[{i['doc_id']}] {i['court']} {i['esas_no']} E., {i['karar_no']} K. ({i['tarih']}) sonuç={i['outcome_label']}\n{i['snippet']}"
+            for i in items
+        )
+        p = f"""Aşağıda bir avukatın dava özeti ve onunla benzer bulunan emsal kararların dava anlatımı var.
+Her karar için, YALNIZCA verilen metne dayanarak, 1-2 cümleyle neden benzer olduğunu ve avukat için çıkarımı yaz.
+Metinde olmayan olgu veya madde uydurma; emin değilsen belirt. Bu bir tahmin değildir, davanın sonucunu söyleme.
+
+DAVA ÖZETİ:
+{query[:1500]}
+
+EMSALLER:
+{block}
+
+JSON: {{"explanations":[{{"doc_id":"","why":"","takeaway":""}}]}}"""
+        data = _json(provider, SYSTEM, p)
+        ids = {i["doc_id"] for i in items}
+        return {"explanations": [
+            {"doc_id": str(e.get("doc_id")), "why": str(e.get("why", ""))[:500], "takeaway": (str(e.get("takeaway"))[:400] if e.get("takeaway") else None)}
+            for e in (data.get("explanations") or []) if str(e.get("doc_id")) in ids
+        ]}
+
+    return _run(provider, ai, lambda: _explain_mock(query, items))

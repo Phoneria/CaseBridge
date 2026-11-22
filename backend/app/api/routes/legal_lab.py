@@ -131,3 +131,61 @@ def trial_ask(body: AskBody, user: User = Depends(get_current_user), db: Session
               provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     summary = _summary(db, body, user.law_firm_id)
     return service.trial_ask(provider, summary, body.side, [t.model_dump() for t in body.transcript], body.question)
+
+
+# ------------------------------------------------------------------ Emsal arama
+from app.legal_lab import precedents  # noqa: E402
+
+
+class PrecedentFilters(BaseModel):
+    kinds: list[Literal["yargitay", "bam", "ilk_derece"]] = Field(default_factory=list, max_length=3)
+    outcomes: list[str] = Field(default_factory=list, max_length=12)
+    year_min: Optional[int] = Field(default=None, ge=1960, le=2100)
+    year_max: Optional[int] = Field(default=None, ge=1960, le=2100)
+    court: Optional[str] = Field(default=None, max_length=60)
+
+
+class PrecedentSearchBody(CaseRef):
+    query: Optional[str] = Field(default=None, max_length=4000)
+    k: int = Field(default=10, ge=1, le=30)
+    filters: PrecedentFilters = Field(default_factory=PrecedentFilters)
+
+
+@router.get("/precedents/status")
+def precedents_status(_: User = Depends(get_current_user)):
+    return precedents.status()
+
+
+@router.post("/precedents/search")
+def precedents_search(body: PrecedentSearchBody, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if body.query and body.query.strip():
+        text = body.query.strip()
+    else:
+        text = _summary(db, body, user.law_firm_id)
+    res = precedents.search(text, body.k, body.filters.model_dump(exclude_none=True))
+    note = "Örnek emsal veri seti; gerçek indeks kurulmadı." if res["mode"] == "sample" else None
+    return {**res, "query": text[:300], "note": note}
+
+
+@router.get("/precedents/{doc_id:path}")
+def precedents_detail(doc_id: str, _: User = Depends(get_current_user)):
+    d = precedents.detail(doc_id)
+    if d is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Precedent not found")
+    return d
+
+
+class PrecedentExplainBody(CaseRef):
+    query: Optional[str] = Field(default=None, max_length=4000)
+    doc_ids: list[str] = Field(min_length=1, max_length=8)
+
+
+@router.post("/precedents-explain")
+def precedents_explain(body: PrecedentExplainBody, user: User = Depends(get_current_user), db: Session = Depends(get_db),
+                       provider: Optional[LLMProvider] = Depends(get_optional_provider)):
+    text = body.query.strip() if body.query and body.query.strip() else _summary(db, body, user.law_firm_id)
+    items = [d for d in (precedents.detail(i) for i in body.doc_ids) if d]
+    for it in items:
+        it["snippet"] = (it.get("narr") or it["snippet"])[:900]
+        it["matched"] = it.get("matched") or [t for t in dict.fromkeys(precedents.tokens(text)) if t in set(precedents.tokens(it["snippet"]))][:6]
+    return service.precedent_explain(provider, text, items)

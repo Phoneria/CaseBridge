@@ -711,3 +711,38 @@ export async function trialAsk(
 ): Promise<{ answer: string; law: import("@/types/legalLab").LawRef[]; mode: string; note: string | null }> {
   return request("/legal-lab/trial/ask", { method: "POST", body: JSON.stringify(body) });
 }
+
+export async function getPrecedentStatus(): Promise<import("@/types/legalLab").PrecedentStatus> {
+  return request("/legal-lab/precedents/status");
+}
+
+export async function searchPrecedents(
+  ref: import("@/types/legalLab").CaseRef,
+  opts: { query?: string; k?: number; filters?: import("@/types/legalLab").PrecedentFilters },
+): Promise<import("@/types/legalLab").PrecedentSearchResult> {
+  const f = opts.filters;
+  const filters = f
+    ? {
+        kinds: f.kinds,
+        outcomes: f.outcomes,
+        ...(f.year_min ? { year_min: f.year_min } : {}),
+        ...(f.year_max ? { year_max: f.year_max } : {}),
+      }
+    : undefined;
+  return request("/legal-lab/precedents/search", {
+    method: "POST",
+    body: JSON.stringify({ ...ref, query: opts.query || null, k: opts.k ?? 10, filters }),
+  });
+}
+
+export async function getPrecedent(docId: string): Promise<import("@/types/legalLab").PrecedentItem> {
+  return request(`/legal-lab/precedents/${encodeURIComponent(docId)}`);
+}
+
+export async function explainPrecedents(
+  ref: import("@/types/legalLab").CaseRef,
+  query: string,
+  docIds: string[],
+): Promise<{ explanations: import("@/types/legalLab").PrecedentExplanation[]; mode: "mock" | "ai"; note: string | null }> {
+  return request("/legal-lab/precedents-explain", { method: "POST", body: JSON.stringify({ ...ref, query: query || null, doc_ids: docIds }) });
+}

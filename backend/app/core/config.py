@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     # automated test suite never accidentally calls a real provider.
     llm_provider: Literal["qwen", "openai", "ollama", "anthropic", "mock"] = "mock"
 
+    # Emsal arama indeksi (lab/build_index.py ciktisi). Bos = backend/data/precedent_index.
+    precedent_index_dir: str = ""
+
     # Claude (Anthropic). LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY.
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-sonnet-5-5"

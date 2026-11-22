@@ -140,3 +140,66 @@ export interface GuideResult {
   hamleler?: { hamle: string; neden: string; risk: string; law: LawRef[] }[];
   sureler?: string[];
 }
+
+// ---------------------------------------------------------------- Emsal arama
+export type PrecedentKind = "yargitay" | "bam" | "ilk_derece";
+
+export interface PrecedentItem {
+  doc_id: string;
+  source: string;
+  kind: PrecedentKind;
+  kind_label: string;
+  court: string;
+  esas_no: string;
+  karar_no: string;
+  tarih: string;
+  year: number | null;
+  outcome: string;
+  outcome_label: string;
+  laws: string[];
+  snippet: string;
+  score: number | null;
+  matched: string[];
+  via: ("kelime" | "anlam")[];
+  narr?: string;
+  tail?: string;
+}
+
+export interface PrecedentStats {
+  n: number;
+  by_kind: Record<string, { label: string; total: number; outcomes: { key: string; label: string; n: number }[] }>;
+  note: string;
+}
+
+export interface PrecedentSearchResult {
+  results: PrecedentItem[];
+  stats: PrecedentStats;
+  mode: "hybrid" | "lexical" | "sample";
+  indexed: number;
+  terms: string[];
+  query: string;
+  note: string | null;
+}
+
+export interface PrecedentStatus {
+  mode: "hybrid" | "lexical" | "sample";
+  indexed: number;
+  model: string | null;
+  sources: string[];
+  note: string | null;
+  built?: string | null;
+  eval?: Record<string, number> | null;
+}
+
+export interface PrecedentFilters {
+  kinds: PrecedentKind[];
+  outcomes: string[];
+  year_min?: number | null;
+  year_max?: number | null;
+}
+
+export interface PrecedentExplanation {
+  doc_id: string;
+  why: string;
+  takeaway: string | null;
+}

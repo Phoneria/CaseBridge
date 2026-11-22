@@ -56,3 +56,6 @@ data/import/*
 # Mail files written by EMAIL_BACKEND=file
 backend/var/
 /var/
+
+# Emsal arama indeksi (lab ciktisi, repoya girmez)
+backend/data/precedent_index/
