@@ -110,7 +110,7 @@ export function SettingsView() {
       {isAdmin && (
         <section aria-labelledby="settings-demo-template" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
           <h2 id="settings-demo-template" className="mb-2 text-sm font-medium text-navy-700">Örnek veriler</h2>
-          <p className="mb-4 text-sm text-navy-500">Davalar, indirilebilir belgeler, emsaller, takvim, mali işler, müvekkil takibi, ekip, onaylar, kritik süreler, kontrol listeleri, analizler, sohbet ve duruşma örneklerini yükleyin. Tekrar yükleme eksikleri tamamlar ve örnek tarihleri günceller; gerçek kayıtları değiştirmez. Örnek ekip için ortak şifre veya otomatik davet oluşturulmaz; örneklerin e-posta hatırlatmaları kapalıdır.</p>
+          <p className="mb-4 text-sm text-navy-500">Davalar, indirilebilir belgeler, emsaller, takvim, mali işler, müvekkil takibi, 12 kurgusal avukattan oluşan örnek ekip, onaylar, kritik süreler, kontrol listeleri, analizler, sohbet ve duruşma örneklerini yükleyin. Tekrar yükleme eksikleri tamamlar ve örnek tarihleri günceller; gerçek kayıtları değiştirmez. İlk ekip yüklemesi yalnız örnek davaları avukatlara dağıtır; sonraki yüklemeler yaptığınız atamaları korur. Örnek avukatlar yalnız örnek dosyalara atanabilir. Örnek ekip için ortak şifre veya otomatik davet oluşturulmaz; örneklerin e-posta hatırlatmaları kapalıdır.</p>
           <button type="button" onClick={addExamples} disabled={demoTemplate.kind === "sending"}
             className="rounded-xl bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700 disabled:opacity-60">
             {demoTemplate.kind === "sending" ? "Ekleniyor..." : "Örnek verileri yükle"}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/db/demo_team.py",
+        "backend/app/db/demo_template.py",
+        "backend/app/api/routes/admin.py",
+        "backend/app/schemas/user.py",
+        "frontend/src/components/AdminView.tsx",
+        "frontend/src/components/SettingsView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-expanded-demo-team/spec.md#FR-001",
+        "specs/012-expanded-demo-team/spec.md#FR-002",
+        "specs/012-expanded-demo-team/spec.md#FR-003",
+        "specs/012-expanded-demo-team/spec.md#FR-004",
+        "specs/012-expanded-demo-team/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_demo_template.py::test_expanded_demo_roster_is_visible_scoped_and_idempotent",
+        "backend/tests/integration/test_demo_template.py::test_demo_roster_assignment_cannot_escape_sample_scope",
+        "backend/tests/integration/test_demo_template.py::test_legacy_demo_is_distributed_once_and_preserves_later_assignment",
+        "frontend/src/components/__tests__/AdminView.test.tsx::shows twelve sample lawyers and limits their assignment options to sample cases"
+      ],
+      "reason": "Add 12 safe tenant-scoped fictional lawyers to sample import; distribute marked portfolio once, preserve manual assignments and show readable bounded options/chart."
+    }
+  ]
+}

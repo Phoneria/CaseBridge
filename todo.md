@@ -535,3 +535,9 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 
 - [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
 - [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.
+
+## İncelemeye hazırlanan geniş örnek ekip — v.0.24 adayı
+- [x] Örnek verileri yükle:12 farklı isim/uzmanlıkta ÖRNEK avukat, tenant-bağlı sabit kimlikler, yalnız örnek dosya kapsamı; ortak parola/otomatik davet yok. Önceki örnek portföy ilk kez dağıtılır, tekrar yükleme sonradan yapılan atamaları korur.
+- [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
+- [x] İlk10 backend testi geçti; geniş25 hedefli kontrolün24ü geçti, örnek hesap için yanlış normal-login test yardımcısı düzeltildi ve kalan1 test geçti. Frontend hedefli testler/build/typecheck ve gerçek yerel backend+UI ile6 masaüstü/mobil/açık-koyu akış geçti. Kanıt specs/012-expanded-demo-team ve docs/validation/2026-11-22/expanded-demo-team-browser.json.
+- [ ] Ayrı korumalı PR incelemesi/main birleşmesi ve main kaynaklı final sürüm/yayın/public doğrulama. Bu çalışma In Review bırakılır; canlı içe aktarma veya yeni müşteri teslimi yapılmaz. Rehber PR55 ayrı korunur.

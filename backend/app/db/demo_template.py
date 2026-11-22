@@ -13,11 +13,11 @@ from app.db.seed import (
     _get_or_create_case, _get_or_create_document, _get_or_create_event,
     _get_or_create_task, _seed_case_detail,
 )
-from app.models.case import Case, CaseType
+from app.models.case import Case
 from app.models.document import DocumentType
 from app.models.law_firm import LawFirm
 from app.models.task import TaskStatus
-from app.models.user import User, UserRole
+from app.models.user import User
 
 PREFIX = "ÖRNEK-"
 MARKER = "[ÖRNEK ŞABLON] "
@@ -38,30 +38,18 @@ def add_demo_template(db: Session, admin: User) -> dict:
     before = len(existing)
     counts_before = presentation_counts(db, firm.id)
 
-    from app.models.management import WorkspaceAccess
-    restricted = db.query(WorkspaceAccess.user_id).filter(WorkspaceAccess.law_firm_id == firm.id)
-    lawyers = db.query(User).filter(
-        User.law_firm_id == firm.id,
-        User.role == UserRole.LAWYER,
-        User.is_active.is_(True),
-        User.password_set_at.isnot(None),
-        User.id.notin_(restricted),
-    ).order_by(User.full_name).all()
-    owners = lawyers or [admin]
+    from app.db.demo_team import seed_demo_lawyers, scope_and_distribute
+    owners = seed_demo_lawyers(db, admin)
     author = owners[0]
     demo_cases: dict[str, Case] = {}
 
     for index, source in enumerate(DEMO_CASES):
-        case_type = source["case_type"]
-        assigned = (
-            owners[0] if case_type == CaseType.TICARET_HUKUKU
-            else owners[1] if case_type == CaseType.IS_HUKUKU and len(owners) > 1
-            else owners[2] if case_type == CaseType.KIRA and len(owners) > 2
-            else owners[index % len(owners)]
-        )
+        assigned = owners[index % len(owners)]
         fields = {**source, "case_number": PREFIX + source["case_number"],
                   "description": MARKER + (source.get("description") or "")}
         demo_cases[source["case_number"]] = _get_or_create_case(db, firm, assigned, **fields)
+
+    scope_and_distribute(db, admin, owners, list(demo_cases.values()))
 
     for case_number, title, due_in_days, status in DEMO_TASKS:
         _get_or_create_task(

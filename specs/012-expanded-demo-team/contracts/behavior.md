@@ -1,0 +1,2 @@
+# Behavior contract
+POST /admin/demo-template remains admin-only and firm-locked; response existing counts/coverage preserved. /admin/lawyers?include_demo=true includes safe sample roster with demo_case_ids. PATCH /admin/cases/{id}/lawyer permits that roster only for a case within validated sample scope; ordinary restricted users remain rejected. UI never offers sample roster for real cases. Without include_demo the list remains full-lawyer-only. Sample roster is rejected for precedent reviewer assignment. UI filtering is supplementary; server enforces the same boundary.
