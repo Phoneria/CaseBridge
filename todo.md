@@ -524,3 +524,9 @@ All12 public normal-HTML image URL SHA256 values match the current native23captu
 Actual44985580863 SUCCESS:12 fresh native publicapp23 captures with disposable synthetic/mock API,73proxied200requests, no productionAPI forwarding/browser errors. BotPR51→protectedmain da78face86e246b4b9db2e89ca1573269c8f89ca, genuine own-PR CI44985738248 approved automatically with ephemeral token; no storedPAT, fake status or branch bypass. Timer marketing-only transaction13sec; all12 shipped ?v=0.48 SHA/public identities/health and immutable verifier pass, all7container IDs unchanged. Independent36desktop/mobile tab/modal/keyboard flows pass; initial focus matcher transient and diagnostic rerun honestly recorded. App remains23/f625, backend remains21/1b460a6. No new customer/key operation.
 
 Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health checked, capture/publication skipped, no newversion/PR. Standing five-minute polling and app/marketing version-file triggers active; GitHub scheduling may delay. Evidence specs/010-versioned-gallery/verification.md and docs/validation/2026-11-22/gallery48-*.json. Final evidence-only update changes no runtime/version/gallery and requires no policy bootstrap.
+
+## Onaylanan ekip içerik güncellemesi — 22 Kasım 2026
+
+- [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
+- [x] İzzet: iş geliştirme ve iş ortaklıkları; Emin: yapay zekâ ve veri. Bengü: mevcut belgelenmiş ekosistem ilişkileri katkısı; yatırım ifadesi eklenmez. Hatice ve Ahmet'in ilgili içerikleri korunur.
+- [ ] Hedefli kabul ve JS açık/kapalı masaüstü/mobil görünüm; ayrı protected PR, marketing sürümü, normal public URL/kod/sürüm/health doğrulaması. Rehber işiyle birleştirilmez; yeni müşteri teslimi yoktur.
