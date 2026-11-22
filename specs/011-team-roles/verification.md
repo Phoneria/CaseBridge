@@ -18,3 +18,9 @@ Runtime closure has47files; only index.html among four deployed HTML files has t
 Public app remains23/f625960cadd4e4c29985fa26fcb4914d4ff326b3. Health status=ok; unchanged backend independently reports21/1b460a691af375da61e18014733ed0ca0c10b1a5. No app/backend release, customer onboarding, schema or credential operation. Standing authorized gallery automation may generate its own later version from49, preserving team text.
 
 Evidence: docs/validation/2026-11-22/team-local-results.json, team-public-results.json, team-release-journal.json. This final evidence-only change adds no runtime/version content and requires no redeployment.
+
+## Approved portrait follow-up — local v.0.50
+
+Approved1254×1254 source SHA2561db5d62f4e51a96f76e7db2ae4796eb4123d1ed7da7d769edc88fa540371c3ae read without modification; Pillow LANCZOS resize only to720×720 optimized RGB JPEG,60741bytes. Output SHA256a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16. No generation, retouching, content/color adjustment or compositing. Existing object-fit cover/50%36% crop rules retained; 140×148 desktop and120×126 mobile frames visually inspected with face/hair preserved.
+
+Updated existing team acceptance and three existing marketing checks passed. Six real Chromium views1440/390/320 with JS on/off pass720×720 image decode, exact image URL/body SHA, Emin Merden alt, unchanged five names/roles, no overflow/errors/bad assets. Screenshots visually inspected. Static comparison confirms all HTML bytes except portrait tag and marketing version are unchanged; all other images untouched. Spec/plan/model/tasks consistency: FR-005 linked T007–T009, TeamMember.portrait cited; requirements checklist5/5 existing quality checks pass. Public publication remains pending; T009 unchecked.

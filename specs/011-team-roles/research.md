@@ -3,3 +3,5 @@ Decision: Kısa biyografi BAUROV yazılım liderliği, Baykar makine öğrenmesi
 Decision: Bengü'nün eski business-development başlığı İzzet'in yeni sorumluluğuyla çakıştığından mevcut profilindeki ekosistem ilişkileri katkısıyla uyumlu başlık kullanılır.
 Alternative: Fotoğraf uydurmak veya kullanıcıdan yeni görsel istemek yerine aynı yerleşimde dekoratif EM baş harfleri.
 Runtime audit: Ekip yalnız index.html #team içinde; legacy team-profiles.js ve i18n verileri index tarafından yüklenmez. Ana nav #team bağlantısı korunur.
+
+Portrait follow-up: user approved an existing image and explicitly requests no image-content edits. Existing portrait assets are720px wide and CSS determines display crop. Resize approved square source to720px square JPEG, retain current crop rules. No new generative tool, new CSS or unrelated member edits needed.
