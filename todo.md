@@ -464,8 +464,8 @@ Main kaynak `1b460a691af375da61e18014733ed0ca0c10b1a5`; restricted stage/canary,
 ## Onaylanan tanıtım takibi — Olasılık Ağacı ilk ve varsayılan
 
 - [x] Mevcut ağaç tek kez ilk ve varsayılan; analiz ikinci, diğer sıra/rota/açıklama aynı. 12 gerçek görsel yeni sol menülü app v.0.22 ile güncellendi.
-- [ ] Yerel masaüstü/mobil ilk açılış/ARIA/klavye/dialog geçti; gereksinim/kabul testli korumalı PR ve public kontrol tamamlanınca kapatılacak.
-- [ ] Tanıtım v.0.46 yalnız marketing scope ile main artefaktından yayımlanacak; public varsayılan/kod/sürüm ve app health kontrol edilecek.
+- [x] Yerel ve public masaüstü/mobil ilk açılış/ARIA/klavye/dialog geçti; PR #29 zorunlu kabul testleriyle korumalı main’e alındı.
+- [x] Sonradan açıkça eklenen uygulama sidebar isteğiyle birlikte app v.0.22 / site v.0.46, main 80035ea all artefaktından yayımlandı. Değişmeyen backend imajı yeniden kullanıldı. Public varsayılan içerik/kod/sürüm/health doğrulandı; önceki yalnız-marketing ara kapsamı son uygulama isteğiyle genişledi.
 
 ## Son onay — Sol CaseBridge AI grubu geri, tüm menü tek bakışta
 
@@ -473,6 +473,25 @@ Header AI erişimi korunacak. Dokuz yetkili AI aracı sidebar’da ayrı başlı
 
 Sol menü yerel kanıt: 15 hedefli test, production build/typecheck geçti. Gerçek tam admin menüsü 20 bağlantı; 1440×900 ve 1280×768 × açık/koyu temada tümü tek bakışta görünür, minimum satır 24px; ilk bağlantı top 69.58px, son bottom 855/723px. 390×844, 320×568 ve 720×384 dar CSS alanında scroll/odak erişimi geçti. 720×384 zoom eşdeğeri dar alan testidir; gerçek browser zoom doğrulaması iddia edilmez. Header dokuz AI bağlantısı korunur. Public app v.0.22 / site v.0.46 doğrulaması henüz bu satırla tamamlanmış sayılmaz.
 
+### Son yayın tamamlandı — uygulama v.0.22 / tanıtım v.0.46
+
+Korumalı PR #29 → main `80035eaea87f07445d375d8848ee7e8bee8ae8b5`; zorunlu spec-governance içindeki 6 isimli kabul testi ve otomatik frontend kontrolü geçti. Değişmez stage/canary, yalıtılmış eski→yeni→eski, activate/verify başarılı. Public 929 kaynak/54 frontend JS-CSS/48 tanıtım dosyası manifestle eşleşti. App v.0.22 etiketi/release.json, site v.0.46 ve doğrudan health ok doğrulandı. Backend değişmedi/reuse: kendi health kimliği 1b460a6/0.21 olarak korunur; frontend güncel kimliği 80035ea/0.22’dir.
+
+Public tam admin menüsünde 20 link (9 AI + Ayarlar dahil), 1440×900 ve 1280×768 × açık/koyu temada aynı anda görünür. 390×844, 320×568 ve 720×384 CSS alanında kaydırma/odak ve header dokuz AI erişimi geçti. Gerçek browser zoom iddia edilmez; dar CSS alanı sınandı. Public tanıtımda 1440/390/320 × JavaScript açık/kapalı ilk açılış/yenileme: tek ve ilk seçili Olasılık Ağacı, analiz ikinci, klavye/dialog/odak ve 12 güncel görsel hash’i geçti. Page error/taşma yok. UI akışları actual public JS + sentetik yalıtılmış API ile; gerçek müşteri verisi/sağlayıcı/anahtar kullanımı yok. Doğrudan health ve kimliksiz demo 401 gerçek üretimde sınandı.
+
+Yapılandırma/şifreli anahtar sürümleri değişmedi; yeni korumalı eşleşen DB/config/şifreli-sürüm yedeği ve önceki doğrulanmış artefakt tutuldu. Main ruleset 27816126 etkin; PR zorunlu/force-push engelli/bypass listesi boş/spec-governance GitHub Actions 15368 zorunlu/ikinci kişi onayı yok. Deneme PR #28 başarısız-BLOCKED → aynı PR düzeltmesinde required SUCCESS/MERGEABLE, opsiyonel işler sürerken UNSTABLE; kapalı ve mergedAt=null, deneme kodu main’de yok. Tam CI geçti iddiası bu probe için yapılmaz. Önceki demo yayını 1b460a6’nın üç CI işi sonradan başarıyla tamamlandı. Yeni manuel tam süit başlatılmadı veya beklenmedi.
+
+Kanıtlar: docs/validation/2026-11-22/main-protection-results.json, sidebar-release-results.json, sidebar-public-results.json, tree-first-public-results.json. Bu v.0.22 kanıt kayıtları uygulama/tanıtım/deployment kodunu değiştirmez; sonraki v.0.23 UI takip değişikliği ayrı yayın gerektirir. Ayrı büro anahtarları/staged aktivasyon ve ek müşteri teslim kapıları aynen korunur; yeni onboarding yapılmadı.
+
+## Son görsel düzeltme — yüksekliği dolduran menü, eski mavi AI kutusu, platesiz özgün logo
+
+Kullanıcı kompakt v.0.22 düzenini son görünüm saymadı: normal 256px sidebar’da logo üstte/Ayarlar altta, aradaki araçlar 768/900/1080px yükseklikte orantılı alan dolduracak; büyük boşluk olmayacak, kısa/mobilde kaydırma sürecek. Eski mavi kutu açıkça yeniden onaylandı; b640c54 koyu panel/bg-ai-glow kaynak stili geri gelir. Önceki mavi-kutu-istemiyor yorumu bu kapsamda geçersizdir. Header, izinler ve açık tek sütun korunur.
+
+Logo: kaynak PNG’de alpha tamamı 255 ve köşeler beyaz; kapsayıcıda ayrıca #fff plate var. Sahte fontlu mevcut dark SVG özgün çizim olmadığı için kullanılmaz. Özgün PNG baytları korunup plate kaldırılır; beyaz matte render katmanında zemine blend edilir, koyuda aynı geometri okunur renklerle render edilir. Şeffaf görünümlü UI hedefidir; yeni transparan PNG üretildiği iddiası yok. Açık/koyu/alternatif zeminlerde piksel ve geometri gerçek sonuçları kaydedilmeden kapanmaz.
+
+Bu takip uygulama v.0.23 olarak ayrı korumalı PR/app scope yayınıdır. Tanıtım v.0.46 ve ilk/varsayılan Olasılık Ağacı korunur; değişmeyen tanıtım için tekrar görsel/yayın turu başlatılmaz. Önceki v.0.22 public sonuçları tarihçe olarak saklanır.
+
+Yerel takip sonucu: 11 hedefli Sidebar/BrandLogo testi ve üretim build/typecheck geçti. 768/900/1080px × iki temada 20 link kaydırmasız; satırlar 28.39/35.34/44.81px, AI→Ayarlar boşluğu 21px; normal genişlik256px. 10 logo piksel kontrolünde beyaz matte noktaları arka planla ±1RGB, minimum ana-ink kontrast4.24:1; özgün PNG hash/baytları değişmedi. Dar alan ve %200 CSS metin boyutunda scroll/odak geçti. Otomatik altyapı ayrı yürütücüye devredildi; burada hiçbir workflow/deployment düzenlemesi yapılmadı. UI PR’ı güncel main’den yetkili auto-merge/pilot yayını bekleyecek; bu takip için elle VPS yayını yapılmayacak.
 ## Hızlı UI yayını — kullanıcı onaylı
 
 - [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.

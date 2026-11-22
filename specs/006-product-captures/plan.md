@@ -29,3 +29,7 @@ spec.md, research.md, data-model.md, contracts/behavior.md, quickstart.md, tasks
 ## Complexity Tracking
 
 Reuse existing architecture; no new service or database migration. New behavior is bounded by FR and tested with synthetic data.
+
+## Final tree-first follow-up
+
+Move the existing tab/panel pair without renumbering IDs or changing other relative order; default visibility exists in HTML. Refresh all twelve native captures after sidebar restoration. Targeted markup/version/provenance and actual browser keyboard/default checks; app v.0.22/site v.0.46 public release verified. See verification.md.

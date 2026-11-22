@@ -1,0 +1,303 @@
+{
+  "source_sha256": "5167f71b9fd308f37f75d7086659df96522943f1ead9ada9092b1abb9d4c7c37",
+  "source_unchanged": true,
+  "method": "Original opaque raster unchanged; CSS matte blending, transparent wrapper; actual browser screenshot pixels",
+  "results": [
+    {
+      "theme": "light",
+      "background": [
+        237,
+        249,
+        252
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        4.43,
+        13.06
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "theme": "light",
+      "background": [
+        255,
+        255,
+        255
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": true,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        4.59,
+        13.83
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": null
+    },
+    {
+      "theme": "light",
+      "background": [
+        220,
+        234,
+        244
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": true,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        4.24,
+        11.84
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": null
+    },
+    {
+      "theme": "dark",
+      "background": [
+        23,
+        42,
+        40
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        6.89,
+        10.88
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "theme": "dark",
+      "background": [
+        11,
+        18,
+        32
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": true,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        8.0,
+        13.21
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": null
+    },
+    {
+      "theme": "dark",
+      "background": [
+        36,
+        53,
+        74
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "alternate": true,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        5.96,
+        9.22
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": null
+    },
+    {
+      "theme": "light",
+      "background": [
+        237,
+        249,
+        252
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        4.43,
+        13.06
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "theme": "dark",
+      "background": [
+        23,
+        42,
+        40
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        6.89,
+        10.88
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "theme": "light",
+      "background": [
+        237,
+        249,
+        252
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        4.43,
+        13.06
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "theme": "dark",
+      "background": [
+        23,
+        42,
+        40
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      },
+      "alternate": false,
+      "maxMatteCornerDelta": 0,
+      "dominantInkContrast": [
+        6.89,
+        10.88
+      ],
+      "size": [
+        192,
+        56
+      ],
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    }
+  ]
+}

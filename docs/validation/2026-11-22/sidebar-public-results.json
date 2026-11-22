@@ -1,0 +1,1917 @@
+{
+  "app": "https://app.casebridge.com.tr",
+  "syntheticApi": true,
+  "results": [
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 69.578125,
+          "bottom": 93.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 93.578125,
+          "bottom": 117.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 117.578125,
+          "bottom": 141.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 141.578125,
+          "bottom": 165.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 165.578125,
+          "bottom": 189.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 189.578125,
+          "bottom": 213.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 213.578125,
+          "bottom": 237.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 237.578125,
+          "bottom": 261.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 261.578125,
+          "bottom": 285.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 285.578125,
+          "bottom": 309.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 337.578125,
+          "bottom": 361.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 361.578125,
+          "bottom": 385.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 385.578125,
+          "bottom": 409.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 409.578125,
+          "bottom": 433.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 433.578125,
+          "bottom": 457.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 457.578125,
+          "bottom": 481.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 481.578125,
+          "bottom": 505.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 505.578125,
+          "bottom": 529.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 529.578125,
+          "bottom": 553.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 831,
+          "bottom": 855,
+          "left": 12,
+          "right": 243,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 69.578125,
+          "bottom": 93.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 93.578125,
+          "bottom": 117.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 117.578125,
+          "bottom": 141.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 141.578125,
+          "bottom": 165.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 165.578125,
+          "bottom": 189.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 189.578125,
+          "bottom": 213.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 213.578125,
+          "bottom": 237.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 237.578125,
+          "bottom": 261.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 261.578125,
+          "bottom": 285.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 285.578125,
+          "bottom": 309.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 337.578125,
+          "bottom": 361.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 361.578125,
+          "bottom": 385.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 385.578125,
+          "bottom": 409.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 409.578125,
+          "bottom": 433.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 433.578125,
+          "bottom": 457.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 457.578125,
+          "bottom": 481.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 481.578125,
+          "bottom": 505.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 505.578125,
+          "bottom": 529.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 529.578125,
+          "bottom": 553.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 831,
+          "bottom": 855,
+          "left": 12,
+          "right": 243,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 768,
+      "theme": "light",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 69.578125,
+          "bottom": 93.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 93.578125,
+          "bottom": 117.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 117.578125,
+          "bottom": 141.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 141.578125,
+          "bottom": 165.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 165.578125,
+          "bottom": 189.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 189.578125,
+          "bottom": 213.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 213.578125,
+          "bottom": 237.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 237.578125,
+          "bottom": 261.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 261.578125,
+          "bottom": 285.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 285.578125,
+          "bottom": 309.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 337.578125,
+          "bottom": 361.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 361.578125,
+          "bottom": 385.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 385.578125,
+          "bottom": 409.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 409.578125,
+          "bottom": 433.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 433.578125,
+          "bottom": 457.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 457.578125,
+          "bottom": 481.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 481.578125,
+          "bottom": 505.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 505.578125,
+          "bottom": 529.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 529.578125,
+          "bottom": 553.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 699,
+          "bottom": 723,
+          "left": 12,
+          "right": 243,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 768,
+      "theme": "dark",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 69.578125,
+          "bottom": 93.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 93.578125,
+          "bottom": 117.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 117.578125,
+          "bottom": 141.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 141.578125,
+          "bottom": 165.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 165.578125,
+          "bottom": 189.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 189.578125,
+          "bottom": 213.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 213.578125,
+          "bottom": 237.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 237.578125,
+          "bottom": 261.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 261.578125,
+          "bottom": 285.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 285.578125,
+          "bottom": 309.578125,
+          "left": 12,
+          "right": 239,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 337.578125,
+          "bottom": 361.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 361.578125,
+          "bottom": 385.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 385.578125,
+          "bottom": 409.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 409.578125,
+          "bottom": 433.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 433.578125,
+          "bottom": 457.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 457.578125,
+          "bottom": 481.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 481.578125,
+          "bottom": 505.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 505.578125,
+          "bottom": 529.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 529.578125,
+          "bottom": 553.578125,
+          "left": 16,
+          "right": 235,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 699,
+          "bottom": 723,
+          "left": 12,
+          "right": 243,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 775,
+          "bottom": 799,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 775,
+          "bottom": 799,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 499,
+          "bottom": 523,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 499,
+          "bottom": 523,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 720,
+      "height": 384,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 315,
+          "bottom": 339,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    },
+    {
+      "width": 720,
+      "height": 384,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "Büro Yönetimi",
+          "href": "/buro",
+          "top": 131.578125,
+          "bottom": 155.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 155.578125,
+          "bottom": 179.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel Bakış",
+          "href": "/dashboard",
+          "top": 179.578125,
+          "bottom": 203.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 203.578125,
+          "bottom": 227.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 227.578125,
+          "bottom": 251.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 251.578125,
+          "bottom": 275.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Görevler",
+          "href": "/gorevler",
+          "top": 275.578125,
+          "bottom": 299.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 299.578125,
+          "bottom": 323.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 323.578125,
+          "bottom": 347.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 347.578125,
+          "bottom": 371.578125,
+          "left": 12,
+          "right": 271,
+          "height": 24
+        },
+        {
+          "label": "Genel bakış",
+          "href": "/ai",
+          "top": 399.578125,
+          "bottom": 423.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 423.578125,
+          "bottom": 447.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 447.578125,
+          "bottom": 471.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Canlı Duruşma",
+          "href": "/ai/durusma",
+          "top": 471.578125,
+          "bottom": 495.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistanı",
+          "href": "/ai/sohbet",
+          "top": 495.578125,
+          "bottom": 519.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Karşı Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 519.578125,
+          "bottom": 543.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Yönetilen Duruşma",
+          "href": "/ai/yonetmen",
+          "top": 543.578125,
+          "bottom": 567.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritası",
+          "href": "/ai/harita",
+          "top": 567.578125,
+          "bottom": 591.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Olasılık Ağacı",
+          "href": "/ai/olasilik",
+          "top": 591.578125,
+          "bottom": 615.578125,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 315,
+          "bottom": 339,
+          "left": 12,
+          "right": 275,
+          "height": 24
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

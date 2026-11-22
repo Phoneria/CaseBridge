@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 768
+      },
+      "rootFontSize": "32px (200% text size, not browser zoom)",
+      "firstLastAndSettingsFocus": true,
+      "scroll": {
+        "client": 412,
+        "scroll": 1010
+      }
+    },
+    {
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 768
+      },
+      "rootFontSize": "32px (200% text size, not browser zoom)",
+      "firstLastAndSettingsFocus": true,
+      "scroll": {
+        "client": 412,
+        "scroll": 1010
+      }
+    }
+  ]
+}

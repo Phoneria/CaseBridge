@@ -63,3 +63,8 @@
 :root[data-theme="dark"] [class~="bg-surface-muted/60"] {background-color:rgb(11 14 15 / .6);}
 :root[data-theme="dark"] [class~="bg-white/70"] {background-color:rgb(17 23 24 / .7);}
 :root[data-theme="dark"] [class~="bg-white/80"] {background-color:rgb(17 23 24 / .8);}
+
+/* The original two-ink PNG has an opaque white matte. Blend that matte into the
+   actual surface instead of redrawing the mark or changing its raster pixels. */
+.brand-logo-image { mix-blend-mode:multiply; }
+:root[data-theme="dark"] .brand-logo-image { filter:invert(1) hue-rotate(180deg); mix-blend-mode:screen; }

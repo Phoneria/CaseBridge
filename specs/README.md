@@ -41,3 +41,7 @@ No automatic deployment trigger/frequency was selected; current publication is m
 ## Follow-up 009 — Demo scenario weights
 
 `009-demo-scenario-weights/` implements the latest explicitly authorized numerical POC: same-question synthetic partition totals 100; scoped normal cases have independent 0–100 support weights with visible neutral starting assumptions. All numeric output says Demo tahmini; neither model is calibrated or a legal success probability. Local targeted checks/build/browser pass; public release evidence is recorded in its verification.md when complete. This follow-up supersedes the prior uncomputed POC presentation, without changing tenant or key policies.
+
+## Current accepted navigation and release
+
+Latest steering restores the expanded single-column sidebar AI group while retaining the header. All nine tools plus Settings fit the tested complete 20-link admin menu at 900/768px heights. Existing Olasılık Ağacı is first/default on marketing, analysis second, with twelve native app v.0.22 captures. Public app v.0.22 / marketing v.0.46 are verified from protected-main artifact 80035ea. Main requires PR + actual provider-bound spec-governance; diff-to-requirement/named executed acceptance checks and unmerged negative/fixed probe #28 are verified. See feature 001/002/006 verification and docs/validation/2026-11-22/ for exact source identities, results and limits.

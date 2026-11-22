@@ -17,7 +17,7 @@ interface NavItem {
 
 function Icon({ d }: { d: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.75} stroke="currentColor" className="h-4 w-4 shrink-0">
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.75} stroke="currentColor" className="h-5 w-5 shrink-0">
       <path d={d} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -64,7 +64,7 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`flex min-h-6 items-center gap-2 rounded-lg px-2 py-0.5 text-[13px] font-medium leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 ${
+      className={`flex min-h-6 items-center gap-2 rounded-lg px-2 py-0.5 text-sm font-medium leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 ${
         active
           ? "bg-accent-600 text-white shadow-card"
           : "text-navy-700 hover:bg-accent-100 hover:text-accent-800"
@@ -78,10 +78,11 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string | null })
 
 export function Sidebar({ role, platform = false, restricted = false }: { role?: "admin" | "lawyer"; platform?: boolean; restricted?: boolean }) {
   const pathname = usePathname();
+  const mainCount = NAV_ITEMS.length + (role === "admin" ? 2 : role === "lawyer" ? 1 : 0);
 
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-3 py-3">
-      <div className="mb-2 shrink-0 px-1 [&_img]:w-36 [&>span]:px-1 [&>span]:py-0.5"><BrandLogo /></div>
+    <aside className="flex h-full w-full shrink-0 flex-col border-r border-accent-200 bg-accent-50 px-4 py-4">
+      <div className="mb-2 shrink-0"><BrandLogo /></div>
 
       <div className="min-h-0 flex flex-1 flex-col">
 
@@ -101,8 +102,8 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
       ) : (
       <nav aria-label="Ana menü" className="flex min-h-0 flex-1 flex-col gap-1">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
-        <div className="flex min-h-full flex-col">
-        <div className="shrink-0 space-y-0">
+        <div className="flex h-full flex-col gap-2" style={{ minHeight: `calc(${(mainCount + AI_NAVIGATION.length) * 1.5 + 3}rem + 2px)` }}>
+        <div className="flex min-h-0 flex-col [&>a]:flex-1" style={{ flexBasis: `${mainCount * 1.5}rem`, flexGrow: mainCount, flexShrink: 0 }}>
         {role === "admin" && <NavLink item={{label:"Büro Yönetimi",href:"/buro",icon:<Icon d="M3 21h18M5 21V7l7-4 7 4v14M9 10h2M13 10h2M9 14h2M13 14h2"/>}} pathname={pathname}/>}
         {role === "lawyer" && <NavLink item={{label:"Çalışma Alanım",href:"/calisma-alanim",icon:<Icon d="M9 11.5 11 13.5 15.5 9M5 6h14v14H5z"/>}} pathname={pathname}/>}
         {role === "admin" && (
@@ -112,13 +113,17 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
         </div>
-        <section role="group" aria-label="CaseBridge AI" className="mt-1 shrink-0 rounded-xl bg-white px-1 py-1">
-          <h2 className="mb-1 flex items-center gap-2 px-2 text-[11px] font-semibold leading-4 tracking-wide text-navy-600"><AiMark className="h-3.5 w-3.5 text-navy-500" />CaseBridge AI</h2>
-          <div className="space-y-0">{AI_NAVIGATION.map(item => <NavLink key={item.href} item={{...item, icon:<AiMark className="h-4 w-4 shrink-0" />}} pathname={pathname} />)}</div>
+        <section role="group" aria-label="CaseBridge AI" className="relative flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-navy-950 p-2" style={{ flexBasis: `calc(${AI_NAVIGATION.length * 1.5 + 2.5}rem + 2px)`, flexGrow: AI_NAVIGATION.length, flexShrink: 0 }}>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
+          <h2 className="relative mb-1 flex shrink-0 items-center gap-2 px-3 text-sm font-semibold leading-5 text-white"><AiMark className="h-4 w-4 text-accent-300" />CaseBridge AI</h2>
+          <div className="relative flex min-h-0 flex-1 flex-col">{AI_NAVIGATION.map(item => <Link key={item.href} href={item.href} aria-current={aiLinkActive(pathname ?? '', item.href) ? 'page' : undefined}
+            className={'flex min-h-6 flex-1 items-center rounded-xl py-0.5 pl-9 pr-3 text-sm leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ' + (aiLinkActive(pathname ?? '', item.href) ? 'bg-white/15 font-medium text-white' : 'text-accent-100 hover:bg-white/10 hover:text-white')}>
+            {item.label}
+          </Link>)}</div>
         </section>
         </div>
         </div>
-        <div className="mt-auto flex shrink-0 flex-col gap-1 pt-2">
+        <div className="mt-auto flex shrink-0 flex-col gap-1 pt-2 [&>a]:min-h-8">
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
         </div>
       </nav>
