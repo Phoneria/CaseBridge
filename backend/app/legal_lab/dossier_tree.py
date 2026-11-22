@@ -3,6 +3,7 @@ from app.db.dossier_documents import entries
 from app.db.dossier_exhibits import EXHIBITS
 from app.db.dossier_pack import document_key
 from app.legal_lab.dossier_decisions import DECISIONS
+from app.legal_lab.dossier_forks import FORKS
 from app.legal_lab.scenario_tree import TreeNode
 
 
@@ -28,7 +29,14 @@ def history_nodes(case_id, story, sources):
                     uncertainties=[], path_percent=100)
     nodes = [root]
 
-    def add(parent, key, label, description, reason, sources, *, recorded=True, terminal=False, weight=100):
+    forks = FORKS[story.code]
+    continuation = {}
+    for fork in forks:
+        continuation[fork.stage] = continuation.get(fork.stage, 100) - fork.percent
+
+    def add(parent, key, label, description, reason, sources, *, recorded=True, terminal=False, weight=None):
+        if weight is None:
+            weight = continuation.get(parent.id, 100)
         node = TreeNode(id=key, parent_id=parent.id, kind="outcome" if terminal else "development",
                         label=label, description=description, reasoning=reason, source_ids=sources,
                         uncertainties=[], transition_percent=weight,
@@ -81,5 +89,15 @@ def history_nodes(case_id, story, sources):
             description = f"{story.claim}\n\n{path.decision}" if terminal else f"{story.title} · {label}"
             reason = path.reason if terminal else (path[j - 1] if j else story.response)
             parent = add(parent, f"alternative-{i}-{j}", label, description, reason, evidence,
-                         recorded=False, terminal=terminal, weight=shares[i] if j == 0 else 100)
+                         recorded=False, terminal=terminal, weight=shares[i] if j == 0 else None)
+    stages = {n.id: n for n in nodes}
+    for index, fork in enumerate(forks):
+        parent = stages[fork.stage]
+        key = f"{fork.stage}-exhibit-fork-{index}"
+        source_ids = refs(fork.exhibit)
+        finding = add(parent, key, fork.finding, f"{story.title} · {fork.finding}",
+                      f"{fork.exhibit} bu varsayım altında değerlendirilir. {fork.reason}",
+                      source_ids, recorded=False, weight=fork.percent)
+        add(finding, f"{key}-decision", fork.decision, f"{story.claim}\n\n{fork.decision}",
+            fork.reason, source_ids, recorded=False, terminal=True)
     return nodes
