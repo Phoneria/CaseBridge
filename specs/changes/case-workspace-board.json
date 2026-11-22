@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/api/routes/cases.py",
+        "backend/app/api/routes/precedents.py",
+        "backend/app/models/case.py",
+        "backend/app/services/case_lifecycle.py",
+        "frontend/src/components/CaseCloseModal.tsx",
+        "frontend/src/components/CaseDecisionCard.tsx",
+        "frontend/src/components/CaseDetailView.tsx",
+        "frontend/src/components/CaseListView.tsx",
+        "frontend/src/components/PrecedentsView.tsx",
+        "frontend/src/components/Sidebar.tsx",
+        "frontend/src/components/lab/ScenarioTreeView.tsx",
+        "frontend/src/lib/filters.ts"
+      ],
+      "requirements": [
+        "specs/013-case-workspace-board/spec.md#FR-001",
+        "specs/013-case-workspace-board/spec.md#FR-002"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_precedents.py::test_related_precedents_use_selected_case_and_bureau",
+        "backend/tests/api/test_precedents.py::test_precedent_links_are_specific_writable_and_isolated",
+        "backend/tests/api/test_case_lifecycle.py::test_legacy_decision_can_be_recorded_once_without_reopening",
+        "frontend/src/components/__tests__/CaseDetailView.test.tsx::opens precedents and the interactive tree for the current case",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::renders the main navigation without the old Simülasyonlar item"
+      ],
+      "reason": "Case context owns precedent links, documents, recorded results and the selected scenario tree."
+    },
+    {
+      "files": [
+        "backend/alembic/versions/e914c60adc31_task_planning.py",
+        "backend/app/api/routes/users.py",
+        "backend/app/models/task.py",
+        "backend/app/schemas/task.py",
+        "backend/app/services/task_service.py",
+        "frontend/src/components/TasksView.tsx",
+        "frontend/src/components/tasks/TaskFormModal.tsx",
+        "frontend/src/lib/taskBoard.ts",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/013-case-workspace-board/spec.md#FR-001",
+        "specs/013-case-workspace-board/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_management_migration.py::test_board_migration_preserves_legacy_task_states_through_downgrade",
+        "backend/tests/api/test_tasks.py::test_board_stages_and_details_round_trip",
+        "backend/tests/api/test_tasks.py::test_restricted_lawyer_can_only_receive_tasks_in_granted_cases",
+        "frontend/src/components/__tests__/TasksView.test.tsx::moves a card by drag and edits its priority notes and deadline"
+      ],
+      "reason": "Preserve old task status consumers and persist editable board data with case-scoped assignment."
+    },
+    {
+      "files": [
+        "backend/app/db/demo_template.py",
+        "backend/app/db/demo_team.py",
+        "backend/app/db/demo_presentation_seed.py",
+        "backend/app/db/demo_outcomes.py",
+        "backend/app/db/seed.py"
+      ],
+      "requirements": [
+        "specs/013-case-workspace-board/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_demo_template.py::test_sample_rates_come_from_stable_mixed_decisions",
+        "backend/tests/integration/test_demo_template_removal.py::test_removal_preview_confirm_repeat_and_reload_preserve_real_data"
+      ],
+      "reason": "Generate stable mixed outcomes and coherent notes. Include new sample files in the existing bounded cleanup."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/reports.py",
+        "frontend/src/components/ReportsView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/013-case-workspace-board/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_reports.py::test_report_previews_match_all_exported_cells",
+        "frontend/src/components/__tests__/ReportsView.test.tsx::opens all four tabular previews without starting a download"
+      ],
+      "reason": "Preview exact CSV data using the existing generators; increment candidate application version."
+    }
+  ]
+}

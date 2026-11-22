@@ -6,7 +6,7 @@ const CLOSED_OUTCOMES = new Set(["won", "lost", "settled"]);
 /** "Karar bilgisi" of a closed case; what a case closed before decisions were recorded lacks shows as "—". */
 export function CaseDecisionCard({ caseDetail }: { caseDetail: Case }) {
   const rows: [string, string][] = [
-    ["Sonuç", CLOSED_OUTCOMES.has(caseDetail.outcome) ? CASE_OUTCOME_LABELS[caseDetail.outcome] : "—"],
+    ["Sonuç", CLOSED_OUTCOMES.has(caseDetail.outcome) ? CASE_OUTCOME_LABELS[caseDetail.outcome] : "Sonuç kaydedilmemiş"],
     ["Karar tarihi", caseDetail.decision_date ? formatDate(caseDetail.decision_date) : "—"],
     ["Karar notu", caseDetail.closing_note?.trim() ? caseDetail.closing_note : "—"],
   ];

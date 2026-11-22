@@ -21,10 +21,10 @@ def roster_ids(firm_id: str) -> set[str]:
 
 
 def sample_cases(db: Session, firm_id: str) -> list[Case]:
-    from app.db.seed import DEMO_CASES
+    from app.db.demo_outcomes import template_numbers
     return db.query(Case).filter(
         Case.law_firm_id == firm_id,
-        Case.case_number.in_(["ÖRNEK-" + row["case_number"] for row in DEMO_CASES]),
+        Case.case_number.in_(["ÖRNEK-" + number for number in template_numbers()]),
         Case.description.startswith("[ÖRNEK ŞABLON] "),
         Case.is_precedent.is_(False),
     ).all()
@@ -64,9 +64,9 @@ def scope_and_distribute(db: Session, admin: User, members: list[User], cases: l
     marker_id = identity(firm_id, "team-distribution:v1")
     if db.get(ManagementAudit, marker_id) is not None:
         return
-    eligible = [u for u in members if u.is_active and u.password_set_at is not None and demo_case_ids(db, u)]
+    scopes = {u.id: set(demo_case_ids(db, u) or []) for u in members if u.is_active and u.password_set_at is not None}
     for index, case in enumerate(cases):
-        candidates = [u for u in eligible if case.id in (demo_case_ids(db, u) or [])]
+        candidates = [u for u in members if case.id in scopes.get(u.id, ())]
         if candidates:
             previous = case.assigned_lawyer_id
             case.assigned_lawyer_id = candidates[index % len(candidates)].id

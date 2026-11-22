@@ -1,0 +1,1 @@
+Open a case from Davalar, inspect related decisions and Olasılık Ağacı. Move and edit a task on Görevler, then reload and inspect its notes and due date. Open all four previews in Raporlar. Load and repeat the sample template in a disposable bureau and compare the category counts.

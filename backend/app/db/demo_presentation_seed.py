@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.timeutil import local_today
 from app.models.calendar import CalendarEvent, CalendarEventType
-from app.models.case import Case, CaseOutcome, CaseStatus
+from app.models.case import Case, CaseOutcome, CasePrecedentLink, CaseStatus
 from app.models.chat import ChatConversation, ChatMessage, ChatMessageStatus, ChatRole
 from app.models.document import Document
 from app.models.management import FirmProfile, ManagementAudit, ManagementRecord, WorkspaceAccess, WorkTransfer
@@ -51,7 +51,13 @@ def enrich_cases(db, admin, cases):
             "defendant_position": "İfa ve ödeme kayıtlarının talebi karşılamadığı; bazı iddiaların ek delille kanıtlanması gerektiği savunuluyor.",
         }
         if case.status == CaseStatus.KAPALI:
-            fields.update(decision_date=case.opening_date + timedelta(days=90), closing_note=LABEL + "Gösterim amaçlı sonuç kaydı; kesinleşme ve tahsilat takibi örneklendirilmiştir.")
+            result = {CaseOutcome.WON: "Müvekkil lehine sonuçlandı.", CaseOutcome.LOST: "Müvekkil aleyhine sonuçlandı.",
+                      CaseOutcome.SETTLED: "Taraflar sulh yoluyla anlaştı."}.get(case.outcome)
+            fields["decision_date"] = case.opening_date + timedelta(days=90)
+            if result:
+                fields["closing_note"] = f"{LABEL}{case.case_name}. {result}"
+                if case.closing_note == LABEL + "Gösterim amaçlı sonuç kaydı; kesinleşme ve tahsilat takibi örneklendirilmiştir.":
+                    case.closing_note = fields["closing_note"]
         for field, value in fields.items():
             if not getattr(case, field):
                 setattr(case, field, value)
@@ -79,8 +85,10 @@ def enrich_cases(db, admin, cases):
     # Deliberately fictional precedent illustrations, isolated from case statistics.
     from app.db.seed import _get_or_create_case, _get_or_create_demo_note
     for index, source in enumerate([c for c in cases if c.status == CaseStatus.KAPALI][:3]):
+        number = f"ÖRNEK-EMSAL-{index+1}"
+        new_precedent = not db.query(Case.id).filter_by(law_firm_id=admin.law_firm_id, case_number=number).first()
         precedent = _get_or_create_case(
-            db, admin.law_firm, admin, case_number=f"ÖRNEK-EMSAL-{index+1}",
+            db, admin.law_firm, admin, case_number=number,
             case_name=LABEL + source.case_name + " · emsal inceleme örneği",
             client_name="Anonim örnek taraf A", opposing_party="Anonim örnek taraf B",
             case_type=source.case_type, court="Kurgusal karar inceleme örneği",
@@ -93,6 +101,8 @@ def enrich_cases(db, admin, cases):
             defendant_position="Ödeme ve ifa itirazlarının değerlendirilmesi.", client_role="plaintiff",
             court_file_number=f"GÖSTERİM-{index+1}", closing_note=DISCLAIMER,
         )
+        if new_precedent:
+            db.add(CasePrecedentLink(law_firm_id=admin.law_firm_id, case_id=source.id, precedent_id=precedent.id))
         _get_or_create_demo_note(db, precedent, admin, "ornek-karar-incelemesi.txt", f"{DISCLAIMER}\n{source.case_name}\nİspat yükü, delil tutarlılığı ve itirazların karşılaştırılması. Bu metne gerçek emsal olarak atıf yapılamaz.")
     db.flush()
 

@@ -8,10 +8,11 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.case import Case
-from app.models.task import Task, TaskStatus
+from app.models.management import WorkspaceAccess
+from app.models.task import Task, TaskStage, TaskStatus
 from app.repositories.task_repository import TaskRepository
 from app.schemas.task import TaskCreate, TaskUpdate
-from app.services.assignees import find_assignable_in_firm
+from app.services.assignees import AssigneeNotAssignable, find_assignable_in_firm
 
 
 class AssigneeNotFound(Exception):
@@ -25,19 +26,29 @@ class TaskService:
         self.db = db
         self.tasks = TaskRepository(db)
 
-    def _check_assignee(self, assigned_to: Optional[str], law_firm_id: str) -> None:
+    def _check_assignee(self, assigned_to: Optional[str], law_firm_id: str, case_id: str) -> None:
         """Raises AssigneeNotFound (other firm / unknown) or
         AssigneeNotAssignable (pending or inactive user)."""
-        if assigned_to is not None and find_assignable_in_firm(self.db, assigned_to, law_firm_id) is None:
+        if assigned_to is None:
+            return
+        if find_assignable_in_firm(self.db, assigned_to, law_firm_id) is None:
             raise AssigneeNotFound()
+        grant = self.db.query(WorkspaceAccess).filter_by(law_firm_id=law_firm_id, user_id=assigned_to).first()
+        if grant and (grant.position == "accountant" or case_id not in grant.case_ids):
+            raise AssigneeNotAssignable()
 
     def create_task(self, case: Case, payload: TaskCreate, created_by: Optional[str]) -> Task:
-        self._check_assignee(payload.assigned_to, case.law_firm_id)
+        self._check_assignee(payload.assigned_to, case.law_firm_id, case.id)
+        stage = payload.stage
+        done = stage == TaskStage.DONE
         task = Task(
             case_id=case.id,
             law_firm_id=case.law_firm_id,
             created_by=created_by,
-            **payload.model_dump(exclude_unset=True),
+            open_stage=TaskStage.TODO if done else stage,
+            status=TaskStatus.COMPLETED if done else TaskStatus.PENDING,
+            completed_at=datetime.now(timezone.utc) if done else None,
+            **payload.model_dump(exclude_unset=True, exclude={"stage"}),
         )
         return self.tasks.create(task)
 
@@ -52,7 +63,12 @@ class TaskService:
         # Only a new assignee is checked: a task whose assignee was deactivated
         # since can still be edited (or handed to someone else).
         if updates.get("assigned_to") != task.assigned_to:
-            self._check_assignee(updates.get("assigned_to"), task.law_firm_id)
+            self._check_assignee(updates.get("assigned_to"), task.law_firm_id, task.case_id)
+        stage = updates.pop("stage", None)
+        if stage is not None:
+            updates["status"] = TaskStatus.COMPLETED if stage == TaskStage.DONE else TaskStatus.PENDING
+            if stage != TaskStage.DONE:
+                updates["open_stage"] = stage
         was_pending = task.status == TaskStatus.PENDING
         for field, value in updates.items():
             setattr(task, field, value)

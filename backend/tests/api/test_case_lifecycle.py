@@ -409,3 +409,16 @@ def test_lifecycle_routes_load_the_case_with_a_row_lock(client, lawyer, monkeypa
     client.post(f"/cases/{case['id']}/unarchive", headers=lawyer)
 
     assert len(locked) == 5 and plain == []
+
+
+def test_legacy_decision_can_be_recorded_once_without_reopening(client, lawyer, office, auth_headers):
+    case = _new_case(client, lawyer, status="kapali")
+    path = f"/cases/{case['id']}/decision"
+    payload = _close_payload(note="Karar tebliğ edildi.")
+    assert client.post(path, headers=auth_headers(office.lawyer_b), json=payload).status_code == 404
+    assert client.post(path, headers=auth_headers(office.lawyer_a2), json=payload).status_code == 403
+    result = client.post(path, headers=lawyer, json=payload)
+    assert result.status_code == 200 and result.json()["outcome"] == "won"
+    assert result.json()["status"] == "kapali" and result.json()["closing_note"] == payload["note"]
+    assert client.post(path, headers=lawyer, json=payload).status_code == 409
+    assert len([e for e in _timeline(client,lawyer,case["id"]) if "sonucu kaydedildi" in e["title"]]) == 1

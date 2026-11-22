@@ -1,0 +1,1 @@
+The current tree accepts a selected case. Existing precedents have a law category and no maintained case-to-case link. Match the law category and label that rule. Use stored example decisions to calculate historical rates through the existing analytics service.

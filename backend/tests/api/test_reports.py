@@ -161,3 +161,20 @@ def test_csv_exports_neutralise_spreadsheet_formulas(client, two_firms_two_users
     assert ",'@cmd," in row
     assert any(line.startswith("'+1+1,") for line in tasks_lines)
     assert any(",'=SUM(1)," in line for line in tasks_lines)
+
+
+def test_report_previews_match_all_exported_cells(client, two_firms_two_users, db_session):
+    import csv
+    import io
+    from app.models.management import ManagementAudit
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers, case_name='Türkçe, "örnek"')
+    client.post(f"/cases/{case['id']}/tasks", headers=headers, json={"title": "Bir, iki"})
+    for kind in ("cases", "tasks", "hearings", "performance"):
+        audits = db_session.query(ManagementAudit).filter_by(action="report.downloaded")
+        before = audits.count()
+        preview = client.get(f"/reports/{kind}/preview", headers=headers)
+        assert preview.status_code == 200 and audits.count() == before
+        exported = client.get(f"/reports/{kind}.csv", headers=headers)
+        assert preview.json() == list(csv.reader(io.StringIO(exported.content.decode("utf-8-sig"))))
+    assert len(client.get("/reports/cases/preview", headers=_auth_headers(client, two_firms_two_users, "user_b")).json()) == 1

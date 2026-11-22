@@ -1,5 +1,6 @@
 """The sample template is firm-scoped and safe to request more than once."""
 from app.db.seed import DEMO_CASES
+from app.db.demo_outcomes import template_numbers
 from app.models.case import Case, CaseEvent, CaseType
 from app.models.document import Document
 from app.models.task import Task
@@ -9,11 +10,11 @@ def test_admin_imports_sample_portfolio_only_into_own_firm(client, db_session, o
     headers = auth_headers(office.admin_a)
     first = client.post("/admin/demo-template", headers=headers)
     assert first.status_code == 200, first.text
-    assert first.json()["total_cases"] == len(DEMO_CASES)
-    assert first.json()["added_cases"] == len(DEMO_CASES)
+    assert first.json()["total_cases"] == len(template_numbers())
+    assert first.json()["added_cases"] == len(template_numbers())
     assert all(first.json()["coverage"].values())
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
-    assert len(cases) == len(DEMO_CASES)
+    assert len(cases) == len(template_numbers())
     assert all(case.case_number.startswith("ÖRNEK-") for case in cases)
     from app.db.demo_team import roster_ids
     assert all(case.assigned_lawyer_id in roster_ids(office.firm_a.id) for case in cases)
@@ -55,7 +56,7 @@ def test_new_firm_with_only_admin_can_import_examples(client, db_session, office
     response = client.post("/admin/demo-template", headers=auth_headers(office.admin_a))
     assert response.status_code == 200, response.text
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
-    assert len(cases) == len(DEMO_CASES)
+    assert len(cases) == len(template_numbers())
     from app.db.demo_team import roster_ids
     assert {case.assigned_lawyer_id for case in cases} == roster_ids(office.firm_a.id)
 
@@ -106,8 +107,8 @@ def test_presentation_covers_workflows_and_readable_ai_history(client, db_sessio
     grants=db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).all()
     sample_ids={c.id for c in db_session.query(Case).filter(Case.law_firm_id==office.firm_a.id,Case.case_number.like("ÖRNEK-%"))}
     assert all(set(g.case_ids) <= sample_ids for g in grants)
-    assert db_session.query(Simulation).filter_by(law_firm_id=office.firm_a.id).count() == len(DEMO_CASES)
-    assert db_session.query(AIAnalysis).filter_by(law_firm_id=office.firm_a.id).count() == len(DEMO_CASES)
+    assert db_session.query(Simulation).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers())
+    assert db_session.query(AIAnalysis).filter_by(law_firm_id=office.firm_a.id).count() == len(template_numbers())
     assert db_session.query(ChatConversation).filter_by(law_firm_id=office.firm_a.id, user_id=office.admin_a.id).count() == 3
     assert db_session.query(CourtroomSession).filter_by(law_firm_id=office.firm_a.id, status=CourtroomSessionStatus.ACTIVE).count() == 1
     documents=db_session.query(Document).filter_by(law_firm_id=office.firm_a.id).all()
@@ -170,7 +171,7 @@ def test_old_template_with_missing_hearing_is_repaired_before_detail_notes(clien
     db_session.add(legacy);db_session.commit()
     response=client.post("/admin/demo-template",headers=auth_headers(office.admin_a))
     assert response.status_code==200,response.text
-    assert response.json()["added_cases"]==len(DEMO_CASES)-1
+    assert response.json()["added_cases"]==len(template_numbers())-1
     db_session.refresh(legacy)
     assert legacy.next_hearing_date>=local_today()
     assert db_session.query(Document).filter_by(case_id=legacy.id).count()>=2
@@ -254,3 +255,17 @@ def test_legacy_demo_is_distributed_once_and_preserves_later_assignment(client, 
     assert client.patch(f"/admin/cases/{legacy.id}/lawyer",headers=headers,json={"assigned_lawyer_id":office.lawyer_a2.id}).status_code == 200
     assert client.post("/admin/demo-template",headers=headers).status_code == 200
     db_session.refresh(legacy); assert legacy.assigned_lawyer_id == office.lawyer_a2.id
+
+
+def test_sample_rates_come_from_stable_mixed_decisions(client, office, auth_headers):
+    headers = auth_headers(office.admin_a)
+    assert client.post("/admin/demo-template", headers=headers).status_code == 200
+    def read_rates():
+        return client.get("/analytics/overview", headers=headers).json()["by_category"]
+    rates = read_rates()
+    assert len(rates) == 5
+    for row in rates:
+        assert row["won"] and row["lost"]
+        assert row["win_rate"] == round(row["won"] * 100 / (row["won"] + row["lost"]), 2)
+    assert client.post("/admin/demo-template", headers=headers).json()["added_cases"] == 0
+    assert read_rates() == rates
