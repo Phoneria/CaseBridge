@@ -535,3 +535,18 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 
 - [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
 - [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.
+
+## İncelemeye hazırlanan geniş örnek ekip — v.0.24 adayı
+- [x] Örnek verileri yükle:12 farklı isim/uzmanlıkta ÖRNEK avukat, tenant-bağlı sabit kimlikler, yalnız örnek dosya kapsamı; ortak parola/otomatik davet yok. Önceki örnek portföy ilk kez dağıtılır, tekrar yükleme sonradan yapılan atamaları korur.
+- [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
+- [x] İlk10 backend testi geçti; geniş25 hedefli kontrolün24ü geçti, örnek hesap için yanlış normal-login test yardımcısı düzeltildi ve kalan1 test geçti. Frontend hedefli testler/build/typecheck ve gerçek yerel backend+UI ile6 masaüstü/mobil/açık-koyu akış geçti. Kanıt specs/012-expanded-demo-team ve docs/validation/2026-11-22/expanded-demo-team-browser.json.
+- [ ] Ayrı korumalı PR incelemesi/main birleşmesi ve main kaynaklı final sürüm/yayın/public doğrulama. Bu çalışma In Review bırakılır; canlı içe aktarma veya yeni müşteri teslimi yapılmaz. Rehber PR55 ayrı korunur.
+
+- [x] Ayrı PR #61 ve iş #60 In Review; 9 davranış dosyasına bağlı4 gerçek kabul testi başarılı çalıştı.32 hedefli frontend testi geçti. Canlı import veya yayın yapılmadı.
+
+### Kullanıcı ek isteği — Örnek verileri kaldır
+- [x] Ayarlar’da salt okunur sayım önizlemesi, Vazgeç/Escape, açık kalıcı kaldırma onayı; büro kapsamı, değişen planda409, çift işlem kilidi, boş durum ve hata sonrası tekrar. Örnek dosyalara sonradan eklenen içeriğin de silineceği açıkça yazılır.
+- [x] Kesin şablon kimlikleri + bilinen işaretli davalar; gerçek/diğer büro kayıtları ve ayarlar korunur. Kullanılmış/değiştirilmiş örnek hesaplar ve gerçek dosya kapsamları tutulur; yalnız silinen örnek erişim kimlikleri temizlenir. Dosya silme DB commit sonrası ve storage/paylaşılan-dosya kontrolüyle.
+- [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
+- [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
+- [ ] Main birleşmesi ve canlı doğrulama ayrı bekler. Gerçek canlı örnekler kaldırılmadı.

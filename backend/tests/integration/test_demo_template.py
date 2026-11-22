@@ -15,7 +15,8 @@ def test_admin_imports_sample_portfolio_only_into_own_firm(client, db_session, o
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
     assert len(cases) == len(DEMO_CASES)
     assert all(case.case_number.startswith("ÖRNEK-") for case in cases)
-    assert all(case.assigned_lawyer_id in (office.lawyer_a1.id, office.lawyer_a2.id) for case in cases)
+    from app.db.demo_team import roster_ids
+    assert all(case.assigned_lawyer_id in roster_ids(office.firm_a.id) for case in cases)
     assert db_session.query(Case).filter(Case.law_firm_id == office.firm_b.id).count() == 0
 
     counts = tuple(db_session.query(model).filter(model.law_firm_id == office.firm_a.id).count()
@@ -55,7 +56,8 @@ def test_new_firm_with_only_admin_can_import_examples(client, db_session, office
     assert response.status_code == 200, response.text
     cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
     assert len(cases) == len(DEMO_CASES)
-    assert all(case.assigned_lawyer_id == office.admin_a.id for case in cases)
+    from app.db.demo_team import roster_ids
+    assert {case.assigned_lawyer_id for case in cases} == roster_ids(office.firm_a.id)
 
 
 def test_presentation_covers_workflows_and_readable_ai_history(client, db_session, office, auth_headers, monkeypatch):
@@ -95,7 +97,7 @@ def test_presentation_covers_workflows_and_readable_ai_history(client, db_sessio
     assert {r.data["entry_type"] for r in rows if r.kind == "finance"} == {"fee","payment","expense","reimbursement","advance","advance_spend"}
     assert any(r.due_date and r.due_date < local_today() for r in rows)
     assert any(r.due_date and r.due_date > local_today() for r in rows)
-    assert db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).count() == 6
+    assert db_session.query(WorkspaceAccess).filter_by(law_firm_id=office.firm_a.id).count() == 18
     from app.models.user import User
     demo_lawyer = db_session.get(User, identity(office.firm_a.id,"member:lawyer"))
     assert demo_lawyer.is_platform_admin is False
@@ -172,3 +174,83 @@ def test_old_template_with_missing_hearing_is_repaired_before_detail_notes(clien
     db_session.refresh(legacy)
     assert legacy.next_hearing_date>=local_today()
     assert db_session.query(Document).filter_by(case_id=legacy.id).count()>=2
+
+
+def test_expanded_demo_roster_is_visible_scoped_and_idempotent(client, db_session, office, auth_headers, monkeypatch):
+    from app.db.demo_team import roster_ids
+    from app.models.user import User
+    from app.models.management import WorkspaceAccess
+    from app.services.auth_service import AuthService
+    def forbidden(*args, **kwargs):
+        raise AssertionError("No invitation may be sent")
+    monkeypatch.setattr("app.services.account_service.deliver", forbidden)
+    headers = auth_headers(office.admin_a)
+    response = client.post("/admin/demo-template", headers=headers)
+    assert response.status_code == 200, response.text
+    roster = roster_ids(office.firm_a.id)
+    lawyers = client.get("/admin/lawyers?include_demo=true", headers=headers).json()
+    samples = [row for row in lawyers if row["id"] in roster]
+    assert len(samples) == 12
+    assert not roster.intersection({row["id"] for row in client.get("/admin/lawyers", headers=headers).json()})
+    assert all(row["full_name"].startswith("ÖRNEK · ") for row in samples)
+    cases = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.is_precedent.is_(False)).all()
+    assert {case.assigned_lawyer_id for case in cases} == roster
+    for member in samples:
+        assert set(member["demo_case_ids"]) == {case.id for case in cases}
+        saved = db_session.get(User, member["id"])
+        assert saved.email.endswith("@example.invalid") and saved.invited_at is None
+        assert saved.is_platform_admin is False
+        assert AuthService(db_session).authenticate(saved.email, "demo1234") is None
+    before = db_session.query(User).count()
+    again = client.post("/admin/demo-template", headers=headers)
+    assert again.status_code == 200 and again.json()["added_records"] == 0
+    assert db_session.query(User).count() == before
+    assert db_session.query(WorkspaceAccess).filter(WorkspaceAccess.user_id.in_(roster)).count() == 12
+
+
+def test_demo_roster_assignment_cannot_escape_sample_scope(client, db_session, office, auth_headers):
+    from app.db.demo_team import roster_ids
+    from app.models.user import User
+    from app.models.management import WorkspaceAccess
+    headers = auth_headers(office.admin_a)
+    assert client.post("/admin/demo-template", headers=headers).status_code == 200
+    member = sorted(roster_ids(office.firm_a.id))[0]
+    real = Case(law_firm_id=office.firm_a.id, case_number="REAL-SAFE", case_name="Gerçek dosya", client_name="Gerçek", case_type=CaseType.KIRA, assigned_lawyer_id=office.lawyer_a1.id)
+    db_session.add(real); db_session.commit()
+    denied = client.patch(f"/admin/cases/{real.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member})
+    assert denied.status_code == 422
+    db_session.refresh(real); assert real.assigned_lawyer_id == office.lawyer_a1.id
+    sample = db_session.query(Case).filter(Case.law_firm_id == office.firm_a.id, Case.case_number.like("ÖRNEK-%"), Case.is_archived.is_(False)).first()
+    assert client.patch(f"/admin/cases/{sample.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member}).status_code == 200
+    sample_user = db_session.get(User, member)
+    from app.services.auth_service import AuthService
+    sample_headers = {"Authorization": "Bearer " + AuthService(db_session).issue_token_for(sample_user)}
+    workspace = client.get("/bureau/workspace", headers=sample_headers)
+    assert workspace.status_code == 200
+    assert real.id not in {row["id"] for row in workspace.json()["cases"]}
+    assert client.get("/cases", headers=sample_headers).status_code == 403
+    precedent = db_session.query(Case).filter_by(law_firm_id=office.firm_a.id,is_precedent=True).first()
+    assert client.patch(f"/admin/precedents/{precedent.id}/reviewer", headers=headers, json={"reviewer_lawyer_id":member}).status_code == 422
+    # Existing real restricted accounts do not become assignable.
+    db_session.add(WorkspaceAccess(law_firm_id=office.firm_a.id,user_id=office.lawyer_a1.id,position="client",case_ids=[])); db_session.commit()
+    assert office.lawyer_a1.id not in {r["id"] for r in client.get("/admin/lawyers?include_demo=true",headers=headers).json()}
+    assert client.patch(f"/admin/cases/{sample.id}/lawyer", headers=headers, json={"assigned_lawyer_id": office.lawyer_a1.id}).status_code == 422
+    assert client.patch(f"/admin/cases/{sample.id}/lawyer", headers=headers, json={"assigned_lawyer_id": office.lawyer_b.id}).status_code == 422
+    # Removing the sample scope must not grant ordinary full assignment rights.
+    grant = db_session.query(WorkspaceAccess).filter_by(user_id=member).one()
+    db_session.delete(grant); db_session.commit()
+    assert member not in {r["id"] for r in client.get("/admin/lawyers?include_demo=true",headers=headers).json()}
+    assert client.patch(f"/admin/cases/{real.id}/lawyer", headers=headers, json={"assigned_lawyer_id": member}).status_code == 422
+
+
+def test_legacy_demo_is_distributed_once_and_preserves_later_assignment(client, db_session, office, auth_headers):
+    from app.db.demo_team import roster_ids
+    source = DEMO_CASES[0]
+    legacy = Case(law_firm_id=office.firm_a.id, case_number="ÖRNEK-"+source["case_number"], case_name=source["case_name"], client_name=source["client_name"], case_type=source["case_type"], description="[ÖRNEK ŞABLON] Eski örnek", assigned_lawyer_id=office.lawyer_a1.id)
+    db_session.add(legacy); db_session.commit()
+    headers = auth_headers(office.admin_a)
+    assert client.post("/admin/demo-template",headers=headers).status_code == 200
+    db_session.refresh(legacy); assert legacy.assigned_lawyer_id in roster_ids(office.firm_a.id)
+    assert client.patch(f"/admin/cases/{legacy.id}/lawyer",headers=headers,json={"assigned_lawyer_id":office.lawyer_a2.id}).status_code == 200
+    assert client.post("/admin/demo-template",headers=headers).status_code == 200
+    db_session.refresh(legacy); assert legacy.assigned_lawyer_id == office.lawyer_a2.id

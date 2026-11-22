@@ -316,6 +316,8 @@ export interface AppUser {
   /** CaseBridge team member who manages customer firms (/platform). */
   is_platform_admin?: boolean;
   workspace_position?: string | null;
+  /** Admin assignment endpoint: explicit sample-only allowlist; absent/null for ordinary lawyers. */
+  demo_case_ids?: string[] | null;
 }
 
 export type UserStatus = "pending" | "active" | "inactive";
