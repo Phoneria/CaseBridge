@@ -109,6 +109,8 @@ def verify(root):
     if set(references(public_html)) != set(ledger['hashes']):
         raise ValueError('Public product references differ')
     for path,digest in ledger['hashes'].items():
+        if path+'?v='+ledger['marketingVersion'].removeprefix('v.') not in public_html:
+            raise ValueError('Public gallery cache identity missing: '+path)
         if hashlib.sha256(fetch(SITE+'/'+path+'?v='+ledger['marketingVersion'].removeprefix('v.'))).hexdigest() != digest:
             raise ValueError('Public image bytes differ: '+path)
     if json.loads(fetch(APP+'/api/health'))['status'] != 'ok':
@@ -123,9 +125,13 @@ def main():
     if args.action=='detect':
         observed=identity()
         ledger=json.loads((ROOT/LEDGER).read_text()) if (ROOT/LEDGER).exists() else {}
+        refresh=needed(observed,ledger)
+        if ledger and not refresh:
+            try: verify(ROOT)
+            except (ValueError,OSError): refresh=True
         state=ROOT/'.gallery-observed.json'; state.write_text(json.dumps(observed))
         with open(os.environ.get('GITHUB_OUTPUT','/dev/stdout'),'a') as output:
-            output.write('needed='+str(needed(observed,ledger)).lower()+'\n')
+            output.write('needed='+str(refresh).lower()+'\n')
             output.write('app_commit='+observed['app']['commit']+'\n')
         return
     observed=json.loads((ROOT/'.gallery-observed.json').read_text())

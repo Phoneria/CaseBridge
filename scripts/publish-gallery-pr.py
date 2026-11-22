@@ -52,7 +52,7 @@ def main():
     url=run('gh','pr','create','--head',branch,'--base','main','--title','Automatic product gallery '+ledger['marketingVersion'],'--body-file',str(body))
     # Token-created PR events are suppressed by GitHub; dispatch real required Actions CI explicitly.
     run('gh','workflow','run','ci.yml','--ref',branch,'-f','base='+base)
-    checks_deadline=time.monotonic()+600
+    checks_deadline=time.monotonic()+300
     while time.monotonic()<checks_deadline:
         checks=json.loads(run('gh','pr','view',url,'--json','statusCheckRollup'))['statusCheckRollup']
         required=[check for check in checks if check.get('name')=='spec-governance']
