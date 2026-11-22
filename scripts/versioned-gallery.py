@@ -71,6 +71,9 @@ def prepare(root, batch, observed, audit, latest):
         raise ValueError('Public versions changed during capture')
     paths = references((root/'web-page/index.html').read_text())
     hashes = validate_batch(paths, batch, audit, observed)
+    app_version_file = root/'frontend/app-version.json'
+    if app_version_file.exists() and json.loads(app_version_file.read_text())['version'] != observed['app']['version']:
+        raise ValueError('Main application source has not reached public version')
     version_file = root/'web-page/website-version.json'
     version = json.loads(version_file.read_text())
     if version['version'] != observed['marketingVersion']:

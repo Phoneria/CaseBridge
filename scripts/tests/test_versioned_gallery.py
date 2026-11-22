@@ -72,6 +72,8 @@ class VersionedGalleryTests(unittest.TestCase):
         self.assertIn('web-page/website-version.json',workflow)
         publisher=(ROOT/'scripts/publish-gallery-pr.py').read_text()
         self.assertIn("'--auto','--merge'",publisher)
+        self.assertIn('gallery.identity()!=expected',publisher)
+        self.assertIn("'--match-head-commit',head",publisher)
         self.assertIn("'ci.yml','--ref',branch",publisher)
         self.assertIn('set(staged)-set(paths)',publisher)
 

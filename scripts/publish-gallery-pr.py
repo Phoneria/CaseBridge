@@ -52,7 +52,23 @@ def main():
     url=run('gh','pr','create','--head',branch,'--base','main','--title','Automatic product gallery '+ledger['marketingVersion'],'--body-file',str(body))
     # Token-created PR events are suppressed by GitHub; dispatch real required Actions CI explicitly.
     run('gh','workflow','run','ci.yml','--ref',branch,'-f','base='+base)
-    run('gh','pr','merge',url,'--auto','--merge')
+    checks_deadline=time.monotonic()+600
+    while time.monotonic()<checks_deadline:
+        checks=json.loads(run('gh','pr','view',url,'--json','statusCheckRollup'))['statusCheckRollup']
+        required=[check for check in checks if check.get('name')=='spec-governance']
+        if required and all(check.get('conclusion')=='SUCCESS' for check in required): break
+        if any(check.get('conclusion') in ('FAILURE','CANCELLED','TIMED_OUT') for check in required):
+            run('gh','pr','close',url,'--delete-branch')
+            raise ValueError('Required gallery acceptance failed; next schedule retries cleanly')
+        time.sleep(5)
+    else:
+        run('gh','pr','close',url,'--delete-branch')
+        raise ValueError('Required gallery acceptance timed out; next schedule retries cleanly')
+    expected={'app':ledger['app'],'marketingVersion':ledger['sourceMarketingVersion']}
+    if gallery.identity()!=expected:
+        run('gh','pr','close',url,'--delete-branch')
+        raise ValueError('Public versions changed while candidate CI ran; retry current source')
+    run('gh','pr','merge',url,'--auto','--merge','--match-head-commit',head)
     deadline=time.monotonic()+900
     while time.monotonic()<deadline:
         state=json.loads(run('gh','pr','view',url,'--json','state,mergeCommit'))
