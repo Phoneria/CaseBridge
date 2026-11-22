@@ -27,3 +27,5 @@ Dokuz ağaç bileşen testi ve TypeScript denetimi geçti. Chromium’da dava se
 FR-013: 11 ağaç bileşen testi geçti. Chromium ile dava sekmesinde ve AI menüsünde gerçek tekerlek girdisiyle yüzde 100 → 125 → 100, işaretçinin altında sabit düğüm, gerçekleşen yol etiketi ve ilgili evraka geçiş doğrulandı. Ayrı bir kapalı dosya testinde celse ve kayıp sonucu, iki alternatiften ayrı kaldı.
 
 FR-014: Yerelde 778 arayüz testi, TypeScript denetimi ve Spec Kit doğrulaması geçti. Chromium ölçümünde her iki girişte kökün merkezden dikey sapması 0 pikseldi. Açık dosyanın 22 düğümü ve 18 farklı geçiş yüzdesi vardı. Yeniden yüklemede oranlar birebir eşleşti.
+
+FR-015: 14 ağaç bileşeni testi geçti. 32,43 → 68,83 → 100 koşullu yüzdelerinde oklar 32,43 → 22,32 → 22,32 gösterdi. Chromium ile her iki girişte 56 okun metni ayrı ayrı hedef kartıyla eşleşti. Seçim, fare ölçeği ve belgeye geçiş doğrulandı.

@@ -31,3 +31,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-013**: Her iki ağaçta tekerlek ve izleme dörtgeni işaretçi çevresinde ölçekler. Tüm dosyalarda olası adımlarda koşullu ve birikimli senaryo yüzdeleri görünür. Kapanışta doğrulanmış geçmiş kalıcı renk ve metin ile ayırt edilir.
 
 - **FR-014**: Açılışta kök görünür alanın dikey merkezindedir. Her dava ağacı en az 20 düğüm sunar. Eksik koşullu oranlara dosya ve dala özgü kararlı rastgele sunum payları verilir. Kardeş payları yüzde 100 eder. Kaynak oranları ve gerçek dosya geçmişi ayrı tutulur.
+
+- **FR-015**: Oklar, düğüm kartları, metin görünümü ve sonraki adım bağlantıları hedefe kökten ulaşma olasılığını gösterir. Seçili düğümün ayrıntısında son koşullu geçiş ayrıca etiketlenir. Kayıtlı geçmişte varsayımsal oran icat edilmez.
