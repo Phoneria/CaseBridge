@@ -16,7 +16,7 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 - **FR-006**: Büroya özgü yükleme tekrar çalıştırılabilir. Temizlik eski sürüm ve kullanıcı eklerini gözetir.
 - **FR-007**: Kurgusal evrak belirgin biçimde işaretlenir. Gerçek emsal kullanılırsa kaynak bağlantısı ayrı tutulur.
 
-- **FR-008**: Her katalog dosyası ilk görüşmeden belgeli sonuca kadar en az beş aşama ve elli anlamlı düğüm sunar. Yalnız katalogda tanımlanan dosyalarda her koşullu geçişin ve o noktaya ulaşmanın varsayımsal yüzdesi görünür. Renkli yollar fare, klavye ve dokunmayla izlenebilir.
+- **FR-008**: Her katalog dosyası ilk görüşmeden belgeli sonuca kadar en az beş aşama ve elli anlamlı düğüm sunar. Katalogda tanımlanan dosyalarda her koşullu geçişin ve o noktaya ulaşmanın varsayımsal yüzdesi görünür. Renkli yollar fare, klavye ve dokunmayla izlenebilir.
 - **FR-009**: Dosyalarda taraflar, tarihli işlemler, görevler ve okunabilir tam genişlikte evrak gösterilir. Gösterim bürosunun ekip, müvekkil, finans ve grafik gereksinimleri todo.md içindeki onaylı listeye uyar.
 - **FR-010**: Büro yöneticisi OpenAI veya Claude API anahtarını kaydeder, ayrı test ve açık etkinleştirmeyle kendi bürosuna bağlar. Sağlayıcı yetkisi gerektiren hesap bağlantıları gizli değer kabul etmez.
 
@@ -25,3 +25,5 @@ Avukat seçtiği örneği ilk görüşmeden kapanışa kadar inceler. Raporda bi
 20 dosyanın tamamında kronoloji, içerik ve gezinme kontrolleri geçer. Her evrak türünün kapsam tablosunda en az bir açılabilir örneği vardır. Tekrar yükleme, temizleme ve bürolar arası erişim testleri geçer.
 
 - **FR-012**: Dava ekranındaki ve ana menüdeki olasılık ağacının ölçeği değiştirilebilir. Seçili düğüm, yüzdeler ve belge bağlantıları korunur.
+
+- **FR-013**: Her iki ağaçta tekerlek ve izleme dörtgeni işaretçi çevresinde ölçekler. Tüm dosyalarda olası adımlarda koşullu ve birikimli senaryo yüzdeleri görünür. Kapanışta doğrulanmış geçmiş kalıcı renk ve metin ile ayırt edilir.

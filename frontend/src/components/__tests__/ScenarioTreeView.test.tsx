@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ScenarioTree, ScenarioNode } from '@/types/scenarioTree';
 import { ApiError } from '@/lib/apiError';
@@ -15,7 +15,7 @@ describe('Scenario tree data boundaries',()=>{
  it('uses the same source in graph/text and displays independent demo weights consistently',async()=>{
   render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');
   expect(screen.getByRole('group',{name:'Dosya senaryo ağacı'})).toBeVisible();await userEvent.click(screen.getByRole('button',{name:'Metin alternatifi'}));
-  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText('Demo tahmini: 50/100').length).toBeGreaterThan(0);expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();expect(screen.queryByText(/%\d/)).not.toBeInTheDocument();
+  expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Belgeler doğrulanırsa');expect(screen.getAllByText('Demo tahmini: 50/100').length).toBeGreaterThan(0);expect(screen.queryByText(/Hesaplanmadı/)).not.toBeInTheDocument();expect(screen.getByRole('region',{name:'Ağacın metin alternatifi'})).toHaveTextContent('Geçiş %100 · Başlangıçtan %100');
  });
  it('announces changed source content without browser persistence',async()=>{
   const storage=vi.spyOn(Storage.prototype,'setItem');render(<ScenarioTreeView/>);await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));await screen.findByText('Koşullu hazırlık yolları');getScenarioTree.mockResolvedValue(tree('c1','b'.repeat(64)));
@@ -86,4 +86,38 @@ it('zooms the graph within limits and retains the selected branch', async () => 
   expect(branch.parentElement).toHaveStyle({transform:'scale(2)'});
   expect(branch).toHaveAttribute('aria-pressed','true');
   expect(getScenarioTree).toHaveBeenCalledTimes(1);
+});
+
+it('zooms at the pointer with the wheel and keeps selection', async () => {
+  render(<ScenarioTreeView fixedCaseId="c1" />);
+  const graph = within(await screen.findByRole('group', {name:'Dosya senaryo ağacı'}));
+  const branch = graph.getByRole('button', {name:/Belgeler doğrulanırsa/});
+  await userEvent.click(branch);
+  fireEvent.wheel(branch, {deltaY:-100, clientX:80, clientY:40});
+  await waitFor(() => expect(graph.getByRole('button', {name:'Ölçek %125, normal boyuta dön'})).toBeVisible());
+  fireEvent.wheel(branch, {deltaY:100, clientX:80, clientY:40});
+  await waitFor(() => expect(graph.getByRole('button', {name:'Ölçek %100, normal boyuta dön'})).toBeVisible());
+  expect(branch).toHaveAttribute('aria-pressed','true');
+});
+
+it('separates recorded history from simulated percentages', async () => {
+  const snapshot = tree();
+  snapshot.case_closed = true;
+  snapshot.nodes.push(node('second','root','İkinci seçenek','scenario'));
+  snapshot.sources.push({id:'event:a', kind:'event', label:'Celse', detail:'Beyan alındı', recorded_at:'2024-03-01'});
+  getScenarioTree.mockResolvedValue(snapshot);
+  getCases.mockResolvedValue([{id:'c1', case_name:'Örnek A', case_number:'A', client_name:'Sentetik',
+    outcome:'lost', closing_note:'Talep reddedildi.', decision_date:'2024-04-01'}]);
+  render(<ScenarioTreeView />);
+  await userEvent.click(await screen.findByRole('button',{name:/Örnek A/}));
+  const graph = within(await screen.findByRole('group', {name:'Dosya senaryo ağacı'}));
+  const outcome = graph.getByRole('button',{name:/Gerçekleşen yol.*Kaybedildi/});
+  expect(graph.getByRole('button',{name:/Gerçekleşen yol.*Celse/})).toBeVisible();
+  await userEvent.click(outcome);
+  expect(screen.getByRole('region',{name:'Seçili dalın dayanakları'})).toHaveTextContent('Talep reddedildi.');
+  const conditional = graph.getByRole('button',{name:/Belgeler doğrulanırsa/});
+  expect(conditional).toHaveTextContent('Geçiş %50 · Başlangıçtan %50');
+  expect(graph.getByRole('button',{name:/Hazırlık gözden geçirilir/})).toHaveTextContent('Geçiş %100 · Başlangıçtan %50');
+  await userEvent.click(conditional);
+  expect(outcome).toHaveTextContent('Gerçekleşen yol');
 });
