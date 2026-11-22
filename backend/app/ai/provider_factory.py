@@ -183,7 +183,18 @@ class _TrackedProvider(LLMProvider):
 
     def complete(self, system_prompt: str, user_prompt: str, *, response_format: Optional[str] = None) -> str:
         self._router._last = self._inner
-        return self._inner.complete(system_prompt, user_prompt, response_format=response_format)
+        if not (settings.anonymize_llm_input and settings.llm_provider in ("qwen", "openai", "anthropic")):
+            return self._inner.complete(system_prompt, user_prompt, response_format=response_format)
+        # Kişisel veriler dış sağlayıcıya gitmeden maskelenir; yanıttaki etiketler geri çevrilir.
+        from app.privacy.anonymizer import anonymize
+
+        detectors = []
+        if settings.anonymize_use_ner:
+            from app.privacy.ner import detect
+
+            detectors.append(detect)
+        res = anonymize(user_prompt, extra_detectors=detectors)
+        return res.restore(self._inner.complete(system_prompt, res.text, response_format=response_format))
 
     @property
     def last_usage(self) -> Optional[dict]:  # type: ignore[override]
