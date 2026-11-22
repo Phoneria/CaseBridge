@@ -332,6 +332,8 @@ def verify(sha, quiet=False, allow_unhardened_baseline=False, scope=None):
         for path, wanted in release['frontend_assets'].items():
             if hashlib.sha256(fetch('https://app.casebridge.com.tr' + path)).hexdigest() != wanted:
                 raise ReleaseError('Served frontend asset mismatch')
+    if scope == 'marketing' and json.loads(fetch('https://app.casebridge.com.tr/api/health')).get('status') != 'ok':
+        raise ReleaseError('Public health check failed during marketing release')
     if scope in ('marketing', 'all'):
         marker = json.loads(fetch('https://casebridge.com.tr/release.json'))
         if marker.get('commit') != sha or marker.get('version') != release['marketing_version']:

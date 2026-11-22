@@ -472,3 +472,8 @@ Main kaynak `1b460a691af375da61e18014733ed0ca0c10b1a5`; restricted stage/canary,
 Header AI erişimi korunacak. Dokuz yetkili AI aracı sidebar’da ayrı başlık altında tek sütun, ilk açılışta genişletilmiş ve ek tıklamasız gösterilecek. Parlak mavi tüm-grup çerçevesi yok; seçili satır/klavye odağı ve platform/restricted sınırları korunacak. Tam admin menüsü 900/768px yüksekliğinde DOM geometriyle doğrulanacak; kısa/mobil/yüksek zoom alanında kaydırma erişimi kalacak. Uygulama v.0.22, tanıtım v.0.46 hazırlanacak; ikisi korumalı PR/main artefaktıyla ve gerçek public doğrulamayla yayımlanacak.
 
 Sol menü yerel kanıt: 15 hedefli test, production build/typecheck geçti. Gerçek tam admin menüsü 20 bağlantı; 1440×900 ve 1280×768 × açık/koyu temada tümü tek bakışta görünür, minimum satır 24px; ilk bağlantı top 69.58px, son bottom 855/723px. 390×844, 320×568 ve 720×384 dar CSS alanında scroll/odak erişimi geçti. 720×384 zoom eşdeğeri dar alan testidir; gerçek browser zoom doğrulaması iddia edilmez. Header dokuz AI bağlantısı korunur. Public app v.0.22 / site v.0.46 doğrulaması henüz bu satırla tamamlanmış sayılmaz.
+
+## Hızlı UI yayını — kullanıcı onaylı
+
+- [x] Arayüz kapsamını seçen testli allowlist ve değişmez ana dal yayın aracına otomatik tetik. Karma ve altyapı değişiklikleri standart akışta kalır.
+- [ ] Zamanlayıcının VPS kurulumu ve gerçek korumalı UI PR'ından otomatik yayın ile canlı kimlik, sağlık ve kalıcı servislerin değişmediğinin doğrulanması.

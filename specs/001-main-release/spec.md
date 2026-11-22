@@ -51,3 +51,5 @@ Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gö
 ## Assumptions
 
 Kapsam todo.md S01–S09 ve constitution ile sınırlıdır. Mevcut yetkiler ve kullanıcı verileri korunur. Otomatik yayın tetikleyicisi seçilmemiştir.
+
+- **FR-009**: After an authorized, protected PR merges to main, detect presentation-only changes automatically; ship the pinned UI artifact using the existing locked release, canary, health, file identity and recovery checks. Default unknown, mixed, backend, deployment and workflow changes to standard release. Non-overlapping PR acceptance, explicit maintainer merge intent and ordinary branch protection remain mandatory. No arbitrary PR head can trigger a production operation.
