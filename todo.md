@@ -524,3 +524,11 @@ All12 public normal-HTML image URL SHA256 values match the current native23captu
 Actual44985580863 SUCCESS:12 fresh native publicapp23 captures with disposable synthetic/mock API,73proxied200requests, no productionAPI forwarding/browser errors. BotPR51→protectedmain da78face86e246b4b9db2e89ca1573269c8f89ca, genuine own-PR CI44985738248 approved automatically with ephemeral token; no storedPAT, fake status or branch bypass. Timer marketing-only transaction13sec; all12 shipped ?v=0.48 SHA/public identities/health and immutable verifier pass, all7container IDs unchanged. Independent36desktop/mobile tab/modal/keyboard flows pass; initial focus matcher transient and diagnostic rerun honestly recorded. App remains23/f625, backend remains21/1b460a6. No new customer/key operation.
 
 Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health checked, capture/publication skipped, no newversion/PR. Standing five-minute polling and app/marketing version-file triggers active; GitHub scheduling may delay. Evidence specs/010-versioned-gallery/verification.md and docs/validation/2026-11-22/gallery48-*.json. Final evidence-only update changes no runtime/version/gallery and requires no policy bootstrap.
+
+## İncelemeye hazırlanan etkileşimli Rehber — v.0.24
+
+- [x] Güncel origin/main c994bb4 üzerinden ayrı dal; oturum header sağ üstünde masaüstü/mobil görünür Rehber, sayfa/sekme/rol bağlamı, konu seçimi, önceki/sonraki/baştan başla/çıkış.
+- [x] Büro Yönetimi 17 bölüm; kritik süre, yedek/doğrulama, toplu devir/teslim teyidi, inceleme/onay, açık müvekkil yayını iş akışları kaynakla doğrulandı. Platform, avukat ve kısıtlı kapsam ayrımı korunur.
+- [x] 23 hedefli frontend testi ve final 5 rehber testi; üretim build/typecheck; 30 gerçek Chromium rol/genişlik/tema senaryosu. Rehber okurken sıfır ağ isteği/yazım/URL-storage değişimi, sayfa hatası/taşma yok. Spec 011 ve docs/validation/2026-11-22/workspace-guide-browser.json.
+- [ ] İnceleme ve korumalı main birleşmesi; bu çalışma PR/In Review aşamasında bırakılır.
+- [ ] Main kaynaklı yayın sonrası public v.0.24 kod/sürüm/health doğrulaması. Canlıya alındı veya yeni müşteriye hazır iddiası yok.

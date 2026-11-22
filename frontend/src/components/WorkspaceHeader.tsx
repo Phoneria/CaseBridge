@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
+import { WorkspaceGuide } from "@/components/WorkspaceGuide";
 import { usePathname } from "next/navigation";
 
 import { GlobalSearch } from "@/components/GlobalSearch";
@@ -68,7 +70,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
         <p className="mt-1 text-sm text-navy-700">{today}</p>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-4">
         {/* Firm workspace widgets: the platform firm has no firm data or pages. */}
         {!user?.is_platform_admin && !user?.workspace_position && (
           <>
@@ -82,6 +84,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
         )}
         <AiNavigation user={user} />
         <UserMenu user={user} />
+        <Suspense fallback={null}><WorkspaceGuide user={user} /></Suspense>
       </div>
     </header>
   );

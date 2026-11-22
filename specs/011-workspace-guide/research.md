@@ -1,0 +1,3 @@
+# Research
+Decision: mevcut ModalFrame ve semantik tema tokenlarını kullan. Rationale: odak geri dönüşü ve klavye döngüsü zaten testli; yeni overlay altyapısı gerekmez. Alternatives: gerçek butonlara tıklatan tur, iş başlatma ve rota değişimi riski nedeniyle seçilmedi.
+Kaynaklar: WorkspaceHeader, Sidebar, AppShell; management/BureauManagementView, RecordEditor, RecordPanel, AccessPanel, ScopedWorkspaceView; lib/management ve AI sayfaları. /platform büro operasyonları değildir. workspace_position her normal rolden önce gelir. Kritik süre doğrulama ve bildirim servisi koşullu; devir hesabı pasifleştirmez; müvekkil açık yayınları görür; anahtar adayı kaydetmek aktivasyon değildir.
