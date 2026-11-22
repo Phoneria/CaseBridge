@@ -152,3 +152,11 @@ class VersionedGalleryTests(unittest.TestCase):
                     self.assertTrue(publisher.runtime_unchanged(baseline))
                     (root/folder).mkdir(exist_ok=True);(root/folder/'new-runtime').write_text('new');git('add','.');git('commit','-qm',folder);git('update-ref','refs/remotes/origin/main',git('rev-parse','HEAD'))
                     self.assertFalse(publisher.runtime_unchanged(baseline))
+
+    def test_capture_runner_is_pinned_to_supported_browser_os(self):
+        # A rolling runner changed to26.04 and Playwright1.56 refused before capture.
+        # Keep the browser+OS compatibility contract explicit until both are reviewed.
+        workflow=(ROOT/'.github/workflows/versioned-gallery.yml').read_text()
+        self.assertIn('runs-on: ubuntu-24.04',workflow)
+        self.assertNotIn('runs-on: ubuntu-latest',workflow)
+        self.assertIn('@playwright/test@1.56.1',workflow)
