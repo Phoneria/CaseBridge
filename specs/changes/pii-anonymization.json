@@ -7,8 +7,8 @@
         "backend/app/privacy/anonymizer.py"
       ],
       "requirements": [
-        "specs/011-pii-anonymization/spec.md#FR-001",
-        "specs/011-pii-anonymization/spec.md#FR-002"
+        "specs/012-pii-anonymization/spec.md#FR-001",
+        "specs/012-pii-anonymization/spec.md#FR-002"
       ],
       "acceptance_tests": [
         "backend/tests/unit/test_anonymizer.py::test_fictional_value_removed",
@@ -23,7 +23,7 @@
         "backend/app/privacy/ner.py"
       ],
       "requirements": [
-        "specs/011-pii-anonymization/spec.md#FR-003"
+        "specs/012-pii-anonymization/spec.md#FR-003"
       ],
       "acceptance_tests": [
         "backend/tests/unit/test_anonymizer.py::test_ner_unavailable_falls_back_silently"
@@ -37,7 +37,7 @@
         "frontend/app-version.json"
       ],
       "requirements": [
-        "specs/011-pii-anonymization/spec.md#FR-004"
+        "specs/012-pii-anonymization/spec.md#FR-004"
       ],
       "acceptance_tests": [
         "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_anonymizes_and_restores",
