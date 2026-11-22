@@ -1,10 +1,6 @@
-import { AppShell } from "@/components/AppShell";
-import { CounterAnalysisView } from "@/components/lab/CounterAnalysisView";
+import { AppShell } from '@/components/AppShell';
+import { HearingWorkspace } from '@/components/ai/HearingWorkspace';
 
-export default function CounterAnalysisPagePage() {
-  return (
-    <AppShell>
-      <CounterAnalysisView />
-    </AppShell>
-  );
+export default function HearingPage() {
+  return <AppShell><HearingWorkspace mode="counter" /></AppShell>;
 }

@@ -36,7 +36,7 @@ describe("Sidebar", () => {
   it("shows every authorized AI tool in the restored expanded blue panel", () => {
     render(<Sidebar role="admin" />);
     const group=screen.getByRole("group", {name:"CaseBridge AI"});
-    expect(within(group).getAllByRole("link")).toHaveLength(9);
+    expect(within(group).getAllByRole("link")).toHaveLength(4);
     for(const item of AI_NAVIGATION) expect(within(group).getByRole("link",{name:item.label})).toHaveAttribute("href",item.href);
     expect(within(group).queryByRole("button")).not.toBeInTheDocument();
     expect(group.querySelector("details")).toBeNull();
@@ -50,12 +50,12 @@ describe("Sidebar", () => {
     expect(screen.getByRole("link", { name: "Genel Bakış" })).toHaveAttribute("aria-current", "page");
   });
 
-  it.each(["/ai", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("marks one matching AI tool on %s", path => {
+  it.each(["/ai/karsi-taraf", "/ai/harita", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("marks one matching AI tool on %s", path => {
     pathname = path; render(<Sidebar />);
     const group=screen.getByRole("group", {name:"CaseBridge AI"});
     const active=group.querySelectorAll('a[aria-current="page"]');
     expect(active).toHaveLength(1);
-    expect(active[0]).toHaveAttribute("href",path.startsWith("/ai/durusma/")?"/ai/durusma":path);
+    expect(active[0]).toHaveAttribute("href",path.startsWith("/ai/durusma/") || path === "/ai/karsi-taraf" ? "/ai/durusma" : path === "/ai/harita" ? "/ai/olasilik" : path);
     expect(screen.queryByRole("button", {name:/AI kontrol/})).not.toBeInTheDocument();
   });
 

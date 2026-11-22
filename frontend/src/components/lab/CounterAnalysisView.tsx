@@ -20,8 +20,9 @@ const STAGE_LABEL: Record<string, string> = {
 
 const STAGE_ORDER = Object.keys(STAGE_LABEL);
 
-export function CounterAnalysisView() {
-  const [ref, setRef] = useState<CaseRef>({});
+export function CounterAnalysisView({ fixedCaseId, initialCaseId, onCaseChange }: { fixedCaseId?: string; initialCaseId?: string | null; onCaseChange?: (id: string | null) => void } = {}) {
+  const [selection, setRef] = useState<CaseRef>({ case_id: initialCaseId });
+  const ref = fixedCaseId ? { case_id: fixedCaseId } : selection;
   const [side, setSide] = useState<"davaci" | "davali">("davaci");
   const [result, setResult] = useState<CounterAnalysis | null>(null);
   const [busy, setBusy] = useState(false);
@@ -50,7 +51,11 @@ export function CounterAnalysisView() {
       />
 
       <AiCard>
-        <CaseSource value={ref} onChange={setRef} />
+        {!fixedCaseId && <CaseSource value={ref} onChange={next => {
+          setRef(next);
+          setResult(null);
+          onCaseChange?.(next.case_id ?? null);
+        }} />}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <div role="group" aria-label="Taraf" className="inline-flex rounded-xl border border-surface-border p-0.5">
             {(["davaci", "davali"] as const).map((s) => (

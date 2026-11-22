@@ -39,7 +39,7 @@ describe("QuickViewAiRow", () => {
     render(<QuickViewAiRow caseId="c1" />);
 
     expect(await screen.findByText("Henüz AI analizi yok")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Analizi başlat" })).toHaveAttribute("href", "/ai/analiz?dava=c1");
+    expect(screen.getByRole("link", { name: "Analizi başlat" })).toHaveAttribute("href", "/davalar/c1?sekme=ai");
   });
 
   it("renders nothing when the request fails", async () => {

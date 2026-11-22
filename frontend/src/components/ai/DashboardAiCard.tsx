@@ -54,9 +54,7 @@ export function DashboardAiCard() {
           <AiMark className="h-4 w-4 text-accent-500" />
           CaseBridge AI
         </p>
-        <Link href={AI_ROUTES.hub} className="text-xs font-medium text-accent-700 hover:text-accent-800">
-          Tümü →
-        </Link>
+
       </div>
 
       <div className="mt-4 grid gap-5 md:grid-cols-3">
@@ -111,11 +109,11 @@ export function DashboardAiCard() {
 
         <div className="flex flex-col gap-2 md:col-start-3">
           <Link
-            href={AI_ROUTES.analysis}
+            href="/davalar"
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-700"
           >
             <AiMark className="h-4 w-4 text-white" />
-            Dosya analizi başlat
+            Analiz için dava seç
           </Link>
           <Link
             href={AI_ROUTES.courtroom}

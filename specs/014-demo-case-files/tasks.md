@@ -23,3 +23,6 @@ FR-001 through FR-007 gereksinimlerinin ilişkileri [data-model.md#featurecontra
 - [x] T017 Her yolu ve hükmü yirmi dava üzerinde doğrula, genel dosyaları ve son sütunun konumunu test et (FR-016).
 - [x] T018 Borca itiraz dosyasında anlaşma ve esas hakkında karar yollarının ayrımını sına (FR-017).
 - [x] T019 Delil ve itiraz aşamalarındaki ek karar yollarını dosya kaynakları, tek kayıtlı kapanış ve birikimli yüzdelerle doğrula (FR-018). 20 dosyanın delil ve itiraz ayrımları, belge bağları, kayıtlı kapanışı, 20–100 düğüm sınırı ve son kararların toplam olasılığı entegrasyon testinde doğrulandı.
+- [x] T020 FR-019 için dosya, ağaç ve PDF takma adlarını, büro sınırını ve göz düğmesinin geri dönüşünü doğrula.
+
+- [x] T021 Büro başlığında göz düğmesinin kaldırıldığını ve mevcut kısayolların çalıştığını doğrula (FR-020).

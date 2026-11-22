@@ -34,7 +34,7 @@ function arrivalLabel(node: ScenarioNode) {
 const recordedColor = '#1e40af';
 const edgeColors = ['#007eac', '#804ca3', '#aa5710'];
 
-function TreeDiagram({ tree, selected, onSelect }: { tree: ScenarioTree; selected: string; onSelect: (id: string) => void }) {
+export function TreeDiagram({ tree, selected, onSelect }: { tree: Pick<ScenarioTree, 'nodes' | 'case_closed' | 'source_mode'>; selected: string; onSelect: (id: string) => void }) {
   const marker = useId().replace(/:/g, '');
   const [hovered, setHovered] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);

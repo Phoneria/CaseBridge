@@ -127,13 +127,12 @@ const commonTopics: GuideTopic[] = [
   ]),
 ];
 const aiTopics = [
-  ['hub','CaseBridge AI','/ai','Dosyanız için uygun yapay zekâ aracını bulun.','İhtiyacınıza göre dosya analizi, asistan, duruşma veya diğer araçlardan birini seçin.'],
-  ['analysis','Dosya Analizi','/ai/analiz','Bir dava dosyasındaki belgelerden analiz hazırlayın.','Dosya ve kullanılacak belgeleri seçin. Analiz başlatmadan önce dosya içeriğinin güncel olduğunu kontrol edin.'],
+  ['analysis','Dosya Analizi','/davalar','Bir dava dosyasındaki belgelerden analiz hazırlayın.','Davayı açın ve CaseBridge AI sekmesinde Dosya Analizi’ni seçin. Analiz başlatmadan önce dosya içeriğinin güncel olduğunu kontrol edin.'],
   ['courtroom','Canlı Duruşma','/ai/durusma','Duruşma öncesinde sözlü veya yazılı savunma provası yapın.','Dosya ve rolünüzle oturumu açın. Yazın veya Konuş ile kayıt başlatıp Kaydı bitir ile gönderin; karşı taraf yanıtını bekleyin. Hakim değerlendirmesi için ayrıca Bitir kullanın.'],
   ['chat','Hukuk Asistanı','/ai/sohbet','Dosyaya ilişkin sorularınızı bağlamı koruyan bir görüşmede inceleyin.','Dosya bağlamını ve sorunuzu belirleyin. Yanıtta dayanakları ve eksik bilgileri kontrol ederek devam sorusu sorun.'],
   ['sufle','Sufle','/ai/sufle','Görüşme sırasında kaynak alıntılarını ve görüşme özetini takip edin.','Gösterim görüşmeleri inceleyin veya görüşme başlatın. Mikrofon iznini kontrol edin; kaynak alıntılı kartları okuyun. Bitir ile son sesin işlenmesini ve özeti bekleyin; gerekiyorsa dışa aktarın. Sayfadan ayrılmak kaydedilmeyen görüşmeyi kaybettirir.'],
   ['counter','Karşı Taraf Analizi','/ai/karsi-taraf','Karşı tarafın ileri sürebileceği argümanları inceleyin.','Dosyayı ve taraf bağlamını seçin; karşı argümanları dayanaklarıyla birlikte inceleyin.'],
-  ['directed','Yönetilen Duruşma','/ai/yonetmen','Bir duruşma senaryosunda karakterleri ve oturumun gidişini yönetin.','Dosya ile sahneyi başlatın. Karakter ve yönlendirme kontrolleriyle aşamaları ilerletin; değerlendirmeyi inceleyin.'],
+  ['directed','Yönetilen Duruşma','/davalar','Bir duruşma senaryosunda karakterleri ve oturumun gidişini yönetin.','Davanın CaseBridge AI sekmesinde Yönetilen Duruşma’yı açıp sahneyi başlatın. Karakter ve yönlendirme kontrolleriyle aşamaları ilerletin; değerlendirmeyi inceleyin.'],
   ['map','Bilgi Haritası','/ai/harita','Kanun ve maddeler arasındaki bağlantıların kaynaklarını keşfedin.','Haritadaki kanun ve madde düğümlerini seçin; bağlantıları ve sunulan kaynak ayrıntılarını inceleyin.'],
   ['scenarios','Olasılık Ağacı','/ai/olasilik','Davanın olası gidişatlarını ve her dalın dayandığı varsayımları inceleyin.','Gösterim dava veya büro dosyasını seçin. Dal seçerek dayanak, koşul, eksik ve çelişen bilgileri okuyun; Metin alternatifi ile ağacı liste halinde inceleyin. Varsayımlar ve destek ağırlığı hukuki kazanma olasılığı değildir.'],
 ].map(([id,title,route,purpose,body]) => topic(`ai-${id}`, title, route, purpose, [

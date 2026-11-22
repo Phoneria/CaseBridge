@@ -37,3 +37,5 @@ CI exposed an existing passive-effect/recording closure race: a fast recording c
 ## Final sidebar follow-up
 
 Shared metadata remains the source for both menus. Compact 24px rows and 13px labels plus smaller logo/spacing meet measured 900/768px full-menu visibility; min-h-0/overflow preserve short/mobile reachability. No group disclosure or bright outline. App v.0.22 / site v.0.46 public verification complete; see verification.md.
+
+FR-008: Mevcut duruşma ve harita sayfalarının her çiftine ortak alt gezinme ekle. Dosya seçimi gerektiren eski URL'leri dava detayına veya dava listesine yönlendir. Dava araçlarını seçili dosya ve URL üzerinden aç; oturum başlatmak kullanıcı eylemi gerektirir.

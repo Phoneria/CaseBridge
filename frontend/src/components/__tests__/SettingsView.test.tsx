@@ -206,7 +206,7 @@ it("shows per-area presentation coverage even when only missing modules were add
   expect(await screen.findByText("80 kayıt eklendi; gösterim verileri hazır.")).toHaveAttribute("role", "status");
   expect(screen.getByText("Büroda gösterime hazır veriler")).toBeInTheDocument();
   expect(screen.getByText("Büro iş akışları")).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "AI araçlarına git →" })).toHaveAttribute("href", "/ai");
+  expect(screen.queryByRole("link", { name: "AI araçlarına git →" })).not.toBeInTheDocument();
 });
 
 
