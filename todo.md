@@ -529,4 +529,4 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 
 - [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
 - [x] İzzet: iş geliştirme ve iş ortaklıkları; Emin: yapay zekâ ve veri. Bengü: mevcut belgelenmiş ekosistem ilişkileri katkısı; yatırım ifadesi eklenmez. Hatice ve Ahmet'in ilgili içerikleri korunur.
-- [ ] Hedefli kabul ve JS açık/kapalı masaüstü/mobil görünüm; ayrı protected PR, marketing sürümü, normal public URL/kod/sürüm/health doğrulaması. Rehber işiyle birleştirilmez; yeni müşteri teslimi yoktur.
+- [x] Hedefli kabul ve altı JS açık/kapalı masaüstü/mobil görünüm geçti. Ayrı protected PR #56 → main444c520; mevcut timer marketing v.0.49 yayımladı. Normal public ekip metni ve HTML SHA256 kaynakla aynı, release.json49/444c520 ve restricted verify/health ok. Rehber işiyle birleştirilmedi; yeni müşteri teslimi/anahtar işlemi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/team-*.json.
