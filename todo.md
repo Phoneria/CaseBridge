@@ -577,4 +577,4 @@ Birleşik yayın kaydı ve geri dönüş provası [v.0.26 doğrulamasında](spec
 
 - [x] Sağ üstteki Rehber, ilgili konuyu /rehber sayfasında açar. Her konuda amaç, menü konumu, ayrıntılı adımlar ve ekran bağlantısı bulunur.
 - [x] Davalar, Görevler, Raporlar, Admin Paneli ve Hesabım turları ekrandaki kontrolü vurgular. 771 arayüz testi, 34 sentetik Chromium senaryosu, üretim derlemesi ve Spec Kit kontrolleri geçti.
-- [ ] Korumalı main birleşmesi ve canlı yayın doğrulaması. İnceleme [PR 65](https://github.com/Phoneria/CaseBridge/pull/65) üzerinden yürütülür.
+- [x] [PR 65](https://github.com/Phoneria/CaseBridge/pull/65) korumalı main dalında birleşti. v.0.27 ve 57 arayüz dosyası canlıda doğrulandı. Açık üretim oturumunda Raporlar turu, yalıtılmış verilerle beş turun toplam 34 tarayıcı kontrolü geçti. [Yayın kaydı](specs/011-workspace-guide/verification.md#production-release-v027)
