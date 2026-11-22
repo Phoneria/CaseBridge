@@ -33,7 +33,8 @@
     {
       "files": [
         "backend/app/ai/provider_factory.py",
-        "backend/app/core/config.py"
+        "backend/app/core/config.py",
+        "frontend/app-version.json"
       ],
       "requirements": [
         "specs/011-pii-anonymization/spec.md#FR-004"
@@ -43,7 +44,7 @@
         "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_off_by_default",
         "backend/tests/unit/test_anonymizer.py::test_restore_roundtrip"
       ],
-      "reason": "Opt-in masking of prompts sent to external LLM providers with response restoration; off by default."
+      "reason": "Opt-in masking of prompts sent to external LLM providers with response restoration; off by default. Application version manifest is bumped because backend source changed."
     }
   ]
 }
