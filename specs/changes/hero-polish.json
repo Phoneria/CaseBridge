@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": ["web-page/index.html", "web-page/story3d.css", "web-page/story3d.js", "web-page/website-version.json"],
+      "requirements": ["specs/016-3d-story-homepage/spec.md#FR-006"],
+      "acceptance_tests": ["scripts/tests/test_story_3d.py::Story3DHomepage.test_hero_feedback_headspace_document_text_and_slower_morph"],
+      "reason": "Team feedback: header/headline headspace, readable fictional page text, slower labelled page-to-node morph; marketing-only v.0.57."
+    }
+  ]
+}

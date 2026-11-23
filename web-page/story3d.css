@@ -55,8 +55,8 @@ main a, main button, main details, main summary, main .copy, main .team-surface,
 
 /* chapters */
 .chapter { position: relative; height: 270vh; }
-.chapter-hero { height: 210vh; }
-.chapter-inner { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+.chapter-hero { height: 320vh; }
+.chapter-inner { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding-top: 84px; padding-bottom: 24px; }
 .copy { width: min(470px, 100%); padding: 30px 32px; border-radius: 22px; background: linear-gradient(160deg, rgba(13,29,46,.78), rgba(8,19,31,.62)); border: 1px solid var(--line); backdrop-filter: blur(10px); box-shadow: 0 30px 80px rgba(0,0,0,.35); position: relative; }
 .copy::before { content: ""; position: absolute; left: -1px; top: 26px; bottom: 26px; width: 2px; border-radius: 2px; background: linear-gradient(var(--teal) calc(var(--p, 0) * 100%), rgba(238,232,217,.12) 0); }
 .hero-copy { width: min(600px, 100%); background: none; border: 0; box-shadow: none; backdrop-filter: none; padding: 0; }
@@ -64,7 +64,7 @@ main a, main button, main details, main summary, main .copy, main .team-surface,
 .kicker { margin: 0 0 14px; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: var(--teal); display: flex; gap: 10px; align-items: center; }
 .kicker span { color: var(--amber); font-variant-numeric: tabular-nums; }
 h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.02em; line-height: 1.08; margin: 0 0 18px; }
-h1 { font-size: clamp(44px, 6.4vw, 86px); }
+h1 { font-size: clamp(40px, min(6vw, 10vh), 82px); }
 h1 em { font-style: italic; color: var(--teal); }
 h2 { font-size: clamp(30px, 3.2vw, 44px); }
 .lead { color: #d4dbe2; margin: 0 0 22px; font-size: 17px; }
@@ -155,7 +155,7 @@ h2 { font-size: clamp(30px, 3.2vw, 44px); }
 }
 @media (max-width: 900px) {
   .chapter { height: 240vh; }
-  .chapter-hero { height: 190vh; }
+  .chapter-hero { height: 280vh; }
   .chapter-inner { align-items: flex-end; padding-bottom: 18px; }
   .chapter-hero .chapter-inner { align-items: flex-end; padding-bottom: 40px; }
   .copy { width: 100%; padding: 20px 20px; border-radius: 18px; background: rgba(8,19,31,.86); }
