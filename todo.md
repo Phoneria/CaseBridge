@@ -602,6 +602,8 @@ Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Pub
 
 - Mevcut anonimleştirme motoruna büro oturumuyla erişilen, kayıt tutmayan metin maskeleme API’si ve sidebar bağlantılı ekran eklendi. Metin yapıştırma, maskeleme, kategori özeti, kopyalama ve temizleme desteklenir. Platform/kısıtlı hesap sınırları korunur; global AI maskeleme ayarı değiştirilmez.
 - 791 frontend testi, üretim build/type kontrolü, 20 release testi ve Spec Kit governance geçti. Odaklı backend: 46 geçti, NER modeli yokluğu nedeniyle 1 atlandı ve 1 beklenen başarısızlık kaldı. Gerçek oturumla iki büro/rol erişimi ve kısıtlı erişim reddi doğrulandı. Sentetik Chromium masaüstü/mobil maskeleme, kopyalama, temizleme ve sidebar kontrolleri geçti; görseller incelendi.
-- [ ] Tam backend/CI sonuçları ve main commit kaydı.
-- [ ] Main kaynaklı değişmez artefakt yayını; public v.0.43/kod/health ve geri dönüş kaydı doğrulaması.
+- [x] Tam backend/CI sonuçları ve main commit kaydı: GitHub CI 45120054103 başarılı (normal maliyetle 1.168 backend geçti, 1 atlandı, 1 beklenen başarısızlık); 791 frontend geçti. PR #85 main commit b8699b9542ca0db07679e288ea737804eaa41503 olarak birleştirildi; test edilen dal ile dosya ağacı aynı.
+- [x] Main kaynaklı değişmez artefakt b8699b9542ca0db07679e288ea737804eaa41503 uygulama kapsamıyla yayımlandı. Stage/canary/activate/verify geçti; public v.0.43, yeni ekran/API kodu, aynı commit’i gösteren health (ok) ve sentetik public masaüstü/mobil akışlar doğrulandı. Geri dönüş kaynağı b60e7e47e65cdfd511f69f3b55e8292f09e3a30a korunuyor.
 - Gerçek müşteri verisi/anahtar kullanılmadı; ek müşteri onboarding yapılmadı. Ayrıntılar specs/012-pii-anonymization/verification.md içindedir.
+
+- Yayın sonrası yapılandırma ve şifreli anahtar dosyaları korumalı `/var/backups/casebridge-anonymization-v043-20261123T055238Z` yedeğiyle byte bazında aynı; arşiv bütünlüğü geçti. Gerçek anahtar işlemi, şema değişikliği veya global AI ayarı değişikliği yapılmadı. Public tarayıcı testi tüm API çağrılarını sentetik karşılıklarla yalıttı; canlı müşteri oturumuyla test iddiası yok. Yeni backend imajı ayrıca ağsız/salt okunur sentetik testten geçti.
