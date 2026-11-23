@@ -114,9 +114,14 @@ class Story3DHomepage(unittest.TestCase):
         source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
         for marker in ['MAX_PROGRESS_PER_S = 0.55', 'SCROLL_DAMP = 4.5', 'if (ch._sp === undefined || reduceMotion) ch._sp = p;', 'cp = ch._sp']:
             self.assertIn(marker, source)
-        for blocker in ['preventDefault', "addEventListener('wheel'", 'overflow: hidden']:
-            self.assertNotIn(blocker, source)
 
+    def test_wheel_speed_is_capped_inside_story_only(self):
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        for marker in ['MAX_SCROLL_VH_PER_S = 1.1', 'MAX_QUEUED_VH = 1.2', "if (reduceMotion || e.ctrlKey || e.metaKey", 'if (from >= storyEnd() && dy > 0) return;',
+                       "addEventListener('keydown', () => { wheelDriving = false;", '{ passive: false }']:
+            self.assertIn(marker, source)
+        self.assertNotIn("addEventListener('touchmove'", source)
+        self.assertNotIn('overflow: hidden', (SITE / 'story3d.css').read_text().split('/* real application tree snapshot */')[0].split('.wordmark-line')[0])
 
 if __name__ == '__main__':
     unittest.main()
