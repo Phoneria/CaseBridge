@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class TeamRolesAcceptance(unittest.TestCase):
     def test_five_members_have_nonconflicting_roles_and_public_professional_bios(self):
-        source = (ROOT/'web-page/team.html').read_text()
+        source = (ROOT/'web-page/index.html').read_text()
         team = re.search(r'<section[^>]*id="team"[^>]*>(.*?)</section>', source, re.S)[1]
         cards = re.findall(r'<article class="team-person">(.*?)</article>', team, re.S)
         expected = [('İzzet Ahmet', 'İş geliştirme ve iş ortaklıkları'), ('Emin Merden', 'Yapay zekâ ve veri'), ('Hatice Çam', 'Yazılım altyapısı ve sistem mimarisi'), ('Bengü Özbek', 'Ekosistem ilişkileri'), ('Ahmet Büyükdağ', 'Hukuki içerik ve ürün danışmanlığı')]
@@ -24,5 +24,5 @@ class TeamRolesAcceptance(unittest.TestCase):
         self.assertNotRegex(team.lower(),r'mailto:|tel:|@|\.pdf|yatırım')
         self.assertIn('Veritabanları, veri akışları ve uygulama altyapısı',cards[2])
         self.assertIn('hukuki senaryolar, analiz çerçevesi',cards[4])
-        self.assertIn('href="team.html"',(ROOT/'web-page/index.html').read_text())
+        self.assertIn('href="#team"',source)
         self.assertNotRegex(source,r'<script[^>]+src="(?:team-profiles|i18n[^"/]*).*?"')
