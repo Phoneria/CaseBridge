@@ -25,9 +25,12 @@ const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
 const listClients = vi.fn();
 const createClient = vi.fn();
+const getSimilarPrecedents = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getSimilarCases: () => Promise.resolve([]),
+  getSimilarPrecedents: (...args: unknown[]) => getSimilarPrecedents(...args),
+  setPrecedentLink: vi.fn(),
   getPrecedents: (...args: unknown[]) => getPrecedents(...args),
   getScenarioTree: (...args: unknown[]) => getScenarioTree(...args),
   getCase: (...args: unknown[]) => getCase(...args),
@@ -104,6 +107,20 @@ afterEach(() => {
 });
 
 describe("CaseDetailView", () => {
+  it("opens the Benzer Davalar sidebar for the current case and closes it with Escape", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getSimilarPrecedents.mockReset().mockResolvedValue([]);
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "Benzer Davalar" }));
+    expect(screen.getByRole("dialog", { name: "Benzer Davalar" })).toBeVisible();
+    expect(getSimilarPrecedents).toHaveBeenCalledWith("c1", 8);
+    expect(await screen.findByText("Benzer emsal bulunamadı.")).toBeVisible();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "Benzer Davalar" })).toBeNull();
+  });
+
   it("opens precedents and the interactive tree for the current case", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);

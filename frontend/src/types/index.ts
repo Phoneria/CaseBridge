@@ -804,3 +804,36 @@ export interface SimilarCase {
   score: number;
   reasons: string[];
 }
+
+export interface TextHighlight {
+  start: number;
+  end: number;
+}
+
+export interface PassagePair {
+  case_label: string;
+  case_text: string;
+  case_highlights: TextHighlight[];
+  precedent_label: string;
+  precedent_text: string;
+  precedent_highlights: TextHighlight[];
+}
+
+export interface SimilarPrecedent {
+  precedent_id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  court: string | null;
+  outcome: CaseOutcome;
+  decision_date: string | null;
+  score: number;
+  text_score: number;
+  linked_to_case: boolean;
+  explanation: {
+    shared_terms: string[];
+    shared_statutes: string[];
+    matching_fields: string[];
+    passages: PassagePair[];
+  };
+}

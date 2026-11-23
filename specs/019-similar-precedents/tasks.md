@@ -1,0 +1,12 @@
+# Tasks
+- [x] T001 Map Case, Document, precedent routes and link rules (data-model.md#featurecontract).
+- [x] T002 Similarity service: normalisation, suffix trimming, statute references, court match, hybrid score (FR-003, FR-004, FR-005, FR-006).
+- [x] T003 Extractive explanation: terms, statutes, matching fields, passage pairs with highlights (FR-007, FR-008).
+- [x] T004 Per-bureau cache keyed by precedent and document stamps (FR-009).
+- [x] T005 Endpoint with existing tenant/read dependencies (FR-001, FR-002).
+- [x] T006 Backend and component tests covering FR-001 through FR-010: ranking, precedents only, document text, anti-hallucination, bureau isolation, access, link flag, cache, normalisation, references, court match.
+- [x] T007 Sidebar component and case-detail button (FR-010) with component tests.
+- [x] T008 Bump application version to v.0.49; check-specs and check-spec-changes.
+- [x] T009 Browser check against a local demo backend with synthetic precedents (verification.md).
+- [x] T010 PostgreSQL run of the similarity tests (verification.md; full suite on PostgreSQL not run).
+- [ ] T011 Standard application release and public verification (not part of this branch).

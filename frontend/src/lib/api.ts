@@ -25,6 +25,7 @@ import type {
   CaseStatus,
   CaseType,
   SimilarCase,
+  SimilarPrecedent,
   DocumentItem,
   HandoverReport,
   ReportKind,
@@ -357,6 +358,10 @@ export function setPrecedentLink(caseId: string, precedentId: string, linked: bo
 
 export async function getSimilarCases(caseId: string, limit = 5): Promise<SimilarCase[]> {
   return request(`/cases/${encodeURIComponent(caseId)}/similar?limit=${limit}`);
+}
+
+export async function getSimilarPrecedents(caseId: string, limit = 5): Promise<SimilarPrecedent[]> {
+  return request(`/cases/${encodeURIComponent(caseId)}/similar-precedents?limit=${limit}`);
 }
 
 export async function searchSimilarCases(text: string, caseType?: CaseType | null, limit = 5): Promise<SimilarCase[]> {

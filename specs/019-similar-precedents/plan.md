@@ -1,0 +1,5 @@
+# Plan
+- Backend: `app/services/similarity_service.py` (normalisation and suffix trimming, statute/Yargıtay reference extraction, court match, per-bureau precedent corpus with stamp + TTL cache, hybrid score, extractive explanation with passage pairs), new response models in `app/schemas/similar_case.py`, `GET /cases/{id}/similar-precedents` in `app/api/routes/similar_cases.py` (existing `cases_router`, so no `main.py` change). Reuses `turkish_lower`, `fold`, `STOPWORDS`, `GENERIC_STEMS`, `court_type`, `CASE_TYPE_LABELS` from `similar_cases.py`.
+- Frontend: `SimilarPrecedent` types, `getSimilarPrecedents`, `components/similar/SimilarPrecedentsSidebar.tsx`, button + sidebar in `CaseDetailView.tsx`. Link toggling reuses `setPrecedentLink` and the existing `PUT/DELETE /cases/{id}/precedents/{pid}` rules.
+- No migration, no new dependency, no AI call. SQL uses only filters, `count`, `max` and a join, so SQLite and PostgreSQL behave the same.
+- Version: `node scripts/update-version.mjs` → 0.49.

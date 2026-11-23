@@ -28,3 +28,38 @@ class SimilarCaseSearch(BaseModel):
     text: SearchText
     case_type: Optional[CaseType] = None
     limit: int = Field(default=5, ge=1, le=20)
+
+
+class HighlightOut(BaseModel):
+    start: int = Field(ge=0)
+    end: int = Field(ge=0)
+
+
+class PassagePairOut(BaseModel):
+    case_label: str
+    case_text: str
+    case_highlights: list[HighlightOut]
+    precedent_label: str
+    precedent_text: str
+    precedent_highlights: list[HighlightOut]
+
+
+class SimilarityExplanationOut(BaseModel):
+    shared_terms: list[str]
+    shared_statutes: list[str]
+    matching_fields: list[str]
+    passages: list[PassagePairOut]
+
+
+class SimilarPrecedentOut(BaseModel):
+    precedent_id: str
+    case_number: str
+    case_name: str
+    case_type: CaseType
+    court: Optional[str] = None
+    outcome: CaseOutcome
+    decision_date: Optional[date] = None
+    score: int = Field(ge=0, le=100)
+    text_score: int = Field(ge=0, le=100)
+    linked_to_case: bool = False
+    explanation: SimilarityExplanationOut
