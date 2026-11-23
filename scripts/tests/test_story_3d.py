@@ -117,7 +117,7 @@ class Story3DHomepage(unittest.TestCase):
 
     def test_wheel_speed_is_capped_inside_story_only(self):
         source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
-        for marker in ['MAX_SCROLL_VH_PER_S = 1.1', 'MAX_QUEUED_VH = 1.2', "if (reduceMotion || e.ctrlKey || e.metaKey", 'if (from >= storyEnd() && dy > 0) return;',
+        for marker in ['MAX_SCROLL_VH_PER_S = 1.1', 'MAX_QUEUED_VH = 1.2', "if (reduceMotion || e.ctrlKey || e.metaKey", 'if (from >= storyEnd() && dy > 0) return release();',
                        "addEventListener('keydown', () => { wheelDriving = false;", '{ passive: false }']:
             self.assertIn(marker, source)
         self.assertNotIn("addEventListener('touchmove'", source)
