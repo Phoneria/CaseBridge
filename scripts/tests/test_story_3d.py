@@ -123,5 +123,12 @@ class Story3DHomepage(unittest.TestCase):
         self.assertNotIn("addEventListener('touchmove'", source)
         self.assertNotIn('overflow: hidden', (SITE / 'story3d.css').read_text().split('/* real application tree snapshot */')[0].split('.wordmark-line')[0])
 
+    def test_native_scroll_below_story_is_not_pulled_back(self):
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        self.assertIn('const release = () => { wheelDriving = false; wheelTarget = scrollY; };', source)
+        self.assertIn('if (from >= storyEnd() && dy > 0) return release();', source)
+        self.assertIn('return release();', source.split('if (scrollY > storyEnd() + innerHeight * 0.25 && dy < 0)')[1][:20])
+
+
 if __name__ == '__main__':
     unittest.main()
