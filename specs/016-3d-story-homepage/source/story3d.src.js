@@ -747,6 +747,40 @@ function resize() {
 addEventListener('resize', resize);
 resize();
 
+/* ---------- wheel speed limit inside the story ----------
+   Wheel and trackpad input inside the six story chapters is applied at a capped speed so
+   every transition is seen. Keyboard, scrollbar, anchor links and touch stay native; zoom
+   gestures and reduced-motion users are never intercepted; team, FAQ and footer scroll normally. */
+const MAX_SCROLL_VH_PER_S = 1.1;   // at most ~1.1 screen heights per second
+const MAX_QUEUED_VH = 1.2;         // a hard fling queues at most ~1.2 screens of travel
+let wheelTarget = scrollY; let selfScroll = false; let lastWheelFrame = performance.now(); let lastWheelEvent = 0; let wheelDriving = false;
+const storyEnd = () => { const ch = chapters[chapters.length - 1]; return ch.offsetTop + ch.offsetHeight - innerHeight * 0.5; };
+addEventListener('wheel', (e) => {
+  if (reduceMotion || e.ctrlKey || e.metaKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  if (e.target.closest && e.target.closest('#lease-view, .bureau-tip')) return;
+  const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
+  const from = Math.abs(wheelTarget - scrollY) > 2 ? wheelTarget : scrollY;
+  if (from >= storyEnd() && dy > 0) return;
+  if (from > storyEnd() + innerHeight && dy < 0) return;
+  e.preventDefault(); lastWheelEvent = performance.now(); wheelDriving = true;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  wheelTarget = clamp(from + dy, Math.max(0, scrollY - innerHeight * MAX_QUEUED_VH), Math.min(max, scrollY + innerHeight * MAX_QUEUED_VH));
+}, { passive: false });
+// any scroll we did not cause (keyboard, scrollbar, anchor link) becomes the new resting point
+addEventListener('scroll', () => { if (selfScroll) { selfScroll = false; return; } if (!wheelDriving) wheelTarget = scrollY; }, { passive: true });
+addEventListener('keydown', () => { wheelDriving = false; wheelTarget = scrollY; });
+addEventListener('pointerdown', () => { wheelDriving = false; wheelTarget = scrollY; });
+(function wheelLoop(now) {
+  const dt = Math.min((now - lastWheelFrame) / 1000, 0.05); lastWheelFrame = now;
+  const d = wheelTarget - scrollY;
+  if (wheelDriving && Math.abs(d) <= 0.5) wheelDriving = false;
+  if (wheelDriving) {
+    const step = Math.sign(d) * Math.min(Math.abs(d) * Math.min(1, dt * 7), innerHeight * MAX_SCROLL_VH_PER_S * dt);
+    selfScroll = true; window.scrollTo({ top: scrollY + step, behavior: 'instant' });
+  }
+  requestAnimationFrame(wheelLoop);
+})(performance.now());
+
 const SCROLL_DAMP = 4.5; // how quickly the scene catches up with the scroll position
 const MAX_PROGRESS_PER_S = 0.55; // a full chapter animation never plays faster than ~1.8 s
 let last = performance.now();
