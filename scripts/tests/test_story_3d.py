@@ -81,5 +81,15 @@ class Story3DHomepage(unittest.TestCase):
         self.assertTrue((ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').is_file())
 
 
+    def test_hero_feedback_headspace_document_text_and_slower_morph(self):
+        css = (SITE / 'story3d.css').read_text()
+        self.assertIn('padding-top: 84px', css)
+        self.assertIn('.chapter-hero { height: 320vh; }', css)
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        for marker in ['PAGE_BODY', "'GEREKÇELİ KARAR'", 'Kurgusal örnek', 'node.userData.tag = tag']:
+            self.assertIn(marker, source)
+        self.assertIn('Kurgusal', (SITE / 'story3d.js').read_text())
+
+
 if __name__ == '__main__':
     unittest.main()

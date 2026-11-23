@@ -78,16 +78,42 @@ function fadeGroup(group, f) {
     });
   });
 }
-function pageTexture(lines, { seed = 1 } = {}) {
+const PAGE_BODY = {
+  'DAVA DOSYASI': 'Dosya: 2025/142 Esas. Konu: kira bedelinin tespiti. Taraflar, vekiller, süreler ve deliller bu dosyada toplanır.',
+  'DİLEKÇE': 'Davacı vekili olarak, müvekkil ile davalı arasındaki kira ilişkisine dair beyanlarımızı sunarız. Kira bedeli emsallerin altında kalmış olup tespiti talep olunur.',
+  'CEVAP': 'Davalı vekili, kira bedelinin taraflarca serbestçe belirlendiğini, emsal kira iddialarının somut delile dayanmadığını beyan etmiştir.',
+  'BİLİRKİŞİ RAPORU': 'İnceleme konusu taşınmazın konumu, yaşı ve emsal kiralar dikkate alınarak aylık kira bedeli değerlendirilmiştir.',
+  'TUTANAK': 'Taraf vekilleri hazır. Bilirkişi raporu okundu. Davacı vekili rapora itiraz için süre talep etti. Duruşma ertelendi.',
+  'DELİL LİSTESİ': '1. Kira sözleşmesi 2. İhtarname 3. Banka dekontları 4. Emsal kira ilanları 5. Bilirkişi incelemesi 6. Tanık beyanları',
+  'ARA KARAR': 'Dosyanın bilirkişiye tevdiine, taraflara rapora itiraz için iki haftalık kesin süre verilmesine karar verildi.',
+  'GEREKÇELİ KARAR': 'Toplanan deliller ve bilirkişi raporu birlikte değerlendirildiğinde davacının talebinin yerinde olmadığı anlaşılmıştır.',
+  'İSTİNAF': 'İlk derece mahkemesi kararına karşı süresinde istinaf yoluna başvurulmuş olup kararın kaldırılması talep edilmektedir.',
+  'NOTLAR': 'Müvekkil görüşmesi: sözleşme aslı istenecek. Emsal kira için üç ilan daha bulunmalı. Süreleri takvime işle.',
+  'TEBLİGAT': 'Dava dilekçesi ve duruşma günü davalı tarafa usulüne uygun olarak tebliğ edilmiştir.',
+  'EMSAL': 'Benzer nitelikteki kira tespit dosyalarında emsal kira bedelleri ve endeks oranları birlikte dikkate alınmıştır.',
+  'MÜVEKKİL NOTU': 'Ev sahibi kirayı birden çok artırmak istiyor. Geçen yıl da artış yapılmıştı. Sözleşme evde olabilir.',
+  'SÜRE TAKVİMİ': 'Rapora itiraz: 2 hafta. Duruşma: 14.03. İstinaf süresi: tebliğden itibaren 2 hafta. Hatırlatmalar açık.',
+};
+function pageTexture(title, { seed = 1 } = {}) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 704;
   const x = c.getContext('2d');
   x.fillStyle = '#eee8d9'; x.fillRect(0, 0, 512, 704);
-  x.fillStyle = '#16304d'; x.font = `700 30px ${FONT}`; x.fillText(lines, 46, 78);
-  let s = seed;
-  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  x.fillStyle = 'rgba(22,48,77,.38)';
-  for (let i = 0; i < 17; i++) x.fillRect(46, 130 + i * 31, 300 + rnd() * 120, 9);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  x.fillStyle = 'rgba(22,48,77,.55)'; x.font = `600 15px ${FONT}`;
+  x.fillText('T.C. ANKARA 9. SULH HUKUK MAHKEMESİ', 46, 52);
+  x.fillText(`Esas No: 2025/${100 + seed * 7}   ·   Kurgusal örnek`, 46, 74);
+  x.fillStyle = '#16304d'; x.font = `800 30px ${FONT}`; x.fillText(title, 46, 124);
+  x.fillStyle = '#7a8a9a'; x.fillRect(46, 140, 420, 2);
+  x.fillStyle = '#26384c'; x.font = `500 19px ${FONT}`;
+  const words = (PAGE_BODY[title] || '').split(' ');
+  let line = ''; let y = 182;
+  const flush = () => { x.fillText(line.trim(), 46, y); y += 30; line = ''; };
+  for (const w of words) { if (x.measureText(line + w).width > 420) flush(); line += w + ' '; }
+  if (line) flush();
+  let s = seed; const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  x.fillStyle = 'rgba(22,48,77,.22)';
+  for (y += 14; y < 620; y += 28) x.fillRect(46, y - 8, 300 + rnd() * 120, 8);
+  x.fillStyle = 'rgba(22,48,77,.55)'; x.font = `italic 500 16px ${FONT}`; x.fillText('Av. — imza', 340, 668);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 }
 
 await Promise.race([
@@ -142,6 +168,8 @@ scenes[0] = (() => {
     g.add(p); pages.push(p);
     const node = glowSphere(0.09 + (i % 3) * 0.03, i % 4 === 0 ? C.amber : C.teal, 1.1);
     node.position.copy(p.userData.end); node.userData.alpha = 1; g.add(node); nodes.push(node);
+    const tag = labelSprite(t, { size: 20, weight: 700, color: i % 4 === 0 ? '#edb45d' : '#bfeee7', height: 0.17 });
+    tag.position.copy(p.userData.end).add(new THREE.Vector3(0, 0.3, 0)); g.add(tag); node.userData.tag = tag;
     net.push(p.userData.end);
   });
   const lp = [];
@@ -153,21 +181,27 @@ scenes[0] = (() => {
     group: outer, fit: [3.3, 2.6],
     camera: { pos: [0, 1.2, 8.4], look: [0, 0, 0] },
     update(p, t, pointer) {
-      const open = seg(p, 0.05, 0.6); const morph = seg(p, 0.5, 0.95);
+      const open = seg(p, 0.03, 0.42); const morph = seg(p, 0.45, 0.92);
       g.rotation.y = (reduceMotion ? -0.35 : Math.sin(t * 0.25) * 0.25 - 0.35) + pointer.x * 0.25 + open * 0.6;
       g.rotation.x = lerp(0.95, 0.25, open) + pointer.y * 0.12;
       g.rotation.z = lerp(-0.12, 0, open);
-      outer.position.x = innerWidth > 900 ? open * 1.1 : 0;
-      folder.userData.alpha = 1 - morph; tab.userData.alpha = 1 - morph;
+      outer.position.x = innerWidth > 900 ? open * 1.4 : 0;
+      folder.userData.alpha = 1 - seg(morph, 0, 0.4); tab.userData.alpha = folder.userData.alpha;
       pages.forEach((pg, i) => {
         const d = pg.userData; const k = seg(open, i / n * 0.4, 0.6 + i / n * 0.4);
+        // each page turns into its node one after another
+        const m = seg(morph, (i / n) * 0.55, (i / n) * 0.55 + 0.45);
         pg.position.lerpVectors(d.start, d.end, k);
-        pg.rotation.set(d.rot * k, d.rot * 0.6 * k + (reduceMotion ? 0 : Math.sin(t + i) * 0.04 * k), d.rot * 0.4 * k);
-        const s = lerp(1, 0.04, morph); pg.scale.set(s, 1, s);
-        pg.userData.alpha = 1 - morph * 0.9;
+        pg.rotation.set(d.rot * k * (1 - m), (d.rot * 0.6 * k + (reduceMotion ? 0 : Math.sin(t + i) * 0.04 * k)) * (1 - m), d.rot * 0.4 * k * (1 - m));
+        const sc = lerp(1, 0.5, k) * lerp(1, 0.08, ease(m)); pg.scale.set(sc, 1, sc);
+        pg.userData.alpha = 1 - seg(m, 0.55, 1);
+        const nd = nodes[i]; const pop = seg(m, 0.35, 0.85);
+        nd.userData.alpha = pop;
+        const flash = Math.sin(Math.PI * seg(m, 0.35, 0.75)) * 0.9;
+        nd.scale.setScalar(0.25 + pop * (0.85 + (reduceMotion ? 0 : Math.sin(t * 2 + i) * 0.12)) + flash);
+        nd.userData.tag.userData.alpha = seg(m, 0.7, 1);
       });
-      nodes.forEach((nd, i) => { nd.userData.alpha = morph; nd.scale.setScalar(0.4 + morph * (0.8 + (reduceMotion ? 0 : Math.sin(t * 2 + i) * 0.15))); });
-      lines.userData.alpha = morph;
+      lines.userData.alpha = seg(morph, 0.55, 1) * 0.9;
     },
   };
 })();
@@ -602,7 +636,7 @@ function frame() {
   document.documentElement.classList.toggle('stage-off', current < 0);
   if (current < 0) { renderer.clear(); return; }
   if (current !== active) { prevActive = active; active = current; switchAt = elapsed; fade = 0; }
-  fade = reduceMotion ? 1 : clamp(fade + dt * 2.2);
+  fade = reduceMotion ? 1 : clamp(fade + dt * 1.3);
   scenes.forEach((s, i) => { s.group.visible = i === active; });
   const s = scenes[active];
   s.update(cp, elapsed, pointer);
