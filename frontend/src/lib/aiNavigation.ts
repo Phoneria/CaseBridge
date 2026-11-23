@@ -12,6 +12,7 @@ export const AI_PAIRS = {
 } as const;
 
 export const AI_NAVIGATION = [
+  { label: 'Anonimleştirme', href: AI_ROUTES.anonymize },
   { label: 'Sufle', href: AI_ROUTES.sufle },
   { label: 'Canlı Duruşma ve Karşı Taraf Analizi', href: AI_ROUTES.courtroom },
   { label: 'Hukuk Asistanı', href: AI_ROUTES.chat },

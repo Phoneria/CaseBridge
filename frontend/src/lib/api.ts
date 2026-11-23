@@ -810,3 +810,12 @@ export function getPresentationFile(id: string) {
 export function downloadPresentationPdf(cid: string, did: string) {
   return fetchBlob("/presentation/" + encodeURIComponent(cid) + "/documents/" + encodeURIComponent(did), "Maskeli PDF indirilemedi");
 }
+
+export interface MaskedTextResult {
+  text: string; counts: Record<string, number>;
+  report: Record<string, {mod: string; adet: number; farkli: number}>;
+  ner_available: boolean; review_required: boolean;
+}
+export function anonymizeText(text: string): Promise<MaskedTextResult> {
+  return request<MaskedTextResult>("/privacy/anonymize", {method: "POST", body: JSON.stringify({text}), cache: "no-store"});
+}

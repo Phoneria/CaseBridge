@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/api/routes/privacy.py",
+        "backend/app/main.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-007",
+        "specs/012-pii-anonymization/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_privacy.py::test_masking_stateless_redacted",
+        "backend/tests/api/test_privacy.py::test_anonymous_denied",
+        "backend/tests/api/test_privacy.py::test_restricted_denied_with_real_session"
+      ],
+      "reason": "Expose the existing motor through a stateless bureau-authenticated endpoint without provider calls or stored text."
+    },
+    {
+      "files": [
+        "frontend/src/app/ai/anonimlestirme/page.tsx",
+        "frontend/src/components/ai/AnonymizationView.tsx",
+        "frontend/src/components/WorkspaceHeader.tsx",
+        "frontend/src/lib/ai.ts",
+        "frontend/src/lib/aiNavigation.ts",
+        "frontend/src/lib/api.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-007",
+        "specs/012-pii-anonymization/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::masks, reports, copies and clears without persisting input",
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::discards a response after the source changes",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::shows every authorized AI tool in the restored expanded blue panel"
+      ],
+      "reason": "Provide an in-memory paste/mask/copy/reset workflow and sidebar access, with versioned release."
+    }
+  ]
+}

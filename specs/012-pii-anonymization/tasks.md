@@ -9,3 +9,10 @@
 - [ ] T007 Manual review of the PR, then merge; wiring into upload/indexing and UI notice are follow-up work.
 
 Dependencies: T001 → T002/T003 → T004/T005 → T006 → T007. No claim of guaranteed de-identification is made.
+
+## Interactive screen tasks
+- [x] T008 Implement stateless authenticated masking endpoint and authorization/validation tests (FR-007/008).
+- [x] T009 Add sidebar route and accessible paste/mask/copy/reset screen with stale-result protection and tests (FR-007/008).
+- [ ] T010 Run tests/build/spec checks, prepare version, record actual results.
+- [ ] T011 Merge tested code to main and publish immutable application artifact; verify public version/code/health and rollback record.
+Dependencies: T008 → T009 → T010 → T011.
