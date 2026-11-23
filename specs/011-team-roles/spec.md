@@ -24,7 +24,7 @@ Emin Merden ekibe eklenir. İzzet iş geliştirmeden, Emin yapay zekâ ve veride
 - **FR-006**: Kullanıcının 23 Kasım 2026 talebiyle Emin Merden tanıtımına Perpetual Labs bünyesindeki altyapı (infra) yönetimi eklenir; rolü ve diğer ekip metinleri değişmez.
 - **FR-007**: Her ekip üyesinin tanıtımı aynı bilgileri koruyarak kısa madde listesi olarak gösterilir.
 - **FR-008**: Kullanıcının 23 Kasım 2026 talebiyle her üyede iki deneyim maddesi (İzzet: ASELSAN, Perpetual Labs; Emin: Outlier AI, Perpetual Labs; Hatice: Technarts, Perpetual Labs; Bengü: Technarts, Lastfall; Ahmet: İHH, Hacettepe) ve CaseBridge’deki kısa görevi gösterilir; FR-001'deki BAUROV/Baykar ayrıntısı bu taleple kaldırılır.
-- **FR-009**: Ekip maddelerindeki kurum adları kullanıcının verdiği resmî sitelere (Perpetual Labs, ASELSAN, Lastfall, Technarts, İHH) yeni sekmede bağlanır.
+- **FR-009**: Ekip maddelerindeki kurum adları kullanıcının verdiği resmî sitelere (Perpetual Labs, ASELSAN, Lastfall, Technarts, İHH, Outlier AI, Hacettepe) yeni sekmede bağlanır.
 - **FR-005**: Kullanıcının onayladığı hazır Emin portresi yalnız web boyutuna küçültülerek mevcut EM alanının yerine gerçek img dosyasıyla eklenir; yüz/renk/içerik yeniden üretilmez. Mevcut ekip kadrajı, doğru alt metni, Emin unvanı ve tüm ekip metinleri korunur. Normal canlı URL, dosya hash/decode, masaüstü/mobil kadraj, sürüm ve health doğrulanır.
 
 ## Success Criteria
