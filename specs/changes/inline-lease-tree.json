@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json",
+        "web-page/ornek-dava.html",
+        "web-page/ornek-dava.css",
+        "web-page/ornek-dava.js",
+        "web-page/kira-agaci.js",
+        "web-page/kira-agaci.css"
+      ],
+      "requirements": [
+        "specs/009-demo-scenario-weights/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_lease_tree_replaces_product_gallery_inline",
+        "deployment/tests/test_release.py::ReleaseTests.test_marketing_dependency_closure_contains_public_case_reader"
+      ],
+      "reason": "Replace the complete product feature gallery with the supplied application tree inline and remove the separate page."
+    }
+  ]
+}

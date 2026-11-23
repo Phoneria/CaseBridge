@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08131f">
+  <title>CaseBridge — Uygulamadan örnek Olasılık Ağacı</title>
+  <link rel="icon" href="assets/casebridge-e2e.svg?v=0.41" type="image/svg+xml">
+  <link rel="stylesheet" href="story3d.css?v=0.58">
+  <link rel="stylesheet" href="kira-agaci.css?v=0.53">
+  <script defer src="kira-agaci.js?v=0.53"></script>
+</head>
+<body class="subpage">
+  <header class="header"><div class="nav wrap"><a class="nav-login" href="index.html">← Ana sayfa</a><div class="nav-actions"><a class="nav-cta" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep et <span aria-hidden="true">↗</span></a></div></div></header>
+  <main id="main">
+    <section class="lease-tree wrap" id="product" aria-labelledby="lease-heading">
+      <p class="kicker"><span>Uygulamadan</span> Gerçek ekran verisi</p>
+      <h2 id="lease-heading">Olasılık Ağacı, uygulamadaki hâliyle</h2>
+      <p class="lease-intro">Kira bedeli uyuşmazlığı <span>· CB-SONUC-2025/142-1</span></p>
+      <div class="lease-grid">
+        <div class="lease-map">
+          <div class="lease-toolbar"><button id="lease-expand" type="button">Tüm dalları aç</button><div aria-label="Harita ölçeği"><button id="lease-minus" type="button" aria-label="Uzaklaştır">−</button><output id="lease-scale">%100</output><button id="lease-plus" type="button" aria-label="Yakınlaştır">+</button></div></div>
+          <div id="lease-view" tabindex="0" aria-label="Kaydırılabilir karar ağacı"><div id="lease-sizer"><div id="lease-plane"></div></div></div>
+          <p class="lease-caption">Mavi yol dosyada kayıtlı kararı gösterir. Bir düğümü seçerek dayanağını ve sonraki dalları inceleyin.</p>
+        </div>
+        <aside class="lease-panel">
+          <h3 id="lease-title">Kira bedeli uyuşmazlığı</h3>
+          <p id="lease-path">Başlangıçtan ulaşma %100</p>
+          <p id="lease-info">Dosyada kayıtlı sonuç: Müvekkilin talebi reddedildi.</p>
+          <div id="lease-assumption" hidden><label for="lease-choice">Bu senaryonun dayanakları</label><select id="lease-choice"><option value="1">Destekleyici varsay</option><option value="0">Nötr varsay</option><option value="-1">Çelişkili varsay</option></select><p id="lease-score" role="status"></p></div>
+          <details><summary>Kayıtlı olaylar ve iddialar</summary><p>18.09.2025 tarihinde dosya açıldı. Davacı, sözleşmedeki edimin yerine getirilmediğini ve ihtara rağmen uyuşmazlığın sürdüğünü ileri sürüyor. Davalı, ifa ve ödeme kayıtlarına ve ek delil gereğine dayanıyor.</p></details>
+          <details><summary>Dosya kaydı · iç not</summary><small>demo-dosya-kaydi.txt</small><pre class="lease-document">DEMO DOSYA KAYDI — İÇ ÇALIŞMA NOTU
+Bu metin mevcut veri tabanı alanlarından üretilmiştir; mahkeme evrakı veya müvekkil belgesi değildir.
+
+Dosya: CB-SONUC-2025/142-1 — Kira bedeli uyuşmazlığı
+Müvekkil: Selin Erdem
+Karşı taraf: Umut Uçar
+Mahkeme: Ankara 9. Sulh Hukuk Mahkemesi
+Açılış tarihi: 18.09.2025
+Durum / kayıtlı sonuç: kapali / Ret
+Dava değeri: 145,000 TL
+Sonraki duruşma: Kayıt yok
+Veri tabanındaki açıklama: [Gösterim] Kira bedeli uyuşmazlığı hakkında sonuçlanan kurgusal dosya. Müvekkilin talebi reddedildi.
+
+Doğrulama sınırı: Dilekçe, karar ve diğer asıl evraklar bu nottan çıkarılamaz; ayrıca temin edilmelidir.</pre></details>
+          <details><summary>Delil ve evrak kontrol listesi</summary><small>demo-delil-kontrol-listesi.txt</small><pre class="lease-document">DELİL VE EVRAK KONTROL LİSTESİ — DEMO İÇ NOT
+Dosya: CB-SONUC-2025/142-1 — Kira bedeli uyuşmazlığı
+Aşağıdaki evrakın mevcut olduğu varsayılmıyor. Her biri asıl kaynaktan istenmeli ve doğrulanmalıdır.
+
+[DOĞRULANMADI] İmzalı kira sözleşmesi ve yenileme geçmişi
+[DOĞRULANMADI] Taşınmaz nitelikleri ve doğrulanabilir emsal kiralar
+[DOĞRULANMADI] Gerekçeli tespit kararı ve yeni bedel hesabı
+
+Kontrol: belge tarihi, tarafları, imza/tebliğ bilgisi ve dosya numarası asıl evrakla eşleştirilmeli.
+Kamuya açık internet kaynakları bu özel davanın gerçek dilekçesi veya kararı yerine geçmez.</pre></details>
+          <details open><summary>Olası kararların dağılımı</summary><div id="lease-outcomes"></div><p>Aynı kararla biten yolların temsili yüzdeleri toplanır. Dosyadaki kayıtlı karar ayrıca gösterilir.</p></details>
+          <details><summary>Yüzdeler nasıl okunur?</summary><p>Başlangıçtan ulaşma, o düğüme kadar izlenen geçişlerin çarpımıdır. Uygulama bu dosya için temsili geçiş oranları kullanır. Destek puanı ise seçtiğiniz varsayıma göre değişen bağımsız bir 0–100 puanıdır. Dava kazanma olasılığı olarak yorumlanamaz.</p></details>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

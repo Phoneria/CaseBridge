@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { activateAiKey, getAiKeyStatus, saveAiKey, type AIKeyStatus } from "@/lib/api";
+import { activateAiKey, getAiKeyStatus, saveAiKey, type AIKeyProvider, type AIKeyStatus } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
 import type { AIConnectivity } from "@/types";
 import { ModalFrame } from "@/components/ModalFrame";
@@ -9,6 +9,7 @@ import { ModalFrame } from "@/components/ModalFrame";
 export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) => void }) {
   const [status, setStatus] = useState<AIKeyStatus | null>(null);
   const [open, setOpen] = useState(false);
+  const [provider, setProvider] = useState<"openai" | "anthropic">("openai");
   const [key, setKey] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
     const candidate = key.trim();
     setKey("");
     try {
-      const result = await saveAiKey(candidate);
+      const result = provider === "openai" ? await saveAiKey(candidate) : await saveAiKey(candidate, provider);
       setStatus(result);
       setOpen(false);
       setNotice("Yeni anahtar test edildi ve beklemeye alındı. Mevcut bağlantı değişmedi.");
@@ -44,17 +45,17 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
     }
   }
 
-  async function activate() {
+  async function activate(selected?: AIKeyProvider) {
     if (busy.current) return;
     busy.current = true;
     setSaving(true);
     setError(null);
     setNotice(null);
     try {
-      const result = await activateAiKey();
+      const result = selected ? await activateAiKey(selected) : await activateAiKey();
       onSaved(result);
-      setStatus({ configured: true, managed: true, pending: false, can_save: true });
-      setNotice(result.connected ? "Yeni anahtar etkinleştirildi. AI bağlantısı doğrulandı. Önceki anahtar korundu." : "Yeni anahtar etkinleştirildi. Güncel bağlantı durumunu kontrol edin. Önceki anahtar korundu.");
+      setStatus(await getAiKeyStatus());
+      setNotice(selected ? "Sağlayıcı seçimi kaydedildi." : result.connected ? "Yeni anahtar etkinleştirildi. AI bağlantısı doğrulandı. Önceki anahtar korundu." : "Yeni anahtar etkinleştirildi. Güncel bağlantı durumunu kontrol edin. Önceki anahtar korundu.");
     } catch (err) {
       setError(userMessage(err, "Anahtar etkinleştirilemedi. Mevcut bağlantı korunuyor."));
     } finally { busy.current = false; setSaving(false); }
@@ -64,12 +65,22 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
     <div className="mt-5 border-t border-surface-border pt-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-navy-900">OpenAI API anahtarı</h3>
+          <h3 className="text-sm font-semibold text-navy-900">AI sağlayıcısı</h3>
           <p className="mt-1 text-sm text-navy-600">Anahtar sunucuda şifrelenir ve tekrar gösterilmez.</p>
         </div>
         <button type="button" disabled={!status?.can_save || saving} onClick={() => { setOpen(true); setError(null); setNotice(null); }}
           className="rounded-xl bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700 disabled:opacity-50">Gizli anahtar ekle</button>
       </div>
+      {!!status?.available_providers?.length && <fieldset disabled={saving || !status.can_save} className="mt-4">
+        <legend className="text-sm font-medium text-navy-800">Büroda kullanılacak yapay zekâyı seçin</legend>
+        <div className="mt-2 flex gap-2">{status.available_providers.map(name =>
+          <button key={name} type="button" aria-pressed={status.active_provider === name}
+            disabled={status.active_provider === name}
+            onClick={() => void activate(name)}
+            className="rounded-lg border border-surface-border px-3 py-2 text-sm aria-pressed:bg-accent-50">
+            {name === "anthropic" ? "Claude" : "OpenAI"}{status.active_provider === name ? " · Etkin" : ""}
+          </button>)}</div>
+      </fieldset>}
       {status && !status.can_save && <p className="mt-3 text-sm text-navy-600">Anahtar yönetiminin sunucuda etkinleştirilmesi gerekiyor.</p>}
       {status?.configured && <p className="mt-3 text-xs text-navy-500">Bir anahtar tanımlı. Yeni anahtarı kaydetmek mevcut bağlantıyı değiştirmez.</p>}
       {status?.pending && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent-200 bg-accent-50 p-4">
@@ -80,7 +91,14 @@ export function AiKeySettings({ onSaved }: { onSaved: (result: AIConnectivity) =
       {!open && error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
       {open && <ModalFrame title="AI bağlantısını kur" onClose={close} busy={saving}>
         <form onSubmit={save}>
-          <label htmlFor="openai-secret-key" className="block text-sm font-medium text-navy-700">OpenAI API anahtarı</label>
+          <label className="mb-3 block text-sm font-medium">Bağlantı yöntemi
+            <select className="mt-1 block rounded-lg border p-2" value={provider} onChange={e => {setProvider(e.target.value as "openai" | "anthropic"); setKey(""); setError(null);}}>
+              <option value="openai">OpenAI API</option><option value="anthropic">Claude API</option>
+              <option disabled>OpenAI hesabıyla giriş · entegrasyon yetkisi gerekiyor</option>
+              <option disabled>Claude setup token · Claude Code için</option>
+            </select>
+          </label>
+          <label htmlFor="openai-secret-key" className="block text-sm font-medium text-navy-700">{provider === "openai" ? "OpenAI API anahtarı" : "Claude API anahtarı"}</label>
           <input id="openai-secret-key" type="password" autoComplete="off" autoCapitalize="none" spellCheck={false} value={key}
             onChange={(event) => setKey(event.target.value)} disabled={saving} maxLength={512} required data-autofocus
             className="mt-2 w-full rounded-xl border border-surface-border px-3 py-2.5 text-sm outline-none focus:border-accent-500" />

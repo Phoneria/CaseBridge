@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/db/dossier_documents.py",
+        "backend/app/db/dossier_pack.py",
+        "backend/app/db/dossier_stories.py",
+        "backend/app/legal_lab/dossier_tree.py",
+        "backend/app/legal_lab/scenario_demo.py",
+        "backend/app/legal_lab/scenario_tree.py",
+        "backend/app/services/dossier_pdf.py",
+        "frontend/src/components/CaseDetailView.tsx",
+        "frontend/src/components/CaseDocumentsPanel.tsx",
+        "frontend/src/components/CaseHearingsCard.tsx",
+        "frontend/src/components/lab/ScenarioTreeView.tsx",
+        "frontend/src/types/scenarioTree.ts"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_dossier_pack.py::test_complete_files_resolve_evidence_and_protect_user_additions",
+        "frontend/src/components/__tests__/ScenarioTreeView.test.tsx::opens the recorded dossier exhibit from its branch"
+      ],
+      "reason": "dossiers and recorded evidence"
+    },
+    {
+      "files": [
+        "backend/app/api/routes/admin.py",
+        "backend/app/db/demo_presentation_seed.py",
+        "backend/app/db/demo_team.py",
+        "backend/app/db/demo_template.py",
+        "backend/app/db/demo_template_removal.py",
+        "backend/app/db/demo_upgrade.py",
+        "backend/app/db/seed.py",
+        "backend/app/schemas/management.py",
+        "backend/app/services/assignees.py",
+        "backend/app/services/management_service.py",
+        "frontend/app-version.json",
+        "frontend/src/components/CourtroomSessionView.tsx",
+        "frontend/src/components/DashboardView.tsx",
+        "frontend/src/components/SettingsView.tsx",
+        "frontend/src/components/ai/CourtroomLobbyView.tsx",
+        "frontend/src/components/ai/SufleView.tsx",
+        "frontend/src/components/ai/chat/ChatThread.tsx",
+        "frontend/src/components/lab/LabBits.tsx",
+        "frontend/src/components/lab/MapView.tsx",
+        "frontend/src/components/management/BureauManagementView.tsx",
+        "frontend/src/components/management/FinanceCharts.tsx",
+        "frontend/src/components/management/RecordEditor.tsx",
+        "frontend/src/components/management/RecordPanel.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/lib/management.ts",
+        "frontend/src/lib/workspaceGuide.ts"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_demo_template.py::test_admin_imports_sample_portfolio_only_into_own_firm"
+      ],
+      "reason": "bureau operations and portfolio"
+    },
+    {
+      "files": [
+        "backend/app/ai/chat/anthropic_provider.py",
+        "backend/app/ai/chat/factory.py",
+        "backend/app/ai/connectivity.py",
+        "backend/app/ai/provider_factory.py",
+        "backend/app/api/routes/sufle.py",
+        "backend/app/api/routes/system.py",
+        "backend/app/services/ai_credentials.py",
+        "backend/app/services/sufle_service.py",
+        "frontend/src/components/AiKeySettings.tsx",
+        "frontend/src/components/ai/AiModelStatus.tsx"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-010"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_firm_ai_keys.py::test_claude_key_switches_only_its_firm_and_never_reaches_openai"
+      ],
+      "reason": "bureau-scoped provider activation"
+    }
+  ]
+}

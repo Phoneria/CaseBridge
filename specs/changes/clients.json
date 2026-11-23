@@ -5,6 +5,7 @@
       "files": [
         "backend/alembic/versions/c8f2a4e6b0d1_add_clients.py",
         "backend/alembic/versions/eeb771ad79be_merge_clients_and_bureau_heads.py",
+        "backend/alembic/versions/0244bf696c5e_merge_clients_and_criminal_case_type_heads.py",
         "backend/app/models/__init__.py",
         "backend/app/models/case.py",
         "backend/app/models/client.py",
@@ -126,7 +127,7 @@
         "frontend/src/lib/__tests__/clients.test.ts::formats lira without decimals",
         "frontend/src/lib/__tests__/clients.test.ts::accepts a plain e-mail and rejects obvious mistakes"
       ],
-      "reason": "Müvekkiller sidebar item and the client list/detail screens with search, paging, states, create/edit form and admin-only delete; client types and API calls; application version incremented to v.0.24."
+      "reason": "Müvekkiller sidebar item and the client list/detail screens with search, paging, states, create/edit form and admin-only delete; client types and API calls; application version incremented (v.0.48 after main v.0.47)."
     },
     {
       "files": [

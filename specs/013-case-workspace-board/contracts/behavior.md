@@ -1,0 +1,2 @@
+Case scope comes from the authenticated session. Unavailable cases return 404. Task changes use the existing case write guard. Report previews read the existing CSV generators. Download audit occurs only on the download route.
+PUT/DELETE /cases/{id}/precedents/{precedent_id} require a writable case and its manager. POST /cases/{id}/decision accepts a missing decision once on an already closed case.

@@ -1,0 +1,422 @@
+[
+  {
+    "role": "admin",
+    "width": 1440,
+    "theme": "light",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "admin",
+    "width": 1440,
+    "theme": "dark",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "admin",
+    "width": 390,
+    "theme": "light",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "admin",
+    "width": 390,
+    "theme": "dark",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "admin",
+    "width": 320,
+    "theme": "light",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "admin",
+    "width": 320,
+    "theme": "dark",
+    "selected": "bureau-deadline",
+    "topics": 37,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 1440,
+    "theme": "light",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 1440,
+    "theme": "dark",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 390,
+    "theme": "light",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 390,
+    "theme": "dark",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 320,
+    "theme": "light",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "lawyer",
+    "width": 320,
+    "theme": "dark",
+    "selected": "ai-scenarios",
+    "topics": 20,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 1440,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 1440,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 390,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 390,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 320,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "client",
+    "width": 320,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 1440,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 1440,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 390,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 390,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 320,
+    "theme": "light",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "accountant",
+    "width": 320,
+    "theme": "dark",
+    "selected": "workspace",
+    "topics": 2,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 1440,
+    "theme": "light",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 1440,
+    "theme": "dark",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 390,
+    "theme": "light",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 390,
+    "theme": "dark",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 320,
+    "theme": "light",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  },
+  {
+    "role": "platform",
+    "width": 320,
+    "theme": "dark",
+    "selected": "platform",
+    "topics": 3,
+    "guideRequests": 0,
+    "writes": 0,
+    "errors": [],
+    "overflow": {
+      "inner": false,
+      "document": false
+    }
+  }
+]

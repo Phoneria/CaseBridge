@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { getPrecedentDocuments, getPrecedents } from "@/lib/api";
+import { getPrecedentDocuments, getPrecedents, setPrecedentLink } from "@/lib/api";
 import { CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
@@ -11,9 +11,10 @@ import { LoadingState } from "@/components/LoadingState";
 import { DecisionText } from "@/components/DecisionText";
 import type { Case, DocumentItem } from "@/types";
 
-export function PrecedentsView() {
-  const selectedParam = useSearchParams()?.get("karar") ?? null;
-  const [rows, setRows] = useState<Case[]>([]);
+export function PrecedentsView({ caseId, canLink = false }: { caseId?: string; canLink?: boolean }) {
+  const params = useSearchParams();
+  const selectedParam = caseId ? null : params?.get("karar") ?? null;
+  const [rows, setRows] = useState<(Case & { linked_to_case?: boolean })[]>([]);
   const [selected, setSelected] = useState<string | null>(selectedParam);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
@@ -22,12 +23,21 @@ export function PrecedentsView() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
+  const [allCategories, setAllCategories] = useState(false);
+  const [savingLink, setSavingLink] = useState(false);
+  const [revision, setRevision] = useState(0);
+
   useEffect(() => {
-    getPrecedents().then((items) => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    getPrecedents(caseId, allCategories).then((items) => {
+      if (!active) return;
       setRows(items);
-      setSelected((current) => current ?? items[0]?.id ?? null);
-    }).catch(() => setError("Emsal kararlar yüklenemedi.")).finally(() => setLoading(false));
-  }, []);
+      setSelected(current => items.some(row => row.id === current) ? current : items[0]?.id ?? null);
+    }).catch(() => active && setError("Emsal kararlar yüklenemedi.")).finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [caseId, allCategories, revision]);
 
   useEffect(() => { if (selectedParam) setSelected(selectedParam); }, [selectedParam]);
 
@@ -53,15 +63,19 @@ export function PrecedentsView() {
   return <div className="space-y-5">
     <div>
       <h1 className="text-xl font-semibold text-navy-900">Emsal Kararlar</h1>
-      <p className="text-sm text-navy-500">Kamuya açık anonim kararlar burada araştırma amaçlı tutulur; büro davalarına, avukat iş yüküne ve kazanma oranına dahil değildir.</p>
+      <p className="text-sm text-navy-500">{caseId ? "Dosyaya bağlanan emsaller ve aynı hukuk kategorisindeki kararlar." : "Arşivdeki emsal kararlar büro davalarına, avukat iş yüküne ve kazanma oranına dahil değildir."}</p>
     </div>
     {error && <ErrorState message={error} />}
+    {caseId && <label className="flex items-center gap-2 text-sm text-navy-700">
+      <input type="checkbox" disabled={savingLink} checked={allCategories} onChange={e => setAllCategories(e.target.checked)} /> Diğer hukuk kategorilerini de göster
+    </label>}
     <input type="search" aria-label="Emsal karar ara" placeholder="Karar veya konu ara..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-full max-w-md rounded-xl border border-surface-border bg-white px-4 py-2 text-sm" />
     {visible.length === 0 ? <EmptyState message={rows.length === 0 ? "Henüz emsal karar yok." : "Aramayla eşleşen karar yok."} /> : (
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(250px,380px)_minmax(0,1fr)]">
         <ul className="max-h-[70vh] space-y-2 overflow-y-auto">
           {visible.map((row) => <li key={row.id}>
             <button type="button" onClick={() => setSelected(row.id)} className={`w-full rounded-xl border p-4 text-left ${selected === row.id ? "border-accent-400 bg-accent-50" : "border-surface-border bg-white hover:border-accent-300"}`}>
+              {row.linked_to_case && <span className="text-xs font-medium text-accent-700">Dosyaya bağlı</span>}
               <span className="block text-sm font-semibold text-navy-900">{row.case_name}</span>
               <span className="mt-1 block text-xs text-navy-500">{row.case_number} · {CASE_TYPE_LABELS[row.case_type] ?? row.case_type}</span>
             </button>
@@ -76,6 +90,19 @@ export function PrecedentsView() {
               </div>
               <span className="rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">{CASE_TYPE_LABELS[current.case_type] ?? current.case_type}</span>
             </div>
+            {caseId && canLink && <button type="button" disabled={savingLink} onClick={async () => {
+              setSavingLink(true);
+              try {
+                await setPrecedentLink(caseId, current.id, !current.linked_to_case);
+                setRevision(n => n + 1);
+              } catch {
+                setError("Emsal bağlantısı güncellenemedi.");
+              } finally {
+                setSavingLink(false);
+              }
+            }} className="mt-3 rounded-lg border border-accent-200 px-3 py-2 text-sm text-accent-700">
+              {current.linked_to_case ? "Dosya bağlantısını kaldır" : "Bu davaya bağla"}
+            </button>}
             <dl className="mt-5 grid gap-3 rounded-xl border border-surface-border bg-surface-muted p-4 sm:grid-cols-3">
               <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-navy-500">Esas / karar no</dt><dd className="mt-1 break-words text-sm font-medium text-navy-800">{current.case_number}</dd></div>
               <div><dt className="text-[11px] font-semibold uppercase tracking-wide text-navy-500">Mahkeme / daire</dt><dd className="mt-1 text-sm font-medium text-navy-800">{current.court ?? "Belirtilmemiş"}</dd></div>

@@ -2,139 +2,186 @@
 <html lang="tr"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="CaseBridge, hukuki uyuşmazlıkları ve belgeleri yapay zekâyla analiz ederek olası dava sonuçlarını, riskleri ve hukuki seçenekleri değerlendirmenizi sağlayan bir platformdur.">
-  <title>CaseBridge — Yapay zekâ destekli dava analizi</title>
+  <meta name="theme-color" content="#08131f">
+  <meta name="description" content="CaseBridge; biten davalardan ders çıkaran, süren davanın olası yollarını gösteren, veriyi maskeleyen, büroyu tek ekranda toplayan ve müvekkil görüşmesinde sufle veren yapay zekâ çalışma alanıdır.">
+  <meta name="casebridge-website-version" content="v.0.65">
+  <title>CaseBridge — Davanın her yolunu önceden görün</title>
   <link rel="icon" href="assets/casebridge-e2e.svg?v=0.41" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=7">
-  <link rel="stylesheet" href="growth-motion.css?v=1">
-  <link rel="stylesheet" href="hero-outcome.css?v=6">
-  <link rel="stylesheet" href="hero-case-map.css?v=3">
-  <link rel="stylesheet" href="ai-screen-gallery.css?v=0.28">
-  <link rel="stylesheet" href="finance-overview.css?v=1">
-  <link rel="stylesheet" href="home-interactions.css?v=3">
-  <link rel="stylesheet" href="home-forecast.css?v=2">
-  <link rel="stylesheet" href="i18n.css?v=1">
-  <link rel="stylesheet" href="pilot-results.css?v=1">
-  <link rel="stylesheet" href="brand-refresh.css?v=0.11">
-  <meta name="casebridge-website-version" content="v.0.50">
-  <link rel="stylesheet" href="interactive-story.css?v=0.5">
-  <script src="script.js?v=0.41" defer=""></script>
-
-
-
-  <script src="overview.js?v=0.35" defer=""></script>
-
-
-
-
-
-
-
-
-  <script src="feature-screens.js?v=0.22" defer=""></script>
-
-  <script src="number-counters.js?v=0.4" defer=""></script>
-  <link rel="stylesheet" href="section-refinements.css?v=0.16">
-  <link rel="stylesheet" href="hero-map-living.css?v=0.8">
-  <style>
-    .story-hero .hero-actions { flex-wrap: wrap; }
-    .button-app { align-items: center; gap: 12px; background: var(--ink); color: #fff; }
-    .button-app:hover { background: var(--teal); }
-  </style>
-  <link rel="stylesheet" href="dark-theme.css?v=0.30">
-  <link rel="stylesheet" href="readability.css?v=0.39">
-  <script src="dark-hero.js?v=0.25" defer=""></script>
-
-
-<link rel="stylesheet" href="turkish-refresh.css?v=0.41">  <link rel="stylesheet" href="hero-video-restoration.css?v=0.44">
+  <link rel="stylesheet" href="story3d.css?v=0.60">
+  <script type="module" src="story3d.js?v=0.64"></script>
+  <!-- Legacy hero film: shown only as the no-WebGL hero background. -->
+  <link rel="stylesheet" href="hero-video-restoration.css?v=0.44">
 </head>
 <body>
   <a class="skip-link" href="#main">İçeriğe geç</a>
+  <canvas id="stage" aria-hidden="true"></canvas>
+  <div id="bureau-tip" class="bureau-tip" role="status" hidden></div>
+
   <header class="header">
     <div class="nav wrap">
-      <a class="brand" href="#" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Her dava, başından sonuna.</small></span></a>
-      <button class="menu-toggle" aria-label="Menüyü aç" aria-expanded="false" aria-controls="navigation"><span></span><span></span></button>
+      <a class="brand" href="#top" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Her dava, başından sonuna.</small></span></a>
       <nav id="navigation" aria-label="Ana menü">
-        <a href="#overview">Genel bakış</a><a href="#product">Ürün</a><a href="#team">Ekip</a>
+        <a href="#gecmis">Geçmiş analiz</a><a href="#olasilik">Olasılık Ağacı</a><a href="#anonim">Anonimleştirme</a><a href="#buro">Büro yönetimi</a><a href="#sufle">Sufle</a><a href="#simulasyon">Simülasyon</a><a href="#team">Ekip</a>
       </nav>
-
-      <a class="nav-cta" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep edin <span aria-hidden="true">↗</span></a>
+      <div class="nav-actions">
+        <a class="nav-login" href="https://app.casebridge.com.tr/login">Giriş</a>
+        <a class="nav-cta" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep et <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
   </header>
 
   <main id="main">
-    <section class="story-hero wrap" id="overview">
-      <video class="hero-film" muted="" loop="" playsinline="" preload="metadata" poster="assets/video/hero-poster.jpg" aria-hidden="true"><source src="assets/video/casebridge-hero.mp4" type="video/mp4"></video>
-
-      <div class="story-hero-copy"><p class="stage-label">YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU YÖNETİMİ</p><h1>Hukuk büronuz için<br><span>yapay zekâ desteği</span></h1><p class="story-lead">CaseBridge, hukuki uyuşmazlıkları ve belgeleri yapay zekâyla analiz ederek olası dava sonuçlarını, riskleri ve hukuki seçenekleri değerlendirmenizi sağlayan bir platformdur.</p><div class="hero-actions"><a class="button button-app" href="https://app.casebridge.com.tr/login">Uygulamaya giriş yap <span aria-hidden="true">→</span></a><a class="button button-red" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Görüşme planlayın</a></div></div>
-
-    </section>
-
-
-    <section class="pilot-results wrap section" id="pilot-results" aria-labelledby="pilot-results-title">
-      <p class="section-label">BUGÜN CASEBRIDGE</p>
-      <h2 id="pilot-results-title">Güncel pilot sonuçları</h2><p class="source-note">Ekip tarafından bildirilen pilot kapsamı. Bu rakamlar zaman tasarrufunu veya dava başarı oranını ölçmez.</p>
-      <div class="pilot-results-grid">
-        <article class="pilot-result-card"><p class="pilot-result-value" aria-label="10 TB"><span data-pilot-count="10" data-count-suffix=" TB" aria-hidden="true">10 TB</span></p><h3>Veri</h3></article>
-        <article class="pilot-result-card"><p class="pilot-result-value" aria-label="10+"><span data-pilot-count="10" data-count-suffix="+" aria-hidden="true">10+</span></p><h3>Hukuk büroları</h3></article>
-        <article class="pilot-result-card"><p class="pilot-result-value" aria-label="100.000+"><span data-pilot-count="100000" data-count-suffix="+" aria-hidden="true">100.000+</span></p><h3>Dava dosyaları</h3></article>
-      </div>
-    </section>
-
-
-
-    <section class="offering-surface wrap section" id="product" aria-labelledby="product-title">
-      <div class="business-heading"><div><p class="section-label">CaseBridge’in içinden</p><h2 id="product-title">Davanızı hazırlayın<br>Argümanınızı prova edin</h2></div><p>Bir davayı dört hukuki bakış açısından analiz edin, argümanlarınızı yapay zekâ karşı vekille çalışın ve hukuk asistanına soru sorun</p></div>
-      <div class="capability-explorer" data-capability-explorer="">
-        <div class="capability-tabs" role="tablist" aria-label="CaseBridge ürün özellikleri" aria-orientation="vertical"><button type="button" role="tab" id="capability-tab-12" aria-controls="capability-panel-12" aria-selected="true" tabindex="0" data-capability-tab=""><strong>Olasılık Ağacı</strong></button><button type="button" role="tab" id="capability-tab-1" aria-controls="capability-panel-1" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Yapay zekâ ile dava analizi</strong></button><button type="button" role="tab" id="capability-tab-2" aria-controls="capability-panel-2" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Konuşmayı prova edin</strong></button><button type="button" role="tab" id="capability-tab-3" aria-controls="capability-panel-3" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Delile itiraz edin</strong></button><button type="button" role="tab" id="capability-tab-4" aria-controls="capability-panel-4" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Provadan öğrenin</strong></button><button type="button" role="tab" id="capability-tab-5" aria-controls="capability-panel-5" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Hukuk asistanı</strong></button><button type="button" role="tab" id="capability-tab-6" aria-controls="capability-panel-6" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Dava ve belge yönetimi</strong></button><button type="button" role="tab" id="capability-tab-7" aria-controls="capability-panel-7" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Görevler ve duruşma takvimi</strong></button><button type="button" role="tab" id="capability-tab-8" aria-controls="capability-panel-8" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Raporlar ve devir</strong></button><button type="button" role="tab" id="capability-tab-9" aria-controls="capability-panel-9" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Hukuki zihin haritası</strong></button><button type="button" role="tab" id="capability-tab-10" aria-controls="capability-panel-10" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Karşı taraf analizi</strong></button><button type="button" role="tab" id="capability-tab-11" aria-controls="capability-panel-11" aria-selected="false" tabindex="-1" data-capability-tab=""><strong>Yönetilen duruşma</strong></button></div>
-        <div class="capability-screens"><div role="tabpanel" id="capability-panel-12" aria-labelledby="capability-tab-12" tabindex="0"><p class="capability-description">Dosya kayıtlarını ve son tamamlanmış analizdeki alternatif senaryoları dayanakları, koşullu gelişmeleri ve belirsizlikleriyle inceleyin. Kullanılabilir analiz yoksa genel hazırlık yolları açıkça belirtilir. Varsayıma bağlı Demo tahmini destek ağırlıklarını ve hesaplama yöntemini görün. Büro dosyalarındaki bağımsız 0–100 puanlar toplamlanmaz; sentetik örnekte yalnız aynı sorunun alternatifleri %100’e tamamlanır. Hukuki sonuç veya başarı garantisi değildir. <a href="https://app.casebridge.com.tr/ai/olasilik">Uygulamada Olasılık Ağacı’nı aç ↗</a></p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Olasılık Ağacı" href="assets/feature-screens/tr-current/scenario-tree.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Olasılık Ağacı ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/scenario-tree.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge Olasılık Ağacı: kurgusal örnekte Demo tahmini yüzdeleri, varsayımlar ve dayanaklar"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-1" aria-labelledby="capability-tab-1" tabindex="0" hidden=""><p class="capability-description">Dosyayı araştırmacı, davacı vekili, davalı vekili ve hâkim bakış açılarından inceleyin. Destekleyici argümanları, zayıf yönleri, eksik bilgileri ve önerilen sonraki adımları görün.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Yapay zekâ ile dava analizi" href="assets/feature-screens/tr-current/analysis.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Yapay zekâ ile dava analizi ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/analysis.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Yapay zekâ ile dava analizi — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-2" aria-labelledby="capability-tab-2" tabindex="0" hidden=""><p class="capability-description">Sizin argümanınız, yapay zekâ karşı tarafın yanıtı ve hâkimin soruları</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Konuşmayı prova edin" href="assets/feature-screens/tr-current/conversation.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Konuşmayı prova edin ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/conversation.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Konuşmayı prova edin — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-3" aria-labelledby="capability-tab-3" tabindex="0" hidden=""><p class="capability-description">İddiayı, itirazı ve yanıtı tek bir tutanakta takip edin.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Delile itiraz edin" href="assets/feature-screens/tr-current/evidence.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Delile itiraz edin ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/evidence.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Delile itiraz edin — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-4" aria-labelledby="capability-tab-4" tabindex="0" hidden=""><p class="capability-description">Delil kullanımını, itirazları ve sonraki hazırlık adımlarını inceleyin.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Provadan öğrenin" href="assets/feature-screens/tr-current/evaluation.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Provadan öğrenin ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/evaluation.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Provadan öğrenin — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-5" aria-labelledby="capability-tab-5" tabindex="0" hidden=""><p class="capability-description">Hukuki sorularınızı ayrı bir sohbette sorun; hazırlığınız ilerledikçe önceki konuşmalara geri dönün</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Hukuk asistanı" href="assets/feature-screens/tr-current/assistant.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Hukuk asistanı ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/assistant.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Hukuk asistanı — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-6" aria-labelledby="capability-tab-6" tabindex="0" hidden=""><p class="capability-description">Tarafları, dava ayrıntılarını, yüklenen belgeleri ve tarihli gelişmeleri tek bir dava çalışma alanında tutun</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Dava ve belge yönetimi" href="assets/feature-screens/tr-current/case-documents.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Dava ve belge yönetimi ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/case-documents.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Dava ve belge yönetimi — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-7" aria-labelledby="capability-tab-7" tabindex="0" hidden=""><p class="capability-description">Davaya bağlı görevler oluşturun, son tarih belirleyin ve tamamlanmasını takip edin. Duruşmaları ve görev tarihlerini takvimde görün.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Görevler ve duruşma takvimi" href="assets/feature-screens/tr-current/calendar.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Görevler ve duruşma takvimi ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/calendar.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Görevler ve duruşma takvimi — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-8" aria-labelledby="capability-tab-8" tabindex="0" hidden=""><p class="capability-description">Kaydedilen sonuçları ve büro analitiğini inceleyin. Başka bir avukatın dosyayı anlamasına yardımcı olacak bir dava devir özeti oluşturun.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Raporlar ve devir" href="assets/feature-screens/tr-current/reports.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Raporlar ve devir ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/reports.jpg?v=0.48" loading="lazy" alt="Gerçek CaseBridge uygulaması: Raporlar ve devir — kurgusal örnek veriler"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-9" aria-labelledby="capability-tab-9" tabindex="0" hidden=""><p class="capability-description">Yargıtay kararlarında birlikte anılan kanun maddelerini bilgi haritasında inceleyin. Bir maddeyi seçerek bağlantılı maddeleri ve karar bağlamını görün.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Hukuki zihin haritası" href="assets/feature-screens/tr-current/knowledge-map.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Hukuki zihin haritası ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/knowledge-map.jpg?v=0.48" alt="Gerçek CaseBridge uygulaması: Hukuki zihin haritası — yalıtılmış örnek kurulum" loading="lazy"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-10" aria-labelledby="capability-tab-10" tabindex="0" hidden=""><p class="capability-description">Davacı veya davalı açısından dosyadaki olası açıkları, karşı argümanları ve hukuki hamleleri kanun dayanaklarıyla birlikte inceleyin.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Karşı taraf analizi" href="assets/feature-screens/tr-current/counter-analysis.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Karşı taraf analizi ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/counter-analysis.jpg?v=0.48" alt="Gerçek CaseBridge uygulaması: Karşı taraf analizi — yalıtılmış örnek kurulum" loading="lazy"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div><div role="tabpanel" id="capability-panel-11" aria-labelledby="capability-tab-11" tabindex="0" hidden=""><p class="capability-description">Hâkim, iki vekil ve bilirkişinin yer aldığı duruşmada rol seçin. Sahneyi ilerletin, müdahaleleri deneyin ve rehberin sonraki hamle önerilerini inceleyin.</p><a class="feature-screen-link" data-feature-screen="" data-feature-title="Yönetilen duruşma" href="assets/feature-screens/tr-current/directed-trial.jpg?v=0.48" target="_blank" rel="noopener" aria-label="Yönetilen duruşma ekran görüntüsünü tam boyutta aç"><img src="assets/feature-screens/tr-current/directed-trial.jpg?v=0.48" alt="Gerçek CaseBridge uygulaması: Yönetilen duruşma — yalıtılmış örnek kurulum" loading="lazy"><span class="feature-screen-expand">Tam ekran görün ↗</span></a></div></div>
-      </div>
-      <dialog id="feature-screen-dialog" class="actual-ai-dialog feature-screen-dialog" aria-labelledby="feature-screen-title"><div class="actual-ai-dialog-header"><span id="feature-screen-title" data-feature-title="">CaseBridge.</span><button type="button" data-feature-close="" aria-label="Ekran görüntüsünü kapat">×</button></div><img alt=""></dialog>
-      <p class="image-note">Gerçek CaseBridge uygulamasından, yalnızca kurgusal örnek verilerle alınmış Türkçe ekran görüntüleri. Eğitim puanları gerçek dava sonuçlarını öngörmez.</p><details class="story-detail"><summary>Ürünü keşfedin: analiz, prova ve dava yönetimi<span aria-hidden="true">+</span></summary><div class="story-detail-body"><section class="intro section wrap" id="approach">
-      <div class="section-label"><span class="tiny-square"></span> Davanıza dört bakış açısı</div>
-      <div class="intro-content"><h2>Argümanınız önemli<br><span>Karşı tarafınki de öyle</span></h2><p>CaseBridge davanızı bir araştırmacının, davacı vekilinin, davalı vekilinin ve hâkimin bakış açısından inceler. Hangi iddiaların desteklendiğini, neyin eksik olduğunu ve karşı tarafın hangi noktalarda itiraz edebileceğini tek raporda görün.</p></div>
-      <div class="perspectives"><div><span>01</span><h3>Araştırmacı</h3><p>Olguları ve eksik bilgileri belirleyin</p></div><div><span>02</span><h3>Davacı vekili</h3><p>İddiayı destekleyen argümanları inceleyin</p></div><div><span>03</span><h3>Davalı vekili</h3><p>Karşı tarafın itirazlarına hazırlanın</p></div><div><span>04</span><h3>Hâkimin bakış açısı</h3><p>İki tarafı birlikte değerlendirin</p></div></div>
-    </section><section class="analysis-section" id="analysis">
-      <div class="wrap section">
-        <div class="section-label light"><span class="tiny-square"></span> Dava analizi</div>
-        <div class="section-heading"><h2>Olası sonuçlar<br>Gerekçeler<br><em>Somut sonraki adımlar</em></h2><div><p>Analiz raporunuz olası senaryoları ve gerekçelerini sunar. Güçlü ve zayıf yönlerin yanında, araştırılacak soruları ve davanızı güçlendirecek önerilen adımları listeler.</p><a class="text-link light-link" href="#platform">Ürünü iş başında görün <span aria-hidden="true">↗</span></a></div></div>
-        <div class="analysis-details">
-          <div class="feature-list"><article><span>01</span><div><h3>Olası dava sonuçlarını değerlendirin</h3><p>Dava materyallerinize dayanan senaryoları bir yapay zekâ değerlendirme puanı ve güven düzeyiyle birlikte inceleyin</p></div></article><article><span>02</span><div><h3>Dava stratejinizi güçlendirin</h3><p>Sonraki adımlarınızı eksik belgeler, yanıtlanmamış sorular ve önerilen işlemler etrafında planlayın</p></div></article><article><span>03</span><div><h3>Karşı argümanlara hazırlanın</h3><p>Kendi argümanlarınızın yanında karşı tarafın savunmasını ve davanızın zayıf yönlerini inceleyin</p></div></article></div>
-          <div class="strategy-card"><div class="strategy-top"><span>STRATEJİ NOTLARI</span></div><h3>Örnek dava:<br>Alacak tahsili uyuşmazlığı</h3><p class="example-label">DEĞERLENDİRİLECEK ADIMLAR</p><div class="strategy-step"><span>1</span><div><strong>Delil zincirini tamamlayın</strong><p>Ödeme kaydını ve yazışmaları net bir zaman çizelgesinde birleştirin</p></div></div><div class="strategy-step"><span>2</span><div><strong>Karşı iddiayı inceleyin</strong><p>Karşı tarafın iddiasını dayandırdığı anlaşmayı ve koşulları inceleyin.</p></div></div><div class="strategy-step"><span>3</span><div><strong>Yanıtlanmamış soruları netleştirin</strong><p>Eksik belgeleri toplayın ve davanızı yeniden değerlendirin</p></div></div><div class="strategy-footer"><span class="status-dot"></span> Öneriler bir hukuk profesyoneli tarafından incelenmelidir</div></div>
+    <section class="chapter chapter-hero" id="top" data-scene="0" aria-labelledby="hero-title">
+      <video class="hero-fallback" src="assets/video/casebridge-hero.mp4" poster="assets/video/hero-poster.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="chapter-inner wrap">
+        <div class="copy hero-copy">
+          <p class="kicker">Hukuk büroları için yapay zekâ çalışma alanı</p>
+          <h1 id="hero-title">Davanın her yolunu <em>önceden</em> görün.</h1>
+          <p class="lead">CaseBridge biten davalardan ders çıkarır, süren davanın olası yollarını gösterir, verinizi modele gitmeden maskeler, büronuzu tek bakışta toplar ve müvekkil görüşmesinde size sufle verir.</p>
+          <div class="actions">
+            <a class="button primary" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep et <span aria-hidden="true">↗</span></a>
+            <a class="button ghost" href="#gecmis">Hikâyeyi izle <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="scroll-hint" aria-hidden="true">Kaydırın — dosya açılıyor</p>
         </div>
-        <p class="ai-note">Yapay zekâ çıktıları karar vermeyi destekler; hukuki bir sonucu ya da başarıyı garanti etmez. Değerlendirme puanı, istatistiksel olarak doğrulanmış bir kazanma olasılığı değildir. Sonuçlar bir hukuk profesyoneli tarafından incelenmelidir.</p>
       </div>
-    </section><section class="platform-section section wrap" id="platform">
-      <div class="section-label"><span class="tiny-square"></span> Platform</div>
-      <div class="platform-heading"><h2>Duruşmadan önce<br><span>prova yapmaya zaman ayırın</span></h2><p>Örnek bir davada taraf seçin, delil sunun ve karşı argümanlara yanıt verin. Oturumun sonunda güçlü yönlerinizi ve gelişmeye açık alanlarınızı inceleyin.</p></div>
-      <div class="screen-tabs" role="tablist" aria-label="Uygulama ekran görüntüleri"><button id="tab-courtroom" role="tab" aria-selected="true" aria-controls="screen-courtroom" tabindex="0">Duruşma simülasyonu <span>↗</span></button><button id="tab-evaluation" role="tab" aria-selected="false" aria-controls="screen-evaluation" tabindex="-1">Değerlendirme ve geri bildirim <span>↗</span></button></div>
-      <div class="screen-panel" id="screen-courtroom" role="tabpanel" aria-labelledby="tab-courtroom"><div class="screen-frame"><div class="window-bar"><span><i></i><i></i><i></i></span><span>CaseBridge / Duruşma simülasyonu</span><span>ÜRÜN EKRAN GÖRÜNTÜSÜ</span></div><img src="assets/feature-screens/tr-current/conversation.jpg?v=0.48" alt="Örnek bir CaseBridge duruşması: gizli dava notları, delil dosyası ve duruşma tutanağı" loading="lazy"></div><div class="screen-description"><h3>Duruşma salonuna girmeden önce prova yapın</h3><p>Davacı ya da davalı vekili rolünü üstlenin. Delil sunun, yapay zekâ karşı tarafa yanıt verin ve altı aşamalı kurgusal bir duruşmada stratejinizi çalışın.</p></div></div>
-      <div class="screen-panel" id="screen-evaluation" role="tabpanel" aria-labelledby="tab-evaluation" hidden=""><div class="screen-frame"><div class="window-bar"><span><i></i><i></i><i></i></span><span>CaseBridge / Eğitim değerlendirmesi</span><span>ÜRÜN EKRAN GÖRÜNTÜSÜ</span></div><img src="assets/feature-screens/tr-current/evaluation.jpg?v=0.48" alt="CaseBridge eğitim değerlendirmesi: delil kullanımı, itiraz ve strateji puanları, güçlü yönler ve geliştirme önerileri" loading="lazy"></div><div class="screen-description"><h3>Her provadan öğrenin</h3><p>Delil kullanımı, karşı argümanlar ve duruşma stratejisi üzerine geri bildirim alın. Ekrandaki puan bir eğitim değerlendirmesidir; gerçek bir davanın sonucunu öngörmez.</p></div></div>
-      <p class="image-note">Ekran görüntüleri, CaseBridge uygulamasındaki kurgusal bir örnek duruşmadan alınmıştır</p>
-    </section><section class="workspace-section section wrap"><div class="workspace-title"><div class="section-label"><span class="tiny-square"></span> Dava yönetimi</div><h2>Büronuzun<br><span>günlük çalışma alanı</span></h2></div><div class="workspace-features"><article><h3>Davalar ve belgeler</h3><p>Tarafları, belgeleri ve dava geçmişini tek yerde tutun</p></article><article><h3>Takvim ve görevler</h3><p>Duruşma tarihlerini ve görevleri birlikte takip edin</p></article><article><h3>Büro analitiği</h3><p>Dava dağılımlarını ve kaydedilen sonuçları incele</p></article><article><h3>Dava devri</h3><p>Dava geçmişini ve sonraki adımları bir araya getirin</p></article></div></section></div></details>
     </section>
 
+    <section class="chapter" id="gecmis" data-scene="1" aria-labelledby="gecmis-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>01</span> Geçmiş dava analizi</p>
+          <h2 id="gecmis-title">Biten davayı geri sarın.</h2>
+          <p class="lead">Kapanmış dosyanın olaylarını, delillerini ve kararını yeniden okuyun. Hangi aşamada farklı bir adımın sonucu değiştirebileceğini görün ve bu dersi sonraki dosyaya taşıyın.</p>
+          <ol class="steps">
+            <li data-at="0.22"><strong>Kayıtlı yol</strong> Dilekçeden karara kadar dosyadaki gerçek sıra.</li>
+            <li data-at="0.5"><strong>Kırılma noktası</strong> Bilirkişi raporu: itiraz edilmeden kesinleşti.</li>
+            <li data-at="0.82"><strong>Alternatif yol</strong> Süresinde itiraz ve emsal kira delili, kısmi kabule giden daha güçlü bir yol açar.</li>
+          </ol>
+          <p class="fine">Analiz güçlü ve zayıf noktaları, eksik delilleri ve önerilen adımları gösterir. Değerlendirme her zaman avukatındır.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="olasilik" data-scene="2" aria-labelledby="olasilik-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>02</span> Olasılık Ağacı</p>
+          <h2 id="olasilik-title">Süren dava nasıl biter, sizin hamleniz neyi değiştirir?</h2>
+          <p class="lead">Dosyadaki kayıtlardan dallanan olası yolları ve her yolun payını görün. Kaydırdıkça dallar soldan sağa açılır; ret yolunda istinaf ihtimali de görünür. Bir hamle seçin, ağaç ve sonuç dağılımı anında yeniden hesaplansın.</p>
+          <div class="chips" role="group" aria-label="Hamle seçin">
+            <button type="button" class="chip" data-chip="expert" aria-pressed="false">Ek bilirkişi incelemesi iste</button>
+            <button type="button" class="chip" data-chip="precedent" aria-pressed="false">Emsal kira delili sun</button>
+            <button type="button" class="chip" data-chip="settle" aria-pressed="false">Sulh teklif et</button>
+          </div>
+          <ul class="outcomes" aria-live="polite" aria-label="Sonuç dağılımı">
+            <li data-out="kabul" class="o-kabul"><span>Kabul</span><i></i><output>%26</output></li>
+            <li data-out="kismi" class="o-kismi"><span>Kısmi kabul</span><i></i><output>%32</output></li>
+            <li data-out="ret" class="o-ret"><span>Ret</span><i></i><output>%27</output></li>
+            <li data-out="sulh" class="o-sulh"><span>Sulh</span><i></i><output>%15</output></li>
+          </ul>
+          <p class="fine">Kurgusal kira dosyası. Yüzdeler senaryo varsayımıdır; kalibre edilmiş bir kazanma olasılığı değildir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="anonim" data-scene="3" aria-labelledby="anonim-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>03</span> Veri anonimleştirme</p>
+          <h2 id="anonim-title">Kişisel veri, modele gitmeden maskelenir.</h2>
+          <p class="lead">Ad soyad, T.C. kimlik numarası, telefon, adres, e-posta ve IBAN gibi bilgiler etiketlenip gizlenir. Maskeli sonucu siz gözden geçirir, onaylarsınız.</p>
+          <ol class="steps">
+            <li data-at="0.08"><strong>Tara</strong> Belge ya da metin, kalıcı kayıt oluşturmadan okunur.</li>
+            <li data-at="0.4"><strong>Maskele</strong> Hassas alanlar kategori etiketleriyle değiştirilir.</li>
+            <li data-at="0.7"><strong>Kilitle</strong> Her büronun verisi ve yapay zekâ anahtarı ayrı ve şifreli tutulur.</li>
+          </ol>
+          <p class="fine">Otomatik maskeleme insan incelemesinin yerine geçmez; uygulama her sonuçta gözden geçirme ister.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="buro" data-scene="4" aria-labelledby="buro-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>04</span> Büro yönetimi</p>
+          <h2 id="buro-title">Büronuzu tek bakışta görün.</h2>
+          <p class="lead">Hangi avukat hangi dava türünde daha başarılı, kimin üzerinde süresi yaklaşan iş var, nerede iş yükü birikiyor? Ekip, süre, finans ve onay kayıtları tek panelde.</p>
+          <ul class="legend" aria-label="Dava türleri">
+            <li class="t-is">İş</li><li class="t-kira">Kira</li><li class="t-ticaret">Ticaret</li><li class="t-ceza">Ceza</li><li class="t-lost">Kaybedilen</li>
+          </ul>
+          <ol class="steps">
+            <li data-at="0.1"><strong>Sonuçlar</strong> Avukat ve dava türüne göre kazanılan ve kaybedilen dosyalar.</li>
+            <li data-at="0.6"><strong>Riskler</strong> Yaklaşan süreler ve geciken görevler kırmızıyla öne çıkar.</li>
+          </ol>
+          <p class="fine">Kurgusal büro verisi. Çubukların üzerine gelerek ayrıntıyı görün.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="sufle" data-scene="5" aria-labelledby="sufle-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>05</span> Sufle</p>
+          <h2 id="sufle-title">Görüşme sürerken, doğru madde elinizin altında.</h2>
+          <p class="lead">Müvekkil görüşmesini metin ya da sesle takip eder; konuşmaya bağlı, kaynak alıntılı destek kartları çıkarır. Dayanağı olmayan kart gösterilmez.</p>
+          <div class="transcript" aria-label="Örnek görüşme">
+            <p data-at="0.05"><b>Müvekkil</b> Ev sahibi kirayı birden çok artırmak istiyor.</p>
+            <p data-at="0.38"><b>Müvekkil</b> Sözleşmeyi bulamadım, galiba evde bir yerde.</p>
+            <p data-at="0.6"><b>Müvekkil</b> Geçen yıl da bir artış yapmıştı.</p>
+          </div>
+          <p class="fine">Kurgusal görüşme. Kartlar bilgilendirme amaçlıdır; hukuki değerlendirme avukatındır.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="simulasyon" data-scene="6" aria-labelledby="simulasyon-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>06</span> Duruşma simülasyonu</p>
+          <h2 id="simulasyon-title">Duruşmaya girmeden önce prova edin.</h2>
+          <p class="lead">Siz vekil olarak konuşursunuz; karşı vekil ve hâkim yapay zekâdır. Karşı taraf delillerinize itiraz eder, hâkim soru sorar, oturum sonunda dört ölçütlü bir değerlendirme alırsınız.</p>
+          <ol class="steps">
+            <li data-at="0.06"><strong>Siz</strong> İddianızı ve delilinizi sunarsınız.</li>
+            <li data-at="0.22"><strong>Karşı vekil</strong> Zayıf noktanıza itiraz eder.</li>
+            <li data-at="0.38"><strong>Hâkim</strong> Dosyaya özel sorusunu sorar.</li>
+            <li data-at="0.74"><strong>Değerlendirme</strong> Hukuki dayanak, delil, ikna ve usul: 4 × 25 puan.</li>
+          </ol>
+          <p class="fine">Kurgusal prova. Puan bir eğitim değerlendirmesidir; gerçek dava sonucu tahmini değildir.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing wrap" aria-labelledby="closing-title">
+      <h2 id="closing-title">Altı araç, tek dosya, tek ekip.</h2>
+      <p>Geçmişten öğrenin, olası yolları görün, veriyi koruyun, büroyu yönetin, görüşmede ve duruşmada hazırlıklı olun.</p>
+      <div class="actions">
+        <a class="button primary" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep et <span aria-hidden="true">↗</span></a>
+        <a class="button ghost" href="https://app.casebridge.com.tr/login">Uygulamaya giriş yap →</a>
+      </div>
+    </section>
 
     <section class="team-surface wrap section" id="team">
       <div class="wrap section">
         <div class="team-heading"><h2>CaseBridge’in arkasındaki ekip</h2><p>Yapay zekâ, yazılım mühendisliği ve hukuk deneyimini bir araya getirerek avukatların dava hazırlığını ve günlük çalışmalarını destekleyen bir platform geliştiriyoruz.</p></div>
-        <div class="team-list"><article class="team-person"><img class="member-photo" src="assets/team/izzet-ahmet-web.jpg" alt="İzzet Ahmet" width="240" height="252" loading="lazy"><div><h3>İzzet Ahmet</h3><p class="team-role">İş geliştirme ve iş ortaklıkları</p><p>Perpetual Labs bünyesindeki yapay zekâ operasyonları ve iş ortaklıkları deneyimini CaseBridge’in iş geliştirme çalışmalarına taşıyor. ASELSAN’daki mühendislik deneyimiyle teknoloji ve müşteri ihtiyaçları arasında köprü kuruyor; iş ortaklıkları ve ürünün pazara sunulması üzerine çalışıyor.</p></div></article><article class="team-person"><img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy"><div><h3>Emin Merden</h3><p class="team-role">Yapay zekâ ve veri</p><p>BAUROV’da yazılım ekip liderliği, Baykar’da makine öğrenmesi stajı ve Outlier AI’da dil modeli değerlendirme deneyimine sahip. Bilgisayarlı görü, veri seti hazırlama ve sentetik veri üretimi çalışmalarını CaseBridge’in yapay zekâ ve veri süreçlerine taşıyor.</p></div></article><article class="team-person"><img class="member-photo" src="assets/team/hatice-cam-web.jpg" alt="Hatice Çam" width="240" height="252" loading="lazy"><div><h3>Hatice Çam</h3><p class="team-role">Yazılım altyapısı ve sistem mimarisi</p><p>Technarts bünyesinde etkinlik yönetimi platformu ve IP adresi yönetim sistemi geliştirme çalışmalarına katkı sağlıyor. Veritabanları, veri akışları ve uygulama altyapısı üzerine çalışıyor; Perpetual Labs bünyesinde yapay zekâyla sunum hazırlama çalışmalarını da sürdürüyor.</p></div></article><article class="team-person"><img class="member-photo" src="assets/team/bengu-ozbek-web.jpg" alt="Bengü Özbek" width="240" height="252" loading="lazy"><div><h3>Bengü Özbek</h3><p class="team-role">Ekosistem ilişkileri</p><p>Lastfall, Autosense ve Technarts deneyimleriyle müşteri ihtiyaçlarının anlaşılması ve teknoloji ekosistemindeki ilişkilerin geliştirilmesi üzerine çalışıyor. CaseBridge’in ürün ihtiyaçları ile ekosistem bağlantılarının bir araya gelmesine katkı sağlıyor.</p></div></article><article class="team-person"><img class="member-photo" src="assets/team/ahmet-buyukdag-web.jpg" alt="Ahmet Büyükdağ" width="240" height="252" loading="lazy"><div><h3>Ahmet Büyükdağ</h3><p class="team-role">Hukuki içerik ve ürün danışmanlığı</p><p>İHH’daki gönüllü yönetimi ve proje koordinasyonu, Genç İHH yönetim kurulu ve Hacettepe Ombudsmanlık ve İnsan Hakları Topluluğu kurucu başkanlığı deneyimleriyle hukuki senaryolar, analiz çerçevesi ve hukukçuların ihtiyaçları üzerine çalışıyor.</p></div></article></div>
+        <div class="team-list"><article class="team-person"><img class="member-photo" src="assets/team/izzet-ahmet-web.jpg" alt="İzzet Ahmet" width="240" height="252" loading="lazy"><div><h3>İzzet Ahmet</h3><p class="team-role">İş geliştirme ve iş ortaklıkları</p><ul class="team-facts"><li><b><a href="https://www.aselsan.com/" target="_blank" rel="noopener noreferrer">ASELSAN</a>:</b> mühendislik deneyimi</li><li><b><a href="https://perpetual-labs.ai/" target="_blank" rel="noopener noreferrer">Perpetual Labs</a>:</b> yapay zekâ operasyonları ve iş ortaklıkları</li><li><b>CaseBridge:</b> iş ortaklıkları ve ürünün pazara sunulması</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy"><div><h3>Emin Merden</h3><p class="team-role">Yapay zekâ ve veri</p><ul class="team-facts"><li><b><a href="https://outlier.ai/" target="_blank" rel="noopener noreferrer">Outlier AI</a>:</b> dil modeli değerlendirme</li><li><b><a href="https://perpetual-labs.ai/" target="_blank" rel="noopener noreferrer">Perpetual Labs</a>:</b> altyapı (infra) yönetimi</li><li><b>CaseBridge:</b> yapay zekâ modelleri ve veri süreçleri</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/hatice-cam-web.jpg" alt="Hatice Çam" width="240" height="252" loading="lazy"><div><h3>Hatice Çam</h3><p class="team-role">Yazılım altyapısı ve sistem mimarisi</p><ul class="team-facts"><li><b><a href="https://technarts.com/" target="_blank" rel="noopener noreferrer">Technarts</a>:</b> etkinlik yönetimi platformu ve IP adresi yönetim sistemi</li><li><b><a href="https://perpetual-labs.ai/" target="_blank" rel="noopener noreferrer">Perpetual Labs</a>:</b> yapay zekâyla sunum hazırlama</li><li><b>CaseBridge:</b> Veritabanları, veri akışları ve uygulama altyapısı</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/bengu-ozbek-web.jpg" alt="Bengü Özbek" width="240" height="252" loading="lazy"><div><h3>Bengü Özbek</h3><p class="team-role">Ekosistem ilişkileri</p><ul class="team-facts"><li><b><a href="https://technarts.com/" target="_blank" rel="noopener noreferrer">Technarts</a>:</b> müşteri ihtiyaçlarını anlama</li><li><b><a href="https://lastfall.com.tr/" target="_blank" rel="noopener noreferrer">Lastfall</a>:</b> teknoloji ekosistemi ilişkileri</li><li><b>CaseBridge:</b> ürün ihtiyaçlarını ekosistem bağlantılarıyla buluşturma</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/ahmet-buyukdag-web.jpg" alt="Ahmet Büyükdağ" width="240" height="252" loading="lazy"><div><h3>Ahmet Büyükdağ</h3><p class="team-role">Hukuki içerik ve ürün danışmanlığı</p><ul class="team-facts"><li><b><a href="https://ihh.org.tr/" target="_blank" rel="noopener noreferrer">İHH</a>:</b> gönüllü yönetimi ve proje koordinasyonu</li><li><b><a href="https://www.hacettepe.edu.tr/" target="_blank" rel="noopener noreferrer">Hacettepe</a>:</b> Ombudsmanlık ve İnsan Hakları Topluluğu kurucu başkanlığı</li><li><b>CaseBridge:</b> hukuki senaryolar, analiz çerçevesi ve hukukçuların ihtiyaçları</li></ul></div></article></div>
       </div>
     </section>
 
-
-
-
-    <section class="research-surface wrap"><details class="story-detail" id="faq"><summary>Sık sorulan sorular<span aria-hidden="true">+</span></summary><div class="story-detail-body"><div><div class="section-label"><span class="tiny-square"></span> Sık sorulan sorular</div><h2>Aklınıza<br>takılabilecekler</h2></div><div class="faqs"><details><summary>CaseBridge dava sonuçlarını kesin olarak tahmin eder mi?<span aria-hidden="true">+</span></summary><p>Hayır. CaseBridge, dosyanızdaki bilgilere dayanarak olası senaryolar ve bir yapay zekâ değerlendirmesi sunar. Puan, istatistiksel olarak doğrulanmış bir kazanma yüzdesi değildir. Eksik bilgiler ve model hataları değerlendirmeyi etkileyebilir; nihai karar her zaman bir hukuk profesyonelindedir.</p></details><details><summary>Bir davayı güçlendirmeye nasıl yardımcı olabilir?<span aria-hidden="true">+</span></summary><p>Güçlü ve zayıf argümanları, olası itirazları ve eksik bilgileri öne çıkarır. Araştırılacak sorular ve önerilen adımlar hazırlığı somut işe dönüştürmeye yardımcı olur.</p></details><details><summary>Dava analizi ile duruşma simülasyonu arasındaki fark nedir?<span aria-hidden="true">+</span></summary><p>Dava analizi, davanıza dayanan çok perspektifli bir değerlendirme raporudur. Duruşma simülasyonu ise vekil rolünü üstlendiğiniz ve yapay zekâ karşı taraf ve hâkimle etkileşime girdiğiniz kurgusal bir eğitim çalışmasıdır.</p></details><details><summary>CaseBridge kimler için tasarlandı?<span aria-hidden="true">+</span></summary><p>Dava dosyalarını yönetmek, farklı argümanları değerlendirmek ve duruşma hazırlığını geliştirmek isteyen avukatlar ve hukuk büroları için tasarlanmıştır.</p></details><details><summary>Yapay zekâ araçlarına nereden ulaşırım?<span aria-hidden="true">+</span></summary><p>Uygulamanın üst bölümündeki CaseBridge AI menüsü; dava analizi, duruşma, hukuk asistanı ve harita araçlarını bir araya getirir. Menü mobilde de üst bölümden açılır. Erişimler hesabınızın rolüne bağlıdır.</p></details><details><summary>Bilgi Haritası neyi gösterir?<span aria-hidden="true">+</span></summary><p>Yargıtay kararlarında birlikte anılan kanun maddelerini ve aralarındaki atıf bağlantılarını gösterir. Madde arayıp seçerek ilişkileri ve karar bağlamını inceleyebilirsiniz. Bu harita dosyanıza özgü bir sonuç tahmini değildir; gösterilen oranlar kazanma olasılığı sayılmaz.</p></details><details><summary>Olasılık Ağacı yüzde hesaplar mı?<span aria-hidden="true">+</span></summary><p>Olasılık Ağacı, varsayıma bağlı sayıları “Demo tahmini” olarak gösterir. Sentetik örnekte yalnız aynı sorunun birbirini dışlayan alternatifleri toplam %100’dür; gerekli kayıt eksikse eşit başlangıç kullanılır. Büro dosyalarında örtüşebilen dallar bağımsız 0–100 destek ağırlığı alır ve toplamlanmaz. Başlangıç 50/100 nötrdür; varsayımın ve bağlı kayıt sayısının etkisi görünür. Bu sayılar kazanma olasılığı veya kalibre edilmiş hukuki tahmin değildir.</p></details><details><summary>Dosyaya yeni bilgi eklendiğinde ağaç nasıl güncellenir?<span aria-hidden="true">+</span></summary><p>Kaynakları yenile düğmesiyle dosyanın güncel kayıtlarını yeniden okuyabilirsiniz. İçerik değişmişse bir uyarı, değişen dallar ve aynı oturumdaki önceki görüntü gösterilir. Bu görünüm kendi başına yeni bir yapay zekâ analizi başlatmaz.</p></details><details><summary>Karşı taraf analizi nasıl kullanılır?<span aria-hidden="true">+</span></summary><p>Karşı Taraf Analizi aracında dosyayı ve davacı ya da davalı bakış açısını seçersiniz. Araç, verilen özete göre incelenebilecek açıkları ve karşı argümanları sunar. Çıktı, karşı tarafın gerçek niyetini veya mahkemenin kararını bildiği anlamına gelmez.</p></details><details><summary>Yönetilen duruşma ile ne çalışabilirim?<span aria-hidden="true">+</span></summary><p>Yönetilen Duruşma aracında seçtiğiniz dosyanın özeti üzerinden aşamalı bir prova yapabilirsiniz. Duruşma kaydı, soru ve yanıtlar hazırlığınızı gözden geçirmenize yardımcı olur; gerçek duruşmanın yerine geçmez.</p></details><details><summary>Örnek moddaki yanıtlar gerçek bir model değerlendirmesi mi?<span aria-hidden="true">+</span></summary><p>Örnek mod, uygulamayı denemek için önceden tanımlanmış kurgusal yanıtlar kullanır. Örnek veya eğitim etiketi taşıyan çıktılar gerçek dosyanız için yapılmış bir değerlendirme veya doğrulanmış hukuki araştırma sayılmaz.</p></details><details><summary>Yapay zekâ çıktısını kullanmadan önce neyi kontrol etmeliyim?<span aria-hidden="true">+</span></summary><p>Belge asıllarını, tarihleri, tarafların iddialarını ve varsa mevzuat ya da karar atıflarını bağımsız kaynaklarla doğrulayın. Eksik veya çelişkili bilgileri dosyaya ekleyin. Analizler ve prova puanları karar desteğidir; hukuki değerlendirme ve son karar hukuk profesyoneline aittir.</p></details></div></div></details></section>
+    <section class="faq wrap" id="sss" aria-labelledby="sss-title">
+      <h2 id="sss-title">Aklınıza takılabilecekler</h2>
+      <details><summary>CaseBridge dava sonuçlarını kesin olarak tahmin eder mi?</summary><p>Hayır. Dosyanızdaki bilgilere dayanarak olası senaryolar ve bir yapay zekâ değerlendirmesi sunar. Gösterilen yüzdeler senaryo varsayımıdır; istatistiksel olarak doğrulanmış bir kazanma oranı değildir. Nihai karar her zaman bir hukuk profesyoneline aittir.</p></details>
+      <details><summary>Geçmiş dava analizi ne işe yarar?</summary><p>Kapanmış dosyada güçlü ve zayıf noktaları, eksik delilleri ve farklı adımların açabileceği yolları gösterir. Amaç, aynı türdeki sonraki dosyada daha iyi hazırlanmaktır.</p></details>
+      <details><summary>Verilerim nasıl korunur?</summary><p>Her büronun dosyaları, kullanıcıları ve yapay zekâ anahtarı ayrı tutulur; anahtarlar şifreli saklanır. Anonimleştirme aracı kişisel verileri etiketleyerek gizler, sonucu gözden geçirmeniz istenir.</p></details>
+      <details><summary>Sufle görüşmeyi kaydeder mi?</summary><p>Sufle görüşme sırasında çalışır; görüşme ve kartlar tarayıcı oturumunda tutulur, dışa aktarma sizin açık eyleminizdir. Kullanım öncesi müvekkilin bilgilendirilmesi istenir.</p></details>
+      <details><summary>Yapay zekâ çıktısını kullanmadan önce neyi kontrol etmeliyim?</summary><p>Belge asıllarını, tarihleri, tarafların iddialarını ve mevzuat ya da karar atıflarını bağımsız kaynaklarla doğrulayın. Analizler karar desteğidir.</p></details>
+    </section>
   </main>
 
-  <footer class="footer wrap"><a class="brand" href="#" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Her dava, başından sonuna.</small></span></a><p>Uçtan uca dava desteği</p><span>© <span id="year">2026</span> CaseBridge · <a href="gorsel-kaynaklari.html">Görsel kaynakları</a></span></footer>
-
-
-
-
-
-
-
-</body></html>
+  <footer class="footer wrap">
+    <a class="brand" href="#top" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Uçtan uca dava desteği</small></span></a>
+    <p>© 2026 CaseBridge · <a href="olasilik-agaci.html">Uygulamadan örnek ağaç</a> · <a href="gorsel-kaynaklari.html">Görsel kaynakları</a> · <span class="site-version">v.0.65</span></p>
+  </footer>
+  <noscript><style>.chapter{height:auto}.chapter-inner{position:static;height:auto;padding-block:96px}</style></noscript>
+</body>
+</html>

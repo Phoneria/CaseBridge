@@ -2,6 +2,21 @@
 
 Updated: 22 November 2026.
 
+## Gösterim bürosu için bekleyen düzenlemeler
+
+- [ ] Olasılık ağacında aşamaları dava türüne uygun sırada göster. Fare düğümün üzerine geldiğinde düğüm hafifçe yükselsin ve parlasın, izlenen yol belirginleşsin. Dalları ayırt edilebilir renklerle çiz. Bağlantı okları kaynak düğümden hedef düğüme açıkça yönelsin ve yüzde etiketlerini örtmesin. Bir düğüm seçildiğinde o aşamanın açıklaması, ilgili adımları ve doğrudan açılabilen dava belgeleri gösterilsin. Aynı seçim klavye ve dokunmayla da yapılabilsin.
+- [ ] Genel Bakış’taki dava durumu halka grafiğinin merkezinde grafiğe dahil toplam dava sayısını göster. Dava dağılımı çubuklarının üstüne her çubuğun temsil ettiği dava sayısını yaz.
+- [ ] 20 gösterim davasının her birinde tarafları, duruşma bilgilerini ve dosyayla ilgili görevleri dava detayında görünür yap. Görevlerde açık ve tamamlanmış işleri dosyanın aşamasına uygun göster. Duruşmasız sonuçlanan dosyada (örneğin KYOK) bu bölümde sebebini ve dosyayı sonuçlandıran işlemi göster.
+- [ ] Davalar → Belgeler içinde belge önizlemesini tam sayfaya yayılan, başlıkları, paragrafları ve listeleri belirgin bir Markdown okuma görünümüne dönüştür. İndirilebilir PDF ile aynı belgenin içeriğini göster.
+- [ ] 20 davanın her biri için ayrı bir olasılık ağacı hazırla. Her ağaçta en az 50 anlamlı düğüm ve en az 5 farklı aşama olsun (hedef 5–10 aşama). Kullanıcının paylaştığı “Ceza Davaları Aşamaları” ve “Hukuk Davaları Aşamaları” listelerini esas al. İlk müvekkil görüşmesinden başlayarak müvekkil onayı, başvuru, deliller, duruşmalar, karar ve dosyaya uygun kanun yollarındaki alternatifleri adım adım dallandır. Her dalda o aşamadan geçiş yüzdesini, her yolda başlangıçtan itibaren o yolun gerçekleşme yüzdesini göster. Gösterim yüzdelerini senaryo varsayımı olarak belirt. Gerçekleşen yolu ilgili dava evrakına bağla.
+- [ ] İş Hukuku, Kira ve Ticaret Hukuku örneklerinde kazanılan ve kaybedilen davalara yer ver. Analitikteki yüzdeler kayıtlı sonuçlardan hesaplansın.
+- [ ] Gösterim ekibini İzzet ve dört avukatla sınırla.
+- [ ] Davalar, finans ve ekip kartları dahil uygulama genelinde kullanıcıya görünen “örnek” ibarelerini kaldır.
+- [ ] Finans ekranında gelir ve giderlerin dönem içindeki değişimini ve dağılımını uygun grafiklerle göster.
+- [ ] Müvekkilleri “Gerçek kişi” ve “Tüzel kişi” olarak ayır. Gösterim kayıtlarına gerçekçi görünümlü kurgusal telefon (ör. 0538 ile başlayan) ve e-posta bilgileri ekle.
+- [ ] Örnek aktif davaları ve görevleri ekipteki avukatlara dağıt. Her birinde iki veya üç güncel iş bulunsun. Sonuçlanmış örnek davaları da dağıt ve her avukatın kazandığı ve kaybettiği dava sayılarını ekip ekranında göster.
+- [ ] Ayarlar → Gizli anahtar ekle bölümünde büro yöneticisinin AI bağlantı yöntemini seçebilmesini ve AI işlemlerinin etkin bağlantıyı kullanmasını sağla. İstenen yöntemler OpenAI API anahtarı, OpenAI hesabıyla giriş (OAuth), Claude API anahtarı ve Claude setup token. Hesap bağlantısı ve setup token için CaseBridge'de izin verilen sunucu kullanımını sağlayıcının belgelerinden doğrula. Yönetici gizli değerleri yalnız uygulamada girer. Büro bazında şifreli saklama, maskeli gösterim, adayı ayrı test etme ve açıkça etkinleştirme akışını koru.
+
 ## Geçerli çalışma ve yayın ilkeleri — 22 Kasım 2026
 
 **Tüm CaseBridge çalışmaları GitHub Spec Kit iş akışına uymalıdır.** Bu zorunluluk mevcut açık iş listesinin tamamını, uygulamayı, tanıtım sitesini ve sunucu/yayın sürecini kapsar; yalnız gelecekte açılacak yeni işler veya entegrasyon sonrasındaki işler ile sınırlı değildir. GitHub Spec Kit 1.4.3 Codex entegrasyonu, constitution ve S02–S09 gereksinim/plan/görev/doğrulama kayıtları bu çalışma kapsamında kuruldu; tamamlanma yalnız gerçek kabul kanıtıyla işaretlenir.
@@ -525,6 +540,14 @@ Actual44985580863 SUCCESS:12 fresh native publicapp23 captures with disposable s
 
 Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health checked, capture/publication skipped, no newversion/PR. Standing five-minute polling and app/marketing version-file triggers active; GitHub scheduling may delay. Evidence specs/010-versioned-gallery/verification.md and docs/validation/2026-11-22/gallery48-*.json. Final evidence-only update changes no runtime/version/gallery and requires no policy bootstrap.
 
+## İncelemeye hazırlanan etkileşimli Rehber — v.0.24
+
+- [x] Güncel origin/main c994bb4 üzerinden ayrı dal; oturum header sağ üstünde masaüstü/mobil görünür Rehber, sayfa/sekme/rol bağlamı, konu seçimi, önceki/sonraki/baştan başla/çıkış.
+- [x] Büro Yönetimi 17 bölüm; kritik süre, yedek/doğrulama, toplu devir/teslim teyidi, inceleme/onay, açık müvekkil yayını iş akışları kaynakla doğrulandı. Platform, avukat ve kısıtlı kapsam ayrımı korunur.
+- [x] 23 hedefli frontend testi ve final 5 rehber testi; üretim build/typecheck; 30 gerçek Chromium rol/genişlik/tema senaryosu. Rehber okurken sıfır ağ isteği/yazım/URL-storage değişimi, sayfa hatası/taşma yok. Spec 011 ve docs/validation/2026-11-22/workspace-guide-browser.json.
+- [x] İncelemeye hazır PR #55 oluşturuldu; #54 CaseBridge Projects In Review. Diff kabul kapısındaki 4 isimli test gerçekten çalışıp geçti.
+- [x] Rehber, #55 ile korumalı main dalında birleşti.
+- [x] Rehberin birleşik v.0.26 sürümü genel uygulama adresinde doğrulandı.
 ## Onaylanan ekip içerik güncellemesi — 22 Kasım 2026
 
 - [x] Emin Merden'in yerel CV'si metin/render incelendi; yalnız kısa mesleki tanıtım kullanılır, ham PDF/özel iletişim bilgileri depoya veya siteye eklenmez.
@@ -535,3 +558,76 @@ Subsequent ordinary44985846872 SUCCESS: actual public48bytes/identity/health che
 
 - [x] Kullanıcının onayladığı hazır portre yalnız720×720 web JPEG boyutuna küçültüldü; görsel içerik/renk/yüz değiştirilmez. Emin'in EM alanı gerçek img ve Emin Merden alt metniyle değiştirilir; Yapay zekâ ve veri unvanı, biyografi ve diğer üyeler korunur.
 - [x] Dört hedefli kabul ve altı local/public JS açık/kapalı masaüstü/mobil görünüm geçti. PR58 → protected main ebe5f51; mevcut timer marketing v.0.50 yayımladı. Normal public portre dosya/hash/decode/alt/kadraj, HTML hash ve release.json50/ebe5f51, restricted immutable verify ve health ok. Tüm ekip metinleri/diğer üyeler korundu; ilgisiz işler ve yeni müşteri teslimi yok. Kanıt specs/011-team-roles/verification.md ve docs/validation/2026-11-22/emin-portrait-*.json.
+
+### Rehber konumu kullanıcı düzeltmesi
+- [x] Son açık talimatla header CaseBridge AI düğmesi kaldırılıp aynı konuma Rehber kondu; tıklamak etkileşimli rehberi açar. AI araçları sol menüde korunur.
+- [x] 22 hedefli test, final production build/typecheck/version check ve 30 Chromium senaryosu geçti; her senaryoda header AI yokluğu ve rehber işlevi doğrulandı. PR #55 güncellenir, In Review kalır. Public yayın yapılmadı.
+
+## İncelemeye hazırlanan geniş örnek ekip — v.0.24 adayı
+- [x] Örnek verileri yükle:12 farklı isim/uzmanlıkta ÖRNEK avukat, tenant-bağlı sabit kimlikler, yalnız örnek dosya kapsamı; ortak parola/otomatik davet yok. Önceki örnek portföy ilk kez dağıtılır, tekrar yükleme sonradan yapılan atamaları korur.
+- [x] Admin panelinde tüm avukat isimleri okunur; yalnız örnek dosya için örnek avukat seçimi, gerçek ve bürolar arası atama engeli, standart yeni/düzenle listelerinde örnek ekip yok.
+- [x] İlk10 backend testi geçti; geniş25 hedefli kontrolün24ü geçti, örnek hesap için yanlış normal-login test yardımcısı düzeltildi ve kalan1 test geçti. Frontend hedefli testler/build/typecheck ve gerçek yerel backend+UI ile6 masaüstü/mobil/açık-koyu akış geçti. Kanıt specs/012-expanded-demo-team ve docs/validation/2026-11-22/expanded-demo-team-browser.json.
+- [x] Örnek ekip #61 ile main dalına alındı ve v.0.26 içinde yayımlandı.
+
+- [x] Ayrı PR #61 ve iş #60 In Review; 9 davranış dosyasına bağlı4 gerçek kabul testi başarılı çalıştı.32 hedefli frontend testi geçti. Canlı import veya yayın yapılmadı.
+
+### Kullanıcı ek isteği — Örnek verileri kaldır
+- [x] Ayarlar’da salt okunur sayım önizlemesi, Vazgeç/Escape, açık kalıcı kaldırma onayı; büro kapsamı, değişen planda409, çift işlem kilidi, boş durum ve hata sonrası tekrar. Örnek dosyalara sonradan eklenen içeriğin de silineceği açıkça yazılır.
+- [x] Kesin şablon kimlikleri + bilinen işaretli davalar; gerçek/diğer büro kayıtları ve ayarlar korunur. Kullanılmış/değiştirilmiş örnek hesaplar ve gerçek dosya kapsamları tutulur; yalnız silinen örnek erişim kimlikleri temizlenir. Dosya silme DB commit sonrası ve storage/paylaşılan-dosya kontrolüyle.
+- [x] Üç backend kaldırma/izolasyon/stale-plan/rollback/yeniden yükleme testi geçti;19 hedefli arayüz testi geçti. Tarayıcıda bulunan odak dönüşü hatası düzeltildi. Final kodun build/tarayıcı ve diff kabul sonuçları specs/012-expanded-demo-team/verification.md içinde ayrıca kaydedilir.
+- [x] PR61 kaldırma işlemiyle güncellendi; In Review. Final3 backend/19 frontend, production build/type/version ve6 gerçek tarayıcı kaldır/yeniden yükle akışı geçti;10 davranış dosyası9 isimli kabul testiyle doğrulandı.
+- [x] Örnek verileri kaldırma akışı v.0.26 içinde yayımlandı ve yalıtılmış verilerle sınandı.
+
+## Dava dosyası ve görev panosu · v.0.25 adayı
+
+- [x] Dava detayında belgeler, dosyaya bağlı emsaller, kayıtlı sonuç ve etkileşimli Olasılık Ağacı. Sonucu eksik kapalı bir davaya yetkili kullanıcı kararını ekleyebilir.
+- [x] Beş aşamalı görev panosunda sürükle bırak ve aşama seçimi, görev notları, dosya kapsamında avukata atama, öncelik ve son tarih.
+- [x] Beş kategoride değişken sonuçlar üreten on ek kurgusal dava ve dört CSV raporunda tablo önizlemesi.
+- [x] Üretim derlemesi, sürüm kontrolü, 14 isimli kabul testi ve masaüstü/mobil tarayıcı akışları geçti. Ayrıntılar specs/013-case-workspace-board/verification.md içinde.
+- [x] #63 ve #55 birlikte 9bfc8a9 revizyonunda birleşti. Üretim kodu, v.0.26 sürümü ve sağlık kontrolü doğrulandı.
+
+Birleşik yayın kaydı ve geri dönüş provası [v.0.26 doğrulamasında](specs/001-main-release/verification.md#workspace-release-v026) bulunur.
+
+## Ayrı rehber sayfası ve ekran turu · v.0.27 adayı
+
+- [x] Sağ üstteki Rehber, ilgili konuyu /rehber sayfasında açar. Her konuda amaç, menü konumu, ayrıntılı adımlar ve ekran bağlantısı bulunur.
+- [x] Davalar, Görevler, Raporlar, Admin Paneli ve Hesabım turları ekrandaki kontrolü vurgular. 771 arayüz testi, 34 sentetik Chromium senaryosu, üretim derlemesi ve Spec Kit kontrolleri geçti.
+- [x] [PR 65](https://github.com/Phoneria/CaseBridge/pull/65) korumalı main dalında birleşti. v.0.27 ve 57 arayüz dosyası canlıda doğrulandı. Açık üretim oturumunda Raporlar turu, yalıtılmış verilerle beş turun toplam 34 tarayıcı kontrolü geçti. [Yayın kaydı](specs/011-workspace-guide/verification.md#production-release-v027)
+
+## v.0.28 · Verified fictional case files
+
+Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Public version, health, code and rollback rehearsal passed. The live workspace reported 20 files and 478 PDF documents. [Acceptance results](specs/014-demo-case-files/verification.md)
+
+## Anonimleştirme ekranı — v.0.43, 23 Kasım 2026
+
+- Mevcut anonimleştirme motoruna büro oturumuyla erişilen, kayıt tutmayan metin maskeleme API’si ve sidebar bağlantılı ekran eklendi. Metin yapıştırma, maskeleme, kategori özeti, kopyalama ve temizleme desteklenir. Platform/kısıtlı hesap sınırları korunur; global AI maskeleme ayarı değiştirilmez.
+- 791 frontend testi, üretim build/type kontrolü, 20 release testi ve Spec Kit governance geçti. Odaklı backend: 46 geçti, NER modeli yokluğu nedeniyle 1 atlandı ve 1 beklenen başarısızlık kaldı. Gerçek oturumla iki büro/rol erişimi ve kısıtlı erişim reddi doğrulandı. Sentetik Chromium masaüstü/mobil maskeleme, kopyalama, temizleme ve sidebar kontrolleri geçti; görseller incelendi.
+- [x] Tam backend/CI sonuçları ve main commit kaydı: GitHub CI 45120054103 başarılı (normal maliyetle 1.168 backend geçti, 1 atlandı, 1 beklenen başarısızlık); 791 frontend geçti. PR #85 main commit b8699b9542ca0db07679e288ea737804eaa41503 olarak birleştirildi; test edilen dal ile dosya ağacı aynı.
+- [x] Main kaynaklı değişmez artefakt b8699b9542ca0db07679e288ea737804eaa41503 uygulama kapsamıyla yayımlandı. Stage/canary/activate/verify geçti; public v.0.43, yeni ekran/API kodu, aynı commit’i gösteren health (ok) ve sentetik public masaüstü/mobil akışlar doğrulandı. Geri dönüş kaynağı b60e7e47e65cdfd511f69f3b55e8292f09e3a30a korunuyor.
+- Gerçek müşteri verisi/anahtar kullanılmadı; ek müşteri onboarding yapılmadı. Ayrıntılar specs/012-pii-anonymization/verification.md içindedir.
+
+- Yayın sonrası yapılandırma ve şifreli anahtar dosyaları korumalı `/var/backups/casebridge-anonymization-v043-20261123T055238Z` yedeğiyle byte bazında aynı; arşiv bütünlüğü geçti. Gerçek anahtar işlemi, şema değişikliği veya global AI ayarı değişikliği yapılmadı. Public tarayıcı testi tüm API çağrılarını sentetik karşılıklarla yalıttı; canlı müşteri oturumuyla test iddiası yok. Yeni backend imajı ayrıca ağsız/salt okunur sentetik testten geçti.
+
+## Anonimleştirmede dosya yükleme — v.0.44 adayı
+
+- [x] PDF/DOCX/TXT ve diğer uzantılardaki okunabilir UTF-8/BOM UTF-16 metinlerini dosyayı kaydetmeden çıkarma, kaynak metni inceleyip açıkça maskeleme. DOCX tablo/üst-alt bilgi/not metinleri kapsanır; görsel/gömülü içerik uyarılır.
+- [x] 5 MB dosya, 30.000 karakter, 100 PDF sayfası, 16 MB açılmış DOCX/512 öğe sınırları; şifreli/bozuk/taranmış/ikili dosyada sabit ve açıklayıcı hata, sessiz kırpma yok. Dosya seçme/düzenleme/temizleme eski yanıtları geçersiz kılar. Ayrı yerel okuyucu işlemi 15 saniye, Linux’ta 512 MiB/10 CPU saniyesiyle sınırlıdır; anahtar ortamı aktarılmaz.
+- [x] Son kaynakta 17 odaklı extraction testi, sentetik düşük parola maliyetli 1.185 backend testi (1 atlama/1 beklenen başarısızlık), 795 frontend ve son düğme değişikliğinde 7 ilgili test geçti. Production build/type/version ve sentetik gerçek PDF/TXT/DOCX/diğer uzantı/taranmış/ikili masaüstü-mobil Chromium akışları geçti; görseller incelendi.
+- [x] Normal maliyetli GitHub CI 45123304886 geçti: 1.185 backend (1 atlama/1 beklenen başarısızlık), frontend/build/type/version ve yönetişim. PR #87 main e8f691c04f01bfdb1b963fd42de6b30de281d154 olarak birleşti; backend/frontend/deployment kaynakları test edilen dalla aynı. Değişmez yayın doğrulaması aşağıdaki maddede ayrıca kaydedilir.
+- [x] e8f691c04f01bfdb1b963fd42de6b30de281d154 app kapsamıyla stage/canary/activate/verify üzerinden yayımlandı. Public v.0.44/kod/health ve gerçek dosya seçiciyle sentetik public masaüstü/mobil akışları geçti. Önce yeni imaj ağsız/salt okunur gerçek PDF/TXT/DOCX/diğer metin testinden geçti; public oturumsuz API 401 döndü. Üç korumalı yapılandırma/şifreli anahtar dosyası `/var/backups/casebridge-anonymization-v044-20261123T062056Z` yedeğiyle byte bazında aynı. Geri dönüş kaynağı b8699b9542ca0db07679e288ea737804eaa41503 korunuyor. Public tarayıcıdaki tüm API çağrıları sentetik olarak yalıtıldı; gerçek müşteri oturumu veya yeni tam kurtarma provası iddiası yok.
+- Gerçek müşteri verisi/anahtar, ek müşteri onboarding, global AI ayarı veya şema değişikliği yok. Ayrıntılı kabul kaydı specs/012-pii-anonymization/verification.md içindedir.
+
+## Gece Atlası tanıtım sitesi — v.0.51, 23 Kasım 2026
+
+- [x] Dört değer tek kurgusal dosyada: geçmiş belge/kritik bulgu, koşullu iki dal, dala bağlı prova/geri bildirim, büro-avukat portföy/görev/ajanda. Gerçek WebGL derinliği, doğal kaydırma, azaltılmış hareket ve statik fallback; gerçek Demo randevu bağlantısı.
+- [x] 25 betik ve 3 model testi; beş genişlikte gerçek Chromium akışları ve görsel inceleme geçti. Taste gate OPEN60; brief ile uyuşmayan kit/tam-ekran ölçütleri açık kaydedildi. Performans 0 hata/2 yinelenen logo uyarısı. Klavyede harf ile yerel seçim ve Tab geçti; ok tuşuyla OS pencere otomasyonu sınırı açıklandı. Ayrıntılar specs/015-night-atlas/verification.md.
+- [x] PR89 → main 7c9a7af9c74b45ea2009e0b23acc3c4ad41dedd6; CI 45137707329 başarılı: 1.185 backend (1 atlama/1 beklenen başarısızlık), 795 frontend/build/type/version ve governance. Marketing-only stage/canary/activate/verify geçti. Public v.0.51/kod, 20 dosya hash’i ve beş genişlikte gerçek WebGL/kurgu akışları doğrulandı. Uygulama e8f691c/v.0.44 ve tüm yedi container kimliği aynı; health ok. Önceki v.0.50 artefaktı korundu, yeni üretim rollback provası iddiası yok. Kanıt docs/validation/2026-11-23/night-atlas-*. Yeni müşteri onboarding veya anahtar işlemi yok.
+
+## Örnek olasılık haritası · tanıtım v.0.52
+
+- [x] Geri alınan v.0.50 ana sayfasında iki giriş, perspektif karar ağacı, değiştirilebilir koşullu dağılımlar, ağırlıklı sonuçlar, üç okunabilir belge ve açık yapay zekâ/kurgu etiketi. Yerel 24 betik testi, 21 yayın testi ve 1440/390/320 px tarayıcı akışları geçti.
+- [x] PR #91, main 09c80cb: yalnız tanıtım kapsamıyla v.0.52 yayımlandı. Canlı kaynak eşleşmesi, üç genişlikte harita/belge akışları ve uygulama sağlık kontrolü geçti.
+
+## Tanıtım v.0.53 · Kira bedeli uyuşmazlığı
+- [x] Eski ürün bölümünün yerine aynı konumda düz ağaç, uygulamadan 46 düğüm ve iki kayıtlı iç not. Yeşil sayfa ve iki bağlantısı kaldırıldı. 24 betik testi, 21 yayın testi ve masaüstü/mobil etkileşimler geçti.
+- [x] PR #93 main 08b0e43 için marketing-only yayın ve public v.0.53/kod/health doğrulandı. Canlı üç genişlikte etkileşim kontrolleri geçti. Eski yeşil sayfa HTTP 404.

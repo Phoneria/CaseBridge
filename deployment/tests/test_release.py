@@ -114,11 +114,25 @@ class ReleaseTests(unittest.TestCase):
                 args = command.call_args.args[0]
                 self.assertIn('cb-frontend', args); self.assertNotIn('cb-backend', args); verify.assert_called_once()
 
-    def test_marketing_dependency_closure_keeps_original_video(self):
+    def test_marketing_dependency_closure_contains_public_case_reader(self):
         files = r.marketing_files(Path(__file__).parents[2] / 'web-page')
-        self.assertIn('assets/video/casebridge-hero.mp4', files)
-        self.assertIn('hero-video-restoration.css', files)
+        for name in ('kira-agaci.css', 'kira-agaci.js',
+                     'hero-video-restoration.css', 'assets/video/casebridge-hero.mp4'):
+            self.assertIn(name, files)
+        self.assertNotIn('ornek-dava.html', files)
+        self.assertNotIn('night-atlas.js', files)
         self.assertNotIn('planning/business-plan.xlsx', files)
+
+    def test_marketing_dependency_closure_preserves_referenced_legacy_video(self):
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            (root/'assets/video').mkdir(parents=True)
+            (root/'index.html').write_text('<link href="hero-video-restoration.css"><video src="assets/video/casebridge-hero.mp4"></video>')
+            (root/'hero-video-restoration.css').write_text('video{width:100%}')
+            (root/'assets/video/casebridge-hero.mp4').write_bytes(b'legacy fixture')
+            files = r.marketing_files(root)
+            self.assertIn('assets/video/casebridge-hero.mp4', files)
+            self.assertIn('hero-video-restoration.css', files)
 
 
 if __name__ == '__main__': unittest.main()

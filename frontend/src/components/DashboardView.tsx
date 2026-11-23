@@ -1,6 +1,7 @@
 "use client";
 
-import { BRAND_ACCENT, BRAND_CHART_COLORS } from "@/lib/brand";
+import { OUTCOME_COLORS } from "@/lib/brand";
+import { CHART, STATUS_COLORS, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE, statusColor } from "@/lib/chartTheme";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,8 +19,6 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { DashboardAiCard } from "@/components/ai/DashboardAiCard";
-
-const CHART_COLORS = BRAND_CHART_COLORS;
 
 function hrefFromChartEvent(data: unknown): string | undefined {
   return (data as { payload?: { href?: string } } | undefined)?.payload?.href;
@@ -74,12 +73,12 @@ export function DashboardView() {
     href: analyticsCaseListHref({ kategori: row.case_type }),
   }));
 
-  const statusData = (overview.by_status ?? []).map((row, index) => ({
+  const statusData = (overview.by_status ?? []).map((row) => ({
     key: row.status,
     name: CASE_STATUS_LABELS[row.status] ?? row.status,
     value: row.total,
     href: analyticsCaseListHref({ durum: row.status }),
-    color: CHART_COLORS[index % CHART_COLORS.length],
+    color: statusColor(row.status),
   }));
 
   const lawyerData = (overview.by_lawyer ?? []).filter((row) => row.lawyer_id).map((row) => ({
@@ -119,13 +118,13 @@ export function DashboardView() {
           <p className="mb-4 text-sm font-medium text-navy-700">Avukata Göre Davalar</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={lawyerData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
-              <Tooltip />
-              <Bar dataKey="total" name="Toplam" fill={BRAND_ACCENT[600]} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
-              <Bar dataKey="won" name="Kazanılan" fill="#10b981" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
-              <Bar dataKey="lost" name="Kaybedilen" fill="#f97373" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
+              <XAxis dataKey="name" stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+              <YAxis allowDecimals={false} stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ fill: CHART.cursor }} />
+              <Bar dataKey="total" name="Toplam" fill={CHART.primarySoft} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="won" name="Kazanılan" fill={STATUS_COLORS.devam_eden} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="lost" name="Kaybedilen" fill={OUTCOME_COLORS.lost} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
             </BarChart>
           </ResponsiveContainer>
           <ChartLegendLinks
@@ -143,12 +142,12 @@ export function DashboardView() {
           ) : (
             <>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={categoryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
-                  <Tooltip cursor={{ fill: "#edf9fc" }} />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]} fill={BRAND_ACCENT[600]} cursor="pointer" onClick={openFromChart} />
+                <BarChart data={categoryData} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
+                  <XAxis dataKey="name" stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+                  <YAxis allowDecimals={false} stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ fill: CHART.cursor }} />
+                  <Bar dataKey="total" name="Dava" label={{ position: "top", fontSize: 12, fill: CHART.label }} radius={[6, 6, 0, 0]} fill={CHART.primary} cursor="pointer" onClick={openFromChart} />
                 </BarChart>
               </ResponsiveContainer>
               <ChartLegendLinks
@@ -167,12 +166,14 @@ export function DashboardView() {
             <>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} cursor="pointer" onClick={openFromChart}>
+                  <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" fill={CHART.strong} fontSize="24" fontWeight="650">{statusData.reduce((total, row) => total + row.value, 0)}</text>
+                  <text x="50%" y="58%" textAnchor="middle" fill={CHART.muted} fontSize="11">Toplam dava</text>
+                  <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} stroke={CHART.node} strokeWidth={2} cursor="pointer" onClick={openFromChart}>
                     {statusData.map((row) => (
                       <Cell key={row.key} fill={row.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} />
                 </PieChart>
               </ResponsiveContainer>
               <ChartLegendLinks

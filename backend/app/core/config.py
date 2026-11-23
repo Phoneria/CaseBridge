@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # automated test suite never accidentally calls a real provider.
     llm_provider: Literal["qwen", "openai", "ollama", "anthropic", "mock"] = "mock"
 
+    # Dış LLM sağlayıcılarına (qwen/openai/anthropic) giden istemlerde kişisel verileri maskele.
+    anonymize_llm_input: bool = False
+    anonymize_use_ner: bool = True
+
     # Claude (Anthropic). LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY.
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-sonnet-5-5"

@@ -1,0 +1,29 @@
+# Verification — marketing v.0.51
+
+## Scope and authority
+The explicit user-approved Night Atlas redesign supersedes the constitution's legacy marketing-theme/video preservation and generic synthetic-screenshot convention for this composed, clearly labelled fictional demonstration. No application screenshot is reconstructed or presented as live product. Existing app links and the unchanged five professional team biographies/photos remain available. The app, bureau credentials, production configuration, customer data and onboarding are outside scope.
+
+## Local validation — 23 November 2026
+- 25 Python script tests passed; their fixture runner intentionally prints an inner failing/skipped test to verify rejection, while the outer suite passes. Three pure-model Node tests passed.
+- Chromium/SwiftShader real WebGL pixels change on rotation. Both conditional branches, correct/wrong feedback, resets, document timeline, bureau/lawyer counts, idempotent task planning and TR/EN passed at 1440/1024/768/390/320 pixels. No page errors, missing requests, API calls, horizontal overflow or vertical scroll lock.
+- Reduced-motion frame count stays fixed. WebGL failure retains eight native node links and working journey controls; JS disabled retains core content and real booking links. Narrow 320/390 English fallback passed. Four graph rotations at 1440/768/390/320 had zero label collisions.
+- Keyboard Tab/skip focus, Enter branch, Space answer, Enter planning and mobile Escape/focus return passed. Native selects also passed keyboard type selection (y / s) and Tab; bureau/lawyer counts changed correctly. Headless macOS Chromium did not automate the OS select popup using arrows; the same behavior reproduced in an isolated native-select fixture.
+- The real Demo link opened calendar.app.google; no appointment was booked. Team factual copy/assets retained, investor/timeline destinations kept. Rendered desktop/mobile hero, document, branches, rehearsal, bureau and team inspected.
+- Self-hosted Manrope OFL fonts: 39.1 KiB. Own rendered hero used for share.jpg. No reference assets/code copied, no external runtime dependency, no persistent state or AI request.
+
+## Design tools — actual results and limits
+Taste gate completed its three allowed rounds: **GATE: OPEN 60**, 26 warnings. It did not pass. Remaining findings demand kit-specific visual/motion classes, exact one/two-screen sections, Turkish-category heading heuristics and grid alignment within the deliberate spatial graph. The approved question/fictional native composition, natural section heights and original scene take precedence. This is an explicit brief-driven exception, not a claim of blanket design approval. Genuine small text, touch, contrast and graph collisions found during review were corrected; only the homepage was gated.
+
+Final Taste performance: **0 FAIL, 2 WARN**, both the same reused small header logo classified as below-fold (footer logo is lazy). Three CPU-only relative runs reported zero blocking tasks and CLS 0; these laboratory results are not field Core Web Vitals or a real-GPU benchmark. One WebGL context, no missing requests. Offscreen/background scheduling is paused.
+
+Impeccable context/detector/desktop-mobile shots ran. Paper-footer contrast and 10px/10.4px labels were corrected; full-bleed section padding advisories refer to outer sections with actual padded inner content. Setup drift was reported by the tool; no hook repair, login or unrelated setup change was made.
+
+The first remote CI correctly rejected a legacy homepage-video assertion. It was updated to verify the new dependency closure and a separate referenced-video fixture. Explicit modulepreload/image/license links make every transitive runtime/share asset visible to the existing immutable exporter; release runtime/policy is unchanged.
+
+## Release
+- [x] PR [89](https://github.com/Phoneria/CaseBridge/pull/89) merged to main **7c9a7af9c74b45ea2009e0b23acc3c4ad41dedd6**. Tested branch ee62fd74c89c9e944fa8ce00c0d1194aa65fb9e1 and main marketing/app/release trees match. CI [45137707329](https://github.com/Phoneria/CaseBridge/actions/runs/45137707329) passed: 1,185 backend, 1 skipped, 1 xfailed; 795 frontend across 88 files, type/version/build and governance. 21 local release tests passed. Restricted stage/canary/activate/verify passed with **marketing** scope; no app rebuild or deployment-policy change.
+- [x] At 2026-11-23 08:34:52 UTC public [homepage](https://casebridge.com.tr) and release.json served v.0.51 / 7c9a7af. All 20 exported public files matched source SHA256; JS/mjs MIME types passed. Five public browser widths passed the complete journey, real WebGL projection, reduced motion, native scroll, TR/EN, static and no-JS fallbacks with no page/resource errors or API calls. App release/health remained e8f691c / 0.44, health ok, and all seven existing server-container IDs were unchanged. Prior marketing artifact ebe5f51 / v.0.50 is retained; no new production rollback rehearsal was performed. No real keys/customer data/onboarding used or modified.
+
+Evidence: [public hashes/health](../../docs/validation/2026-11-23/night-atlas-public.json), [actual test records](../../docs/validation/2026-11-23/night-atlas-checks.json), [full open Taste findings](../../docs/validation/2026-11-23/night-atlas-taste-gate.txt), [performance output](../../docs/validation/2026-11-23/night-atlas-performance.txt). Open Taste findings also include action/button-style counts from native graph nodes, heading scales, whitespace and separator conventions; none are silently marked passed.
+
+Repeatable browser, keyboard, motion/offscreen/drag/team and native-touch runners are in tests/e2e/marketing. The keyboard runner opens the real calendar but never submits a booking. The original dirty workspace still has its 241 independent entries; implementation/release used an isolated worktree.

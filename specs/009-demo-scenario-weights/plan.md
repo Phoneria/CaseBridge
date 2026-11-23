@@ -17,3 +17,7 @@ backend/app/legal_lab/scenario_demo.py; scenario_tree.py DTO guards; legal_lab.p
 
 ## Validation and Release
 Pure combinations/rounding, schema/tenant/API negative tests, renderer/stale-response tests, browser sample-to-real switch; appropriate full suites/build/version checks. Increment app v.0.21 and marketing v.0.45 once finalized. Build from pinned main using existing restricted release entrypoint; canary, isolated rollback, public hashes/health and actual public JS with synthetic data. No automatic trigger added.
+
+Public example. Build a separate static Turkish case reader linked from the restored v.0.50 hero and probability feature panel. Project 3D nodes to an accessible interactive diagram, and use the same in-memory probability model for the tree and result summary. Preserve existing marketing video, gallery and team.
+
+FR-009 uses the supplied v.0.44 record as a static public snapshot, with application colors, expandable branches, zoom, document reading and per-scenario support controls.

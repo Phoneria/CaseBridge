@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const getMe = vi.fn();
@@ -95,4 +95,20 @@ describe("AdminView", () => {
     expect(listAdminLawyers).not.toHaveBeenCalled();
     expect(getPrecedents).not.toHaveBeenCalled();
   });
+});
+
+
+it("shows twelve sample lawyers and limits their assignment options to sample cases", async () => {
+  const samples = Array.from({length:12},(_,i)=>({id:`demo-${i}`,full_name:`ÖRNEK · Avukat ${i+1}`,department:"Kurgusal ekip",is_active:true,role:"lawyer",demo_case_ids:["demo-case"]}));
+  listAdminLawyers.mockResolvedValue([...lawyers,...samples]);
+  getCases.mockResolvedValue([caseRow,{...caseRow,id:"demo-case",case_name:"Örnek dava",assigned_lawyer_id:"demo-0"}]);
+  render(<AdminView/>);
+  const sampleSelect=await screen.findByRole("combobox",{name:"Örnek dava sorumlu avukatı"});
+  expect(within(sampleSelect).getAllByRole("option")).toHaveLength(15);
+  const realSelect=screen.getByRole("combobox",{name:"Ticari Dava sorumlu avukatı"});
+  expect(within(realSelect).queryByRole("option",{name:/ÖRNEK/})).not.toBeInTheDocument();
+  expect(within(realSelect).getAllByRole("option")).toHaveLength(3);
+  expect(screen.getByLabelText("Avukat iş yükü bar grafiği")).toHaveStyle({height:"600px"});
+  await userEvent.selectOptions(sampleSelect,"demo-11");
+  expect(assignCaseLawyer).toHaveBeenCalledWith("demo-case","demo-11");
 });

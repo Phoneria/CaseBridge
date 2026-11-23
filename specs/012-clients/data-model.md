@@ -10,6 +10,6 @@ client_name_key(name) = " ".join(name.split()).replace("I","ı").replace("İ","i
 
 ClientListItem = Client alanları + case_count (bağlı taraf üzerinden farklı, emsal olmayan dava; arşivliler dahil) + open_case_count. ClientDetailOut = Client + stats {total, open, closed, archived, won, lost, settled, total_case_value (None→0)} + cases [{id, case_number, case_name, case_type, status, outcome, assigned_lawyer_name, next_hearing_date, is_archived}].
 
-Alembic: c8f2a4e6b0d1 (down: b9d3e7f1a520) şema+veri; eeb771ad79be boş merge (down: c8f2a4e6b0d1, d8e9f0a1b2c3). Tek head eeb771ad79be. Downgrade: client_id sütunu, sonra clients tablosu; taraf adları kalır.
+Alembic: c8f2a4e6b0d1 (down: b9d3e7f1a520) şema+veri; eeb771ad79be boş merge (down: c8f2a4e6b0d1, d8e9f0a1b2c3); 0244bf696c5e boş merge (down: eeb771ad79be, fa28b1d90311). Tek head 0244bf696c5e. Downgrade: client_id sütunu, sonra clients tablosu; taraf adları kalır.
 
 Frontend PartyRow.client_id: string | null; Client, ClientListItem, ClientDetail tipleri; listClients/getClient/createClient/updateClient/deleteClient.

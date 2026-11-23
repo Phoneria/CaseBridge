@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/main.py",
+        "backend/app/api/routes/presentation.py",
+        "backend/app/services/presentation_mask.py"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-019"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_masked_presentation.py::test_aliases_are_consistent_across_identifiers_and_all_sample_text",
+        "backend/tests/integration/test_masked_presentation.py::test_masked_portfolio_tree_preview_and_pdf_are_scoped"
+      ],
+      "reason": "Render scoped fictional exhibits and PDF copies with consistent aliases."
+    },
+    {
+      "files": [
+        "frontend/app-version.json",
+        "frontend/src/components/AppShell.tsx",
+        "frontend/src/components/WorkspaceHeader.tsx",
+        "frontend/src/components/PresentationView.tsx",
+        "frontend/src/components/PresentationEye.tsx",
+        "frontend/src/components/CaseDocumentsPanel.tsx",
+        "frontend/src/components/lab/ScenarioTreeView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/lib/readingMarkdown.ts"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-019"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/PresentationView.test.tsx::opens the masked file and restores the selected document with the eye"
+      ],
+      "reason": "Switch the presentation view, preserve document context and use the same masked evidence in the scenario tree."
+    }
+  ]
+}

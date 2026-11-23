@@ -309,3 +309,44 @@ def test_task_create_on_another_firms_case_is_404(client, two_firms_two_users):
     response = client.post(f"/cases/{case['id']}/tasks", json={"title": "Gorev"}, headers=headers_b)
 
     assert response.status_code == 404
+
+
+def test_board_stages_and_details_round_trip(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    path = f"/cases/{case['id']}/tasks"
+    user = two_firms_two_users["user_a"]
+    task = client.post(path, headers=headers, json={"title": "Dilekçe", "stage": "backlog", "priority": "urgent",
+        "description": "Ekler beklenecek", "due_date": "2027-02-01", "assigned_to": user.id}).json()
+    assert task["assignee_name"] == user.full_name
+    path += "/" + task["id"]
+    for stage in ("backlog", "todo", "in_progress", "in_review", "done", "in_progress"):
+        response = client.patch(path, headers=headers, json={"stage": stage})
+        assert response.status_code == 200, response.text
+        saved = client.get("/tasks", headers=headers).json()[0]
+        assert saved["stage"] == stage and saved["priority"] == "urgent"
+        assert (saved["status"] == "completed") == (stage == "done")
+        assert bool(saved["completed_at"]) == (stage == "done")
+        assert saved["description"] == "Ekler beklenecek" and saved["due_date"] == "2027-02-01"
+    assert client.patch(path, headers=headers, json={"stage": "done", "status": "pending"}).status_code == 422
+    assert client.patch(path, headers=headers, json={"priority": "tomorrow"}).status_code == 422
+    assert client.patch(path, headers=_auth_headers(client,two_firms_two_users,"user_b"),json={"stage":"done"}).status_code == 404
+
+
+def test_restricted_lawyer_can_only_receive_tasks_in_granted_cases(client, office, auth_headers, db_session):
+    from app.models.management import WorkspaceAccess
+    headers = auth_headers(office.admin_a)
+    created = client.post("/cases", headers=headers, json={**VALID_CASE_PAYLOAD, "assigned_lawyer_id": office.lawyer_a2.id})
+    assert created.status_code == 201, created.text
+    case = created.json()
+    grant = WorkspaceAccess(law_firm_id=office.firm_a.id, user_id=office.lawyer_a1.id, position="lawyer", case_ids=[])
+    db_session.add(grant)
+    db_session.commit()
+    url = f"/users?task_case_id={case['id']}"
+    payload = {"title":"Kontrol", "assigned_to":office.lawyer_a1.id}
+    assert office.lawyer_a1.id not in {r["id"] for r in client.get(url, headers=headers).json()}
+    assert client.post(f"/cases/{case['id']}/tasks", headers=headers,json=payload).status_code == 422
+    grant.case_ids = [case["id"]]
+    db_session.commit()
+    assert office.lawyer_a1.id in {r["id"] for r in client.get(url, headers=headers).json()}
+    assert client.post(f"/cases/{case['id']}/tasks", headers=headers,json=payload).status_code == 201

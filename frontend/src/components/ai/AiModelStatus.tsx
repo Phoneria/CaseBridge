@@ -9,11 +9,11 @@ export function AiModelStatus({ status, variant }: { status: AIStatus | null; va
     return (
       <p
         className={`mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ${
-          variant === "dark" ? "bg-white/10 text-accent-100" : "bg-emerald-50 text-emerald-700"
+          variant === "dark" ? "bg-glass/10 text-accent-100" : "bg-emerald-50 text-emerald-700"
         }`}
       >
         <i aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-400" />
-        {status.provider === "mock" ? "Yapay zekâ örnek modu" : "Yapay zekâ hizmeti yapılandırıldı"}
+        {status.provider === "mock" ? "Yapay zekâ gösterim modu" : "Yapay zekâ hizmeti yapılandırıldı"}
       </p>
     );
   }

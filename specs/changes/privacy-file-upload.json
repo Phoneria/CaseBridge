@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/privacy/files.py",
+        "backend/app/privacy/file_worker.py",
+        "backend/app/api/routes/privacy.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-009",
+        "specs/012-pii-anonymization/spec.md#FR-010"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_privacy_files.py::test_real_document_extract_then_mask",
+        "backend/tests/api/test_privacy_files.py::test_limits_reject_without_truncation",
+        "backend/tests/api/test_privacy_files.py::test_pdf_scanned_encrypted_and_page_limit",
+        "backend/tests/api/test_privacy_files.py::test_extract_real_session_scope",
+        "backend/tests/api/test_privacy_files.py::test_parser_diagnostics_not_logged_or_returned"
+      ],
+      "reason": "Read raw file bytes locally under explicit limits with no spooling, secrets in worker environment, external provider calls or reflected parser errors."
+    },
+    {
+      "files": [
+        "frontend/src/lib/api.ts",
+        "frontend/src/components/ai/AnonymizationView.tsx",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-011"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::loads a document, clears old result and requires explicit masking",
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::ignores extracted text after editing or clearing the source",
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::reports file errors and rejects oversized files without preserving stale text",
+        "frontend/src/lib/__tests__/privacyFileApi.test.ts::sends raw file bytes with explicit content type and no filename or bureau identifiers"
+      ],
+      "reason": "Keep file upload/paste/copy/reset in the same masking screen with raw authenticated upload, explicit limits and stale-response protection."
+    }
+  ]
+}

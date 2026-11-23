@@ -30,3 +30,4 @@ T001 → T002 → T003 → T004/T005 → T006. Independent fixture/research work
 - [x] T020 Implement FR-001 through FR-005 expanded compact sidebar and data-model.md#featurecontract shared AI navigation; critical role/active-state tests, geometry at 900/768px and short/mobile scroll, protected PR and public release.
 
 - [ ] T021 Implement FR-005/FR-006 and data-model.md#featurecontract balanced full-height sidebar plus restored historic blue panel; verify actual 768/900/1080px no-scroll and gap/row growth, short-area scroll, protected follow-up release.
+- [x] T022 FR-008 için birleşik menüleri, eski bağlantıları ve dava araçlarını doğrula.

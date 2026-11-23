@@ -32,6 +32,7 @@ class TimeData(Strict):
 
 
 class ClientData(Strict):
+    client_type: Literal["individual", "organization"] | None = None
     case_ids: list[ID] = Field(default=[], max_length=1000)
     email: EmailStr | None = None
     phone: Annotated[str, StringConstraints(max_length=50)] = ""

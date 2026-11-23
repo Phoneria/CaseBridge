@@ -123,7 +123,7 @@ export function nodeRadius(n: GraphNode): number {
   return Math.min(22, 6.5 + Math.sqrt(n.n) * 0.9);
 }
 
-const PALETTE = ["#007eac", "#0f766e", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f", "#a21caf", "#0e7490", "#9a3412"];
+const PALETTE = ["#0c7468", "#3b6fd6", "#7c3aed", "#b45309", "#be123c", "#1d4ed8", "#4d7c0f", "#a21caf", "#0e7490", "#9a3412"];
 export function lawColor(law: string, laws: string[]): string {
   const i = Math.max(0, laws.indexOf(law));
   return PALETTE[i % PALETTE.length];

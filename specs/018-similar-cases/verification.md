@@ -1,0 +1,6 @@
+# Verification — 23 Nov 2026 (local, before PR)
+- Backend: tests/api/test_similar_cases.py 9 passed (ranking, bureau isolation, lawyer/restricted/anonymous access, self/sibling exclusion, empty and stop-word-only text, cache invalidation, Turkish normalisation and court types). Full backend suite: see PR / CI.
+- Frontend: `npx tsc --noEmit` clean; full Vitest 91 files / 808 tests passed (new SimilarCases.test.tsx 6 tests; themeContrast 4 tests; Sidebar and header navigation counts updated to six AI tools); `npm run build` succeeded; `node scripts/update-version.mjs --check` → v0.47.
+- Browser: local backend (SQLite, demo seed, mock AI, one worker) + `next dev`; lawyer login. Case detail "Kiracı Tahliye Davası" shows five similar cases (49 Kira Tespit Davası, 42 Ticari Kira Uyarlama Davası, 36 Depozito İadesi Davası, 17 Ticari Alacak Davası, 14 Hizmet Sözleşmesi Alacağı) with reasons, badges, durations and links; `/ai/benzer-davalar` free-text and `?dava=` case modes render. Checked in dark and light themes. Console: only the pre-existing dev `favicon.ico` 404 and recharts `defaultProps` warnings from the dashboard; none from the new screens.
+- Demo seed has no precedent rows in the demo bureau, so precedent results were verified by the automated tests only.
+- Release: not performed (T009).

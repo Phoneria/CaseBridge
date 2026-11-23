@@ -4,10 +4,10 @@
 Büroya ait `clients` tablosu eklenir; bağlantı davadaki taraf üzerinden (`case_parties.client_id`) kurulur. `/clients` API'si, dava API'sindeki taraf kuralları, müvekkil listesi/detayı ekranları ve dava formundaki müvekkil seçici aynı modeli kullanır. Ayrıntılı adımlar [uygulama planındadır](../../docs/superpowers/plans/2026-11-16-clients.md).
 
 ## Technical Context
-Next.js 14/React 18/TypeScript; FastAPI/Pydantic/SQLAlchemy/Alembic. Yeni bağımlılık, model/API sağlayıcı çağrısı, anahtar veya erişim değişikliği yoktur. Bir şema+veri migration'ı ve main ile birleşmeden doğan boş bir Alembic merge revision'ı vardır.
+Next.js 14/React 18/TypeScript; FastAPI/Pydantic/SQLAlchemy/Alembic. Yeni bağımlılık, model/API sağlayıcı çağrısı, anahtar veya erişim değişikliği yoktur. Bir şema+veri migration'ı ve main ile birleşmelerden doğan iki boş Alembic merge revision'ı vardır.
 
 ## Constitution Check
-PASS. II: büro kapsamı oturumdan gelir; başka büronun müvekkili 404, davada başka büronun `client_id`'si 422 döner; negatif ve izolasyon testleri vardır. III: gerçek veri veya anahtar yoktur; müvekkil adı ve iletişim bilgisi loglanmaz. VI: mevcut roller korunur; silme yalnızca büro yöneticisine açıktır; yeni kenar çubuğu öğesi mevcut gezinme ve klavye odağını bozmaz. VII: uygulama sürümü v.0.24'e çıkar. V: yayın yalnızca main'den, mevcut kısıtlı yayın yoluyla yapılır.
+PASS. II: büro kapsamı oturumdan gelir; başka büronun müvekkili 404, davada başka büronun `client_id`'si 422 döner; negatif ve izolasyon testleri vardır. III: gerçek veri veya anahtar yoktur; müvekkil adı ve iletişim bilgisi loglanmaz. VI: mevcut roller korunur; silme yalnızca büro yöneticisine açıktır; yeni kenar çubuğu öğesi mevcut gezinme ve klavye odağını bozmaz. VII: uygulama sürümü main'in v.0.47 sürümünden v.0.48'e çıkar. V: yayın yalnızca main'den, mevcut kısıtlı yayın yoluyla yapılır.
 
 ## Research and Design
 Bkz. research.md ve data-model.md#featurecontract.

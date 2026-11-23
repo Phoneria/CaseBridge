@@ -1,10 +1,5 @@
-import { AppShell } from "@/components/AppShell";
-import { AiHubView } from "@/components/ai/AiHubView";
+import { redirect } from 'next/navigation';
 
-export default function AiHubPage() {
-  return (
-    <AppShell>
-      <AiHubView />
-    </AppShell>
-  );
+export default function LegacyAiOverview() {
+  redirect('/davalar');
 }

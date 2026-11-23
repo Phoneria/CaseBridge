@@ -4,6 +4,7 @@ lifespan (app/main.py) already logs from.
 """
 import json
 import logging
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from starlette.concurrency import run_in_threadpool
@@ -22,13 +23,13 @@ from app.services.ai_usage_service import get_ai_usage
 router = APIRouter(prefix="/system", tags=["system"])
 
 
-@router.get("/openai-key", response_model=AIKeyStatusOut)
+@router.get("/openai-key", response_model=AIKeyStatusOut, response_model_exclude_unset=True)
 def openai_key_status(response: Response, actor: User = Depends(get_current_user)):
     response.headers["Cache-Control"] = "no-store"
     return key_status(ai_credential_scope(actor))
 
 
-@router.put("/openai-key", response_model=AIKeyStatusOut)
+@router.put("/openai-key", response_model=AIKeyStatusOut, response_model_exclude_unset=True)
 async def update_openai_key(request: Request, response: Response, actor: User = Depends(get_current_admin)):
     response.headers["Cache-Control"] = "no-store"
     limiter = f"ai-key:{actor.id}"
@@ -48,10 +49,13 @@ async def update_openai_key(request: Request, response: Response, actor: User = 
         if not isinstance(api_key, str):
             raise ValueError()
         api_key = api_key.strip()
+        provider = payload.get("provider", "openai")
+        if provider not in ("anthropic", "openai") or (provider == "anthropic") != api_key.startswith("sk-ant-api") or (provider == "openai" and api_key.startswith("sk-ant-")):
+            raise ValueError()
         if not (20 <= len(api_key) <= 512 and api_key.startswith("sk-") and not any(c.isspace() for c in api_key)):
             raise ValueError()
     except (ValueError, UnicodeError):
-        raise HTTPException(400, "Geçerli bir OpenAI API anahtarı girin.") from None
+        raise HTTPException(400, "Seçtiğiniz sağlayıcı için geçerli bir API anahtarı girin.") from None
     scope = ai_credential_scope(actor)
     if not key_status(scope)["can_save"]:
         raise HTTPException(503, "Güvenli anahtar yönetimi sunucuda etkinleştirilmemiş.")
@@ -64,14 +68,15 @@ async def update_openai_key(request: Request, response: Response, actor: User = 
 
 
 @router.post("/openai-key/activate", response_model=AIConnectivityOut)
-def activate_openai_key(response: Response, actor: User = Depends(get_current_admin)):
+def activate_openai_key(response: Response, actor: User = Depends(get_current_admin),
+                        provider: Literal["openai", "anthropic"] | None = None):
     response.headers["Cache-Control"] = "no-store"
     limiter = f"ai-key:{actor.id}"
     if is_rate_limited(limiter, max_attempts=5):
         raise HTTPException(429, "Çok fazla deneme. Bir dakika sonra yeniden deneyin.")
     record_attempt(limiter)
     try:
-        activate_openai_api_key(ai_credential_scope(actor))
+        activate_openai_api_key(ai_credential_scope(actor), provider)
     except CredentialError as exc:
         raise HTTPException(400, str(exc)) from None
     reset_cache(ai_credential_scope(actor))

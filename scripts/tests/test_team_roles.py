@@ -15,9 +15,12 @@ class TeamRolesAcceptance(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertEqual(len({role for _,role in actual}),5)
         emin=cards[1]
-        for fact in ['BAUROV', 'yazılım ekip liderliği', 'Baykar', 'makine öğrenmesi stajı', 'Outlier AI', 'dil modeli değerlendirme', 'sentetik veri']:self.assertIn(fact,emin)
+        for fact in ['<a href="https://outlier.ai/" target="_blank" rel="noopener noreferrer">Outlier AI</a>', 'dil modeli değerlendirme', '<a href="https://perpetual-labs.ai/" target="_blank" rel="noopener noreferrer">Perpetual Labs</a>:</b> altyapı (infra) yönetimi']:self.assertIn(fact,emin)
         self.assertIn('<img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy">',emin)
         self.assertNotIn('>EM</span>',emin)
+        for url in ['https://perpetual-labs.ai/','https://www.aselsan.com/','https://lastfall.com.tr/','https://technarts.com/','https://ihh.org.tr/','https://outlier.ai/','https://www.hacettepe.edu.tr/']: self.assertIn(f'href="{url}"', team)
+        for card in cards: self.assertRegex(card, r'<ul class="team-facts"><li><b>(?:<a href=\"https://[^\"]+\" target=\"_blank\" rel=\"noopener noreferrer\">)?[^<]+(?:</a>)?:</b>[^<]+</li><li><b>(?:<a href=\"https://[^\"]+\" target=\"_blank\" rel=\"noopener noreferrer\">)?[^<]+(?:</a>)?:</b>[^<]+</li><li><b>CaseBridge:</b>[^<]+</li></ul>')
+        self.assertNotIn('CaseBridge’de:', team)
         image=ROOT/'web-page/assets/team/emin-merden-web.jpg'
         self.assertTrue(image.is_file())
         self.assertGreater(image.stat().st_size,10000)

@@ -102,7 +102,7 @@ describe("CaseListView", () => {
     expect(screen.getByText("Kategori: İcra")).toBeInTheDocument();
     expect(screen.getByText("Sonuç: Kazanılan")).toBeInTheDocument();
     expect(screen.getByText("Arşiv dahil")).toBeInTheDocument();
-    expect(screen.getByText("1 sonuç")).toBeInTheDocument();
+    expect(await screen.findByText("1 sonuç")).toBeInTheDocument();
   });
 
   it("maps durum=aktif to the active filter", async () => {

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "frontend/app-version.json",
+        "frontend/src/app/theme.css",
+        "frontend/src/components/AdminView.tsx",
+        "frontend/src/components/AiNavigation.tsx",
+        "frontend/src/components/AiStatusIndicator.tsx",
+        "frontend/src/components/AnalyticsView.tsx",
+        "frontend/src/components/AppShell.tsx",
+        "frontend/src/components/CaseDocumentsPanel.tsx",
+        "frontend/src/components/CaseQuickView.tsx",
+        "frontend/src/components/DashboardView.tsx",
+        "frontend/src/components/ModalFrame.tsx",
+        "frontend/src/components/ReportsView.tsx",
+        "frontend/src/components/Sidebar.tsx",
+        "frontend/src/components/ai/AiHero.tsx",
+        "frontend/src/components/ai/AiModelStatus.tsx",
+        "frontend/src/components/ai/SufleView.tsx",
+        "frontend/src/components/ai/chat/ChatView.tsx",
+        "frontend/src/components/calendar/CalendarEventDrawer.tsx",
+        "frontend/src/components/calendar/CalendarEventForm.tsx",
+        "frontend/src/components/lab/MapView.tsx",
+        "frontend/src/components/lab/ScenarioTreeView.tsx",
+        "frontend/src/components/management/BureauManagementView.tsx",
+        "frontend/src/components/management/FinanceCharts.tsx",
+        "frontend/src/components/tasks/TaskFormModal.tsx",
+        "frontend/src/lib/__tests__/brandPalette.test.ts",
+        "frontend/src/lib/__tests__/themeContrast.test.ts",
+        "frontend/src/lib/chartTheme.ts",
+        "frontend/src/lib/themeTokens.ts",
+        "frontend/tailwind.config.ts"
+      ],
+      "requirements": [
+        "specs/017-app-shared-palette/spec.md#FR-006",
+        "specs/017-app-shared-palette/spec.md#FR-007",
+        "specs/017-app-shared-palette/spec.md#FR-008",
+        "specs/017-app-shared-palette/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "frontend/src/lib/__tests__/themeContrast.test.ts::every text colour reads on the surface it is used on",
+        "frontend/src/lib/__tests__/themeContrast.test.ts::hover states keep text readable and stay distinguishable",
+        "frontend/src/lib/__tests__/themeContrast.test.ts::chart text and the bar hover cursor follow the theme",
+        "frontend/src/lib/__tests__/themeContrast.test.ts::charts take colours from theme variables, not fixed hex values",
+        "frontend/src/lib/__tests__/brandPalette.test.ts::uses the marketing turquoise, navy and outcome colours in both themes"
+      ],
+      "reason": "User feedback: unreadable dark-theme hover, chart centre value, white bar hover and drawer; re-decide all colours with contrast tests; application v.0.46."
+    }
+  ]
+}

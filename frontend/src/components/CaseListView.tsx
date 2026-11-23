@@ -18,7 +18,7 @@ import {
   toCaseListFilters,
   type OutcomeSlug,
 } from "@/lib/filters";
-import { CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
+import { CASE_OUTCOME_LABELS, CASE_STATUS_LABELS, CASE_TYPE_LABELS, formatDate } from "@/lib/labels";
 import { useQuickViewHref, useUrlParams } from "@/lib/urlState";
 import type { AppUser, Case } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
@@ -258,6 +258,7 @@ export function CaseListView() {
                     >
                       {CASE_STATUS_LABELS[c.status] ?? c.status}
                     </Link>
+                    {c.status === "kapali" && <p className="mt-1.5 text-xs text-navy-600">{CASE_OUTCOME_LABELS[c.outcome] && c.outcome !== "ongoing" ? CASE_OUTCOME_LABELS[c.outcome] : "Sonuç kaydedilmemiş"}</p>}
                   </td>
                   <td className="px-4 py-3 text-navy-700">{c.next_hearing_date ? formatDate(c.next_hearing_date) : "—"}</td>
                   <td className="px-4 py-3 text-right">

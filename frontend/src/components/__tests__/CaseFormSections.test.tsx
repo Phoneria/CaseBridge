@@ -52,7 +52,7 @@ describe("BasicInfoFields", () => {
   it("offers the case types and statuses", () => {
     render(<BasicHarness />);
     const type = screen.getByLabelText(/^Dava türü/) as HTMLSelectElement;
-    expect([...type.options].map((option) => option.text)).toEqual(["İş Hukuku", "Ticaret Hukuku", "Sözleşme", "Kira", "İcra", "Diğer"]);
+    expect([...type.options].map((option) => option.text)).toEqual(["Ceza Hukuku", "İş Hukuku", "Ticaret Hukuku", "Sözleşme", "Kira", "İcra", "Diğer"]);
     const status = screen.getByLabelText("Durum") as HTMLSelectElement;
     expect([...status.options].map((option) => option.text)).toEqual(["Devam Eden", "Duruşma Bekleyen", "Karar Bekleyen"]);
   });

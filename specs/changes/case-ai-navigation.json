@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "frontend/src/app/ai/analiz/page.tsx",
+        "frontend/src/app/ai/durusma/page.tsx",
+        "frontend/src/app/ai/harita/page.tsx",
+        "frontend/src/app/ai/karsi-taraf/page.tsx",
+        "frontend/src/app/ai/olasilik/page.tsx",
+        "frontend/src/app/ai/page.tsx",
+        "frontend/src/app/ai/yonetmen/page.tsx",
+        "frontend/src/components/ai/AiPairNav.tsx",
+        "frontend/src/components/ai/HearingWorkspace.tsx",
+        "frontend/src/lib/ai.ts",
+        "frontend/src/lib/aiNavigation.ts"
+      ],
+      "requirements": [
+        "specs/002-header-ai/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/AiRoutes.test.tsx::routes legacy AI entries to case selection or the matching case tool",
+        "frontend/src/components/__tests__/AiRoutes.test.tsx::keeps both map views in the same case and both hearing tools in the selected case",
+        "frontend/src/components/__tests__/AiNavigation.test.tsx::includes all tools and preserves deep-route active state"
+      ],
+      "reason": "Provide a single navigable workspace per pair and resolve old case-tool links."
+    },
+    {
+      "files": [
+        "frontend/app-version.json",
+        "frontend/src/components/CaseDetailView.tsx",
+        "frontend/src/components/ai/CaseAiTools.tsx",
+        "frontend/src/components/ai/CourtroomLobbyView.tsx",
+        "frontend/src/components/lab/CounterAnalysisView.tsx",
+        "frontend/src/components/lab/DirectedTrialView.tsx"
+      ],
+      "requirements": [
+        "specs/002-header-ai/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/CaseDetailView.test.tsx::opens the AI tab from ?sekme=ai and the legacy ?sekme=simulasyonlar"
+      ],
+      "reason": "Expose each case tool using the current file for the hearing, analysis and opponent actions."
+    },
+    {
+      "files": [
+        "frontend/src/components/SettingsView.tsx",
+        "frontend/src/components/WorkspaceGuide.tsx",
+        "frontend/src/components/ai/DashboardAiCard.tsx",
+        "frontend/src/lib/workspaceGuide.ts"
+      ],
+      "requirements": [
+        "specs/002-header-ai/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/WorkspaceGuide.test.tsx::covers all bureau tabs and main routes with practical sourced steps"
+      ],
+      "reason": "Align discovery and guidance with the four global entries and case-only tools."
+    }
+  ]
+}

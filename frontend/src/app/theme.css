@@ -1,68 +1,41 @@
-/* Appearance is local to the browser. The server renders dark by default. */
+/* Appearance is local to the browser. The server renders dark by default.
+   Colour utilities resolve to CSS variables generated from src/lib/themeTokens.ts
+   (tailwind.config.ts), so this file only holds what a variable cannot express. */
 :root[data-theme="light"] { color-scheme: light; }
-:root[data-theme="dark"] { color-scheme: dark; --theme-text:#f3f0e9; --theme-muted:#a5aeae; --theme-accent:#9ddbd1; --theme-page:#0b0e0f; --theme-surface:#111718; --theme-border:#2a3334; }
-:root[data-theme="dark"], :root[data-theme="dark"] body { background-color:var(--theme-page); color:var(--theme-text); }
-:root[data-theme="dark"] .bg-white { background-color:var(--theme-surface); }
-:root[data-theme="dark"] .bg-surface-muted { background-color:var(--theme-page); }
-:root[data-theme="dark"] .bg-surface-border { background-color:var(--theme-border); }
-:root[data-theme="dark"] .border-surface-border { border-color:var(--theme-border); }
-:root[data-theme="dark"] :is(.text-navy-900,.text-navy-800) { color:var(--theme-text); }
-:root[data-theme="dark"] :is(.text-navy-700,.text-navy-600) { color:#c6d0ca; }
-:root[data-theme="dark"] :is(.text-navy-500,.text-navy-400) { color:var(--theme-muted); }
-:root[data-theme="dark"] :is(.text-accent-100,.text-accent-200,.text-accent-300,.text-accent-500,.text-accent-600,.text-accent-700,.text-accent-800,.text-accent-900) { color:var(--theme-accent); }
-:root[data-theme="dark"] :is(.bg-accent-50,.bg-accent-100) { background-color:#172a28; }
-:root[data-theme="dark"] .bg-accent-600 { background-color:var(--theme-accent); color:#0b1713; }
-:root[data-theme="dark"] .bg-accent-600 .text-white { color:#0b1713; }
-:root[data-theme="dark"] :is(.border-accent-100,.border-accent-200,.border-accent-300) { border-color:#36514b; }
-:root[data-theme="dark"] :is(.border-accent-400,.border-accent-500,.border-accent-600) { border-color:#8bc2b8; }
-:root[data-theme="dark"] :is(.bg-navy-800,.bg-navy-900,.bg-navy-950) { background-color:#111b1c; }
-:root[data-theme="dark"] :is(.bg-red-50,.bg-rose-50,.bg-rose-100) { background-color:#2b1d21; }
-:root[data-theme="dark"] :is(.text-red-500,.text-red-600,.text-red-700,.text-red-800,.text-rose-600,.text-rose-700,.text-rose-900) { color:#f0aab1; }
-:root[data-theme="dark"] :is(.border-red-100,.border-red-200,.border-rose-100,.border-rose-200) { border-color:#69414a; }
-:root[data-theme="dark"] :is(.bg-amber-50,.bg-amber-100) { background-color:#2b271a; }
-:root[data-theme="dark"] :is(.text-amber-600,.text-amber-700,.text-amber-800,.text-amber-900) { color:#dfcf9e; }
-:root[data-theme="dark"] :is(.border-amber-200,.border-amber-300) { border-color:#655630; }
-:root[data-theme="dark"] .bg-emerald-50 { background-color:#182a22; }
-:root[data-theme="dark"] :is(.text-emerald-600,.text-emerald-700,.text-emerald-800) { color:#abd4b4; }
-:root[data-theme="dark"] :is(.bg-sky-50,.bg-blue-50) { background-color:#15282d; }
-:root[data-theme="dark"] :is(.text-sky-600,.text-sky-800,.text-blue-700) { color:#a2d5e0; }
-:root[data-theme="dark"] :is(.bg-slate-100,.bg-slate-300) { background-color:#253030; }
-:root[data-theme="dark"] :is(.text-slate-600,.text-slate-700) { color:#c0cfca; }
-:root[data-theme="dark"] .from-white { --tw-gradient-from:#111718 var(--tw-gradient-from-position); --tw-gradient-to:rgb(17 23 24 / 0) var(--tw-gradient-to-position); }
-:root[data-theme="dark"] .to-accent-50\/60 { --tw-gradient-to:rgb(23 42 40 / .6) var(--tw-gradient-to-position); }
-:root[data-theme="dark"] .to-accent-50\/70 { --tw-gradient-to:rgb(23 42 40 / .7) var(--tw-gradient-to-position); }
-:root[data-theme="dark"] .bg-ai-glow { background-image:radial-gradient(600px circle at 85% -10%,#254d444d,transparent 60%),radial-gradient(500px circle at -5% 110%,#729e912e,transparent 55%); }
-:root[data-theme="dark"] .bg-ai-border { background-image:linear-gradient(135deg,#729e91,#294b42 65%,#111b1c); }
-:root[data-theme="dark"] :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) { background-color:#0e1516; color:#dce6df; border-color:#34443f; }
-:root[data-theme="dark"] ::placeholder { color:#94a69d; opacity:1; }
-:root[data-theme="dark"] :is(input[type="checkbox"],input[type="radio"],input[type="range"]) { accent-color:var(--theme-accent); }
-:root[data-theme="dark"] :where(a,button,input,select,textarea):focus-visible { outline-color:var(--theme-accent); }
-:root[data-theme="dark"] .hover\:bg-white:hover { background-color:#1b2926; }
-:root[data-theme="dark"] .hover\:bg-surface-muted:hover { background-color:#1b2926; }
-:root[data-theme="dark"] .hover\:bg-accent-50:hover { background-color:#213b34; }
-:root[data-theme="dark"] .hover\:bg-accent-700:hover { background-color:#b7e7dc; color:#0b1713; }
-:root[data-theme="dark"] :is(.hover\:text-navy-900,.hover\:text-navy-700,.hover\:text-navy-800):hover { color:#f3f0e9; }
-:root[data-theme="dark"] :is(.hover\:text-accent-700,.hover\:text-accent-800):hover { color:#c1e8dd; }
-:root[data-theme="dark"] .chat-markdown :is(p,li,strong,h1,h2,h3) { color:#dce6df; }
-:root[data-theme="dark"] .chat-markdown a { color:var(--theme-accent); }
-:root[data-theme="dark"] .chat-markdown code { background:#24352f; color:#c9dfd1; }
-:root[data-theme="dark"] .chat-markdown pre { background:#080e0e; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="dark"], :root[data-theme="dark"] body { background-color:#08131f; color:#eee8d9; }
+:root[data-theme="dark"] body { background-image:radial-gradient(120% 80% at 80% -10%, #12304a 0%, transparent 55%); background-attachment:fixed; }
+
+/* Solid light-teal fills need dark ink in the dark theme (white fails contrast). */
+:root[data-theme="dark"] :is(.bg-accent-500,.bg-accent-600,.bg-accent-700,.hover\:bg-accent-600:hover,.hover\:bg-accent-700:hover),
+:root[data-theme="dark"] :is(.bg-accent-500,.bg-accent-600,.bg-accent-700) :is(.text-white,.text-accent-50,.text-accent-100) { color:#06201d; }
+
+/* Hovering a row or card lifts it instead of sinking it to the page colour. */
+:root[data-theme="dark"] :is(.hover\:bg-white,.hover\:bg-surface-muted):hover { background-color:#15283b; }
+
+:root[data-theme="dark"] :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) { background-color:#0a1726; color:#eee8d9; border-color:#2c4763; }
+:root[data-theme="dark"] :is(input,select,textarea):disabled { background-color:#132538; color:#94a8bc; }
+:root[data-theme="dark"] ::placeholder { color:#8399ae; opacity:1; }
+:root[data-theme="dark"] :is(input[type="checkbox"],input[type="radio"],input[type="range"]) { accent-color:#68dfcf; }
+:root[data-theme="dark"] :where(a,button,input,select,textarea):focus-visible { outline-color:#68dfcf; }
+:root[data-theme="dark"] .chat-markdown :is(p,li,strong,h1,h2,h3) { color:#eee8d9; }
+:root[data-theme="dark"] .chat-markdown a { color:#68dfcf; }
+:root[data-theme="dark"] .chat-markdown code { background:#15283b; color:#d6dee6; }
+:root[data-theme="dark"] .chat-markdown pre { background:#050d17; }
 :root[data-theme="dark"] .chat-markdown pre code { background:transparent; color:inherit; }
-:root[data-theme="dark"] .chat-markdown blockquote { border-color:#729e91; color:#a5bdb0; }
-:root[data-theme="dark"] .shadow-card { box-shadow:0 3px 18px #0003; }
-:root[data-theme="dark"] .recharts-cartesian-grid line { stroke:#2a3334; }
-:root[data-theme="dark"] .recharts-text { fill:#a5aeae; }
-:root[data-theme="dark"] .recharts-default-tooltip { background-color:#172022 !important; border-color:#36514b !important; color:#f3f0e9; }
-:root[data-theme="dark"] [class~="bg-accent-50/40"] {background-color:rgb(23 42 40 / .4);}
-:root[data-theme="dark"] [class~="bg-accent-50/50"] {background-color:rgb(23 42 40 / .5);}
-:root[data-theme="dark"] [class~="bg-accent-50/60"] {background-color:rgb(23 42 40 / .6);}
-:root[data-theme="dark"] [class~="bg-rose-50/50"] {background-color:rgb(43 29 33 / .5);}
-:root[data-theme="dark"] [class~="bg-amber-50/60"] {background-color:rgb(43 39 26 / .6);}
-:root[data-theme="dark"] [class~="bg-surface-muted/35"] {background-color:rgb(11 14 15 / .35);}
-:root[data-theme="dark"] [class~="bg-surface-muted/40"] {background-color:rgb(11 14 15 / .4);}
-:root[data-theme="dark"] [class~="bg-surface-muted/60"] {background-color:rgb(11 14 15 / .6);}
-:root[data-theme="dark"] [class~="bg-white/70"] {background-color:rgb(17 23 24 / .7);}
-:root[data-theme="dark"] [class~="bg-white/80"] {background-color:rgb(17 23 24 / .8);}
+:root[data-theme="dark"] .chat-markdown blockquote { border-color:#68dfcf; color:#a9b9c9; }
+:root[data-theme="dark"] :is(.shadow-card) { box-shadow:0 1px 0 #ffffff08 inset, 0 6px 22px #0000004d; }
+:root[data-theme="dark"] :is(.shadow-xl) { box-shadow:0 24px 60px #000000a6, 0 0 0 1px #213851; }
+:root[data-theme="dark"] .bg-ai-glow { background-image:radial-gradient(600px circle at 85% -10%,#68dfcf2e,transparent 60%),radial-gradient(500px circle at -5% 110%,#5b8def24,transparent 55%); }
+:root[data-theme="dark"] .bg-ai-border { background-image:linear-gradient(135deg,#68dfcf,#1d4f5a 65%,#0d1d2e); }
+
+/* Charts: SVG colours come from --chart-* variables (src/lib/chartTheme.ts). */
+.recharts-cartesian-grid line { stroke:var(--chart-grid); }
+.recharts-text { fill:var(--chart-axis); }
+.recharts-default-tooltip { background-color:var(--chart-tooltip-bg) !important; border-color:var(--chart-tooltip-border) !important; color:var(--chart-tooltip-text); border-radius:12px; }
+.recharts-tooltip-label { color:var(--chart-tooltip-text); }
+.recharts-tooltip-cursor { fill:var(--chart-cursor); }
+.recharts-legend-item-text { color:var(--chart-muted) !important; }
 
 /* The original two-ink PNG has an opaque white matte. Blend that matte into the
    actual surface instead of redrawing the mark or changing its raster pixels. */

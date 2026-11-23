@@ -39,7 +39,7 @@ Bugün müvekkil yalnızca taraf üzerindeki `is_client` işaretiyle ve davadaki
 - **FR-009**: Kenar çubuğunda "Davalar"ın altında **Müvekkiller** (`/muvekkiller`) bulunur. Liste ekranı yazmayı bıraktıktan sonra arar, tür/iletişim/dava sayılarını gösterir, 50'şer kayıtla sayfalar, boş/yükleme/hata durumlarını gösterir; **Yeni müvekkil** formu kaydedince müvekkilin sayfasını açar, hata olursa formu sunucu mesajıyla açık tutar.
 - **FR-010**: Müvekkil sayfası iletişim kartını (`tel:`/`mailto:`), özet sayıları ve davaları gösterir; aynı formla yerinde düzenlenir; Sil düğmesi yalnızca yöneticiye görünür ve davası olan müvekkilde pasiftir. "Bu müvekkil için yeni dava" `/davalar/yeni?muvekkil=<id>` açar. Bulunamayan müvekkilde sunucunun mesajı gösterilir.
 - **FR-011**: Dava formunda müvekkil işaretli satır `ClientPicker` kullanır: yazdıkça en çok 10 öneri, her zaman "yeni müvekkil ekle" seçeneği, klavye (ok tuşları, Enter, Esc) ve `combobox` erişilebilirliği, seçili müvekkil için değiştirilebilir ve müvekkil sayfasına bağlanan etiket. AI'nın doldurduğu müvekkil adı aramaya yazılı ve öneriler açık gelir. İşaret kaldırılınca bağlantı temizlenir, ad düz metin kalır. Müvekkil seçilmeden kayıt engellenir ("Müvekkili listeden seçin veya yeni ekleyin."); yalnızca müvekkil satırları `client_id` gönderir. Dava sayfasında müvekkil adları müvekkil sayfasına bağlıdır.
-- **FR-012**: Uygulama davranışı değiştiği için uygulama sürümü artırılır ve `v.` biçimi korunur (main'in v.0.23 sürümünden sonra v.0.24).
+- **FR-012**: Uygulama davranışı değiştiği için uygulama sürümü artırılır ve `v.` biçimi korunur (main'in v.0.47 sürümünden sonra v.0.48).
 
 ## Success Criteria
 - **SC-001**: Bir müvekkilin bütün (emsal olmayan) davaları ve özet sayıları tek sayfadan okunur.

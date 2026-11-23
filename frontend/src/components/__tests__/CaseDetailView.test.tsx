@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
+const getScenarioTree = vi.fn();
+const getPrecedents = vi.fn();
 const getCase = vi.fn();
 const getMe = vi.fn();
 const listSimulations = vi.fn();
@@ -25,6 +27,9 @@ const listClients = vi.fn();
 const createClient = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  getSimilarCases: () => Promise.resolve([]),
+  getPrecedents: (...args: unknown[]) => getPrecedents(...args),
+  getScenarioTree: (...args: unknown[]) => getScenarioTree(...args),
   getCase: (...args: unknown[]) => getCase(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   listSimulations: (...args: unknown[]) => listSimulations(...args),
@@ -99,6 +104,20 @@ afterEach(() => {
 });
 
 describe("CaseDetailView", () => {
+  it("opens precedents and the interactive tree for the current case", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getPrecedents.mockResolvedValue([]);
+    getScenarioTree.mockResolvedValue(null);
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "İlgili emsal kararları göster" }));
+    expect(getPrecedents).toHaveBeenCalledWith("c1", false);
+    await userEvent.click(screen.getByRole("tab", { name: "Olasılık Ağacı" }));
+    expect(getScenarioTree).toHaveBeenCalledWith("c1", {});
+    expect(screen.queryByText("Bir dava seçin")).toBeNull();
+  });
+
   it("renders the case overview with the AI card by default", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);
@@ -530,6 +549,13 @@ describe("CaseDetailView", () => {
     expect(screen.getByText("Bu dava için henüz yapay zekâ analizi yapılmadı.")).toBeInTheDocument();
     unmount();
 
+    setUrl("/davalar/c1?sekme=ai&arac=durusma");
+    const hearing = render(<CaseDetailView caseId="c1" />);
+    expect(await screen.findByRole("button", { name: "Duruşmayı başlat" })).toBeEnabled();
+    expect(screen.queryByLabelText("Dava ara")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Karşı Taraf Analizi" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=karsi-taraf");
+    expect(screen.getByRole("link", { name: "Yönetilen Duruşma" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=yonetmen");
+    hearing.unmount();
     setUrl("/davalar/c1?sekme=simulasyonlar");
     render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));

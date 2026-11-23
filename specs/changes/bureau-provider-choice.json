@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": ["backend/app/api/routes/system.py", "backend/app/schemas/system.py", "backend/app/services/ai_credentials.py"],
+      "requirements": ["specs/014-demo-case-files/spec.md#FR-011"],
+      "acceptance_tests": ["backend/tests/api/test_firm_ai_keys.py::test_switch_saved_provider_preserves_pending_and_firm_scope"],
+      "reason": "Only the authenticated bureau administrator can switch to a previously activated connection while retaining the pending candidate."
+    },
+    {
+      "files": ["frontend/app-version.json", "frontend/src/components/AiKeySettings.tsx", "frontend/src/lib/api.ts"],
+      "requirements": ["specs/014-demo-case-files/spec.md#FR-011"],
+      "acceptance_tests": ["frontend/src/components/__tests__/AiKeySettings.test.tsx::switches between connected providers without asking for another key"],
+      "reason": "Expose saved providers and the active selection without requesting the credentials again."
+    }
+  ]
+}

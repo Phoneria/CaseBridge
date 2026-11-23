@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
+import { contextTopic, guideTopics } from "@/lib/workspaceGuide";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { UpcomingNotifications } from "@/components/UpcomingNotifications";
-import { AiNavigation } from "@/components/AiNavigation";
 import { UserMenu } from "@/components/UserMenu";
 import type { AppUser } from "@/types";
 
 const PAGE_TITLES: Record<string, string> = {
+  "/rehber": "Rehber",
   "/buro": "Büro Yönetimi",
   "/calisma-alanim": "Çalışma Alanım",
   "/admin": "Admin Paneli",
@@ -25,6 +27,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/ayarlar": "Ayarlar",
   "/hesabim": "Hesabım",
   "/ai": "CaseBridge AI",
+  "/ai/anonimlestirme": "Anonimleştirme",
   "/ai/analiz": "Dosya Analizi",
   "/ai/durusma": "Canlı Duruşma",
   "/ai/sohbet": "Hukuk Asistanı",
@@ -33,6 +36,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/ai/karsi-taraf": "Karşı Taraf Analizi",
   "/ai/yonetmen": "Yönetilen Duruşma",
   "/ai/olasilik": "Olasılık Ağacı",
+  "/ai/benzer-davalar": "Benzer Dava Bul",
 };
 
 function sectionForPath(pathname: string): { href: string; title: string } | null {
@@ -40,6 +44,15 @@ function sectionForPath(pathname: string): { href: string; title: string } | nul
     .filter((route) => pathname === route || pathname.startsWith(`${route}/`))
     .sort((a, b) => b.length - a.length)[0];
   return key ? { href: key, title: PAGE_TITLES[key] } : null;
+}
+
+function GuideLink({ user }: { user: AppUser }) {
+  const path = usePathname() ?? "";
+  const params = useSearchParams();
+  const topic = contextTopic(guideTopics(user), path, params.get("tab"));
+  return <Link href={path === "/rehber" ? "/rehber" : "/rehber?konu=" + topic.id}
+    aria-current={path === "/rehber" ? "page" : undefined}
+    className="rounded-xl border border-accent-200 bg-accent-50 px-4 py-2.5 text-sm font-semibold text-accent-800 hover:border-accent-400">Rehber</Link>;
 }
 
 export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user: AppUser | null; onMenuToggle?: () => void; menuOpen?: boolean }) {
@@ -68,7 +81,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
         <p className="mt-1 text-sm text-navy-700">{today}</p>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-4">
         {/* Firm workspace widgets: the platform firm has no firm data or pages. */}
         {!user?.is_platform_admin && !user?.workspace_position && (
           <>
@@ -80,7 +93,7 @@ export function WorkspaceHeader({ user, onMenuToggle, menuOpen = false }: { user
             </nav>
           </>
         )}
-        <AiNavigation user={user} />
+        <Suspense fallback={null}>{user && <GuideLink user={user} />}</Suspense>
         <UserMenu user={user} />
       </div>
     </header>

@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.timeutil import local_today
 from app.models.calendar import CalendarEvent, CalendarEventType
-from app.models.case import Case, CaseOutcome, CaseStatus
+from app.models.case import Case, CaseOutcome, CasePrecedentLink, CaseStatus
 from app.models.chat import ChatConversation, ChatMessage, ChatMessageStatus, ChatRole
 from app.models.document import Document
 from app.models.management import FirmProfile, ManagementAudit, ManagementRecord, WorkspaceAccess, WorkTransfer
@@ -21,7 +21,7 @@ from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
 from app.schemas.management import RecordWrite
 
-LABEL = "ÖRNEK · "
+LABEL = ""
 DISCLAIMER = "Kurgusal gösterim verisidir. Gerçek belge, AI sağlayıcı çıktısı veya hukuki görüş değildir."
 
 
@@ -36,6 +36,10 @@ def put(db, row_class, firm_id, key, **values):
         row = row_class(id=row_id, **values)
         db.add(row)
         db.flush()
+    elif "title" in values and row.title == "ÖRNEK · " + values["title"]:
+        row.title = values["title"]
+    elif "full_name" in values and row.full_name == "ÖRNEK · " + values["full_name"]:
+        row.full_name = values["full_name"]
     return row
 
 
@@ -46,21 +50,27 @@ def enrich_cases(db, admin, cases):
         fields = {
             "client_role": "plaintiff", "court_file_number": f"{today.year}/{200 + index} E.",
             "claim": f"{case.client_name} adına {case.case_name.lower()} kapsamındaki talebin değerlendirilmesi.",
-            "facts_summary": f"{DISCLAIMER} {case.description.removeprefix('[ÖRNEK ŞABLON] ')} Tarafların sözleşmesi, yazışmaları ve ödeme kayıtları birlikte incelenecek.",
+            "facts_summary": f"{DISCLAIMER} {case.description.removeprefix('[Gösterim] ')} Tarafların sözleşmesi, yazışmaları ve ödeme kayıtları birlikte incelenecek.",
             "plaintiff_position": "Sözleşmedeki edimin yerine getirilmediği, ihtara rağmen uyuşmazlığın giderilmediği ileri sürülüyor.",
             "defendant_position": "İfa ve ödeme kayıtlarının talebi karşılamadığı; bazı iddiaların ek delille kanıtlanması gerektiği savunuluyor.",
         }
         if case.status == CaseStatus.KAPALI:
-            fields.update(decision_date=case.opening_date + timedelta(days=90), closing_note=LABEL + "Gösterim amaçlı sonuç kaydı; kesinleşme ve tahsilat takibi örneklendirilmiştir.")
+            result = {CaseOutcome.WON: "Müvekkil lehine sonuçlandı.", CaseOutcome.LOST: "Müvekkil aleyhine sonuçlandı.",
+                      CaseOutcome.SETTLED: "Taraflar sulh yoluyla anlaştı."}.get(case.outcome)
+            fields["decision_date"] = case.opening_date + timedelta(days=90)
+            if result:
+                fields["closing_note"] = f"{LABEL}{case.case_name}. {result}"
+                if case.closing_note == LABEL + "Gösterim amaçlı sonuç kaydı; kesinleşme ve tahsilat takibi örneklendirilmiştir.":
+                    case.closing_note = fields["closing_note"]
         for field, value in fields.items():
             if not getattr(case, field):
                 setattr(case, field, value)
         for party in case.parties:
             if not party.counsel_name:
-                party.counsel_name = "Örnek dosya vekili"
+                party.counsel_name = "Dosya vekili"
         if case.status != CaseStatus.KAPALI and (not case.next_hearing_date or case.next_hearing_date < today):
             from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
-            ensure_all_day_hearing(db, case, today+timedelta(days=index%6+2), admin.id)
+            ensure_all_day_hearing(db, case, today+timedelta(days=index%6+2), case.assigned_lawyer_id or admin.id)
             recompute_next_hearing(db, case, today)
         # Legacy seeds had demo:// documents which could be read but not downloaded.
         for document in db.query(Document).filter_by(case_id=case.id, law_firm_id=admin.law_firm_id).all():
@@ -79,20 +89,24 @@ def enrich_cases(db, admin, cases):
     # Deliberately fictional precedent illustrations, isolated from case statistics.
     from app.db.seed import _get_or_create_case, _get_or_create_demo_note
     for index, source in enumerate([c for c in cases if c.status == CaseStatus.KAPALI][:3]):
+        number = f"CB-EMSAL-{index+1}"
+        new_precedent = not db.query(Case.id).filter_by(law_firm_id=admin.law_firm_id, case_number=number).first()
         precedent = _get_or_create_case(
-            db, admin.law_firm, admin, case_number=f"ÖRNEK-EMSAL-{index+1}",
-            case_name=LABEL + source.case_name + " · emsal inceleme örneği",
-            client_name="Anonim örnek taraf A", opposing_party="Anonim örnek taraf B",
+            db, admin.law_firm, admin, case_number=number,
+            case_name=LABEL + source.case_name + " · emsal incelemesi",
+            client_name="Anonim taraf A", opposing_party="Anonim taraf B",
             case_type=source.case_type, court="Kurgusal karar inceleme örneği",
             is_precedent=True, is_archived=True, status=CaseStatus.KAPALI,
             outcome=source.outcome, opening_date=today-timedelta(days=45+index*30),
             decision_date=today-timedelta(days=15+index*30),
-            description="[ÖRNEK ŞABLON] " + DISCLAIMER,
+            description="[Gösterim] " + DISCLAIMER,
             claim="Delil değerlendirmesinin ve ispat yükünün karşılaştırmalı incelenmesi.",
             facts_summary=DISCLAIMER, plaintiff_position="İfanın ispatı ve sözleşmeye aykırılık iddiası.",
             defendant_position="Ödeme ve ifa itirazlarının değerlendirilmesi.", client_role="plaintiff",
             court_file_number=f"GÖSTERİM-{index+1}", closing_note=DISCLAIMER,
         )
+        if new_precedent:
+            db.add(CasePrecedentLink(law_firm_id=admin.law_firm_id, case_id=source.id, precedent_id=precedent.id))
         _get_or_create_demo_note(db, precedent, admin, "ornek-karar-incelemesi.txt", f"{DISCLAIMER}\n{source.case_name}\nİspat yükü, delil tutarlılığı ve itirazların karşılaştırılması. Bu metne gerçek emsal olarak atıf yapılamaz.")
     db.flush()
 
@@ -105,7 +119,11 @@ def seed_operations(db: Session, admin: User, cases: list[Case]):
     # The example identities never receive real customer case assignments or access.
     from app.services.auth_service import DUMMY_PASSWORD_HASH
     members = []
-    for position, name in [("lawyer", "Deniz Kaya"), ("trainee", "Ece Yalın"), ("secretary", "Selin Akın"), ("accountant", "Can Erdem"), ("consultant", "Arda Ekin"), ("client", "Ada Örnek Müvekkil")]:
+    for position, name in [("lawyer", "Deniz Kaya"), ("trainee", "Ece Yalın"), ("secretary", "Selin Akın"), ("accountant", "Can Erdem"), ("consultant", "Arda Ekin"), ("client", "Ada Müvekkil")]:
+        if position == "lawyer":
+            from app.db.demo_team import seed_demo_lawyers
+            members.append(seed_demo_lawyers(db, admin)[0])
+            continue
         user = put(db, User, firm_id, f"member:{position}", law_firm_id=firm_id,
                    email=f"ornek-{identity(firm_id, position)}@example.com", full_name=LABEL+name,
                    role=UserRole.LAWYER, department="Kurgusal gösterim ekibi", hashed_password=DUMMY_PASSWORD_HASH)
@@ -139,25 +157,31 @@ def seed_operations(db: Session, admin: User, cases: list[Case]):
             due_date=today+timedelta(days=index-1),status=TaskStatus.PENDING,reminder_days=[])
     for index, case in enumerate(open_cases[:6]):
         for entry_type, amount in [("fee", 90000+index*15000), ("payment", 30000+index*5000), ("expense", 3500), ("reimbursement", 1500), ("advance", 10000), ("advance_spend", 2000)]:
-            record(f"finance:{index}:{entry_type}", "finance", f"{case.case_name} · {entry_type}", {"entry_type":entry_type,"amount":str(amount),"currency":"TRY","entry_date":str(today-timedelta(days=10-index)),"note":DISCLAIMER},case=case,owner=accountant)
+            record(f"finance:{index}:{entry_type}", "finance", f"{case.case_name} · {entry_type}", {"entry_type":entry_type,"amount":str(amount),"currency":"TRY","entry_date":str(today-timedelta(days=30*(5-index)+1)),"note":DISCLAIMER},case=case,owner=accountant)
         record(f"time:{index}", "time", case.case_name+" · dosya çalışması", {"work_date":str(today-timedelta(days=index)),"minutes":90+index*30,"hourly_cost":"1800","currency":"TRY","note":"Belge inceleme, görüşme ve duruşma hazırlığı. "+DISCLAIMER},case=case,owner=lawyer)
-        customer=record(f"client:{index}", "client", case.client_name, {"case_ids":[case.id],"email":f"ornek-muvekkil-{index}@example.com","phone":"Örnek iletişim kaydı","company":case.client_name,"contact_date":str(today-timedelta(days=2)),"next_contact_date":str(today+timedelta(days=3)),"note":DISCLAIMER},case=case,owner=secretary)
+        company = any(word in case.client_name for word in ("Şti", "A.Ş.", "Kooperatifi", "Yönetimi"))
+        email = f"iletisim{index + 1}@example.com"
+        phone = f"0538 000 00 {index + 10:02}"
+        customer=record(f"client:{index}", "client", case.client_name, {"case_ids":[case.id],"client_type":"organization" if company else "individual","email":email,"phone":phone,"company":case.client_name if company else "","contact_date":str(today-timedelta(days=2)),"next_contact_date":str(today+timedelta(days=3)),"note":DISCLAIMER},case=case,owner=secretary)
+        if customer.data.get("phone") == "Örnek iletişim kaydı":
+            customer.data = {**customer.data, "phone": phone, "client_type": "organization" if company else "individual",
+                             "email": email if customer.data.get("email") == f"ornek-muvekkil-{index}@example.com" else customer.data.get("email")}
         record(f"communication:{index}", "communication", "Müvekkil hazırlık görüşmesi", {"client_id":customer.id,"contact_date":str(today-timedelta(days=2)),"channel":"meeting","promise":"Eksik belgeler üç iş günü içinde paylaşılacak.","note":"Duruşma takvimi ve tahsilat planı konuşuldu. "+DISCLAIMER},case=case,owner=secretary)
-        record(f"deadline:{index}","deadline",case.case_name+" · beyan süresi",{"source":"Örnek ara karar / tebliğ kaydı","backup_id":lawyer.id,"verified":index%2==0,"reminder_days":[],"note":DISCLAIMER},case=case,owner=admin,due=today+timedelta(days=index-1))
+        record(f"deadline:{index}","deadline",case.case_name+" · beyan süresi",{"source":"Ara karar / tebliğ kaydı","backup_id":lawyer.id,"verified":index%2==0,"reminder_days":[],"note":DISCLAIMER},case=case,owner=admin,due=today+timedelta(days=index-1))
         record(f"checklist:{index}","checklist",case.case_name+" · hazırlık kontrolü",{"template":"hearing","items":[{"title":"Dosya ve taraf bilgilerini kontrol et","done":True},{"title":"Delil klasörünü hazırla","done":False,"depends_on":0},{"title":"Duruşma notunu gözden geçir","done":False,"depends_on":1}],"note":DISCLAIMER},case=case,owner=lawyer,due=today+timedelta(days=index+2))
         document=db.query(Document).filter_by(case_id=case.id).first()
         record(f"approval:{index}","approval",case.case_name+" · beyan taslağı",{"document_id":document.id,"revision":index+1,"content":"Uyuşmazlık özeti, deliller ve taleplerin yer aldığı kurgusal taslak. "+DISCLAIMER,"review_note":"Eklerin sırası ve talep sonucu kontrol edilecek."},status=["draft","review","changes","approved"][index%4],case=case,owner=lawyer,due=today+timedelta(days=2))
     for index, stage in enumerate(["new","meeting","evaluation","offer","contract","documents"]):
-        record(f"lead:{stage}","lead",f"Yeni müvekkil görüşmesi {index+1}",{"client_name":f"Örnek Şirket {index+1}","opposing_party":"Kurgusal Karşı Taraf","email":f"ornek-aday-{index}@example.com","waiting_reason":"Sözleşme ve belgelerin değerlendirilmesi bekleniyor.","conflict_decision":"clear" if index>2 else "pending","conflict_reason":"Yalnızca kurgusal taraflarla gösterim kontrolü." if index>2 else "","note":DISCLAIMER},status=stage,owner=secretary,due=today+timedelta(days=index+1))
+        record(f"lead:{stage}","lead",f"Yeni müvekkil görüşmesi {index+1}",{"client_name":f"Kıyı Ticaret {index+1}","opposing_party":"Kurgusal Karşı Taraf","email":f"ornek-aday-{index}@example.com","waiting_reason":"Sözleşme ve belgelerin değerlendirilmesi bekleniyor.","conflict_decision":"clear" if index>2 else "pending","conflict_reason":"Yalnızca kurgusal taraflarla gösterim kontrolü." if index>2 else "","note":DISCLAIMER},status=stage,owner=secretary,due=today+timedelta(days=index+1))
     record("leave","leave","İzin ve yedek sorumlu planı",{"starts_on":str(today+timedelta(days=7)),"ends_on":str(today+timedelta(days=10)),"backup_id":admin.id,"note":DISCLAIMER},status="requested",owner=lawyer,due=today+timedelta(days=7))
     doc=db.query(Document).filter_by(case_id=primary.id).first()
     for status in ["draft","published"]:
-        record(f"publication:{status}","publication",f"Müvekkil durum özeti · {status}",{"audience_ids":[client_user.id],"document_ids":[doc.id],"message":"Duruşma hazırlığı sürüyor; delil listesi tamamlandı. "+DISCLAIMER,"request":"İmzalı sözleşme ekini yüklemeniz bekleniyor.","appointment":str(today+timedelta(days=5)),"financial_summary":"Örnek ücret 90.000 TL; örnek tahsilat 30.000 TL."},status=status,case=primary,owner=admin)
+        record(f"publication:{status}","publication",f"Müvekkil durum özeti · {status}",{"audience_ids":[client_user.id],"document_ids":[doc.id],"message":"Duruşma hazırlığı sürüyor; delil listesi tamamlandı. "+DISCLAIMER,"request":"İmzalı sözleşme ekini yüklemeniz bekleniyor.","appointment":str(today+timedelta(days=5)),"financial_summary":"Ücret 90.000 TL; tahsilat 30.000 TL."},status=status,case=primary,owner=admin)
     for index,state in enumerate(["open","in_progress","resolved"]):
-        record(f"support:{state}","support",["Gösterim hazırlığı kontrolü","Örnek belge yükleme takibi","Tamamlanan kurulum görüşmesi"][index],{"priority":["high","normal","low"][index],"contact_name":admin.full_name,"note":DISCLAIMER},status=state,owner=admin,due=today+timedelta(days=index+1))
-    record("trash","support","İptal edilmiş gösterim kaydı",{"priority":"low","contact_name":"Örnek ekip","note":DISCLAIMER},deleted=True)
+        record(f"support:{state}","support",["Gösterim hazırlığı kontrolü","Belge yükleme takibi","Tamamlanan kurulum görüşmesi"][index],{"priority":["high","normal","low"][index],"contact_name":admin.full_name,"note":DISCLAIMER},status=state,owner=admin,due=today+timedelta(days=index+1))
+    record("trash","support","İptal edilmiş gösterim kaydı",{"priority":"low","contact_name":"Büro ekibi","note":DISCLAIMER},deleted=True)
     for i,event_type in enumerate([CalendarEventType.MEETING,CalendarEventType.CLIENT_MEETING,CalendarEventType.OTHER]):
-        event=put(db,CalendarEvent,firm_id,f"calendar:{i}",law_firm_id=firm_id,title=LABEL+["Dosya strateji toplantısı","Müvekkil hazırlık görüşmesi","Ekip belge kontrolü"][i],event_type=event_type,starts_at=datetime.combine(today+timedelta(days=i),time(11+i,0)),duration_minutes=45,location="Örnek toplantı odası / çevrim içi",notes=DISCLAIMER,case_id=primary.id,assignee_id=admin.id,created_by=admin.id,reminder_days=[])
+        event=put(db,CalendarEvent,firm_id,f"calendar:{i}",law_firm_id=firm_id,title=LABEL+["Dosya strateji toplantısı","Müvekkil hazırlık görüşmesi","Ekip belge kontrolü"][i],event_type=event_type,starts_at=datetime.combine(today+timedelta(days=i),time(11+i,0)),duration_minutes=45,location="Toplantı odası / çevrim içi",notes=DISCLAIMER,case_id=primary.id,assignee_id=admin.id,created_by=admin.id,reminder_days=[])
         event.starts_at=datetime.combine(today+timedelta(days=i),time(11+i,0))
     put(db,WorkTransfer,firm_id,"transfer",law_firm_id=firm_id,from_user_id=admin.id,to_user_id=lawyer.id,created_by=admin.id,reason="Kurgusal devir geçmişi; gerçek dosya devredilmedi.",counts={"cases":0,"tasks":0,"events":0,"records":0},accepted_at=now)
     profile=db.get(FirmProfile,firm_id)
@@ -204,7 +228,7 @@ def seed_ai_history(db, admin, cases):
             analysis_type=AnalysisType.SIMULATION_REPORT,assessment_score=report.assessment.score,
             assessment_confidence=AssessmentConfidence.LOW,created_at=now-timedelta(hours=index+1),**data)
     for i,(title,question,answer) in enumerate([
-        ("Duruşma hazırlık planı","Örnek dosyada duruşma hazırlığını nasıl sıralayalım?","Önce talep ve savunmayı özetleyin. Ardından her iddiayı belgeyle eşleştirin; eksik asılları ve tebliğ tarihlerini ayırın. Son olarak karşı tarafın üç temel itirazına kısa cevap hazırlayın."),
+        ("Duruşma hazırlık planı","Bu dosyada duruşma hazırlığını nasıl sıralayalım?","Önce talep ve savunmayı özetleyin. Ardından her iddiayı belgeyle eşleştirin; eksik asılları ve tebliğ tarihlerini ayırın. Son olarak karşı tarafın üç temel itirazına kısa cevap hazırlayın."),
         ("Müvekkil görüşme soruları","İlk görüşmede hangi bilgileri netleştirelim?","Sözleşmenin tarafları, önemli tarihler, ödemeler ve önceki bildirimler sorulmalı. Müvekkilin hedefini ve elindeki belgeleri ayrı ayrı kaydedin. Dosyada olmayan bir belgeyi varmış gibi kabul etmeyin."),
         ("Delil ve süre kontrolü","Beyan taslağını incelemeye göndermeden önce neyi kontrol edelim?","Talep sonucu ile olay kronolojisinin uyumunu, eklerin numarasını ve hangi iddiayı desteklediğini kontrol edin. Tebliğ ve son gün hesabını ikinci bir kişi doğrulasın.")]):
         conversation=put(db,ChatConversation,firm_id,f"chat:{admin.id}:{i}",law_firm_id=firm_id,user_id=admin.id,title=LABEL+title,created_at=now-timedelta(hours=i+1),updated_at=now-timedelta(hours=i+1))
@@ -213,7 +237,7 @@ def seed_ai_history(db, admin, cases):
                 status=ChatMessageStatus.COMPLETE if n else None,model="fictional-presentation" if n else None,level="standard" if n else None,
                 prompt_tokens=240 if n else None,completion_tokens=180 if n else None,latency_ms=600 if n else None,created_at=now-timedelta(hours=i+1)+timedelta(seconds=n))
     # Two personal case snapshots: a completed result and a resumable rehearsal.
-    case=next(c for c in cases if c.case_number=="ÖRNEK-2026/153")
+    case=next(c for c in cases if c.case_number=="CB-2026/153")
     for active in [False,True]:
         key=f"personal-court:{admin.id}:{active}"
         if db.get(CourtroomSession,identity(firm_id,key)):
@@ -236,7 +260,7 @@ def seed_ai_history(db, admin, cases):
             put(db,CourtroomTurn,firm_id,f"{key}:turn:{n}",session_id=session.id,sequence_number=n,actor=actor,legal_role=role,turn_type=kind,content=content,structured_data={"showcase":True})
         if not active:
             put(db,JudgeEvaluation,firm_id,f"{key}:evaluation",session_id=session.id,verdict="partial",summary=DISCLAIMER,
-                reasoning="Dönem karşılaştırması ve somut işletme verileri tamamlanmadan kesin sonuç çıkarılamaz.",evidence_assessment=["Örnek sözleşme: koşullar ve tarih karşılaştırılmalı."],
+                reasoning="Dönem karşılaştırması ve somut işletme verileri tamamlanmadan kesin sonuç çıkarılamaz.",evidence_assessment=["Sözleşme: koşullar ve tarih karşılaştırılmalı."],
                 unanswered_questions=["Gider artışı hangi dönem kayıtlarıyla doğrulanıyor?"],user_strengths=["Talep ve delil bağlantısı kuruldu."],user_weaknesses=["Somut dönem karşılaştırması eksik."],learning_notes=["Karşı savunmayı belge bazında yanıtlayın."],
                 relevance_score=20,evidence_score=18,rebuttal_score=17,courtroom_strategy_score=19,total_score=74,confidence="low",requires_verification=True,disclaimer=DISCLAIMER)
     db.flush()

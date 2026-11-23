@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/privacy/__init__.py",
+        "backend/app/privacy/anonymizer.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-001",
+        "specs/012-pii-anonymization/spec.md#FR-002"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_fictional_value_removed",
+        "backend/tests/unit/test_anonymizer.py::test_no_leaks_and_consistent_labels",
+        "backend/tests/unit/test_anonymizer.py::test_same_person_same_label",
+        "backend/tests/unit/test_anonymizer.py::test_tc_checksum"
+      ],
+      "reason": "Anonymize known identities and rule-detectable personal data in case text with consistent placeholders and a leak check (issue #34)."
+    },
+    {
+      "files": [
+        "backend/app/privacy/ner.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_ner_unavailable_falls_back_silently",
+        "backend/tests/unit/test_anonymizer.py::test_fold_caps_preserves_offsets_and_titlecases",
+        "backend/tests/unit/test_anonymizer.py::test_ner_kinds_follow_policy_and_heuristic_modes"
+      ],
+      "reason": "Optional local NER for unregistered person names; safe fallback when the model is not installed."
+    },
+    {
+      "files": [
+        "backend/app/ai/provider_factory.py",
+        "backend/app/core/config.py",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_anonymizes_and_restores",
+        "backend/tests/unit/test_anonymizer.py::test_provider_wrapper_off_by_default",
+        "backend/tests/unit/test_anonymizer.py::test_restore_roundtrip"
+      ],
+      "reason": "Opt-in masking of prompts sent to external LLM providers with response restoration; off by default. Application version manifest is bumped because backend source changed."
+    },
+    {
+      "files": [
+        "backend/app/privacy/policy.py",
+        "backend/app/privacy/policy.json"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_policy_city_flag_keeps_text_but_reports",
+        "backend/tests/unit/test_anonymizer.py::test_policy_city_mask_and_off",
+        "backend/tests/unit/test_anonymizer.py::test_policy_invalid_mode_rejected",
+        "backend/tests/unit/test_anonymizer.py::test_report_has_no_original_values",
+        "backend/tests/unit/test_anonymizer.py::test_policy_invalid_heuristic_mode_rejected"
+      ],
+      "reason": "Configurable masking policy per category and a value-free report of what was masked or flagged."
+    },
+    {
+      "files": [
+        "backend/app/privacy/names.py"
+      ],
+      "requirements": [
+        "specs/012-pii-anonymization/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_anonymizer.py::test_court_names_not_taken_as_address",
+        "backend/tests/unit/test_anonymizer.py::test_uppercase_names_and_surname_propagation"
+      ],
+      "reason": "Name heuristics found necessary on real UYAP documents: upper-case names, role words, court names, surname propagation."
+    }
+  ]
+}

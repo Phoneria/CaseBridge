@@ -12,7 +12,7 @@ import { CaseHearingResultModal } from "@/components/CaseHearingResultModal";
 type Dialog = { kind: "add" } | { kind: "edit" | "result" | "delete"; hearing: CaseHearing } | null;
 
 interface Props {
-  caseDetail: Pick<Case, "id" | "assigned_lawyer_id" | "status">;
+  caseDetail: Pick<Case, "id" | "assigned_lawyer_id" | "status"> & Partial<Pick<Case, "closing_note">>;
   hearings: CaseHearing[];
   /** An archived case is read-only. */
   readOnly: boolean;
@@ -72,7 +72,7 @@ export function CaseHearingsCard({ caseDetail, hearings, readOnly, onChanged }: 
         )}
       </header>
       {hearings.length === 0 ? (
-        <p className="p-4 text-sm text-navy-500">Henüz duruşma yok.</p>
+        <p className="p-4 text-sm text-navy-500">{closed && caseDetail.closing_note ? `Duruşma kaydı bulunmuyor. Dosyanın kapanışı: ${caseDetail.closing_note}` : "Henüz duruşma yok."}</p>
       ) : (
         <div className="divide-y divide-surface-border">
           {upcoming.length > 0 && (

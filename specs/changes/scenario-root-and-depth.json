@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "changes": [{
+    "files": ["frontend/app-version.json","frontend/src/components/lab/ScenarioTreeView.tsx","frontend/src/components/lab/scenarioMap.ts","frontend/src/types/scenarioTree.ts"],
+    "requirements": ["specs/014-demo-case-files/spec.md#FR-014"],
+    "acceptance_tests": ["frontend/src/components/__tests__/ScenarioTreeView.test.tsx::centers the root between the outermost leaves","frontend/src/components/__tests__/ScenarioTreeView.test.tsx::expands short trees with stable varied illustrative shares and preserves supplied weights"],
+    "reason": "Provide a centered entry, enough conditional steps and stable illustrative percentages in short case maps."
+  }]
+}

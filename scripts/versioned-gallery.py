@@ -126,6 +126,14 @@ def main():
     if args.action=='verify':
         verify(ROOT); return
     if args.action=='detect':
+        manifest=json.loads((ROOT/'web-page/website-version.json').read_text())
+        if manifest.get('product_gallery')=='disabled':
+            # Explicit homepage contract: never capture or reinsert the retired
+            # screenshot gallery into the interactive fictional story.
+            with open(os.environ.get('GITHUB_OUTPUT','/dev/stdout'),'a') as output:
+                output.write('needed=false\n')
+            print('Legacy product gallery disabled by the marketing manifest; no capture or publication.')
+            return
         observed=identity()
         ledger=json.loads((ROOT/LEDGER).read_text()) if (ROOT/LEDGER).exists() else {}
         refresh=needed(observed,ledger)

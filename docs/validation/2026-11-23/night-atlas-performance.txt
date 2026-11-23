@@ -1,0 +1,56 @@
+
+perf web-page/index.html @ 1440px
+  PASS  host CPU load (before/after)               35/24 %        
+  PASS  total transfer                             76 KiB         html 6.3K  css 7.5K  js 15K  font 39.1K  img 1.2K  other 6.9K
+  PASS  requests                                   11             10 by load
+  PASS  images bytes                               1.2 KiB        2 files
+  PASS  largest image                              0.6 KiB        assets/casebridge-e2e-dark.svg
+  PASS  JS parsed                                  36.4 KiB       3 files, 15K gz
+  PASS  CSS                                        7.5 KiB        1 files
+  PASS  font families                              1              Manrope
+  PASS  font files                                 2              39.1K
+  PASS  font bytes                                 39.1 KiB       
+  PASS  images without width+height                0              
+  WARN  below-fold images not lazy                 1              casebridge-e2e-dark.svg
+  PASS  oversized images (natural > 2.2x shown)    0              
+  PASS  WebGL live at load                         1              
+  PASS  WebGL live at bottom                       1              
+  PASS  WebGL peak live                            1              1 contexts made in all
+  PASS  long tasks (WebGL off)                     0              runs 3, 0..0, max 0ms
+  PASS  blocking time (WebGL off)                  0 ms           runs 3, 0..0 ms; at load 0ms
+  PASS  FCP (CPU, relative)                        56 ms          runs 3, 52..68
+  PASS  LCP (CPU, relative)                        56 ms          runs 3, 52..68, h1
+  PASS  layout shift                               0.004          runs 3, 0.004..0.004; at load 0.004
+  INFO    info: one load with WebGL on the CPU     123 ms         1 long tasks; SwiftShader runs shaders on the CPU, not a verdict, and shader compile on a real GPU is not measured
+  PASS  modules loaded, never mounted              0              
+  PASS  broken requests                            0              
+  PASS  page height                                7.3 screens    DOM 325 nodes
+
+perf web-page/index.html @ 390px
+  PASS  host CPU load (before/after)               35/24 %        
+  PASS  total transfer                             74.8 KiB       html 6.3K  css 7.5K  js 15K  font 39.1K  img 0.6K  other 6.3K
+  PASS  requests                                   9              9 by load
+  PASS  images bytes                               0.6 KiB        1 files
+  PASS  largest image                              0.6 KiB        assets/casebridge-e2e-dark.svg
+  PASS  JS parsed                                  36.4 KiB       3 files, 15K gz
+  PASS  CSS                                        7.5 KiB        1 files
+  PASS  font families                              1              Manrope
+  PASS  font files                                 2              39.1K
+  PASS  font bytes                                 39.1 KiB       
+  PASS  images without width+height                0              
+  WARN  below-fold images not lazy                 1              casebridge-e2e-dark.svg
+  PASS  oversized images (natural > 2.2x shown)    0              
+  PASS  WebGL live at load                         1              
+  PASS  WebGL live at bottom                       1              
+  PASS  WebGL peak live                            1              1 contexts made in all
+  PASS  long tasks (WebGL off)                     0              runs 3, 0..0, max 0ms
+  PASS  blocking time (WebGL off)                  0 ms           runs 3, 0..0 ms; at load 0ms
+  PASS  FCP (CPU, relative)                        56 ms          runs 3, 52..56
+  PASS  LCP (CPU, relative)                        56 ms          runs 3, 52..56, h1
+  PASS  layout shift                               0.000          runs 3, 0.000..0.000; at load 0.000
+  INFO    info: one load with WebGL on the CPU     49 ms          1 long tasks; SwiftShader runs shaders on the CPU, not a verdict, and shader compile on a real GPU is not measured
+  PASS  modules loaded, never mounted              0              
+  PASS  broken requests                            0              
+  PASS  page height                                10.5 screens   DOM 325 nodes
+
+SUMMARY web-page/index.html: 0 FAIL, 2 WARN  -> WARN

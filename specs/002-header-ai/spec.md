@@ -52,3 +52,5 @@ Kullanıcı, doğrulanmış kaynak/sürüm, kabul kanıtı ve bu özelliğin gö
 ## Assumptions
 
 Kapsam todo.md S01–S09 ve constitution ile sınırlıdır. Mevcut yetkiler ve kullanıcı verileri korunur. Otomatik yayın tetikleyicisi seçilmemiştir.
+
+- **FR-008**: Büro AI menüsü Sufle, Canlı Duruşma ve Karşı Taraf Analizi, Hukuk Asistanı, Olasılık Ağacı ve Bilgi Haritası girişlerinden oluşur. Her birleşik alanda iki araç arasında geçilir. AI genel bakış kaldırılır. Dosya Analizi ve Yönetilen Duruşma yalnız seçili dava içinde açılır. Dava detayındaki CaseBridge AI sekmesi diğer araçlara da erişim sağlar. Eski bağlantılar dosya kimliği varsa korur. Bu menü FR-001/005'teki eski dokuz satırın yerini alır.

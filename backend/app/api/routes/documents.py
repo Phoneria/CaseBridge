@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+from urllib.parse import quote
+
+from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
 from app.api.case_access import require_case_id_writable, require_case_writable
@@ -102,6 +104,15 @@ def download_document(
 ):
     service = DocumentService(db)
     document = service.get(document_id, law_firm_id)
+    from app.services.management_service import audit, commit
+    if document is not None and document.storage_path == "demo://dossier/" + document.id:
+        from app.services.dossier_pdf import render_dossier
+        content = render_dossier(document.extracted_text)
+        audit(db, current_user, law_firm_id, "document.downloaded", "document", document.id)
+        commit(db)
+        return Response(content=content, media_type="application/pdf", headers={
+            "Content-Disposition": "attachment; filename*=UTF-8''" + quote(document.filename, safe=""),
+        })
     path = service.resolve_download_path(document) if document is not None else None
     if path is None:
         # Same answer for "not yours" and "file gone" - no information leak.

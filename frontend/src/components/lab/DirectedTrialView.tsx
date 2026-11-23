@@ -26,8 +26,9 @@ interface Composer {
   text: string;
 }
 
-export function DirectedTrialView() {
-  const [ref, setRef] = useState<CaseRef>({});
+export function DirectedTrialView({ fixedCaseId }: { fixedCaseId?: string } = {}) {
+  const [selection, setRef] = useState<CaseRef>({});
+  const ref = fixedCaseId ? { case_id: fixedCaseId } : selection;
   const [side, setSide] = useState<TrialSide>("davaci");
   const [started, setStarted] = useState(false);
   const [stage, setStage] = useState(0);
@@ -169,7 +170,7 @@ export function DirectedTrialView() {
 
       {!started ? (
         <AiCard>
-          <CaseSource value={ref} onChange={setRef} />
+          {!fixedCaseId && <CaseSource value={ref} onChange={setRef} />}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div role="group" aria-label="Rolünüz" className="inline-flex rounded-xl border border-surface-border p-0.5">
               {(["davaci", "davali", "hakim"] as const).map((s) => (

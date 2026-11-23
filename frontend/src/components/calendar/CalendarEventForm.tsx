@@ -147,7 +147,7 @@ export function CalendarEventForm({
   const selectedCase = cases.find((item) => item.id === caseId) ?? null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy-900/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-scrim p-4 sm:items-center">
       <div
         role="dialog"
         aria-modal="true"
