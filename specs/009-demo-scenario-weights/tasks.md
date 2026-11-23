@@ -9,4 +9,4 @@
 - [x] T007 Run appropriate suites/build, stage pinned main, canary/rollback and public code/version/health/demo verification; record real results and converge.
 
 Dependencies: T001 → T002/T003 → T004/T005 → T006 → T007. No independent legal audit or numerical calibration is claimed.
-- [ ] T810 Validate FR-008 model, public links, documents, mobile/keyboard controls and immutable marketing delivery.
+- [x] T810 Validate FR-008 model, public links, documents, mobile/keyboard controls and immutable marketing delivery.

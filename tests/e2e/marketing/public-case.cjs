@@ -7,6 +7,7 @@ const assert=require('node:assert/strict');
   const page=await browser.newPage({viewport:{width,height:900}}), errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base);await page.locator('.hero-actions [href="ornek-dava.html"]').click();
+  await page.locator("#totals b").first().waitFor();
   const totals=()=>page.locator('#totals b').allTextContents();
   assert.deepEqual(await totals(),['%46','%28','%26']);
   const nodes=page.locator('#tree [role=button]');
