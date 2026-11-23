@@ -18,6 +18,8 @@ Final Taste performance: **0 FAIL, 2 WARN**, both the same reused small header l
 
 Impeccable context/detector/desktop-mobile shots ran. Paper-footer contrast and 10px/10.4px labels were corrected; full-bleed section padding advisories refer to outer sections with actual padded inner content. Setup drift was reported by the tool; no hook repair, login or unrelated setup change was made.
 
+The first remote CI correctly rejected a legacy homepage-video assertion. It was updated to verify the new dependency closure and a separate referenced-video fixture. Explicit modulepreload/image/license links make every transitive runtime/share asset visible to the existing immutable exporter; release runtime/policy is unchanged.
+
 ## Release
 - [ ] Protected-main CI and immutable marketing-only activation.
 - [ ] Public v.0.51, source/asset bytes, health and unchanged app/container identities.
