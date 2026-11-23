@@ -630,3 +630,4 @@ Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Pub
 
 ## Tanıtım v.0.53 · Kira bedeli uyuşmazlığı
 - [x] Eski ürün bölümünün yerine aynı konumda düz ağaç, uygulamadan 46 düğüm ve iki kayıtlı iç not. Yeşil sayfa ve iki bağlantısı kaldırıldı. 24 betik testi, 21 yayın testi ve masaüstü/mobil etkileşimler geçti.
+- [x] PR #93 main 08b0e43 için marketing-only yayın ve public v.0.53/kod/health doğrulandı. Canlı üç genişlikte etkileşim kontrolleri geçti. Eski yeşil sayfa HTTP 404.

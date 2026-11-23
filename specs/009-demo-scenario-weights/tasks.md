@@ -11,4 +11,4 @@
 Dependencies: T001 → T002/T003 → T004/T005 → T006 → T007. No independent legal audit or numerical calibration is claimed.
 - [x] T810 Validate FR-008 model, public links, documents, mobile/keyboard controls and immutable marketing delivery.
 
-- [ ] T811 Validate the supplied 2D rental tree, its source documents and marketing-only release.
+- [x] T811 Validate the supplied 2D rental tree, its source documents and marketing-only release.

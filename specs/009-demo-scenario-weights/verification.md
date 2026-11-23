@@ -24,3 +24,6 @@ Proof: docs/validation/2026-11-22/demo-{local-results,public-results,public-iden
 Local script suite 24/24, release suite 21/21. Chromium at 1440, 390 and 320 pixels followed the home link, verified 46/28/26, tested zero and maximal conditional probabilities, all nodes and document links, rotation, reset, keyboard and overflow. No production data used.
 
 PR #91 main 09c80cb4e4ab8f1dec3770443868f8cd9e1f10f4 passed restricted marketing stage/canary/activate/verify. Public homepage, case page, JS, CSS and version manifest matched source bytes. Public v.0.52 and app v.0.44 health ok. The same Chromium interaction sequence passed from the live homepage at 1440, 390 and 320 pixels after waiting for the deferred script to render the result controls. Previous v.0.50 immutable artifact retained.
+
+## Inline rental tree v.0.53
+PR #93, main 08b0e432469b868d783515aa938c3856a4632ad1. Marketing scope stage, canary, activate and verify passed. Public HTML, JS, CSS and version manifest matched source. Public browser checks at 1440/390/320 px passed zoom, all 46 nodes, the original recorded decision, document expansion, assumption updates and absence of the old links. Retired standalone page returned HTTP 404. Public health ok. Prior verified v.0.52 artifact retained.
