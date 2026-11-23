@@ -21,6 +21,7 @@ Emin Merden ekibe eklenir. İzzet iş geliştirmeden, Emin yapay zekâ ve veride
 - **FR-003**: Gerçek sunulan tüm ekip görünümlerinde, JS kapalı, masaüstü/mobil ve erişilebilir metinde aynı bilgiler bulunur; mevcut tema ve bağlantılar korunur.
 - **FR-004**: Ayrı marketing sürümü korumalı main ve mevcut immutable otomatik VPS akışından yayımlanır; normal public URL'de yeni metin/kod/sürüm ve health doğrulanmadan tamamlanmış sayılmaz.
 
+- **FR-006**: Kullanıcının 23 Kasım 2026 talebiyle Emin Merden tanıtımına Perpetual Labs bünyesindeki altyapı (infra) yönetimi eklenir; rolü ve diğer ekip metinleri değişmez.
 - **FR-005**: Kullanıcının onayladığı hazır Emin portresi yalnız web boyutuna küçültülerek mevcut EM alanının yerine gerçek img dosyasıyla eklenir; yüz/renk/içerik yeniden üretilmez. Mevcut ekip kadrajı, doğru alt metni, Emin unvanı ve tüm ekip metinleri korunur. Normal canlı URL, dosya hash/decode, masaüstü/mobil kadraj, sürüm ve health doğrulanır.
 
 ## Success Criteria
