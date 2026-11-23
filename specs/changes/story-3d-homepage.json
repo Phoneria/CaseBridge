@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/story3d.css",
+        "web-page/story3d.js",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/016-3d-story-homepage/spec.md#FR-001",
+        "specs/016-3d-story-homepage/spec.md#FR-002",
+        "specs/016-3d-story-homepage/spec.md#FR-003",
+        "specs/016-3d-story-homepage/spec.md#FR-004",
+        "specs/016-3d-story-homepage/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_five_feature_chapters_with_real_ctas",
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_probability_demo_is_labelled_scenario_assumption_without_unverified_claims",
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_release_closure_ships_self_contained_story_bundle"
+      ],
+      "reason": "User-requested from-scratch 3D story homepage showing five capabilities; marketing-only release v.0.54."
+    }
+  ]
+}
