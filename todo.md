@@ -597,3 +597,11 @@ Birleşik yayın kaydı ve geri dönüş provası [v.0.26 doğrulamasında](spec
 ## v.0.28 · Verified fictional case files
 
 Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Public version, health, code and rollback rehearsal passed. The live workspace reported 20 files and 478 PDF documents. [Acceptance results](specs/014-demo-case-files/verification.md)
+
+## Anonimleştirme ekranı — v.0.43, 23 Kasım 2026
+
+- Mevcut anonimleştirme motoruna büro oturumuyla erişilen, kayıt tutmayan metin maskeleme API’si ve sidebar bağlantılı ekran eklendi. Metin yapıştırma, maskeleme, kategori özeti, kopyalama ve temizleme desteklenir. Platform/kısıtlı hesap sınırları korunur; global AI maskeleme ayarı değiştirilmez.
+- 791 frontend testi, üretim build/type kontrolü, 20 release testi ve Spec Kit governance geçti. Odaklı backend: 46 geçti, NER modeli yokluğu nedeniyle 1 atlandı ve 1 beklenen başarısızlık kaldı. Gerçek oturumla iki büro/rol erişimi ve kısıtlı erişim reddi doğrulandı. Sentetik Chromium masaüstü/mobil maskeleme, kopyalama, temizleme ve sidebar kontrolleri geçti; görseller incelendi.
+- [ ] Tam backend/CI sonuçları ve main commit kaydı.
+- [ ] Main kaynaklı değişmez artefakt yayını; public v.0.43/kod/health ve geri dönüş kaydı doğrulaması.
+- Gerçek müşteri verisi/anahtar kullanılmadı; ek müşteri onboarding yapılmadı. Ayrıntılar specs/012-pii-anonymization/verification.md içindedir.

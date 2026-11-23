@@ -27,6 +27,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/ayarlar": "Ayarlar",
   "/hesabim": "Hesabım",
   "/ai": "CaseBridge AI",
+  "/ai/anonimlestirme": "Anonimleştirme",
   "/ai/analiz": "Dosya Analizi",
   "/ai/durusma": "Canlı Duruşma",
   "/ai/sohbet": "Hukuk Asistanı",

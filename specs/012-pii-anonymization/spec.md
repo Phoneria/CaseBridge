@@ -13,3 +13,7 @@ Personal data in case files must be anonymized so that the identity of the peopl
 
 ## Success Criteria
 Every fictional value in `backend/tests/fixtures/ornek_dava_kurgusal.txt` is absent from the anonymized output while the legal text stays readable. Known limits: indirect identifiers are not detected and the NER layer is probabilistic.
+
+## Interactive masking screen — authorized 23 November 2026
+- **FR-007**: Bureau administrators and unrestricted lawyers can open Anonimleştirme from the existing sidebar and paste up to 30,000 characters, mask locally on the application server, inspect category counts and copy the result. Reject anonymous, platform and restricted accounts. No client bureau/case ID or stored document is accepted. Never persist input, output or mapping, and return no mapping or original values in metadata. Invalid input returns generic errors without echoing input. Clear stale results when input changes; clear resets all text.
+- **FR-008**: Show detection limitations and NER availability. No external AI/provider call or automatic LLM masking setting changes. Use regex and heuristics plus an already loaded local NER if available; do not download models on this endpoint. Output requires human review and leaves flagged places/organizations unchanged under current policy. Return Cache-Control: no-store.

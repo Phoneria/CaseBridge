@@ -5,6 +5,7 @@ import type { CourtroomRole, CourtroomSessionSummary, CourtroomStatus, Simulatio
 
 export const AI_ROUTES = {
   hub: "/ai",
+  anonymize: "/ai/anonimlestirme",
   analysis: "/ai/analiz",
   courtroom: "/ai/durusma",
   chat: "/ai/sohbet",
