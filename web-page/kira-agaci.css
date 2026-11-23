@@ -1,0 +1,29 @@
+.lease-tree{padding-block:76px;scroll-margin-top:72px}
+.lease-tree h2{margin:0;font-size:clamp(32px,4vw,56px);line-height:1.12}
+.lease-tree .lease-intro{margin:12px 0 26px;font-size:18px}
+.lease-intro span{font-size:14px;opacity:.8}
+.lease-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(270px,1fr);gap:16px;align-items:start;color:#18283e;color-scheme:light;text-align:left}
+.lease-map,.lease-panel{background:#fff;border:1px solid #cadae2;border-radius:16px;min-width:0;overflow:hidden}
+.lease-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:8px;border-bottom:1px solid #d2dfe6}
+.lease-toolbar div{display:flex;align-items:center;gap:5px}
+.lease-toolbar button,.lease-panel select{font:inherit;font-size:14px;color:#113c57;background:white;border:1px solid #a9c0cd;border-radius:7px;min-height:40px;padding:5px 12px;cursor:pointer}
+.lease-toolbar button:disabled{opacity:.45}.lease-toolbar output{font:600 14px system-ui;min-width:42px;text-align:center}
+#lease-view{height:480px;overflow:auto;background:#e6f3f5;position:relative;overscroll-behavior-x:contain}
+#lease-sizer{overflow:hidden;position:relative}#lease-plane{position:absolute;inset:0 auto auto 0;transform-origin:0 0}
+#lease-plane svg{position:absolute;inset:0;pointer-events:none}
+#lease-plane path{fill:none;stroke:#8454ad;stroke-width:2}
+#lease-plane path.recorded{stroke:#224bb0;stroke-width:4}
+.lease-node{box-sizing:border-box;position:absolute;width:202px;height:96px;display:flex;flex-direction:column;align-items:start;justify-content:center;gap:3px;padding:8px 10px;border:1px solid #aebfcf;border-radius:9px;background:#fff;color:#142842;text-align:left;cursor:pointer;line-height:1.22;white-space:normal}
+.lease-node.recorded{border-color:#658ad0;background:#eaf1ff}
+.lease-node[aria-pressed=true]{outline:2px solid #164caf;outline-offset:1px}
+.lease-node strong{font:650 13px/1.22 system-ui;color:#172b43;letter-spacing:normal}
+.lease-node small,.lease-node span{font:500 11px/1.25 system-ui;color:#38506c}
+.lease-tree button:focus-visible,.lease-tree summary:focus-visible,.lease-tree select:focus-visible{outline:3px solid #007eae;outline-offset:2px}
+.lease-tree .lease-caption{margin:0;padding:12px 16px;background:white;font:400 13px/1.5 system-ui;color:#42596a}
+.lease-panel{padding:20px}.lease-panel h3{font:700 21px/1.25 system-ui;color:#18283e;margin:0 0 12px}
+.lease-panel p,.lease-panel li{font:400 14px/1.55 system-ui;color:#30435b;letter-spacing:normal;margin:8px 0}.lease-panel ul{padding-left:20px}
+.lease-panel #lease-path{background:#e8f6fa;color:#09526c;padding:10px;border-radius:8px;font-weight:700}
+.lease-panel details{border-top:1px solid #d4e1e7;margin:0;padding:0}.lease-panel summary{padding:11px 0;font:600 14px/1.5 system-ui;color:#18374e;cursor:pointer}.lease-panel small{color:#4c6071;font:12px system-ui}.lease-panel details[open]{padding-bottom:12px}
+#lease-assumption{margin:12px 0}#lease-assumption label{display:block;font:600 14px system-ui;color:#152e4b;margin-bottom:7px}
+@media(max-width:820px){.lease-grid{grid-template-columns:minmax(0,1fr)}#lease-view{height:365px}.lease-tree{padding-block:48px}.lease-panel{padding:16px}}
+.lease-panel .lease-document{white-space:pre-wrap;overflow-wrap:anywhere;font:400 14px/1.55 system-ui;color:#243a50;background:#f2f8fb;padding:12px;border-radius:6px;margin:9px 0 0}
