@@ -31,8 +31,8 @@ function arrivalLabel(node: ScenarioNode) {
   return node.path_percent == null ? assessment(node) : 'Başlangıçtan ulaşma ' + percent(node.path_percent);
 }
 
-const recordedColor = '#1e40af';
-const edgeColors = ['#007eac', '#804ca3', '#aa5710'];
+const recordedColor = '#3b6fd6';
+const edgeColors = ['#14907f', '#c06a8f', '#c88a2e'];
 
 export function TreeDiagram({ tree, selected, onSelect }: { tree: Pick<ScenarioTree, 'nodes' | 'case_closed' | 'source_mode'>; selected: string; onSelect: (id: string) => void }) {
   const marker = useId().replace(/:/g, '');

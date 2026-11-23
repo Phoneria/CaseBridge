@@ -198,7 +198,7 @@ export function MapView() {
                       y1={a.y}
                       x2={b.x}
                       y2={b.y}
-                      stroke={on ? "#007eac" : "#94a6bc"}
+                      stroke={on ? "#14907f" : "#94a6bc"}
                       strokeWidth={on ? 2.6 : 0.8 + e.j * 1.4}
                       opacity={focus ? (on ? 1 : 0.06) : 0.45}
                     />
@@ -361,7 +361,7 @@ function NodeLabel({ n, r, sel, ang, w, focus }: { n: GraphNode; r: number; sel:
     <text x={x} y={y} textAnchor={anchor} fontSize={12} fill="#0f1a2e" style={halo}>
       <tspan fontWeight={700}>{n.code}</tspan>
       {title ? <tspan x={x} dy={14} fontWeight={500}>{title}</tspan> : null}
-      {w ? <tspan x={x} dy={13} fontSize={11} fill="#007eac" fontWeight={600}>{w} kararda birlikte</tspan> : null}
+      {w ? <tspan x={x} dy={13} fontSize={11} fill="#0c7468" fontWeight={600}>{w} kararda birlikte</tspan> : null}
     </text>
   );
 }

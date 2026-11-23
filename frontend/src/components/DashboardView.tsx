@@ -124,8 +124,8 @@ export function DashboardView() {
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
               <Tooltip />
               <Bar dataKey="total" name="Toplam" fill={BRAND_ACCENT[600]} radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
-              <Bar dataKey="won" name="Kazanılan" fill="#10b981" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
-              <Bar dataKey="lost" name="Kaybedilen" fill="#f97373" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="won" name="Kazanılan" fill="#1fb5a3" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
+              <Bar dataKey="lost" name="Kaybedilen" fill="#e36b5f" radius={[6, 6, 0, 0]} cursor="pointer" onClick={openFromChart} />
             </BarChart>
           </ResponsiveContainer>
           <ChartLegendLinks
@@ -147,7 +147,7 @@ export function DashboardView() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="#3d5170" />
-                  <Tooltip cursor={{ fill: "#edf9fc" }} />
+                  <Tooltip cursor={{ fill: "#ecfaf7" }} />
                   <Bar dataKey="total" label={{ position: "top", fontSize: 12, fill: "#31465a" }} radius={[6, 6, 0, 0]} fill={BRAND_ACCENT[600]} cursor="pointer" onClick={openFromChart} />
                 </BarChart>
               </ResponsiveContainer>
