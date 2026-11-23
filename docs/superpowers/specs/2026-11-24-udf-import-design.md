@@ -2,7 +2,7 @@
 
 - **Tarih:** 2026-11-24
 - **Dal:** `feature/udf-import` (`main` `1186165` üzerinden)
-- **Durum:** Onay bekliyor
+- **Durum:** Onaylandı
 - **Boyut:** Küçük değişiklik
 
 ## 1. Amaç
