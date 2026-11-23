@@ -17,6 +17,7 @@ A law-firm visitor scrolls one continuous story. A case file opens into a networ
 - **FR-008**: Team feedback: the hero network is handed to the timeline scene unchanged (same nodes, names, links, no fade) and its documents travel one by one onto their events over a longer scroll; all probability-tree labels stay inside the frame while the tree grows.
 - **FR-009**: Fast wheel/trackpad scrolling is never blocked; scene progress follows the scroll position with damping and a speed limit so transitions play out smoothly even at maximum scroll speed; reduced-motion users get the direct (undamped) mapping.
 - **FR-010**: User request (23 Nov): inside the six story chapters, wheel/trackpad scrolling is applied at a capped speed (about 1.1 screen heights per second, at most 1.2 screens queued per fling) so every transition is seen. Keyboard, scrollbar, anchor links and touch stay native; zoom gestures, horizontal gestures and reduced-motion users are not intercepted; team, FAQ and footer scroll normally. This is a deliberate, scoped exception to FR-002's no-capture rule.
+- **FR-011**: Bug fix: once the wheel leaves the story (team, FAQ, footer), any pending capped glide is cancelled so the page stays where the visitor scrolled and is never pulled back up.
 
 ## Success Criteria
 All six scenes render on 1440×900 and 390×844 without overflow or console errors; tree moves change both views; acceptance tests in `scripts/tests/test_story_3d.py` pass; public `/website-version.json` reports v.0.54 and serves the new `story3d.js`.

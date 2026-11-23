@@ -760,8 +760,11 @@ addEventListener('wheel', (e) => {
   if (e.target.closest && e.target.closest('#lease-view, .bureau-tip')) return;
   const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * innerHeight : e.deltaY;
   const from = Math.abs(wheelTarget - scrollY) > 2 ? wheelTarget : scrollY;
-  if (from >= storyEnd() && dy > 0) return;
-  if (from > storyEnd() + innerHeight && dy < 0) return;
+  // past the story (team, FAQ, footer) the wheel is native; stop any pending capped glide first,
+  // otherwise it would pull the page back up to the last story position
+  const release = () => { wheelDriving = false; wheelTarget = scrollY; };
+  if (from >= storyEnd() && dy > 0) return release();
+  if (scrollY > storyEnd() + innerHeight * 0.25 && dy < 0) return release();
   e.preventDefault(); lastWheelEvent = performance.now(); wheelDriving = true;
   const max = document.documentElement.scrollHeight - innerHeight;
   wheelTarget = clamp(from + dy, Math.max(0, scrollY - innerHeight * MAX_QUEUED_VH), Math.min(max, scrollY + innerHeight * MAX_QUEUED_VH));
