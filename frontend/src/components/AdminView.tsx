@@ -101,10 +101,10 @@ export function AdminView() {
   const workloadAxisWidth = Math.min(180, Math.max(80, Math.max(0, ...workloadData.map((row) => row.name.length)) * 7));
   const busiest = [...workloadData].sort((a, b) => (b.aktif + b.kapali) - (a.aktif + a.kapali))[0];
   const statusData = [
-    { name: "Aktif", value: cases.filter((item) => item.status === "devam_eden").length, color: "#10b981" },
-    { name: "Duruşma", value: cases.filter((item) => item.status === "durusma_bekleyen").length, color: "#f59e0b" },
-    { name: "Karar", value: cases.filter((item) => item.status === "karar_bekleyen").length, color: "#f97316" },
-    { name: "Kapalı", value: cases.filter((item) => item.status === "kapali").length, color: "#94a3b8" },
+    { name: "Aktif", value: cases.filter((item) => item.status === "devam_eden").length, color: "#1fb5a3" },
+    { name: "Duruşma", value: cases.filter((item) => item.status === "durusma_bekleyen").length, color: "#edb45d" },
+    { name: "Karar", value: cases.filter((item) => item.status === "karar_bekleyen").length, color: "#5b8def" },
+    { name: "Kapalı", value: cases.filter((item) => item.status === "kapali").length, color: "#8fa3b8" },
   ].filter((row) => row.value > 0);
 
   if (loading) return <LoadingState label="Admin paneli yükleniyor..." />;
@@ -146,7 +146,7 @@ export function AdminView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
                 <XAxis dataKey="ay" tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: "#afe3f0" }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: "#68dfcf" }} />
                 <Area type="monotone" dataKey="dava" name="Yeni dava" stroke={BRAND_ACCENT[600]} strokeWidth={3} fill="url(#caseTrend)" activeDot={{ r: 5, fill: BRAND_ACCENT[600], stroke: "white", strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
@@ -178,7 +178,7 @@ export function AdminView() {
               <YAxis type="category" interval={0} dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#f7f8fb" }} />
               <Bar dataKey="aktif" name="Aktif" stackId="cases" fill={BRAND_ACCENT[600]} radius={[6, 0, 0, 6]} />
-              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#d7f1f8" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#a6e8da" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

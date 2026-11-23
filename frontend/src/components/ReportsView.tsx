@@ -64,9 +64,9 @@ const REPORTS: ReportCard[] = [
 
 const STATUS_COLORS: Record<string, string> = {
   devam_eden: BRAND_ACCENT[600],
-  durusma_bekleyen: "#f59e0b",
-  karar_bekleyen: "#0ea5e9",
-  kapali: "#10b981",
+  durusma_bekleyen: "#edb45d",
+  karar_bekleyen: "#5b8def",
+  kapali: "#1fb5a3",
 };
 
 function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overview: AnalyticsOverview }) {
@@ -79,7 +79,7 @@ function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overv
   const statusRows = overview.by_status.filter((row) => row.total > 0).map((row) => ({
     ...row,
     label: CASE_STATUS_LABELS[row.status] ?? row.status,
-    color: STATUS_COLORS[row.status] ?? "#94a3b8",
+    color: STATUS_COLORS[row.status] ?? "#8fa3b8",
   }));
   let cursor = 0;
   const slices = statusRows.map((row) => {

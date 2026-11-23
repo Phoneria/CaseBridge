@@ -95,7 +95,7 @@ export function AnalyticsView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
                 <YAxis tick={{ fontSize: 11 }} stroke="#3d5170" />
-                <Tooltip cursor={{ fill: "#edf9fc" }} />
+                <Tooltip cursor={{ fill: "#ecfaf7" }} />
                 <Bar
                   dataKey="Kazanma Oranı"
                   radius={[6, 6, 0, 0]}

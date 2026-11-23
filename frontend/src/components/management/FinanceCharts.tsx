@@ -22,8 +22,8 @@ export function FinanceCharts({records}: {records: ManagementRecord[]}) {
       <p className="my-2 text-sm text-navy-600">Toplam tahsilat {money(rows.reduce((v,r) => v+r.income, 0),currency)} · Masraf {money(rows.reduce((v,r) => v+r.expense, 0),currency)}</p>
       <ResponsiveContainer width="100%" height={240}><BarChart data={rows}>
         <CartesianGrid vertical={false} strokeDasharray="3 3"/><XAxis dataKey="month"/><YAxis/><Tooltip/><Legend/>
-        <Bar dataKey="income" name="Tahsilat" fill="#007eac" radius={[4,4,0,0]}/>
-        <Bar dataKey="expense" name="Büro masrafı" fill="#ae570f" radius={[4,4,0,0]}/>
+        <Bar dataKey="income" name="Tahsilat" fill="#1fb5a3" radius={[4,4,0,0]}/>
+        <Bar dataKey="expense" name="Büro masrafı" fill="#edb45d" radius={[4,4,0,0]}/>
       </BarChart></ResponsiveContainer>
     </section>;
   })}</>;

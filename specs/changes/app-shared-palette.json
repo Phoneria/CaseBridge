@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "frontend/app-version.json", "frontend/src/app/globals.css", "frontend/src/app/theme.css",
+        "frontend/src/components/AdminView.tsx", "frontend/src/components/AnalyticsView.tsx", "frontend/src/components/DashboardView.tsx",
+        "frontend/src/components/ReportsView.tsx", "frontend/src/components/lab/MapView.tsx", "frontend/src/components/lab/ScenarioTreeView.tsx",
+        "frontend/src/components/management/FinanceCharts.tsx", "frontend/src/lib/brand.ts", "frontend/src/lib/graphLayout.ts",
+        "frontend/tailwind.config.ts", "frontend/public/fonts/manrope-latin-v23.woff2", "frontend/public/fonts/manrope-latin-ext-v23.woff2", "frontend/public/fonts/OFL.txt"
+      ],
+      "requirements": [
+        "specs/017-app-shared-palette/spec.md#FR-001", "specs/017-app-shared-palette/spec.md#FR-002", "specs/017-app-shared-palette/spec.md#FR-003",
+        "specs/017-app-shared-palette/spec.md#FR-004", "specs/017-app-shared-palette/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "frontend/src/lib/__tests__/brandPalette.test.ts::uses the marketing turquoise, navy and outcome colours in both themes",
+        "frontend/src/lib/__tests__/brandPalette.test.ts::keeps readable contrast and defaults to the dark theme"
+      ],
+      "reason": "User-requested marketing palette in the application; dark default, light kept; application v.0.45."
+    }
+  ]
+}
