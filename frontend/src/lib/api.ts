@@ -1,4 +1,8 @@
 import type {
+  Client,
+  ClientDetail,
+  ClientListItem,
+  ClientPayload,
   PlatformAdminInvite,
   PlatformAdminPayload,
   PlatformFirm,
@@ -325,6 +329,7 @@ export interface CaseListFilters {
   active?: boolean;
   hearing_within_days?: number;
   assigned_lawyer_id?: string;
+  client_id?: string;
 }
 
 export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
@@ -337,6 +342,7 @@ export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
   if (filters.active !== undefined) params.set("active", String(filters.active));
   if (filters.hearing_within_days) params.set("hearing_within_days", String(filters.hearing_within_days));
   if (filters.assigned_lawyer_id) params.set("assigned_lawyer_id", filters.assigned_lawyer_id);
+  if (filters.client_id) params.set("client_id", filters.client_id);
   const query = params.toString();
   return request(`/cases${query ? `?${query}` : ""}`);
 }
@@ -710,6 +716,37 @@ export async function openChatStream(
   });
   if (!response.ok) await throwApiError(response, `/chat/conversations/${conversationId}/messages`);
   return response;
+}
+
+export interface ClientListFilters {
+  q?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function listClients(filters: ClientListFilters = {}): Promise<ClientListItem[]> {
+  const params = new URLSearchParams();
+  if (filters.q?.trim()) params.set("q", filters.q.trim());
+  if (filters.limit) params.set("limit", String(filters.limit));
+  if (filters.offset) params.set("offset", String(filters.offset));
+  const query = params.toString();
+  return request(`/clients${query ? `?${query}` : ""}`);
+}
+
+export async function getClient(id: string): Promise<ClientDetail> {
+  return request(`/clients/${id}`);
+}
+
+export async function createClient(payload: ClientPayload): Promise<Client> {
+  return request("/clients", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateClient(id: string, payload: Partial<ClientPayload>): Promise<Client> {
+  return request(`/clients/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function deleteClient(id: string): Promise<void> {
+  return request(`/clients/${id}`, { method: "DELETE" });
 }
 
 export interface SufleTurn { id: number; speaker: "Avukat" | "Müvekkil" | "Görüşme"; text: string }

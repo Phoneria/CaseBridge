@@ -3,8 +3,12 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const updateCase = vi.fn();
+const listClients = vi.fn();
+const createClient = vi.fn();
 vi.mock("@/lib/api", () => ({
   updateCase: (...args: unknown[]) => updateCase(...args),
+  listClients: (...args: unknown[]) => listClients(...args),
+  createClient: (...args: unknown[]) => createClient(...args),
 }));
 
 import { CaseDisputeCard } from "@/components/CaseDisputeCard";
@@ -22,12 +26,23 @@ const baseCase = {
   defendant_position: null,
   description: "Müvekkil acele istiyor.",
   parties: [
-    { id: "p1", name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, counsel_name: "Av. Ece Kaya", sort_order: 0 },
-    { id: "p2", name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, counsel_name: null, sort_order: 1 },
+    { id: "p1", name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, client_id: "cl-alfa", counsel_name: "Av. Ece Kaya", sort_order: 0 },
+    { id: "p2", name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, client_id: null, counsel_name: null, sort_order: 1 },
   ],
 } as unknown as Case;
 
-beforeEach(() => updateCase.mockReset());
+/** After "Müvekkilimiz" is checked: add the row's name as a new client. */
+async function chooseNewClient(rowName: string) {
+  const row = screen.getByRole("group", { name: rowName });
+  await userEvent.click(within(row).getByRole("option", { name: /adıyla yeni müvekkil ekle/ }));
+  await waitFor(() => expect(within(row).getByRole("button", { name: "Müvekkili değiştir" })).toBeInTheDocument());
+}
+
+beforeEach(() => {
+  updateCase.mockReset();
+  listClients.mockReset().mockResolvedValue([]);
+  createClient.mockReset().mockImplementation(async (payload: { name: string }) => ({ id: `cl-${payload.name}`, name: payload.name }));
+});
 
 describe("CasePartiesCard", () => {
   it("lists the parties with role, counsel and the client badge", () => {
@@ -56,16 +71,18 @@ describe("CasePartiesCard", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
     const first = screen.getByRole("group", { name: "Taraf 1" });
+    await userEvent.click(within(first).getByRole("button", { name: "Müvekkili değiştir" }));
     expect(within(first).getByLabelText(/^Ad/)).toHaveValue("Alfa Ticaret A.Ş.");
     expect(within(first).getByLabelText("Müvekkilimiz")).toBeChecked();
     await userEvent.type(within(first).getByLabelText(/^Ad/), " Yeni");
+    await chooseNewClient("Taraf 1");
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
 
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(updated));
     expect(updateCase).toHaveBeenCalledWith("c1", {
       parties: [
-        { name: "Alfa Ticaret A.Ş. Yeni", role: "plaintiff", is_client: true, counsel_name: "Av. Ece Kaya" },
-        { name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, counsel_name: null },
+        { name: "Alfa Ticaret A.Ş. Yeni", role: "plaintiff", is_client: true, client_id: "cl-Alfa Ticaret A.Ş. Yeni", counsel_name: "Av. Ece Kaya" },
+        { name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, client_id: null, counsel_name: null },
       ],
     });
     expect(screen.queryByRole("button", { name: "Kaydet" })).toBeNull();
@@ -102,10 +119,12 @@ describe("CasePartiesCard", () => {
   it("discards edits on Vazgeç", async () => {
     render(<CasePartiesCard canEdit caseDetail={baseCase} onSaved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByRole("button", { name: "Müvekkili değiştir" }));
     await userEvent.type(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/), "xyz");
     await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }));
     expect(screen.getByText("Alfa Ticaret A.Ş.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Tarafları düzenle" }));
+    await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByRole("button", { name: "Müvekkili değiştir" }));
     expect(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText(/^Ad/)).toHaveValue("Alfa Ticaret A.Ş.");
     expect(updateCase).not.toHaveBeenCalled();
   });

@@ -16,6 +16,7 @@ from app.core.security import hash_password, verify_password
 from app.db.base import Base
 from app.db.purge import delete_cases
 from app.models.case import Case
+from app.models.client import Client
 from app.models.courtroom import CourtroomSession
 from app.models.law_firm import LawFirm
 from app.models.user import User
@@ -102,7 +103,9 @@ def remove_demo_data(
         result.users_removed.append(user.email)
     db.flush()
 
-    if count_references(db, "law_firms", firm.id) == 0:
+    # The firm's clients alone do not keep it: every case is gone, so they have no cases left.
+    if count_references(db, "law_firms", firm.id, ignore=("clients",)) == 0:
+        db.query(Client).filter(Client.law_firm_id == firm.id).delete(synchronize_session=False)
         db.delete(firm)
         result.firm_removed = True
         db.flush()

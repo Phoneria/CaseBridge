@@ -9,6 +9,9 @@ const addCaseEvent = vi.fn();
 const uploadDocument = vi.fn();
 const getMe = vi.fn();
 const listAdminLawyers = vi.fn();
+const listClients = vi.fn();
+const createClient = vi.fn();
+const getClient = vi.fn();
 vi.mock("@/lib/api", () => ({
   extractCaseIntake: (...args: unknown[]) => extractCaseIntake(...args),
   createCase: (...args: unknown[]) => createCase(...args),
@@ -16,9 +19,12 @@ vi.mock("@/lib/api", () => ({
   uploadDocument: (...args: unknown[]) => uploadDocument(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   listAdminLawyers: (...args: unknown[]) => listAdminLawyers(...args),
+  listClients: (...args: unknown[]) => listClients(...args),
+  createClient: (...args: unknown[]) => createClient(...args),
+  getClient: (...args: unknown[]) => getClient(...args),
 }));
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
-import { nav, resetNav } from "@/test/navigation";
+import { nav, resetNav, setUrl } from "@/test/navigation";
 
 import { ApiError } from "@/lib/apiError";
 
@@ -54,10 +60,12 @@ const RESULT: CaseIntakeResult = {
 const scrollIntoView = vi.fn();
 
 beforeEach(() => {
-  for (const mock of [extractCaseIntake, createCase, addCaseEvent, uploadDocument, getMe, listAdminLawyers, scrollIntoView]) {
+  for (const mock of [extractCaseIntake, createCase, addCaseEvent, uploadDocument, getMe, listAdminLawyers, getClient, scrollIntoView]) {
     mock.mockReset();
   }
   getMe.mockResolvedValue({ id: "u1", role: "lawyer" });
+  listClients.mockReset().mockResolvedValue([]);
+  createClient.mockReset().mockImplementation(async (payload: { name: string }) => ({ id: `cl-${payload.name}`, name: payload.name }));
   createCase.mockResolvedValue({ id: "new-1" });
   addCaseEvent.mockResolvedValue({});
   uploadDocument.mockResolvedValue({});
@@ -242,12 +250,20 @@ describe("NewCaseView", () => {
   });
 });
 
+/** After "Müvekkilimiz" is checked: add the row's name as a new client. */
+async function chooseNewClient(rowName: string) {
+  const row = screen.getByRole("group", { name: rowName });
+  await userEvent.click(within(row).getByRole("option", { name: /adıyla yeni müvekkil ekle/ }));
+  await waitFor(() => expect(within(row).getByRole("button", { name: "Müvekkili değiştir" })).toBeInTheDocument());
+}
+
 async function fillRequired() {
   await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/9 E.");
   await userEvent.type(screen.getByLabelText(/^Dava adı/), "Kira Alacağı");
   const first = screen.getByRole("group", { name: "Taraf 1" });
   await userEvent.type(within(first).getByLabelText(/^Ad/), "Alfa Ticaret A.Ş.");
   await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+  await chooseNewClient("Taraf 1");
 }
 
 const submit = () => userEvent.click(screen.getByRole("button", { name: "Davayı oluştur" }));
@@ -287,6 +303,18 @@ describe("NewCaseView create flow", () => {
     expect(screen.getByText("Geçerli bir tutar girin.")).toBeInTheDocument();
   });
 
+  it("does not create a case while a client row has no chosen client", async () => {
+    render(<NewCaseView />);
+    await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/9");
+    await userEvent.type(screen.getByLabelText(/^Dava adı/), "Kira Alacağı");
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    await userEvent.type(within(first).getByLabelText(/^Ad/), "Alfa Ticaret A.Ş.");
+    await userEvent.click(within(first).getByLabelText("Müvekkilimiz"));
+    await submit();
+    expect(within(first).getByText("Müvekkili listeden seçin veya yeni ekleyin.")).toBeInTheDocument();
+    expect(createCase).not.toHaveBeenCalled();
+  });
+
   it("creates a manually entered case with parties only and opens it", async () => {
     render(<NewCaseView />);
     await fillRequired();
@@ -298,7 +326,7 @@ describe("NewCaseView create flow", () => {
       case_name: "Kira Alacağı",
       case_type: "diger",
       status: "devam_eden",
-      parties: [{ name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, counsel_name: null }],
+      parties: [{ name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, client_id: "cl-Alfa Ticaret A.Ş.", counsel_name: null }],
     });
     expect(addCaseEvent).not.toHaveBeenCalled();
     expect(uploadDocument).not.toHaveBeenCalled();
@@ -322,6 +350,7 @@ describe("NewCaseView create flow", () => {
     await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
     await fillFromPastedText();
     await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await chooseNewClient("Taraf 1");
     await userEvent.upload(screen.getByLabelText("Belge ekle"), new File(["ek"], "ek-belge.pdf", { type: "application/pdf" }));
     await submit();
 
@@ -341,8 +370,8 @@ describe("NewCaseView create flow", () => {
       plaintiff_position: "Mal teslim edildi.",
       defendant_position: "Mal ayıplıydı.",
       parties: [
-        { name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, counsel_name: "Av. Ece Kaya" },
-        { name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, counsel_name: null },
+        { name: "Alfa Ticaret A.Ş.", role: "plaintiff", is_client: true, client_id: "cl-Alfa Ticaret A.Ş.", counsel_name: "Av. Ece Kaya" },
+        { name: "Beta Lojistik Ltd.", role: "defendant", is_client: false, client_id: null, counsel_name: null },
       ],
     });
     expect(addCaseEvent).toHaveBeenCalledWith("c9", {
@@ -358,6 +387,7 @@ describe("NewCaseView create flow", () => {
     await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
     await fillFromPastedText();
     await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await chooseNewClient("Taraf 1");
     await userEvent.click(screen.getByLabelText(/İlk duruşma/));
     await userEvent.click(screen.getByLabelText("Kaynak belgeyi davaya ekle"));
     await submit();
@@ -376,6 +406,7 @@ describe("NewCaseView create flow", () => {
     await userEvent.type(screen.getByLabelText(/^Dava no/), "2026/145");
     await fillFromPastedText();
     await userEvent.click(within(screen.getByRole("group", { name: "Taraf 1" })).getByLabelText("Müvekkilimiz"));
+    await chooseNewClient("Taraf 1");
     await submit();
 
     await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/davalar/new-1?eklenemeyen=2"));
@@ -516,5 +547,17 @@ describe("NewCaseView create flow safeguards", () => {
     render(<NewCaseView />);
     await submit();
     expect(screen.getByRole("heading", { name: "Temel bilgiler ve mahkeme" })).toHaveFocus();
+  });
+});
+
+describe("NewCaseView from a client page", () => {
+  it("opens with the client chosen in the first party row", async () => {
+    setUrl("/davalar/yeni?muvekkil=cl-7");
+    getClient.mockResolvedValue({ id: "cl-7", name: "Nova Yazılım A.Ş.", client_type: "company" });
+    render(<NewCaseView />);
+    const first = screen.getByRole("group", { name: "Taraf 1" });
+    expect(await within(first).findByRole("link", { name: "Nova Yazılım A.Ş." })).toHaveAttribute("href", "/muvekkiller/cl-7");
+    expect(within(first).getByLabelText("Müvekkilimiz")).toBeChecked();
+    expect(getClient).toHaveBeenCalledWith("cl-7");
   });
 });

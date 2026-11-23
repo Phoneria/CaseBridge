@@ -83,6 +83,7 @@ def list_cases(
     outcome: Optional[CaseOutcome] = None,
     active: Optional[bool] = None,
     hearing_within_days: Optional[int] = Query(default=None, ge=1, le=365),
+    client_id: Optional[str] = None,
     limit: Optional[int] = Query(default=None, ge=1, le=200),
     offset: Optional[int] = Query(default=None, ge=0),
     law_firm_id: str = Depends(get_current_law_firm_id),
@@ -100,6 +101,7 @@ def list_cases(
         outcome=outcome,
         active=active,
         hearing_within_days=hearing_within_days,
+        client_id=client_id,
     )
 
 
@@ -141,7 +143,7 @@ def update_case(
     require_case_writable(case)
     _lifecycle(lambda: CaseLifecycleService.ensure_patch_allowed(case, payload))
     try:
-        return CaseService(db).update_case(case, payload)
+        return CaseService(db).update_case(case, payload, current_user.id)
     except InvalidPartiesError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
 

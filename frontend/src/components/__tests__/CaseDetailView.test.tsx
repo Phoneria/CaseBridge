@@ -23,6 +23,8 @@ const createCalendarEvent = vi.fn();
 const createTask = vi.fn();
 const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
+const listClients = vi.fn();
+const createClient = vi.fn();
 
 vi.mock("@/lib/api", () => ({
   getSimilarCases: () => Promise.resolve([]),
@@ -47,6 +49,8 @@ vi.mock("@/lib/api", () => ({
   createTask: (...args: unknown[]) => createTask(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
   updateCase: (...args: unknown[]) => updateCase(...args),
+  listClients: (...args: unknown[]) => listClients(...args),
+  createClient: (...args: unknown[]) => createClient(...args),
   deleteDocument: vi.fn(),
   downloadDocument: vi.fn(),
 }));
@@ -87,6 +91,8 @@ beforeEach(() => {
   createTask.mockReset();
   updateTaskStatus.mockReset();
   updateCase.mockReset();
+  listClients.mockReset().mockResolvedValue([]);
+  createClient.mockReset();
   listCaseTasks.mockResolvedValue([]);
   getCaseHearings.mockReset();
   getCaseHearings.mockResolvedValue([]);
@@ -577,7 +583,7 @@ describe("CaseDetailView", () => {
       plaintiff_position: "Fesih haksız.",
       defendant_position: "Fesih haklı.",
       parties: [
-        { id: "p1", name: "Deniz Arslan", role: "defendant", is_client: true, counsel_name: null, sort_order: 0 },
+        { id: "p1", name: "Deniz Arslan", role: "defendant", is_client: true, client_id: "cl-1", counsel_name: null, sort_order: 0 },
         { id: "p2", name: "Mavi Yapı A.Ş.", role: "plaintiff", is_client: false, counsel_name: "Av. Can", sort_order: 1 },
       ],
     };

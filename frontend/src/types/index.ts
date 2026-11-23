@@ -15,6 +15,7 @@ export interface CaseParty {
   role: PartyRole;
   is_client: boolean;
   counsel_name: string | null;
+  client_id: string | null;
   sort_order: number;
 }
 
@@ -61,6 +62,7 @@ export interface CasePartyPayload {
   role: PartyRole;
   is_client: boolean;
   counsel_name?: string | null;
+  client_id?: string | null;
 }
 
 export interface CasePayload {
@@ -726,6 +728,65 @@ export type ChatStreamEvent =
   | { type: "delta"; text: string }
   | { type: "done"; message: ChatMessage | null }
   | { type: "error"; message: string };
+
+export type ClientType = "person" | "company";
+
+export interface Client {
+  id: string;
+  law_firm_id: string;
+  name: string;
+  client_type: ClientType;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientListItem extends Client {
+  case_count: number;
+  open_case_count: number;
+}
+
+export interface ClientStats {
+  total: number;
+  open: number;
+  closed: number;
+  archived: number;
+  won: number;
+  lost: number;
+  settled: number;
+  total_case_value: number;
+}
+
+/** A case of the client as GET /clients/{id} lists it. */
+export interface ClientCase {
+  id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  status: CaseStatus;
+  outcome: CaseOutcome;
+  assigned_lawyer_name: string | null;
+  next_hearing_date: string | null;
+  is_archived: boolean;
+}
+
+export interface ClientDetail extends Client {
+  stats: ClientStats;
+  cases: ClientCase[];
+}
+
+/** Blank optional fields are sent as null. */
+export interface ClientPayload {
+  name: string;
+  client_type: ClientType;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+}
 
 /** GET /cases/{id}/similar and POST /similar-cases/search (stage 1, no AI). */
 export interface SimilarCase {
