@@ -747,6 +747,8 @@ function resize() {
 addEventListener('resize', resize);
 resize();
 
+const SCROLL_DAMP = 4.5; // how quickly the scene catches up with the scroll position
+const MAX_PROGRESS_PER_S = 0.55; // a full chapter animation never plays faster than ~1.8 s
 let last = performance.now();
 let elapsed = 0;
 function frame() {
@@ -759,8 +761,15 @@ function frame() {
   let current = -1; let cp = 0;
   chapters.forEach((ch) => {
     const { p, visible } = progressOf(ch);
-    syncSteps(ch, p);
-    if (visible) { current = +ch.dataset.scene; cp = p; }
+    // Scroll is never blocked. The animation follows it with damping and a speed limit,
+    // so a fast wheel flick plays the transition out instead of jumping frames.
+    if (ch._sp === undefined || reduceMotion) ch._sp = p;
+    const diff = p - ch._sp;
+    const step = Math.min(Math.abs(diff) * Math.min(1, dt * SCROLL_DAMP), MAX_PROGRESS_PER_S * dt);
+    ch._sp += Math.sign(diff) * step;
+    if (Math.abs(p - ch._sp) < 0.0005) ch._sp = p;
+    syncSteps(ch, ch._sp);
+    if (visible) { current = +ch.dataset.scene; cp = ch._sp; }
   });
   document.documentElement.classList.toggle('stage-off', current < 0);
   if (current < 0) { renderer.clear(); return; }
