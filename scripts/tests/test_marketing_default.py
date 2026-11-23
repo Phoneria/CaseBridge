@@ -14,6 +14,8 @@ class MarketingDefaultAcceptance(unittest.TestCase):
     def test_lease_tree_replaces_product_gallery_inline(self):
         home=(ROOT/'web-page/index.html').read_text()
         self.assertIn('assets/video/casebridge-hero.mp4',home)
+        self.assertIn('href="olasilik-agaci.html"',home)
+        home=(ROOT/'web-page/olasilik-agaci.html').read_text()
         self.assertIn('CB-SONUC-2025/142-1',home)
         self.assertIn('id="lease-view"',home)
         self.assertIn('demo-delil-kontrol-listesi.txt',home)
