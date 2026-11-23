@@ -20,6 +20,7 @@ import type {
   CaseOutcome,
   CaseStatus,
   CaseType,
+  SimilarCase,
   DocumentItem,
   HandoverReport,
   ReportKind,
@@ -346,6 +347,17 @@ export async function getPrecedents(caseId?: string, allCategories = false): Pro
 
 export function setPrecedentLink(caseId: string, precedentId: string, linked: boolean): Promise<void> {
   return request(`/cases/${caseId}/precedents/${precedentId}`, { method: linked ? "PUT" : "DELETE" });
+}
+
+export async function getSimilarCases(caseId: string, limit = 5): Promise<SimilarCase[]> {
+  return request(`/cases/${encodeURIComponent(caseId)}/similar?limit=${limit}`);
+}
+
+export async function searchSimilarCases(text: string, caseType?: CaseType | null, limit = 5): Promise<SimilarCase[]> {
+  return request("/similar-cases/search", {
+    method: "POST",
+    body: JSON.stringify({ text, limit, ...(caseType ? { case_type: caseType } : {}) }),
+  });
 }
 
 export async function getPrecedentDocuments(precedentId: string): Promise<DocumentItem[]> {

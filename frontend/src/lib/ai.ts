@@ -14,6 +14,7 @@ export const AI_ROUTES = {
   scenarios: "/ai/olasilik",
   counter: "/ai/karsi-taraf",
   directed: "/ai/yonetmen",
+  similar: "/ai/benzer-davalar",
 } as const;
 
 export const AI_PERSPECTIVES = ["Hakim", "Davacı vekili", "Davalı vekili", "Araştırmacı"] as const;

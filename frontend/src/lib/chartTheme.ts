@@ -39,3 +39,11 @@ export const STATUS_COLORS: Record<string, string> = {
   kapali: OUTCOME_COLORS.neutral,
 };
 export const statusColor = (status: string) => STATUS_COLORS[status] ?? OUTCOME_COLORS.rose;
+
+/** Outcome badge colour: decided cases by result, open ones by their status colour. */
+export const OUTCOME_BADGE_COLORS: Record<string, string> = {
+  won: OUTCOME_COLORS.won,
+  lost: OUTCOME_COLORS.lost,
+  settled: OUTCOME_COLORS.partial,
+};
+export const outcomeColor = (outcome: string, status: string) => OUTCOME_BADGE_COLORS[outcome] ?? statusColor(status);

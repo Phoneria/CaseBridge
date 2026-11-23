@@ -36,6 +36,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/ai/karsi-taraf": "Karşı Taraf Analizi",
   "/ai/yonetmen": "Yönetilen Duruşma",
   "/ai/olasilik": "Olasılık Ağacı",
+  "/ai/benzer-davalar": "Benzer Dava Bul",
 };
 
 function sectionForPath(pathname: string): { href: string; title: string } | null {
