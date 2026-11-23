@@ -128,7 +128,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers = new Headers(options.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (options.body && !(options.body instanceof FormData)) {
+  if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -818,4 +818,11 @@ export interface MaskedTextResult {
 }
 export function anonymizeText(text: string): Promise<MaskedTextResult> {
   return request<MaskedTextResult>("/privacy/anonymize", {method: "POST", body: JSON.stringify({text}), cache: "no-store"});
+}
+
+export interface ExtractedPrivacyText {text: string; format: "pdf" | "docx" | "text"; warnings: string[];}
+export function extractPrivacyFile(file: File): Promise<ExtractedPrivacyText> {
+  return request<ExtractedPrivacyText>("/privacy/extract-text", {
+    method: "POST", body: file, headers: {"Content-Type": "application/octet-stream"}, cache: "no-store",
+  });
 }
