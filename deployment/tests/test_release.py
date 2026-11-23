@@ -114,11 +114,26 @@ class ReleaseTests(unittest.TestCase):
                 args = command.call_args.args[0]
                 self.assertIn('cb-frontend', args); self.assertNotIn('cb-backend', args); verify.assert_called_once()
 
-    def test_marketing_dependency_closure_keeps_original_video(self):
+    def test_marketing_dependency_closure_contains_complete_night_atlas(self):
         files = r.marketing_files(Path(__file__).parents[2] / 'web-page')
-        self.assertIn('assets/video/casebridge-hero.mp4', files)
-        self.assertIn('hero-video-restoration.css', files)
+        for name in ('night-atlas.js', 'night-atlas-map.js', 'night-atlas-model.mjs',
+                     'night-atlas.css', 'assets/night-atlas/share.jpg', 'assets/night-atlas/OFL.txt',
+                     'assets/night-atlas/manrope-latin-v23.woff2',
+                     'assets/night-atlas/manrope-latin-ext-v23.woff2', 'team.html'):
+            self.assertIn(name, files)
         self.assertNotIn('planning/business-plan.xlsx', files)
+        self.assertNotIn('assets/video/casebridge-hero.mp4', files)
+
+    def test_marketing_dependency_closure_preserves_referenced_legacy_video(self):
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            (root/'assets/video').mkdir(parents=True)
+            (root/'index.html').write_text('<link href="hero-video-restoration.css"><video src="assets/video/casebridge-hero.mp4"></video>')
+            (root/'hero-video-restoration.css').write_text('video{width:100%}')
+            (root/'assets/video/casebridge-hero.mp4').write_bytes(b'legacy fixture')
+            files = r.marketing_files(root)
+            self.assertIn('assets/video/casebridge-hero.mp4', files)
+            self.assertIn('hero-video-restoration.css', files)
 
 
 if __name__ == '__main__': unittest.main()
