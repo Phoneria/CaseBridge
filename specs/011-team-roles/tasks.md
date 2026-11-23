@@ -18,3 +18,4 @@ Dependencies: T001 → T002 → T003 → T004 → T005(local) → T006 → T005(
 - [x] T008 [US2] Verify portrait source/hash/alt/decode and existing team roles contract, local desktop/mobile crop and JS-disabled image; record verification.md.
 - [x] T009 Protected main marketing timer release; verify normal public portrait file/hash, desktop/mobile crop, version and health, record verification.md and todo.md.
 Dependencies: T007 → T008 → T009. Prior T001–T006 evidence is historical and remains valid.
+- [x] T010 FR-010 label change on team cards; test_team_roles updated (v.0.65).
