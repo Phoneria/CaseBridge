@@ -13,6 +13,7 @@ A law-firm visitor scrolls one continuous story. A case file opens into a networ
 - **FR-005**: Verify desktop/mobile rendering, console errors, overflow and frame rate in a real browser, run repository suites, increment the marketing version, publish marketing-only through the existing main-sourced release path and verify public version and hashes.
 
 - **FR-006**: Team feedback (23 Nov): the hero headline keeps clear space below the fixed header at short viewports; hero pages carry readable fictional legal text; pages turn into labelled document nodes one by one and more slowly, without covering the hero copy.
+- **FR-007**: Team feedback: 3D labels always render in front of geometry; the probability tree grows edge by edge from left to right while scrolling (with an appeal branch after Ret) and the camera follows; hero nodes settle into a line and fly into the case timeline; the inline application tree moves to its own linked page; a sixth scene shows the courtroom rehearsal (you as counsel, AI opposing counsel and judge, 4 × 25 training evaluation).
 
 ## Success Criteria
 All six scenes render on 1440×900 and 390×844 without overflow or console errors; tree moves change both views; acceptance tests in `scripts/tests/test_story_3d.py` pass; public `/website-version.json` reports v.0.54 and serves the new `story3d.js`.

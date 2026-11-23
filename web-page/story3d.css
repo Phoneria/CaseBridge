@@ -191,3 +191,5 @@ h2 { font-size: clamp(30px, 3.2vw, 44px); }
 /* no-WebGL hero falls back to the original film */
 .hero-fallback { display: none; }
 .no-webgl .hero-fallback { display: block; position: absolute; inset: 0; width: 100%; height: 100vh; object-fit: cover; opacity: .35; }
+.subpage main { pointer-events: auto; padding-top: 70px; }
+.subpage .nav { justify-content: space-between; }

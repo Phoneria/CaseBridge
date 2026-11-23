@@ -44,10 +44,10 @@ class Story3DHomepage(unittest.TestCase):
         self.page = Page(self.html)
 
     def test_five_feature_chapters_with_real_ctas(self):
-        self.assertEqual(self.page.scenes, {'0': 'top', '1': 'gecmis', '2': 'olasilik', '3': 'anonim', '4': 'buro', '5': 'sufle'})
-        for title in ['Biten davayı geri sarın.', 'Süren dava nasıl biter', 'Kişisel veri, modele gitmeden maskelenir.', 'Büronuzu tek bakışta görün.', 'Görüşme sürerken']:
+        self.assertEqual(self.page.scenes, {'0': 'top', '1': 'gecmis', '2': 'olasilik', '3': 'anonim', '4': 'buro', '5': 'sufle', '6': 'simulasyon'})
+        for title in ['Biten davayı geri sarın.', 'Süren dava nasıl biter', 'Kişisel veri, modele gitmeden maskelenir.', 'Büronuzu tek bakışta görün.', 'Görüşme sürerken', 'Duruşmaya girmeden önce prova edin.']:
             self.assertIn(title, self.html)
-        for anchor in ['#gecmis', '#olasilik', '#anonim', '#buro', '#sufle', '#team']:
+        for anchor in ['#gecmis', '#olasilik', '#anonim', '#buro', '#sufle', '#simulasyon', '#team', 'olasilik-agaci.html']:
             self.assertIn(anchor, self.page.hrefs)
         self.assertIn(DEMO, self.page.hrefs)
         self.assertIn('https://app.casebridge.com.tr/login', self.page.hrefs)
@@ -62,7 +62,7 @@ class Story3DHomepage(unittest.TestCase):
         initial = [int(n) for n in re.findall(r'<output>%(\d+)</output>', self.html)]
         self.assertEqual(sum(initial), 100)
         self.assertIn('Yüzdeler senaryo varsayımıdır; kalibre edilmiş bir kazanma olasılığı değildir.', self.html)
-        for fictional in ['Kurgusal kira dosyası.', 'Kurgusal büro verisi.', 'Kurgusal görüşme.']:
+        for fictional in ['Kurgusal kira dosyası.', 'Kurgusal büro verisi.', 'Kurgusal görüşme.', 'Kurgusal prova. Puan bir eğitim değerlendirmesidir; gerçek dava sonucu tahmini değildir.']:
             self.assertIn(fictional, self.html)
         for claim in ['10 TB', '100.000', 'müşterimiz', 'garanti']:
             self.assertNotIn(claim, self.html)
@@ -89,6 +89,16 @@ class Story3DHomepage(unittest.TestCase):
         for marker in ['PAGE_BODY', "'GEREKÇELİ KARAR'", 'Kurgusal örnek', 'node.userData.tag = tag']:
             self.assertIn(marker, source)
         self.assertIn('Kurgusal', (SITE / 'story3d.js').read_text())
+
+
+    def test_tree_grows_rightward_simulation_scene_and_labels_on_top(self):
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        for marker in ["['bR', 'ist']", "ist: 'İstinaf'", 'm.userData.win', 'scenes[6] = ', "card('KARŞI VEKİL'", "'HÂKİM DEĞERLENDİRMESİ · EĞİTİM PUANI'", 'sprite.renderOrder = 20;', 'incoming.forEach']:
+            self.assertIn(marker, source)
+        self.assertNotIn('id="lease-view"', self.html)
+        files = release_module().marketing_files(SITE)
+        for name in ['olasilik-agaci.html', 'kira-agaci.js', 'kira-agaci.css']:
+            self.assertIn(name, files)
 
 
 if __name__ == '__main__':

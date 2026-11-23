@@ -4,13 +4,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#08131f">
   <meta name="description" content="CaseBridge; biten davalardan ders çıkaran, süren davanın olası yollarını gösteren, veriyi maskeleyen, büroyu tek ekranda toplayan ve müvekkil görüşmesinde sufle veren yapay zekâ çalışma alanıdır.">
-  <meta name="casebridge-website-version" content="v.0.57">
+  <meta name="casebridge-website-version" content="v.0.58">
   <title>CaseBridge — Davanın her yolunu önceden görün</title>
   <link rel="icon" href="assets/casebridge-e2e.svg?v=0.41" type="image/svg+xml">
-  <link rel="stylesheet" href="story3d.css?v=0.57">
-  <script type="module" src="story3d.js?v=0.57"></script>
-  <link rel="stylesheet" href="kira-agaci.css?v=0.53">
-  <script defer src="kira-agaci.js?v=0.53"></script>
+  <link rel="stylesheet" href="story3d.css?v=0.58">
+  <script type="module" src="story3d.js?v=0.58"></script>
   <!-- Legacy hero film: shown only as the no-WebGL hero background. -->
   <link rel="stylesheet" href="hero-video-restoration.css?v=0.44">
 </head>
@@ -23,7 +21,7 @@
     <div class="nav wrap">
       <a class="brand" href="#top" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Her dava, başından sonuna.</small></span></a>
       <nav id="navigation" aria-label="Ana menü">
-        <a href="#gecmis">Geçmiş analiz</a><a href="#olasilik">Olasılık Ağacı</a><a href="#anonim">Anonimleştirme</a><a href="#buro">Büro yönetimi</a><a href="#sufle">Sufle</a><a href="#team">Ekip</a>
+        <a href="#gecmis">Geçmiş analiz</a><a href="#olasilik">Olasılık Ağacı</a><a href="#anonim">Anonimleştirme</a><a href="#buro">Büro yönetimi</a><a href="#sufle">Sufle</a><a href="#simulasyon">Simülasyon</a><a href="#team">Ekip</a>
       </nav>
       <div class="nav-actions">
         <a class="nav-login" href="https://app.casebridge.com.tr/login">Giriş</a>
@@ -56,9 +54,9 @@
           <h2 id="gecmis-title">Biten davayı geri sarın.</h2>
           <p class="lead">Kapanmış dosyanın olaylarını, delillerini ve kararını yeniden okuyun. Hangi aşamada farklı bir adımın sonucu değiştirebileceğini görün ve bu dersi sonraki dosyaya taşıyın.</p>
           <ol class="steps">
-            <li data-at="0.05"><strong>Kayıtlı yol</strong> Dilekçeden karara kadar dosyadaki gerçek sıra.</li>
-            <li data-at="0.4"><strong>Kırılma noktası</strong> Bilirkişi raporu: itiraz edilmeden kesinleşti.</li>
-            <li data-at="0.75"><strong>Alternatif yol</strong> Süresinde itiraz ve emsal kira delili, kısmi kabule giden daha güçlü bir yol açar.</li>
+            <li data-at="0.14"><strong>Kayıtlı yol</strong> Dilekçeden karara kadar dosyadaki gerçek sıra.</li>
+            <li data-at="0.42"><strong>Kırılma noktası</strong> Bilirkişi raporu: itiraz edilmeden kesinleşti.</li>
+            <li data-at="0.78"><strong>Alternatif yol</strong> Süresinde itiraz ve emsal kira delili, kısmi kabule giden daha güçlü bir yol açar.</li>
           </ol>
           <p class="fine">Analiz güçlü ve zayıf noktaları, eksik delilleri ve önerilen adımları gösterir. Değerlendirme her zaman avukatındır.</p>
         </div>
@@ -70,7 +68,7 @@
         <div class="copy">
           <p class="kicker"><span>02</span> Olasılık Ağacı</p>
           <h2 id="olasilik-title">Süren dava nasıl biter, sizin hamleniz neyi değiştirir?</h2>
-          <p class="lead">Dosyadaki kayıtlardan dallanan olası yolları ve her yolun payını görün. Bir hamle seçin; ağaç ve sonuç dağılımı anında yeniden hesaplansın.</p>
+          <p class="lead">Dosyadaki kayıtlardan dallanan olası yolları ve her yolun payını görün. Kaydırdıkça dallar soldan sağa açılır; ret yolunda istinaf ihtimali de görünür. Bir hamle seçin, ağaç ve sonuç dağılımı anında yeniden hesaplansın.</p>
           <div class="chips" role="group" aria-label="Hamle seçin">
             <button type="button" class="chip" data-chip="expert" aria-pressed="false">Ek bilirkişi incelemesi iste</button>
             <button type="button" class="chip" data-chip="precedent" aria-pressed="false">Emsal kira delili sun</button>
@@ -137,55 +135,26 @@
       </div>
     </section>
 
-<section class="lease-tree wrap" id="product" aria-labelledby="lease-heading">
-      <p class="kicker"><span>Uygulamadan</span> Gerçek ekran verisi</p>
-      <h2 id="lease-heading">Olasılık Ağacı, uygulamadaki hâliyle</h2>
-      <p class="lease-intro">Kira bedeli uyuşmazlığı <span>· CB-SONUC-2025/142-1</span></p>
-      <div class="lease-grid">
-        <div class="lease-map">
-          <div class="lease-toolbar"><button id="lease-expand" type="button">Tüm dalları aç</button><div aria-label="Harita ölçeği"><button id="lease-minus" type="button" aria-label="Uzaklaştır">−</button><output id="lease-scale">%100</output><button id="lease-plus" type="button" aria-label="Yakınlaştır">+</button></div></div>
-          <div id="lease-view" tabindex="0" aria-label="Kaydırılabilir karar ağacı"><div id="lease-sizer"><div id="lease-plane"></div></div></div>
-          <p class="lease-caption">Mavi yol dosyada kayıtlı kararı gösterir. Bir düğümü seçerek dayanağını ve sonraki dalları inceleyin.</p>
+    <section class="chapter" id="simulasyon" data-scene="6" aria-labelledby="simulasyon-title">
+      <div class="chapter-inner wrap">
+        <div class="copy">
+          <p class="kicker"><span>06</span> Duruşma simülasyonu</p>
+          <h2 id="simulasyon-title">Duruşmaya girmeden önce prova edin.</h2>
+          <p class="lead">Siz vekil olarak konuşursunuz; karşı vekil ve hâkim yapay zekâdır. Karşı taraf delillerinize itiraz eder, hâkim soru sorar, oturum sonunda dört ölçütlü bir değerlendirme alırsınız.</p>
+          <ol class="steps">
+            <li data-at="0.06"><strong>Siz</strong> İddianızı ve delilinizi sunarsınız.</li>
+            <li data-at="0.22"><strong>Karşı vekil</strong> Zayıf noktanıza itiraz eder.</li>
+            <li data-at="0.38"><strong>Hâkim</strong> Dosyaya özel sorusunu sorar.</li>
+            <li data-at="0.74"><strong>Değerlendirme</strong> Hukuki dayanak, delil, ikna ve usul: 4 × 25 puan.</li>
+          </ol>
+          <p class="fine">Kurgusal prova. Puan bir eğitim değerlendirmesidir; gerçek dava sonucu tahmini değildir.</p>
         </div>
-        <aside class="lease-panel">
-          <h3 id="lease-title">Kira bedeli uyuşmazlığı</h3>
-          <p id="lease-path">Başlangıçtan ulaşma %100</p>
-          <p id="lease-info">Dosyada kayıtlı sonuç: Müvekkilin talebi reddedildi.</p>
-          <div id="lease-assumption" hidden><label for="lease-choice">Bu senaryonun dayanakları</label><select id="lease-choice"><option value="1">Destekleyici varsay</option><option value="0">Nötr varsay</option><option value="-1">Çelişkili varsay</option></select><p id="lease-score" role="status"></p></div>
-          <details><summary>Kayıtlı olaylar ve iddialar</summary><p>18.09.2025 tarihinde dosya açıldı. Davacı, sözleşmedeki edimin yerine getirilmediğini ve ihtara rağmen uyuşmazlığın sürdüğünü ileri sürüyor. Davalı, ifa ve ödeme kayıtlarına ve ek delil gereğine dayanıyor.</p></details>
-          <details><summary>Dosya kaydı · iç not</summary><small>demo-dosya-kaydi.txt</small><pre class="lease-document">DEMO DOSYA KAYDI — İÇ ÇALIŞMA NOTU
-Bu metin mevcut veri tabanı alanlarından üretilmiştir; mahkeme evrakı veya müvekkil belgesi değildir.
-
-Dosya: CB-SONUC-2025/142-1 — Kira bedeli uyuşmazlığı
-Müvekkil: Selin Erdem
-Karşı taraf: Umut Uçar
-Mahkeme: Ankara 9. Sulh Hukuk Mahkemesi
-Açılış tarihi: 18.09.2025
-Durum / kayıtlı sonuç: kapali / Ret
-Dava değeri: 145,000 TL
-Sonraki duruşma: Kayıt yok
-Veri tabanındaki açıklama: [Gösterim] Kira bedeli uyuşmazlığı hakkında sonuçlanan kurgusal dosya. Müvekkilin talebi reddedildi.
-
-Doğrulama sınırı: Dilekçe, karar ve diğer asıl evraklar bu nottan çıkarılamaz; ayrıca temin edilmelidir.</pre></details>
-          <details><summary>Delil ve evrak kontrol listesi</summary><small>demo-delil-kontrol-listesi.txt</small><pre class="lease-document">DELİL VE EVRAK KONTROL LİSTESİ — DEMO İÇ NOT
-Dosya: CB-SONUC-2025/142-1 — Kira bedeli uyuşmazlığı
-Aşağıdaki evrakın mevcut olduğu varsayılmıyor. Her biri asıl kaynaktan istenmeli ve doğrulanmalıdır.
-
-[DOĞRULANMADI] İmzalı kira sözleşmesi ve yenileme geçmişi
-[DOĞRULANMADI] Taşınmaz nitelikleri ve doğrulanabilir emsal kiralar
-[DOĞRULANMADI] Gerekçeli tespit kararı ve yeni bedel hesabı
-
-Kontrol: belge tarihi, tarafları, imza/tebliğ bilgisi ve dosya numarası asıl evrakla eşleştirilmeli.
-Kamuya açık internet kaynakları bu özel davanın gerçek dilekçesi veya kararı yerine geçmez.</pre></details>
-          <details open><summary>Olası kararların dağılımı</summary><div id="lease-outcomes"></div><p>Aynı kararla biten yolların temsili yüzdeleri toplanır. Dosyadaki kayıtlı karar ayrıca gösterilir.</p></details>
-          <details><summary>Yüzdeler nasıl okunur?</summary><p>Başlangıçtan ulaşma, o düğüme kadar izlenen geçişlerin çarpımıdır. Uygulama bu dosya için temsili geçiş oranları kullanır. Destek puanı ise seçtiğiniz varsayıma göre değişen bağımsız bir 0–100 puanıdır. Dava kazanma olasılığı olarak yorumlanamaz.</p></details>
-        </aside>
       </div>
     </section>
 
     <section class="closing wrap" aria-labelledby="closing-title">
-      <h2 id="closing-title">Beş araç, tek dosya, tek ekip.</h2>
-      <p>Geçmişten öğrenin, olası yolları görün, veriyi koruyun, büroyu yönetin, görüşmede hazırlıklı olun.</p>
+      <h2 id="closing-title">Altı araç, tek dosya, tek ekip.</h2>
+      <p>Geçmişten öğrenin, olası yolları görün, veriyi koruyun, büroyu yönetin, görüşmede ve duruşmada hazırlıklı olun.</p>
       <div class="actions">
         <a class="button primary" href="https://calendar.app.google/RL4CxQFEZAuVF2xP9" target="_blank" rel="noopener noreferrer">Demo talep et <span aria-hidden="true">↗</span></a>
         <a class="button ghost" href="https://app.casebridge.com.tr/login">Uygulamaya giriş yap →</a>
@@ -195,7 +164,7 @@ Kamuya açık internet kaynakları bu özel davanın gerçek dilekçesi veya kar
     <section class="team-surface wrap section" id="team">
       <div class="wrap section">
         <div class="team-heading"><h2>CaseBridge’in arkasındaki ekip</h2><p>Yapay zekâ, yazılım mühendisliği ve hukuk deneyimini bir araya getirerek avukatların dava hazırlığını ve günlük çalışmalarını destekleyen bir platform geliştiriyoruz.</p></div>
-        <div class="team-list"><article class="team-person"><img class="member-photo" src="assets/team/izzet-ahmet-web.jpg" alt="İzzet Ahmet" width="240" height="252" loading="lazy"><div><h3>İzzet Ahmet</h3><p class="team-role">İş geliştirme ve iş ortaklıkları</p><ul class="team-facts"><li><b>Perpetual Labs:</b> yapay zekâ operasyonları ve iş ortaklıkları</li><li><b>ASELSAN:</b> mühendislik deneyimi; teknoloji ile müşteri ihtiyaçları arasında köprü</li><li><b>CaseBridge’de:</b> iş ortaklıkları ve ürünün pazara sunulması</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy"><div><h3>Emin Merden</h3><p class="team-role">Yapay zekâ ve veri</p><ul class="team-facts"><li><b>BAUROV:</b> yazılım ekip liderliği</li><li><b>Baykar:</b> makine öğrenmesi stajı</li><li><b>Outlier AI:</b> dil modeli değerlendirme</li><li><b>Perpetual Labs:</b> altyapı (infra) yönetimi</li><li><b>Uzmanlık:</b> bilgisayarlı görü, veri seti hazırlama ve sentetik veri üretimi</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/hatice-cam-web.jpg" alt="Hatice Çam" width="240" height="252" loading="lazy"><div><h3>Hatice Çam</h3><p class="team-role">Yazılım altyapısı ve sistem mimarisi</p><ul class="team-facts"><li><b>Technarts:</b> etkinlik yönetimi platformu ve IP adresi yönetim sistemi geliştirme</li><li><b>Perpetual Labs:</b> yapay zekâyla sunum hazırlama</li><li><b>CaseBridge’de:</b> Veritabanları, veri akışları ve uygulama altyapısı</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/bengu-ozbek-web.jpg" alt="Bengü Özbek" width="240" height="252" loading="lazy"><div><h3>Bengü Özbek</h3><p class="team-role">Ekosistem ilişkileri</p><ul class="team-facts"><li><b>Deneyim:</b> Lastfall, Autosense ve Technarts</li><li><b>Odak:</b> müşteri ihtiyaçlarını anlamak ve teknoloji ekosistemindeki ilişkileri geliştirmek</li><li><b>CaseBridge’de:</b> ürün ihtiyaçlarını ekosistem bağlantılarıyla buluşturmak</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/ahmet-buyukdag-web.jpg" alt="Ahmet Büyükdağ" width="240" height="252" loading="lazy"><div><h3>Ahmet Büyükdağ</h3><p class="team-role">Hukuki içerik ve ürün danışmanlığı</p><ul class="team-facts"><li><b>İHH:</b> gönüllü yönetimi ve proje koordinasyonu</li><li><b>Genç İHH:</b> yönetim kurulu üyeliği</li><li><b>Hacettepe:</b> Ombudsmanlık ve İnsan Hakları Topluluğu kurucu başkanlığı</li><li><b>CaseBridge’de:</b> hukuki senaryolar, analiz çerçevesi ve hukukçuların ihtiyaçları</li></ul></div></article></div>
+        <div class="team-list"><article class="team-person"><img class="member-photo" src="assets/team/izzet-ahmet-web.jpg" alt="İzzet Ahmet" width="240" height="252" loading="lazy"><div><h3>İzzet Ahmet</h3><p class="team-role">İş geliştirme ve iş ortaklıkları</p><ul class="team-facts"><li><b>ASELSAN:</b> mühendislik deneyimi</li><li><b>Perpetual Labs:</b> yapay zekâ operasyonları ve iş ortaklıkları</li><li><b>CaseBridge’de:</b> iş ortaklıkları ve ürünün pazara sunulması</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy"><div><h3>Emin Merden</h3><p class="team-role">Yapay zekâ ve veri</p><ul class="team-facts"><li><b>Outlier AI:</b> dil modeli değerlendirme</li><li><b>Perpetual Labs:</b> altyapı (infra) yönetimi</li><li><b>CaseBridge’de:</b> yapay zekâ modelleri ve veri süreçleri</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/hatice-cam-web.jpg" alt="Hatice Çam" width="240" height="252" loading="lazy"><div><h3>Hatice Çam</h3><p class="team-role">Yazılım altyapısı ve sistem mimarisi</p><ul class="team-facts"><li><b>Technarts:</b> etkinlik yönetimi platformu ve IP adresi yönetim sistemi</li><li><b>Perpetual Labs:</b> yapay zekâyla sunum hazırlama</li><li><b>CaseBridge’de:</b> Veritabanları, veri akışları ve uygulama altyapısı</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/bengu-ozbek-web.jpg" alt="Bengü Özbek" width="240" height="252" loading="lazy"><div><h3>Bengü Özbek</h3><p class="team-role">Ekosistem ilişkileri</p><ul class="team-facts"><li><b>Technarts:</b> müşteri ihtiyaçlarını anlama</li><li><b>Lastfall:</b> teknoloji ekosistemi ilişkileri</li><li><b>CaseBridge’de:</b> ürün ihtiyaçlarını ekosistem bağlantılarıyla buluşturma</li></ul></div></article><article class="team-person"><img class="member-photo" src="assets/team/ahmet-buyukdag-web.jpg" alt="Ahmet Büyükdağ" width="240" height="252" loading="lazy"><div><h3>Ahmet Büyükdağ</h3><p class="team-role">Hukuki içerik ve ürün danışmanlığı</p><ul class="team-facts"><li><b>İHH:</b> gönüllü yönetimi ve proje koordinasyonu</li><li><b>Hacettepe:</b> Ombudsmanlık ve İnsan Hakları Topluluğu kurucu başkanlığı</li><li><b>CaseBridge’de:</b> hukuki senaryolar, analiz çerçevesi ve hukukçuların ihtiyaçları</li></ul></div></article></div>
       </div>
     </section>
 
@@ -211,7 +180,7 @@ Kamuya açık internet kaynakları bu özel davanın gerçek dilekçesi veya kar
 
   <footer class="footer wrap">
     <a class="brand" href="#top" aria-label="CaseBridge ana sayfa"><span class="brand-lockup"><span class="bridge-wordmark"><span class="wordmark-case">Cas<span class="bridge-start">e</span></span><span class="wordmark-bridge">Bridg<span class="bridge-end">e</span></span><svg class="wordmark-line" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M33 26 Q64 -9 96 26"></path></svg></span><small>Uçtan uca dava desteği</small></span></a>
-    <p>© 2026 CaseBridge · <a href="gorsel-kaynaklari.html">Görsel kaynakları</a> · <span class="site-version">v.0.57</span></p>
+    <p>© 2026 CaseBridge · <a href="olasilik-agaci.html">Uygulamadan örnek ağaç</a> · <a href="gorsel-kaynaklari.html">Görsel kaynakları</a> · <span class="site-version">v.0.58</span></p>
   </footer>
   <noscript><style>.chapter{height:auto}.chapter-inner{position:static;height:auto;padding-block:96px}</style></noscript>
 </body>

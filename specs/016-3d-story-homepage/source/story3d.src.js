@@ -35,8 +35,9 @@ function labelSprite(text, { color = '#eee8d9', size = 30, weight = 600, bg = nu
   lines.forEach((l, i) => ctx.fillText(l, pad * scale, pad * 0.7 * scale + lh * (i + 0.5)));
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false });
   const sprite = new THREE.Sprite(mat);
+  sprite.renderOrder = 20;
   const hh = height * LS * lines.length;
   sprite.scale.set(hh * (w / h), hh, 1);
   sprite.userData.base = 1;
@@ -148,6 +149,7 @@ const rim = new THREE.PointLight(C.teal, 18, 20); rim.position.set(-4, 2, -3); s
 
 const scenes = [];
 
+const tmpH = new THREE.Vector3(); const tagOff = new THREE.Vector3(0, 0.3, 0);
 /* ---------- 0 · hero: case file opens into a network ---------- */
 scenes[0] = (() => {
   const g = new THREE.Group();
@@ -201,7 +203,13 @@ scenes[0] = (() => {
         nd.scale.setScalar(0.25 + pop * (0.85 + (reduceMotion ? 0 : Math.sin(t * 2 + i) * 0.12)) + flash);
         nd.userData.tag.userData.alpha = seg(m, 0.7, 1);
       });
-      lines.userData.alpha = seg(morph, 0.55, 1) * 0.9;
+      const settle = seg(p, 0.9, 1);
+      lines.userData.alpha = seg(morph, 0.55, 1) * 0.9 * (1 - settle);
+      if (settle > 0) nodes.forEach((nd, i) => {
+        const tx = lerp(-3.6, 3.6, (i % 5) / 4); nd.position.lerpVectors(pages[i].userData.end, tmpH.set(tx, 0, 0), ease(settle));
+        nd.userData.tag.userData.alpha = 1 - settle; nd.userData.tag.position.copy(nd.position).add(tagOff);
+      });
+      else nodes.forEach((nd, i) => { nd.position.copy(pages[i].userData.end); nd.userData.tag.position.copy(nd.position).add(tagOff); });
     },
   };
 })();
@@ -212,18 +220,27 @@ scenes[1] = (() => {
   const evts = [['Dava açıldı', -4], ['Cevap dilekçesi', -2.2], ['Bilirkişi raporu', -0.4], ['Duruşma', 1.4], ['Karar: Ret', 3.3]];
   const pts = evts.map(([, x], i) => new THREE.Vector3(x, Math.sin(i * 1.3) * 0.15, Math.cos(i) * 0.3));
   const curve = new THREE.CatmullRomCurve3(pts);
-  const rail = new THREE.Mesh(new THREE.TubeGeometry(curve, 160, 0.035, 10), new THREE.MeshStandardMaterial({ color: C.steel, roughness: 0.5, transparent: true, opacity: 0.75 }));
+  const railGeo = new THREE.TubeGeometry(curve, 160, 0.035, 10);
+  const rail = new THREE.Mesh(railGeo, new THREE.MeshStandardMaterial({ color: C.steel, roughness: 0.5, transparent: true, opacity: 0.75 }));
   g.add(rail);
-  const labels = [];
+  const railTotal = railGeo.index.count;
+  const labels = []; const dots = [];
   pts.forEach((p, i) => {
-    const s = glowSphere(i === 4 ? 0.17 : 0.12, i === 4 ? C.red : C.paper, i === 4 ? 0.9 : 0.3); s.position.copy(p); g.add(s);
+    const s = glowSphere(i === 4 ? 0.17 : 0.12, i === 4 ? C.red : C.paper, i === 4 ? 0.9 : 0.3); s.position.copy(p); g.add(s); dots.push(s);
     const l = labelSprite(evts[i][0], { size: 26, color: i === 4 ? '#f1a49b' : '#eee8d9', height: 0.26 });
     l.position.copy(p).add(new THREE.Vector3(0, i % 2 ? -0.45 : 0.45, 0)); g.add(l); labels.push(l);
   });
-  // rewind head
+  // documents arriving from the hero network and settling onto the case timeline
+  const incoming = [];
+  for (let i = 0; i < 14; i++) {
+    const n = glowSphere(0.1, i % 4 === 0 ? C.amber : C.teal, 1.1);
+    const ang = (i / 14) * Math.PI * 2;
+    n.userData.from = new THREE.Vector3(Math.cos(ang) * 3.2, Math.sin(ang * 2) * 1.4 + 0.4, Math.sin(ang) * 1.6);
+    n.userData.to = pts[Math.min(4, Math.floor(i / 3))];
+    g.add(n); incoming.push(n);
+  }
   const head = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.025, 12, 48), new THREE.MeshBasicMaterial({ color: C.teal, transparent: true }));
   g.add(head);
-  // alternative branch from "Bilirkişi raporu"
   const a0 = pts[2].clone();
   const altCurve = new THREE.CatmullRomCurve3([a0, a0.clone().add(new THREE.Vector3(1.2, 1.1, 0.6)), new THREE.Vector3(2.0, 1.9, 0.9), new THREE.Vector3(3.6, 2.1, 0.6)]);
   const altGeo = new THREE.TubeGeometry(altCurve, 160, 0.05, 12);
@@ -241,18 +258,30 @@ scenes[1] = (() => {
     update(p, t, pointer) {
       g.rotation.y = -0.18 + pointer.x * 0.15 + (reduceMotion ? 0 : Math.sin(t * 0.3) * 0.05);
       g.rotation.x = 0.08 + pointer.y * 0.06;
-      const rew = seg(p, 0.08, 0.42);
-      const u = lerp(1, 0.5, rew);
-      head.position.copy(curve.getPoint(u)); head.lookAt(camera.position);
+      // 1) arrival: network nodes fly in and the timeline is drawn under them
+      const arrive = seg(p, 0, 0.2);
+      incoming.forEach((n, i) => {
+        const k = seg(arrive, (i / 14) * 0.4, 0.6 + (i / 14) * 0.4);
+        n.position.lerpVectors(n.userData.from, n.userData.to, ease(k));
+        n.userData.alpha = 1 - seg(k, 0.85, 1); n.scale.setScalar(lerp(1.4, 0.6, k));
+      });
+      const draw = seg(p, 0.04, 0.22);
+      railGeo.setDrawRange(0, Math.max(3, Math.floor(railTotal * draw / 3) * 3));
+      dots.forEach((d, i) => { const k = seg(draw, i / 5 - 0.05, i / 5 + 0.12); d.userData.alpha = k; d.scale.setScalar(Math.max(k, 0.001)); labels[i].userData.alpha = k; });
+      // 2) rewind
+      const rew = seg(p, 0.26, 0.48);
+      head.userData.alpha = seg(p, 0.22, 0.28);
+      head.position.copy(curve.getPoint(lerp(1, 0.5, rew))); head.lookAt(camera.position);
       head.scale.setScalar(1 + (reduceMotion ? 0 : Math.sin(t * 4) * 0.08));
-      rail.userData.alpha = lerp(1, 0.5, seg(p, 0.4, 0.6));
-      const grow = seg(p, 0.42, 0.82);
+      rail.userData.alpha = lerp(1, 0.5, seg(p, 0.46, 0.6));
+      // 3) alternative path
+      const grow = seg(p, 0.5, 0.84);
       altGeo.setDrawRange(0, Math.floor(total * grow / 3) * 3);
       alt.visible = grow > 0.001;
-      altEnd.userData.alpha = seg(p, 0.78, 0.86); altEnd.scale.setScalar(0.5 + altEnd.userData.alpha * 0.6);
-      altMid.userData.alpha = seg(p, 0.55, 0.65);
-      altLbl.userData.alpha = seg(p, 0.82, 0.92);
-      labels[4].userData.alpha = lerp(1, 0.55, grow);
+      altEnd.userData.alpha = seg(p, 0.8, 0.88); altEnd.scale.setScalar(0.5 + altEnd.userData.alpha * 0.6);
+      altMid.userData.alpha = seg(p, 0.6, 0.7);
+      altLbl.userData.alpha = seg(p, 0.84, 0.94);
+      labels[4].userData.alpha = Math.min(labels[4].userData.alpha, lerp(1, 0.55, grow));
     },
   };
 })();
@@ -272,60 +301,73 @@ function treeModel(chips) {
     ret: root.b * B.ret,
     sulh: root.c,
   };
-  return { root, A, B, out };
+  const Cn = { istinaf: 0.7, kaldir: 0.3, onama: 0.7 };
+  return { root, A, B, Cn, out };
 }
 scenes[2] = (() => {
   const g = new THREE.Group();
   const P = {
-    root: new THREE.Vector3(-3.6, 0, 0),
-    a: new THREE.Vector3(-1.2, 1.5, 0.4), b: new THREE.Vector3(-1.2, -0.3, -0.5), c: new THREE.Vector3(-1.2, -1.9, 0.5),
-    aK: new THREE.Vector3(1.6, 2.3, 0.2), aQ: new THREE.Vector3(1.6, 1.0, 0.9),
-    bQ: new THREE.Vector3(1.6, 0.1, -1.0), bR: new THREE.Vector3(1.6, -1.1, -0.2),
-    cS: new THREE.Vector3(1.6, -2.2, 0.9),
+    root: new THREE.Vector3(-4.6, 0, 0),
+    a: new THREE.Vector3(-2.3, 1.5, 0.4), b: new THREE.Vector3(-2.3, -0.3, -0.5), c: new THREE.Vector3(-2.3, -1.9, 0.5),
+    aK: new THREE.Vector3(0.3, 2.3, 0.2), aQ: new THREE.Vector3(0.3, 1.0, 0.9),
+    bQ: new THREE.Vector3(0.3, 0.1, -1.0), bR: new THREE.Vector3(0.3, -1.1, -0.2),
+    cS: new THREE.Vector3(0.3, -2.2, 0.9),
+    ist: new THREE.Vector3(2.5, -1.1, -0.2),
+    iK: new THREE.Vector3(4.6, -0.4, 0.3), iO: new THREE.Vector3(4.6, -1.8, -0.5),
   };
-  const names = { root: 'Kira tespit davası', a: 'Bilirkişi lehe', b: 'Bilirkişi aleyhe', c: 'Sulh görüşmesi', aK: 'Kabul', aQ: 'Kısmi kabul', bQ: 'Kısmi kabul', bR: 'Ret', cS: 'Sulh' };
-  const colors = { aK: C.teal, aQ: C.amber, bQ: C.amber, bR: C.red, cS: C.blue };
-  const edges = [['root', 'a', 1], ['root', 'b', 1], ['root', 'c', 1], ['a', 'aK', 2], ['a', 'aQ', 2], ['b', 'bQ', 2], ['b', 'bR', 2], ['c', 'cS', 2]];
-  const edgeMeshes = {}; const nodeMeshes = {}; const nodeLabels = {};
-  edges.forEach(([f, to, lvl]) => {
+  const names = { root: 'Kira tespit davası', a: 'Bilirkişi lehe', b: 'Bilirkişi aleyhe', c: 'Sulh görüşmesi', aK: 'Kabul', aQ: 'Kısmi kabul', bQ: 'Kısmi kabul', bR: 'Ret', cS: 'Sulh', ist: 'İstinaf', iK: 'Kaldırma', iO: 'Onama' };
+  const colors = { aK: C.teal, aQ: C.amber, bQ: C.amber, bR: C.red, cS: C.blue, ist: C.steel, iK: C.teal, iO: C.red };
+  const outcomeKeys = ['aK', 'aQ', 'bQ', 'bR', 'cS', 'iK', 'iO'];
+  // order of appearance while scrolling: left to right, one branch at a time
+  const edges = [['root', 'a'], ['root', 'b'], ['root', 'c'], ['a', 'aK'], ['a', 'aQ'], ['b', 'bQ'], ['b', 'bR'], ['c', 'cS'], ['bR', 'ist'], ['ist', 'iK'], ['ist', 'iO']];
+  const edgeMeshes = {}; const nodeMeshes = {}; const nodeLabels = {}; const appear = { root: 0 };
+  edges.forEach(([f, to], i) => {
     const mat = new THREE.MeshStandardMaterial({ color: colors[to] ?? C.teal, emissive: colors[to] ?? C.teal, emissiveIntensity: 0.5, roughness: 0.4 });
-    const m = cylinderBetween(P[f], P[to], 0.05, mat); m.userData.lvl = lvl; m.userData.target = 0.05; g.add(m); edgeMeshes[to] = m;
+    const m = cylinderBetween(P[f], P[to], 0.05, mat); m.userData.target = 0.05;
+    m.userData.win = [0.03 + i * 0.062, 0.03 + i * 0.062 + 0.09]; appear[to] = m.userData.win[1];
+    g.add(m); edgeMeshes[to] = m;
   });
   Object.keys(P).forEach((k) => {
     const s = glowSphere(1, colors[k] ?? (k === 'root' ? C.paper : C.teal), 0.7);
     s.userData.target = 0.16; s.scale.setScalar(0.16); s.position.copy(P[k]); g.add(s); nodeMeshes[k] = s;
     const l = labelSprite(names[k], { size: 24, height: 0.25 });
-    l.position.copy(P[k]).add(new THREE.Vector3(k === 'root' ? 0 : 0.15, 0.36, 0)); if (k.length === 2) l.position.x += 0.75, l.position.y -= 0.36;
+    const off = outcomeKeys.includes(k) ? (k === 'bR' ? [0, -0.42] : [0.95, 0]) : [0, 0.4];
+    l.position.copy(P[k]).add(new THREE.Vector3(off[0], off[1], 0.2));
     g.add(l); nodeLabels[k] = l;
   });
   function apply(model, instant = false) {
-    const { root, A, B } = model;
-    const pathP = { root: 1, a: root.a, b: root.b, c: root.c, aK: root.a * A.kabul, aQ: root.a * A.kismi, bQ: root.b * B.kismi, bR: root.b * B.ret, cS: root.c };
+    const { root, A, B, Cn } = model;
+    const ret = root.b * B.ret; const ist = ret * Cn.istinaf;
+    const pathP = { root: 1, a: root.a, b: root.b, c: root.c, aK: root.a * A.kabul, aQ: root.a * A.kismi, bQ: root.b * B.kismi, bR: ret, cS: root.c, ist, iK: ist * Cn.kaldir, iO: ist * Cn.onama };
     Object.entries(pathP).forEach(([k, v]) => {
       if (k !== 'root') { edgeMeshes[k].userData.target = 0.018 + v * 0.16; }
       nodeMeshes[k].userData.target = k === 'root' ? 0.2 : 0.07 + Math.sqrt(v) * 0.22;
-      if (k !== 'root') setText(nodeLabels[k], `${names[k]}  ${pct(v)}`, { size: 24, height: 0.25, color: k.length === 2 ? '#eee8d9' : '#b9c9d8' });
+      if (k !== 'root') setText(nodeLabels[k], `${names[k]}  ${pct(v)}`, { size: 24, height: 0.25, color: outcomeKeys.includes(k) ? '#eee8d9' : '#b9c9d8' });
       if (instant) { if (edgeMeshes[k]) edgeMeshes[k].userData.r = edgeMeshes[k].userData.target; nodeMeshes[k].scale.setScalar(nodeMeshes[k].userData.target); }
     });
   }
   apply(treeModel(treeState.chips), true);
   treeState.apply = apply;
+  const cam = { pos: [0, 0.3, 8.8], look: [-2.2, 0.1, 0] };
   return {
     group: g,
-    fit: [3.9, 2.8], camera: { pos: [0, 0.3, 8.8], look: [-0.4, 0.1, 0] },
+    fit: [3.2, 2.8], camera: cam,
     update(p, t, pointer) {
-      g.rotation.y = -0.22 + pointer.x * 0.25 + (reduceMotion ? 0 : Math.sin(t * 0.25) * 0.06);
+      g.rotation.y = -0.18 + pointer.x * 0.2 + (reduceMotion ? 0 : Math.sin(t * 0.25) * 0.05);
       g.rotation.x = pointer.y * 0.1;
-      const g1 = seg(p, 0.02, 0.22), g2 = seg(p, 0.18, 0.4);
+      // camera follows the growing edge to the right, then pulls back to show the whole tree
+      const follow = seg(p, 0.05, 0.72); const back = seg(p, 0.74, 0.9);
+      cam.look[0] = lerp(lerp(-2.2, 1.6, follow), 0, back);
+      this.fit[0] = lerp(3.2, 6.1, back);
       Object.values(edgeMeshes).forEach((m) => {
-        m.userData.grow = m.userData.lvl === 1 ? g1 : g2;
+        m.userData.grow = seg(p, m.userData.win[0], m.userData.win[1]);
         m.userData.r = lerp(m.userData.r, m.userData.target, reduceMotion ? 1 : 0.08);
         placeCylinder(m);
       });
       Object.entries(nodeMeshes).forEach(([k, s]) => {
-        const vis = k === 'root' ? 1 : k.length === 1 ? g1 : g2;
-        const cur = s.scale.x; s.scale.setScalar(lerp(cur, s.userData.target * Math.max(vis, 0.001), reduceMotion ? 1 : 0.1));
-        nodeLabels[k].userData.alpha = k === 'root' ? 1 : seg(vis, 0.7, 1);
+        const vis = k === 'root' ? 1 : seg(p, appear[k] - 0.02, appear[k] + 0.03);
+        const cur = s.scale.x; s.scale.setScalar(lerp(cur, s.userData.target * Math.max(vis, 0.001), reduceMotion ? 1 : 0.12));
+        nodeLabels[k].userData.alpha = vis;
       });
     },
   };
@@ -539,6 +581,85 @@ scenes[5] = (() => {
         c.userData.alpha = k;
         if (!reduceMotion) c.position.y += Math.sin(t * 1.2 + i) * 0.03 * k;
       });
+    },
+  };
+})();
+
+/* ---------- 6 · courtroom rehearsal ---------- */
+scenes[6] = (() => {
+  const g = new THREE.Group();
+  const floor = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.05, 64), new THREE.MeshStandardMaterial({ color: C.navy, roughness: 0.85, transparent: true, opacity: 0.9 }));
+  floor.position.y = -1.55; g.add(floor);
+  const ring = new THREE.PolarGridHelper(4.5, 12, 4, 64, 0x2c4b6c, 0x2c4b6c); ring.position.y = -1.52; g.add(ring);
+  const wood = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, metalness: 0.05 });
+  const bench = new THREE.Group();
+  const b1 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.5, 0.8), wood(0x22405f)); b1.position.y = -0.8; bench.add(b1);
+  const b2 = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.0), wood(0x2e5579)); b2.position.y = -0.02; bench.add(b2);
+  bench.position.set(0, 0.25, -1.8); g.add(bench);
+  const judge = glowSphere(0.26, C.paper, 0.4); judge.position.set(0, 0.75, -2.0); g.add(judge);
+  const podium = (x, col) => { const m = new THREE.Group(); const a = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.6), wood(0x1d3a5a)); a.position.y = -1.0; m.add(a); const top = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.06, 0.75), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.4 })); top.position.y = -0.42; m.add(top); m.position.set(x, 0, 0.9); g.add(m); return m; };
+  podium(-2.6, C.teal); podium(2.6, C.amber);
+  const you = glowSphere(0.22, C.teal, 0.8); you.position.set(-2.6, -0.1, 0.9); g.add(you);
+  const opp = glowSphere(0.22, C.amber, 0.8); opp.position.set(2.6, -0.1, 0.9); g.add(opp);
+  const tags = [
+    [labelSprite('Hâkim · yapay zekâ', { size: 22, color: '#eee8d9', height: 0.22 }), [0, 1.2, -2.0]],
+    [labelSprite('Siz · davacı vekili', { size: 22, color: '#68dfcf', height: 0.22 }), [-2.6, -1.85, 1.2]],
+    [labelSprite('Karşı vekil · yapay zekâ', { size: 22, color: '#edb45d', height: 0.22 }), [2.6, -1.85, 1.2]],
+  ];
+  tags.forEach(([l, pos]) => { l.position.set(...pos); g.add(l); });
+  function card(who, col, text) {
+    const c = document.createElement('canvas'); c.width = 720; c.height = 230; const x = c.getContext('2d');
+    x.fillStyle = 'rgba(14,30,48,.96)'; x.beginPath(); x.roundRect(0, 0, 720, 230, 24); x.fill();
+    x.fillStyle = '#' + new THREE.Color(col).getHexString(); x.fillRect(0, 0, 9, 230);
+    x.font = `800 24px ${FONT}`; x.fillText(who, 36, 50);
+    x.fillStyle = '#eee8d9'; x.font = `500 28px ${FONT}`;
+    let line = '', y = 100; for (const w of text.split(' ')) { if (x.measureText(line + w).width > 640) { x.fillText(line, 36, y); y += 38; line = ''; } line += w + ' '; } x.fillText(line, 36, y);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 2.7 * 230 / 720), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthTest: false }));
+    m.renderOrder = 15; g.add(m); return m;
+  }
+  const turns = [
+    [card('SİZ', C.teal, 'Müvekkilin ödediği kira, aynı bölgedeki emsal kiraların belirgin şekilde altındadır.'), [-1.75, 0.95, 1.6], 0.06, you],
+    [card('KARŞI VEKİL', C.amber, 'Sunulan emsal ilanlar farklı nitelikteki taşınmazlara ait; karşılaştırma yapılamaz.'), [1.75, 1.0, 1.6], 0.22, opp],
+    [card('HÂKİM', C.paper, 'Davacı vekili, emsallerin konum ve yaş benzerliğini hangi delile dayandırıyorsunuz?'), [0, 2.05, 0.4], 0.38, judge],
+    [card('SİZ', C.teal, 'Aynı mahallede, aynı yaştaki üç dairenin kira sözleşmelerini sunuyoruz.'), [-1.75, 0.95, 1.7], 0.54, you],
+  ];
+  // evaluation board: 4 criteria x 25
+  const crit = [['Hukuki dayanak', 20], ['Delil kullanımı', 19], ['İkna ve tutarlılık', 18], ['Usul ve süreler', 17]];
+  const bc = document.createElement('canvas'); bc.width = 760; bc.height = 470; const bx = bc.getContext('2d');
+  bx.fillStyle = 'rgba(10,24,40,.97)'; bx.beginPath(); bx.roundRect(0, 0, 760, 470, 28); bx.fill();
+  bx.strokeStyle = '#68dfcf'; bx.lineWidth = 3; bx.beginPath(); bx.roundRect(1.5, 1.5, 757, 467, 27); bx.stroke();
+  bx.fillStyle = '#68dfcf'; bx.font = `800 24px ${FONT}`; bx.fillText('HÂKİM DEĞERLENDİRMESİ · EĞİTİM PUANI', 40, 58);
+  bx.fillStyle = '#eee8d9'; bx.font = `700 72px ${FONT}`; bx.fillText('74', 40, 145); bx.font = `500 34px ${FONT}`; bx.fillStyle = '#a9b8c7'; bx.fillText('/ 100', 130, 145);
+  crit.forEach(([n, v], i) => {
+    const y = 210 + i * 62; bx.fillStyle = '#d4dbe2'; bx.font = `600 24px ${FONT}`; bx.fillText(n, 40, y);
+    bx.fillStyle = 'rgba(238,232,217,.12)'; bx.fillRect(330, y - 16, 300, 14); bx.fillStyle = '#68dfcf'; bx.fillRect(330, y - 16, 300 * v / 25, 14);
+    bx.fillStyle = '#eee8d9'; bx.font = `700 22px ${FONT}`; bx.fillText(`${v}/25`, 650, y);
+  });
+  const btex = new THREE.CanvasTexture(bc); btex.colorSpace = THREE.SRGBColorSpace; btex.anisotropy = 8;
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4 * 470 / 760), new THREE.MeshBasicMaterial({ map: btex, transparent: true, depthTest: false }));
+  board.renderOrder = 16; board.position.set(0, 0.55, 2.2); g.add(board);
+  // speaking beams to the judge
+  const beams = turns.map(([, , , who]) => {
+    const geo = new THREE.BufferGeometry().setFromPoints([who.position, judge.position]);
+    const l = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: C.teal, transparent: true, opacity: 0.8 })); g.add(l); return l;
+  });
+  return {
+    group: g,
+    fit: [4.2, 2.6], camera: { pos: [0, 2.2, 8.6], look: [0, 0.1, 0] },
+    update(p, t, pointer) {
+      g.rotation.y = pointer.x * 0.25 + (reduceMotion ? 0 : Math.sin(t * 0.2) * 0.08);
+      g.rotation.x = pointer.y * 0.06;
+      const done = seg(p, 0.72, 0.82);
+      turns.forEach(([m, pos, at, who], i) => {
+        const k = seg(p, at, at + 0.08); const next = turns[i + 1] ? seg(p, turns[i + 1][2], turns[i + 1][2] + 0.08) : done;
+        m.position.set(pos[0], pos[1] + (1 - k) * -0.4, pos[2]);
+        m.lookAt(camera.position);
+        m.userData.alpha = k * lerp(1, 0.0, next);
+        beams[i].userData.alpha = k * (1 - next) * (reduceMotion ? 0.8 : 0.4 + 0.4 * Math.abs(Math.sin(t * 3)));
+        who.scale.setScalar(1 + k * (1 - next) * (reduceMotion ? 0.3 : 0.25 + 0.2 * Math.sin(t * 6)));
+      });
+      board.userData.alpha = done; board.position.y = lerp(0.1, 0.55, done); board.lookAt(camera.position);
     },
   };
 })();
