@@ -50,7 +50,7 @@ from app.services.client_service import resolve_party_clients
 from app.services.hearing_dates import ensure_all_day_hearing, recompute_next_hearing
 from app.services.text_extraction import extract_text
 
-_EXT = {".pdf": DocumentType.PDF, ".docx": DocumentType.DOCX, ".txt": DocumentType.TXT}
+_EXT = {".pdf": DocumentType.PDF, ".docx": DocumentType.DOCX, ".txt": DocumentType.TXT, ".udf": DocumentType.UDF}
 _CASE_FIELDS = (
     "case_name", "client_name", "opposing_party", "court", "description", "case_value",
 )
@@ -193,7 +193,7 @@ def _import_case(db, firm: LawFirm, lawyer: User, item: dict, docs_dir: str, is_
             raw = d["text"].encode("utf-8")
         file_type = _EXT.get(os.path.splitext(filename.lower())[1])
         if file_type is None:
-            raise ImportError_(f"Unsupported document type: {filename} (pdf, docx, txt)")
+            raise ImportError_(f"Unsupported document type: {filename} (pdf, docx, txt, udf)")
         exists = db.query(Document).filter(Document.case_id == case.id, Document.filename == filename).first()
         if exists:
             continue

@@ -14,16 +14,17 @@ _EXTENSION_TO_TYPE = {
     ".pdf": DocumentType.PDF,
     ".docx": DocumentType.DOCX,
     ".txt": DocumentType.TXT,
+    ".udf": DocumentType.UDF,
 }
 
 
 def resolve_document_type(filename: str) -> DocumentType:
-    """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt."""
+    """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt/udf."""
     _, ext = os.path.splitext(filename.lower())
     if ext not in _EXTENSION_TO_TYPE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt.",
+            detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt, udf.",
         )
     return _EXTENSION_TO_TYPE[ext]
 

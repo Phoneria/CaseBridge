@@ -281,3 +281,29 @@ def test_extraction_asks_for_the_standard_level(client, two_firms_two_users):
     router = _use(_RecordingRouter([VALID_ANSWER]))
     _extract(client, headers, data={"text": "metin"})
     assert router.tasks == ["case_intake.extract"]
+
+
+def test_a_udf_file_is_read(client, two_firms_two_users):
+    from tests.udf_samples import make_udf
+
+    headers = _headers(client, two_firms_two_users)
+    provider = _use(MockProvider(default_response=VALID_ANSWER))
+
+    response = _extract(
+        client, headers, files={"file": ("dilekce.udf", make_udf("Kira alacağı davası"), "application/octet-stream")}
+    )
+
+    assert response.status_code == 200
+    assert "Kira alacağı davası" in provider.calls[0]["user_prompt"]
+
+
+def test_an_unreadable_udf_is_rejected_with_the_hint(client, two_firms_two_users):
+    from app.api.routes.case_intake import NOT_READABLE
+
+    headers = _headers(client, two_firms_two_users)
+    _use(MockProvider(default_response=VALID_ANSWER))
+
+    response = _extract(client, headers, files={"file": ("bozuk.udf", b"not a zip", "application/octet-stream")})
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == NOT_READABLE

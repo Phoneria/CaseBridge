@@ -13,6 +13,7 @@ class DocumentType(str, enum.Enum):
     PDF = "pdf"
     DOCX = "docx"
     TXT = "txt"
+    UDF = "udf"
 
 
 class Document(Base):
