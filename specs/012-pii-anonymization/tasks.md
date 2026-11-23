@@ -21,5 +21,5 @@ Dependencies: T008 → T009 → T010 → T011.
 - [x] T012 Implement bounded local extraction endpoint/service and meaningful format/auth/privacy/limit tests (FR-009/010).
 - [x] T013 Add unrestricted file chooser, upload transport and stale-result/reset/error handling with tests (FR-011).
 - [x] T014 Verify real synthetic PDF/TXT/DOCX and other text file browser flows, run tests/build/spec checks, prepare version and record results.
-- [ ] T015 Merge/publish the immutable main application artifact; verify public code/version/health, protected credentials and rollback source; record evidence.
+- [x] T015 Merge/publish the immutable main application artifact; verify public code/version/health, protected credentials and rollback source; record evidence.
 Dependencies: T012 → T013 → T014 → T015.
