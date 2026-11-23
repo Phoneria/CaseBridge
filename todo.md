@@ -626,3 +626,4 @@ Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Pub
 ## Örnek olasılık haritası · tanıtım v.0.52
 
 - [x] Geri alınan v.0.50 ana sayfasında iki giriş, perspektif karar ağacı, değiştirilebilir koşullu dağılımlar, ağırlıklı sonuçlar, üç okunabilir belge ve açık yapay zekâ/kurgu etiketi. Yerel 24 betik testi, 21 yayın testi ve 1440/390/320 px tarayıcı akışları geçti.
+- [x] PR #91, main 09c80cb: yalnız tanıtım kapsamıyla v.0.52 yayımlandı. Canlı kaynak eşleşmesi, üç genişlikte harita/belge akışları ve uygulama sağlık kontrolü geçti.
