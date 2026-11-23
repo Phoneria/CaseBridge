@@ -607,3 +607,12 @@ Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Pub
 - Gerçek müşteri verisi/anahtar kullanılmadı; ek müşteri onboarding yapılmadı. Ayrıntılar specs/012-pii-anonymization/verification.md içindedir.
 
 - Yayın sonrası yapılandırma ve şifreli anahtar dosyaları korumalı `/var/backups/casebridge-anonymization-v043-20261123T055238Z` yedeğiyle byte bazında aynı; arşiv bütünlüğü geçti. Gerçek anahtar işlemi, şema değişikliği veya global AI ayarı değişikliği yapılmadı. Public tarayıcı testi tüm API çağrılarını sentetik karşılıklarla yalıttı; canlı müşteri oturumuyla test iddiası yok. Yeni backend imajı ayrıca ağsız/salt okunur sentetik testten geçti.
+
+## Anonimleştirmede dosya yükleme — v.0.44 adayı
+
+- [x] PDF/DOCX/TXT ve diğer uzantılardaki okunabilir UTF-8/BOM UTF-16 metinlerini dosyayı kaydetmeden çıkarma, kaynak metni inceleyip açıkça maskeleme. DOCX tablo/üst-alt bilgi/not metinleri kapsanır; görsel/gömülü içerik uyarılır.
+- [x] 5 MB dosya, 30.000 karakter, 100 PDF sayfası, 16 MB açılmış DOCX/512 öğe sınırları; şifreli/bozuk/taranmış/ikili dosyada sabit ve açıklayıcı hata, sessiz kırpma yok. Dosya seçme/düzenleme/temizleme eski yanıtları geçersiz kılar. Ayrı yerel okuyucu işlemi 15 saniye, Linux’ta 512 MiB/10 CPU saniyesiyle sınırlıdır; anahtar ortamı aktarılmaz.
+- [x] Son kaynakta 17 odaklı extraction testi, sentetik düşük parola maliyetli 1.185 backend testi (1 atlama/1 beklenen başarısızlık), 795 frontend ve son düğme değişikliğinde 7 ilgili test geçti. Production build/type/version ve sentetik gerçek PDF/TXT/DOCX/diğer uzantı/taranmış/ikili masaüstü-mobil Chromium akışları geçti; görseller incelendi.
+- [ ] Normal maliyetli GitHub CI, main commit ve değişmez artefakt yayını.
+- [ ] Public v.0.44/kod/health, sentetik public ekran, korumalı anahtar/yapılandırma bütünlüğü ve geri dönüş kaydı.
+- Gerçek müşteri verisi/anahtar, ek müşteri onboarding, global AI ayarı veya şema değişikliği yok. Ayrıntılı kabul kaydı specs/012-pii-anonymization/verification.md içindedir.
