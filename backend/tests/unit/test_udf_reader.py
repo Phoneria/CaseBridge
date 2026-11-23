@@ -115,3 +115,28 @@ def test_is_udf():
     assert not is_udf(b"PK\x03\x04broken")
     assert not is_udf(docx_buffer.getvalue())
     assert not is_udf(odt_like_zip())
+
+
+def test_java_style_utf8_encoding_name_is_read():
+    # UYAP's editor is a Java program; Java's legacy charset name is "UTF8".
+    assert "Çağrı Öztürk" in read_udf_text(make_udf("Çağrı Öztürk", encoding="UTF8"))
+
+
+def test_many_elements_do_not_build_a_document_tree():
+    import tracemalloc
+
+    xml = b'<template format_id="1.8"><content>Metin</content><elements>' + b"<p/>" * 400_000 + b"</elements></template>"
+    raw = make_udf(content_xml=xml)
+    tracemalloc.start()
+    try:
+        text = read_udf_text(raw)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    assert text == "Metin"
+    assert peak < 10 * 1024 * 1024
+
+
+def test_deeply_nested_xml_is_invalid():
+    xml = b"<template><content>x</content>" + b"<a>" * 1000 + b"</a>" * 1000 + b"</template>"
+    assert _read_error(make_udf(content_xml=xml)) == INVALID_UDF

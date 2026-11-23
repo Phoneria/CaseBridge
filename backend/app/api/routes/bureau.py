@@ -20,7 +20,7 @@ from app.models.user import User, UserRole
 from app.schemas.admin_user import AdminUserCreate
 from app.schemas.management import AccessWrite, Kind, RecordWrite, ScopedInvite, VersionAction
 from app.services.account_service import deliver, prepare_invite_email
-from app.services.document_service import DocumentService
+from app.services.document_service import DocumentService, media_type_for
 from app.services.management_service import (
     access_for, audit, case_in_firm, check_version, commit, conflict_search,
     fail, flush, get_record, money_summary, overview, record_out, save_record, transfer_management_work, transfer_out, user_in_firm,
@@ -252,7 +252,7 @@ def scoped_download(document_id: str, actor: User = Depends(get_current_user), d
         fail("Belge bulunamadı.", 404)
     audit(db, actor, actor.law_firm_id, "document.downloaded", "document", document.id)
     commit(db)
-    return FileResponse(path, filename=document.filename, headers={"Cache-Control": "no-store"})
+    return FileResponse(path, filename=document.filename, media_type=media_type_for(document), headers={"Cache-Control": "no-store"})
 
 
 class Decision(BaseModel):

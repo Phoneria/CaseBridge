@@ -17,6 +17,18 @@ _EXTENSION_TO_TYPE = {
     ".udf": DocumentType.UDF,
 }
 
+MEDIA_TYPES = {
+    DocumentType.PDF: "application/pdf",
+    DocumentType.DOCX: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    DocumentType.TXT: "text/plain; charset=utf-8",
+    DocumentType.UDF: "application/octet-stream",
+}
+
+
+def media_type_for(document: Document) -> str:
+    """The download Content-Type for a stored document."""
+    return MEDIA_TYPES.get(document.file_type, "application/octet-stream")
+
 
 def resolve_document_type(filename: str) -> DocumentType:
     """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt/udf."""
