@@ -1,0 +1,19 @@
+# 3D story homepage (marketing v.0.54)
+
+User request (23 Nov 2026): rebuild the marketing homepage from scratch so a visitor sees five capabilities in 3D and is impressed — historical case analysis (what would have gone better), the probability tree (how a live case may end and how moves change it), data anonymisation, bureau management (which lawyer wins which case types, where deadlines slip) and Sufle (prompts during a client meeting) — and replace the live site.
+
+## User Scenarios
+A law-firm visitor scrolls one continuous story. A case file opens into a network (hero); a closed case rewinds and an alternative branch lights up; a probability tree grows and re-weights when the visitor toggles moves; a petition is scanned and its personal data masked, then locked in a vault; a bureau's lawyers appear as 3D columns with approaching deadlines; a conversation waveform produces sourced prompt cards. The visitor can then inspect the real application tree snapshot, read the team and FAQ, and request a demo.
+
+### Functional Requirements
+- **FR-001**: Replace the homepage with a six-scene scroll story (hero + the five capabilities) in Turkish, with the existing CaseBridge wordmark, the real demo calendar URL, app login and image-credits link. Retain the existing team section, the real application Kira Ağacı snapshot and the separate visible marketing version.
+- **FR-002**: Render the scenes with one WebGL canvas driven by native scroll (no scroll capture or hijacking), pointer parallax, reduced-motion support (no idle animation), a no-WebGL fallback (readable copy, working tree controls, original hero film) and no-JS readable content. The 3D module is a single self-contained file so the existing static release copier ships every asset.
+- **FR-003**: Keep claims truthful: all demo data is labelled fictional; tree percentages are stated once as scenario assumptions, not calibrated winning probabilities; masking requires human review; no invented customers, testimonials, pricing or unverified volume claims (the previous "10 TB / 100.000+" figures are removed).
+- **FR-004**: Probability-tree moves recompute the branch weights and the outcome distribution consistently in both the 3D scene and the DOM list; initial outcomes total 100%.
+- **FR-005**: Verify desktop/mobile rendering, console errors, overflow and frame rate in a real browser, run repository suites, increment the marketing version, publish marketing-only through the existing main-sourced release path and verify public version and hashes.
+
+## Success Criteria
+All six scenes render on 1440×900 and 390×844 without overflow or console errors; tree moves change both views; acceptance tests in `scripts/tests/test_story_3d.py` pass; public `/website-version.json` reports v.0.54 and serves the new `story3d.js`.
+
+## Constitution exception
+Principle VI asks marketing to preserve the existing theme/video. The user explicitly requested a from-scratch redesign on 23 Nov 2026; the theme changes to dark, the original film is kept only as the no-WebGL hero fallback. Logo identity is preserved.
