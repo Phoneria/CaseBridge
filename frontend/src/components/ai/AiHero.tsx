@@ -43,7 +43,7 @@ export function AiHero({
       {stats && stats.length > 0 && (
         <dl className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-white/10">
+            <div key={stat.label} className="rounded-2xl bg-glass/5 px-4 py-3 ring-1 ring-white/10">
               <dt className="text-[11px] uppercase tracking-wide text-accent-200">{stat.label}</dt>
               <dd className="mt-1 text-xl font-semibold">{stat.value}</dd>
             </div>

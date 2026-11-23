@@ -10,6 +10,10 @@ A lawyer opening the app sees the same navy, paper and turquoise world as casebr
 - **FR-002**: Use the same semantic outcome colours across dashboard, admin, reports, finance, probability tree and knowledge map.
 - **FR-003**: Self-host Manrope (SIL OFL) as the application typeface, as on the marketing site.
 - **FR-004**: Keep dark as the default theme and the light theme selectable; keep WCAG AA contrast for body text and accent buttons; keep the existing logo image.
+- **FR-006**: (v.0.46, user feedback 23 Nov 2026) Every colour utility resolves to a per-role CSS variable (text, background, border) generated from one token file, so hover, focus, aria and opacity variants switch theme automatically; light-tint backgrounds hovered in the dark theme stay readable.
+- **FR-007**: All text colours used in the app meet WCAG AA (4.5:1) on the surface they are rendered on, including hover states, in both themes; checked automatically over every class list in the source.
+- **FR-008**: Charts take grid, axis, label, centre-value, tooltip, hover-cursor, primary and halo colours from theme variables; case statuses use one colour each everywhere (active teal, hearing blue, decision amber, closed neutral).
+- **FR-009**: Drawers and modals sit on a theme-aware scrim with a visible edge, so the panel reads as separate from the page in the dark theme.
 - **FR-005**: Verify type checks, the full frontend suite and visual inspection of login, dashboard, cases, case detail and bureau in both themes; release as application v.0.45 through the standard path.
 
 ## Success Criteria

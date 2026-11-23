@@ -1,6 +1,6 @@
 "use client";
 
-import { BRAND_ACCENT } from "@/lib/brand";
+import { CHART, statusColor } from "@/lib/chartTheme";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -62,13 +62,6 @@ const REPORTS: ReportCard[] = [
   },
 ];
 
-const STATUS_COLORS: Record<string, string> = {
-  devam_eden: BRAND_ACCENT[600],
-  durusma_bekleyen: "#edb45d",
-  karar_bekleyen: "#5b8def",
-  kapali: "#1fb5a3",
-};
-
 function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overview: AnalyticsOverview }) {
   const metrics = [
     { label: "Toplam dava", value: summary.total_cases, hint: "Portföydeki tüm dosyalar", href: analyticsCaseListHref(), color: "text-accent-600" },
@@ -79,7 +72,7 @@ function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overv
   const statusRows = overview.by_status.filter((row) => row.total > 0).map((row) => ({
     ...row,
     label: CASE_STATUS_LABELS[row.status] ?? row.status,
-    color: STATUS_COLORS[row.status] ?? "#8fa3b8",
+    color: statusColor(row.status),
   }));
   let cursor = 0;
   const slices = statusRows.map((row) => {
@@ -87,7 +80,7 @@ function ReportsDashboard({ summary, overview }: { summary: ReportSummary; overv
     cursor += overview.total_cases ? row.total / overview.total_cases * 100 : 0;
     return `${row.color} ${start}% ${Math.min(cursor, 100)}%`;
   });
-  const ring = statusRows.length ? `conic-gradient(${slices.join(", ")}, #e6e8ef ${Math.min(cursor, 100)}% 100%)` : "#e6e8ef";
+  const ring = statusRows.length ? `conic-gradient(${slices.join(", ")}, ${CHART.track} ${Math.min(cursor, 100)}% 100%)` : CHART.track;
   const categories = [...overview.by_category].filter((row) => row.total > 0).sort((a, b) => b.total - a.total);
   const largestCategory = Math.max(...categories.map((row) => row.total), 1);
 

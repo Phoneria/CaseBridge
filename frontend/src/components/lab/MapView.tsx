@@ -1,4 +1,5 @@
 "use client";
+import { CHART } from "@/lib/chartTheme";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -198,7 +199,7 @@ export function MapView() {
                       y1={a.y}
                       x2={b.x}
                       y2={b.y}
-                      stroke={on ? "#14907f" : "#94a6bc"}
+                      stroke={on ? CHART.primary : CHART.muted}
                       strokeWidth={on ? 2.6 : 0.8 + e.j * 1.4}
                       opacity={focus ? (on ? 1 : 0.06) : 0.45}
                     />
@@ -225,7 +226,7 @@ export function MapView() {
                     }}
                   >
                     <title>{`${n.code} · ${n.title ?? ""} (${n.tot} karar)`}</title>
-                    <circle r={r} fill={lawColor(n.law, model.laws)} stroke={isSel ? "#0f1a2e" : "#ffffff"} strokeWidth={isSel ? 3 : 1.5} />
+                    <circle r={r} fill={lawColor(n.law, model.laws)} stroke={isSel ? CHART.strong : CHART.node} strokeWidth={isSel ? 3 : 1.5} />
                     {(focus ? inFocus : n.n >= 120) && <NodeLabel n={n} r={r} sel={isSel} ang={rg?.ang} w={focus?.nb.get(n.id)?.w} focus={!!focus} />}
                   </g>
                 );
@@ -342,11 +343,11 @@ function clip(t: string, n: number) {
 
 /** Label placed outward from the ring centre; white halo keeps it readable over lines and dots. */
 function NodeLabel({ n, r, sel, ang, w, focus }: { n: GraphNode; r: number; sel: boolean; ang?: number; w?: number; focus: boolean }) {
-  const halo = { paintOrder: "stroke", stroke: "#f5f7fa", strokeWidth: 4, strokeLinejoin: "round", pointerEvents: "none" } as const;
+  const halo = { paintOrder: "stroke", stroke: CHART.halo, strokeWidth: 4, strokeLinejoin: "round", pointerEvents: "none" } as const;
   const title = focus && n.title ? clip(n.title, 30) : "";
   if (ang === undefined) {
     return (
-      <text y={r + 14} textAnchor="middle" fontSize={focus ? 13 : 10} fontWeight={sel ? 700 : 500} fill="#0f1a2e" style={halo}>
+      <text y={r + 14} textAnchor="middle" fontSize={focus ? 13 : 10} fontWeight={sel ? 700 : 500} fill={CHART.strong} style={halo}>
         {n.code}
         {sel && title ? <tspan x={0} dy={15} fontWeight={500} fontSize={12}>{title}</tspan> : null}
       </text>
@@ -358,10 +359,10 @@ function NodeLabel({ n, r, sel, ang, w, focus }: { n: GraphNode; r: number; sel:
   const x = cos > 0.3 ? r + 6 : cos < -0.3 ? -r - 6 : 0;
   const y = Math.abs(cos) <= 0.3 ? (sin > 0 ? r + 14 : -r - 22) : 4;
   return (
-    <text x={x} y={y} textAnchor={anchor} fontSize={12} fill="#0f1a2e" style={halo}>
+    <text x={x} y={y} textAnchor={anchor} fontSize={12} fill={CHART.strong} style={halo}>
       <tspan fontWeight={700}>{n.code}</tspan>
       {title ? <tspan x={x} dy={14} fontWeight={500}>{title}</tspan> : null}
-      {w ? <tspan x={x} dy={13} fontSize={11} fill="#0c7468" fontWeight={600}>{w} kararda birlikte</tspan> : null}
+      {w ? <tspan x={x} dy={13} fontSize={11} fill={CHART.primary} fontWeight={600}>{w} kararda birlikte</tspan> : null}
     </text>
   );
 }

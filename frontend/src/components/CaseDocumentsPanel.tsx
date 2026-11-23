@@ -146,7 +146,7 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
         <mark
           key={i}
           data-match={idx}
-          className={`rounded px-0.5 ${idx === activeMatch ? "bg-accent-400 text-white" : "bg-amber-200 text-navy-900"}`}
+          className={`rounded px-0.5 ${idx === activeMatch ? "bg-accent-600 text-white" : "bg-amber-200 text-navy-900"}`}
         >
           {seg.text}
         </mark>

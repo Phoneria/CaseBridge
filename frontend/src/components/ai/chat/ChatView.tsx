@@ -286,7 +286,7 @@ export function ChatView() {
             <button
               type="button"
               onClick={exportTrainingData}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15"
+              className="rounded-xl bg-glass/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-glass/15"
             >
               Eğitim verisini indir (JSONL)
             </button>

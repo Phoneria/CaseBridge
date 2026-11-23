@@ -1,4 +1,5 @@
 'use client';
+import { CHART } from "@/lib/chartTheme";
 
 import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useId, useMemo, useRef, useState } from 'react';
@@ -144,7 +145,7 @@ export function TreeDiagram({ tree, selected, onSelect }: { tree: Pick<ScenarioT
           return <g key={node.id}>
             <title>{node.reasoning}</title>
             <path pointerEvents="stroke" d={`M${start} ${from.y+46} C${start+45} ${from.y+46},${end-60} ${cy},${end} ${cy}`} fill="none" stroke={color} strokeWidth={recorded ? 5 : trail.has(node.id) ? 3.5 : 1.8} markerEnd={`url(#${marker}${recorded ? edgeColors.length : to.color})`}/>
-            {node.path_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={color} fontSize="12" paintOrder="stroke" stroke="white" strokeWidth="3">{percent(node.path_percent)}</text>}
+            {node.path_percent != null && <text x={end-4} y={cy-10} textAnchor="end" fill={color} fontSize="12" paintOrder="stroke" stroke={CHART.halo} strokeWidth="3">{percent(node.path_percent)}</text>}
           </g>;
         })}
       </svg>
