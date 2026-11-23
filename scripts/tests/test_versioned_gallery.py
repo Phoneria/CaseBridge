@@ -34,12 +34,8 @@ class VersionedGalleryTests(unittest.TestCase):
             with self.assertRaises(ValueError):gallery.prepare(root,batch,observed,audit,observed)
             self.assertEqual({p:p.read_bytes() for p in original},original)
 
-    def test_retired_homepage_gallery_is_not_silently_reintroduced(self):
-        # A full redesign no longer presents historical app screenshots as current.
-        # The capture tooling still validates legacy gallery fixtures separately.
-        with self.assertRaises(ValueError):
-            gallery.references((ROOT/'web-page/index.html').read_text())
-        self.assertNotIn('assets/feature-screens/tr-current/',(ROOT/'web-page/index.html').read_text())
+    def test_restored_gallery_retains_twelve_images(self):
+        self.assertEqual(len(gallery.references((ROOT/'web-page/index.html').read_text())),12)
 
     def test_disabled_manifest_prevents_network_capture_or_publication(self):
         import os

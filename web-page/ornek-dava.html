@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Örnek dava · Olasılık haritası | CaseBridge</title>
+  <link rel="icon" href="assets/casebridge-e2e.svg">
+  <link rel="stylesheet" href="ornek-dava.css"><script defer src="ornek-dava.js"></script>
+</head>
+<body>
+<header><div class="wrap bar"><a href="index.html" aria-label="CaseBridge ana sayfa"><img src="assets/casebridge-e2e.svg" alt="CaseBridge" width="152"></a><a href="index.html#product">Ürüne dön ↗</a></div></header>
+<main class="wrap">
+  <div class="intro"><p class="eyebrow">Alacak davası · Örnek dosya</p><h1>Teslim kaydı doğrulanırsa<br>sonuç nasıl değişir?</h1>
+  <p>Bir atölye, ürettiği masalar için 120.000 TL talep ediyor. Alıcı, teslim fişindeki imzanın kime ait olduğunu sorguluyor.</p>
+  <p class="disclosure"><strong>Tamamen kurgusal dava.</strong> Taraflar, belgeler ve karar ağacı yapay zekâyla bu örnek için oluşturuldu. Yüzdeler değiştirilebilir senaryo varsayımlarıdır. Gerçek dava verisine dayanmaz.</p></div>
+  <noscript>Haritayı değiştirmek için JavaScript’i açın. Örnek belgeleri aşağıda okuyabilirsiniz.</noscript>
+  <div class="workspace"><section class="map-card" aria-labelledby="map-title"><div class="map-head"><h2 id="map-title">Olasılık haritası</h2><button id="rotate" type="button">Görünümü döndür ↻</button></div>
+  <p class="graph-tip">Bir dalı veya sonucu seçin. Haritayı yatay sürükleyerek döndürebilirsiniz.</p>
+  <svg id="tree" viewBox="0 0 680 425" role="group" aria-label="Üç boyutlu karar ağacı"></svg>
+  <div class="detail" aria-live="polite"><h3 id="detail-title">Teslim kaydı doğrulanırsa</h3><p id="detail-text"></p><a id="doc-link" href="#teslim">İlgili belgeyi incele ↓</a></div></section>
+  <section class="controls"><h2>Dava nasıl sonuçlanabilir?</h2><p>Her iki dal birlikte hesaba katıldığında</p><div id="totals" aria-live="polite"></div>
+  <details><summary>Yüzdeler nasıl hesaplanıyor?</summary><p>Her sonuç için dalın olasılığı ile o daldaki sonuç yüzdesi çarpılır. İki dalın katkıları toplanır. Başlangıçta tam kabul için hesap %60 × %70 + %40 × %10 = %46’dır.</p></details>
+  <h3>Varsayımları değiştir</h3><label for="chance">Teslim kaydının doğrulanması <output for="chance" id="chance-out">%60</output></label><input id="chance" type="range" min="0" max="100" value="60">
+  <fieldset><legend id="branch-label">Seçili dalda sonuç dağılımı</legend>
+  <label for="full">Tam kabul <output id="full-out" for="full"></output></label><input id="full" type="range" min="0" max="100">
+  <label for="partial">Kısmi kabul <output id="partial-out" for="partial"></output></label><input id="partial" type="range" min="0" max="100">
+  <p>Ret, kalan paydır. Üç sonuç toplam %100 eder.</p></fieldset><button id="reset" type="button">Başlangıç değerlerine dön</button></section></div>
+  <section class="documents"><h2>Dosyadaki belgeler</h2><p>Yapay zekâyla yazılmış kurgusal belge örnekleri.</p>
+  <details id="siparis"><summary>Sipariş formu <small>4 Mart · SF-28</small></summary><article><h3>Üretim ve sipariş onayı</h3><p>Gönderen: Çizgi Atölye · Alıcı: Sarnıç Tasarım</p><p>On iki çalışma masası için birim fiyat 10.000 TL ve toplam bedel 120.000 TL olarak kayda alınmıştır. Alıcı, masaların depo girişinde sayılmasını istemiştir.</p><p><b>Dosyada neyi açıklıyor?</b> Talep edilen tutarın ve sipariş miktarının kaynağı bu formdur.</p></article></details>
+  <details id="teslim"><summary>Teslim fişi <small>18 Mart · TF-09</small></summary><article><h3>Depo giriş nüshası</h3><p>Sevk: Çizgi Atölye → Sarnıç Tasarım deposu</p><p>“12 masa teslim edildi” satırının altında bir imza var. Teslim alanın adı ve görevi boş. Depo giriş listesi fişe eklenmemiş.</p><p><b>İnceleme noktası</b> İmza ile yetkili alıcı arasında bağlantı kurulması iki dalı ayıran varsayımdır.</p></article></details>
+  <details id="itiraz"><summary>Alıcının itirazı <small>22 Mart · YZ-03</small></summary><article><h3>Teslim miktarına ilişkin yazışma</h3><p>“Depoda sekiz masa bulundu. Kalan dört masayı kimin aldığı ve teslim fişini kimin imzaladığı araştırılıyor.”</p><p><b>İnceleme noktası</b> Tarafların miktar konusunda ayrılması, kısmi kabul senaryosunu incelemek için bir dayanak sunar.</p></article></details></section>
+</main><footer class="wrap"><a href="index.html">← CaseBridge’e dön</a><span>v.0.52</span></footer>
+</body></html>

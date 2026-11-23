@@ -31,3 +31,5 @@ Normal bureau files retain null probability but display independent 0–100 Demo
 ## Assumptions and Limits
 
 The user explicitly authorized a POC (Demo tahmini). Rule points are illustrative configuration, not learned frequencies or a legal expert's calibrated probabilities. No provider calls, migration, persisted synthetic cases, new customer delivery or independent-audit claim. Latest explicit user steering requires numeric Demo tahmini on all scenario branches in both modes. Roots/actions are context or steps rather than scored scenarios. No Hesaplanmadı appears in POC presentation.
+
+- **FR-008**: Public marketing visitors can open an AI-authored fictional case from the restored homepage, rotate its perspective decision tree, select branches and outcomes, inspect fictional documents, edit event and conditional outcome weights, see the weighted whole-case distribution, and reset. No account or stored case is required.
