@@ -101,5 +101,14 @@ class Story3DHomepage(unittest.TestCase):
             self.assertIn(name, files)
 
 
+    def test_hero_network_hands_over_to_timeline_and_tree_labels_stay_in_frame(self):
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        for marker in ['heroNet.ends = net', 'applyMatrix4(heroM).applyMatrix4(toLocal)', 'fade = (prevActive + active === 1) ? 1 : 0',
+                       "LABEL_OFF = { bR: [0, -0.42], c: [0, -0.42], iK: [0, 0.42], iO: [0, -0.42] }", 'fit: [5.6, 2.8], camera: cam']:
+            self.assertIn(marker, source)
+        self.assertNotIn('const settle = seg(p, 0.9, 1);', source)
+        self.assertIn('<li data-at="0.22"><strong>Kayıtlı yol', self.html)
+
+
 if __name__ == '__main__':
     unittest.main()

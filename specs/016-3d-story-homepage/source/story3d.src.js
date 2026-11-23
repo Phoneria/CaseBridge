@@ -149,6 +149,7 @@ const rim = new THREE.PointLight(C.teal, 18, 20); rim.position.set(-4, 2, -3); s
 
 const scenes = [];
 
+const heroNet = {};
 const tmpH = new THREE.Vector3(); const tagOff = new THREE.Vector3(0, 0.3, 0);
 /* ---------- 0 · hero: case file opens into a network ---------- */
 scenes[0] = (() => {
@@ -174,6 +175,7 @@ scenes[0] = (() => {
     tag.position.copy(p.userData.end).add(new THREE.Vector3(0, 0.3, 0)); g.add(tag); node.userData.tag = tag;
     net.push(p.userData.end);
   });
+  heroNet.ends = net; heroNet.titles = titles; heroNet.colors = titles.map((_, i) => (i % 4 === 0 ? C.amber : C.teal));
   const lp = [];
   for (let i = 0; i < n; i++) for (const j of [i + 1, i + 3]) { const k = j % n; lp.push(...net[i].toArray(), ...net[k].toArray()); }
   const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3));
@@ -184,8 +186,9 @@ scenes[0] = (() => {
     camera: { pos: [0, 1.2, 8.4], look: [0, 0, 0] },
     update(p, t, pointer) {
       const open = seg(p, 0.03, 0.42); const morph = seg(p, 0.45, 0.92);
-      g.rotation.y = (reduceMotion ? -0.35 : Math.sin(t * 0.25) * 0.25 - 0.35) + pointer.x * 0.25 + open * 0.6;
-      g.rotation.x = lerp(0.95, 0.25, open) + pointer.y * 0.12;
+      const calm = 1 - seg(p, 0.55, 0.95);
+      g.rotation.y = (reduceMotion ? -0.35 : Math.sin(t * 0.25) * 0.25 * calm - 0.35) + pointer.x * 0.25 * calm + open * 0.6;
+      g.rotation.x = lerp(0.95, 0.25, open) + pointer.y * 0.12 * calm;
       g.rotation.z = lerp(-0.12, 0, open);
       outer.position.x = innerWidth > 900 ? open * 1.4 : 0;
       folder.userData.alpha = 1 - seg(morph, 0, 0.4); tab.userData.alpha = folder.userData.alpha;
@@ -203,13 +206,8 @@ scenes[0] = (() => {
         nd.scale.setScalar(0.25 + pop * (0.85 + (reduceMotion ? 0 : Math.sin(t * 2 + i) * 0.12)) + flash);
         nd.userData.tag.userData.alpha = seg(m, 0.7, 1);
       });
-      const settle = seg(p, 0.9, 1);
-      lines.userData.alpha = seg(morph, 0.55, 1) * 0.9 * (1 - settle);
-      if (settle > 0) nodes.forEach((nd, i) => {
-        const tx = lerp(-3.6, 3.6, (i % 5) / 4); nd.position.lerpVectors(pages[i].userData.end, tmpH.set(tx, 0, 0), ease(settle));
-        nd.userData.tag.userData.alpha = 1 - settle; nd.userData.tag.position.copy(nd.position).add(tagOff);
-      });
-      else nodes.forEach((nd, i) => { nd.position.copy(pages[i].userData.end); nd.userData.tag.position.copy(nd.position).add(tagOff); });
+      lines.userData.alpha = seg(morph, 0.55, 1) * 0.9;
+      nodes.forEach((nd, i) => { nd.position.copy(pages[i].userData.end); nd.userData.tag.position.copy(nd.position).add(tagOff); });
     },
   };
 })();
@@ -230,15 +228,22 @@ scenes[1] = (() => {
     const l = labelSprite(evts[i][0], { size: 26, color: i === 4 ? '#f1a49b' : '#eee8d9', height: 0.26 });
     l.position.copy(p).add(new THREE.Vector3(0, i % 2 ? -0.45 : 0.45, 0)); g.add(l); labels.push(l);
   });
-  // documents arriving from the hero network and settling onto the case timeline
-  const incoming = [];
-  for (let i = 0; i < 14; i++) {
-    const n = glowSphere(0.1, i % 4 === 0 ? C.amber : C.teal, 1.1);
-    const ang = (i / 14) * Math.PI * 2;
-    n.userData.from = new THREE.Vector3(Math.cos(ang) * 3.2, Math.sin(ang * 2) * 1.4 + 0.4, Math.sin(ang) * 1.6);
+  // the hero network is handed over as-is: same nodes, names and links, re-expressed in this scene's space
+  const heroM = new THREE.Matrix4().compose(new THREE.Vector3(innerWidth > 900 ? 1.4 : 0, 0, 0), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.25, 0.25, 0)), new THREE.Vector3(1, 1, 1));
+  const toLocal = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(0.08, -0.18, 0)).invert();
+  const incoming = heroNet.ends.map((end, i) => {
+    const n = glowSphere(0.1, heroNet.colors[i], 1.1);
+    n.userData.from = end.clone().applyMatrix4(heroM).applyMatrix4(toLocal);
     n.userData.to = pts[Math.min(4, Math.floor(i / 3))];
-    g.add(n); incoming.push(n);
-  }
+    n.userData.tag = labelSprite(heroNet.titles[i], { size: 20, weight: 700, color: i % 4 === 0 ? '#edb45d' : '#bfeee7', height: 0.17 });
+    g.add(n); g.add(n.userData.tag); return n;
+  });
+  const N = incoming.length; const pairs = [];
+  for (let i = 0; i < N; i++) for (const j of [i + 1, i + 3]) pairs.push([i, j % N]);
+  const linkPos = new Float32Array(pairs.length * 6);
+  const linkGeo = new THREE.BufferGeometry(); linkGeo.setAttribute('position', new THREE.BufferAttribute(linkPos, 3));
+  const links = new THREE.LineSegments(linkGeo, new THREE.LineBasicMaterial({ color: C.teal, transparent: true, opacity: 0.35 }));
+  g.add(links);
   const head = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.025, 12, 48), new THREE.MeshBasicMaterial({ color: C.teal, transparent: true }));
   g.add(head);
   const a0 = pts[2].clone();
@@ -258,29 +263,34 @@ scenes[1] = (() => {
     update(p, t, pointer) {
       g.rotation.y = -0.18 + pointer.x * 0.15 + (reduceMotion ? 0 : Math.sin(t * 0.3) * 0.05);
       g.rotation.x = 0.08 + pointer.y * 0.06;
-      // 1) arrival: network nodes fly in and the timeline is drawn under them
-      const arrive = seg(p, 0, 0.2);
+      // 1) hand-over: the network holds still, then documents travel one by one to their event on the timeline
+      const hold = seg(p, 0, 0.06);
       incoming.forEach((n, i) => {
-        const k = seg(arrive, (i / 14) * 0.4, 0.6 + (i / 14) * 0.4);
-        n.position.lerpVectors(n.userData.from, n.userData.to, ease(k));
-        n.userData.alpha = 1 - seg(k, 0.85, 1); n.scale.setScalar(lerp(1.4, 0.6, k));
+        const k = ease(seg(p, 0.06 + (i / N) * 0.16, 0.16 + (i / N) * 0.16));
+        n.position.lerpVectors(n.userData.from, n.userData.to, k);
+        n.userData.alpha = 1 - seg(k, 0.9, 1); n.scale.setScalar(lerp(1.15, 0.7, k));
+        n.userData.tag.position.copy(n.position).add(tagOff); n.userData.tag.userData.alpha = 1 - seg(k, 0.2, 0.7);
       });
-      const draw = seg(p, 0.04, 0.22);
+      pairs.forEach(([a, b], q) => { incoming[a].position.toArray(linkPos, q * 6); incoming[b].position.toArray(linkPos, q * 6 + 3); });
+      linkGeo.attributes.position.needsUpdate = true;
+      links.userData.alpha = 1 - seg(p, 0.08, 0.26);
+      const draw = seg(p, 0.1, 0.32);
       railGeo.setDrawRange(0, Math.max(3, Math.floor(railTotal * draw / 3) * 3));
-      dots.forEach((d, i) => { const k = seg(draw, i / 5 - 0.05, i / 5 + 0.12); d.userData.alpha = k; d.scale.setScalar(Math.max(k, 0.001)); labels[i].userData.alpha = k; });
+      dots.forEach((d, i) => { const k = seg(p, 0.12 + i * 0.04, 0.2 + i * 0.04); d.userData.alpha = k; d.scale.setScalar(Math.max(k, 0.001)); labels[i].userData.alpha = k; });
+      void hold;
       // 2) rewind
-      const rew = seg(p, 0.26, 0.48);
-      head.userData.alpha = seg(p, 0.22, 0.28);
+      const rew = seg(p, 0.36, 0.55);
+      head.userData.alpha = seg(p, 0.33, 0.38);
       head.position.copy(curve.getPoint(lerp(1, 0.5, rew))); head.lookAt(camera.position);
       head.scale.setScalar(1 + (reduceMotion ? 0 : Math.sin(t * 4) * 0.08));
-      rail.userData.alpha = lerp(1, 0.5, seg(p, 0.46, 0.6));
+      rail.userData.alpha = lerp(1, 0.5, seg(p, 0.54, 0.66));
       // 3) alternative path
-      const grow = seg(p, 0.5, 0.84);
+      const grow = seg(p, 0.57, 0.86);
       altGeo.setDrawRange(0, Math.floor(total * grow / 3) * 3);
       alt.visible = grow > 0.001;
-      altEnd.userData.alpha = seg(p, 0.8, 0.88); altEnd.scale.setScalar(0.5 + altEnd.userData.alpha * 0.6);
-      altMid.userData.alpha = seg(p, 0.6, 0.7);
-      altLbl.userData.alpha = seg(p, 0.84, 0.94);
+      altEnd.userData.alpha = seg(p, 0.82, 0.9); altEnd.scale.setScalar(0.5 + altEnd.userData.alpha * 0.6);
+      altMid.userData.alpha = seg(p, 0.66, 0.74);
+      altLbl.userData.alpha = seg(p, 0.86, 0.95);
       labels[4].userData.alpha = Math.min(labels[4].userData.alpha, lerp(1, 0.55, grow));
     },
   };
@@ -331,7 +341,8 @@ scenes[2] = (() => {
     const s = glowSphere(1, colors[k] ?? (k === 'root' ? C.paper : C.teal), 0.7);
     s.userData.target = 0.16; s.scale.setScalar(0.16); s.position.copy(P[k]); g.add(s); nodeMeshes[k] = s;
     const l = labelSprite(names[k], { size: 24, height: 0.25 });
-    const off = outcomeKeys.includes(k) ? (k === 'bR' ? [0, -0.42] : [0.95, 0]) : [0, 0.4];
+    const LABEL_OFF = { bR: [0, -0.42], c: [0, -0.42], iK: [0, 0.42], iO: [0, -0.42] };
+    const off = LABEL_OFF[k] ?? (outcomeKeys.includes(k) ? [0.95, 0] : [0, 0.4]);
     l.position.copy(P[k]).add(new THREE.Vector3(off[0], off[1], 0.2));
     g.add(l); nodeLabels[k] = l;
   });
@@ -348,17 +359,14 @@ scenes[2] = (() => {
   }
   apply(treeModel(treeState.chips), true);
   treeState.apply = apply;
-  const cam = { pos: [0, 0.3, 8.8], look: [-2.2, 0.1, 0] };
+  const cam = { pos: [0, 0.3, 8.8], look: [0.35, 0.1, 0] };
   return {
     group: g,
-    fit: [3.2, 2.8], camera: cam,
+    fit: [5.6, 2.8], camera: cam,
     update(p, t, pointer) {
       g.rotation.y = -0.18 + pointer.x * 0.2 + (reduceMotion ? 0 : Math.sin(t * 0.25) * 0.05);
       g.rotation.x = pointer.y * 0.1;
-      // camera follows the growing edge to the right, then pulls back to show the whole tree
-      const follow = seg(p, 0.05, 0.72); const back = seg(p, 0.74, 0.9);
-      cam.look[0] = lerp(lerp(-2.2, 1.6, follow), 0, back);
-      this.fit[0] = lerp(3.2, 6.1, back);
+      // the whole tree stays in frame; branches are added left to right while scrolling
       Object.values(edgeMeshes).forEach((m) => {
         m.userData.grow = seg(p, m.userData.win[0], m.userData.win[1]);
         m.userData.r = lerp(m.userData.r, m.userData.target, reduceMotion ? 1 : 0.08);
@@ -756,7 +764,7 @@ function frame() {
   });
   document.documentElement.classList.toggle('stage-off', current < 0);
   if (current < 0) { renderer.clear(); return; }
-  if (current !== active) { prevActive = active; active = current; switchAt = elapsed; fade = 0; }
+  if (current !== active) { prevActive = active; active = current; switchAt = elapsed; fade = (prevActive + active === 1) ? 1 : 0; }
   fade = reduceMotion ? 1 : clamp(fade + dt * 1.3);
   scenes.forEach((s, i) => { s.group.visible = i === active; });
   const s = scenes[active];
