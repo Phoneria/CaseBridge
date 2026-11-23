@@ -31,7 +31,7 @@
 
 ---
 
-### Görev 1: UDF okuyucu
+### Task 1: UDF okuyucu
 
 **Files:**
 - Create: `backend/app/services/udf_reader.py`
@@ -203,7 +203,7 @@ git commit -m "feat: UDF text reader with archive and XML safety limits"
 
 ---
 
-### Görev 2: Dava belgeleri, AI ile doldurma ve CLI içe aktarmada UDF
+### Task 2: Dava belgeleri, AI ile doldurma ve CLI içe aktarmada UDF
 
 **Files:**
 - Modify: `backend/app/models/document.py` (`DocumentType.UDF = "udf"`)
@@ -286,7 +286,7 @@ git commit -m "feat: accept UDF documents in case uploads, intake and CLI import
 
 ---
 
-### Görev 3: Gizlilik aracında UDF
+### Task 3: Gizlilik aracında UDF
 
 **Files:**
 - Modify: `backend/app/privacy/files.py` (`extract_document` içinde UDF tespiti ve `_udf`)
@@ -350,7 +350,7 @@ git commit -m "feat: read UDF files in the privacy tool"
 
 ---
 
-### Görev 4: Frontend
+### Task 4: Frontend
 
 **Files:**
 - Modify: `frontend/src/types/index.ts:466`. `file_type: "pdf" | "docx" | "txt" | "udf"`.
@@ -417,7 +417,7 @@ git commit -m "feat: accept UDF files in the web app"
 
 ---
 
-### Görev 5: Tüm doğrulama
+### Task 5: Tüm doğrulama
 
 - [ ] **Adım 1:** `backend/` içinde `python -m pytest -q` çalıştır. Beklenen: tümü PASS (gerçek sağlayıcı testleri varsayılan olarak hariçtir).
 - [ ] **Adım 2:** `frontend/` içinde `npx vitest run` ve `npx tsc --noEmit` çalıştır. Beklenen: tümü PASS.
