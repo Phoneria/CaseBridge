@@ -34,8 +34,9 @@ class VersionedGalleryTests(unittest.TestCase):
             with self.assertRaises(ValueError):gallery.prepare(root,batch,observed,audit,observed)
             self.assertEqual({p:p.read_bytes() for p in original},original)
 
-    def test_restored_gallery_retains_twelve_images(self):
-        self.assertEqual(len(gallery.references((ROOT/'web-page/index.html').read_text())),12)
+    def test_removed_product_gallery_is_absent(self):
+        with self.assertRaises(ValueError):
+            gallery.references((ROOT/'web-page/index.html').read_text())
 
     def test_disabled_manifest_prevents_network_capture_or_publication(self):
         import os

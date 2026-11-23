@@ -116,9 +116,10 @@ class ReleaseTests(unittest.TestCase):
 
     def test_marketing_dependency_closure_contains_public_case_reader(self):
         files = r.marketing_files(Path(__file__).parents[2] / 'web-page')
-        for name in ('ornek-dava.html', 'ornek-dava.css', 'ornek-dava.js',
+        for name in ('kira-agaci.css', 'kira-agaci.js',
                      'hero-video-restoration.css', 'assets/video/casebridge-hero.mp4'):
             self.assertIn(name, files)
+        self.assertNotIn('ornek-dava.html', files)
         self.assertNotIn('night-atlas.js', files)
         self.assertNotIn('planning/business-plan.xlsx', files)
 

@@ -12,7 +12,7 @@ class GeneratedGalleryTests(unittest.TestCase):
         manifest=json.loads((root/'web-page/website-version.json').read_text())
         if manifest.get('product_gallery')=='disabled':
             self.assertEqual(ledger['marketingVersion'],'v.0.48')  # preserved historical batch, not the current homepage
-            self.assertIn('assets/feature-screens/tr-current/scenario-tree.jpg?v=0.48',(root/'web-page/index.html').read_text())
+            self.assertNotIn('assets/feature-screens/tr-current/scenario-tree.jpg?v=0.48',(root/'web-page/index.html').read_text())
         else:
             self.assertEqual(manifest['version'],ledger['marketingVersion'])
         for name, digest in expected.items():
