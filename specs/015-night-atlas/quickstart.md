@@ -1,0 +1,2 @@
+# Quickstart
+Serve web-page/ using a static server; no installation or app API needed. Run the pure model acceptance and scripts/check-specs.py. Browser QA uses existing Playwright installation with synthetic marketing data only. No app/customer API should be called. Before publishing, review todo.md, required CI, main SHA and marketing v. manifest; use the existing restricted marketing release path and record public validation.

@@ -34,12 +34,23 @@ class VersionedGalleryTests(unittest.TestCase):
             with self.assertRaises(ValueError):gallery.prepare(root,batch,observed,audit,observed)
             self.assertEqual({p:p.read_bytes() for p in original},original)
 
-    def test_every_current_product_reference_is_bound_and_tree_first(self):
-        names=gallery.references((ROOT/'web-page/index.html').read_text())
-        self.assertEqual(len(names),12)
-        self.assertEqual(Path(names[0]).stem,'scenario-tree')
-        self.assertEqual(len(names),len(set(names)))
-        with self.assertRaises(ValueError):gallery.references('<div class="capability-screens"><img src="assets/feature-screens/tr-current/analysis.jpg"><dialog id="feature-screen-dialog">')
+    def test_retired_homepage_gallery_is_not_silently_reintroduced(self):
+        # A full redesign no longer presents historical app screenshots as current.
+        # The capture tooling still validates legacy gallery fixtures separately.
+        with self.assertRaises(ValueError):
+            gallery.references((ROOT/'web-page/index.html').read_text())
+        self.assertNotIn('assets/feature-screens/tr-current/',(ROOT/'web-page/index.html').read_text())
+
+    def test_disabled_manifest_prevents_network_capture_or_publication(self):
+        import os
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'web-page').mkdir();(root/'web-page/website-version.json').write_text('{"version":"v.0.51","product_gallery":"disabled"}')
+            output=root/'output'
+            with mock.patch.object(gallery,'ROOT',root), mock.patch.object(gallery,'identity',side_effect=AssertionError('must not contact app')), mock.patch('sys.argv',['gallery','detect']), mock.patch.dict(os.environ,{'GITHUB_OUTPUT':str(output)}):
+                gallery.main()
+            self.assertEqual(output.read_text(),'needed=false\n')
+            self.assertFalse((root/'.gallery-observed.json').exists())
 
     def test_successful_complete_candidate_generates_all_byte_acceptance_and_output_ledger(self):
         import hashlib
