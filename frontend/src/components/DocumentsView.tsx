@@ -97,6 +97,7 @@ export function DocumentsView() {
             <option value="pdf">PDF</option>
             <option value="docx">DOCX</option>
             <option value="txt">TXT</option>
+            <option value="udf">UDF</option>
           </select>
         </div>
       )}

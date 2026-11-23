@@ -318,15 +318,17 @@ describe("applyDraft", () => {
 });
 
 describe("document files", () => {
-  it("accepts pdf, docx and txt up to 10 MB", () => {
+  it("accepts pdf, docx, txt and udf up to 10 MB", () => {
     expect(MAX_DOCUMENT_BYTES).toBe(10 * 1024 * 1024);
     expect(checkDocumentFile(new File(["x"], "a.PDF"))).toBeNull();
     expect(checkDocumentFile(new File(["x"], "a.docx"))).toBeNull();
     expect(checkDocumentFile(new File(["x"], "a.txt"))).toBeNull();
+    expect(checkDocumentFile(new File(["x"], "karar.udf"))).toBeNull();
+    expect(checkDocumentFile(new File(["x"], "KARAR.UDF"))).toBeNull();
   });
 
   it("rejects other types and big files with a message naming the file", () => {
-    expect(checkDocumentFile(new File(["x"], "resim.png"))).toBe("resim.png desteklenmeyen bir dosya türü (pdf, docx, txt).");
+    expect(checkDocumentFile(new File(["x"], "resim.png"))).toBe("resim.png desteklenmeyen bir dosya türü (pdf, docx, txt, udf).");
     const big = new File(["x"], "buyuk.pdf");
     Object.defineProperty(big, "size", { value: MAX_DOCUMENT_BYTES + 1 });
     expect(checkDocumentFile(big)).toBe("buyuk.pdf 10 MB sınırını aşıyor.");

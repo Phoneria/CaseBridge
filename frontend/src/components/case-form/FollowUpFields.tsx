@@ -66,7 +66,7 @@ export function FollowUpFields(props: Props) {
           className={`rounded-xl border-2 border-dashed p-5 text-center text-sm ${dragging ? "border-accent-400 bg-accent-50" : "border-surface-border"}`}
         >
           <p className="text-navy-700">Belgeleri buraya sürükleyip bırakın veya seçin.</p>
-          <p className="mt-1 text-xs text-navy-500">pdf, docx veya txt · her biri en fazla 10 MB</p>
+          <p className="mt-1 text-xs text-navy-500">pdf, docx, txt veya udf · her biri en fazla 10 MB</p>
           <input
             type="file"
             multiple

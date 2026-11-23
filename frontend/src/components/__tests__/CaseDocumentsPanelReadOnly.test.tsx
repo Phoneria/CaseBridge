@@ -19,6 +19,13 @@ describe("CaseDocumentsPanel readOnly", () => {
     expect(screen.getByRole("button", { name: "Sil" })).toBeInTheDocument();
   });
 
+  it("names UDF and accepts .udf files in the upload zone", () => {
+    renderPanel([], false);
+    expect(screen.getByText("Belge Yükle (PDF, DOCX, TXT, UDF)")).toBeInTheDocument();
+    expect(screen.getByText("Bu davaya PDF, DOCX, TXT veya UDF belge yükleyin.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Belge Yükle (PDF, DOCX, TXT, UDF)")).toHaveAttribute("accept", ".pdf,.docx,.txt,.udf");
+  });
+
   it("hides the upload zone and delete but keeps copy and download when read-only", () => {
     renderPanel([document], true);
     expect(screen.queryByText(/Belge Yükle/)).toBeNull();
@@ -31,6 +38,6 @@ describe("CaseDocumentsPanel readOnly", () => {
     renderPanel([], true);
     expect(screen.getByText("Henüz belge yok.")).toBeInTheDocument();
     expect(screen.queryByText(/Belge Yükle/)).toBeNull();
-    expect(screen.queryByText("Bu davaya PDF, DOCX veya TXT belge yükleyin.")).toBeNull();
+    expect(screen.queryByText("Bu davaya PDF, DOCX, TXT veya UDF belge yükleyin.")).toBeNull();
   });
 });

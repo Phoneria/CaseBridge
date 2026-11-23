@@ -135,7 +135,7 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
               setFile(problem ? null : chosen);
             }}
           />
-          <p className="mt-1 text-xs text-navy-500">pdf, docx veya txt · en fazla 10 MB</p>
+          <p className="mt-1 text-xs text-navy-500">pdf, docx, txt veya udf · en fazla 10 MB</p>
         </div>
       ) : (
         <textarea

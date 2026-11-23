@@ -90,7 +90,7 @@ describe("IntakeFillBox", () => {
     await userEvent
       .setup({ applyAccept: false })
       .upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "foto.png", { type: "image/png" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("foto.png desteklenmeyen bir dosya türü (pdf, docx, txt).");
+    expect(screen.getByRole("alert")).toHaveTextContent("foto.png desteklenmeyen bir dosya türü (pdf, docx, txt, udf).");
     expect(screen.getByRole("button", { name: "Doldur" })).toBeDisabled();
     expect(extractCaseIntake).not.toHaveBeenCalled();
   });

@@ -463,7 +463,7 @@ export interface DocumentItem {
   id: string;
   case_id: string;
   filename: string;
-  file_type: "pdf" | "docx" | "txt";
+  file_type: "pdf" | "docx" | "txt" | "udf";
   extracted_text: string | null;
   uploaded_at: string;
 }
