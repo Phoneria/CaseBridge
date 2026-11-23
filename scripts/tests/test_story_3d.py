@@ -110,5 +110,13 @@ class Story3DHomepage(unittest.TestCase):
         self.assertIn('<li data-at="0.22"><strong>Kayıtlı yol', self.html)
 
 
+    def test_fast_scroll_is_damped_not_blocked(self):
+        source = (ROOT / 'specs/016-3d-story-homepage/source/story3d.src.js').read_text()
+        for marker in ['MAX_PROGRESS_PER_S = 0.55', 'SCROLL_DAMP = 4.5', 'if (ch._sp === undefined || reduceMotion) ch._sp = p;', 'cp = ch._sp']:
+            self.assertIn(marker, source)
+        for blocker in ['preventDefault', "addEventListener('wheel'", 'overflow: hidden']:
+            self.assertNotIn(blocker, source)
+
+
 if __name__ == '__main__':
     unittest.main()
