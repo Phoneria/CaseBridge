@@ -726,3 +726,20 @@ export type ChatStreamEvent =
   | { type: "delta"; text: string }
   | { type: "done"; message: ChatMessage | null }
   | { type: "error"; message: string };
+
+/** GET /cases/{id}/similar and POST /similar-cases/search (stage 1, no AI). */
+export interface SimilarCase {
+  case_id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  status: CaseStatus;
+  outcome: CaseOutcome;
+  decision_date: string | null;
+  duration_days: number | null;
+  duration_ongoing: boolean;
+  assigned_lawyer_name: string | null;
+  is_precedent: boolean;
+  score: number;
+  reasons: string[];
+}

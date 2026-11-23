@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/main.py",
+        "backend/app/api/routes/similar_cases.py",
+        "backend/app/schemas/similar_case.py",
+        "backend/app/services/similar_cases.py"
+      ],
+      "requirements": [
+        "specs/018-similar-cases/spec.md#FR-001",
+        "specs/018-similar-cases/spec.md#FR-002",
+        "specs/018-similar-cases/spec.md#FR-003",
+        "specs/018-similar-cases/spec.md#FR-004",
+        "specs/018-similar-cases/spec.md#FR-005",
+        "specs/018-similar-cases/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_similar_cases.py::test_ranks_closest_cases_first_with_reasons_and_details",
+        "backend/tests/api/test_similar_cases.py::test_excludes_the_case_itself_and_its_numbered_sibling",
+        "backend/tests/api/test_similar_cases.py::test_never_returns_another_bureaus_cases",
+        "backend/tests/api/test_similar_cases.py::test_free_text_search_is_scoped_to_the_callers_bureau",
+        "backend/tests/api/test_similar_cases.py::test_lawyer_sees_only_cases_they_may_already_read",
+        "backend/tests/api/test_similar_cases.py::test_empty_or_meaningless_text",
+        "backend/tests/api/test_similar_cases.py::test_cache_follows_case_changes",
+        "backend/tests/api/test_similar_cases.py::test_turkish_normalisation_and_court_types"
+      ],
+      "reason": "User request 23 Nov 2026: similar cases stage 1 (same bureau + precedent archive, TF-IDF + structured pre-filter, no AI, no migration)."
+    },
+    {
+      "files": [
+        "frontend/app-version.json",
+        "frontend/src/app/ai/benzer-davalar/page.tsx",
+        "frontend/src/components/CaseDetailView.tsx",
+        "frontend/src/components/WorkspaceHeader.tsx",
+        "frontend/src/components/ai/SimilarCasesView.tsx",
+        "frontend/src/components/similar/SimilarCaseList.tsx",
+        "frontend/src/components/similar/SimilarCasesCard.tsx",
+        "frontend/src/lib/ai.ts",
+        "frontend/src/lib/aiNavigation.ts",
+        "frontend/src/lib/api.ts",
+        "frontend/src/lib/chartTheme.ts",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/018-similar-cases/spec.md#FR-007",
+        "specs/018-similar-cases/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/SimilarCases.test.tsx::lists the first five with score, result badge, duration, lawyer, reasons and links",
+        "frontend/src/components/__tests__/SimilarCases.test.tsx::shows an empty state when nothing is similar",
+        "frontend/src/components/__tests__/SimilarCases.test.tsx::is listed in the CaseBridge AI menu",
+        "frontend/src/components/__tests__/SimilarCases.test.tsx::finds cases similar to the case chosen from the link or the picker",
+        "frontend/src/components/__tests__/SimilarCases.test.tsx::searches free text with an optional category and shows the empty state"
+      ],
+      "reason": "Case-detail card and CaseBridge AI page for similar cases with token colours and chartTheme outcome badges; application v.0.47."
+    }
+  ]
+}

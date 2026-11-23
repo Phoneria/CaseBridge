@@ -16,6 +16,7 @@ export const AI_NAVIGATION = [
   { label: 'Sufle', href: AI_ROUTES.sufle },
   { label: 'Canlı Duruşma ve Karşı Taraf Analizi', href: AI_ROUTES.courtroom },
   { label: 'Hukuk Asistanı', href: AI_ROUTES.chat },
+  { label: 'Benzer Dava Bul', href: AI_ROUTES.similar },
   { label: 'Olasılık Ağacı ve Bilgi Haritası', href: AI_ROUTES.scenarios },
 ] as const;
 

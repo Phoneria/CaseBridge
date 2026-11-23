@@ -25,6 +25,7 @@ const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  getSimilarCases: () => Promise.resolve([]),
   getPrecedents: (...args: unknown[]) => getPrecedents(...args),
   getScenarioTree: (...args: unknown[]) => getScenarioTree(...args),
   getCase: (...args: unknown[]) => getCase(...args),

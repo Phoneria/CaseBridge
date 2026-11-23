@@ -47,6 +47,7 @@ import { CaseCloseModal, type CloseResult } from "@/components/CaseCloseModal";
 import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 import { CaseDecisionCard } from "@/components/CaseDecisionCard";
 import { CaseHearingsCard } from "@/components/CaseHearingsCard";
+import { SimilarCasesCard } from "@/components/similar/SimilarCasesCard";
 
 import { PrecedentsView } from "@/components/PrecedentsView";
 import { ScenarioTreeView } from "@/components/lab/ScenarioTreeView";
@@ -468,6 +469,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
             <CaseDisputeCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
           </div>
+
+          <SimilarCasesCard caseId={caseId} />
 
           <div className="grid grid-cols-3 gap-3">
             <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "belgeler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">

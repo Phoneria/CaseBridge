@@ -17,7 +17,7 @@ describe('Header AI navigation', () => {
   });
   it('includes all tools and preserves deep-route active state', async () => {
     render(<AiNavigation user={user}/>);await userEvent.click(screen.getByRole('button',{name:/CaseBridge AI/}));
-    expect(screen.getByRole('dialog',{name:'Yapay zekâ araçları'})).toBeVisible();expect(screen.getAllByRole('link')).toHaveLength(5);
+    expect(screen.getByRole('dialog',{name:'Yapay zekâ araçları'})).toBeVisible();expect(screen.getAllByRole('link')).toHaveLength(6);
     expect(screen.getByRole('link',{name:/Olasılık Ağacı/})).toHaveAttribute('href','/ai/olasilik');
     expect(screen.getByRole('link',{name:/Canlı Duruşma/})).toHaveAttribute('aria-current','page');
     expect(screen.queryByRole('link',{name:/Genel bakış|Dosya Analizi|Yönetilen Duruşma/})).not.toBeInTheDocument();
