@@ -104,7 +104,7 @@ export function AppShell({ children, platform = false }: { children: React.React
       {menuOpen && (
         <dialog ref={menuRef} aria-label="Uygulama menüsü" onCancel={() => setMenuOpen(false)}
           onClick={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }}
-          className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[calc(100vw-2rem)] border-0 bg-accent-50 p-0 text-navy-900 shadow-xl backdrop:bg-navy-950/50">
+          className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[calc(100vw-2rem)] border-0 bg-accent-50 p-0 text-navy-900 shadow-xl backdrop:bg-scrim">
           <div className="flex h-full flex-col">
             <button type="button" onClick={() => setMenuOpen(false)} className="m-3 self-end rounded-lg border border-accent-200 bg-white px-3 py-2 text-sm font-medium">Menüyü kapat</button>
             <div className="min-h-0 flex-1" onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMenuOpen(false); }}>

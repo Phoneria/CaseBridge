@@ -140,7 +140,7 @@ export function TaskFormModal({
   const alerts = loadError ? ["Davalar veya kullanıcılar yüklenemedi.", ...errors] : errors;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy-900/40 p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-scrim p-4 sm:items-center">
       <div role="dialog" aria-modal="true" aria-labelledby="task-form-title" className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
         <form onSubmit={submit} noValidate>
           <div className="flex items-center justify-between border-b border-surface-border px-5 py-4">

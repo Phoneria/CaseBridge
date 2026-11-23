@@ -1,5 +1,25 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 import { BRAND_ACCENT } from "./src/lib/brand";
+import { FAMILIES, SHADES, themeVariables } from "./src/lib/themeTokens";
+
+/* Role-specific colour utilities backed by CSS variables (see src/lib/themeTokens.ts). */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+function roleColors(role: "tx" | "bg" | "bd") {
+  type Colors = { [key: string]: string | Colors };
+  const out: Colors = {};
+  for (const fam of FAMILIES) out[fam] = Object.fromEntries(SHADES.map((s) => [s, v(`${role}-${fam}-${s}`)]));
+  if (role !== "tx") out.surface = { DEFAULT: v(`${role}-surface`), muted: v(`${role}-surface-muted`), border: v(`${role}-surface-border`) };
+  if (role === "bg") {
+    out.white = v("bg-white");
+    out.glass = "rgb(255 255 255 / <alpha-value>)";
+    out.scrim = "var(--scrim)";
+  }
+  return out;
+}
+const TX = roleColors("tx");
+const BG = roleColors("bg");
+const BD = roleColors("bd");
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -26,6 +46,13 @@ const config: Config = {
           border: "#e1ddd3",
         },
       },
+      textColor: TX,
+      placeholderColor: TX,
+      backgroundColor: BG,
+      gradientColorStops: BG,
+      borderColor: BD,
+      divideColor: BD,
+      ringColor: BD,
       fontFamily: {
         sans: [
           "Manrope",
@@ -60,7 +87,11 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addBase }) => {
+      addBase({ ":root": themeVariables("light"), ':root[data-theme="dark"]': themeVariables("dark") });
+    }),
+  ],
 };
 
 export default config;

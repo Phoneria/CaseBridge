@@ -81,7 +81,7 @@ export function AiStatusIndicator({ tone = "light" }: { tone?: "light" | "dark" 
         aria-label={`${label}. Ayrıntılar`}
         data-state={state}
         className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ${
-          tone === "dark" ? "border-white/15 bg-white/[0.04] hover:bg-white/[0.09]" : "border-surface-border hover:bg-surface-muted"
+          tone === "dark" ? "border-white/15 bg-glass/[0.04] hover:bg-glass/[0.09]" : "border-surface-border hover:bg-surface-muted"
         }`}
       >
         <span className="relative flex h-2.5 w-2.5 shrink-0">

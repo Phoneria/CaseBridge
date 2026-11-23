@@ -1,3 +1,5 @@
+import { OUTCOME_COLORS } from "@/lib/brand";
+import { CHART, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from "@/lib/chartTheme";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CARD, money, type ManagementRecord } from "@/lib/management";
 
@@ -21,9 +23,9 @@ export function FinanceCharts({records}: {records: ManagementRecord[]}) {
       <h2 className="font-semibold">Aylık tahsilat ve büro masrafı · {currency}</h2>
       <p className="my-2 text-sm text-navy-600">Toplam tahsilat {money(rows.reduce((v,r) => v+r.income, 0),currency)} · Masraf {money(rows.reduce((v,r) => v+r.expense, 0),currency)}</p>
       <ResponsiveContainer width="100%" height={240}><BarChart data={rows}>
-        <CartesianGrid vertical={false} strokeDasharray="3 3"/><XAxis dataKey="month"/><YAxis/><Tooltip/><Legend/>
-        <Bar dataKey="income" name="Tahsilat" fill="#1fb5a3" radius={[4,4,0,0]}/>
-        <Bar dataKey="expense" name="Büro masrafı" fill="#edb45d" radius={[4,4,0,0]}/>
+        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={CHART.grid}/><XAxis dataKey="month" stroke={CHART.grid} tick={{ fill: CHART.axis }}/><YAxis stroke={CHART.grid} tick={{ fill: CHART.axis }}/><Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ fill: CHART.cursor }}/><Legend/>
+        <Bar dataKey="income" name="Tahsilat" fill={OUTCOME_COLORS.won} radius={[4,4,0,0]}/>
+        <Bar dataKey="expense" name="Büro masrafı" fill={OUTCOME_COLORS.partial} radius={[4,4,0,0]}/>
       </BarChart></ResponsiveContainer>
     </section>;
   })}</>;

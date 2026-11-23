@@ -115,7 +115,7 @@ export function Sidebar({ role, platform = false, restricted = false }: { role?:
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow opacity-70" />
           <h2 className="relative mb-1 flex shrink-0 items-center gap-2 px-3 text-sm font-semibold leading-5 text-white"><AiMark className="h-4 w-4 text-accent-300" />CaseBridge AI</h2>
           <div className="relative flex min-h-0 flex-1 flex-col">{AI_NAVIGATION.map(item => <Link key={item.href} href={item.href} aria-current={aiLinkActive(pathname ?? '', item.href) ? 'page' : undefined}
-            className={'flex min-h-6 flex-1 items-center rounded-xl py-0.5 pl-9 pr-3 text-sm leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ' + (aiLinkActive(pathname ?? '', item.href) ? 'bg-white/15 font-medium text-white' : 'text-accent-100 hover:bg-white/10 hover:text-white')}>
+            className={'flex min-h-6 flex-1 items-center rounded-xl py-0.5 pl-9 pr-3 text-sm leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300 ' + (aiLinkActive(pathname ?? '', item.href) ? 'bg-glass/15 font-medium text-white' : 'text-accent-100 hover:bg-glass/10 hover:text-white')}>
             {item.label}
           </Link>)}</div>
         </section>

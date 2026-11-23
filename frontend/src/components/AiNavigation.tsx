@@ -30,7 +30,7 @@ export function AiNavigation({ user }: { user: AppUser | null }) {
     <dialog ref={dialog} id="header-ai-dialog" aria-labelledby="header-ai-title"
       onCancel={() => setOpen(false)} onClose={() => setOpen(false)}
       onClick={event => { if (event.target === event.currentTarget) setOpen(false); }}
-      className="fixed inset-x-auto bottom-auto right-4 top-20 m-0 max-h-[calc(100dvh-6rem)] w-[min(34rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-surface-border bg-white p-5 text-navy-900 shadow-xl backdrop:bg-navy-950/40">
+      className="fixed inset-x-auto bottom-auto right-4 top-20 m-0 max-h-[calc(100dvh-6rem)] w-[min(34rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-surface-border bg-white p-5 text-navy-900 shadow-xl backdrop:bg-scrim">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 id="header-ai-title" className="flex items-center gap-2 font-semibold"><AiMark className="h-5 w-5 text-accent-600" />Yapay zekâ araçları</h2>
         <button type="button" onClick={() => setOpen(false)} aria-label="Yapay zekâ menüsünü kapat" className="rounded-lg border border-surface-border px-3 py-1.5 text-sm">Kapat</button>
