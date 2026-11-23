@@ -132,7 +132,10 @@ h2 { font-size: clamp(30px, 3.2vw, 44px); }
 .team-person > div { padding: 16px 16px 20px; }
 .team-person h3 { margin: 0; font-size: 18px; font-family: var(--serif); font-weight: 400; }
 .team-role { color: var(--teal); font-size: 12.5px; font-weight: 800; margin: 4px 0 10px; }
-.team-person p:last-child { font-size: 13.5px; color: var(--muted); margin: 0; line-height: 1.55; }
+.team-facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.team-facts li { position: relative; padding-left: 14px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.team-facts li::before { content: ""; position: absolute; left: 0; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+.team-facts b { color: var(--paper); font-weight: 700; }
 .faq { padding: 60px 0 100px; border-top: 1px solid var(--line); max-width: 860px; }
 .faq h2 { margin-bottom: 26px; }
 .faq details { border-bottom: 1px solid var(--line); padding: 18px 0; }

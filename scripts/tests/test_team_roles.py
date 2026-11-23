@@ -15,9 +15,10 @@ class TeamRolesAcceptance(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertEqual(len({role for _,role in actual}),5)
         emin=cards[1]
-        for fact in ['BAUROV', 'yazılım ekip liderliği', 'Baykar', 'makine öğrenmesi stajı', 'Outlier AI', 'dil modeli değerlendirme', 'sentetik veri', 'Perpetual Labs bünyesinde altyapı (infra) yönetimini yürütüyor']:self.assertIn(fact,emin)
+        for fact in ['BAUROV', 'yazılım ekip liderliği', 'Baykar', 'makine öğrenmesi stajı', 'Outlier AI', 'dil modeli değerlendirme', 'sentetik veri', '<b>Perpetual Labs:</b> altyapı (infra) yönetimi']:self.assertIn(fact,emin)
         self.assertIn('<img class="member-photo" src="assets/team/emin-merden-web.jpg" alt="Emin Merden" width="240" height="252" loading="lazy">',emin)
         self.assertNotIn('>EM</span>',emin)
+        for card in cards: self.assertRegex(card, r'<ul class="team-facts">(?:<li>.+?</li>){3,}</ul>')
         image=ROOT/'web-page/assets/team/emin-merden-web.jpg'
         self.assertTrue(image.is_file())
         self.assertGreater(image.stat().st_size,10000)
