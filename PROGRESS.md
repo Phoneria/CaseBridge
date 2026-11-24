@@ -252,3 +252,12 @@ Status: APP LIVE · MARKETING ROLLED BACK
 - Live: app v.0.51, health ok, migration head `a7c3e9d1f2b4`. `/public/site-chat` CORS and refusals verified in production.
 - Open: the platform OpenAI key is rejected by OpenAI (401), so the site cat cannot answer typed questions; the real firm key works (tool planning + answer verified server-side). The in-app cat UI check needs a signed-in session.
 - Marketing v.0.66 rolled back to v.0.65: the release tool only publishes files linked from HTML/CSS, so the lazily loaded widget files were missing. Fix with marketing v.0.67 in `fix/site-cat-release-files`.
+
+## Release — application v.0.52 / marketing v.0.68 (24 Nov 2026)
+Status: LIVE
+
+- Merged PR #122 (release-tool fix for the widget files, section-driven cat poses, topic-rule tests) as main dd980ab and released it with scope `all` (stage/canary → activate → verify). The release followed an online backup with a verified restore rehearsal.
+- Live: health ok on v.0.52; marketing v.0.68 with all 24 widget files served byte-identical to main. Automatic UI publishing resumed (baseline dd980ab).
+- Site cat verified live on desktop and 390 px mobile: the cat appears, poses follow the sections, the chips answer offline, and typed questions show the friendly "Şu an yanıt veremiyorum" fallback with "Demo planla".
+- The platform OpenAI key is still invalid. Each typed question makes one rejected (401) request with no retries. Owner decision: replace the direct platform key with a subagent-based answer service (todo.md).
+- Still open: the knowledge-file TODOs, and the in-app cat UI check with a signed-in session.
