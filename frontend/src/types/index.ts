@@ -142,6 +142,8 @@ export interface CaseIntakeResult {
   draft: CaseIntakeDraft;
   truncated: boolean;
   source_chars: number;
+  /** Exactly the text the AI read (the first part of a long document). */
+  source_text: string;
 }
 
 export interface CaseEvent {

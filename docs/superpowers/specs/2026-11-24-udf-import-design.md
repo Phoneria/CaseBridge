@@ -99,3 +99,12 @@ Kullanıcı seçenek 1'i (yalnızca içe aktarma) seçti ve nasıl yapılacağı
 - Okuyucu modülünün yeri ve adı.
 - Boşluk normalizasyonunun ayrıntısı (sekme karakterleri, art arda boş satırlar).
 - Kullanıcıya gösterilecek mesajların son metni.
+
+## 10. Ek (2026-11-24): "Belgeden doldur"da okunan metin
+
+- **İstek:** Yeni dava formundaki "Belgeden doldur" kutusunda yüklenen dosyanın metni, dava kaydedilmeden görülebilsin. Bu ek yalnızca UDF için değil, tüm dosya türleri için geçerli.
+- **Seçilen yol (kullanıcı onayladı):** Metin, "Doldur"dan sonra kutunun altında kapalı başlayan, açılıp kapanabilen bir bölümde gösterilir: "Belgeden okunan metin (dosya adı)". Bölümün yüksekliği sınırlı, içi kaydırılabilir ve klavyeyle odaklanılabilir.
+- **API:** `/case-intake/extract` yanıtına `source_text` eklenir. Bu alan, AI'ın okuduğu metnin birebir aynısıdır, yani uzun belgelerde ilk `case_intake_max_chars` (30.000) karakter. Belge uzunsa bölümde şu not gösterilir: "Belge uzun olduğu için yalnızca AI'ın okuduğu ilk kısım gösteriliyor." *(Bizim kararımız: tam metni göndermek 10 MB'lık bir belgede yanıtı gereksiz yere büyütür.)*
+- **Yapıştırılan metin:** Bölüm gösterilmez, çünkü metin zaten ekranda. *(Bizim kararımız.)*
+- **Bölümün kaybolduğu durumlar:** yeni bir dosya seçilince, sekme değiştirilince, yeniden doldurulunca ve "Değiştir" sorusunda "Vazgeç" denince.
+- **Kapsam dışı:** "Doldur"dan önce, dosya seçilir seçilmez önizleme (ayrı bir okuma isteği gerektirir); belgenin aslı gibi biçimli gösterim.
