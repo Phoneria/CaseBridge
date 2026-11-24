@@ -88,7 +88,7 @@ def _get(client, headers, case_id, limit=20):
 
 
 def test_ranks_precedents_with_hybrid_score_and_extractive_explanation(client, office, auth_headers, archive):
-    rows = _get(client, auth_headers(office.lawyer_a1), archive["source"].id).json()
+    rows = _get(client, auth_headers(office.lawyer_a1), archive["source"].id).json()["items"]
     ids = [r["precedent_id"] for r in rows]
     assert ids[0] == archive["best"].id
     assert archive["unrelated"].id not in ids
@@ -109,13 +109,13 @@ def test_ranks_precedents_with_hybrid_score_and_extractive_explanation(client, o
 
 
 def test_only_precedents_are_returned_never_ordinary_cases(client, office, auth_headers, archive):
-    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()
+    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()["items"]
     ids = {r["precedent_id"] for r in rows}
     assert archive["ordinary"].id not in ids and archive["source"].id not in ids
 
 
 def test_document_text_counts_and_is_labelled(client, office, auth_headers, archive):
-    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()
+    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()["items"]
     row = next(r for r in rows if r["precedent_id"] == archive["via_document"].id)
     assert row["explanation"]["shared_statutes"] == ["TBK m. 344"]
     assert any(p["precedent_label"] == "Belge: karar.txt" for p in row["explanation"]["passages"])
@@ -123,7 +123,7 @@ def test_document_text_counts_and_is_labelled(client, office, auth_headers, arch
 
 def test_passages_and_terms_come_only_from_stored_text(client, office, auth_headers, archive, db_session):
     """Anti-hallucination: every explanation string is copied from the stored case or precedent data."""
-    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()
+    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()["items"]
     assert rows
     source = archive["source"]
     source_text = " ".join(filter(None, [source.case_name, source.claim, source.facts_summary]))
@@ -152,13 +152,13 @@ def stem_of(word: str) -> str:
 
 
 def test_never_reads_another_bureaus_precedents(client, office, auth_headers, archive):
-    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()
+    rows = _get(client, auth_headers(office.admin_a), archive["source"].id).json()["items"]
     assert archive["foreign"].id not in {r["precedent_id"] for r in rows}
     # Bureau B cannot use bureau A's case as a source.
     assert _get(client, auth_headers(office.lawyer_b), archive["source"].id).status_code == 404
     # Bureau B's own case only ever sees bureau B's precedent.
     own = _case(_session(archive), office.firm_b, "2026/1", "Kira tespit davası", **SOURCE)
-    rows_b = _get(client, auth_headers(office.lawyer_b), own.id).json()
+    rows_b = _get(client, auth_headers(office.lawyer_b), own.id).json()["items"]
     assert [r["precedent_id"] for r in rows_b] == [archive["foreign"].id]
 
 
@@ -180,7 +180,7 @@ def test_access_rules(client, office, auth_headers, archive, db_session):
     assert _get(client, auth_headers(office.lawyer_a2), archive["source"].id).status_code == 403
     # Every result is a precedent the caller may already open.
     headers = auth_headers(office.lawyer_a1)
-    for row in _get(client, headers, archive["source"].id).json():
+    for row in _get(client, headers, archive["source"].id).json()["items"]:
         assert client.get(f"/precedents/{row['precedent_id']}", headers=headers).status_code == 200
 
 
@@ -188,26 +188,26 @@ def test_linked_flag_follows_case_links(client, office, auth_headers, archive):
     headers = auth_headers(office.admin_a)
     case_id, precedent_id = archive["source"].id, archive["best"].id
     assert client.put(f"/cases/{case_id}/precedents/{precedent_id}", headers=headers).status_code == 204
-    row = next(r for r in _get(client, headers, case_id).json() if r["precedent_id"] == precedent_id)
+    row = next(r for r in _get(client, headers, case_id).json()["items"] if r["precedent_id"] == precedent_id)
     assert row["linked_to_case"] is True
 
 
 def test_cache_follows_precedent_and_document_changes(client, office, auth_headers, archive, db_session):
     headers = auth_headers(office.admin_a)
     case_id = archive["source"].id
-    assert archive["unrelated"].id not in {r["precedent_id"] for r in _get(client, headers, case_id).json()}
+    assert archive["unrelated"].id not in {r["precedent_id"] for r in _get(client, headers, case_id).json()["items"]}
     archive["unrelated"].claim = "Kira bedelinin tespiti ve kira farkı"
     db_session.commit()
-    assert archive["unrelated"].id in {r["precedent_id"] for r in _get(client, headers, case_id).json()}
+    assert archive["unrelated"].id in {r["precedent_id"] for r in _get(client, headers, case_id).json()["items"]}
     fresh = _precedent(db_session, office.firm_a, "2021/2", "Miras emsali", case_type=CaseType.DIGER, claim="Uyuşmazlık.")
-    assert fresh.id not in {r["precedent_id"] for r in _get(client, headers, case_id).json()}
+    assert fresh.id not in {r["precedent_id"] for r in _get(client, headers, case_id).json()["items"]}
     _document(db_session, fresh, "yeni.txt", "Kira bedelinin tespiti ve ödenmeyen kira farkı; TBK 344.")
-    assert fresh.id in {r["precedent_id"] for r in _get(client, headers, case_id).json()}
+    assert fresh.id in {r["precedent_id"] for r in _get(client, headers, case_id).json()["items"]}
 
 
 def test_case_without_matches_returns_empty_list(client, office, auth_headers, db_session):
     lonely = _case(db_session, office.firm_a, "2026/90", "Diğer iş", case_type=CaseType.DIGER)
-    assert _get(client, auth_headers(office.admin_a), lonely.id).json() == []
+    assert _get(client, auth_headers(office.admin_a), lonely.id).json()["items"] == []
 
 
 # --- Unit level -----------------------------------------------------------------------

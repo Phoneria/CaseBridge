@@ -9,4 +9,8 @@
 - [x] T008 Bump application version to v.0.49; check-specs and check-spec-changes.
 - [x] T009 Browser check against a local demo backend with synthetic precedents (verification.md).
 - [x] T010 PostgreSQL run of the similarity tests (verification.md; full suite on PostgreSQL not run).
+- [x] T012 Stage 3 backend: filters, summary, facts, key differences, timeline, score breakdown (FR-011 through FR-014).
+- [x] T013 Optional AI explanation with deadline, grounding check and fallback; mock-provider tests (FR-016).
+- [x] T014 Sidebar stage 3: summary, filters, sort, detail view, compare mode, AI button states; component tests (FR-015); keep the stage-1 card (FR-017).
+- [x] T015 Validation: full pytest, tsc, Vitest, next build, PostgreSQL similarity tests, browser check with screenshots in artifacts/similar-cases/ (verification.md); docs/similar-cases-report.md.
 - [ ] T011 Standard application release and public verification (not part of this branch).

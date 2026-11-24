@@ -97,6 +97,10 @@ class Settings(BaseSettings):
     chat_auto_level: bool = True
     chat_classifier_timeout_seconds: PositiveFloat = 8
 
+    # "Benzer Davalar" optional AI explanation: total deadline for one request; on expiry the
+    # endpoint answers with the extractive fallback.
+    similarity_explain_timeout_seconds: PositiveFloat = 12
+
     # "Belgeden doldur" (new case page): at most this many characters of the
     # uploaded or pasted document are sent to the model; the rest is cut and
     # the response says so (truncated). Positive so 0 can't disable the cap.

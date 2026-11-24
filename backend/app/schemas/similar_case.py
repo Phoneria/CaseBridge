@@ -63,3 +63,71 @@ class SimilarPrecedentOut(BaseModel):
     text_score: int = Field(ge=0, le=100)
     linked_to_case: bool = False
     explanation: SimilarityExplanationOut
+
+
+class ScoreComponentOut(BaseModel):
+    key: str
+    label: str
+    points: float
+    max_points: float
+
+
+class TimelineEventOut(BaseModel):
+    event_date: date
+    event_type: str
+    title: str
+
+
+class DifferenceOut(BaseModel):
+    label: str
+    case_value: str
+    precedent_value: str
+
+
+class FactsOut(BaseModel):
+    case_type: CaseType
+    court: Optional[str] = None
+    court_type: Optional[str] = None
+    client_role: Optional[str] = None
+    case_value: Optional[float] = None
+    opening_date: Optional[date] = None
+    decision_date: Optional[date] = None
+    duration_months: Optional[float] = None
+    outcome: CaseOutcome
+    evidence: list[str]
+    has_expert_report: bool
+    document_count: int
+    statutes: list[str]
+
+
+class AIExplanationOut(BaseModel):
+    status: str  # "ai" | "fallback"
+    text: str
+    notice: Optional[str] = None
+
+
+class SimilarPrecedentDetailOut(SimilarPrecedentOut):
+    case_value: Optional[float] = None
+    duration_months: Optional[float] = None
+    score_breakdown: list[ScoreComponentOut]
+    key_differences: list[DifferenceOut]
+    timeline: list[TimelineEventOut]
+    facts: FactsOut
+    ai_explanation: Optional[AIExplanationOut] = None
+
+
+class SimilarPrecedentsSummaryOut(BaseModel):
+    count: int
+    outcomes: dict[str, int]
+    avg_duration_months: Optional[float] = None
+    duration_count: int
+    avg_case_value: Optional[float] = None
+    value_count: int
+    available_courts: list[str]
+    excluded_signals: list[str]
+
+
+class SimilarPrecedentsResponse(BaseModel):
+    summary: SimilarPrecedentsSummaryOut
+    source: FactsOut
+    items: list[SimilarPrecedentDetailOut]

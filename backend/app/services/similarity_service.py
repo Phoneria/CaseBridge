@@ -241,6 +241,7 @@ class Profile:
     surfaces: dict[str, str]
     refs: dict[str, str]
     sentences: list[Sentence]
+    evidence: tuple[str, ...] = ()
 
 
 def split_sentences(text: str) -> list[str]:
@@ -268,6 +269,28 @@ def _sentences(label: str, text: str) -> list[Sentence]:
     return out
 
 
+# Evidence families named in the stored text (folded, word-prefix match). Used for rule-based differences only.
+EVIDENCE_TYPES = (
+    ("Bilirkişi raporu", re.compile(r"\bbilirkisi")),
+    ("Tanık beyanı", re.compile(r"\btanik")),
+    ("Sözleşme", re.compile(r"\bsozlesme")),
+    ("İhtarname", re.compile(r"\bihtar")),
+    ("Fatura / ödeme belgesi", re.compile(r"\b(fatura|dekont|makbuz)")),
+    ("Yazışma / mesaj", re.compile(r"\b(e-?posta|whatsapp|yazisma|sms\b|kisa mesaj)")),
+    ("Fotoğraf / görüntü", re.compile(r"\b(fotograf|goruntu|video|kamera kayd)")),
+    ("Keşif", re.compile(r"\bkesif")),
+    ("Tutanak", re.compile(r"\btutanag|\btutanak")),
+    ("Sağlık raporu", re.compile(r"\b(saglik raporu|adli tip|hastane)")),
+    ("Bordro / SGK kaydı", re.compile(r"\b(bordro|sgk\b)")),
+    ("Tapu kaydı", re.compile(r"\btapu")),
+)
+
+
+def evidence_types(text: Optional[str]) -> tuple[str, ...]:
+    folded = _folded(text or "")
+    return tuple(label for label, pattern in EVIDENCE_TYPES if pattern.search(folded))
+
+
 def build_profile(case: Case, documents: Iterable[tuple[str, str]] = ()) -> Profile:
     parts: list[tuple[str, str]] = []
     for name, label in TEXT_FIELDS:
@@ -293,7 +316,8 @@ def build_profile(case: Case, documents: Iterable[tuple[str, str]] = ()) -> Prof
         for key, surface in statute_refs(text).items():
             refs.setdefault(key, surface)
         sentences.extend(_sentences(label, text))
-    return Profile(case.id, case.case_type, case.court, case.case_value, terms, surfaces, refs, sentences)
+    evidence = evidence_types("\n".join(text for _, text in parts))
+    return Profile(case.id, case.case_type, case.court, case.case_value, terms, surfaces, refs, sentences, evidence)
 
 
 @dataclass
@@ -384,11 +408,34 @@ class Explanation:
 
 
 @dataclass
+class ScoreComponent:
+    key: str            # text | case_type | court | statutes
+    label: str
+    points: float       # contribution to the 0-100 score
+    max_points: float   # the most this signal could add for this source case
+
+
+@dataclass
 class PrecedentMatch:
     precedent: Case
     score: int
     text_score: int
     explanation: Explanation
+    breakdown: list[ScoreComponent] = field(default_factory=list)
+    profile: Optional[Profile] = None
+
+
+@dataclass
+class Ranking:
+    """Every listed precedent of the bureau for one source case, best first, before explanations."""
+    source_profile: Profile
+    corpus: Corpus
+    source_vector: dict[str, float]
+    rows: list[tuple[float, float, Case, Profile, dict[str, float], list[ScoreComponent]]]
+    excluded: list[str]  # labels of signals the source case cannot provide
+
+
+SIGNAL_LABELS = {"text": "Metin benzerliği", "case_type": "Kategori", "court": "Mahkeme", "statutes": "Ortak mevzuat"}
 
 
 def _shared_terms(source: Profile, other: Profile, sv: dict[str, float], ov: dict[str, float]) -> list[str]:
@@ -468,16 +515,19 @@ class SimilarityService:
         return CACHE.get(firm_id, self._stamp(firm_id), build)
 
     # Ranking ------------------------------------------------------------------------
-    def for_case(self, source: Case, limit: int = 5) -> list[PrecedentMatch]:
+    def rank(self, source: Case) -> Ranking:
         firm_id = source.law_firm_id
         corpus, precedents = self._precedent_corpus(firm_id)
         source_profile = build_profile(source, self._documents(firm_id, [source.id]).get(source.id, ()))
         sv = corpus.vector(source_profile) if source_profile.terms else {}
         has_court = bool(source.court and source.court.strip())
         has_refs = bool(source_profile.refs)
-        possible = (W_TEXT if sv else 0) + W_TYPE + (W_COURT if has_court else 0) + (W_STATUTE if has_refs else 0)
+        weights = {"text": W_TEXT if sv else 0.0, "case_type": W_TYPE,
+                   "court": W_COURT if has_court else 0.0, "statutes": W_STATUTE if has_refs else 0.0}
+        possible = sum(weights.values())
+        excluded = [SIGNAL_LABELS[k] for k, w in weights.items() if not w]
 
-        ranked: list[tuple[float, float, Case, Profile, dict[str, float]]] = []
+        rows = []
         for pid, profile in corpus.profiles.items():
             precedent = precedents[pid]
             if pid == source.id or precedent.law_firm_id != firm_id:
@@ -487,22 +537,36 @@ class SimilarityService:
             same_type = precedent.case_type == source.case_type
             if text < MIN_TEXT and not same_type:
                 continue
-            earned = W_TEXT * text + (W_TYPE if same_type else 0)
+            values = {"text": text, "case_type": 1.0 if same_type else 0.0}
             if has_court:
-                earned += W_COURT * court_match(source.court, precedent.court)[0]
+                values["court"] = court_match(source.court, precedent.court)[0]
             if has_refs:
                 shared = [k for k in source_profile.refs if any(_ref_matches(k, o) for o in profile.refs)]
-                earned += W_STATUTE * len(shared) / len(source_profile.refs)
+                values["statutes"] = len(shared) / len(source_profile.refs)
+            earned = sum(weights[k] * v for k, v in values.items())
             score = earned / possible if possible else 0.0
-            if score > 0:
-                ranked.append((score, text, precedent, profile, ov))
-        ranked.sort(key=lambda r: (-r[0], -r[1], r[2].case_number, r[2].id))
+            if score <= 0:
+                continue
+            components = [
+                ScoreComponent(k, SIGNAL_LABELS[k], round(100 * weights[k] * values.get(k, 0.0) / possible, 1),
+                               round(100 * weights[k] / possible, 1))
+                for k in ("text", "case_type", "court", "statutes") if weights[k]
+            ]
+            rows.append((score, text, precedent, profile, ov, components))
+        rows.sort(key=lambda r: (-r[0], -r[1], r[2].case_number, r[2].id))
+        return Ranking(source_profile, corpus, sv, rows, excluded)
 
-        out = []
-        for score, text, precedent, profile, ov in ranked[:limit]:
-            out.append(PrecedentMatch(precedent, min(round(100 * score), 100), round(100 * text),
-                                      self._explain(source, source_profile, precedent, profile, corpus, sv, ov)))
-        return out
+    def explain(self, source: Case, ranking: Ranking, row) -> PrecedentMatch:
+        score, text, precedent, profile, ov, components = row
+        return PrecedentMatch(
+            precedent, min(round(100 * score), 100), round(100 * text),
+            self._explain(source, ranking.source_profile, precedent, profile, ranking.corpus, ranking.source_vector, ov),
+            components, profile,
+        )
+
+    def for_case(self, source: Case, limit: int = 5) -> list[PrecedentMatch]:
+        ranking = self.rank(source)
+        return [self.explain(source, ranking, row) for row in ranking.rows[:limit]]
 
     def _explain(self, source: Case, sp: Profile, precedent: Case, pp: Profile, corpus: Corpus,
                  sv: dict[str, float], ov: dict[str, float]) -> Explanation:

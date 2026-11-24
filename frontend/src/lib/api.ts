@@ -25,7 +25,9 @@ import type {
   CaseStatus,
   CaseType,
   SimilarCase,
-  SimilarPrecedent,
+  AIExplanation,
+  SimilarPrecedentsQuery,
+  SimilarPrecedentsResponse,
   DocumentItem,
   HandoverReport,
   ReportKind,
@@ -360,8 +362,22 @@ export async function getSimilarCases(caseId: string, limit = 5): Promise<Simila
   return request(`/cases/${encodeURIComponent(caseId)}/similar?limit=${limit}`);
 }
 
-export async function getSimilarPrecedents(caseId: string, limit = 5): Promise<SimilarPrecedent[]> {
-  return request(`/cases/${encodeURIComponent(caseId)}/similar-precedents?limit=${limit}`);
+export async function getSimilarPrecedents(
+  caseId: string, query: SimilarPrecedentsQuery = {},
+): Promise<SimilarPrecedentsResponse> {
+  const params = new URLSearchParams({ limit: String(query.limit ?? 5) });
+  for (const outcome of query.outcome ?? []) params.append("outcome", outcome);
+  if (query.court) params.set("court", query.court);
+  if (query.minScore) params.set("min_score", String(query.minScore));
+  if (query.explain) params.set("explain", "true");
+  if (query.precedentId) params.set("precedent_id", query.precedentId);
+  return request(`/cases/${encodeURIComponent(caseId)}/similar-precedents?${params.toString()}`);
+}
+
+/** The optional AI explanation for one precedent; the server falls back to stored data on timeout or error. */
+export async function explainSimilarPrecedent(caseId: string, precedentId: string): Promise<AIExplanation | null> {
+  const body = await getSimilarPrecedents(caseId, { limit: 1, explain: true, precedentId });
+  return body.items[0]?.ai_explanation ?? null;
 }
 
 export async function searchSimilarCases(text: string, caseType?: CaseType | null, limit = 5): Promise<SimilarCase[]> {

@@ -837,3 +837,81 @@ export interface SimilarPrecedent {
     passages: PassagePair[];
   };
 }
+
+export interface ScoreComponent {
+  key: "text" | "case_type" | "court" | "statutes";
+  label: string;
+  points: number;
+  max_points: number;
+}
+
+export interface PrecedentTimelineEvent {
+  event_date: string;
+  event_type: CaseEventType;
+  title: string;
+}
+
+export interface KeyDifference {
+  label: string;
+  case_value: string;
+  precedent_value: string;
+}
+
+/** Stored facts of the case or a precedent, as compared side by side. */
+export interface SimilarityFacts {
+  case_type: CaseType;
+  court: string | null;
+  court_type: string | null;
+  client_role: string | null;
+  case_value: number | null;
+  opening_date: string | null;
+  decision_date: string | null;
+  duration_months: number | null;
+  outcome: CaseOutcome;
+  evidence: string[];
+  has_expert_report: boolean;
+  document_count: number;
+  statutes: string[];
+}
+
+export interface AIExplanation {
+  status: "ai" | "fallback";
+  text: string;
+  notice: string | null;
+}
+
+export interface SimilarPrecedentDetail extends SimilarPrecedent {
+  case_value: number | null;
+  duration_months: number | null;
+  score_breakdown: ScoreComponent[];
+  key_differences: KeyDifference[];
+  timeline: PrecedentTimelineEvent[];
+  facts: SimilarityFacts;
+  ai_explanation: AIExplanation | null;
+}
+
+export interface SimilarPrecedentsSummary {
+  count: number;
+  outcomes: Partial<Record<CaseOutcome, number>>;
+  avg_duration_months: number | null;
+  duration_count: number;
+  avg_case_value: number | null;
+  value_count: number;
+  available_courts: string[];
+  excluded_signals: string[];
+}
+
+export interface SimilarPrecedentsResponse {
+  summary: SimilarPrecedentsSummary;
+  source: SimilarityFacts;
+  items: SimilarPrecedentDetail[];
+}
+
+export interface SimilarPrecedentsQuery {
+  limit?: number;
+  outcome?: CaseOutcome[];
+  court?: string | null;
+  minScore?: number;
+  explain?: boolean;
+  precedentId?: string;
+}

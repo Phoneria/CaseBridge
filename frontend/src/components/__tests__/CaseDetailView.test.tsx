@@ -111,11 +111,16 @@ describe("CaseDetailView", () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);
     listDocuments.mockResolvedValue([]);
-    getSimilarPrecedents.mockReset().mockResolvedValue([]);
+    getSimilarPrecedents.mockReset().mockResolvedValue({
+      summary: { count: 0, outcomes: {}, avg_duration_months: null, duration_count: 0, avg_case_value: null,
+        value_count: 0, available_courts: [], excluded_signals: [] },
+      source: null,
+      items: [],
+    });
     render(<CaseDetailView caseId="c1" />);
     await userEvent.click(await screen.findByRole("button", { name: "Benzer Davalar" }));
     expect(screen.getByRole("dialog", { name: "Benzer Davalar" })).toBeVisible();
-    expect(getSimilarPrecedents).toHaveBeenCalledWith("c1", 8);
+    expect(getSimilarPrecedents).toHaveBeenCalledWith("c1", { limit: 20, outcome: [], court: null, minScore: 0 });
     expect(await screen.findByText("Benzer emsal bulunamadı.")).toBeVisible();
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "Benzer Davalar" })).toBeNull();

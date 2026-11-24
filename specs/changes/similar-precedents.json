@@ -47,14 +47,82 @@
         "specs/019-similar-precedents/spec.md#FR-010"
       ],
       "acceptance_tests": [
-        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows ranked precedents with score, matching fields, statutes and a link to each decision",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows the summary header and ranked cards with duration, amount and statutes",
         "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::reveals shared terms and highlighted passage pairs on demand",
-        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::links and unlinks a precedent for users who may edit the case",
-        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows empty and error states",
-        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::closes with Escape and the close button",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::links a precedent and shows empty, error and close behaviour",
         "frontend/src/components/__tests__/CaseDetailView.test.tsx::opens the Benzer Davalar sidebar for the current case and closes it with Escape"
       ],
       "reason": "Benzer Davalar stage 2: case-detail sidebar with explanations, highlighted passages and precedent linking; application v.0.49."
+    },
+    {
+      "files": [
+        ".env.example",
+        "backend/app/ai/llm_levels.py",
+        "backend/app/api/deps.py",
+        "backend/app/api/routes/similar_cases.py",
+        "backend/app/core/config.py",
+        "backend/app/schemas/similar_case.py",
+        "backend/app/services/similarity_explainer.py",
+        "backend/app/services/similarity_insights.py",
+        "backend/app/services/similarity_service.py"
+      ],
+      "requirements": [
+        "specs/019-similar-precedents/spec.md#FR-002",
+        "specs/019-similar-precedents/spec.md#FR-008",
+        "specs/019-similar-precedents/spec.md#FR-011",
+        "specs/019-similar-precedents/spec.md#FR-012",
+        "specs/019-similar-precedents/spec.md#FR-013",
+        "specs/019-similar-precedents/spec.md#FR-014",
+        "specs/019-similar-precedents/spec.md#FR-016"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_similar_precedents_details.py::test_summary_counts_outcomes_and_averages_only_stored_values",
+        "backend/tests/api/test_similar_precedents_details.py::test_summary_has_no_averages_without_data",
+        "backend/tests/api/test_similar_precedents_details.py::test_filters_by_outcome_court_and_min_score",
+        "backend/tests/api/test_similar_precedents_details.py::test_limit_applies_to_items_not_to_the_summary",
+        "backend/tests/api/test_similar_precedents_details.py::test_item_details_value_duration_breakdown_timeline_and_differences",
+        "backend/tests/api/test_similar_precedents_details.py::test_details_never_include_another_bureaus_rows",
+        "backend/tests/api/test_similar_precedents_details.py::test_explain_off_by_default_and_never_calls_the_provider",
+        "backend/tests/api/test_similar_precedents_details.py::test_explain_uses_only_the_two_texts",
+        "backend/tests/api/test_similar_precedents_details.py::test_explain_falls_back_to_stored_data",
+        "backend/tests/api/test_similar_precedents_details.py::test_mock_mode_without_override_uses_the_fallback",
+        "backend/tests/unit/test_llm_levels.py::test_task_table_is_exact"
+      ],
+      "reason": "User request 24 Nov 2026 (stage 3): filters, summary, per-precedent details, rule-based differences, timeline and an optional AI explanation with timeout and extractive fallback; response becomes {summary, source, items}. No migration, no new dependency."
+    },
+    {
+      "files": [
+        "frontend/src/components/similar/SimilarPrecedentDetail.tsx",
+        "frontend/src/components/similar/SimilarPrecedentsSidebar.tsx",
+        "frontend/src/components/similar/similarPrecedentUi.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts",
+        "frontend/app-version.json",
+        "artifacts/similar-cases/compare-dark.png",
+        "artifacts/similar-cases/compare-light.png",
+        "artifacts/similar-cases/detail-light.png",
+        "artifacts/similar-cases/detail-mobile.png",
+        "artifacts/similar-cases/detail-timeline-light.png",
+        "artifacts/similar-cases/filters-dark.png",
+        "artifacts/similar-cases/list-light.png",
+        "artifacts/similar-cases/list-mobile.png"
+      ],
+      "requirements": [
+        "specs/019-similar-precedents/spec.md#FR-015",
+        "specs/019-similar-precedents/spec.md#FR-017"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::filters by outcome chips, court and minimum similarity through the API",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::sorts on the client without another request",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows the score breakdown, timeline and key differences, and goes back to the list",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows empty timeline and difference states",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::compares this case with the precedent side by side and marks differences",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::asks for the AI explanation with a loading state and shows the answer",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::shows the server fallback notice and a request error",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::builds the summary line only from stored values",
+        "frontend/src/components/__tests__/SimilarPrecedentsSidebar.test.tsx::sorts with missing values last"
+      ],
+      "reason": "Benzer Davalar stage 3 sidebar: summary header, filters, sort, detail view with İzlenen yol and Temel farklar, compare mode and the AI explanation button; version stays v.0.49 (unreleased). Browser screenshots of these screens are kept in artifacts/similar-cases/."
     }
   ]
 }
