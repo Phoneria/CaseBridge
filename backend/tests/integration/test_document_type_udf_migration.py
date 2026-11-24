@@ -29,8 +29,10 @@ def test_udf_migration_upgrades_and_downgrades_on_sqlite(tmp_path, monkeypatch):
     config = _alembic_config()
 
     command.upgrade(config, PREVIOUS_HEAD)
-    command.upgrade(config, "head")
+    command.upgrade(config, UDF_REVISION)
     assert _version(url) == UDF_REVISION
+
+    command.upgrade(config, "head")
 
     command.downgrade(config, PREVIOUS_HEAD)
     assert _version(url) == PREVIOUS_HEAD
