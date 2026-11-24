@@ -1,7 +1,7 @@
 /** Reads the chat reply SSE stream (fetch + ReadableStream; EventSource
  * can't send a POST body or an Authorization header). */
 import { openChatStream } from "@/lib/api";
-import type { ChatStreamEvent } from "@/types";
+import type { ChatPageContext, ChatStreamEvent } from "@/types";
 
 /** Incremental SSE parser: feed it decoded text in any chunking. */
 export function createSseParser(onEvent: (event: ChatStreamEvent) => void) {
@@ -34,9 +34,20 @@ export function createSseParser(onEvent: (event: ChatStreamEvent) => void) {
 export async function streamChatMessage(
   conversationId: string,
   content: string,
-  { signal, onEvent }: { signal?: AbortSignal; onEvent: (event: ChatStreamEvent) => void },
+  {
+    signal,
+    onEvent,
+    dataTools,
+    context,
+  }: {
+    signal?: AbortSignal;
+    onEvent: (event: ChatStreamEvent) => void;
+    /** Let the answer use the firm's records (CaseBridge AI floating assistant). */
+    dataTools?: boolean;
+    context?: ChatPageContext;
+  },
 ): Promise<void> {
-  const response = await openChatStream(conversationId, content, signal);
+  const response = await openChatStream(conversationId, content, signal, dataTools ? { dataTools, context } : {});
   if (!response.body) return;
   const reader = response.body.getReader();
   const decoder = new TextDecoder();

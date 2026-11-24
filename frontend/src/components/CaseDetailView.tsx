@@ -1,5 +1,6 @@
 "use client";
 
+import { announceCaseViewed } from "@/lib/mascot";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -189,6 +190,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   useEffect(() => {
     setActiveTab(labelForSlug(parseCaseTab(sekmeParam)));
   }, [sekmeParam]);
+
+  // The CaseBridge AI cat celebrates a won case (once per case and tab session).
+  const viewedId = caseDetail?.id;
+  const viewedOutcome = caseDetail?.outcome;
+  useEffect(() => {
+    if (viewedId) announceCaseViewed({ id: viewedId, outcome: viewedOutcome });
+  }, [viewedId, viewedOutcome]);
 
   function upsertSimulation(updated: Simulation) {
     setSimulations((prev) => {
