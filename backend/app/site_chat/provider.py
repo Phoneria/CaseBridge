@@ -23,10 +23,13 @@ TOPIC_TITLES_EN = {
 
 
 def unknown_answer(lang: str) -> str:
+    """Off-topic questions and CaseBridge facts the knowledge file does not hold."""
     if lang == "en":
-        return ("I can only help with questions about CaseBridge, and I don't have information on that. "
-                f"You can book a demo and ask the team directly: {BOOKING_URL}")
-    return ("Yalnızca CaseBridge hakkındaki sorulara yardımcı olabiliyorum ve bu konuda bilgim yok. "
+        return ("I don't have information on that; I only answer questions about the CaseBridge product. "
+                "You can ask about its features, data security, how its AI works or the demo process, "
+                f"or book a demo and ask the team directly: {BOOKING_URL}")
+    return ("Bu konuda bilgim yok; yalnızca CaseBridge ürünüyle ilgili soruları yanıtlıyorum. "
+            "Örneğin özelliklerini, veri güvenliğini, yapay zekânın nasıl çalıştığını veya demo sürecini sorabilirsiniz. "
             f"Ekibe doğrudan sormak için demo planlayabilirsiniz: {BOOKING_URL}")
 
 

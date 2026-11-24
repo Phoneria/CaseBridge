@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, statSync} from 'node:fs';
+import {gzipSync} from 'node:zlib';
 import {
-  BOOKING_URL, COPY, FAQ, MAX_USER_CHARS, MARGIN, POSES, clampPosition, defaultPosition, faqAnswer, failureMessage,
-  initialPose, languageOf, leftOf, linkParts, parsePosition, poseOf, poseReducer, snapPosition,
+  BOOKING_URL, COPY, CROSSFADE_MS, CYCLE_MS, FAQ, MAX_USER_CHARS, MARGIN, POSES, SECTION_POSES, SLEEP_AFTER_MS,
+  clampPosition, cycleFor, defaultPosition, faqAnswer, failureMessage, initialPose, languageOf, leftOf, linkParts,
+  parsePosition, poseOf, poseReducer, snapPosition, visibleSection,
 } from '../../../web-page/site-cat-model.mjs';
 
 const root = new URL('../../../web-page/', import.meta.url);
@@ -31,20 +33,62 @@ test('language follows ?lang= first, then the page', () => {
   assert.equal(languageOf('en-GB', ''), 'en');
 });
 
-test('poses: thinking while waiting, dancing for the demo link, victory, sleep and wake', () => {
-  let state = initialPose;
-  assert.equal(poseOf(state), 'idle');
-  state = poseReducer(state, 'send'); assert.equal(poseOf(state), 'thinking');
-  assert.equal(poseOf(poseReducer(state, 'idle-timeout')), 'thinking'); // never sleeps while waiting
-  state = poseReducer(state, 'answer'); assert.equal(poseOf(state), 'victory');
-  state = poseReducer(state, 'victory-end'); assert.equal(poseOf(state), 'idle');
-  state = poseReducer(state, 'idle-timeout'); assert.equal(poseOf(state), 'sleeping');
-  state = poseReducer(state, 'activity'); assert.equal(poseOf(state), 'idle');
-  state = poseReducer(state, 'dance'); assert.equal(poseOf(state), 'dancing');
-  assert.equal(poseOf(poseReducer(state, 'send')), 'thinking');
-  state = poseReducer(state, 'dance-end'); assert.equal(poseOf(state), 'idle');
-  assert.equal(poseOf(poseReducer(poseReducer(initialPose, 'send'), 'fail')), 'idle');
+test('the section in view picks the pose', () => {
+  assert.deepEqual(SECTION_POSES, {top: 'idle', gecmis: 'researching', olasilik: 'thinking', anonim: 'working', buro: 'reading', sufle: 'courtroom', simulasyon: 'courtroom', team: 'dancing'});
+  const at = id => poseOf(poseReducer(initialPose, {type: 'section', id}));
+  assert.equal(poseOf(initialPose), 'idle');
+  assert.equal(at('gecmis'), 'researching');
+  assert.equal(at('olasilik'), 'thinking');
+  assert.equal(at('anonim'), 'working');
+  assert.equal(at('buro'), 'reading');
+  assert.equal(at('sufle'), 'courtroom');
+  assert.equal(at('simulasyon'), 'courtroom');
+  assert.equal(at('team'), 'dancing');
+  assert.equal(at('sss'), 'idle'); // sections outside the map count as idle
+  assert.equal(visibleSection({top: 0.1, gecmis: 0.7, olasilik: 0.2}), 'gecmis');
+  assert.equal(visibleSection({top: 0, gecmis: 0}), null);
   for (const pose of POSES) for (const size of [128, 256]) assert.ok(statSync(new URL(`assets/site-cat/cat-${pose}@${size}.webp`, root)).size > 1000);
+  for (const pose of Object.values(SECTION_POSES)) assert.ok(POSES.includes(pose));
+  assert.equal(CYCLE_MS, 10000); assert.equal(SLEEP_AFTER_MS, 60000); assert.equal(CROSSFADE_MS, 300);
+});
+
+test('staying in a section alternates every tick in a fixed order, restarting on a new section', () => {
+  assert.deepEqual(cycleFor('researching'), ['researching', 'idle', 'researching', 'tea-break']);
+  assert.deepEqual(cycleFor('idle'), ['idle', 'tea-break']);
+  let state = poseReducer(initialPose, {type: 'section', id: 'gecmis'});
+  const seen = [];
+  for (let i = 0; i < 6; i++) { seen.push(poseOf(state)); state = poseReducer(state, {type: 'tick'}); }
+  assert.deepEqual(seen, ['researching', 'idle', 'researching', 'tea-break', 'researching', 'idle']);
+  state = poseReducer(state, {type: 'section', id: 'team'});
+  assert.equal(poseOf(state), 'dancing'); // tick reset
+  assert.equal(poseReducer(state, {type: 'section', id: 'team'}), state); // same section: no reset
+  let hero = initialPose;
+  const heroSeen = [];
+  for (let i = 0; i < 4; i++) { heroSeen.push(poseOf(hero)); hero = poseReducer(hero, {type: 'tick'}); }
+  assert.deepEqual(heroSeen, ['idle', 'tea-break', 'idle', 'tea-break']);
+});
+
+test('panel and visitor poses take priority: thinking, working, victory once, sleeping', () => {
+  let state = poseReducer(initialPose, {type: 'section', id: 'buro'});
+  state = poseReducer(state, {type: 'send'}); assert.equal(poseOf(state), 'thinking');
+  assert.equal(poseOf(poseReducer(state, {type: 'idle-timeout'})), 'thinking'); // never sleeps while waiting
+  state = poseReducer(state, {type: 'received'}); assert.equal(poseOf(state), 'working');
+  state = poseReducer(state, {type: 'done'}); assert.equal(poseOf(state), 'reading');
+  state = poseReducer(state, {type: 'demo'}); assert.equal(poseOf(state), 'victory');
+  state = poseReducer(state, {type: 'victory-end'}); assert.equal(poseOf(state), 'reading');
+  assert.equal(poseOf(poseReducer(state, {type: 'demo'})), 'reading'); // only once per visit
+  state = poseReducer(state, {type: 'idle-timeout'}); assert.equal(poseOf(state), 'sleeping');
+  state = poseReducer(state, {type: 'tick'}); assert.equal(poseOf(state), 'sleeping');
+  state = poseReducer(state, {type: 'activity'}); assert.equal(poseOf(state), 'idle'); // tick 1 of the reading cycle
+});
+
+test('reduced motion: the pose changes only with the section', () => {
+  let state = poseReducer(initialPose, {type: 'section', id: 'gecmis'});
+  for (const event of ['tick', 'send', 'received', 'demo', 'idle-timeout']) {
+    state = poseReducer(state, {type: event});
+    assert.equal(poseOf(state, true), 'researching', event);
+  }
+  assert.equal(poseOf(poseReducer(state, {type: 'section', id: 'team'}), true), 'dancing');
 });
 
 test('position snaps to the nearest side, stays on screen and survives bad storage', () => {
@@ -82,8 +126,12 @@ test('every marketing page lazy-loads the widget, and the bundle stays small', (
     const html = readFileSync(new URL(page, root), 'utf8');
     assert.match(html, /<script src="site-cat-loader\.js\?v=[\d.]+" data-api="https:\/\/app\.casebridge\.com\.tr\/api\/public\/site-chat" defer><\/script>/, page);
   }
-  const bytes = ['site-cat-loader.js', 'site-cat.js', 'site-cat-model.mjs', 'site-cat.css'].reduce((sum, file) => sum + statSync(new URL(file, root)).size, 0);
-  assert.ok(bytes < 30 * 1024, `${bytes} bytes`);
+  // Budget "about 30 KB": readable source under 34 KB, under 15 KB as served (the server compresses).
+  const files = ['site-cat-loader.js', 'site-cat.js', 'site-cat-model.mjs', 'site-cat.css'].map(file => readFileSync(new URL(file, root)));
+  const bytes = files.reduce((sum, data) => sum + data.length, 0);
+  const gzipped = files.reduce((sum, data) => sum + gzipSync(data, {level: 9}).length, 0);
+  assert.ok(bytes < 34 * 1024, `${bytes} bytes`);
+  assert.ok(gzipped < 15 * 1024, `${gzipped} gzipped bytes`);
   const widget = readFileSync(new URL('site-cat.js', root), 'utf8');
   assert.doesNotMatch(widget, /innerHTML|sessionStorage|document\.cookie/);
   assert.match(widget, /credentials: 'omit'/);

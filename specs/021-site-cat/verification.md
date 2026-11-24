@@ -11,3 +11,8 @@
 # Production — 24 Nov 2026
 - Application v.0.51 (main aad6428) live via stage/activate/verify after an online backup with a verified restore rehearsal; health ok. `/public/site-chat`: CORS for casebridge.com.tr/www (204, no credentials), other origins 403, legal-advice refusal without a model call — all verified in production. Model answers return 503 `unavailable` because OpenAI rejects the platform key (401); a secret, not code.
 - Marketing v.0.66 published only the loader (release tool `marketing_files` follows HTML/CSS links), so the widget 404'd; marketing rolled back to v.0.65 (`rollback 3cda090`, marketing scope). Fix (v.0.67, FR-014): `scripts/tests/test_site_cat.py::SiteCatAcceptance.test_release_tool_publishes_every_widget_file` passes; widget suites and the Playwright browser check pass again.
+
+# Follow-up — 24 Nov 2026 (branch fix/site-cat-release-files, marketing v.0.68, application v.0.52)
+- Widget: `node --test` passes, including the new section-pose, fixed-alternation, priority and reduced-motion tests. `scripts/tests/test_site_cat.py` passes 4 tests with all 20 pose images in the release tool's selection. The Playwright browser check passes: section poses while scrolling, two-image crossfade, idle after an answer, victory once on the page's demo link, and reduced motion holding the section pose. Screenshots refreshed in `artifacts/site-cat/`.
+- Backend: `test_site_chat.py` 19 passed (3 new borderline tests).
+- Spec checks: `check-specs.py` 24 features validated; `check-spec-changes.py --run` (base aad6428) 31 behavior files linked, 7 named tests run, exit 0.

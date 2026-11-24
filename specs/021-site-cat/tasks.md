@@ -8,5 +8,7 @@
 - [x] T007 Widget tests (node:test + unittest wrapper) and Playwright browser check with screenshots (FR-010 through FR-012).
 - [x] T008 Marketing v.0.66 and application v.0.51; spec checks; docs/site-cat-report.md (FR-013).
 - [x] T011 Release fix: the widget files were not published by v.0.66 (release tool follows HTML/CSS links); prefetch links + CSS url list + regression test; marketing v.0.67 (FR-014).
+- [x] T012 Section-driven poses with fixed 10 s alternation, panel/visitor priorities, 300 ms crossfade, preload and reduced-motion rule; unit and browser tests (FR-011).
+- [x] T013 Topic-rule pointer and three borderline tests (UYAP unknown, divorce refused as legal advice, weather refused); marketing v.0.68, application v.0.52 (FR-015).
 - [ ] T009 Fill the knowledge-file TODOs, confirm the marketing CSP and test with the real platform key on staging (owner).
 - [ ] T010 Release and public verification (not part of this branch).

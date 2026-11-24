@@ -3,20 +3,32 @@
   "changes": [
     {
       "files": [
+        "web-page/assets/site-cat/cat-courtroom@128.webp",
+        "web-page/assets/site-cat/cat-courtroom@256.webp",
+        "web-page/assets/site-cat/cat-reading@128.webp",
+        "web-page/assets/site-cat/cat-reading@256.webp",
+        "web-page/assets/site-cat/cat-researching@128.webp",
+        "web-page/assets/site-cat/cat-researching@256.webp",
+        "web-page/assets/site-cat/cat-tea-break@128.webp",
+        "web-page/assets/site-cat/cat-tea-break@256.webp",
+        "web-page/assets/site-cat/cat-working@128.webp",
+        "web-page/assets/site-cat/cat-working@256.webp",
+        "web-page/gorsel-kaynaklari.html",
         "web-page/index.html",
+        "web-page/investors.html",
         "web-page/olasilik-agaci.html",
+        "web-page/site-cat-loader.js",
+        "web-page/site-cat-model.mjs",
+        "web-page/site-cat.css",
+        "web-page/site-cat.js",
         "web-page/team.html",
         "web-page/timeline.html",
-        "web-page/investors.html",
-        "web-page/gorsel-kaynaklari.html",
-        "web-page/site-cat-loader.js",
-        "web-page/site-cat.js",
-        "web-page/site-cat.css",
         "web-page/website-version.json"
       ],
       "requirements": [
-        "specs/021-site-cat/spec.md#FR-014",
-        "specs/021-site-cat/spec.md#FR-010"
+        "specs/021-site-cat/spec.md#FR-010",
+        "specs/021-site-cat/spec.md#FR-011",
+        "specs/021-site-cat/spec.md#FR-014"
       ],
       "acceptance_tests": [
         "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_release_tool_publishes_every_widget_file",
@@ -24,6 +36,42 @@
         "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_logic_suite_passes"
       ],
       "reason": "Production 24 Nov 2026: v.0.66 published only the loader; make every widget file reachable for the release tool (marketing v.0.67)."
+    },
+    {
+      "files": [
+        "backend/app/site_chat/provider.py",
+        "backend/app/site_chat/service.py",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-015",
+        "specs/021-site-cat/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_site_chat.py::test_borderline_integration_question_is_answered_as_unknown_with_the_demo_link",
+        "backend/tests/api/test_site_chat.py::test_borderline_personal_legal_matter_is_refused_as_legal_advice",
+        "backend/tests/api/test_site_chat.py::test_borderline_off_topic_question_is_refused_with_a_pointer_to_casebridge_topics",
+        "backend/tests/api/test_site_chat.py::test_off_topic_and_unknown_questions_get_the_demo_link"
+      ],
+      "reason": "Follow-up 24 Nov 2026: off-topic/unknown answers point to CaseBridge topics; borderline tests; application v.0.52."
+    },
+    {
+      "files": [
+        "artifacts/site-cat/desktop-answer.png",
+        "artifacts/site-cat/desktop-busy.png",
+        "artifacts/site-cat/desktop-chips.png",
+        "artifacts/site-cat/desktop-dancing-left.png",
+        "artifacts/site-cat/desktop-english.png",
+        "artifacts/site-cat/desktop-victory-left.png",
+        "artifacts/site-cat/mobile-closed.png"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-011"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_logic_suite_passes"
+      ],
+      "reason": "Browser-check screenshots refreshed for the section-driven poses (v.0.68). The old dancing screenshot is replaced by desktop-victory-left.png."
     }
   ]
 }
