@@ -41,6 +41,7 @@ def _persist(
     usage: dict | None,
     latency_ms: float,
     truncated: bool | None = None,
+    sources: list[dict] | None = None,
 ) -> dict | None:
     db = session_factory()
     try:
@@ -51,6 +52,7 @@ def _persist(
         message.status = status
         message.latency_ms = latency_ms
         message.truncated = truncated
+        message.sources = sources
         if usage:
             message.prompt_tokens = usage.get("prompt_tokens")
             message.completion_tokens = usage.get("completion_tokens")
@@ -93,6 +95,17 @@ async def stream_assistant_reply(
     status = ChatMessageStatus.STOPPED
     started = time.monotonic()
     sources: list[dict] = []
+    # Saved on the answer: None without data tools, else the links (possibly none).
+    persisted_sources: list[dict] | None = None
+
+    def _usage() -> dict | None:
+        """The answer's tokens plus any tool-planning tokens (they count against the AI budget)."""
+        usage = provider.last_usage
+        plan = tool_runner.plan_usage if tool_runner is not None else None
+        if not plan or not any(plan.values()):
+            return usage
+        return {key: (usage or {}).get(key, 0) + plan[key] for key in ("prompt_tokens", "completion_tokens")}
+
     try:
         yield sse(start_event)
         if tool_runner is not None:
@@ -100,6 +113,7 @@ async def stream_assistant_reply(
                 yield sse(event)
             history = tool_runner.final_history(history)
             sources = [source.as_dict() for source in tool_runner.sources]
+            persisted_sources = sources if tool_runner.allowed else None
             if tool_runner.calls:
                 yield sse({"type": "sources", "sources": sources})
         try:
@@ -109,7 +123,7 @@ async def stream_assistant_reply(
         except AIProviderError as exc:
             saved = _try_persist(
                 session_factory, assistant_message_id, conversation_id, "".join(parts),
-                ChatMessageStatus.ERROR, provider.last_usage, (time.monotonic() - started) * 1000,
+                ChatMessageStatus.ERROR, _usage(), (time.monotonic() - started) * 1000, sources=persisted_sources,
             )
             if saved is _FAILED:
                 yield sse({"type": "error", "message": PERSIST_FAILED_MESSAGE})
@@ -128,7 +142,7 @@ async def stream_assistant_reply(
         if truncated and not content.strip():
             saved = _try_persist(
                 session_factory, assistant_message_id, conversation_id, content,
-                ChatMessageStatus.ERROR, provider.last_usage, (time.monotonic() - started) * 1000,
+                ChatMessageStatus.ERROR, _usage(), (time.monotonic() - started) * 1000, sources=persisted_sources,
             )
             if saved is not _FAILED:
                 status = ChatMessageStatus.ERROR
@@ -136,8 +150,8 @@ async def stream_assistant_reply(
             return
         saved = _try_persist(
             session_factory, assistant_message_id, conversation_id, content,
-            ChatMessageStatus.COMPLETE, provider.last_usage, (time.monotonic() - started) * 1000,
-            truncated=truncated,
+            ChatMessageStatus.COMPLETE, _usage(), (time.monotonic() - started) * 1000,
+            truncated=truncated, sources=persisted_sources,
         )
         if saved is _FAILED:
             yield sse({"type": "error", "message": PERSIST_FAILED_MESSAGE})
@@ -152,5 +166,5 @@ async def stream_assistant_reply(
         if status == ChatMessageStatus.STOPPED:
             _persist(
                 session_factory, assistant_message_id, conversation_id, "".join(parts), status,
-                provider.last_usage, (time.monotonic() - started) * 1000,
+                _usage(), (time.monotonic() - started) * 1000, sources=persisted_sources,
             )

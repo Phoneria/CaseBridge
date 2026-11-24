@@ -103,6 +103,8 @@ class ChatToolRunner:
         self.results: list[dict] = []
         self.sources: list[Source] = []
         self.allowed = True
+        #: Tokens of the planning requests, added to the answer's usage (AI budget).
+        self.plan_usage = {"prompt_tokens": 0, "completion_tokens": 0}
 
     # ---------- prompts ----------
 
@@ -201,6 +203,10 @@ class ChatToolRunner:
                 except AIProviderError:
                     logger.warning("Chat tool planning failed; answering without data")
                     break
+                finally:
+                    usage = getattr(self.provider, "last_plan_usage", None) or {}
+                    for key in self.plan_usage:
+                        self.plan_usage[key] += int(usage.get(key) or 0)
                 planned = [call for call in planned if isinstance(call, ToolCall)][:remaining]
                 if not planned:
                     break

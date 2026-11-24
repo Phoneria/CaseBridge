@@ -44,6 +44,7 @@ class OpenAIChatProvider(ChatProvider):
         return self._client
 
     def plan_tool_calls(self, messages: list[ChatTurn], tools: list[dict]) -> list[ToolCall]:
+        self.last_plan_usage = None
         try:
             response = self._ensure_client().chat.completions.create(
                 model=self.model,
@@ -57,6 +58,10 @@ class OpenAIChatProvider(ChatProvider):
         except Exception as exc:
             logger.warning("OpenAI tool planning failed (%s)", type(exc).__name__)
             raise AIProviderError("AI sağlayıcısı bir hata döndürdü. Lütfen tekrar deneyin.") from exc
+        usage = getattr(response, "usage", None)
+        self.last_plan_usage = (
+            {"prompt_tokens": usage.prompt_tokens, "completion_tokens": usage.completion_tokens} if usage is not None else None
+        )
         calls: list[ToolCall] = []
         for choice in response.choices[:1]:
             for call in getattr(choice.message, "tool_calls", None) or []:

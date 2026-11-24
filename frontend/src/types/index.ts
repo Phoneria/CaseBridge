@@ -710,6 +710,8 @@ export interface ChatMessage {
   /** True when a complete reply was cut off by the level's length limit. */
   truncated?: boolean | null;
   feedback: ChatFeedbackValue | null;
+  /** Answers given with the CaseBridge AI data tools: the records they used. */
+  sources?: ChatSource[] | null;
   created_at: string;
 }
 

@@ -16,6 +16,7 @@ const streamChatMessage = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/chatStream", () => ({ streamChatMessage }));
 
 import { AiMascot } from "@/components/mascot/AiMascot";
+import { ChatThread } from "@/components/ai/chat/ChatThread";
 import { canUseAiAssistant } from "@/components/AppShell";
 import { MASCOT_EMPTY_TITLE, MASCOT_NOT_CONFIGURED } from "@/components/mascot/MascotChatPanel";
 import { announceCaseViewed, POSITION_STORAGE_KEY, SLEEP_AFTER_MS } from "@/lib/mascot";
@@ -265,5 +266,27 @@ describe("AiMascot widget", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("shows the saved source chips when a conversation is reopened, in the panel and the full chat page", async () => {
+    const user = userEvent.setup();
+    window.sessionStorage.setItem("cb.mascot.conversation", "conv-9");
+    const saved = [
+      { id: "q1", role: "user", content: "Açık görevlerim neler?", status: null, model: null, feedback: null, created_at: "" },
+      { id: "a1", role: "assistant", content: "İki görev var.", status: "complete", model: "mock", feedback: null, created_at: "", sources: SOURCES },
+      { id: "q2", role: "user", content: "Teşekkürler", status: null, model: null, feedback: null, created_at: "" },
+      { id: "a2", role: "assistant", content: "Rica ederim.", status: "complete", model: "mock", feedback: null, created_at: "", sources: null },
+    ];
+    api.getChatConversation.mockResolvedValue({ id: "conv-9", title: "x", updated_at: "", messages: saved });
+    const { unmount } = render(<AiMascot random={() => 1} />);
+    await user.click(cat());
+    const chips = await screen.findByRole("list", { name: "Kaynaklar" });
+    expect(api.getChatConversation).toHaveBeenCalledWith("conv-9");
+    expect(within(chips).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(["/davalar/c1", "/davalar/c1?sekme=belgeler&belge=d1"]);
+    expect(screen.getAllByRole("list", { name: "Kaynaklar" })).toHaveLength(1); // the plain answer has none
+    unmount();
+
+    render(<ChatThread messages={saved as never} loading={false} streaming={false} examplesDisabled={false} onFeedback={() => {}} onExample={() => {}} />);
+    expect(within(screen.getByRole("list", { name: "Kaynaklar" })).getByRole("link", { name: /Kira Uyuşmazlığı/ })).toHaveAttribute("href", "/davalar/c1");
   });
 });

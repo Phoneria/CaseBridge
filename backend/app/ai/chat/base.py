@@ -39,6 +39,8 @@ class ChatProvider(ABC):
     #: Why the last stream ended ("stop", "length", ...), when reported. Reset
     #: at stream start; "length" means the reply hit the max_tokens cap.
     last_finish_reason: Optional[str] = None
+    #: {"prompt_tokens", "completion_tokens"} of the last plan_tool_calls, when reported.
+    last_plan_usage: Optional[dict] = None
 
     @abstractmethod
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:

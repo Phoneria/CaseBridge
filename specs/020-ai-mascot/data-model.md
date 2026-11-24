@@ -1,6 +1,6 @@
 # Data model
 ## FeatureContract
-No table or column changes.
+One column: `chat_messages.sources` JSON NULL (migration `a7c3e9d1f2b4`). NULL = answered without data tools; list of `ChatSource` (possibly empty) = answered in data-tools mode. `ChatMessageOut.sources` returns it. Export query flag `include_data_tool_answers` (default false).
 
 Request `ChatMessageCreate` adds `data_tools: bool = false` and `context: {route: str ≤200, case_id: str ≤36 [A-Za-z0-9-]} | null`.
 

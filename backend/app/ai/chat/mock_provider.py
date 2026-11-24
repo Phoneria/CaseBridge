@@ -102,6 +102,7 @@ class MockChatProvider(ChatProvider):
 
     def plan_tool_calls(self, messages: list[ChatTurn], tools: list[dict]) -> list[ToolCall]:
         self.plan_calls.append(list(messages))
+        self.last_plan_usage = {"prompt_tokens": 7, "completion_tokens": 3}
         if self._plans is not None:
             return self._plans.pop(0) if self._plans else []
         return mock_tool_plan(messages)

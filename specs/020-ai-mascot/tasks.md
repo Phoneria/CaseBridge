@@ -7,4 +7,6 @@
 - [x] T006 Mode state machine, widget, panel, AppShell mount, case outcome announcement; WebP assets (FR-001, FR-002, FR-003, FR-012).
 - [x] T007 Frontend tests: drag and snap, saved position, storage failure, open/close/Esc/shortcut, hide, modes, sources, empty/not-configured/error states.
 - [x] T008 Validation: full pytest, tsc, Vitest, next build, browser check with screenshots in artifacts/ai-mascot/ (verification.md); docs/ai-mascot-report.md.
+- [x] T010 Save sources with the answer and show them on reopened chats; exclude data-tool answers and their questions from the training export by default; tests (FR-013, FR-014).
+- [x] T011 Full backend suite on a throwaway PostgreSQL 16; migration up/down/up on PostgreSQL (verification.md).
 - [ ] T009 Standard application release and public verification (not part of this branch).

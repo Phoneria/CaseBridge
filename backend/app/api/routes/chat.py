@@ -167,13 +167,14 @@ def set_feedback(
 def export_training_data(
     model: Optional[str] = None,
     level: Optional[ChatLevel] = None,
+    include_data_tool_answers: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return PlainTextResponse(
-        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level),
+        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level, include_data_tool_answers),
         media_type="application/jsonl; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )

@@ -14,6 +14,13 @@ class ChatStatusOut(BaseModel):
     error: Optional[str] = None
 
 
+class ChatSourceOut(BaseModel):
+    kind: str
+    id: str
+    label: str
+    href: str
+
+
 class ChatMessageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
@@ -25,6 +32,8 @@ class ChatMessageOut(BaseModel):
     level: Optional[str] = None
     truncated: Optional[bool] = None
     feedback: Optional[int] = None
+    #: Present only for answers that ran with the data tools.
+    sources: Optional[list[ChatSourceOut]] = None
     created_at: datetime
 
 

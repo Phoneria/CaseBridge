@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 
+import { SourceChips } from "@/components/ai/chat/SourceChips";
 import { createChatConversation, getChatConversation, getChatStatus } from "@/lib/api";
 import { streamChatMessage } from "@/lib/chatStream";
 import { safeStorage, type MascotEvent } from "@/lib/mascot";
@@ -13,14 +14,6 @@ export const MASCOT_CONVERSATION_KEY = "cb.mascot.conversation";
 export const MASCOT_EMPTY_TITLE = "Büronuzun kayıtları hakkında sorun.";
 export const MASCOT_NOT_CONFIGURED = "CaseBridge AI bağlantısı henüz yapılandırılmamış.";
 const SEND_FAILED = "Mesaj gönderilemedi. Lütfen tekrar deneyin.";
-
-const SOURCE_ICONS: Record<ChatSource["kind"], string> = {
-  case: "⚖",
-  document: "📄",
-  precedent: "📚",
-  client: "👤",
-  calendar: "📅",
-};
 
 const TOOL_LABELS: Record<string, string> = {
   search_cases: "Davalar aranıyor",
@@ -49,27 +42,12 @@ function suggestions(caseId: string | null): string[] {
 }
 
 function fromServer(message: ChatMessage): PanelMessage {
-  return { id: message.id, role: message.role === "user" ? "user" : "assistant", content: message.content };
-}
-
-export function SourceChips({ sources, onNavigate }: { sources: ChatSource[]; onNavigate?: () => void }) {
-  if (sources.length === 0) return null;
-  return (
-    <ul aria-label="Kaynaklar" className="mt-2 flex flex-wrap gap-1.5">
-      {sources.map((source) => (
-        <li key={`${source.kind}:${source.id}`} className="max-w-full">
-          <Link
-            href={source.href}
-            onClick={onNavigate}
-            className="inline-flex max-w-full items-center gap-1 rounded-full border border-accent-200 bg-accent-50 px-2.5 py-1 text-xs font-medium text-accent-800 hover:bg-accent-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-          >
-            <span aria-hidden="true">{SOURCE_ICONS[source.kind] ?? "•"}</span>
-            <span className="truncate">{source.label}</span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  return {
+    id: message.id,
+    role: message.role === "user" ? "user" : "assistant",
+    content: message.content,
+    sources: message.sources ?? undefined,
+  };
 }
 
 export function MascotChatPanel({

@@ -41,7 +41,8 @@
         "specs/020-ai-mascot/spec.md#FR-008",
         "specs/020-ai-mascot/spec.md#FR-009",
         "specs/020-ai-mascot/spec.md#FR-010",
-        "specs/020-ai-mascot/spec.md#FR-011"
+        "specs/020-ai-mascot/spec.md#FR-011",
+        "specs/020-ai-mascot/spec.md#FR-013"
       ],
       "acceptance_tests": [
         "backend/tests/api/test_chat_data_tools.py::test_mock_answer_uses_tools_streams_sources_and_writes_audit",
@@ -51,7 +52,9 @@
         "backend/tests/api/test_chat_data_tools.py::test_prompt_injection_in_a_document_triggers_no_extra_tool_calls",
         "backend/tests/api/test_chat_data_tools.py::test_mock_planner_reads_only_the_users_own_words",
         "backend/tests/api/test_chat_data_tools.py::test_openai_planner_parses_tool_calls_and_offers_function_tools",
-        "backend/tests/api/test_chat_data_tools.py::test_claude_planner_parses_tool_use_blocks"
+        "backend/tests/api/test_chat_data_tools.py::test_claude_planner_parses_tool_use_blocks",
+        "backend/tests/api/test_chat_data_tools.py::test_sources_are_saved_with_the_answer_and_returned_when_the_chat_is_reopened",
+        "backend/tests/api/test_chat_data_tools.py::test_tool_planning_tokens_count_against_the_ai_budget"
       ],
       "reason": "CaseBridge AI stage 2: tool planning on the existing chat providers, runner with call cap, injection stop, sources and audit rows inside the existing chat stream."
     },
@@ -95,7 +98,8 @@
         "specs/020-ai-mascot/spec.md#FR-003",
         "specs/020-ai-mascot/spec.md#FR-004",
         "specs/020-ai-mascot/spec.md#FR-009",
-        "specs/020-ai-mascot/spec.md#FR-012"
+        "specs/020-ai-mascot/spec.md#FR-012",
+        "specs/020-ai-mascot/spec.md#FR-013"
       ],
       "acceptance_tests": [
         "frontend/src/components/__tests__/AiMascot.test.tsx::is offered only to users who may use CaseBridge AI",
@@ -113,7 +117,8 @@
         "frontend/src/lib/__tests__/mascot.test.ts::uses page poses, with chat activity and victory taking priority",
         "frontend/src/lib/__tests__/mascot.test.ts::plays a rare idle variant at most once every ten minutes",
         "frontend/src/lib/__tests__/mascot.test.ts::snaps to the nearest side and stays inside the viewport",
-        "frontend/src/lib/__tests__/api.test.ts::asks for data tools and sends the page context only when the assistant opts in"
+        "frontend/src/lib/__tests__/api.test.ts::asks for data tools and sends the page context only when the assistant opts in",
+        "frontend/src/components/__tests__/AiMascot.test.tsx::shows the saved source chips when a conversation is reopened, in the panel and the full chat page"
       ],
       "reason": "CaseBridge AI stage 1: floating cat widget, mode state machine and chat panel on the existing chat API; application v.0.50."
     },
@@ -139,6 +144,35 @@
         "frontend/src/components/__tests__/AiMascot.test.tsx::changes pose while a question is answered with data tools and shows source chips"
       ],
       "reason": "Browser-check screenshots (light, dark, mobile) for the CaseBridge AI cat and panel."
+    },
+    {
+      "files": [
+        "backend/alembic/versions/a7c3e9d1f2b4_chat_message_sources.py",
+        "backend/app/models/chat.py",
+        "backend/app/services/chat_service.py"
+      ],
+      "requirements": [
+        "specs/020-ai-mascot/spec.md#FR-013",
+        "specs/020-ai-mascot/spec.md#FR-014"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_chat_data_tools.py::test_sources_are_saved_with_the_answer_and_returned_when_the_chat_is_reopened",
+        "backend/tests/api/test_chat_data_tools.py::test_data_tool_answers_and_their_questions_are_left_out_of_the_training_export"
+      ],
+      "reason": "Follow-up request 24 Nov 2026: persist answer sources and keep data-tool answers out of the training export by default."
+    },
+    {
+      "files": [
+        "frontend/src/components/ai/chat/SourceChips.tsx",
+        "frontend/src/components/ai/chat/ChatThread.tsx"
+      ],
+      "requirements": [
+        "specs/020-ai-mascot/spec.md#FR-013"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/AiMascot.test.tsx::shows the saved source chips when a conversation is reopened, in the panel and the full chat page"
+      ],
+      "reason": "Saved source chips on reopened conversations in the panel and the full chat page."
     }
   ]
 }

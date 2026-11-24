@@ -321,12 +321,13 @@ def test_openai_planner_parses_tool_calls_and_offers_function_tools():
             seen.update(kwargs)
             calls = [_Obj(function=_Obj(name="get_case", arguments='{"case_id": "c-1"}')),
                      _Obj(function=_Obj(name="search_cases", arguments="not json"))]
-            return _Obj(choices=[_Obj(message=_Obj(tool_calls=calls))])
+            return _Obj(choices=[_Obj(message=_Obj(tool_calls=calls))], usage=_Obj(prompt_tokens=120, completion_tokens=9))
 
     provider = OpenAIChatProvider(api_key="sk-test", model="gpt-test", client=_Obj(chat=_Obj(completions=Completions())))
     plan = provider.plan_tool_calls([{"role": "user", "content": "x"}], tools.tool_schemas())
     assert plan == [ToolCall("get_case", {"case_id": "c-1"}), ToolCall("search_cases", {})]
     assert seen["tool_choice"] == "auto" and "stream" not in seen
+    assert provider.last_plan_usage == {"prompt_tokens": 120, "completion_tokens": 9}
     assert {tool["function"]["name"] for tool in seen["tools"]} == set(TOOLS)
 
 
@@ -338,10 +339,83 @@ def test_claude_planner_parses_tool_use_blocks():
 
     def create(**kwargs):
         seen.update(kwargs)
-        return _Obj(content=[_Obj(type="text", text="..."), _Obj(type="tool_use", name="get_tasks", input={"status": "pending"})])
+        return _Obj(content=[_Obj(type="text", text="..."), _Obj(type="tool_use", name="get_tasks", input={"status": "pending"})],
+                    usage=_Obj(input_tokens=80, output_tokens=6))
 
     provider.client = _Obj(messages=_Obj(create=create))
     plan = provider.plan_tool_calls([{"role": "system", "content": "S"}, {"role": "user", "content": "x"}], tools.tool_schemas())
     assert plan == [ToolCall("get_tasks", {"status": "pending"})]
+    assert provider.last_plan_usage == {"prompt_tokens": 80, "completion_tokens": 6}
     assert seen["system"] == "S" and seen["messages"] == [{"role": "user", "content": "x"}]
     assert {tool["name"] for tool in seen["tools"]} == set(TOOLS)
+
+
+# ---------- persistence and the training export ----------
+
+def _send_in(client, headers, conversation_id, content, **extra):
+    body = {"content": content, **extra}
+    with client.stream("POST", f"/chat/conversations/{conversation_id}/messages", json=body, headers=headers) as response:
+        assert response.status_code == 200
+        raw = "".join(response.iter_text())
+    return [json.loads(block[len("data: "):]) for block in raw.strip().split("\n\n")]
+
+
+def test_sources_are_saved_with_the_answer_and_returned_when_the_chat_is_reopened(client, db_session, firms, chat_with):
+    chat_with(MockChatProvider())
+    headers = _headers(client, firms["user_a"].email)
+    case_id = firms["case_a"].id
+    conversation = client.post("/chat/conversations", headers=headers).json()["id"]
+    streamed = _send_in(client, headers, conversation, "Bu davanın duruşmaları?", data_tools=True,
+                        context={"route": f"/davalar/{case_id}", "case_id": case_id})[-1]
+    _send_in(client, headers, conversation, "Kira artışı nasıl hesaplanır?")
+
+    messages = client.get(f"/chat/conversations/{conversation}", headers=headers).json()["messages"]
+    tool_answer, plain_answer = [m for m in messages if m["role"] == "assistant"]
+    assert tool_answer["sources"] == streamed["sources"] == streamed["message"]["sources"]
+    assert tool_answer["sources"][0]["href"] == f"/davalar/{case_id}"
+    assert plain_answer["sources"] is None
+    assert all(m["sources"] is None for m in messages if m["role"] == "user")
+
+
+def test_data_tool_answers_and_their_questions_are_left_out_of_the_training_export(client, db_session, firms, chat_with):
+    from app.models.user import UserRole
+
+    firms["user_a"].role = UserRole.ADMIN
+    db_session.commit()
+    chat_with(MockChatProvider())
+    headers = _headers(client, firms["user_a"].email)
+    conversation = client.post("/chat/conversations", headers=headers).json()["id"]
+    tool_answer = _send_in(client, headers, conversation, "Açık görevlerim neler?", data_tools=True)[-1]["message"]
+    plain_answer = _send_in(client, headers, conversation, "Kira artışı nasıl hesaplanır?")[-1]["message"]
+    for answer in (tool_answer, plain_answer):
+        assert client.put(f"/chat/messages/{answer['id']}/feedback", json={"value": 1}, headers=headers).status_code == 200
+
+    lines = [json.loads(line) for line in client.get("/chat/export.jsonl", headers=headers).text.splitlines()]
+    assert len(lines) == 1
+    turns = lines[0]["messages"]
+    assert [t["role"] for t in turns] == ["system", "user", "assistant"]
+    assert turns[1]["content"] == "Kira artışı nasıl hesaplanır?"
+    assert turns[2]["content"] == plain_answer["content"]
+    exported = json.dumps(lines, ensure_ascii=False)
+    assert "Açık görevlerim" not in exported and tool_answer["content"] not in exported
+
+    opted_in = client.get("/chat/export.jsonl?include_data_tool_answers=true", headers=headers).text.splitlines()
+    assert len(opted_in) == 2
+
+
+def test_tool_planning_tokens_count_against_the_ai_budget(client, db_session, firms, chat_with):
+    provider = chat_with(MockChatProvider())
+    headers = _headers(client, firms["user_a"].email)
+    conversation = client.post("/chat/conversations", headers=headers).json()["id"]
+    tool_answer = _send_in(client, headers, conversation, "Açık görevlerim neler?", data_tools=True)[-1]["message"]
+    planning_requests = len(provider.plan_calls)
+    assert planning_requests == 2  # one round with calls, then an empty second round
+    _send_in(client, headers, conversation, "Merhaba")
+
+    from app.models.chat import ChatMessage
+
+    rows = {m.id: m for m in db_session.query(ChatMessage).filter(ChatMessage.conversation_id == conversation).all()}
+    assert rows[tool_answer["id"]].prompt_tokens == 7 * planning_requests
+    assert rows[tool_answer["id"]].completion_tokens == 3 * planning_requests + 4  # planning + the 4 answer chunks
+    plain = [m for m in rows.values() if m.role.value == "assistant" and m.id != tool_answer["id"]][0]
+    assert plain.prompt_tokens == 0  # no planning without data tools

@@ -117,9 +117,20 @@ class ChatService:
         self.repo.save(message)
         return message
 
-    def export_jsonl(self, law_firm_id: str, model: Optional[str] = None, level: Optional[str] = None) -> str:
+    def export_jsonl(
+        self,
+        law_firm_id: str,
+        model: Optional[str] = None,
+        level: Optional[str] = None,
+        include_data_tool_answers: bool = False,
+    ) -> str:
         """One OpenAI chat fine-tuning example per liked, complete, untruncated assistant
-        message: system prompt + the conversation up to and including it."""
+        message: system prompt + the conversation up to and including it.
+
+        Answers that ran with the CaseBridge AI data tools (sources is not NULL)
+        are left out by default, as examples and as context turns together with
+        the question they answer: they were written from bureau records that
+        the exported prompt would not contain."""
         query = self.db.query(ChatMessage).filter(
             ChatMessage.law_firm_id == law_firm_id,
             ChatMessage.role == ChatRole.ASSISTANT,
@@ -127,6 +138,8 @@ class ChatService:
             ChatMessage.feedback == 1,
             or_(ChatMessage.truncated.is_(None), ChatMessage.truncated.is_(False)),  # cut-off replies aren't examples
         )
+        if not include_data_tool_answers:
+            query = query.filter(ChatMessage.sources.is_(None))
         if model:
             query = query.filter(ChatMessage.model == model)
         if level == "standard":
@@ -142,6 +155,8 @@ class ChatService:
             for message in self.repo.list_messages(target.conversation_id):
                 if message.role == ChatRole.USER:
                     pending_user = message  # a newer user turn supersedes an unanswered one
+                elif message.sources is not None and not include_data_tool_answers and message.id != target.id:
+                    pending_user = None  # a data-tool answer and its question stay out
                 elif message.status == ChatMessageStatus.COMPLETE and pending_user is not None:
                     turns.append({"role": "user", "content": pending_user.content})
                     turns.append({"role": "assistant", "content": message.content})

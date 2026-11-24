@@ -30,6 +30,7 @@ class ClaudeChatProvider(ChatProvider):
             raise AIProviderError("Claude yanıtı alınamadı.") from None
 
     def plan_tool_calls(self, messages, tools):
+        self.last_plan_usage = None
         system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
         try:
             response = self.client.messages.create(
@@ -41,6 +42,9 @@ class ClaudeChatProvider(ChatProvider):
             raise AIProviderTimeoutError("Claude yanıt süresini aştı.") from None
         except anthropic.AnthropicError:
             raise AIProviderError("Claude yanıtı alınamadı.") from None
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            self.last_plan_usage = {"prompt_tokens": usage.input_tokens, "completion_tokens": usage.output_tokens}
         return [
             ToolCall(block.name, block.input if isinstance(block.input, dict) else {})
             for block in response.content if getattr(block, "type", None) == "tool_use"

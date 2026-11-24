@@ -4,3 +4,5 @@
 - No planning request ever contains document text; document snippets reach the answer wrapped in `<belge_metni>`.
 - Every tool call writes one `ai.tool_used` audit row with ids only.
 - UI: cat bottom right on workspace pages for users with the AI menu; drag snaps left/right and persists; click or ⌘J/Ctrl+J opens the panel; Esc/– closes; "Kediyi gizle" hides; source chips link to app pages; modes per FR-003.
+- Assistant messages carry `sources` (null without data tools); `GET /chat/conversations/{id}` returns them and both the panel and the full chat page render them as chips.
+- `GET /chat/export.jsonl` omits data-tool answers and their questions unless `include_data_tool_answers=true`.

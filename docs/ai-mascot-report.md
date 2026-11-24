@@ -1,6 +1,6 @@
 # CaseBridge AI floating cat and firm-scoped data chat — stages 1 and 2
 
-Branch `feat/ai-mascot` (from main 015493b), application **v.0.50**, not pushed, not released. Spec: `specs/020-ai-mascot/`. Change record: `specs/changes/ai-mascot.json`.
+Branch `feat/ai-mascot` (from main 015493b), application **v.0.50**, not released. Spec: `specs/020-ai-mascot/`. Change record: `specs/changes/ai-mascot.json`.
 
 ## What was built
 
@@ -55,13 +55,16 @@ The firm and user always come from the session, never from tool arguments. Answe
 7. **Client contact details are excluded.** `search_clients` returns only names and case counts; phone, e-mail and address never reach a prompt.
 8. **Precedent rules.** Case, document, task and hearing tools reach only ordinary cases. Precedents are available only through `get_precedents`. A precedent id passed as a case returns "Dava bulunamadı".
 9. **Mock mode** (`CHAT_PROVIDER=mock`) plans from keywords. It reads only the user's message (and a quoted phrase as the search query) plus the open case, and runs one round. It answers "Büro kayıtlarınıza göre ilgili kayıtlar: …" with the source labels, so tests and demos are deterministic.
-10. **Persistence across pages.** Each page mounts its own `AppShell`, so the panel's open state and conversation id are kept in `sessionStorage` and survive navigation. An answer still streaming when the user navigates is stopped, and the existing stream code saves it as "stopped". Source chips are not stored on the message (that would need a migration). A reopened conversation shows its text but not its old chips.
+10. **Persistence across pages.** Each page mounts its own `AppShell`, so the panel's open state and conversation id are kept in `sessionStorage` and survive navigation. An answer still streaming when the user navigates is stopped, and the existing stream code saves it as "stopped".
 11. **Victory** shows once per case per tab session. The case page broadcasts `casebridge:case-viewed` with the outcome; the cat does not fetch the case itself.
 12. **Version.** Bumped to v.0.50 by `scripts/update-version.mjs`, because application behaviour changed.
+13. **Saved sources (follow-up).** Sources are saved on the answer in a new nullable JSON column, `chat_messages.sources` (migration `a7c3e9d1f2b4`, additive). NULL means the answer ran without data tools; a list, possibly empty, means it ran in data-tools mode. Reopened conversations show the chips in the panel and in the full chat page, via a shared `SourceChips` component.
+14. **Training export (follow-up).** `/chat/export.jsonl` leaves out every answer given in data-tools mode, together with the question it answers, both as an example and as a context turn in other examples. That includes data-tools turns where the model ended up calling no tool, because their system prompt also differs. An admin can opt back in with `include_data_tool_answers=true`; the default is off.
+15. **AI budget (found during the follow-up).** The bureau's AI budget sums `prompt_tokens` and `completion_tokens` on chat messages, and tool-planning requests were not counted. Providers now report planning usage (OpenAI `usage`, Claude `input_tokens`/`output_tokens`), the runner adds it up, and the answer is saved with the total.
 
 ## Validation
 
-Final figures are in `specs/020-ai-mascot/verification.md`.
+Final figures are in `specs/020-ai-mascot/verification.md`. After the follow-up: SQLite 1281 passed, 1 skipped, 1 xfailed. PostgreSQL 16: 1279 passed, 2 pre-existing failures (`test_demo_template_removal.py` runs a SQLite-only `PRAGMA` itself and fails the same way on main). Vitest 877 passed.
 
 **Backend**
 - The new `tests/api/test_chat_data_tools.py` covers:
@@ -112,8 +115,5 @@ Final figures are in `specs/020-ai-mascot/verification.md`.
 
 ## Limits and follow-ups
 
-- Source chips are not persisted. Showing them on reopened conversations would need a `sources` JSON column on `chat_messages`.
-- Answers that used tools are stored like any other assistant message. The admin fine-tuning export (`/chat/export.jsonl`) would pair them with the plain system prompt and without the tool results. Excluding them would need a marker column; until then, review liked answers before export.
 - Real-provider tool calling was tested with fake OpenAI and Claude clients only. No live key was used.
-- The full backend suite ran on SQLite only, not on PostgreSQL. The new tools add no new SQL; they reuse existing service queries.
 - Release (T009) was not performed.
