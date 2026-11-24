@@ -131,9 +131,9 @@ test("bureau finance, deadlines, review, scoped portal and mobile navigation", a
 
 test("platform filters, profile, subscription and support persist",async({page,request})=>{
   await login(page,DEMO_PLATFORM);
-  await page.getByLabel("Büro veya yönetici ara").fill("eşleşmeyen-sentetik-büro");
+  await page.getByLabel("Büro veya kullanıcı ara").fill("eşleşmeyen-sentetik-büro");
   await expect(page.getByText("Aramaya uygun büro bulunamadı.")).toBeVisible();
-  await page.getByLabel("Büro veya yönetici ara").fill("");
+  await page.getByLabel("Büro veya kullanıcı ara").fill("");
   await page.getByRole("link",{name:"Profili aç →"}).first().click();
   await expect(page.getByRole("heading",{name:"Kurulum adımları"})).toBeVisible();
   await page.getByRole("button",{name:"İletişim ve fatura",exact:true}).click();

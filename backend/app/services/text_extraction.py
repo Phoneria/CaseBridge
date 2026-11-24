@@ -29,6 +29,12 @@ def extract_text(file_type: DocumentType, raw_bytes: bytes) -> str | None:
             reader = PdfReader(io.BytesIO(raw_bytes))
             return "\n".join(page.extract_text() or "" for page in reader.pages)
 
+        if file_type == DocumentType.UDF:
+            from app.services.udf_reader import read_udf_text
+
+            text = read_udf_text(raw_bytes)
+            return text if text.strip() else None
+
     except Exception:
         logger.warning("Text extraction failed for a %s document", file_type.value)
         return None

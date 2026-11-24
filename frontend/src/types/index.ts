@@ -142,6 +142,8 @@ export interface CaseIntakeResult {
   draft: CaseIntakeDraft;
   truncated: boolean;
   source_chars: number;
+  /** Exactly the text the AI read (the first part of a long document). */
+  source_text: string;
 }
 
 export interface CaseEvent {
@@ -354,6 +356,8 @@ export interface PlatformAdmin {
   id: string;
   full_name: string;
   email: string;
+  /** "admin" or "lawyer"; absent in data from before v.0.54. */
+  role?: UserRole;
   status: UserStatus;
   invited_at: string | null;
 }
@@ -367,6 +371,8 @@ export interface PlatformFirm {
   suspended_at: string | null;
   active_user_count: number;
   admins: PlatformAdmin[];
+  /** The firm's own lawyers (never scoped client/expert users). */
+  lawyers?: PlatformAdmin[];
 }
 
 export interface PlatformFirmPayload {
@@ -385,6 +391,8 @@ export interface PlatformFirmCreated {
 export interface PlatformAdminPayload {
   full_name: string;
   email: string;
+  /** Defaults to "admin" on the server. */
+  role?: UserRole;
 }
 
 export interface PlatformAdminInvite {
@@ -463,7 +471,7 @@ export interface DocumentItem {
   id: string;
   case_id: string;
   filename: string;
-  file_type: "pdf" | "docx" | "txt";
+  file_type: "pdf" | "docx" | "txt" | "udf";
   extracted_text: string | null;
   uploaded_at: string;
 }

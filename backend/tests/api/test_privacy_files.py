@@ -129,3 +129,43 @@ def test_extract_real_session_scope(client, office, auth_headers, db_session, mo
     headers=auth_headers(office.lawyer_a2)
     db_session.add(WorkspaceAccess(user_id=office.lawyer_a2.id,law_firm_id=office.firm_a.id,position='client'));db_session.commit()
     assert client.post('/privacy/extract-text',content=b'text',headers=headers).status_code==403
+
+
+# --- UDF (UYAP Doküman Formatı) ---------------------------------------------
+
+def test_udf_extract_through_isolated_worker(client, reader_user):
+    from app.privacy.files import UDF_WARNING
+    from tests.udf_samples import make_udf
+
+    raw = make_udf("sentetik@example.test", header="ustbilgi@example.test", table=["tablo@example.test"])
+    response = upload(client, raw)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body['format'] == 'udf' and body['warnings'] == [UDF_WARNING]
+    assert all(s in body['text'] for s in ('sentetik@example.test', 'ustbilgi@example.test', 'tablo@example.test'))
+
+
+def test_odt_like_zip_is_not_treated_as_udf(client, reader_user):
+    from tests.udf_samples import odt_like_zip
+
+    response = upload(client, odt_like_zip())
+    assert response.status_code == 422
+    assert response.json()['detail'] == 'Bu ikili dosyadan metin çıkarılamadı. PDF, DOCX veya düz metin dosyası seçin.'
+
+
+def test_invalid_udf_returns_fixed_message(client, reader_user):
+    from app.services.udf_reader import INVALID_UDF
+    from tests.udf_samples import make_udf
+
+    xml = b'<?xml version="1.0"?><!DOCTYPE t [<!ENTITY a "gizli-icerik">]><template><content>&a;</content></template>'
+    response = upload(client, make_udf(content_xml=xml))
+    assert response.status_code == 422 and response.json()['detail'] == INVALID_UDF
+    assert 'gizli-icerik' not in response.text
+
+
+def test_udf_without_text_needs_ocr(client, reader_user):
+    from tests.udf_samples import make_udf
+
+    response = upload(client, make_udf("   "))
+    assert response.status_code == 422
+    assert response.json()['detail'].startswith('Belgede okunabilir metin bulunamadı.')

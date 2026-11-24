@@ -7,3 +7,4 @@ class CaseIntakeExtractOut(BaseModel):
     draft: CaseIntakeDraft
     truncated: bool
     source_chars: int
+    source_text: str

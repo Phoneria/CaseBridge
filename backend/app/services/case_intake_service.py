@@ -33,6 +33,7 @@ class CaseIntakeResult:
     draft: CaseIntakeDraft
     truncated: bool
     source_chars: int
+    source_text: str  # exactly what the model read
 
 
 class CaseIntakeService:
@@ -41,7 +42,8 @@ class CaseIntakeService:
 
     def extract(self, text: str) -> CaseIntakeResult:
         limit = settings.case_intake_max_chars
-        system_prompt, user_prompt = build_extraction_prompts(text[:limit])
+        read = text[:limit]
+        system_prompt, user_prompt = build_extraction_prompts(read)
         try:
             raw = provider_for(self.provider, "case_intake.extract").complete(
                 system_prompt=system_prompt, user_prompt=user_prompt, response_format="json_object"
@@ -58,7 +60,7 @@ class CaseIntakeService:
         except (AIProviderError, AIResponseValidationError) as exc:
             self._log(exc)
             raise CaseIntakeError(502, NOT_READ_MESSAGE) from exc
-        return CaseIntakeResult(draft=draft, truncated=len(text) > limit, source_chars=len(text))
+        return CaseIntakeResult(draft=draft, truncated=len(text) > limit, source_chars=len(text), source_text=read)
 
     @staticmethod
     def _log(exc: Exception) -> None:

@@ -12,7 +12,7 @@ from app.services.user_admin_service import UserAdminError, create_pending_user
 
 PLATFORM_FIRM_NAME = "CaseBridge Platform"
 FIRM_NOT_FOUND = "Büro bulunamadı."
-ADMIN_NOT_FOUND = "Yönetici bulunamadı."
+ADMIN_NOT_FOUND = "Kullanıcı bulunamadı."
 FIRM_NAME_TAKEN = "Bu adla bir büro zaten var."
 SUSPENDED_INVITE = "Askıdaki büroya davet gönderilemez."
 ALREADY_SET = "Kullanıcı şifresini zaten belirlemiş."
@@ -44,14 +44,31 @@ def firm_admins(firm: LawFirm) -> list[User]:
     return sorted((user for user in firm.users if user.role == UserRole.ADMIN), key=lambda u: (u.full_name, u.email))
 
 
+def _scoped_user_ids(db: Session, firm: LawFirm) -> set[str]:
+    """Client/expert users with case-scoped access: not the firm's lawyers."""
+    from app.models.management import WorkspaceAccess
+    rows = db.query(WorkspaceAccess.user_id).filter(
+        WorkspaceAccess.law_firm_id == firm.id, WorkspaceAccess.position != "lawyer",
+    ).all()
+    return {user_id for (user_id,) in rows}
+
+
+def firm_lawyers(db: Session, firm: LawFirm) -> list[User]:
+    scoped = _scoped_user_ids(db, firm)
+    return sorted(
+        (user for user in firm.users if user.role == UserRole.LAWYER and user.id not in scoped),
+        key=lambda u: (u.full_name, u.email),
+    )
+
+
 def _name_taken(db: Session, name: str) -> bool:
     # casefold in Python: SQLite's lower() only folds ASCII (İ, Ş, Ç ...).
     wanted = name.casefold()
     return any(existing.casefold() == wanted for (existing,) in db.query(LawFirm.name).all())
 
 
-def _new_admin(db: Session, firm: LawFirm, full_name: str, email: str) -> User:
-    return create_pending_user(db, firm.id, AdminUserCreate(email=email, full_name=full_name, role=UserRole.ADMIN))
+def _new_admin(db: Session, firm: LawFirm, full_name: str, email: str, role: UserRole = UserRole.ADMIN) -> User:
+    return create_pending_user(db, firm.id, AdminUserCreate(email=email, full_name=full_name, role=role))
 
 
 def create_firm(db: Session, name: str, admin_full_name: str, admin_email: str) -> tuple[LawFirm, User]:
@@ -65,16 +82,15 @@ def create_firm(db: Session, name: str, admin_full_name: str, admin_email: str) 
     return firm, _new_admin(db, firm, admin_full_name, admin_email)
 
 
-def add_firm_admin(db: Session, firm: LawFirm, full_name: str, email: str) -> User:
-    """Flushes; the caller commits."""
-    return _new_admin(db, firm, full_name, email)
+def add_firm_admin(db: Session, firm: LawFirm, full_name: str, email: str, role: UserRole = UserRole.ADMIN) -> User:
+    """An invited admin or lawyer of the firm. Flushes; the caller commits."""
+    return _new_admin(db, firm, full_name, email, role)
 
 
 def get_firm_admin(db: Session, firm: LawFirm, user_id: str) -> User:
-    user = db.query(User).filter(
-        User.id == user_id, User.law_firm_id == firm.id, User.role == UserRole.ADMIN,
-    ).first()
-    if user is None:
+    """An admin or lawyer of the firm; scoped client/expert users are 404."""
+    user = db.query(User).filter(User.id == user_id, User.law_firm_id == firm.id).first()
+    if user is None or (user.role == UserRole.LAWYER and user.id in _scoped_user_ids(db, firm)):
         raise UserAdminError(404, ADMIN_NOT_FOUND)
     return user
 

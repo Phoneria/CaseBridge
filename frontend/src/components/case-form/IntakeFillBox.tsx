@@ -33,7 +33,9 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ truncated: boolean } | null>(null);
-  const [pending, setPending] = useState<{ result: CaseIntakeResult; source: IntakeSource } | null>(null);
+  const [pending, setPending] = useState<{ result: CaseIntakeResult; source: IntakeSource; fromFile: boolean } | null>(null);
+  // What the AI read from an uploaded file, shown after a fill so the draft can be checked against it.
+  const [readText, setReadText] = useState<{ label: string; text: string; truncated: boolean } | null>(null);
 
   const headingId = useId();
   const questionId = useId();
@@ -59,6 +61,7 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
   function switchMode(next: Mode) {
     setMode(next);
     setError(null);
+    setReadText(null);
     if (next === "metin") setFile(null);
   }
 
@@ -67,10 +70,12 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
     setPending(null);
   }
 
-  function accept(result: CaseIntakeResult, source: IntakeSource) {
+  function accept(result: CaseIntakeResult, source: IntakeSource, fromFile: boolean) {
     latest.current.onDraft(result, source);
     closePending();
     setNotice({ truncated: result.truncated });
+    // Pasted text is already on screen; only a file's text is worth showing again.
+    setReadText(fromFile ? { label: source.label, text: result.source_text, truncated: result.truncated } : null);
   }
 
   async function fill() {
@@ -78,13 +83,14 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
     setError(null);
     setNotice(null);
     setPending(null);
+    setReadText(null);
     setBusy(true);
     try {
-      const source: IntakeSource =
-        mode === "dosya" && file ? { label: file.name, file } : { label: PASTED_LABEL, file: pastedTextFile(text) };
-      const result = await extractCaseIntake(mode === "dosya" && file ? { file } : { text });
-      if (latest.current.hasContent) setPending({ result, source });
-      else accept(result, source);
+      const fromFile = mode === "dosya" && file !== null;
+      const source: IntakeSource = fromFile && file ? { label: file.name, file } : { label: PASTED_LABEL, file: pastedTextFile(text) };
+      const result = await extractCaseIntake(fromFile && file ? { file } : { text });
+      if (latest.current.hasContent) setPending({ result, source, fromFile });
+      else accept(result, source, fromFile);
     } catch (err) {
       setError(err instanceof ApiError && err.message ? err.message : FALLBACK_ERROR);
     } finally {
@@ -133,9 +139,10 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
               const problem = chosen ? checkDocumentFile(chosen) : null;
               setError(problem);
               setFile(problem ? null : chosen);
+              setReadText(null);
             }}
           />
-          <p className="mt-1 text-xs text-navy-500">pdf, docx veya txt · en fazla 10 MB</p>
+          <p className="mt-1 text-xs text-navy-500">pdf, docx, txt veya udf · en fazla 10 MB</p>
         </div>
       ) : (
         <textarea
@@ -178,7 +185,7 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => accept(pending.result, pending.source)}
+              onClick={() => accept(pending.result, pending.source, pending.fromFile)}
               className="rounded-lg bg-accent-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-700"
             >
               Değiştir
@@ -198,6 +205,27 @@ export function IntakeFillBox({ hasContent, onDraft }: Props) {
         {notice && <p>AI taslağıdır; kaydetmeden önce kontrol edin.</p>}
         {notice?.truncated && <p>Belge uzun olduğu için yalnızca ilk kısmı okundu.</p>}
       </div>
+
+      {readText && (
+        <details className="rounded-xl border border-surface-border bg-white">
+          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-medium text-navy-800">
+            Belgeden okunan metin ({readText.label})
+          </summary>
+          {readText.truncated && (
+            <p className="px-3 pb-2 text-xs text-navy-500">
+              {"Belge uzun olduğu için yalnızca AI'ın okuduğu ilk kısım gösteriliyor."}
+            </p>
+          )}
+          <div
+            role="region"
+            aria-label="Belgeden okunan metin"
+            tabIndex={0}
+            className="max-h-96 overflow-y-auto whitespace-pre-wrap break-words border-t border-surface-border px-3 py-2 text-sm leading-relaxed text-navy-700"
+          >
+            {readText.text}
+          </div>
+        </details>
+      )}
     </section>
   );
 }

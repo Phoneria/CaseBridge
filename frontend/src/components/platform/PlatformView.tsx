@@ -15,8 +15,9 @@ import Link from "next/link";
 import { INPUT } from "@/lib/management";
 
 const INVITE_FAILED = "Davet e-postası gönderilemedi; daveti yeniden gönderebilirsiniz.";
-const SUSPENDED_ADD =
-  "Yönetici eklendi. Büro askıda olduğu için davet e-postası gönderilmedi; büroyu aktifleştirdikten sonra daveti gönderin.";
+function suspendedAdd(label: string) {
+  return `${label} eklendi. Büro askıda olduğu için davet e-postası gönderilmedi; büroyu aktifleştirdikten sonra daveti gönderin.`;
+}
 
 type Dialog =
   | { kind: "create" }
@@ -69,8 +70,10 @@ export function PlatformView() {
     setFirms((prev) =>
       prev.map((item) => {
         if (item.id !== firmId) return item;
-        const known = item.admins.some((a) => a.id === admin.id);
-        return { ...item, admins: known ? item.admins.map((a) => (a.id === admin.id ? admin : a)) : [...item.admins, admin] };
+        const key = admin.role === "lawyer" ? "lawyers" : "admins";
+        const list = item[key] ?? [];
+        const known = list.some((a) => a.id === admin.id);
+        return { ...item, [key]: known ? list.map((a) => (a.id === admin.id ? admin : a)) : [...list, admin] };
       }),
     );
   }
@@ -88,12 +91,13 @@ export function PlatformView() {
       return;
     }
     const target = firms.find((item) => item.id === result.firmId);
+    const label = result.invite.admin.role === "lawyer" ? "Avukat" : "Yönetici";
     putAdmin(result.firmId, result.invite.admin);
     setDialog({ kind: "detail", firmId: result.firmId });
     setNotice(
       result.invite.email_sent
-        ? { tone: "ok", text: "Yönetici eklendi, davet gönderildi." }
-        : { tone: "warn", text: target && !target.is_active ? SUSPENDED_ADD : INVITE_FAILED },
+        ? { tone: "ok", text: `${label} eklendi, davet gönderildi.` }
+        : { tone: "warn", text: target && !target.is_active ? suspendedAdd(label) : INVITE_FAILED },
     );
   }
 
@@ -127,8 +131,8 @@ export function PlatformView() {
   const current = dialog && dialog.kind !== "create" ? firms.find((item) => item.id === dialog.firmId) : undefined;
   const confirm = dialog?.kind === "confirm" ? dialog : null;
   const visibleFirms = firms.filter(item =>
-    `${item.name} ${item.admins.map(a => `${a.full_name} ${a.email}`).join(" ")}`.toLocaleLowerCase("tr-TR").includes(search.toLocaleLowerCase("tr-TR")) &&
-    (!statusFilter || (statusFilter === "active" ? item.is_active : statusFilter === "suspended" ? !item.is_active : item.admins.some(a => a.status === "pending")))
+    `${item.name} ${[...item.admins, ...(item.lawyers ?? [])].map(a => `${a.full_name} ${a.email}`).join(" ")}`.toLocaleLowerCase("tr-TR").includes(search.toLocaleLowerCase("tr-TR")) &&
+    (!statusFilter || (statusFilter === "active" ? item.is_active : statusFilter === "suspended" ? !item.is_active : [...item.admins, ...(item.lawyers ?? [])].some(a => a.status === "pending")))
   );
 
   return (
@@ -153,7 +157,7 @@ export function PlatformView() {
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[["Toplam büro", firms.length], ["Aktif büro", firms.filter(f => f.is_active).length], ["Askıda büro", firms.filter(f => !f.is_active).length], ["Aktif kullanıcı hesabı", firms.reduce((sum, f) => sum + f.active_user_count, 0)]].map(([label, value]) => <div key={label} className="rounded-xl border border-surface-border bg-surface-muted p-4"><p className="text-xs text-navy-500">{label}</p><p className="mt-2 text-2xl font-semibold text-navy-900">{value}</p></div>)}
       </div>
-      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_220px]"><label className="text-xs text-navy-500">Büro veya yönetici ara<input className={INPUT} value={search} onChange={e => setSearch(e.target.value)} placeholder="Ad veya e-posta" /></label><label className="text-xs text-navy-500">Büro durumu<select className={INPUT} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option value="">Tüm bürolar</option><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="pending">Davet bekleyen</option></select></label></div>
+      <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_220px]"><label className="text-xs text-navy-500">Büro veya kullanıcı ara<input className={INPUT} value={search} onChange={e => setSearch(e.target.value)} placeholder="Ad veya e-posta" /></label><label className="text-xs text-navy-500">Büro durumu<select className={INPUT} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option value="">Tüm bürolar</option><option value="active">Aktif</option><option value="suspended">Askıda</option><option value="pending">Davet bekleyen</option></select></label></div>
       {notice && !dialog && <NoticeLine notice={notice} />}
       {firms.length > 0 && visibleFirms.length === 0 && <p className="my-6 text-sm text-navy-500">Aramaya uygun büro bulunamadı.</p>}
 

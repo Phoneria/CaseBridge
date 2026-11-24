@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/api/routes/platform.py",
+        "backend/app/schemas/platform.py",
+        "backend/app/services/platform_service.py"
+      ],
+      "requirements": [
+        "specs/023-platform-lawyer-invite/spec.md#FR-001",
+        "specs/023-platform-lawyer-invite/spec.md#FR-002",
+        "specs/023-platform-lawyer-invite/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_platform_firms.py::test_add_lawyer_invites_a_lawyer_listed_apart_from_the_admins",
+        "backend/tests/api/test_platform_firms.py::test_add_member_defaults_to_admin_and_rejects_an_unknown_role",
+        "backend/tests/api/test_platform_firms.py::test_scoped_client_users_are_not_listed_or_re_invited",
+        "backend/tests/api/test_platform_firms.py::test_a_lawyer_invite_is_recorded_in_the_firm_history",
+        "backend/tests/api/test_platform_firms.py::test_list_shows_customer_firms_with_their_admins_and_hides_the_platform_firm",
+        "backend/tests/api/test_platform_firms.py::test_resend_invite_only_for_a_pending_admin_of_that_firm"
+      ],
+      "reason": "User request 24 Nov 2026: the platform admin invites a firm's lawyers as well as its admins, and can re-send their invites."
+    },
+    {
+      "files": [
+        "frontend/src/components/platform/FirmFormModal.tsx",
+        "frontend/src/components/platform/FirmDetailModal.tsx",
+        "frontend/src/components/platform/PlatformView.tsx",
+        "frontend/src/components/management/AuditPanel.tsx",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/023-platform-lawyer-invite/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/PlatformView.test.tsx::invites a lawyer and lists them under Avukatlar with a resend button",
+        "frontend/src/components/__tests__/PlatformView.test.tsx::adds an admin to a suspended firm and says the invite waits"
+      ],
+      "reason": "Platform firm detail: Kullanıcı davet et with a Rol select, Yöneticiler and Avukatlar lists, role-named notices."
+    },
+    {
+      "files": [
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/023-platform-lawyer-invite/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_platform_lawyer_invite.py::PlatformLawyerInviteAcceptance.test_app_version_manifest_matches_the_sources"
+      ],
+      "reason": "Application version regenerated with update-version.mjs (v.0.54), never hand-edited."
+    }
+  ]
+}

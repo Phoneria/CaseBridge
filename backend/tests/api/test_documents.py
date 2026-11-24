@@ -292,3 +292,68 @@ def test_download_rejects_path_outside_storage_dir(client, two_firms_two_users, 
     response = client.get(f"/documents/{doc['id']}/download", headers=headers)
 
     assert response.status_code == 404
+
+
+# --- UDF (UYAP Doküman Formatı) ---------------------------------------------
+
+import pytest  # noqa: E402
+
+from tests.udf_samples import make_udf  # noqa: E402
+
+
+def _upload(client, headers, case_id, filename, raw):
+    return client.post(
+        f"/cases/{case_id}/documents",
+        files={"file": (filename, raw, "application/octet-stream")},
+        headers=headers,
+    )
+
+
+def test_upload_udf_extracts_text_and_downloads_original(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+    raw = make_udf("Bilirkişi incelemesi tamamlanmıştır.", signed=True)
+
+    response = _upload(client, headers, case["id"], "Bilirkişi Raporu.udf", raw)
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["file_type"] == "udf" and body["filename"] == "Bilirkişi Raporu.udf"
+    assert "Bilirkişi incelemesi tamamlanmıştır." in body["extracted_text"]
+    download = client.get(f"/documents/{body['id']}/download", headers=headers)
+    assert download.status_code == 200 and download.content == raw
+    assert download.headers["content-type"] == "application/octet-stream"
+    assert "Bilirki%C5%9Fi%20Raporu.udf" in download.headers["content-disposition"]
+
+
+def test_upload_uppercase_udf_extension(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    response = _upload(client, headers, case["id"], "KARAR.UDF", make_udf("Karar"))
+
+    assert response.status_code == 201
+    assert response.json()["file_type"] == "udf"
+
+
+@pytest.mark.parametrize("raw", [b"not a zip", make_udf("   ")], ids=["broken", "no-text"])
+def test_broken_or_scanned_udf_is_saved_without_text(client, two_firms_two_users, raw):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    response = _upload(client, headers, case["id"], "evrak.udf", raw)
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["file_type"] == "udf"
+    assert body["extracted_text"] is None
+
+
+def test_unsupported_type_message_lists_udf(client, two_firms_two_users):
+    headers = _auth_headers(client, two_firms_two_users)
+    case = _create_case(client, headers)
+
+    response = _upload(client, headers, case["id"], "notlar.rtf", b"x")
+
+    assert response.status_code == 400
+    assert "Allowed: pdf, docx, txt, udf." in response.json()["detail"]

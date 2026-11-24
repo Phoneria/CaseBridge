@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-from app.models.user import UserStatus
+from app.models.user import UserRole, UserStatus
 from app.schemas.text_rules import clean_full_name, clean_single_line
 
 
@@ -19,6 +19,7 @@ class PlatformAdminOut(BaseModel):
     id: str
     full_name: str
     email: str
+    role: UserRole
     status: UserStatus
     invited_at: datetime | None = None
 
@@ -31,6 +32,8 @@ class PlatformFirmOut(BaseModel):
     suspended_at: datetime | None = None
     active_user_count: int
     admins: list[PlatformAdminOut]
+    # The firm's own lawyers (scoped client/expert users are never listed).
+    lawyers: list[PlatformAdminOut] = []
 
 
 class PlatformFirmCreate(BaseModel):
@@ -50,8 +53,11 @@ class PlatformFirmCreate(BaseModel):
 
 
 class PlatformAdminCreate(BaseModel):
+    """An invited firm user: an admin (default) or a lawyer."""
+
     full_name: str
     email: EmailStr
+    role: UserRole = UserRole.ADMIN
 
     @field_validator("full_name")
     @classmethod

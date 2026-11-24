@@ -38,7 +38,7 @@ export function AnonymizationView() {
         setMessage("Dosyadan metin çıkarıldı. İnceledikten sonra Metni maskele düğmesine basın.");
       }
     } catch (err) {
-      if (current === revision.current) setMessage(err instanceof ApiError ? err.message : "Dosya okunamadı. PDF, DOCX veya düz metin kopyası deneyin.");
+      if (current === revision.current) setMessage(err instanceof ApiError ? err.message : "Dosya okunamadı. PDF, DOCX, UDF veya düz metin kopyası deneyin.");
     } finally {
       if (current === revision.current) setExtracting(false);
     }
@@ -73,7 +73,7 @@ export function AnonymizationView() {
       <label htmlFor="mask-file" className="block font-medium text-navy-900">Dosya yükle</label>
       <input id="mask-file" ref={fileInput} type="file" onChange={e => loadFile(e.target.files?.[0])} aria-describedby="mask-file-limits" className="hidden" />
       <button type="button" onClick={() => fileInput.current?.click()} aria-describedby="mask-file-limits" className="rounded-lg border border-navy-200 px-4 py-2 text-navy-800">Dosya seç</button>
-      <p id="mask-file-limits" className="text-sm text-navy-600">PDF, DOCX, TXT ve okunabilir metin içeren diğer dosyalar. En fazla 5 MB, 100 PDF sayfası ve 30.000 karakter. DOCX açılmış içerik sınırı 16 MB / 512 öğedir. Taranmış görseller için önce OCR gerekir; bu araç OCR yapmaz. Dosyalar kaydedilmez.</p>
+      <p id="mask-file-limits" className="text-sm text-navy-600">PDF, DOCX, UDF, TXT ve okunabilir metin içeren diğer dosyalar. En fazla 5 MB, 100 PDF sayfası ve 30.000 karakter. DOCX ve UDF açılmış içerik sınırı 16 MB / 512 öğedir. Taranmış görseller için önce OCR gerekir; bu araç OCR yapmaz. Dosyalar kaydedilmez.</p>
       {extracting && <p role="status" className="text-sm text-navy-700">Dosyadan metin çıkarılıyor…</p>}
       {fileInfo && <div className="text-sm text-navy-700"><p>Okunan biçim: {fileInfo.format === "text" ? "Düz metin" : fileInfo.format.toUpperCase()}</p>{fileInfo.warnings.map(warning => <p key={warning} className="mt-1">{warning}</p>)}</div>}
     </div>

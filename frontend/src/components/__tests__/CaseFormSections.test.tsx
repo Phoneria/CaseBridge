@@ -273,7 +273,7 @@ describe("FollowUpFields", () => {
   it("adds valid files, rejects the others with a message and removes files from the list", async () => {
     render(<FollowUpHarness />);
     const input = screen.getByLabelText("Belge ekle");
-    expect(input).toHaveAttribute("accept", ".pdf,.docx,.txt");
+    expect(input).toHaveAttribute("accept", ".pdf,.docx,.txt,.udf");
     expect(input).toHaveAttribute("multiple");
 
     await userEvent.setup({ applyAccept: false }).upload(input, [new File(["a"], "beyan.txt", { type: "text/plain" }), new File(["b"], "gorsel.png", { type: "image/png" })]);
@@ -281,7 +281,7 @@ describe("FollowUpFields", () => {
     const list = screen.getByRole("list", { name: "Eklenecek belgeler" });
     expect(within(list).getByText("beyan.txt")).toBeInTheDocument();
     expect(within(list).queryByText("gorsel.png")).toBeNull();
-    expect(screen.getByRole("alert")).toHaveTextContent("gorsel.png desteklenmeyen bir dosya türü (pdf, docx, txt).");
+    expect(screen.getByRole("alert")).toHaveTextContent("gorsel.png desteklenmeyen bir dosya türü (pdf, docx, txt, udf).");
 
     await userEvent.click(screen.getByRole("button", { name: "beyan.txt dosyasını çıkar" }));
     expect(screen.queryByRole("list", { name: "Eklenecek belgeler" })).toBeNull();
@@ -365,7 +365,7 @@ describe("accessibility details", () => {
     render(<FollowUpHarness />);
     const bad = () => new File(["b"], "gorsel.png", { type: "image/png" });
     await userEvent.setup({ applyAccept: false }).upload(screen.getByLabelText("Belge ekle"), [bad(), bad()]);
-    expect(screen.getAllByText("gorsel.png desteklenmeyen bir dosya türü (pdf, docx, txt).")).toHaveLength(2);
+    expect(screen.getAllByText("gorsel.png desteklenmeyen bir dosya türü (pdf, docx, txt, udf).")).toHaveLength(2);
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });

@@ -51,7 +51,7 @@ async def mask_text(request: Request, response: Response, user: User = Depends(g
 
 class ExtractedText(BaseModel):
     text: str
-    format: Literal["pdf", "docx", "text"]
+    format: Literal["pdf", "docx", "udf", "text"]
     warnings: list[str]
 
 

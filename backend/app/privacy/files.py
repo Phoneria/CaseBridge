@@ -11,11 +11,14 @@ import zipfile
 from contextvars import ContextVar
 from xml.etree import ElementTree
 
+from app.services.udf_reader import UdfReadError, is_udf, read_udf_text
+
 MAX_BYTES = 5 * 1024 * 1024
 MAX_TEXT = 30000
 MAX_PAGES = 100
 MAX_EXPANDED = 16 * 1024 * 1024
 _PRIVATE_READER = ContextVar('privacy_reader', default=False)
+UDF_WARNING = 'UDF içindeki tablolar düz metin olarak alındı; görseller ve biçimlendirme okunmadı.'
 
 
 class ExtractionError(ValueError):
@@ -104,6 +107,15 @@ def _docx(raw):
         return ''.join(out), warnings
 
 
+def _udf(raw):
+    try:
+        text = read_udf_text(raw)
+    except UdfReadError as exc:
+        raise ExtractionError(str(exc)) from None
+    _check_length(len(text))
+    return text, [UDF_WARNING]
+
+
 def _plain(raw):
     encoding = 'utf-16' if raw.startswith((b'\xff\xfe', b'\xfe\xff')) else 'utf-8-sig'
     try:
@@ -123,6 +135,8 @@ def extract_document(raw):
     try:
         if raw.startswith(b'%PDF-'):
             text, warnings = _pdf(raw); kind = 'pdf'
+        elif raw.startswith(b'PK\x03\x04') and is_udf(raw):
+            text, warnings = _udf(raw); kind = 'udf'
         elif raw.startswith(b'PK\x03\x04'):
             text, warnings = _docx(raw); kind = 'docx'
         else:

@@ -33,7 +33,7 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 export const NO_CLIENT_MESSAGE = "En az bir taraf müvekkil olarak işaretlenmeli.";
 export const CLIENT_NOT_CHOSEN = "Müvekkili listeden seçin veya yeni ekleyin.";
 export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
-export const DOCUMENT_EXTENSIONS = [".pdf", ".docx", ".txt"];
+export const DOCUMENT_EXTENSIONS = [".pdf", ".docx", ".txt", ".udf"];
 
 export type SectionId = "temel" | "taraflar" | "uyusmazlik" | "belgeler";
 
@@ -322,7 +322,7 @@ export function applyDraft(form: CaseFormState, draft: CaseIntakeDraft): Applied
 export function checkDocumentFile(file: File): string | null {
   const name = file.name.toLowerCase();
   if (!DOCUMENT_EXTENSIONS.some((extension) => name.endsWith(extension))) {
-    return `${file.name} desteklenmeyen bir dosya türü (pdf, docx, txt).`;
+    return `${file.name} desteklenmeyen bir dosya türü (pdf, docx, txt, udf).`;
   }
   if (file.size > MAX_DOCUMENT_BYTES) return `${file.name} 10 MB sınırını aşıyor.`;
   return null;
