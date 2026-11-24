@@ -1,0 +1,11 @@
+# Tasks
+- [x] T001 Map document upload, extraction, download, intake, privacy-worker and CLI paths and the enum storage (data-model.md#featurecontract).
+- [x] T002 UDF reader with archive/XML limits, streaming parse, depth cap and encoding fallback; synthetic UDF builder (FR-002, FR-003).
+- [x] T003 `.udf` in case uploads, CLI import, downloads on both routes and the enum migration plus the merge revision (FR-001, FR-004, FR-005).
+- [x] T004 UDF in the privacy tool's isolated worker with the fixed warning and ODT exclusion (FR-006).
+- [x] T005 Frontend pickers, copy, unions and documents filter (FR-001, FR-006).
+- [x] T006 `source_text` from case intake and the "Belgeden okunan metin" section (FR-007, FR-008).
+- [x] T007 Application v.0.52 from main's manifest; version acceptance test (FR-009).
+- [x] T008 Backend, frontend, privacy-worker and migration tests covering FR-001 through FR-009; independent whole-branch review and its fixes.
+- [ ] T009 Anonymized real UYAP samples (signed, scanned, image-heavy) as fixtures (owner).
+- [ ] T010 Release and public verification (not part of this branch).
