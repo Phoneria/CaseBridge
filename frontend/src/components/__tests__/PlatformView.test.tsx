@@ -174,20 +174,51 @@ describe("PlatformView", () => {
   it("adds an admin to a suspended firm and says the invite waits", async () => {
     const suspended = { ...KAYA, is_active: false, suspended_at: "2026-10-23T20:00:00" };
     api.listPlatformFirms.mockResolvedValue([suspended]);
-    api.addPlatformFirmAdmin.mockResolvedValue({ admin: admin("n1", "Yeni Yönetici", { status: "pending" }), email_sent: false });
+    api.addPlatformFirmAdmin.mockResolvedValue({ admin: admin("n1", "Yeni Yönetici", { status: "pending", role: "admin" }), email_sent: false });
     render(<PlatformView />);
 
     await userEvent.click(await screen.findByRole("button", { name: "Kaya Hukuk" }));
-    await userEvent.click(within(screen.getByRole("dialog", { name: "Kaya Hukuk" })).getByRole("button", { name: "Yönetici ekle" }));
-    const form = screen.getByRole("dialog", { name: "Yönetici ekle — Kaya Hukuk" });
+    await userEvent.click(within(screen.getByRole("dialog", { name: "Kaya Hukuk" })).getByRole("button", { name: "Kullanıcı davet et" }));
+    const form = screen.getByRole("dialog", { name: "Kullanıcı davet et — Kaya Hukuk" });
+    expect(within(form).getByLabelText("Rol *")).toHaveValue("admin");
     await userEvent.type(within(form).getByLabelText("Ad soyad *"), "Yeni Yönetici");
     await userEvent.type(within(form).getByLabelText("E-posta *"), "yeni@kaya.test");
-    await userEvent.click(within(form).getByRole("button", { name: "Ekle" }));
+    await userEvent.click(within(form).getByRole("button", { name: "Davet gönder" }));
 
-    expect(api.addPlatformFirmAdmin).toHaveBeenCalledWith("f2", { full_name: "Yeni Yönetici", email: "yeni@kaya.test" });
+    expect(api.addPlatformFirmAdmin).toHaveBeenCalledWith("f2", { full_name: "Yeni Yönetici", email: "yeni@kaya.test", role: "admin" });
     const panel = await screen.findByRole("dialog", { name: "Kaya Hukuk" });
-    expect(within(panel).getByRole("alert")).toHaveTextContent("Büro askıda olduğu için davet e-postası gönderilmedi");
+    expect(within(panel).getByRole("alert")).toHaveTextContent("Yönetici eklendi. Büro askıda olduğu için davet e-postası gönderilmedi");
     expect(within(panel).getByText("Yeni Yönetici")).toBeInTheDocument();
+  });
+
+  it("invites a lawyer and lists them under Avukatlar with a resend button", async () => {
+    api.listPlatformFirms.mockResolvedValue([KAYA]);
+    const lawyer = admin("l1", "Yeni Avukat", { status: "pending", role: "lawyer" });
+    api.addPlatformFirmAdmin.mockResolvedValue({ admin: lawyer, email_sent: true });
+    api.resendPlatformAdminInvite.mockResolvedValue({ admin: lawyer, email_sent: true });
+    render(<PlatformView />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Kaya Hukuk" }));
+    const detail = screen.getByRole("dialog", { name: "Kaya Hukuk" });
+    expect(within(detail).getByText("Henüz avukat yok.")).toBeInTheDocument();
+    await userEvent.click(within(detail).getByRole("button", { name: "Kullanıcı davet et" }));
+    const form = screen.getByRole("dialog", { name: "Kullanıcı davet et — Kaya Hukuk" });
+    await userEvent.selectOptions(within(form).getByLabelText("Rol *"), "lawyer");
+    expect(within(form).getByText("Avukat, e-postayla gelen bağlantıdan kendi şifresini belirler.")).toBeInTheDocument();
+    await userEvent.type(within(form).getByLabelText("Ad soyad *"), "Yeni Avukat");
+    await userEvent.type(within(form).getByLabelText("E-posta *"), "avukat@kaya.test");
+    await userEvent.click(within(form).getByRole("button", { name: "Davet gönder" }));
+
+    expect(api.addPlatformFirmAdmin).toHaveBeenCalledWith("f2", { full_name: "Yeni Avukat", email: "avukat@kaya.test", role: "lawyer" });
+    const panel = await screen.findByRole("dialog", { name: "Kaya Hukuk" });
+    expect(within(panel).getByText("Avukat eklendi, davet gönderildi.")).toBeInTheDocument();
+    const lawyers = within(panel).getByRole("heading", { name: "Avukatlar" }).nextElementSibling as HTMLElement;
+    expect(within(lawyers).getByText("Yeni Avukat")).toBeInTheDocument();
+    const admins = within(panel).getByRole("heading", { name: "Yöneticiler" }).nextElementSibling as HTMLElement;
+    expect(within(admins).queryByText("Yeni Avukat")).not.toBeInTheDocument();
+
+    await userEvent.click(within(panel).getByRole("button", { name: "Daveti yeniden gönder, Yeni Avukat" }));
+    expect(api.resendPlatformAdminInvite).toHaveBeenCalledWith("f2", "l1");
   });
 
   it("shows a load error", async () => {

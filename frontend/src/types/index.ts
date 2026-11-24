@@ -356,6 +356,8 @@ export interface PlatformAdmin {
   id: string;
   full_name: string;
   email: string;
+  /** "admin" or "lawyer"; absent in data from before v.0.54. */
+  role?: UserRole;
   status: UserStatus;
   invited_at: string | null;
 }
@@ -369,6 +371,8 @@ export interface PlatformFirm {
   suspended_at: string | null;
   active_user_count: number;
   admins: PlatformAdmin[];
+  /** The firm's own lawyers (never scoped client/expert users). */
+  lawyers?: PlatformAdmin[];
 }
 
 export interface PlatformFirmPayload {
@@ -387,6 +391,8 @@ export interface PlatformFirmCreated {
 export interface PlatformAdminPayload {
   full_name: string;
   email: string;
+  /** Defaults to "admin" on the server. */
+  role?: UserRole;
 }
 
 export interface PlatformAdminInvite {
