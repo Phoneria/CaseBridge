@@ -1,10 +1,13 @@
 /* CaseBridge site cat — dark marketing theme (story3d.css palette). */
-.sc-root{--sc-bg:#0d1d2e;--sc-bg2:#08131f;--sc-paper:#eee8d9;--sc-muted:#a9b8c7;--sc-teal:#68dfcf;--sc-line:rgba(238,232,217,.16);font-family:Manrope,"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--sc-paper)}
+/* The cat images are listed here so the release tool (deployment/release.py marketing_files)
+   publishes them; site-cat.js sets the src at runtime. */
+.sc-root{--i0:url(assets/site-cat/cat-idle@128.webp);--i1:url(assets/site-cat/cat-idle@256.webp);--i2:url(assets/site-cat/cat-thinking@128.webp);--i3:url(assets/site-cat/cat-thinking@256.webp);--i4:url(assets/site-cat/cat-sleeping@128.webp);--i5:url(assets/site-cat/cat-sleeping@256.webp);--i6:url(assets/site-cat/cat-dancing@128.webp);--i7:url(assets/site-cat/cat-dancing@256.webp);--i8:url(assets/site-cat/cat-victory@128.webp);--i9:url(assets/site-cat/cat-victory@256.webp);--i10:url(assets/site-cat/cat-researching@128.webp);--i11:url(assets/site-cat/cat-researching@256.webp);--i12:url(assets/site-cat/cat-working@128.webp);--i13:url(assets/site-cat/cat-working@256.webp);--i14:url(assets/site-cat/cat-reading@128.webp);--i15:url(assets/site-cat/cat-reading@256.webp);--i16:url(assets/site-cat/cat-courtroom@128.webp);--i17:url(assets/site-cat/cat-courtroom@256.webp);--i18:url(assets/site-cat/cat-tea-break@128.webp);--i19:url(assets/site-cat/cat-tea-break@256.webp);--sc-bg:#0d1d2e;--sc-bg2:#08131f;--sc-paper:#eee8d9;--sc-muted:#a9b8c7;--sc-teal:#68dfcf;--sc-line:rgba(238,232,217,.16);font-family:Manrope,"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--sc-paper)}
 .sc-cat{position:fixed;z-index:9990;width:76px;height:76px;padding:0;border:0;border-radius:50%;background:transparent;cursor:grab;touch-action:none;transition:left .2s ease-out,top .2s ease-out;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
-.sc-cat img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
+.sc-cat .sc-pose{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;opacity:0;transition:opacity var(--sc-fade,300ms) ease}
+.sc-cat .sc-pose.sc-front{opacity:1}
 .sc-cat:focus-visible{outline:3px solid var(--sc-teal);outline-offset:3px}
 .sc-dragging .sc-cat{cursor:grabbing;transition:none}
-.sc-root[data-pose="thinking"] .sc-cat img{animation:sc-bob 1.2s ease-in-out infinite}
+.sc-root[data-pose="thinking"] .sc-front{animation:sc-bob 1.2s ease-in-out infinite}
 @keyframes sc-bob{50%{transform:translateY(-4px)}}
 .sc-panel{position:fixed;z-index:9991;bottom:104px;right:16px;width:380px;max-width:calc(100vw - 32px);height:540px;max-height:calc(100dvh - 128px);display:flex;flex-direction:column;background:var(--sc-bg);border:1px solid var(--sc-line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.55);overflow:hidden}
 .sc-root[data-side="left"] .sc-panel{right:auto;left:16px}
@@ -47,5 +50,6 @@
 }
 @media (prefers-reduced-motion:reduce){
   .sc-cat{transition:none}
-  .sc-root[data-pose] .sc-cat img{animation:none}
+  .sc-cat .sc-pose{transition:none}
+  .sc-root[data-pose] .sc-front{animation:none}
 }
