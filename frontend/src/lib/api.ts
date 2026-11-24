@@ -11,6 +11,7 @@ import type {
   ChatConversation,
   ChatConversationSummary,
   ChatMessage,
+  ChatPageContext,
   ChatStatus,
   AnalyticsOverview,
   Case,
@@ -25,6 +26,9 @@ import type {
   CaseStatus,
   CaseType,
   SimilarCase,
+  AIExplanation,
+  SimilarPrecedentsQuery,
+  SimilarPrecedentsResponse,
   DocumentItem,
   HandoverReport,
   ReportKind,
@@ -357,6 +361,24 @@ export function setPrecedentLink(caseId: string, precedentId: string, linked: bo
 
 export async function getSimilarCases(caseId: string, limit = 5): Promise<SimilarCase[]> {
   return request(`/cases/${encodeURIComponent(caseId)}/similar?limit=${limit}`);
+}
+
+export async function getSimilarPrecedents(
+  caseId: string, query: SimilarPrecedentsQuery = {},
+): Promise<SimilarPrecedentsResponse> {
+  const params = new URLSearchParams({ limit: String(query.limit ?? 5) });
+  for (const outcome of query.outcome ?? []) params.append("outcome", outcome);
+  if (query.court) params.set("court", query.court);
+  if (query.minScore) params.set("min_score", String(query.minScore));
+  if (query.explain) params.set("explain", "true");
+  if (query.precedentId) params.set("precedent_id", query.precedentId);
+  return request(`/cases/${encodeURIComponent(caseId)}/similar-precedents?${params.toString()}`);
+}
+
+/** The optional AI explanation for one precedent; the server falls back to stored data on timeout or error. */
+export async function explainSimilarPrecedent(caseId: string, precedentId: string): Promise<AIExplanation | null> {
+  const body = await getSimilarPrecedents(caseId, { limit: 1, explain: true, precedentId });
+  return body.items[0]?.ai_explanation ?? null;
 }
 
 export async function searchSimilarCases(text: string, caseType?: CaseType | null, limit = 5): Promise<SimilarCase[]> {
@@ -704,6 +726,7 @@ export async function openChatStream(
   conversationId: string,
   content: string,
   signal?: AbortSignal,
+  options: { dataTools?: boolean; context?: ChatPageContext } = {},
 ): Promise<Response> {
   const token = getToken();
   const headers = new Headers({ "Content-Type": "application/json", Accept: "text/event-stream" });
@@ -711,7 +734,9 @@ export async function openChatStream(
   const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(
+      options.dataTools ? { content, data_tools: true, ...(options.context ? { context: options.context } : {}) } : { content },
+    ),
     signal,
   });
   if (!response.ok) await throwApiError(response, `/chat/conversations/${conversationId}/messages`);

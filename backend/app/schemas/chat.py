@@ -14,6 +14,13 @@ class ChatStatusOut(BaseModel):
     error: Optional[str] = None
 
 
+class ChatSourceOut(BaseModel):
+    kind: str
+    id: str
+    label: str
+    href: str
+
+
 class ChatMessageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
 
@@ -25,6 +32,8 @@ class ChatMessageOut(BaseModel):
     level: Optional[str] = None
     truncated: Optional[bool] = None
     feedback: Optional[int] = None
+    #: Present only for answers that ran with the data tools.
+    sources: Optional[list[ChatSourceOut]] = None
     created_at: datetime
 
 
@@ -52,8 +61,19 @@ class ChatConversationRename(BaseModel):
         return value
 
 
+class ChatPageContext(BaseModel):
+    """Where the floating assistant was opened. Hints only: the case id is
+    re-checked against the caller's firm before it is used."""
+
+    route: Optional[str] = Field(default=None, max_length=200)
+    case_id: Optional[str] = Field(default=None, max_length=36, pattern=r"^[A-Za-z0-9-]+$")
+
+
 class ChatMessageCreate(BaseModel):
     content: str = Field(min_length=1, max_length=8000)
+    #: Let the model read the firm's records through the read-only data tools.
+    data_tools: bool = False
+    context: Optional[ChatPageContext] = None
 
     @field_validator("content")
     @classmethod

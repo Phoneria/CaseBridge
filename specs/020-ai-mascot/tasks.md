@@ -1,0 +1,12 @@
+# Tasks
+- [x] T001 Map chat stream, providers, per-firm keys, case/document/task/calendar/client/precedent read paths and audit table (data-model.md#featurecontract).
+- [x] T002 Data tools over existing services with firm, precedent and workspace rules and limits (FR-005, FR-006, FR-007).
+- [x] T003 Tool runner: planning rounds, call cap, document wrapping and injection stop, sources, audit rows (FR-008, FR-009, FR-010).
+- [x] T004 Provider tool planning for OpenAI, Claude and mock; chat stream and request wiring (FR-004, FR-011).
+- [x] T005 Backend tests covering FR-001 through FR-012 on the server side: isolation per tool, guessed ids, precedent rules, restricted users, limits, audit, injection, provider parsing.
+- [x] T006 Mode state machine, widget, panel, AppShell mount, case outcome announcement; WebP assets (FR-001, FR-002, FR-003, FR-012).
+- [x] T007 Frontend tests: drag and snap, saved position, storage failure, open/close/Esc/shortcut, hide, modes, sources, empty/not-configured/error states.
+- [x] T008 Validation: full pytest, tsc, Vitest, next build, browser check with screenshots in artifacts/ai-mascot/ (verification.md); docs/ai-mascot-report.md.
+- [x] T010 Save sources with the answer and show them on reopened chats; exclude data-tool answers and their questions from the training export by default; tests (FR-013, FR-014).
+- [x] T011 Full backend suite on a throwaway PostgreSQL 16; migration up/down/up on PostgreSQL (verification.md).
+- [ ] T009 Standard application release and public verification (not part of this branch).

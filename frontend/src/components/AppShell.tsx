@@ -7,6 +7,7 @@ import { GuideTour } from "@/components/GuideTour";
 import { Sidebar } from "@/components/Sidebar";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
+import { AiMascot } from "@/components/mascot/AiMascot";
 import dynamic from "next/dynamic";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { LoadingState } from "@/components/LoadingState";
@@ -21,6 +22,12 @@ const PresentationView = dynamic(() => import("@/components/PresentationView").t
 /** Pages a platform admin may open besides the platform panel. */
 const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar", "/rehber"];
 export const WorkspaceUserContext = createContext<AppUser | null>(null);
+
+/** Who gets the floating CaseBridge AI cat: the same users who see the
+ * CaseBridge AI menu (the chat API refuses restricted workspace accounts). */
+export function canUseAiAssistant(user: AppUser | null): boolean {
+  return !!user && !user.workspace_position && !user.is_platform_admin;
+}
 
 /** `platform`: the page is the platform panel (platform admins only). A
  * platform admin is kept out of the firm pages: they belong to no customer firm. */
@@ -127,6 +134,8 @@ export function AppShell({ children, platform = false }: { children: React.React
       <Suspense fallback={null}>
         <CaseQuickView />
       </Suspense>
+      {/* Same audience as the CaseBridge AI menu: not for restricted workspace accounts or the platform panel. */}
+      {canUseAiAssistant(user) && <Suspense fallback={null}><AiMascot /></Suspense>}
     </div>
   );
 }

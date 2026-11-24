@@ -14,6 +14,7 @@ from app.ai.case_intake import UNCONFIGURED_MESSAGE
 from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_case_intake_provider, get_llm_provider
 from app.ai.providers.base import LLMProvider
+from app.core.config import settings
 from app.core.security import decode_access_token, password_epoch
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
@@ -125,6 +126,26 @@ def get_llm_provider_dep(current_user: User = Depends(get_current_user)) -> LLMP
         return get_llm_provider(ai_credential_scope(current_user))
     except AIProviderConfigError:
         raise HTTPException(status_code=503, detail="Büronuzun AI bağlantısı yapılandırılmamış. Ayarlar üzerinden API anahtarınızı ekleyin.") from None
+
+
+def get_similarity_llm_provider(
+    current_user: User = Depends(get_current_user),
+) -> Callable[[], Optional[LLMProvider]]:
+    """Lazy provider for the optional "Benzer Davalar" AI explanation. The returned callable
+    gives None when AI is off (LLM_PROVIDER=mock) or not configured, and the caller then uses
+    the extractive fallback. Built only when asked for; overridable in tests via
+    app.dependency_overrides."""
+    scope = ai_credential_scope(current_user)
+
+    def build() -> Optional[LLMProvider]:
+        if settings.llm_provider == "mock":
+            return None
+        try:
+            return get_llm_provider(scope)
+        except AIProviderConfigError:
+            return None
+
+    return build
 
 
 def get_case_intake_provider_dep(current_user: User = Depends(get_current_user)) -> LLMProvider:

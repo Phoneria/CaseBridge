@@ -24,8 +24,10 @@ from app.schemas.chat import (
     ChatMessageOut,
     ChatStatusOut,
 )
+from app.services.chat_data_tools import ToolPrincipal
 from app.services.chat_service import ChatService
 from app.services.chat_stream import stream_assistant_reply
+from app.services.chat_tool_runner import ChatToolRunner, PageContext
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -115,6 +117,16 @@ def send_message(
     user_message = service.add_user_message(conversation, payload.content)
     assistant = service.create_assistant_placeholder(conversation, provider.model, level)
     history = service.build_history(conversation, level_config.history_limit, system_prompt_for(level))
+    tool_runner = None
+    if payload.data_tools:
+        context = payload.context
+        tool_runner = ChatToolRunner(
+            provider=provider,
+            principal=ToolPrincipal.of(current_user),
+            conversation_id=conversation.id,
+            session_factory=session_factory,
+            context=PageContext(route=context.route, case_id=context.case_id) if context else None,
+        )
     start_event = {
         "type": "start",
         "user_message": ChatMessageOut.model_validate(user_message).model_dump(mode="json"),
@@ -128,6 +140,7 @@ def send_message(
             assistant_message_id=assistant.id,
             conversation_id=conversation.id,
             session_factory=session_factory,
+            tool_runner=tool_runner,
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
@@ -154,13 +167,14 @@ def set_feedback(
 def export_training_data(
     model: Optional[str] = None,
     level: Optional[ChatLevel] = None,
+    include_data_tool_answers: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return PlainTextResponse(
-        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level),
+        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level, include_data_tool_answers),
         media_type="application/jsonl; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )

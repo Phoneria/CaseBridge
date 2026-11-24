@@ -710,6 +710,8 @@ export interface ChatMessage {
   /** True when a complete reply was cut off by the level's length limit. */
   truncated?: boolean | null;
   feedback: ChatFeedbackValue | null;
+  /** Answers given with the CaseBridge AI data tools: the records they used. */
+  sources?: ChatSource[] | null;
   created_at: string;
 }
 
@@ -723,10 +725,26 @@ export interface ChatConversation extends ChatConversationSummary {
   messages: ChatMessage[];
 }
 
+/** A record the CaseBridge AI answer used (data tools); href is an app path. */
+export interface ChatSource {
+  kind: "case" | "document" | "precedent" | "client" | "calendar";
+  id: string;
+  label: string;
+  href: string;
+}
+
+/** Page context the floating assistant sends with a data-tools question. */
+export interface ChatPageContext {
+  route: string;
+  case_id?: string | null;
+}
+
 export type ChatStreamEvent =
   | { type: "start"; user_message: ChatMessage; assistant_message_id: string }
+  | { type: "tool"; name: string; status: "start" | "done"; count?: number }
+  | { type: "sources"; sources: ChatSource[] }
   | { type: "delta"; text: string }
-  | { type: "done"; message: ChatMessage | null }
+  | { type: "done"; message: ChatMessage | null; sources?: ChatSource[] }
   | { type: "error"; message: string };
 
 export type ClientType = "person" | "company";
@@ -803,4 +821,115 @@ export interface SimilarCase {
   is_precedent: boolean;
   score: number;
   reasons: string[];
+}
+
+export interface TextHighlight {
+  start: number;
+  end: number;
+}
+
+export interface PassagePair {
+  case_label: string;
+  case_text: string;
+  case_highlights: TextHighlight[];
+  precedent_label: string;
+  precedent_text: string;
+  precedent_highlights: TextHighlight[];
+}
+
+export interface SimilarPrecedent {
+  precedent_id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  court: string | null;
+  outcome: CaseOutcome;
+  decision_date: string | null;
+  score: number;
+  text_score: number;
+  linked_to_case: boolean;
+  explanation: {
+    shared_terms: string[];
+    shared_statutes: string[];
+    matching_fields: string[];
+    passages: PassagePair[];
+  };
+}
+
+export interface ScoreComponent {
+  key: "text" | "case_type" | "court" | "statutes";
+  label: string;
+  points: number;
+  max_points: number;
+}
+
+export interface PrecedentTimelineEvent {
+  event_date: string;
+  event_type: CaseEventType;
+  title: string;
+}
+
+export interface KeyDifference {
+  label: string;
+  case_value: string;
+  precedent_value: string;
+}
+
+/** Stored facts of the case or a precedent, as compared side by side. */
+export interface SimilarityFacts {
+  case_type: CaseType;
+  court: string | null;
+  court_type: string | null;
+  client_role: string | null;
+  case_value: number | null;
+  opening_date: string | null;
+  decision_date: string | null;
+  duration_months: number | null;
+  outcome: CaseOutcome;
+  evidence: string[];
+  has_expert_report: boolean;
+  document_count: number;
+  statutes: string[];
+}
+
+export interface AIExplanation {
+  status: "ai" | "fallback";
+  text: string;
+  notice: string | null;
+}
+
+export interface SimilarPrecedentDetail extends SimilarPrecedent {
+  case_value: number | null;
+  duration_months: number | null;
+  score_breakdown: ScoreComponent[];
+  key_differences: KeyDifference[];
+  timeline: PrecedentTimelineEvent[];
+  facts: SimilarityFacts;
+  ai_explanation: AIExplanation | null;
+}
+
+export interface SimilarPrecedentsSummary {
+  count: number;
+  outcomes: Partial<Record<CaseOutcome, number>>;
+  avg_duration_months: number | null;
+  duration_count: number;
+  avg_case_value: number | null;
+  value_count: number;
+  available_courts: string[];
+  excluded_signals: string[];
+}
+
+export interface SimilarPrecedentsResponse {
+  summary: SimilarPrecedentsSummary;
+  source: SimilarityFacts;
+  items: SimilarPrecedentDetail[];
+}
+
+export interface SimilarPrecedentsQuery {
+  limit?: number;
+  outcome?: CaseOutcome[];
+  court?: string | null;
+  minScore?: number;
+  explain?: boolean;
+  precedentId?: string;
 }

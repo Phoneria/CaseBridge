@@ -18,6 +18,7 @@ TASK_LEVELS: dict[str, str] = {
     "courtroom.json_repair": "basic",
     "case_intake.extract": "standard",
     "case_intake.json_repair": "basic",
+    "similarity.explain": "basic",
 }
 
 

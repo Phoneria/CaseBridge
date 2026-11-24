@@ -32,25 +32,35 @@ class RelatedPrecedentOut(CaseOut):
     linked_to_case: bool = False
 
 
+def firm_precedents(db: Session, law_firm_id: str, case: Case | None = None, all_categories: bool = False) -> tuple[list[Case], set[str]]:
+    """The firm's precedents, linked ones first. With a case: only its category
+    (plus anything linked to it) unless all_categories. Shared by GET /precedents
+    and the CaseBridge AI get_precedents tool."""
+    query = db.query(Case).filter(Case.law_firm_id == law_firm_id, Case.is_precedent.is_(True))
+    linked: set[str] = set()
+    if case is not None:
+        linked = {row[0] for row in db.query(CasePrecedentLink.precedent_id).filter_by(
+            law_firm_id=law_firm_id, case_id=case.id).all()}
+        if not all_categories:
+            query = query.filter(or_(Case.case_type == case.case_type, Case.id.in_(linked)))
+    rows = query.order_by(Case.opening_date.desc(), Case.case_number).all()
+    return sorted(rows, key=lambda row: row.id not in linked), linked
+
+
 @router.get("", response_model=list[RelatedPrecedentOut])
 def list_precedents(
     case_id: str | None = None,
     all_categories: bool = False,
     law_firm_id: str = Depends(get_current_law_firm_id), db: Session = Depends(get_db),
 ):
-    query = db.query(Case).filter(Case.law_firm_id == law_firm_id, Case.is_precedent.is_(True))
-    linked = set()
+    case = None
     if case_id is not None:
         case = CaseService(db).get_case(case_id, law_firm_id)
         if case is None:
             raise HTTPException(status_code=404, detail="Dava bulunamadı")
-        linked = {row[0] for row in db.query(CasePrecedentLink.precedent_id).filter_by(
-            law_firm_id=law_firm_id, case_id=case.id).all()}
-        if not all_categories:
-            query = query.filter(or_(Case.case_type == case.case_type, Case.id.in_(linked)))
-    rows = query.order_by(Case.opening_date.desc(), Case.case_number).all()
+    rows, linked = firm_precedents(db, law_firm_id, case, all_categories)
     return [RelatedPrecedentOut.model_validate(row).model_copy(update={"linked_to_case": row.id in linked})
-            for row in sorted(rows, key=lambda row: row.id not in linked)]
+            for row in rows]
 
 
 @router.get("/{precedent_id}", response_model=CaseDetailOut)
