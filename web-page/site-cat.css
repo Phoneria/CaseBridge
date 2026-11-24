@@ -1,5 +1,7 @@
 /* CaseBridge site cat — dark marketing theme (story3d.css palette). */
-.sc-root{--sc-bg:#0d1d2e;--sc-bg2:#08131f;--sc-paper:#eee8d9;--sc-muted:#a9b8c7;--sc-teal:#68dfcf;--sc-line:rgba(238,232,217,.16);font-family:Manrope,"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--sc-paper)}
+/* The cat images are listed here so the release tool (deployment/release.py marketing_files)
+   publishes them; site-cat.js sets the src at runtime. */
+.sc-root{--sc-img-idle-128:url("assets/site-cat/cat-idle@128.webp");--sc-img-idle-256:url("assets/site-cat/cat-idle@256.webp");--sc-img-thinking-128:url("assets/site-cat/cat-thinking@128.webp");--sc-img-thinking-256:url("assets/site-cat/cat-thinking@256.webp");--sc-img-sleeping-128:url("assets/site-cat/cat-sleeping@128.webp");--sc-img-sleeping-256:url("assets/site-cat/cat-sleeping@256.webp");--sc-img-dancing-128:url("assets/site-cat/cat-dancing@128.webp");--sc-img-dancing-256:url("assets/site-cat/cat-dancing@256.webp");--sc-img-victory-128:url("assets/site-cat/cat-victory@128.webp");--sc-img-victory-256:url("assets/site-cat/cat-victory@256.webp");--sc-bg:#0d1d2e;--sc-bg2:#08131f;--sc-paper:#eee8d9;--sc-muted:#a9b8c7;--sc-teal:#68dfcf;--sc-line:rgba(238,232,217,.16);font-family:Manrope,"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--sc-paper)}
 .sc-cat{position:fixed;z-index:9990;width:76px;height:76px;padding:0;border:0;border-radius:50%;background:transparent;cursor:grab;touch-action:none;transition:left .2s ease-out,top .2s ease-out;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
 .sc-cat img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
 .sc-cat:focus-visible{outline:3px solid var(--sc-teal);outline-offset:3px}

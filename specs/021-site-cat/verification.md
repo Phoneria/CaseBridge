@@ -7,3 +7,7 @@
 - Pre-existing: `public-case.cjs` and `night-atlas-*.cjs` time out at their first step on main's unchanged web-page too (stale scripts), so they could not be used as regression checks.
 - Spec checks: `check-specs.py` 23 features validated; `check-spec-changes.py --run` (base 015493b, venv Python) 41 behavior files linked, 19 named tests run, exit 0 (first run caught a test that read a source file relative to the working directory; fixed).
 - Release: not performed (T010). Real platform-key test on staging not performed (T009).
+
+# Production — 24 Nov 2026
+- Application v.0.51 (main aad6428) live via stage/activate/verify after an online backup with a verified restore rehearsal; health ok. `/public/site-chat`: CORS for casebridge.com.tr/www (204, no credentials), other origins 403, legal-advice refusal without a model call — all verified in production. Model answers return 503 `unavailable` because OpenAI rejects the platform key (401); a secret, not code.
+- Marketing v.0.66 published only the loader (release tool `marketing_files` follows HTML/CSS links), so the widget 404'd; marketing rolled back to v.0.65 (`rollback 3cda090`, marketing scope). Fix (v.0.67, FR-014): `scripts/tests/test_site_cat.py::SiteCatAcceptance.test_release_tool_publishes_every_widget_file` passes; widget suites and the Playwright browser check pass again.

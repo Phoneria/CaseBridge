@@ -7,5 +7,6 @@
 - [x] T006 Widget: loader, model, DOM, CSS, poses, chips and states on all marketing pages (FR-010, FR-011, FR-012).
 - [x] T007 Widget tests (node:test + unittest wrapper) and Playwright browser check with screenshots (FR-010 through FR-012).
 - [x] T008 Marketing v.0.66 and application v.0.51; spec checks; docs/site-cat-report.md (FR-013).
+- [x] T011 Release fix: the widget files were not published by v.0.66 (release tool follows HTML/CSS links); prefetch links + CSS url list + regression test; marketing v.0.67 (FR-014).
 - [ ] T009 Fill the knowledge-file TODOs, confirm the marketing CSP and test with the real platform key on staging (owner).
 - [ ] T010 Release and public verification (not part of this branch).

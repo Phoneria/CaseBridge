@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/olasilik-agaci.html",
+        "web-page/team.html",
+        "web-page/timeline.html",
+        "web-page/investors.html",
+        "web-page/gorsel-kaynaklari.html",
+        "web-page/site-cat-loader.js",
+        "web-page/site-cat.js",
+        "web-page/site-cat.css",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-014",
+        "specs/021-site-cat/spec.md#FR-010"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_release_tool_publishes_every_widget_file",
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_every_marketing_page_lazy_loads_the_current_widget",
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_logic_suite_passes"
+      ],
+      "reason": "Production 24 Nov 2026: v.0.66 published only the loader; make every widget file reachable for the release tool (marketing v.0.67)."
+    }
+  ]
+}

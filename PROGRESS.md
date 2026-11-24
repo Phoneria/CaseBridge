@@ -244,3 +244,11 @@ Status: COMPLETE
 - Firms and their first administrators are opened by the CaseBridge team in the platform panel (/platform); `python -m app.db.create_admin` is removed.
 - Platform admins come from PLATFORM_ADMIN_EMAILS (created and invited on startup, idempotent); demo: platform@demo.casebridge.dev / demo1234.
 - A firm can be suspended: its users cannot sign in, open sessions end, links and reset e-mails stop, reminders are skipped; data stays.
+
+## Release — application v.0.51 (24 Nov 2026)
+Status: APP LIVE · MARKETING ROLLED BACK
+
+- Merged PR #120 (in-app CaseBridge AI cat + firm-scoped data tools, migration `a7c3e9d1f2b4`) and PR #121 (public site cat); CI green on both. Main aad6428 released with the immutable path (stage/canary → activate → verify) after an online DB + storage backup with a verified restore rehearsal.
+- Live: app v.0.51, health ok, migration head `a7c3e9d1f2b4`. `/public/site-chat` CORS and refusals verified in production.
+- Open: the platform OpenAI key is rejected by OpenAI (401), so the site cat cannot answer typed questions; the real firm key works (tool planning + answer verified server-side). The in-app cat UI check needs a signed-in session.
+- Marketing v.0.66 rolled back to v.0.65: the release tool only publishes files linked from HTML/CSS, so the lazily loaded widget files were missing. Fix with marketing v.0.67 in `fix/site-cat-release-files`.

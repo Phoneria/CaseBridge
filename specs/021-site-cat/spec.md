@@ -1,4 +1,4 @@
-# Public "site cat" chat on the marketing website (marketing v.0.66, application v.0.51, unreleased)
+# Public "site cat" chat on the marketing website (marketing v.0.67, application v.0.51)
 
 User request (24 Nov 2026): a floating lawyer-cat on casebridge.com.tr that answers only questions about CaseBridge as a product, fully separate from the in-app CaseBridge AI (no login, no database, no tools, no bureau data), with quick questions that work without the AI, strict abuse limits and no stored conversations.
 
@@ -21,6 +21,7 @@ User request (24 Nov 2026): a floating lawyer-cat on casebridge.com.tr that answ
 - **FR-010**: Widget (`web-page/site-cat-loader.js`, `site-cat.js`, `site-cat-model.mjs`, `site-cat.css`): vanilla JS/CSS under 30 KB uncompressed, lazy-loaded at idle time on all six marketing pages. Bottom-right, draggable with mouse/pen/touch, snaps to the nearest side, position remembered in localStorage (try/catch), kept on screen on resize. Click or Enter opens the panel, Esc and × close it and return focus; full screen below 640 px; respects `prefers-reduced-motion`; dark marketing palette with AA contrast.
 - **FR-011**: Poses from the shared cat art (`web-page/assets/site-cat/`): idle, thinking while waiting, sleeping after 2 minutes without input, dancing when any demo/booking link is clicked, victory briefly after an answer.
 - **FR-012**: Panel: notice "Lütfen kişisel veya dava bilgisi paylaşmayın.", a "Demo planla" button with the existing booking link, four quick-question chips ("Neler yapabiliyor?", "Verilerim güvende mi?", "Yapay zekâ nasıl çalışıyor?", "Demo nasıl alırım?"; English on English pages) answered from a static FAQ with no API call, a 500-character field with counter, and friendly states for busy, unavailable, rate-limited, turn limit, verification and network errors. The conversation lives only in page memory.
+- **FR-014**: Every widget file (loader, module, model, CSS and the ten cat images) must be selected by the release tool's `marketing_files` (it follows HTML/CSS links only): the homepage carries low-priority `prefetch` links for the lazily injected files and `site-cat.css` lists the images as `url()` custom properties. Marketing v.0.67.
 - **FR-013**: Versions: marketing site v.0.66 (`web-page/website-version.json`, homepage meta and footer); application v.0.51 because the backend changed.
 
 ## Success Criteria

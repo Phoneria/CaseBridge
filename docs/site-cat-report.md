@@ -145,3 +145,8 @@ See `specs/021-site-cat/verification.md` for the final numbers.
 - **Existing problems, not caused by this branch:**
   - The existing marketing Playwright scripts (`public-case.cjs`, `night-atlas-*.cjs`) time out at their first step on main's unchanged site too; they are out of date.
   - The homepage shows an empty `bureau-tip` circle at the top-left corner before it is first used.
+
+## Production release (24 Nov 2026)
+- The app went live at v.0.51 (main aad6428). In production the chat endpoint's CORS behaves as designed (marketing origins allowed without credentials, other origins 403), and legal-advice refusals work.
+- **The platform OpenAI key is rejected (401)**, so typed questions get the friendly "unavailable" message. The quick-question chips and refusals still work. The key must be renewed (a secret, not code).
+- Marketing v.0.66 was rolled back to v.0.65: `deployment/release.py` publishes only files reachable from HTML/CSS links, so the widget's lazily injected files were missing. Fix (marketing v.0.67): low-priority `prefetch` links on the homepage and a `url()` list of the cat images in `site-cat.css`, guarded by a test that runs the release tool's own file selection.
