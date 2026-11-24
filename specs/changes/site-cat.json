@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/site_chat/__init__.py",
+        "backend/app/site_chat/knowledge.py",
+        "backend/app/site_chat/guard.py",
+        "backend/app/site_chat/provider.py",
+        "backend/app/site_chat/service.py",
+        "backend/app/api/routes/site_chat.py",
+        "backend/app/main.py"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-001",
+        "specs/021-site-cat/spec.md#FR-002",
+        "specs/021-site-cat/spec.md#FR-003",
+        "specs/021-site-cat/spec.md#FR-004",
+        "specs/021-site-cat/spec.md#FR-005",
+        "specs/021-site-cat/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_site_chat.py::test_route_has_no_auth_database_or_tool_dependency",
+        "backend/tests/api/test_site_chat.py::test_a_turn_touches_no_database_and_no_tool",
+        "backend/tests/api/test_site_chat.py::test_mock_answers_from_the_knowledge_file_in_the_visitors_language",
+        "backend/tests/api/test_site_chat.py::test_off_topic_and_unknown_questions_get_the_demo_link",
+        "backend/tests/api/test_site_chat.py::test_legal_advice_is_refused_without_a_model_call",
+        "backend/tests/api/test_site_chat.py::test_prompt_injection_does_not_change_behaviour",
+        "backend/tests/api/test_site_chat.py::test_real_provider_uses_only_the_platform_key_and_the_site_model_without_tools",
+        "backend/tests/api/test_site_chat.py::test_provider_failure_and_switch_off_answer_politely",
+        "backend/tests/api/test_site_chat.py::test_logs_hold_labels_and_counts_only",
+        "backend/tests/api/test_site_chat.py::test_knowledge_file_is_versioned_and_unknowns_reach_the_model_as_unknown",
+        "backend/tests/api/test_site_chat.py::test_guards"
+      ],
+      "reason": "User request 24 Nov 2026: public site-cat chat endpoint, knowledge-file only, platform key, no DB/tools, deterministic guards."
+    },
+    {
+      "files": [
+        "backend/app/site_chat/limits.py",
+        "backend/app/core/config.py",
+        ".env.example"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-005",
+        "specs/021-site-cat/spec.md#FR-006",
+        "specs/021-site-cat/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_site_chat.py::test_message_length_shape_and_turn_limits",
+        "backend/tests/api/test_site_chat.py::test_per_ip_rate_limits",
+        "backend/tests/api/test_site_chat.py::test_daily_token_budget_turns_into_busy_but_refusals_keep_working",
+        "backend/tests/api/test_site_chat.py::test_turnstile_is_checked_only_when_configured"
+      ],
+      "reason": "Site chat abuse limits, daily token budget, Turnstile and settings."
+    },
+    {
+      "files": [
+        "backend/app/core/public_cors.py"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_site_chat.py::test_cors_allows_only_the_marketing_site_and_localhost"
+      ],
+      "reason": "CORS for /public/* only: marketing origins and localhost, never credentials."
+    },
+    {
+      "files": [
+        "web-page/site-cat-loader.js",
+        "web-page/site-cat.js",
+        "web-page/site-cat-model.mjs",
+        "web-page/site-cat.css",
+        "web-page/index.html",
+        "web-page/olasilik-agaci.html",
+        "web-page/team.html",
+        "web-page/timeline.html",
+        "web-page/investors.html",
+        "web-page/gorsel-kaynaklari.html",
+        "web-page/website-version.json",
+        "frontend/app-version.json",
+        "web-page/assets/site-cat/cat-dancing@128.webp",
+        "web-page/assets/site-cat/cat-dancing@256.webp",
+        "web-page/assets/site-cat/cat-idle@128.webp",
+        "web-page/assets/site-cat/cat-idle@256.webp",
+        "web-page/assets/site-cat/cat-sleeping@128.webp",
+        "web-page/assets/site-cat/cat-sleeping@256.webp",
+        "web-page/assets/site-cat/cat-thinking@128.webp",
+        "web-page/assets/site-cat/cat-thinking@256.webp",
+        "web-page/assets/site-cat/cat-victory@128.webp",
+        "web-page/assets/site-cat/cat-victory@256.webp"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-010",
+        "specs/021-site-cat/spec.md#FR-011",
+        "specs/021-site-cat/spec.md#FR-012",
+        "specs/021-site-cat/spec.md#FR-013"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_logic_suite_passes",
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_every_marketing_page_lazy_loads_the_current_widget",
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_assets_and_privacy"
+      ],
+      "reason": "Site-cat widget on all marketing pages; marketing v.0.66 and application v.0.51."
+    },
+    {
+      "files": [
+        "artifacts/site-cat/desktop-answer.png",
+        "artifacts/site-cat/desktop-busy.png",
+        "artifacts/site-cat/desktop-chips.png",
+        "artifacts/site-cat/desktop-dancing-left.png",
+        "artifacts/site-cat/desktop-english.png",
+        "artifacts/site-cat/desktop-real-backend.png",
+        "artifacts/site-cat/mobile-closed.png",
+        "artifacts/site-cat/mobile-open.png"
+      ],
+      "requirements": [
+        "specs/021-site-cat/spec.md#FR-010",
+        "specs/021-site-cat/spec.md#FR-012"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_site_cat.py::SiteCatAcceptance.test_widget_logic_suite_passes"
+      ],
+      "reason": "Browser-check screenshots (desktop, English, busy, mobile, real backend in mock mode)."
+    }
+  ]
+}
