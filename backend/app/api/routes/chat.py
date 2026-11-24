@@ -24,8 +24,10 @@ from app.schemas.chat import (
     ChatMessageOut,
     ChatStatusOut,
 )
+from app.services.chat_data_tools import ToolPrincipal
 from app.services.chat_service import ChatService
 from app.services.chat_stream import stream_assistant_reply
+from app.services.chat_tool_runner import ChatToolRunner, PageContext
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -115,6 +117,16 @@ def send_message(
     user_message = service.add_user_message(conversation, payload.content)
     assistant = service.create_assistant_placeholder(conversation, provider.model, level)
     history = service.build_history(conversation, level_config.history_limit, system_prompt_for(level))
+    tool_runner = None
+    if payload.data_tools:
+        context = payload.context
+        tool_runner = ChatToolRunner(
+            provider=provider,
+            principal=ToolPrincipal.of(current_user),
+            conversation_id=conversation.id,
+            session_factory=session_factory,
+            context=PageContext(route=context.route, case_id=context.case_id) if context else None,
+        )
     start_event = {
         "type": "start",
         "user_message": ChatMessageOut.model_validate(user_message).model_dump(mode="json"),
@@ -128,6 +140,7 @@ def send_message(
             assistant_message_id=assistant.id,
             conversation_id=conversation.id,
             session_factory=session_factory,
+            tool_runner=tool_runner,
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},

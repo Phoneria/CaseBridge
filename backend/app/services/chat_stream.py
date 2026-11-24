@@ -5,11 +5,15 @@ the final state of the assistant message is written through a fresh session
 from `session_factory` when the stream ends - completed, failed, or closed
 early by the client (status 'stopped'). A reply cut off by the token cap
 (provider finish reason "length") is saved as complete with truncated=True,
-or as an error when nothing usable was produced."""
+or as an error when nothing usable was produced.
+
+With a ChatToolRunner (CaseBridge AI data tools) the read-only tools run
+first: "tool" progress events, then one "sources" event with the links the
+answer may cite; the same sources ride on the final "done" event."""
 import json
 import logging
 import time
-from typing import AsyncIterator, Callable
+from typing import AsyncIterator, Callable, Optional
 
 from sqlalchemy.orm import Session
 from starlette.concurrency import iterate_in_threadpool
@@ -19,6 +23,7 @@ from app.ai.errors import AIProviderError
 from app.models.chat import ChatConversation, ChatMessage, ChatMessageStatus
 from app.schemas.chat import ChatMessageOut
 from app.services.chat_service import utcnow
+from app.services.chat_tool_runner import ChatToolRunner
 
 logger = logging.getLogger("casebridge")
 
@@ -82,12 +87,21 @@ async def stream_assistant_reply(
     assistant_message_id: str,
     conversation_id: str,
     session_factory: Callable[[], Session],
+    tool_runner: Optional[ChatToolRunner] = None,
 ) -> AsyncIterator[str]:
     parts: list[str] = []
     status = ChatMessageStatus.STOPPED
     started = time.monotonic()
+    sources: list[dict] = []
     try:
         yield sse(start_event)
+        if tool_runner is not None:
+            async for event in iterate_in_threadpool(tool_runner.run(history)):
+                yield sse(event)
+            history = tool_runner.final_history(history)
+            sources = [source.as_dict() for source in tool_runner.sources]
+            if tool_runner.calls:
+                yield sse({"type": "sources", "sources": sources})
         try:
             async for chunk in iterate_in_threadpool(provider.stream(history)):
                 parts.append(chunk)
@@ -133,7 +147,7 @@ async def stream_assistant_reply(
             yield sse({"type": "error", "message": DELETED_MESSAGE})
         else:
             status = ChatMessageStatus.COMPLETE
-            yield sse({"type": "done", "message": saved})
+            yield sse({"type": "done", "message": saved, **({"sources": sources} if tool_runner is not None else {})})
     finally:
         if status == ChatMessageStatus.STOPPED:
             _persist(

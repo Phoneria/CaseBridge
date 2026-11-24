@@ -723,10 +723,26 @@ export interface ChatConversation extends ChatConversationSummary {
   messages: ChatMessage[];
 }
 
+/** A record the CaseBridge AI answer used (data tools); href is an app path. */
+export interface ChatSource {
+  kind: "case" | "document" | "precedent" | "client" | "calendar";
+  id: string;
+  label: string;
+  href: string;
+}
+
+/** Page context the floating assistant sends with a data-tools question. */
+export interface ChatPageContext {
+  route: string;
+  case_id?: string | null;
+}
+
 export type ChatStreamEvent =
   | { type: "start"; user_message: ChatMessage; assistant_message_id: string }
+  | { type: "tool"; name: string; status: "start" | "done"; count?: number }
+  | { type: "sources"; sources: ChatSource[] }
   | { type: "delta"; text: string }
-  | { type: "done"; message: ChatMessage | null }
+  | { type: "done"; message: ChatMessage | null; sources?: ChatSource[] }
   | { type: "error"; message: string };
 
 export type ClientType = "person" | "company";

@@ -1,0 +1,5 @@
+# Plan
+- Backend: `app/services/chat_data_tools.py` (ToolPrincipal, eight tool handlers over existing services, limits, link building, workspace check), `app/services/chat_tool_runner.py` (planning rounds, call cap, audit rows, document wrapping, results turn, data-aware system prompt, route hint), `ToolCall` + `ChatProvider.plan_tool_calls` (OpenAI, Claude, mock; default none), prompts in `app/ai/chat/prompt.py` (`NO_CASE_ACCESS_LINE` extracted so the base prompt text is unchanged), `chat_stream.stream_assistant_reply(tool_runner=…)`, `ChatMessageCreate.data_tools/context`, `firm_precedents()` extracted from the precedents route.
+- Frontend: `lib/mascot.ts` (state machine, page detection, snap/clamp, safe storage, case-viewed event), `components/mascot/AiMascot.tsx` (pointer drag, shortcut, timers, crossfade), `components/mascot/MascotChatPanel.tsx` (existing chat API + SSE reader with `dataTools`), `AppShell` mount with `canUseAiAssistant`, case page announces its outcome, audit labels, `ChatSource`/stream event types.
+- No migration, no new dependency, no new service. Audit rows reuse `management_audits`.
+- Version: `node scripts/update-version.mjs` → 0.50.

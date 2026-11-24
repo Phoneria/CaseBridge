@@ -1,12 +1,13 @@
 """OpenAI streaming chat provider. Works unchanged with OpenAI
 fine-tuned models: set CHAT_MODEL to the `ft:...` model id."""
+import json
 import logging
 from typing import Any, Iterator, Optional
 
 import httpx
 import openai
 
-from app.ai.chat.base import ChatProvider, ChatTurn
+from app.ai.chat.base import PLAN_MAX_TOKENS, ChatProvider, ChatTurn, ToolCall
 from app.ai.errors import AIProviderError, AIProviderTimeoutError
 
 logger = logging.getLogger("casebridge")
@@ -34,15 +35,43 @@ class OpenAIChatProvider(ChatProvider):
         self.last_usage = None
         self.last_finish_reason = None
 
+    def _ensure_client(self):
+        if self._client is None:
+            client_kwargs: dict[str, Any] = {"api_key": self._api_key, "timeout": self._timeout}
+            if self._max_retries is not None:
+                client_kwargs["max_retries"] = self._max_retries
+            self._client = openai.OpenAI(**client_kwargs)
+        return self._client
+
+    def plan_tool_calls(self, messages: list[ChatTurn], tools: list[dict]) -> list[ToolCall]:
+        try:
+            response = self._ensure_client().chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=[{"type": "function", "function": tool} for tool in tools],
+                tool_choice="auto",
+                max_completion_tokens=PLAN_MAX_TOKENS,
+            )
+        except openai.APITimeoutError as exc:
+            raise AIProviderTimeoutError("AI sağlayıcısı zaman aşımına uğradı. Lütfen tekrar deneyin.") from exc
+        except Exception as exc:
+            logger.warning("OpenAI tool planning failed (%s)", type(exc).__name__)
+            raise AIProviderError("AI sağlayıcısı bir hata döndürdü. Lütfen tekrar deneyin.") from exc
+        calls: list[ToolCall] = []
+        for choice in response.choices[:1]:
+            for call in getattr(choice.message, "tool_calls", None) or []:
+                try:
+                    arguments = json.loads(call.function.arguments or "{}")
+                except ValueError:
+                    arguments = {}
+                calls.append(ToolCall(call.function.name, arguments if isinstance(arguments, dict) else {}))
+        return calls
+
     def stream(self, messages: list[ChatTurn]) -> Iterator[str]:
         self.last_usage = None
         self.last_finish_reason = None
         try:
-            if self._client is None:
-                client_kwargs: dict[str, Any] = {"api_key": self._api_key, "timeout": self._timeout}
-                if self._max_retries is not None:
-                    client_kwargs["max_retries"] = self._max_retries
-                self._client = openai.OpenAI(**client_kwargs)
+            self._ensure_client()
             limits = {"max_completion_tokens": self.max_tokens} if self.max_tokens else {}
             response = self._client.chat.completions.create(
                 model=self.model,

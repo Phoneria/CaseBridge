@@ -299,3 +299,21 @@ describe("case intake API", () => {
     expect(fetchMock.mock.calls[1][1].body).toBeUndefined();
   });
 });
+
+describe("openChatStream", () => {
+  it("asks for data tools and sends the page context only when the assistant opts in", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, body: null });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    const { openChatStream } = await import("@/lib/api");
+
+    await openChatStream("c1", "Merhaba");
+    await openChatStream("c1", "Duruşmalar?", undefined, { dataTools: true, context: { route: "/davalar/x", case_id: "x" } });
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ content: "Merhaba" });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+      content: "Duruşmalar?",
+      data_tools: true,
+      context: { route: "/davalar/x", case_id: "x" },
+    });
+  });
+});

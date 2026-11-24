@@ -1,7 +1,7 @@
 """Claude Messages streaming for a single bureau."""
 import anthropic
 
-from app.ai.chat.base import ChatProvider
+from app.ai.chat.base import PLAN_MAX_TOKENS, ChatProvider, ToolCall
 from app.ai.errors import AIProviderError, AIProviderTimeoutError
 
 
@@ -28,3 +28,20 @@ class ClaudeChatProvider(ChatProvider):
             raise AIProviderTimeoutError("Claude yanıt süresini aştı.") from None
         except anthropic.AnthropicError:
             raise AIProviderError("Claude yanıtı alınamadı.") from None
+
+    def plan_tool_calls(self, messages, tools):
+        system = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
+        try:
+            response = self.client.messages.create(
+                model=self.model, system=system, max_tokens=PLAN_MAX_TOKENS,
+                messages=[m for m in messages if m["role"] != "system"],
+                tools=[{"name": t["name"], "description": t["description"], "input_schema": t["parameters"]} for t in tools],
+            )
+        except anthropic.APITimeoutError:
+            raise AIProviderTimeoutError("Claude yanıt süresini aştı.") from None
+        except anthropic.AnthropicError:
+            raise AIProviderError("Claude yanıtı alınamadı.") from None
+        return [
+            ToolCall(block.name, block.input if isinstance(block.input, dict) else {})
+            for block in response.content if getattr(block, "type", None) == "tool_use"
+        ]
