@@ -894,7 +894,7 @@ export function anonymizeText(text: string): Promise<MaskedTextResult> {
   return request<MaskedTextResult>("/privacy/anonymize", {method: "POST", body: JSON.stringify({text}), cache: "no-store"});
 }
 
-export interface ExtractedPrivacyText {text: string; format: "pdf" | "docx" | "text"; warnings: string[];}
+export interface ExtractedPrivacyText {text: string; format: "pdf" | "docx" | "udf" | "text"; warnings: string[];}
 export function extractPrivacyFile(file: File): Promise<ExtractedPrivacyText> {
   return request<ExtractedPrivacyText>("/privacy/extract-text", {
     method: "POST", body: file, headers: {"Content-Type": "application/octet-stream"}, cache: "no-store",

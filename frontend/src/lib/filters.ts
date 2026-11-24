@@ -223,7 +223,7 @@ export interface DocumentListQuery {
 }
 
 export const DOCUMENT_LIST_PARAM_KEYS = ["ara", "tur", "dava"] as const;
-const DOCUMENT_TYPES: DocumentItem["file_type"][] = ["pdf", "docx", "txt"];
+const DOCUMENT_TYPES: DocumentItem["file_type"][] = ["pdf", "docx", "txt", "udf"];
 
 export function parseDocumentListQuery(params: ParamSource): DocumentListQuery {
   const ara = params.get("ara")?.trim();

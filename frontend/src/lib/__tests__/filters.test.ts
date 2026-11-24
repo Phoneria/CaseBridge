@@ -111,6 +111,7 @@ describe("document list query", () => {
   const docs: DocumentWithCase[] = [
     { id: "d1", case_id: "c1", case_name: "A", case_number: "1", filename: "Sözleşme.pdf", file_type: "pdf", extracted_text: null, uploaded_at: "2026-01-01" },
     { id: "d2", case_id: "c2", case_name: "B", case_number: "2", filename: "notlar.txt", file_type: "txt", extracted_text: null, uploaded_at: "2026-01-02" },
+    { id: "d3", case_id: "c2", case_name: "B", case_number: "2", filename: "Bilirkişi Raporu.udf", file_type: "udf", extracted_text: null, uploaded_at: "2026-01-03" },
   ];
 
   it("filters by type, case and case-insensitive Turkish filename search", () => {
@@ -118,6 +119,11 @@ describe("document list query", () => {
     expect(filterDocuments(docs, { tur: "txt" }).map((d) => d.id)).toEqual(["d2"]);
     expect(filterDocuments(docs, { dava: "c1" }).map((d) => d.id)).toEqual(["d1"]);
     expect(filterDocuments(docs, { ara: "SÖZ" }).map((d) => d.id)).toEqual(["d1"]);
+  });
+
+  it("parses and filters the udf type", () => {
+    expect(parseDocumentListQuery(new URLSearchParams("tur=udf"))).toEqual({ tur: "udf" });
+    expect(filterDocuments(docs, { tur: "udf" }).map((d) => d.id)).toEqual(["d3"]);
   });
 });
 

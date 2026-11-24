@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/services/udf_reader.py",
+        "backend/app/services/text_extraction.py"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-002",
+        "specs/022-udf-import/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_udf_reader.py::test_reads_turkish_text_from_cdata",
+        "backend/tests/unit/test_udf_reader.py::test_header_and_table_text_are_included",
+        "backend/tests/unit/test_udf_reader.py::test_signed_udf_is_read_and_signature_ignored",
+        "backend/tests/unit/test_udf_reader.py::test_crlf_and_cr_become_lf",
+        "backend/tests/unit/test_udf_reader.py::test_escaped_text_without_cdata",
+        "backend/tests/unit/test_udf_reader.py::test_declared_windows_1254_encoding",
+        "backend/tests/unit/test_udf_reader.py::test_java_style_utf8_encoding_name_is_read",
+        "backend/tests/unit/test_udf_reader.py::test_wrong_root_is_invalid",
+        "backend/tests/unit/test_udf_reader.py::test_doctype_is_rejected_without_leaking_text",
+        "backend/tests/unit/test_udf_reader.py::test_too_many_members_hits_the_limit",
+        "backend/tests/unit/test_udf_reader.py::test_expanded_size_hits_the_limit",
+        "backend/tests/unit/test_udf_reader.py::test_encrypted_member_is_invalid",
+        "backend/tests/unit/test_udf_reader.py::test_many_elements_do_not_build_a_document_tree",
+        "backend/tests/unit/test_udf_reader.py::test_deeply_nested_xml_is_invalid",
+        "backend/tests/unit/test_udf_reader.py::test_is_udf"
+      ],
+      "reason": "UDF reader: text from content.xml <template><content>, stdlib only, archive/XML/depth/memory limits and content-free errors."
+    },
+    {
+      "files": [
+        "backend/app/models/document.py",
+        "backend/app/services/document_service.py",
+        "backend/app/api/routes/documents.py",
+        "backend/app/api/routes/bureau.py",
+        "backend/app/db/import_cases.py"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-001",
+        "specs/022-udf-import/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_documents.py::test_upload_udf_extracts_text_and_downloads_original",
+        "backend/tests/api/test_documents.py::test_upload_uppercase_udf_extension",
+        "backend/tests/api/test_documents.py::test_broken_or_scanned_udf_is_saved_without_text",
+        "backend/tests/api/test_documents.py::test_unsupported_type_message_lists_udf",
+        "backend/tests/api/test_bureau_management.py::test_workspace_download_serves_udf_as_binary",
+        "backend/tests/unit/test_import_cases.py::test_imports_udf_document"
+      ],
+      "reason": "Case uploads, CLI import and both download routes accept and return UDF files unchanged as binary."
+    },
+    {
+      "files": [
+        "backend/alembic/versions/e2b4d6f8a1c3_document_type_udf.py",
+        "backend/alembic/versions/f3a5c7e9b1d2_merge_udf_and_chat_sources_heads.py"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_document_type_udf_migration.py::test_udf_migration_upgrades_and_downgrades_on_sqlite"
+      ],
+      "reason": "documenttype gains udf on PostgreSQL; merge revision keeps a single Alembic head after main's chat-sources migration."
+    },
+    {
+      "files": [
+        "backend/app/privacy/files.py",
+        "backend/app/api/routes/privacy.py"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_privacy_files.py::test_udf_extract_through_isolated_worker",
+        "backend/tests/api/test_privacy_files.py::test_odt_like_zip_is_not_treated_as_udf",
+        "backend/tests/api/test_privacy_files.py::test_invalid_udf_returns_fixed_message",
+        "backend/tests/api/test_privacy_files.py::test_udf_without_text_needs_ocr"
+      ],
+      "reason": "Privacy tool reads UDF in the isolated worker with a fixed warning; ODT is not mistaken for UDF."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/case_intake.py",
+        "backend/app/schemas/case_intake.py",
+        "backend/app/services/case_intake_service.py"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_case_intake.py::test_a_udf_file_is_read",
+        "backend/tests/api/test_case_intake.py::test_an_unreadable_udf_is_rejected_with_the_hint",
+        "backend/tests/api/test_case_intake.py::test_the_text_read_from_a_file_is_returned",
+        "backend/tests/api/test_case_intake.py::test_only_the_part_sent_to_the_model_is_returned_for_long_documents"
+      ],
+      "reason": "AI fill reads UDF and returns exactly the text the model read (source_text)."
+    },
+    {
+      "files": [
+        "frontend/src/components/CaseCloseModal.tsx",
+        "frontend/src/components/CaseDocumentsPanel.tsx",
+        "frontend/src/components/DocumentsView.tsx",
+        "frontend/src/components/ai/AnonymizationView.tsx",
+        "frontend/src/components/case-form/FollowUpFields.tsx",
+        "frontend/src/lib/caseIntake.ts",
+        "frontend/src/lib/filters.ts",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-001",
+        "specs/022-udf-import/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/CaseCloseModal.test.tsx::offers pdf, docx, txt and udf in the file picker",
+        "frontend/src/components/__tests__/CaseDocumentsPanelReadOnly.test.tsx::names UDF and accepts .udf files in the upload zone",
+        "frontend/src/lib/__tests__/filters.test.ts::parses and filters the udf type",
+        "frontend/src/lib/__tests__/caseIntake.test.ts::accepts pdf, docx, txt and udf up to 10 MB",
+        "frontend/src/components/__tests__/AnonymizationView.test.tsx::shows UDF as the read format with its warning"
+      ],
+      "reason": "Every picker uses the shared extension list with .udf; copy names UDF; UDF filter; privacy view shows the UDF format."
+    },
+    {
+      "files": [
+        "frontend/src/components/case-form/IntakeFillBox.tsx",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/IntakeFillBox.test.tsx::shows the text read from a chosen file in a closed section after filling",
+        "frontend/src/components/__tests__/IntakeFillBox.test.tsx::says only the part the AI read is shown for a long document",
+        "frontend/src/components/__tests__/IntakeFillBox.test.tsx::does not repeat pasted text in a read-text section",
+        "frontend/src/components/__tests__/IntakeFillBox.test.tsx::drops the read text when another file is chosen or the draft is declined"
+      ],
+      "reason": "User request 24 Nov 2026: show the text read from the uploaded document under Belgeden doldur."
+    },
+    {
+      "files": [
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/022-udf-import/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_udf_import.py::UdfImportAcceptance.test_app_version_manifest_matches_the_sources"
+      ],
+      "reason": "Application version regenerated from main's manifest after each main merge (v.0.53), never hand-edited."
+    }
+  ]
+}

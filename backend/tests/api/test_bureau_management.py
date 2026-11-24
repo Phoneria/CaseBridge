@@ -240,3 +240,19 @@ def test_ai_budget_is_bureau_scoped_without_touching_credentials(client, data):
     assert updated.json()["policy"]["token_budget"] == 1000
     assert client.get("/bureau/ai-usage", headers=data["other"]).json()["policy"]["token_budget"] == 0
     assert client.put("/bureau/ai-budget", headers=data["admin"], json=payload).status_code == 409
+
+
+def test_workspace_download_serves_udf_as_binary(client, data, office, db_session):
+    from app.services.document_service import DocumentService
+    from tests.udf_samples import make_udf
+
+    raw = make_udf("Paylaşılan karar")
+    doc = DocumentService(db_session).upload(case_id=data["a"].id, law_firm_id=office.firm_a.id, filename="Karar.udf", raw_bytes=raw, uploaded_by=office.admin_a.id)
+    db_session.commit()
+    grant = {"position": "lawyer", "case_ids": [data["a"].id], "reason": "Sentetik dosya yetkisi"}
+    assert client.put(f"/bureau/access/{office.lawyer_a2.id}", headers=data["admin"], json=grant).status_code == 200
+
+    download = client.get(f"/bureau/workspace/documents/{doc.id}", headers=data["reviewer"])
+
+    assert download.status_code == 200 and download.content == raw
+    assert download.headers["content-type"] == "application/octet-stream"

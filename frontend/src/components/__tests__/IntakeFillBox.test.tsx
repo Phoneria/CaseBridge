@@ -14,6 +14,7 @@ import type { CaseIntakeResult } from "@/types";
 const RESULT: CaseIntakeResult = {
   truncated: false,
   source_chars: 120,
+  source_text: "Davacı vekili dilekçesi\nDavalı: Ahmet Kaya",
   draft: {
     case_name: "Alacak Davası",
     case_type: "ticaret_hukuku",
@@ -85,12 +86,62 @@ describe("IntakeFillBox", () => {
     expect(screen.getByText("Belge uzun olduğu için yalnızca ilk kısmı okundu.")).toBeInTheDocument();
   });
 
+  it("shows the text read from a chosen file in a closed section after filling", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await userEvent.upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "dilekce.udf"));
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+
+    const summary = await screen.findByText("Belgeden okunan metin (dilekce.udf)");
+    const text = screen.getByLabelText("Belgeden okunan metin");
+    expect(text).not.toBeVisible();
+    await userEvent.click(summary);
+    expect(text).toBeVisible();
+    expect(text).toHaveTextContent("Davacı vekili dilekçesi Davalı: Ahmet Kaya");
+    expect(text.textContent).toBe("Davacı vekili dilekçesi\nDavalı: Ahmet Kaya");
+    expect(screen.queryByText("Belge uzun olduğu için yalnızca AI'ın okuduğu ilk kısım gösteriliyor.")).toBeNull();
+  });
+
+  it("says only the part the AI read is shown for a long document", async () => {
+    extractCaseIntake.mockResolvedValue({ ...RESULT, truncated: true });
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await userEvent.upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "karar.pdf", { type: "application/pdf" }));
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+
+    await userEvent.click(await screen.findByText("Belgeden okunan metin (karar.pdf)"));
+    expect(screen.getByText("Belge uzun olduğu için yalnızca AI'ın okuduğu ilk kısım gösteriliyor.")).toBeVisible();
+  });
+
+  it("does not repeat pasted text in a read-text section", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await pasteAndFill();
+    await screen.findByText("AI taslağıdır; kaydetmeden önce kontrol edin.");
+    expect(screen.queryByLabelText("Belgeden okunan metin")).toBeNull();
+  });
+
+  it("drops the read text when another file is chosen or the draft is declined", async () => {
+    extractCaseIntake.mockResolvedValue(RESULT);
+    const { rerender } = render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
+    await userEvent.upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "ilk.pdf", { type: "application/pdf" }));
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+    await screen.findByText("Belgeden okunan metin (ilk.pdf)");
+
+    await userEvent.upload(screen.getByLabelText("Doldurulacak belge"), new File(["y"], "ikinci.pdf", { type: "application/pdf" }));
+    expect(screen.queryByLabelText("Belgeden okunan metin")).toBeNull();
+
+    rerender(<IntakeFillBox hasContent onDraft={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Doldur" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Vazgeç" }));
+    expect(screen.queryByLabelText("Belgeden okunan metin")).toBeNull();
+  });
+
   it("rejects an unsupported file before calling the API", async () => {
     render(<IntakeFillBox hasContent={false} onDraft={vi.fn()} />);
     await userEvent
       .setup({ applyAccept: false })
       .upload(screen.getByLabelText("Doldurulacak belge"), new File(["x"], "foto.png", { type: "image/png" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("foto.png desteklenmeyen bir dosya türü (pdf, docx, txt).");
+    expect(screen.getByRole("alert")).toHaveTextContent("foto.png desteklenmeyen bir dosya türü (pdf, docx, txt, udf).");
     expect(screen.getByRole("button", { name: "Doldur" })).toBeDisabled();
     expect(extractCaseIntake).not.toHaveBeenCalled();
   });

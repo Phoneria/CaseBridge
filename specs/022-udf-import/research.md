@@ -1,0 +1,6 @@
+# Research
+- UYAP has no public API for private software; integrations are institution protocols. Avukat Portal rule 9 blocks robot-speed use and simultaneous logins from different IPs for 3 hours, and since 1 June 2026 login is only via "Adalet E-İmza Uygulaması" or e-Devlet — so server-side access from the cloud is out; file-level compatibility (UDF) is the safe first step. Notes: project doc `claude/arastirma-uyap-entegrasyonu.md`.
+- A UDF is a ZIP whose `content.xml` (`<template format_id="1.8">`) holds the whole text in `<content>` (CDATA); `<elements>` only references it by offset and length. The `udfpdf` npm package's plain-text output reads the same block. `udf-tools` 0.1.0 (PyPI) has no working loader.
+- An OpenDocument file also has a root `content.xml`; it always has a `mimetype` member, which a UDF does not.
+- Independent review (24 Nov) measured 430–740 MB RSS for a 16 KB upload with ElementTree's tree builder; the streaming target and depth cap remove that. It also found the workspace download served UDF as `text/plain`, and that expat rejects Java's `UTF8` name.
+- Main's #120 added `a7c3e9d1f2b4` on the same parent as the UDF migration; without a merge revision backend start-up (`alembic upgrade head`) fails.

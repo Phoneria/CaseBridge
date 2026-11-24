@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { deleteDocument, downloadDocument } from "@/lib/api";
+import { DOCUMENT_EXTENSIONS } from "@/lib/caseIntake";
 import { saveBlob } from "@/lib/download";
 import { formatDate } from "@/lib/labels";
 import { OUTCOME_LABELS, parseDocument, splitMatches, type DocOutcome } from "@/lib/documentParse";
@@ -172,13 +173,13 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
       }`}
     >
       <label htmlFor="document-upload" className="block cursor-pointer text-sm font-medium text-accent-700">
-        {uploading ? "Yükleniyor..." : "Belge Yükle (PDF, DOCX, TXT)"}
+        {uploading ? "Yükleniyor..." : "Belge Yükle (PDF, DOCX, TXT, UDF)"}
       </label>
       <p className="mt-0.5 text-[11px] text-navy-500">veya dosyayı buraya sürükleyin</p>
       <input
         id="document-upload"
         type="file"
-        accept=".pdf,.docx,.txt"
+        accept={DOCUMENT_EXTENSIONS.join(",")}
         disabled={uploading}
         className="hidden"
         onChange={(e) => {
@@ -195,7 +196,7 @@ export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, up
       <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         {uploadZone}
         {uploadError && <ErrorState message={uploadError} />}
-        <EmptyState message="Henüz belge yok." hint={readOnly ? undefined : "Bu davaya PDF, DOCX veya TXT belge yükleyin."} />
+        <EmptyState message="Henüz belge yok." hint={readOnly ? undefined : "Bu davaya PDF, DOCX, TXT veya UDF belge yükleyin."} />
       </div>
     );
   }

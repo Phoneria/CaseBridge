@@ -67,6 +67,16 @@ it('loads a document, clears old result and requires explicit masking', async ()
   expect(picker).toHaveValue('');expect(screen.getByLabelText('Kaynak metin')).toHaveValue('');
 });
 
+it('shows UDF as the read format with its warning', async () => {
+  const warning='UDF içindeki tablolar düz metin olarak alındı; görseller ve biçimlendirme okunmadı.';
+  vi.mocked(extractPrivacyFile).mockResolvedValue({text:'udf@example.test',format:'udf',warnings:[warning]});
+  render(<AnonymizationView/>);
+  await userEvent.upload(screen.getByLabelText('Dosya yükle'),new File(['synthetic'],'karar.udf'));
+  await waitFor(()=>expect(screen.getByLabelText('Kaynak metin')).toHaveValue('udf@example.test'));
+  expect(screen.getByText('Okunan biçim: UDF')).toBeVisible();
+  expect(screen.getByText(warning)).toBeVisible();
+});
+
 it('ignores extracted text after editing or clearing the source', async () => {
   let finish!: (value: {text:string;format:'text';warnings:string[]})=>void;
   vi.mocked(extractPrivacyFile).mockReturnValue(new Promise(resolve=>{finish=resolve;}));

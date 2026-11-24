@@ -53,4 +53,9 @@ def extract_case_draft(
         result = CaseIntakeService(provider).extract(document_text)
     except CaseIntakeError as exc:
         raise HTTPException(exc.status_code, exc.detail)
-    return CaseIntakeExtractOut(draft=result.draft, truncated=result.truncated, source_chars=result.source_chars)
+    return CaseIntakeExtractOut(
+        draft=result.draft,
+        truncated=result.truncated,
+        source_chars=result.source_chars,
+        source_text=result.source_text,
+    )

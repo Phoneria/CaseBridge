@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 import { closeCase, completeDecision, uploadDocument } from "@/lib/api";
-import { checkDocumentFile } from "@/lib/caseIntake";
+import { checkDocumentFile, DOCUMENT_EXTENSIONS } from "@/lib/caseIntake";
 import {
   CLOSING_OUTCOME_OPTIONS,
   buildClosePayload,
@@ -156,7 +156,7 @@ export function CaseCloseModal({ caseId, missingDecision = false, decisionDate, 
           <input
             id="closing_document"
             type="file"
-            accept=".pdf,.docx,.txt"
+            accept={DOCUMENT_EXTENSIONS.join(",")}
             onChange={(e) => pickFile(e.target.files?.[0])}
             className="block w-full text-sm text-navy-700"
           />

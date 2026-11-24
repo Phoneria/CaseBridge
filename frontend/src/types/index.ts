@@ -142,6 +142,8 @@ export interface CaseIntakeResult {
   draft: CaseIntakeDraft;
   truncated: boolean;
   source_chars: number;
+  /** Exactly the text the AI read (the first part of a long document). */
+  source_text: string;
 }
 
 export interface CaseEvent {
@@ -463,7 +465,7 @@ export interface DocumentItem {
   id: string;
   case_id: string;
   filename: string;
-  file_type: "pdf" | "docx" | "txt";
+  file_type: "pdf" | "docx" | "txt" | "udf";
   extracted_text: string | null;
   uploaded_at: string;
 }

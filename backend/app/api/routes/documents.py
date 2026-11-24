@@ -11,7 +11,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.document import DocumentOut, DocumentWithCaseOut
 from app.services.case_service import CaseService
-from app.services.document_service import DocumentService
+from app.services.document_service import DocumentService, media_type_for
 
 cases_router = APIRouter(prefix="/cases", tags=["documents"])
 documents_router = APIRouter(prefix="/documents", tags=["documents"])
@@ -88,13 +88,6 @@ def list_all_documents(
     ]
 
 
-_MEDIA_TYPES = {
-    "pdf": "application/pdf",
-    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "txt": "text/plain; charset=utf-8",
-}
-
-
 @documents_router.get("/{document_id}/download")
 def download_document(
     document_id: str,
@@ -122,7 +115,7 @@ def download_document(
     commit(db)
     return FileResponse(
         path,
-        media_type=_MEDIA_TYPES.get(document.file_type.value, "application/octet-stream"),
+        media_type=media_type_for(document),
         filename=document.filename,
     )
 
