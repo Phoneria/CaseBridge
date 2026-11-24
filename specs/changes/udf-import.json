@@ -148,7 +148,7 @@
       "acceptance_tests": [
         "scripts/tests/test_udf_import.py::UdfImportAcceptance.test_app_version_manifest_matches_the_sources"
       ],
-      "reason": "Application v.0.52 regenerated from main's v.0.51 manifest after the merge conflict."
+      "reason": "Application version regenerated from main's manifest after each main merge (v.0.53), never hand-edited."
     }
   ]
 }

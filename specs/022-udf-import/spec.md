@@ -1,4 +1,4 @@
-# UDF (UYAP Doküman Formatı) import and the read text in "Belgeden doldur" (application v.0.52, unreleased)
+# UDF (UYAP Doküman Formatı) import and the read text in "Belgeden doldur" (application v.0.53, unreleased)
 
 User request (18 Nov–24 Nov 2026): as the first, risk-free step of UYAP integration, accept the `.udf` files lawyers download from UYAP wherever CaseBridge accepts documents and read their text, so Dosya Analizi, Canlı Duruşma, AI fill and the privacy tool work with real UYAP documents. Follow-up (24 Nov): after "Belgeden doldur", show the text that was read from the uploaded file. Exporting or creating UDF files is out of scope. Design notes: `docs/superpowers/specs/2026-11-24-udf-import-design.md`.
 
@@ -18,7 +18,7 @@ User request (18 Nov–24 Nov 2026): as the first, risk-free step of UYAP integr
 - **FR-006**: Privacy tool: a ZIP with `content.xml` and neither `word/document.xml` nor `mimetype` is read as a UDF in the isolated worker and returned with format `udf` and the warning "UDF içindeki tablolar düz metin olarak alındı; görseller ve biçimlendirme okunmadı." An ODT keeps the existing generic error; a UDF without text gets the existing OCR message.
 - **FR-007**: `POST /case-intake/extract` reads UDF files; an unreadable UDF is a 422 with the existing hint. The response adds `source_text`: exactly the text sent to the model (the first `case_intake_max_chars`, 30,000, characters).
 - **FR-008**: "Belgeden doldur": after a fill from a file, a closed-by-default section "Belgeden okunan metin (<file name>)" shows `source_text` in a scrollable, focusable region, with "Belge uzun olduğu için yalnızca AI'ın okuduğu ilk kısım gösteriliyor." for a long document. It is not shown for pasted text and disappears when another file is chosen, the mode changes, a new fill starts or the overwrite is declined.
-- **FR-009**: Application version v.0.52: `frontend/app-version.json` is regenerated with `frontend/scripts/update-version.mjs` from main's v.0.51 manifest and passes `--check`.
+- **FR-009**: Application version: after every main merge `frontend/app-version.json` is regenerated with `frontend/scripts/update-version.mjs` from main's manifest (never hand-edited) and passes `--check`; v.0.53 after merging main v.0.52.
 
 ## Success Criteria
 - Reader tests prove the text source, normalization, encodings, every limit, DOCTYPE rejection without leaking text, the depth cap and a bounded memory peak for 400,000 elements.
