@@ -145,3 +145,17 @@ See `specs/021-site-cat/verification.md` for the final numbers.
 - **Existing problems, not caused by this branch:**
   - The existing marketing Playwright scripts (`public-case.cjs`, `night-atlas-*.cjs`) time out at their first step on main's unchanged site too; they are out of date.
   - The homepage shows an empty `bureau-tip` circle at the top-left corner before it is first used.
+
+## Production release (24 Nov 2026)
+- The app went live at v.0.51 (main aad6428). In production the chat endpoint's CORS behaves as designed (marketing origins allowed without credentials, other origins 403), and legal-advice refusals work.
+- **The platform OpenAI key is rejected (401)**, so typed questions get the friendly "unavailable" message. The quick-question chips and refusals still work. The key must be renewed (a secret, not code).
+- Marketing v.0.66 was rolled back to v.0.65: `deployment/release.py` publishes only files reachable from HTML/CSS links, so the widget's lazily injected files were missing. Fix (marketing v.0.67): low-priority `prefetch` links on the homepage and a `url()` list of the cat images in `site-cat.css`, guarded by a test that runs the release tool's own file selection.
+
+## Follow-up: section-driven poses and the topic rule (marketing v.0.68, application v.0.52)
+- **Poses follow the section in view** (IntersectionObserver; the most visible section wins). Hero → idle, Geçmiş analiz → researching, Olasılık Ağacı → thinking, Anonimleştirme → working, Büro yönetimi → reading, Sufle and Simülasyon → courtroom, Ekip → dancing.
+  - Every 10 s in the same section, the pose alternates in a fixed order: section pose, idle, section pose, tea-break.
+  - The panel and visitor states override the section: thinking while waiting, working while the answer is written out (about 0.9 s), victory on the first demo click of the visit, sleeping after 60 s without input.
+  - Poses crossfade over 300 ms between two stacked images, and all ten poses are preloaded at idle time.
+  - With reduced motion, I took "change only on section change" literally: the pose changes only with the section.
+- **Size budget:** the readable source is 32.9 KB uncompressed and about 12 KB gzipped (the server compresses). The test now enforces under 34 KB uncompressed and under 15 KB gzipped, instead of stripping comments; the static site has no build step.
+- **Topic rule:** off-topic and unknown answers now point to what the cat can answer. New borderline tests cover a UYAP question (unknown, so "bilgim yok" plus the demo link), "boşanma davası açmak istiyorum" (refused as legal advice) and "hava nasıl" (refused, with the pointer). The changed message is application behaviour, so the app version is v.0.52; it goes live with the next app release.

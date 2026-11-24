@@ -3,12 +3,13 @@
 export const BOOKING_URL = 'https://calendar.app.google/RL4CxQFEZAuVF2xP9';
 export const MAX_USER_CHARS = 500;
 export const MAX_USER_TURNS = 12;
-export const SLEEP_AFTER_MS = 2 * 60 * 1000;
-export const DANCE_MS = 4000;
-export const VICTORY_MS = 2500;
+export const SLEEP_AFTER_MS = 60 * 1000;
+export const CYCLE_MS = 10 * 1000;
+export const VICTORY_MS = 3000;
+export const CROSSFADE_MS = 300;
 export const MARGIN = 16;
 export const POSITION_KEY = 'casebridge-site-cat-position';
-export const POSES = ['idle', 'thinking', 'sleeping', 'dancing', 'victory'];
+export const POSES = ['idle', 'thinking', 'sleeping', 'dancing', 'victory', 'researching', 'working', 'reading', 'courtroom', 'tea-break'];
 
 export const COPY = {
   tr: {
@@ -23,7 +24,7 @@ export const COPY = {
     turnLimit: 'Bu sohbet çok uzadı. Yeni bir sohbet başlatın.',
     tooLong: `Mesaj en fazla ${MAX_USER_CHARS} karakter olabilir.`,
     verification: 'Doğrulama başarısız oldu. Sayfayı yenileyip tekrar deneyin.',
-    poses: {idle: 'bekliyor', thinking: 'düşünüyor', sleeping: 'uyuyor', dancing: 'dans ediyor', victory: 'seviniyor'},
+    poses: {idle: 'bekliyor', thinking: 'düşünüyor', sleeping: 'uyuyor', dancing: 'dans ediyor', victory: 'seviniyor', researching: 'araştırıyor', working: 'yazıyor', reading: 'okuyor', courtroom: 'duruşmada', 'tea-break': 'çay molasında'},
   },
   en: {
     open: 'Ask the CaseBridge cat', title: 'CaseBridge cat', close: 'Close', reset: 'New chat',
@@ -37,7 +38,7 @@ export const COPY = {
     turnLimit: 'This conversation is getting long. Please start a new chat.',
     tooLong: `Messages can be at most ${MAX_USER_CHARS} characters.`,
     verification: 'Verification failed. Please reload the page and try again.',
-    poses: {idle: 'waiting', thinking: 'thinking', sleeping: 'sleeping', dancing: 'dancing', victory: 'celebrating'},
+    poses: {idle: 'waiting', thinking: 'thinking', sleeping: 'sleeping', dancing: 'dancing', victory: 'celebrating', researching: 'researching', working: 'writing', reading: 'reading', courtroom: 'in court', 'tea-break': 'on a tea break'},
   },
 };
 
@@ -92,29 +93,48 @@ export function faqAnswer(id, lang) {
 
 // ---------- poses ----------
 
-export const initialPose = {waiting: false, asleep: false, dancing: false, victory: false};
+// The section in view sets the pose; unknown sections (e.g. the FAQ) count as idle.
+export const SECTION_POSES = {top: 'idle', gecmis: 'researching', olasilik: 'thinking', anonim: 'working', buro: 'reading', sufle: 'courtroom', simulasyon: 'courtroom', team: 'dancing'};
+
+/** Every CYCLE_MS in one section: section pose, idle, section pose, tea-break, … (fixed order). */
+export function cycleFor(pose) {
+  return pose === 'idle' ? ['idle', 'tea-break'] : [pose, 'idle', pose, 'tea-break'];
+}
+
+export const initialPose = {section: 'top', tick: 0, waiting: false, working: false, victory: false, victoryUsed: false, asleep: false};
 
 export function poseReducer(state, event) {
-  switch (event) {
-    case 'send': return {...state, waiting: true, asleep: false};
-    case 'answer': return {...state, waiting: false, victory: true};
-    case 'fail': return {...state, waiting: false};
+  switch (event.type) {
+    case 'section': return event.id === state.section ? state : {...state, section: event.id, tick: 0};
+    case 'tick': return {...state, tick: state.tick + 1};
+    case 'send': return {...state, waiting: true, working: false, asleep: false};
+    case 'received': return {...state, waiting: false, working: true};
+    case 'done': return {...state, waiting: false, working: false};
+    case 'demo': return state.victoryUsed ? state : {...state, victory: true, victoryUsed: true, asleep: false};
     case 'victory-end': return {...state, victory: false};
-    case 'dance': return {...state, dancing: true, asleep: false};
-    case 'dance-end': return {...state, dancing: false};
-    case 'idle-timeout': return state.waiting ? state : {...state, asleep: true};
+    case 'idle-timeout': return state.waiting || state.working ? state : {...state, asleep: true};
     case 'activity': return state.asleep ? {...state, asleep: false} : state;
     default: return state;
   }
 }
 
-/** thinking > dancing > victory > sleeping > idle */
-export function poseOf(state) {
+/** waiting > answer arriving > victory > sleeping > section cycle. Reduced motion: section pose only. */
+export function poseOf(state, reducedMotion = false) {
+  const section = SECTION_POSES[state.section] || 'idle';
+  if (reducedMotion) return section;
   if (state.waiting) return 'thinking';
-  if (state.dancing) return 'dancing';
+  if (state.working) return 'working';
   if (state.victory) return 'victory';
   if (state.asleep) return 'sleeping';
-  return 'idle';
+  const cycle = cycleFor(section);
+  return cycle[state.tick % cycle.length];
+}
+
+/** The most visible observed section ({id: intersectionRatio}), or null. */
+export function visibleSection(ratios) {
+  let best = null, max = 0;
+  for (const [id, ratio] of Object.entries(ratios)) if (ratio > max) { max = ratio; best = id; }
+  return best;
 }
 
 // ---------- position ----------

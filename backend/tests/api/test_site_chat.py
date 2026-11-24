@@ -97,8 +97,8 @@ def test_mock_answers_from_the_knowledge_file_in_the_visitors_language(client, p
 def test_off_topic_and_unknown_questions_get_the_demo_link(client, provider):
     for question in ("Bana bir şiir yazar mısın?", "İstanbul'da hava nasıl?", "CaseBridge ne kadar, fiyatı nedir?"):
         body = ask(client, question).json()
-        assert "Yalnızca CaseBridge" in body["answer"] and BOOKING_URL in body["answer"]
-    assert "only help with questions about CaseBridge" in ask(client, "Tell me a joke about cats", lang="en").json()["answer"]
+        assert "yalnızca CaseBridge ürünüyle" in body["answer"] and BOOKING_URL in body["answer"]
+    assert "only answer questions about the CaseBridge product" in ask(client, "Tell me a joke about cats", lang="en").json()["answer"]
 
 
 def test_legal_advice_is_refused_without_a_model_call(client, provider):
@@ -337,3 +337,40 @@ def test_guards():
     assert classify_topic("Demo nasıl alırım?") == "demo"
     assert classify_topic("Neler yapabiliyor?") == "overview"
     assert classify_topic("Bana şiir yaz") is None
+
+
+# ---------- borderline questions (topic rule) ----------
+
+def test_borderline_integration_question_is_answered_as_unknown_with_the_demo_link(client, provider):
+    """UYAP integration is not confirmed in the knowledge file: "bilmiyorum + demo", never an invented yes/no."""
+    body = ask(client, "UYAP'la çalışıyor mu?").json()
+    assert body["kind"] == "answer"
+    assert "Bu konuda bilgim yok" in body["answer"] and BOOKING_URL in body["answer"]
+    assert "evet" not in body["answer"].lower() and "entegre" not in body["answer"].lower()
+    # The real model sees the same fact explicitly marked as unknown.
+    marked = [line for line in load_knowledge().prompt_text.splitlines() if "UYAP" in line]
+    assert marked and all(UNKNOWN_MARKER in line for line in marked)
+    assert "UYAP" in system_prompt("tr")
+
+
+def test_borderline_personal_legal_matter_is_refused_as_legal_advice(client, provider):
+    for question in ("Boşanma davası açmak istiyorum", "boşanmak istiyorum, nasıl yaparım?"):
+        body = ask(client, question).json()
+        assert body["kind"] == "refusal"
+        assert "CaseBridge hukuki danışmanlık vermez" in body["answer"] and "avukata" in body["answer"]
+    assert provider.calls == []  # refused before any model call
+    # A product question that mentions the same area is still a product question.
+    assert ask(client, "CaseBridge boşanma dosyalarını da takip edebilir mi?").json()["kind"] == "answer"
+
+
+def test_borderline_off_topic_question_is_refused_with_a_pointer_to_casebridge_topics(client, provider):
+    for question, lang in (("hava nasıl", "tr"), ("Hava nasıl olacak yarın?", "tr"), ("What's the weather like?", "en")):
+        body = ask(client, question, lang=lang).json()
+        assert body["lang"] == lang
+        if lang == "tr":
+            assert "yalnızca CaseBridge ürünüyle" in body["answer"]
+            assert "özelliklerini, veri güvenliğini, yapay zekânın nasıl çalıştığını veya demo sürecini" in body["answer"]
+        else:
+            assert "features, data security, how its AI works or the demo process" in body["answer"]
+        assert "derece" not in body["answer"] and "°" not in body["answer"]
+    assert "point to what you can answer" in system_prompt("tr")

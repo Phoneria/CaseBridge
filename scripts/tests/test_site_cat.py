@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / 'web-page'
+POSES = ['idle', 'thinking', 'sleeping', 'dancing', 'victory', 'researching', 'working', 'reading', 'courtroom', 'tea-break']
 PAGES = ['index.html', 'olasilik-agaci.html', 'team.html', 'timeline.html', 'investors.html', 'gorsel-kaynaklari.html']
 LOADER = re.compile(r'<script src="site-cat-loader\.js\?v=([\d.]+)" data-api="https://app\.casebridge\.com\.tr/api/public/site-chat" defer></script>')
 
@@ -29,8 +30,20 @@ class SiteCatAcceptance(unittest.TestCase):
         self.assertIn(f"site-cat.js?v={version[2:]}", loader)
         self.assertIn('requestIdleCallback', loader)
 
+    def test_release_tool_publishes_every_widget_file(self):
+        # deployment/release.py publishes only files reachable from HTML/CSS links;
+        # v.0.66 shipped the loader without the widget because of that.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('casebridge_release', ROOT / 'deployment/release.py')
+        release = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(release)
+        published = set(release.marketing_files(WEB))
+        wanted = {'site-cat-loader.js', 'site-cat.js', 'site-cat-model.mjs', 'site-cat.css'} | {
+            f'assets/site-cat/cat-{pose}@{size}.webp' for pose in POSES for size in (128, 256)}
+        self.assertEqual(wanted - published, set())
+
     def test_widget_assets_and_privacy(self):
-        for pose in ['idle', 'thinking', 'sleeping', 'dancing', 'victory']:
+        for pose in POSES:
             for size in (128, 256):
                 self.assertTrue((WEB / f'assets/site-cat/cat-{pose}@{size}.webp').is_file())
         widget = (WEB / 'site-cat.js').read_text()

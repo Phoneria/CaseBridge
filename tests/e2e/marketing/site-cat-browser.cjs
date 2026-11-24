@@ -33,6 +33,15 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     const root = page.locator('.sc-root');
     assert.equal(await root.getAttribute('data-pose'), 'idle');
     assert.equal(await root.getAttribute('data-side'), 'right');
+    // Crossfade: two stacked pose images, one in front.
+    assert.equal(await page.locator('.sc-cat .sc-pose').count(), 2);
+    assert.equal(await page.locator('.sc-cat .sc-pose.sc-front').count(), 1);
+    // The section in view drives the pose.
+    for (const [id, pose] of [['gecmis', 'researching'], ['anonim', 'working'], ['team', 'dancing'], ['top', 'idle']]) {
+      await page.evaluate(section => document.getElementById(section).scrollIntoView({ block: 'start' }), id);
+      await page.waitForFunction(want => document.querySelector('.sc-root').dataset.pose === want, pose, { timeout: 5000 });
+    }
+    assert.match(await page.locator('.sc-cat .sc-front').getAttribute('src'), /cat-idle@128\.webp/);
 
     // Open with the keyboard, Esc closes and focus returns to the cat.
     await cat.focus();
@@ -65,7 +74,7 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     assert.match(await panel.locator('.sc-log').innerText(), /Düşünüyor…/);
     release(); gate = null;
     await panel.getByText('CaseBridge, hukuk büroları için bir yapay zekâ çalışma alanıdır.').waitFor();
-    assert.equal(await root.getAttribute('data-pose'), 'victory');
+    await page.waitForFunction(() => document.querySelector('.sc-root').dataset.pose === 'idle'); // back to the section pose
     assert.deepEqual(calls[0], { messages: [{ role: 'user', content: 'CaseBridge kimler için?' }], lang: 'tr' });
     await page.screenshot({ path: path.join(shots, 'desktop-answer.png') });
 
@@ -74,6 +83,7 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     await panel.getByRole('button', { name: 'Gönder' }).click();
     await page.waitForFunction(n => document.querySelectorAll('.sc-msg[data-kind="answer"]').length === n, 2);
     assert.equal(calls[1].messages.length, 3);
+    await page.waitForFunction(() => document.querySelector('.sc-root').dataset.pose === 'idle'); // reveal finished
 
     // Capped, rate-limited and offline states.
     reply = { status: 503, body: { detail: 'Şu an yoğunuz, sorunuzu yanıtlayamıyorum.', code: 'busy' } };
@@ -94,7 +104,6 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     const before = calls.length;
     await panel.getByRole('button', { name: 'Demo nasıl alırım?' }).click();
     assert.equal(calls.length, before);
-    assert.equal(await root.getAttribute('data-pose'), 'dancing');
     // Message length is capped in the field.
     assert.equal(await panel.locator('#sc-input').getAttribute('maxlength'), '500');
 
@@ -116,11 +125,15 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     assert.equal(await page.locator('.sc-root').getAttribute('data-side'), 'left');
     assert.equal(Math.round((await cat.boundingBox()).x), 16);
 
-    // Clicking a page's own demo link makes the cat dance.
+    // Clicking a page's own demo link: victory, once per visit.
     await page.locator('a.nav-cta').evaluate(link => link.addEventListener('click', event => event.preventDefault()));
     await page.locator('a.nav-cta').click();
-    assert.equal(await page.locator('.sc-root').getAttribute('data-pose'), 'dancing');
-    await page.screenshot({ path: path.join(shots, 'desktop-dancing-left.png') });
+    assert.equal(await page.locator('.sc-root').getAttribute('data-pose'), 'victory');
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(shots, 'desktop-victory-left.png') });
+    await page.waitForFunction(() => document.querySelector('.sc-root').dataset.pose !== 'victory', null, { timeout: 6000 });
+    await page.locator('a.nav-cta').click();
+    assert.notEqual(await page.locator('.sc-root').getAttribute('data-pose'), 'victory');
 
     // English page copy.
     await page.evaluate(() => localStorage.removeItem('casebridge-site-cat-position'));
@@ -159,6 +172,12 @@ const FAKE_API = 'http://127.0.0.1:9/public/site-chat';
     await calm.goto(`${base}/?site-cat-api=${encodeURIComponent(FAKE_API)}`);
     await calm.locator('.sc-cat').waitFor({ timeout: 15000 });
     assert.equal(await calm.locator('.sc-cat').evaluate(node => getComputedStyle(node).transitionDuration), '0s');
+    assert.equal(await calm.locator('.sc-cat .sc-pose').first().evaluate(node => getComputedStyle(node).transitionDuration), '0s');
+    await calm.evaluate(() => document.getElementById('olasilik').scrollIntoView({ block: 'start' }));
+    await calm.waitForFunction(() => document.querySelector('.sc-root').dataset.pose === 'thinking', null, { timeout: 5000 });
+    await calm.locator('a.nav-cta').evaluate(link => link.addEventListener('click', event => event.preventDefault()));
+    await calm.locator('a.nav-cta').click();
+    assert.equal(await calm.locator('.sc-root').getAttribute('data-pose'), 'thinking'); // only the section changes the pose
     await calm.close();
 
     // ---------- optional: a real backend (mock provider) ----------

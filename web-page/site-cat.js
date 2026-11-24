@@ -3,10 +3,10 @@
 // the quick-question chips answer from the static FAQ with no network call.
 // Nothing is stored except the cat's position (localStorage, try/catch).
 import {
-  BOOKING_URL, COPY, DANCE_MS, FAQ, MAX_USER_CHARS, MAX_USER_TURNS, POSITION_KEY, SLEEP_AFTER_MS, VICTORY_MS,
-  clampPosition, defaultPosition, faqAnswer, failureMessage, initialPose, languageOf, leftOf, linkParts,
-  parsePosition, poseOf, poseReducer, snapPosition,
-} from './site-cat-model.mjs';
+  BOOKING_URL, COPY, CROSSFADE_MS, CYCLE_MS, FAQ, MAX_USER_CHARS, MAX_USER_TURNS, POSES, POSITION_KEY, SLEEP_AFTER_MS,
+  VICTORY_MS, clampPosition, defaultPosition, faqAnswer, failureMessage, initialPose, languageOf, leftOf, linkParts,
+  parsePosition, poseOf, poseReducer, snapPosition, visibleSection,
+} from './site-cat-model.mjs?v=0.68';
 
 const SIZE = () => (window.innerWidth < 640 ? 64 : 76);
 const config = window.__casebridgeSiteCat || {};
@@ -43,12 +43,16 @@ export function mountSiteCat(options = {}) {
   let open = false;
   let position = clampPosition(parsePosition(read(POSITION_KEY)) || defaultPosition(viewport(), SIZE()), viewport(), SIZE());
   const timers = {};
+  const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reduced = () => !!calm?.matches;
 
   function viewport() { return {width: window.innerWidth, height: window.innerHeight}; }
 
   // ---------- markup ----------
-  const catImg = el('img', {alt: '', width: 76, height: 76, draggable: 'false', decoding: 'async'});
-  const cat = el('button', {type: 'button', class: 'sc-cat', 'aria-expanded': 'false', 'aria-controls': 'sc-panel', 'aria-keyshortcuts': 'Escape'}, catImg);
+  // Two stacked images: the new pose fades in over the old one (CROSSFADE_MS).
+  const imgs = [0, 1].map(() => el('img', {alt: '', width: 76, height: 76, draggable: 'false', decoding: 'async', class: 'sc-pose'}));
+  let front = 0;
+  const cat = el('button', {type: 'button', class: 'sc-cat', 'aria-expanded': 'false', 'aria-controls': 'sc-panel', 'aria-keyshortcuts': 'Escape'}, imgs);
   const title = el('h2', {id: 'sc-title', class: 'sc-title'});
   const resetButton = el('button', {type: 'button', class: 'sc-ghost', onclick: reset});
   const closeButton = el('button', {type: 'button', class: 'sc-close', onclick: () => setOpen(false)}, el('span', {'aria-hidden': 'true', text: '×'}));
@@ -67,7 +71,7 @@ export function mountSiteCat(options = {}) {
     el('header', {class: 'sc-head'}, [el('img', {src: image('idle', 128), alt: '', width: 32, height: 32, class: 'sc-avatar'}), title, resetButton, closeButton]),
     notice, log, chips, form, demo,
   ]);
-  const root = el('div', {class: 'sc-root', 'data-pose': 'idle', translate: 'no'}, [cat, panel]);
+  const root = el('div', {class: 'sc-root', translate: 'no'}, [cat, panel]);
   document.body.append(root);
 
   // ---------- language ----------
@@ -93,13 +97,14 @@ export function mountSiteCat(options = {}) {
   });
 
   // ---------- messages ----------
+  function fill(bubble, text) {
+    bubble.replaceChildren(...linkParts(text).map(part => (part.link
+      ? el('a', {href: part.link, target: '_blank', rel: 'noopener noreferrer', 'data-booking': true, text: copy.demo})
+      : document.createTextNode(part.text))));
+  }
   function addMessage(role, text, extra = {}) {
     const bubble = el('p', {class: 'sc-bubble'});
-    for (const part of linkParts(text)) {
-      bubble.append(part.link
-        ? el('a', {href: part.link, target: '_blank', rel: 'noopener noreferrer', 'data-booking': true, text: copy.demo})
-        : document.createTextNode(part.text));
-    }
+    fill(bubble, text);
     const item = el('li', {class: `sc-msg sc-${role}${extra.kind ? ` sc-${extra.kind}` : ''}`, 'data-kind': extra.kind || role}, bubble);
     log.append(item);
     log.scrollTop = log.scrollHeight;
@@ -116,7 +121,6 @@ export function mountSiteCat(options = {}) {
   function answerChip(item) {
     addMessage('user', item.q[lang]);
     addMessage('bot', faqAnswer(item.id, lang), {kind: 'faq'});
-    if (item.id === 'demo') dance();
   }
   function updateCounter() { counter.textContent = copy.counter(input.value.length); }
   input.addEventListener('input', updateCounter);
@@ -137,7 +141,7 @@ export function mountSiteCat(options = {}) {
     input.value = ''; updateCounter();
     addMessage('user', text);
     const pending = addMessage('bot', copy.thinking, {kind: 'pending'});
-    setPose('send');
+    setPose({type: 'send'});
     const turns = [...history, {role: 'user', content: text}];
     try {
       if (!api) throw new Error('no api');
@@ -145,57 +149,95 @@ export function mountSiteCat(options = {}) {
         method: 'POST', headers: {'Content-Type': 'application/json'}, credentials: 'omit',
         body: JSON.stringify({messages: turns, lang}),
       });
+      setPose({type: 'received'});
       let body = null;
       try { body = await response.json(); } catch { /* not JSON */ }
       pending.remove();
       if (response.ok && body && typeof body.answer === 'string') {
         history = [...turns, {role: 'assistant', content: body.answer.slice(0, 1500)}];
-        addMessage('bot', body.answer, {kind: body.kind === 'refusal' ? 'refusal' : 'answer'});
-        setPose('answer');
-        clearTimeout(timers.victory);
-        timers.victory = setTimeout(() => setPose('victory-end'), VICTORY_MS);
+        await reveal(addMessage('bot', '', {kind: body.kind === 'refusal' ? 'refusal' : 'answer'}), body.answer);
       } else {
         const failure = failureMessage(response.status, body, lang);
         addMessage('bot', failure.text, {kind: failure.kind});
         if (failure.kind === 'turn_limit') { input.disabled = true; send.disabled = true; }
-        setPose('fail');
       }
     } catch {
       pending.remove();
       addMessage('bot', failureMessage(0, null, lang).text, {kind: 'network'});
-      setPose('fail');
     } finally {
       busy = false;
+      setPose({type: 'done'});
     }
   }
 
+  // The answer is written out over at most ~0.9 s (the "working" pose); instantly with reduced motion.
+  function reveal(item, text) {
+    const bubble = item.firstChild;
+    if (reduced()) { fill(bubble, text); return Promise.resolve(); }
+    const step = Math.max(1, Math.ceil(text.length / 55));
+    return new Promise(resolve => {
+      let shown = 0;
+      (function frame() {
+        shown = Math.min(text.length, shown + step);
+        bubble.textContent = text.slice(0, shown);
+        log.scrollTop = log.scrollHeight;
+        if (shown < text.length) requestAnimationFrame(frame);
+        else { fill(bubble, text); resolve(); }
+      })();
+    });
+  }
+
   // ---------- poses ----------
-  function setPose(event) {
-    pose = poseReducer(pose, event);
-    const name = poseOf(pose);
+  function render() {
+    const name = poseOf(pose, reduced());
     if (root.dataset.pose === name) return;
     root.dataset.pose = name;
-    catImg.src = image(name, 128);
-    catImg.srcset = `${image(name, 128)} 1x, ${image(name, 256)} 2x`;
     cat.setAttribute('aria-label', `${copy.open} (${copy.poses[name]})`);
+    const next = imgs[1 - front];
+    next.src = image(name, 128);
+    next.srcset = `${image(name, 128)} 1x, ${image(name, 256)} 2x`;
+    next.classList.add('sc-front');
+    imgs[front].classList.remove('sc-front');
+    front = 1 - front;
   }
-  function dance() {
-    setPose('dance');
-    clearTimeout(timers.dance);
-    timers.dance = setTimeout(() => setPose('dance-end'), DANCE_MS);
+  function setPose(event) {
+    pose = poseReducer(pose, event);
+    render();
   }
+  function restartCycle() {
+    clearInterval(timers.cycle);
+    if (!reduced()) timers.cycle = setInterval(() => setPose({type: 'tick'}), CYCLE_MS);
+  }
+  // The section most in view picks the pose; alternation restarts on every section change.
+  const ratios = {};
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) ratios[entry.target.id] = entry.intersectionRatio;
+      const id = visibleSection(ratios);
+      if (id && id !== pose.section) { setPose({type: 'section', id}); restartCycle(); }
+    }, {threshold: [0, 0.2, 0.4, 0.6, 0.8, 1]});
+    document.querySelectorAll('section[id], header[id]').forEach(section => observer.observe(section));
+  }
+  calm?.addEventListener?.('change', () => { restartCycle(); render(); });
   function wake() {
-    setPose('activity');
+    setPose({type: 'activity'});
     clearTimeout(timers.sleep);
-    timers.sleep = setTimeout(() => setPose('idle-timeout'), SLEEP_AFTER_MS);
+    timers.sleep = setTimeout(() => setPose({type: 'idle-timeout'}), SLEEP_AFTER_MS);
   }
   let lastActivity = 0;
   for (const name of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'scroll']) {
     window.addEventListener(name, () => { const now = Date.now(); if (now - lastActivity > 1000) { lastActivity = now; wake(); } }, {passive: true});
   }
+  // A demo/booking link anywhere on the page: victory, once per visit.
   document.addEventListener('click', event => {
-    if (event.target.closest?.(`a[href^="${BOOKING_URL}"]`)) dance();
+    if (!event.target.closest?.(`a[href^="${BOOKING_URL}"]`) || pose.victoryUsed) return;
+    setPose({type: 'demo'});
+    timers.victory = setTimeout(() => setPose({type: 'victory-end'}), VICTORY_MS);
   }, true);
+  function preload() {
+    const size = window.devicePixelRatio > 1.5 ? 256 : 128;
+    for (const name of POSES) new Image().src = image(name, size);
+  }
 
   // ---------- open / close ----------
   function setOpen(value) {
@@ -205,7 +247,6 @@ export function mountSiteCat(options = {}) {
     cat.setAttribute('aria-expanded', String(value));
     if (value) {
       if (!log.children.length) reset();
-      for (const name of ['thinking', 'victory', 'dancing']) new Image().src = image(name, 128); // warm the next poses
       input.focus();
     } else {
       cat.focus();
@@ -265,11 +306,12 @@ export function mountSiteCat(options = {}) {
   window.addEventListener('resize', layout);
 
   renderCopy();
-  catImg.src = image('idle', 128);
-  catImg.srcset = `${image('idle', 128)} 1x, ${image('idle', 256)} 2x`;
-  root.dataset.pose = 'idle';
+  root.style.setProperty('--sc-fade', `${CROSSFADE_MS}ms`);
+  render();
   layout();
   wake();
+  restartCycle();
+  (window.requestIdleCallback || (callback => setTimeout(callback, 500)))(preload);
   return {root, open: () => setOpen(true), close: () => setOpen(false), ask};
 }
 
