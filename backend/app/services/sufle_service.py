@@ -93,10 +93,11 @@ def configured(firm_id):
     return settings.chat_provider == "openai" and bool(get_openai_api_key(firm_id) or get_claude_api_key(firm_id))
 
 
-def analyze(payload: AnalysisRequest, firm_id: str) -> dict:
+def analyze(payload: AnalysisRequest, firm_id: str, provider=None) -> dict:
+    """`provider`: the owner's Claude subagent (allowlisted user), used instead of the firm key."""
     key = get_openai_api_key(firm_id)
     claude = get_claude_api_key(firm_id)
-    if settings.chat_provider != "openai" or not (key or claude):
+    if provider is None and (settings.chat_provider != "openai" or not (key or claude)):
         raise SufleUnavailable("Büronuzun yapay zekâ bağlantısı hazır değil. Ayarlar'dan büronuza ait anahtarı test edip etkinleştirin.")
     # Pydantic constraints are validated locally. Keep the provider schema portable.
     schema = Advice.model_json_schema()
@@ -109,8 +110,8 @@ def analyze(payload: AnalysisRequest, firm_id: str) -> dict:
             for child in node: strict(child)
     strict(schema)
     try:
-        if claude:
-            provider = AnthropicProvider(claude, settings.anthropic_model, timeout_seconds=45, max_tokens=2200)
+        if provider is not None or claude:
+            provider = provider or AnthropicProvider(claude, settings.anthropic_model, timeout_seconds=45, max_tokens=2200)
             output = provider.complete(SYSTEM + "\n" + json.dumps(schema, ensure_ascii=False),
                                        payload.model_dump_json(exclude={"acknowledged"}), response_format="json_object")
             result = Advice.model_validate_json(output)

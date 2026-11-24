@@ -7,6 +7,8 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
+from app.ai.subagent import routing as subagent
+from app.ai.subagent.status import subagent_status
 from app.ai.chat.factory import get_chat_provider_status
 from app.ai.chat.levels import DEFAULT_CHAT_LEVEL, ChatLevel, get_level_config
 from app.ai.chat.prompt import system_prompt_for
@@ -50,6 +52,8 @@ def _conversation_out(service: ChatService, conversation) -> ChatConversationOut
 
 @router.get("/status", response_model=ChatStatusOut)
 def chat_status(current_user: User = Depends(get_current_user)):
+    if subagent.enabled_for(current_user):
+        return ChatStatusOut(**subagent_status())
     return ChatStatusOut(**get_chat_provider_status(ai_credential_scope(current_user)))
 
 

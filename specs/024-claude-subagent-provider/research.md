@@ -1,0 +1,6 @@
+# Research
+- Anthropic docs (checked 25 Nov 2026): the Agent SDK overview says third-party developers may not offer claude.ai login or rate limits for their products unless approved; the legal page says products should use API keys and may not collect, store or intermediate Claude.ai credentials or route requests through Free/Pro/Max/Ultra plans on behalf of users; `claude setup-token` is for the subscriber's own CI/scripts. Hence the owner-only scope (FR-003).
+- In the current app a platform-admin login cannot open AI pages or see firm data, so the token serves named accounts (the owner's own logins) rather than "platform admin requests".
+- `claude-agent-sdk` 0.2.188 bundles the Claude Code CLI 2.1.331 (Linux x86-64 glibc ELF, ~399 MB); `python:3.11-slim` runs it. Its `mcp` dependency forces pydantic ≥ 2.11 and uvicorn ≥ 0.31.1; `mcp` 1.30 still accepts Starlette 0.38 (FastAPI 0.115.0).
+- The SDK merges the parent environment into the CLI's; `options.env` can only override, so inherited variables are blanked explicitly.
+- `ResultError.api_error_status` and `AssistantMessage.error` (`authentication_failed`, `rate_limit`, `server_error`, …) classify failures without string matching.

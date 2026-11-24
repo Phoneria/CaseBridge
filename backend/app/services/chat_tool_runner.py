@@ -58,6 +58,9 @@ MAX_RESULTS_CHARS = 12000
 MAX_SOURCES = 12
 AUDIT_ACTION = "ai.tool_used"
 TOOL_FAILED = "Araç çalıştırılamadı."
+AGENT_TOOLS_CLOSED = "Bu hesap veri araçlarını kullanamaz; kayıtlara bakmadan yanıtla."
+AGENT_AFTER_DOCUMENTS = "Belge metni okunduktan sonra başka araç çalıştırılmaz; elindeki verilerle yanıtla."
+AGENT_CALL_LIMIT = "Bu soru için araç sınırına ulaşıldı; elindeki verilerle yanıtla."
 
 
 @dataclass(frozen=True)
@@ -103,6 +106,8 @@ class ChatToolRunner:
         self.results: list[dict] = []
         self.sources: list[Source] = []
         self.allowed = True
+        #: Set once a tool has returned uploaded-document text (agent-driven path).
+        self.documents_seen = False
         #: Tokens of the planning requests, added to the answer's usage (AI budget).
         self.plan_usage = {"prompt_tokens": 0, "completion_tokens": 0}
 
@@ -181,6 +186,39 @@ class ChatToolRunner:
                 known.add((source.kind, source.id))
                 self.sources.append(source)
         return output
+
+    # ---------- tools called by an agent (Claude subagent provider) ----------
+
+    def prepare(self, db: Session) -> bool:
+        """Permission and page-context checks the planning loop makes first."""
+        try:
+            ensure_allowed(db, self.principal)
+        except ToolDenied:
+            self.allowed = False
+            return False
+        if self.context.case_id and CaseService(db).get_case(self.context.case_id, self.principal.law_firm_id):
+            self.case_id = self.context.case_id
+        return True
+
+    def execute_for_agent(self, db: Session, name: str, arguments) -> str:
+        """Runs one tool the agent asked for, under the planning loop's rules:
+        at most MAX_TOOL_CALLS per turn, one audit row per call, document text
+        wrapped as data, and no further tool once a tool has returned document
+        text (text from documents never chooses the next tools). Returns the
+        data-only text the agent sees."""
+        if not self.allowed:
+            return AGENT_TOOLS_CLOSED
+        if self.documents_seen:
+            return AGENT_AFTER_DOCUMENTS
+        if len(self.calls) >= MAX_TOOL_CALLS:
+            return AGENT_CALL_LIMIT
+        output = self._execute(db, ToolCall(name, arguments if isinstance(arguments, dict) else {}))
+        if output.document_text:
+            self.documents_seen = True
+        payload = json.dumps(self.results[-1], ensure_ascii=False, default=str)
+        if len(payload) > MAX_RESULTS_CHARS:
+            payload = payload[:MAX_RESULTS_CHARS] + " …(kısaltıldı)"
+        return f"{TOOL_RESULTS_HEADER}\n{payload}"
 
     def run(self, history: list[ChatTurn]) -> Iterator[dict]:
         """Yields progress events ({"type": "tool", ...}) for the stream."""

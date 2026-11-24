@@ -7,6 +7,7 @@ import { getMe, getNotificationStatus, importDemoTemplate, previewDemoRemoval, r
 import { userMessage } from "@/lib/userMessages";
 import type { AppUser, NotificationStatus } from "@/types";
 import { AiConnectionPanel } from "@/components/AiConnectionPanel";
+import { ClaudeSubagentCard } from "@/components/ai/ClaudeSubagentCard";
 import { AppearanceSettings } from "@/components/AppearanceSettings";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
@@ -130,6 +131,7 @@ export function SettingsView() {
       <div><h1 className="text-xl font-semibold text-navy-900">Ayarlar</h1><p className="text-sm text-navy-500">Uygulamanın ortak AI bağlantısını yönetin.</p></div>
       <AppearanceSettings />
       <AiConnectionPanel canManageSecrets />
+      <ClaudeSubagentCard />
     </div>
   );
 

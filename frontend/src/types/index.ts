@@ -941,3 +941,28 @@ export interface SimilarPrecedentsQuery {
   explain?: boolean;
   precedentId?: string;
 }
+
+/** Platform admin: the owner's Claude setup-token (personal use; never the value). */
+export interface ClaudeSubagentUser {
+  id: string;
+  full_name: string;
+  email: string;
+  firm_name: string;
+  is_active: boolean;
+  is_platform_admin: boolean;
+}
+
+export interface ClaudeSubagentSettings {
+  set: boolean;
+  last4: string | null;
+  updated_at: string | null;
+  status: "none" | "unknown" | "ok" | "invalid" | "error";
+  checked_at: string | null;
+  users: ClaudeSubagentUser[];
+}
+
+export interface ClaudeSubagentTestResult {
+  ok: boolean;
+  message: string;
+  status: ClaudeSubagentSettings["status"];
+}

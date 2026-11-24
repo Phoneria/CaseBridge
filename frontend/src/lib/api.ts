@@ -12,6 +12,9 @@ import type {
   ChatConversationSummary,
   ChatMessage,
   ChatPageContext,
+  ClaudeSubagentSettings,
+  ClaudeSubagentTestResult,
+  ClaudeSubagentUser,
   ChatStatus,
   AnalyticsOverview,
   Case,
@@ -899,4 +902,30 @@ export function extractPrivacyFile(file: File): Promise<ExtractedPrivacyText> {
   return request<ExtractedPrivacyText>("/privacy/extract-text", {
     method: "POST", body: file, headers: {"Content-Type": "application/octet-stream"}, cache: "no-store",
   });
+}
+
+// ---------- Claude setup-token (platform admin, personal use) ----------
+
+export async function getClaudeSubagent(): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent");
+}
+
+export async function saveClaudeSubagentToken(token: string): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/token", { method: "PUT", body: JSON.stringify({ token }) });
+}
+
+export async function removeClaudeSubagentToken(): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/token", { method: "DELETE" });
+}
+
+export async function testClaudeSubagent(): Promise<ClaudeSubagentTestResult> {
+  return request("/platform/claude-subagent/test", { method: "POST" });
+}
+
+export async function setClaudeSubagentUsers(userIds: string[]): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/users", { method: "PUT", body: JSON.stringify({ user_ids: userIds }) });
+}
+
+export async function searchClaudeSubagentUsers(q: string): Promise<ClaudeSubagentUser[]> {
+  return request(`/platform/claude-subagent/users/search?q=${encodeURIComponent(q)}`);
 }

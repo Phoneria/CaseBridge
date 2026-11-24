@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from starlette.concurrency import run_in_threadpool
 
+from app.ai.subagent import routing as subagent
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.rate_limit import is_rate_limited, record_attempt
@@ -27,6 +28,8 @@ def _limit(user, kind):
 @router.get("/status")
 def status(user: User = Depends(get_current_user)):
     firm = _bureau(user)
+    if subagent.enabled_for(user):
+        return {"configured": True, "model": "Claude (abonelik)", "transcription_model": settings.voice_transcription_model}
     return {"configured": sufle_service.configured(firm), "model": sufle_service.model_name(firm),
             "transcription_model": settings.voice_transcription_model}
 
@@ -36,7 +39,7 @@ def analyze(payload: sufle_service.AnalysisRequest, user: User = Depends(get_cur
     firm = _bureau(user)
     _limit(user, "analyze")
     try:
-        return sufle_service.analyze(payload, firm)
+        return sufle_service.analyze(payload, firm, provider=subagent.llm_provider_for(user))
     except sufle_service.SufleUnavailable as exc:
         raise HTTPException(503, str(exc)) from None
 

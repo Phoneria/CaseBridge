@@ -39,6 +39,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.ai.subagent.routing import build_job_provider
 from app.ai.providers.base import LLMProvider
 from app.ai.errors import AIProviderConfigError
 from app.db.session import SessionLocal
@@ -77,7 +78,7 @@ def process_one_pending_simulation(db: Session, provider: Optional[LLMProvider] 
 
     if provider_factory is not None:
         try:
-            provider = provider_factory(law_firm_id=simulation.law_firm_id)
+            provider = build_job_provider(provider_factory, simulation.law_firm_id, simulation.requested_by)
         except AIProviderConfigError:
             simulation.status = SimulationStatus.FAILED
             simulation.failure_category = "configuration_error"
