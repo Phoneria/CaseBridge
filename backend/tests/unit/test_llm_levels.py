@@ -18,6 +18,7 @@ def test_task_table_is_exact():
         "courtroom.json_repair": "basic",
         "case_intake.extract": "standard",
         "case_intake.json_repair": "basic",
+        "similarity.explain": "basic",
     }
 
 

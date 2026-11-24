@@ -48,6 +48,7 @@ import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 import { CaseDecisionCard } from "@/components/CaseDecisionCard";
 import { CaseHearingsCard } from "@/components/CaseHearingsCard";
 import { SimilarCasesCard } from "@/components/similar/SimilarCasesCard";
+import { SimilarPrecedentsSidebar } from "@/components/similar/SimilarPrecedentsSidebar";
 
 import { PrecedentsView } from "@/components/PrecedentsView";
 import { ScenarioTreeView } from "@/components/lab/ScenarioTreeView";
@@ -86,6 +87,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const sekmeParam = params.get("sekme");
   const [activeTab, setActiveTab] = useState<Tab>(() => labelForSlug(parseCaseTab(sekmeParam)));
   const [showPrecedents, setShowPrecedents] = useState(false);
+  const [showSimilarPrecedents, setShowSimilarPrecedents] = useState(false);
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -456,10 +458,19 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <button type="button" className="rounded-xl bg-accent-600 px-4 py-2 text-sm text-white" onClick={() => setDialog("close")}>Dava sonucunu kaydet</button>}
 
           <section>
-            <button type="button" aria-expanded={showPrecedents} onClick={() => setShowPrecedents(!showPrecedents)}
-              className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
-              {showPrecedents ? "İlgili emsal kararları gizle" : "İlgili emsal kararları göster"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" aria-expanded={showPrecedents} onClick={() => setShowPrecedents(!showPrecedents)}
+                className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
+                {showPrecedents ? "İlgili emsal kararları gizle" : "İlgili emsal kararları göster"}
+              </button>
+              <button type="button" aria-haspopup="dialog" onClick={() => setShowSimilarPrecedents(true)}
+                className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
+                Benzer Davalar
+              </button>
+            </div>
+            {showSimilarPrecedents && (
+              <SimilarPrecedentsSidebar caseId={caseId} canLink={canEditDetails} onClose={() => setShowSimilarPrecedents(false)} />
+            )}
             {showPrecedents && <div className="mt-4"><PrecedentsView key={caseId} caseId={caseId} canLink={canEditDetails} /></div>}
           </section>
 
