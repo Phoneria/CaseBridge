@@ -16,6 +16,7 @@ Updated: 22 November 2026.
 - [ ] Müvekkilleri “Gerçek kişi” ve “Tüzel kişi” olarak ayır. Gösterim kayıtlarına gerçekçi görünümlü kurgusal telefon (ör. 0538 ile başlayan) ve e-posta bilgileri ekle.
 - [ ] Örnek aktif davaları ve görevleri ekipteki avukatlara dağıt. Her birinde iki veya üç güncel iş bulunsun. Sonuçlanmış örnek davaları da dağıt ve her avukatın kazandığı ve kaybettiği dava sayılarını ekip ekranında göster.
 - [ ] Ayarlar → Gizli anahtar ekle bölümünde büro yöneticisinin AI bağlantı yöntemini seçebilmesini ve AI işlemlerinin etkin bağlantıyı kullanmasını sağla. İstenen yöntemler OpenAI API anahtarı, OpenAI hesabıyla giriş (OAuth), Claude API anahtarı ve Claude setup token. Hesap bağlantısı ve setup token için CaseBridge'de izin verilen sunucu kullanımını sağlayıcının belgelerinden doğrula. Yönetici gizli değerleri yalnız uygulamada girer. Büro bazında şifreli saklama, maskeli gösterim, adayı ayrı test etme ve açıkça etkinleştirme akışını koru.
+  - Not (25 Kasım 2026): Anthropic belgeleri kontrol edildi. Claude setup token / Claude.ai girişi büro kullanıcıları için kullanılamaz (Agent SDK genel bakış ve Legal and compliance sayfaları: ürünler API anahtarı kullanmalı; Claude.ai kimlik bilgileri toplanamaz, kullanıcılar adına abonelik üzerinden istek yönlendirilemez). Büro seçeneği olarak yalnız OpenAI ve Claude API anahtarları uygundur. Setup token yalnız sahibin kişisel kullanımı için platform düzeyinde eklendi (spec 024).
 
 ## Geçerli çalışma ve yayın ilkeleri — 22 Kasım 2026
 
@@ -651,6 +652,13 @@ Released from GitHub main commit `c52d2952963a973f902e6d384b25d4cabf563a0f`. Pub
 - [x] `stage dd980ab all` (canary geçti) → `activate` → `verify`: health `ok`, uygulama v.0.52, tanıtım v.0.68, ikisi de dd980ab. Otomatik UI yayını rollback sonrası duraklamadan çıktı (current.json işlemi `activate`, auto-ui baseline dd980ab).
 - [x] Canlı doğrulama: `website-version.json` v.0.68; 24 widget dosyası (yükleyici, modül, model, CSS, 20 poz görseli) HTTP 200 ve main ile bayt bazında aynı. 1440 px ve 390 px'te kedi görünür; masaüstünde kaydırınca bölüm pozları değişir (researching, thinking, dancing, idle); hazır sorular ağ isteği olmadan yanıt verir; yazılı soru "Şu an yanıt veremiyorum…" mesajını "Demo planla" bağlantısı ve düğmesiyle gösterir; panelde ham hata yok, yatay taşma yok, mobilde tam ekran. Tarayıcı konsolunda yalnız 503 yanıtının otomatik kaydı (ziyaretçiye görünmez).
 - [x] Geçersiz platform anahtarıyla her yazılı soru tek bir OpenAI isteği yapıyor ve 401 alıyor; SDK 401'i yeniden denemiyor (yalnız 408/409/429/5xx), istemci de yeniden denemiyor. Reddedilen istek ücretlendirilmez.
-- [ ] Site cat: replace the direct platform OpenAI API key with a subagent-based answer service (owner decision 24 Nov 2026). Until then the platform key is invalid and typed questions show the fallback message.
+- [ ] Site cat: replace the direct platform OpenAI API key with a subagent-based answer service (owner decision 24 Nov 2026). Until then the platform key is invalid and typed questions show the fallback message. Refs #123.
+  - 25 Nov 2026: the Claude subagent provider (spec 024) is live-ready for the owner's own accounts only. By owner decision and Anthropic's terms the site cat does NOT use the setup-token, so this item stays open; it needs a platform Claude/OpenAI API key (or an approved arrangement).
 - [ ] Fill in the site-knowledge.md TODOs (KVKK, hosting, certifications, AI providers, trial, pricing, contact, integrations).
 - [ ] Uygulama içi kedinin tarayıcıda açılıp gerçek büro anahtarıyla yanıt vermesi kullanıcının kendi oturumuyla kontrol edilmeli (sunucu tarafı gerçek büro anahtarı kontrolü v.0.51 yayınında geçti).
+
+## Claude subagent provider — kişisel kullanım (spec 024) · 25 Kasım 2026
+
+- [x] Anthropic belgeleri kontrol edildi; setup token yalnız sahibin kendi hesaplarına hizmet eder. Token yalnız platform yöneticisi tarafından ayarlanır, şifreli saklanır, seçili hesapların istekleri dışında kullanılmaz; büro kullanıcıları ve site kedisi mevcut yolu kullanır. Refs #123.
+- [x] Sandbox: yerleşik araç yok, yalnız salt okunur 8 veri aracı (aynı büro filtresi, denetim kaydı, belge metni veri olarak), istek başına boş geçici dizin, 90 sn, 8 tur, yalnız 5xx'te bir yeniden deneme, büro başına en fazla 3 eşzamanlı çalışma, ortam değişkenleri temizlenir.
+- [ ] Yayın sonrası sahibin kendi setup token'ını Ayarlar'dan ekleyip test etmesi ve hesabını seçmesi.

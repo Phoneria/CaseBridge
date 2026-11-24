@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/app/ai/subagent/__init__.py",
+        "backend/app/ai/subagent/store.py",
+        "backend/app/api/routes/claude_subagent.py",
+        "backend/app/main.py"
+      ],
+      "requirements": [
+        "specs/024-claude-subagent-provider/spec.md#FR-001",
+        "specs/024-claude-subagent-provider/spec.md#FR-002"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_claude_subagent.py::test_only_the_platform_admin_can_read_or_change_the_token",
+        "backend/tests/api/test_claude_subagent.py::test_token_is_encrypted_at_rest_and_never_returned_logged_or_audited",
+        "backend/tests/api/test_claude_subagent.py::test_allowed_users_must_exist_be_active_and_stay_within_the_limit"
+      ],
+      "reason": "Owner request 25 Nov 2026 (issue #123): platform-only, encrypted Claude setup-token for the owner's personal use."
+    },
+    {
+      "files": [
+        "backend/app/ai/subagent/routing.py",
+        "backend/app/ai/subagent/status.py",
+        "backend/app/api/deps.py",
+        "backend/app/api/routes/chat.py",
+        "backend/app/api/routes/legal_lab.py",
+        "backend/app/api/routes/sufle.py",
+        "backend/app/services/sufle_service.py",
+        "backend/app/services/simulation_worker.py",
+        "backend/app/services/courtroom_worker.py"
+      ],
+      "requirements": [
+        "specs/024-claude-subagent-provider/spec.md#FR-003",
+        "specs/024-claude-subagent-provider/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_claude_subagent.py::test_only_allowlisted_users_with_a_stored_token_get_the_subagent",
+        "backend/tests/api/test_claude_subagent.py::test_queued_jobs_use_the_subagent_only_for_jobs_started_by_an_allowlisted_user",
+        "backend/tests/api/test_claude_subagent.py::test_chat_status_shows_claude_for_the_owner_and_the_invalid_token_message",
+        "backend/tests/api/test_claude_subagent.py::test_site_cat_never_uses_the_owner_token"
+      ],
+      "reason": "Subagent only for listed, active users (requests and queued jobs); everyone else and the site cat unchanged."
+    },
+    {
+      "files": [
+        "backend/app/ai/subagent/runner.py",
+        "backend/app/ai/subagent/providers.py",
+        "backend/app/services/chat_stream.py",
+        "backend/app/services/chat_tool_runner.py"
+      ],
+      "requirements": [
+        "specs/024-claude-subagent-provider/spec.md#FR-004",
+        "specs/024-claude-subagent-provider/spec.md#FR-005",
+        "specs/024-claude-subagent-provider/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_claude_subagent.py::test_sandbox_options_allow_only_our_tools_and_scrub_the_environment",
+        "backend/tests/api/test_claude_subagent.py::test_each_run_uses_a_fresh_temp_directory_that_is_deleted",
+        "backend/tests/api/test_claude_subagent.py::test_errors_map_to_friendly_messages_and_only_5xx_is_retried_once",
+        "backend/tests/api/test_claude_subagent.py::test_at_most_three_concurrent_runs_per_firm",
+        "backend/tests/api/test_claude_subagent.py::test_no_token_means_no_run",
+        "backend/tests/api/test_claude_subagent.py::test_owner_mascot_chat_runs_tools_in_the_owners_firm_only_with_audit_and_sources",
+        "backend/tests/api/test_claude_subagent.py::test_agent_tools_keep_the_call_cap_and_stop_after_document_text"
+      ],
+      "reason": "Sandboxed Claude Agent SDK runs; mascot tools as in-process MCP tools under the existing guards."
+    },
+    {
+      "files": [
+        "backend/requirements.txt",
+        "backend/Dockerfile"
+      ],
+      "requirements": [
+        "specs/024-claude-subagent-provider/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_claude_subagent.py::test_sandbox_options_allow_only_our_tools_and_scrub_the_environment",
+        "backend/tests/api/test_claude_subagent.py::test_each_run_uses_a_fresh_temp_directory_that_is_deleted"
+      ],
+      "reason": "claude-agent-sdk 0.2.188 (bundled CLI, build-time --version check) with the minimal dependency bumps that keep FastAPI 0.115/Starlette 0.38."
+    },
+    {
+      "files": [
+        "frontend/src/components/ai/ClaudeSubagentCard.tsx",
+        "frontend/src/components/ai/AiModelStatus.tsx",
+        "frontend/src/components/SettingsView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/024-claude-subagent-provider/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/ClaudeSubagentCard.test.tsx::explains personal use and how to get the token, and starts without one",
+        "frontend/src/components/__tests__/ClaudeSubagentCard.test.tsx::saves the token without keeping it in the page, then tests it",
+        "frontend/src/components/__tests__/ClaudeSubagentCard.test.tsx::shows the invalid-token message and lets the token be removed",
+        "frontend/src/components/__tests__/ClaudeSubagentCard.test.tsx::adds and removes the accounts the token serves",
+        "frontend/src/components/__tests__/ClaudeSubagentCard.test.tsx::names Claude or OpenAI next to the configured status"
+      ],
+      "reason": "Settings card for the platform admin and the Claude/OpenAI badge; application version bump."
+    }
+  ]
+}

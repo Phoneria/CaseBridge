@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_llm_provider
+from app.ai.subagent import routing as subagent
 from app.ai.providers.base import LLMProvider
 from app.api.deps import ai_credential_scope, get_current_law_firm_id, get_current_user
 from app.core.config import settings
@@ -30,6 +31,9 @@ Side = Literal["davaci", "davali", "hakim"]
 
 def get_optional_provider(current_user: User = Depends(get_current_user)) -> Optional[LLMProvider]:
     """None means "use the predetermined mock": mock mode, or a real provider without a usable key."""
+    own = subagent.llm_provider_for(current_user)
+    if own is not None:
+        return own
     if settings.llm_provider == "mock":
         return None
     try:

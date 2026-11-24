@@ -20,6 +20,7 @@ from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.services.firm_access import FIRM_SUSPENDED, firm_is_open
+from app.ai.subagent import routing as subagent
 
 logger = logging.getLogger("casebridge")
 
@@ -122,6 +123,9 @@ def get_llm_provider_dep(current_user: User = Depends(get_current_user)) -> LLMP
     """FastAPI dependency wrapping the provider factory - overridable in
     tests via app.dependency_overrides so no test ever needs a real
     OPENAI_API_KEY or hits the network."""
+    own = subagent.llm_provider_for(current_user)
+    if own is not None:
+        return own
     try:
         return get_llm_provider(ai_credential_scope(current_user))
     except AIProviderConfigError:
@@ -137,7 +141,11 @@ def get_similarity_llm_provider(
     app.dependency_overrides."""
     scope = ai_credential_scope(current_user)
 
+    own = subagent.enabled_for(current_user)
+
     def build() -> Optional[LLMProvider]:
+        if own:
+            return subagent.llm_provider_for(current_user)
         if settings.llm_provider == "mock":
             return None
         try:
@@ -151,6 +159,9 @@ def get_similarity_llm_provider(
 def get_case_intake_provider_dep(current_user: User = Depends(get_current_user)) -> LLMProvider:
     """Provider for "Belgeden doldur". A misconfigured real provider is a 503
     with a generic message (the configuration error text is never exposed)."""
+    own = subagent.llm_provider_for(current_user)
+    if own is not None:
+        return own
     try:
         return get_case_intake_provider(ai_credential_scope(current_user))
     except AIProviderConfigError as exc:
@@ -161,11 +172,16 @@ def get_case_intake_provider_dep(current_user: User = Depends(get_current_user))
 def get_chat_provider_resolver(current_user: User = Depends(get_current_user)) -> Callable[[str], ChatProvider]:
     """Returns level -> configured chat provider (raises AIProviderConfigError
     when misconfigured). Overridable in tests."""
+    own = subagent.chat_provider_for(current_user)
+    if own is not None:
+        return lambda level=None: own
     return partial(get_chat_provider, law_firm_id=ai_credential_scope(current_user))
 
 
 def get_chat_level_classifier(current_user: User = Depends(get_current_user)) -> Callable[[str, Optional[str]], str]:
     """(question, previous_question) -> level. Overridable in tests."""
+    if subagent.enabled_for(current_user):
+        return lambda question, previous=None: "standard"  # no extra subagent run just to pick a level
     return partial(classify_chat_level, law_firm_id=ai_credential_scope(current_user))
 
 

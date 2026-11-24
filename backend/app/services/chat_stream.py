@@ -108,7 +108,11 @@ async def stream_assistant_reply(
 
     try:
         yield sse(start_event)
-        if tool_runner is not None:
+        # A provider that runs the read-only tools itself (Claude subagent) gets
+        # the runner and streams tool events and text in one pass; others plan
+        # first, then stream the answer.
+        agent_tools = tool_runner is not None and getattr(provider, "runs_own_tools", False)
+        if tool_runner is not None and not agent_tools:
             async for event in iterate_in_threadpool(tool_runner.run(history)):
                 yield sse(event)
             history = tool_runner.final_history(history)
@@ -117,9 +121,18 @@ async def stream_assistant_reply(
             if tool_runner.calls:
                 yield sse({"type": "sources", "sources": sources})
         try:
-            async for chunk in iterate_in_threadpool(provider.stream(history)):
+            chunks = provider.stream_with_tools(tool_runner, history) if agent_tools else provider.stream(history)
+            async for chunk in iterate_in_threadpool(chunks):
+                if isinstance(chunk, dict):  # tool progress from the agent
+                    yield sse(chunk)
+                    continue
                 parts.append(chunk)
                 yield sse({"type": "delta", "text": chunk})
+            if agent_tools:
+                sources = [source.as_dict() for source in tool_runner.sources]
+                persisted_sources = sources if tool_runner.allowed else None
+                if tool_runner.calls:
+                    yield sse({"type": "sources", "sources": sources})
         except AIProviderError as exc:
             saved = _try_persist(
                 session_factory, assistant_message_id, conversation_id, "".join(parts),
