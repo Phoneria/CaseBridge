@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.public_cors import PublicCORSMiddleware
+
 from app.core.security_headers import SecurityHeadersMiddleware
-from app.api.routes import legal_lab, platform_management, presentation, privacy, similar_cases
+from app.api.routes import legal_lab, platform_management, presentation, privacy, similar_cases, site_chat
 
 from app.api.routes import activity, admin, admin_users, analytics, auth, bureau, calendar, case_intake, cases, chat, clients, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, sufle, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
@@ -86,6 +88,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
+# Outermost: CORS for the public marketing endpoints only (casebridge.com.tr).
+app.add_middleware(PublicCORSMiddleware)
 
 app.include_router(health.router)
 app.include_router(auth.router)
@@ -112,6 +116,7 @@ app.include_router(activity.router)
 app.include_router(reports.router)
 app.include_router(system.router)
 app.include_router(calendar.router)
+app.include_router(site_chat.router)
 app.include_router(chat.router)
 app.include_router(notifications.router)
 

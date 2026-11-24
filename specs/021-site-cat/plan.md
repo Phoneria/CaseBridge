@@ -1,0 +1,6 @@
+# Plan
+- Backend package `app/site_chat/`: `site-knowledge.md` + `knowledge.py` (load, version, sections, TODO → unknown markers), `guard.py` (language, legal-advice and injection patterns, topic labels), `limits.py` (in-memory per-IP minute/day windows and daily token budget), `provider.py` (platform-key OpenAI provider or deterministic mock), `service.py` (turn order and fixed messages). Route `app/api/routes/site_chat.py`; `app/core/public_cors.py` as the outermost middleware for `/public/*`; settings `SITE_CHAT_*` in `config.py` and `.env.example`.
+- The streaming `OpenAIChatProvider` from the app chat is reused (joined into one string) for usage reporting; no tools argument is ever passed.
+- Marketing: `site-cat-loader.js` on all six pages (idle-time injection of the module and CSS), `site-cat-model.mjs` (pure logic), `site-cat.js` (DOM), `site-cat.css`, five poses copied from the in-app mascot art into `assets/site-cat/`.
+- Tests: `backend/tests/api/test_site_chat.py`; `tests/e2e/marketing/site-cat-model.test.mjs` (node:test) wrapped by `scripts/tests/test_site_cat.py` for the spec gate; `tests/e2e/marketing/site-cat-browser.cjs` (Playwright).
+- No migration, no new dependency, no new service.

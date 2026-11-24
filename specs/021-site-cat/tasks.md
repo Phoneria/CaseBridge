@@ -1,0 +1,11 @@
+# Tasks
+- [x] T001 Map marketing pages, language handling, booking link, deployment hosts and CORS, platform key lookup and the existing rate limiter (data-model.md#featurecontract).
+- [x] T002 Knowledge file from site text and repo docs with TODOs; loader with version and unknown markers (FR-001).
+- [x] T003 Endpoint, guards, mock/platform provider, limits, budget, Turnstile and text-free logging (FR-002 through FR-009).
+- [x] T004 `/public/*` CORS middleware (FR-007).
+- [x] T005 Backend tests covering FR-001 through FR-009.
+- [x] T006 Widget: loader, model, DOM, CSS, poses, chips and states on all marketing pages (FR-010, FR-011, FR-012).
+- [x] T007 Widget tests (node:test + unittest wrapper) and Playwright browser check with screenshots (FR-010 through FR-012).
+- [x] T008 Marketing v.0.66 and application v.0.51; spec checks; docs/site-cat-report.md (FR-013).
+- [ ] T009 Fill the knowledge-file TODOs, confirm the marketing CSP and test with the real platform key on staging (owner).
+- [ ] T010 Release and public verification (not part of this branch).
