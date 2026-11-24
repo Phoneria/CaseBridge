@@ -5,7 +5,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { ModalFrame } from "@/components/ModalFrame";
 import { addPlatformFirmAdmin, createPlatformFirm } from "@/lib/api";
 import { userMessage } from "@/lib/userMessages";
-import type { PlatformAdminInvite, PlatformFirm, PlatformFirmCreated } from "@/types";
+import type { PlatformAdminInvite, PlatformFirm, PlatformFirmCreated, UserRole } from "@/types";
 
 const INPUT =
   "mt-1 block w-full rounded-xl border border-surface-border px-3 py-2 text-sm text-navy-800 outline-none focus:border-accent-400";
@@ -16,19 +16,24 @@ export type FirmSaved =
   | { kind: "firm"; created: PlatformFirmCreated }
   | { kind: "admin"; firmId: string; invite: PlatformAdminInvite };
 
-/** Without `firm`: a new firm and its first admin. With `firm`: one more admin for it. */
+const ROLE_LABELS: Record<UserRole, string> = { admin: "Yönetici", lawyer: "Avukat" };
+
+/** Without `firm`: a new firm and its first admin. With `firm`: one more admin or lawyer for it. */
 export function FirmFormModal({
   firm,
+  initialRole = "admin",
   onClose,
   onSaved,
 }: {
   firm?: PlatformFirm;
+  initialRole?: UserRole;
   onClose: () => void;
   onSaved: (result: FirmSaved) => void;
 }) {
   const [firmName, setFirmName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<UserRole>(initialRole);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const inFlight = useRef(false);
@@ -49,14 +54,14 @@ export function FirmFormModal({
     setSaving(true);
     try {
       if (firm) {
-        const invite = await addPlatformFirmAdmin(firm.id, { full_name: person, email: address });
+        const invite = await addPlatformFirmAdmin(firm.id, { full_name: person, email: address, role });
         onSaved({ kind: "admin", firmId: firm.id, invite });
       } else {
         const created = await createPlatformFirm({ name, admin_full_name: person, admin_email: address });
         onSaved({ kind: "firm", created });
       }
     } catch (err) {
-      setError(userMessage(err, firm ? "Yönetici eklenemedi. Lütfen tekrar deneyin." : "Büro oluşturulamadı. Lütfen tekrar deneyin."));
+      setError(userMessage(err, firm ? "Kullanıcı davet edilemedi. Lütfen tekrar deneyin." : "Büro oluşturulamadı. Lütfen tekrar deneyin."));
     } finally {
       inFlight.current = false;
       setSaving(false);
@@ -64,12 +69,21 @@ export function FirmFormModal({
   }
 
   return (
-    <ModalFrame title={firm ? `Yönetici ekle — ${firm.name}` : "Yeni büro"} onClose={onClose} busy={saving}>
+    <ModalFrame title={firm ? `Kullanıcı davet et — ${firm.name}` : "Yeni büro"} onClose={onClose} busy={saving}>
       <form onSubmit={submit} noValidate className="space-y-3">
         {!firm && (
           <label className="block">
             <span className={LABEL}>Büro adı *</span>
             <input className={INPUT} value={firmName} onChange={(e) => setFirmName(e.target.value)} />
+          </label>
+        )}
+        {firm && (
+          <label className="block">
+            <span className={LABEL}>Rol *</span>
+            <select className={INPUT} value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
+              <option value="admin">{ROLE_LABELS.admin}</option>
+              <option value="lawyer">{ROLE_LABELS.lawyer}</option>
+            </select>
           </label>
         )}
         <label className="block">
@@ -80,7 +94,9 @@ export function FirmFormModal({
           <span className={LABEL}>{firm ? "E-posta *" : "Yönetici e-postası *"}</span>
           <input type="email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
-        <p className="text-xs text-navy-500">Yönetici, e-postayla gelen bağlantıdan kendi şifresini belirler.</p>
+        <p className="text-xs text-navy-500">
+          {firm ? ROLE_LABELS[role] : "Yönetici"}, e-postayla gelen bağlantıdan kendi şifresini belirler.
+        </p>
         {error && (
           <p role="alert" className="text-sm text-red-700">
             {error}
@@ -100,7 +116,7 @@ export function FirmFormModal({
             aria-disabled={saving}
             className="rounded-xl bg-navy-900 px-4 py-2 text-sm font-medium text-white aria-disabled:opacity-60"
           >
-            {saving ? "Kaydediliyor..." : firm ? "Ekle" : "Büroyu oluştur"}
+            {saving ? "Kaydediliyor..." : firm ? "Davet gönder" : "Büroyu oluştur"}
           </button>
         </div>
       </form>

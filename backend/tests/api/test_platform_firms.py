@@ -74,12 +74,12 @@ def test_list_shows_customer_firms_with_their_admins_and_hides_the_platform_firm
 
     assert [row["name"] for row in rows] == ["Demir Hukuk", "Kaya Hukuk"]
     demir = rows[0]
-    assert set(demir) == {"id", "name", "created_at", "is_active", "suspended_at", "active_user_count", "admins"}
+    assert set(demir) == {"id", "name", "created_at", "is_active", "suspended_at", "active_user_count", "admins", "lawyers"}
     assert (demir["is_active"], demir["suspended_at"], demir["active_user_count"]) == (True, None, 3)
     assert {admin["email"]: admin["status"] for admin in demir["admins"]} == {
         office.admin_a.email: "active", pending.email: "pending",
     }
-    assert set(demir["admins"][0]) == {"id", "full_name", "email", "status", "invited_at"}
+    assert set(demir["admins"][0]) == {"id", "full_name", "email", "role", "status", "invited_at"}
 
 
 def test_create_firm_makes_a_pending_admin_who_can_set_a_password(client, db_session, platform, mail_outbox):
@@ -163,8 +163,68 @@ def test_resend_invite_only_for_a_pending_admin_of_that_firm(client, db_session,
     assert len(mail_outbox.messages(to=pending.email)) == 1
 
     assert client.post(f"{base}/{office.admin_b.id}/invite", headers=platform.headers).status_code == 409
-    assert client.post(f"{base}/{office.lawyer_b.id}/invite", headers=platform.headers).status_code == 404
+    # lawyer_b already chose a password: a lawyer is reachable, but not re-invited.
+    assert client.post(f"{base}/{office.lawyer_b.id}/invite", headers=platform.headers).status_code == 409
     assert client.post(f"{base}/{office.admin_a.id}/invite", headers=platform.headers).status_code == 404
+
+
+def test_add_lawyer_invites_a_lawyer_listed_apart_from_the_admins(client, db_session, office, platform, mail_outbox):
+    response = client.post(
+        f"/platform/firms/{office.firm_b.id}/admins",
+        json={"full_name": "Yeni Avukat", "email": "Yeni.Avukat@Kaya.Example.com", "role": "lawyer"},
+        headers=platform.headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert (body["admin"]["role"], body["admin"]["status"], body["email_sent"]) == ("lawyer", "pending", True)
+    assert len(mail_outbox.messages(to="yeni.avukat@kaya.example.com")) == 1
+    user = db_session.get(User, body["admin"]["id"])
+    assert (user.role, user.law_firm_id, user.is_platform_admin) == (UserRole.LAWYER, office.firm_b.id, False)
+    firm = next(row for row in client.get("/platform/firms", headers=platform.headers).json() if row["name"] == "Kaya Hukuk")
+    assert body["admin"]["id"] not in {a["id"] for a in firm["admins"]}
+    assert body["admin"]["id"] in {a["id"] for a in firm["lawyers"]}
+    assert all(a["role"] == "admin" for a in firm["admins"])
+
+    resent = client.post(f"/platform/firms/{office.firm_b.id}/admins/{user.id}/invite", headers=platform.headers)
+    assert resent.status_code == 200
+    assert len(mail_outbox.messages(to="yeni.avukat@kaya.example.com")) == 2
+
+
+def test_add_member_defaults_to_admin_and_rejects_an_unknown_role(client, office, platform):
+    base = f"/platform/firms/{office.firm_b.id}/admins"
+    default = client.post(base, json={"full_name": "Varsayılan Kişi", "email": "varsayilan@kaya.example.com"}, headers=platform.headers)
+    assert default.status_code == 201 and default.json()["admin"]["role"] == "admin"
+    bad = client.post(base, json={"full_name": "Kötü Rol", "email": "kotu@kaya.example.com", "role": "owner"}, headers=platform.headers)
+    assert bad.status_code == 422
+
+
+def test_scoped_client_users_are_not_listed_or_re_invited(client, db_session, office, platform):
+    from app.models.management import WorkspaceAccess
+    scoped = User(
+        law_firm_id=office.firm_b.id, email="muvekkil@example.com", hashed_password=hash_password("placeholder-1234"),
+        full_name="Sentetik Müvekkil", role=UserRole.LAWYER, password_set_at=null(), invited_at=utc_now(),
+    )
+    db_session.add(scoped)
+    db_session.flush()
+    db_session.add(WorkspaceAccess(law_firm_id=office.firm_b.id, user_id=scoped.id, position="client", case_ids=[]))
+    db_session.commit()
+
+    firm = next(row for row in client.get("/platform/firms", headers=platform.headers).json() if row["name"] == "Kaya Hukuk")
+    assert scoped.id not in {a["id"] for a in firm["lawyers"]}
+    assert client.post(f"/platform/firms/{office.firm_b.id}/admins/{scoped.id}/invite", headers=platform.headers).status_code == 404
+
+
+def test_a_lawyer_invite_is_recorded_in_the_firm_history(client, db_session, office, platform):
+    from app.models.management import ManagementAudit
+    response = client.post(
+        f"/platform/firms/{office.firm_b.id}/admins",
+        json={"full_name": "Kayıtlı Avukat", "email": "kayitli@kaya.example.com", "role": "lawyer"},
+        headers=platform.headers,
+    )
+    assert response.status_code == 201
+    event = db_session.query(ManagementAudit).filter(ManagementAudit.law_firm_id == office.firm_b.id, ManagementAudit.action == "lawyer.invited").one()
+    assert event.entity_id == response.json()["admin"]["id"]
 
 
 def test_the_platform_firm_is_not_reachable(client, platform):
