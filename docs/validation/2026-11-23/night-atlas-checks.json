@@ -1,0 +1,207 @@
+{
+  "source_commit": "ee62fd74c89c9e944fa8ce00c0d1194aa65fb9e1",
+  "script_tests": 25,
+  "release_tests": 21,
+  "node_model_tests": 3,
+  "bound_acceptance_tests": 4,
+  "spec_contracts": 17,
+  "ci_run": "https://github.com/Phoneria/CaseBridge/actions/runs/45137707329",
+  "ci_backend": {
+    "passed": 1185,
+    "skipped": 1,
+    "xfailed": 1
+  },
+  "ci_frontend": {
+    "files": 88,
+    "passed": 795
+  },
+  "browser-final": {
+    "results": [
+      {
+        "width": 1440,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 1024,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 768,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 320,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      }
+    ],
+    "fallback": true,
+    "noJavaScript": true
+  },
+  "export-browser": {
+    "results": [
+      {
+        "width": 1440,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 1024,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 768,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 320,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      }
+    ],
+    "fallback": true,
+    "noJavaScript": true
+  },
+  "public-browser": {
+    "results": [
+      {
+        "width": 1440,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 1024,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 768,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      },
+      {
+        "width": 320,
+        "journey": true,
+        "webgl": true,
+        "projection": true,
+        "reducedMotion": true,
+        "scroll": true,
+        "locale": true,
+        "errors": []
+      }
+    ],
+    "fallback": true,
+    "noJavaScript": true
+  },
+  "keyboard": {
+    "keyboard": true,
+    "skipFocus": true,
+    "selectorFocus": true,
+    "nativeKeyboardTypeSelection": true,
+    "planning": true,
+    "realBookingOpened": true,
+    "bookingHost": "calendar.app.google"
+  },
+  "motion": {
+    "ambientFrames": true,
+    "offscreenPause": true,
+    "offscreenResume": true,
+    "dragProjection": true,
+    "teamResponsive": true
+  },
+  "touch": {
+    "nativeVerticalTouchScroll": true,
+    "start": 47,
+    "end": 207
+  }
+}

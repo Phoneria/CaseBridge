@@ -1,0 +1,50 @@
+{
+  "commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "cb-backend": {
+    "image": "sha256:828c5de1f7f77326009ccf1ac2d6462af40307d81144225a9e5f040f8c084b8f",
+    "readonly": true,
+    "user": "",
+    "caps": [
+      "ALL"
+    ],
+    "security": [
+      "no-new-privileges:true"
+    ],
+    "tmpfs": {
+      "/tmp": "rw,nosuid,nodev,size=128m"
+    },
+    "mounts": [
+      {
+        "Type": "volume",
+        "Name": "cb-prod_storage",
+        "Source": "/var/lib/docker/volumes/cb-prod_storage/_data",
+        "Destination": "/app/storage",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ]
+  },
+  "cb-frontend": {
+    "image": "sha256:b32c6d4b336669024fe8cb8586f5bce880edaf9bcdfa91bff8044c23b25f0191",
+    "readonly": true,
+    "user": "1000:1000",
+    "caps": [
+      "ALL"
+    ],
+    "security": [
+      "no-new-privileges:true"
+    ],
+    "tmpfs": {
+      "/app/.next/cache": "rw,nosuid,nodev,size=64m,uid=1000,gid=1000",
+      "/tmp": "rw,nosuid,nodev,size=64m"
+    },
+    "mounts": []
+  },
+  "backend_code_write_denied": true,
+  "frontend_code_write_denied": true,
+  "protected_configuration_unchanged": true,
+  "encrypted_credential_versions_unchanged": true,
+  "existing_admin_access_preserved": true
+}

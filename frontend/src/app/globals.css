@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Manrope (SIL OFL, public/fonts/OFL.txt) — same typeface as casebridge.com.tr. */
+@font-face { font-family: Manrope; src: url("/fonts/manrope-latin-v23.woff2") format("woff2"); font-weight: 200 800; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: Manrope; src: url("/fonts/manrope-latin-ext-v23.woff2") format("woff2"); font-weight: 200 800; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
 html,
 body {
-  background-color: #e7f3f5;
-  color: #0f1a2e;
+  background-color: #f3f1ec;
+  color: #0d1d2e;
   overscroll-behavior-y: none;
 }
 
@@ -15,21 +19,39 @@ body {
   .chat-markdown ul { list-style: disc; padding-left: 1.25rem; }
   .chat-markdown ol { list-style: decimal; padding-left: 1.25rem; }
   .chat-markdown li + li { margin-top: 0.25rem; }
-  .chat-markdown h1, .chat-markdown h2, .chat-markdown h3 { font-weight: 600; color: #0f1a2e; }
+  .chat-markdown h1, .chat-markdown h2, .chat-markdown h3 { font-weight: 600; color: #0d1d2e; }
   .chat-markdown h1 { font-size: 1.125rem; }
   .chat-markdown h2 { font-size: 1rem; }
   .chat-markdown h3 { font-size: 0.9375rem; }
-  .chat-markdown strong { font-weight: 600; color: #0f1a2e; }
-  .chat-markdown a { color: #00658a; text-decoration: underline; text-underline-offset: 2px; }
-  .chat-markdown code { background: #edf9fc; border-radius: 0.25rem; padding: 0.1rem 0.3rem; font-size: 0.85em; }
-  .chat-markdown pre { overflow-x: auto; background: #0b1220; color: #ffffff; padding: 0.75rem; border-radius: 0.75rem; }
+  .chat-markdown strong { font-weight: 600; color: #0d1d2e; }
+  .chat-markdown a { color: #0b5f56; text-decoration: underline; text-underline-offset: 2px; }
+  .chat-markdown code { background: #ecfaf7; border-radius: 0.25rem; padding: 0.1rem 0.3rem; font-size: 0.85em; }
+  .chat-markdown pre { overflow-x: auto; background: #08131f; color: #ffffff; padding: 0.75rem; border-radius: 0.75rem; }
   .chat-markdown pre code { background: transparent; padding: 0; color: inherit; }
-  .chat-markdown blockquote { border-left: 3px solid #afe3f0; padding-left: 0.75rem; color: #3d5170; }
+  .chat-markdown blockquote { border-left: 3px solid #68dfcf; padding-left: 0.75rem; color: #45607c; }
 }
 
 @layer base {
   :where(a, button, input, select, textarea):focus-visible {
-    outline: 2px solid #007eac;
+    outline: 2px solid #0c7468;
     outline-offset: 3px;
   }
+}
+
+[data-guide-current] {
+  outline: 3px solid #14907f;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgb(104 223 207 / 28%);
+}
+
+/* CaseBridge AI cat: the new pose fades in over the old one. */
+@keyframes mascot-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-mascot-in {
+  animation: mascot-in 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot-in { animation: none; }
 }

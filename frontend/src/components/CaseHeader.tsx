@@ -52,7 +52,7 @@ export function CaseHeader({ caseDetail, actions, busy, actionError, onPick }: P
           <h1 className="text-xl font-semibold text-navy-900">{caseDetail.case_name}</h1>
           <p className="text-sm text-navy-500">
             {caseDetail.client_name}
-            {caseDetail.opposing_party ? ` vs. ${caseDetail.opposing_party}` : ""}
+            {caseDetail.opposing_party ? ` ile ${caseDetail.opposing_party}` : ""}
           </p>
           <p className="text-sm text-navy-500">{`Sorumlu: ${caseDetail.assigned_lawyer_name ?? "Atanmamış"}`}</p>
         </div>

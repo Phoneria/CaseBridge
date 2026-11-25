@@ -1,0 +1,122 @@
+{
+  "verified_at": "2026-11-23T08:34:52.800312+00:00",
+  "marketing": {
+    "commit": "7c9a7af9c74b45ea2009e0b23acc3c4ad41dedd6",
+    "version": "v.0.51",
+    "scope": "marketing"
+  },
+  "application": {
+    "commit": "e8f691c04f01bfdb1b963fd42de6b30de281d154",
+    "version": "0.44",
+    "scope": "application"
+  },
+  "health": {
+    "status": "ok",
+    "app": "casebridge",
+    "release_commit": "e8f691c04f01bfdb1b963fd42de6b30de281d154",
+    "application_version": "0.44"
+  },
+  "all_container_ids_unchanged": true,
+  "public_files": [
+    {
+      "path": "assets/casebridge-e2e-dark.svg",
+      "sha256": "277dba3b218c82fc86de194add8b39247b4c375bdcdf8a1a025d9aeaf6ed9453",
+      "content_type": "image/svg+xml"
+    },
+    {
+      "path": "assets/night-atlas/OFL.txt",
+      "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+      "content_type": "text/plain"
+    },
+    {
+      "path": "assets/night-atlas/manrope-latin-ext-v23.woff2",
+      "sha256": "2f7335119075b2079f1d882530bbc18728461612bf90743203d73a74a48f4d9b",
+      "content_type": "font/woff2"
+    },
+    {
+      "path": "assets/night-atlas/manrope-latin-v23.woff2",
+      "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+      "content_type": "font/woff2"
+    },
+    {
+      "path": "assets/night-atlas/share.jpg",
+      "sha256": "fffcac96aaa48011222d2e4ea334f23a03cf90e09c0b3a72ed318a389bc9ebbf",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "assets/team/ahmet-buyukdag-web.jpg",
+      "sha256": "1d3a8d051a4c1896ba3e8331e469db8a50f89cf5553903e63bbf93540afb74e6",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "assets/team/bengu-ozbek-web.jpg",
+      "sha256": "f4c48ca4b466a327ec6c8f1a1a85fb142aa6945d856413be56f45551d81c7764",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "assets/team/emin-merden-web.jpg",
+      "sha256": "a251fefe1a5a78923004ce9b996a23514c486fe2e3d54d611262a1489328ce16",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "assets/team/hatice-cam-web.jpg",
+      "sha256": "74feb8206677a68fb1c0c8924e502ee0153d5ea2edf3372944ef9acba18e0008",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "assets/team/izzet-ahmet-web.jpg",
+      "sha256": "f59b050ce86d1fef9fa093bdbf3ff02510ffbee9b84a805a7bf2000a07a543df",
+      "content_type": "image/jpeg"
+    },
+    {
+      "path": "gorsel-kaynaklari.html",
+      "sha256": "36ba8d7c32cac0e939970280cd1064ead37ed7f00f86f7f6dc5ac67d50f12c8c",
+      "content_type": "text/html"
+    },
+    {
+      "path": "index.html",
+      "sha256": "c3ac81e72b6225ac494b2f2aba2957f4137cc3ed2f9963b445a7170285850667",
+      "content_type": "text/html"
+    },
+    {
+      "path": "investors.html",
+      "sha256": "227c544efdf95dbd0a785ecc6f590bbfcee291041d801caaa9ab1a694f88365d",
+      "content_type": "text/html"
+    },
+    {
+      "path": "night-atlas-map.js",
+      "sha256": "e523e299f00e4729f2c000987632730f0ba6c3ac07ce8de7e480285e2ebc628f",
+      "content_type": "text/javascript"
+    },
+    {
+      "path": "night-atlas-model.mjs",
+      "sha256": "96ae1d7aec4e9dcbd51db66540c94dfbac260f3e784ab5fe0401439a3e7f0c02",
+      "content_type": "text/javascript"
+    },
+    {
+      "path": "night-atlas.css",
+      "sha256": "1ef7e37d74a72a17959703f870adba9312d0fc34be40fc31c48af86268065715",
+      "content_type": "text/css"
+    },
+    {
+      "path": "night-atlas.js",
+      "sha256": "fc8d8deea56ca742163531873fcaee132d22bec18bb94ed3dfab300b629a2f28",
+      "content_type": "text/javascript"
+    },
+    {
+      "path": "team.html",
+      "sha256": "c75b40d099487ae76da543f1ce125f1c93cefe1d6f3ea71ca324559e1d603e46",
+      "content_type": "text/html"
+    },
+    {
+      "path": "timeline.html",
+      "sha256": "227c544efdf95dbd0a785ecc6f590bbfcee291041d801caaa9ab1a694f88365d",
+      "content_type": "text/html"
+    },
+    {
+      "path": "website-version.json",
+      "sha256": "02c09d9c6d7aa45e1c1d4a5d5e369be4b7bd4b2575cabea9d961cde2c2a37d07",
+      "content_type": "application/json"
+    }
+  ]
+}

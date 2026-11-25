@@ -24,6 +24,16 @@ beforeEach(() => {
 });
 
 describe("AppShell", () => {
+  it("admits platform and restricted accounts to the guide route", async () => {
+    setUrl("/rehber");
+    for (const account of [PLATFORM, {...LAWYER,workspace_position:"client"}]) {
+      getMe.mockResolvedValue(account);
+      const view = render(<AppShell><p>Rehber içeriği</p></AppShell>);
+      expect(await screen.findByText("Rehber içeriği")).toBeVisible();
+      expect(nav.replace).not.toHaveBeenCalled();
+      view.unmount();
+    }
+  });
   it("lets platform administrators open Settings", async () => {
     setUrl("/ayarlar");
     getMe.mockResolvedValue(PLATFORM);

@@ -50,7 +50,7 @@ export function ChatComposer({
         disabled={disabled}
         rows={2}
         maxLength={MAX_LENGTH}
-        placeholder="Bir hukuki soru sorun… (Enter gönderir, Shift+Enter yeni satır)"
+        placeholder="Bir hukuki soru sorun… (Göndermek için Enter, yeni satır için Shift+Enter)"
         className="min-h-[3rem] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-navy-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
       />
       {streaming ? (

@@ -1,0 +1,43 @@
+/* Appearance is local to the browser. The server renders dark by default.
+   Colour utilities resolve to CSS variables generated from src/lib/themeTokens.ts
+   (tailwind.config.ts), so this file only holds what a variable cannot express. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="dark"], :root[data-theme="dark"] body { background-color:#08131f; color:#eee8d9; }
+:root[data-theme="dark"] body { background-image:radial-gradient(120% 80% at 80% -10%, #12304a 0%, transparent 55%); background-attachment:fixed; }
+
+/* Solid light-teal fills need dark ink in the dark theme (white fails contrast). */
+:root[data-theme="dark"] :is(.bg-accent-500,.bg-accent-600,.bg-accent-700,.hover\:bg-accent-600:hover,.hover\:bg-accent-700:hover),
+:root[data-theme="dark"] :is(.bg-accent-500,.bg-accent-600,.bg-accent-700) :is(.text-white,.text-accent-50,.text-accent-100) { color:#06201d; }
+
+/* Hovering a row or card lifts it instead of sinking it to the page colour. */
+:root[data-theme="dark"] :is(.hover\:bg-white,.hover\:bg-surface-muted):hover { background-color:#15283b; }
+
+:root[data-theme="dark"] :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) { background-color:#0a1726; color:#eee8d9; border-color:#2c4763; }
+:root[data-theme="dark"] :is(input,select,textarea):disabled { background-color:#132538; color:#94a8bc; }
+:root[data-theme="dark"] ::placeholder { color:#8399ae; opacity:1; }
+:root[data-theme="dark"] :is(input[type="checkbox"],input[type="radio"],input[type="range"]) { accent-color:#68dfcf; }
+:root[data-theme="dark"] :where(a,button,input,select,textarea):focus-visible { outline-color:#68dfcf; }
+:root[data-theme="dark"] .chat-markdown :is(p,li,strong,h1,h2,h3) { color:#eee8d9; }
+:root[data-theme="dark"] .chat-markdown a { color:#68dfcf; }
+:root[data-theme="dark"] .chat-markdown code { background:#15283b; color:#d6dee6; }
+:root[data-theme="dark"] .chat-markdown pre { background:#050d17; }
+:root[data-theme="dark"] .chat-markdown pre code { background:transparent; color:inherit; }
+:root[data-theme="dark"] .chat-markdown blockquote { border-color:#68dfcf; color:#a9b9c9; }
+:root[data-theme="dark"] :is(.shadow-card) { box-shadow:0 1px 0 #ffffff08 inset, 0 6px 22px #0000004d; }
+:root[data-theme="dark"] :is(.shadow-xl) { box-shadow:0 24px 60px #000000a6, 0 0 0 1px #213851; }
+:root[data-theme="dark"] .bg-ai-glow { background-image:radial-gradient(600px circle at 85% -10%,#68dfcf2e,transparent 60%),radial-gradient(500px circle at -5% 110%,#5b8def24,transparent 55%); }
+:root[data-theme="dark"] .bg-ai-border { background-image:linear-gradient(135deg,#68dfcf,#1d4f5a 65%,#0d1d2e); }
+
+/* Charts: SVG colours come from --chart-* variables (src/lib/chartTheme.ts). */
+.recharts-cartesian-grid line { stroke:var(--chart-grid); }
+.recharts-text { fill:var(--chart-axis); }
+.recharts-default-tooltip { background-color:var(--chart-tooltip-bg) !important; border-color:var(--chart-tooltip-border) !important; color:var(--chart-tooltip-text); border-radius:12px; }
+.recharts-tooltip-label { color:var(--chart-tooltip-text); }
+.recharts-tooltip-cursor { fill:var(--chart-cursor); }
+.recharts-legend-item-text { color:var(--chart-muted) !important; }
+
+/* The original two-ink PNG has an opaque white matte. Blend that matte into the
+   actual surface instead of redrawing the mark or changing its raster pixels. */
+.brand-logo-image { mix-blend-mode:multiply; }
+:root[data-theme="dark"] .brand-logo-image { filter:invert(1) hue-rotate(180deg); mix-blend-mode:screen; }

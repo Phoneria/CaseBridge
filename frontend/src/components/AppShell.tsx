@@ -1,11 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { createContext, Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { GuideTour } from "@/components/GuideTour";
 import { Sidebar } from "@/components/Sidebar";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CaseQuickView } from "@/components/CaseQuickView";
+import { AiMascot } from "@/components/mascot/AiMascot";
+import dynamic from "next/dynamic";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import { LoadingState } from "@/components/LoadingState";
 import { getMe } from "@/lib/api";
@@ -14,8 +17,17 @@ import { FIRM_SUSPENDED } from "@/lib/firmStatus";
 import { subscribeUserUpdated } from "@/lib/userEvents";
 import type { AppUser } from "@/types";
 
+const PresentationView = dynamic(() => import("@/components/PresentationView").then(module => module.PresentationView), {ssr: false});
+
 /** Pages a platform admin may open besides the platform panel. */
-const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar"];
+const PLATFORM_ALLOWED = ["/hesabim", "/ayarlar", "/rehber"];
+export const WorkspaceUserContext = createContext<AppUser | null>(null);
+
+/** Who gets the floating CaseBridge AI cat: the same users who see the
+ * CaseBridge AI menu (the chat API refuses restricted workspace accounts). */
+export function canUseAiAssistant(user: AppUser | null): boolean {
+  return !!user && !user.workspace_position && !user.is_platform_admin;
+}
 
 /** `platform`: the page is the platform panel (platform admins only). A
  * platform admin is kept out of the firm pages: they belong to no customer firm. */
@@ -25,6 +37,7 @@ export function AppShell({ children, platform = false }: { children: React.React
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<AppUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [masked,setMasked] = useState(false);
   const menuRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => setMenuOpen(false), [pathname]);
@@ -53,11 +66,16 @@ export function AppShell({ children, platform = false }: { children: React.React
         router.replace("/dashboard");
         return;
       }
+      if (result.workspace_position && !["/calisma-alanim", "/hesabim", "/rehber"].includes(pathname ?? "")) {
+        router.replace("/calisma-alanim");
+        return;
+      }
       if (!platform && result.is_platform_admin && !PLATFORM_ALLOWED.includes(pathname ?? "")) {
         router.replace("/platform");
         return;
       }
       setUser(result);
+      setMasked(sessionStorage.getItem("cb.masked." + result.id) === "1");
       setReady(true);
     }).catch((err) => {
       // A suspended firm: api.ts is already loading /login?askida=1; a client
@@ -72,29 +90,43 @@ export function AppShell({ children, platform = false }: { children: React.React
 
   if (!ready) return <div className="min-h-screen bg-surface-muted p-6"><LoadingState label="Çalışma alanı yükleniyor…" /></div>;
 
+  function toggleMask(value: boolean) {
+    if (!user) return;
+    if (value) sessionStorage.setItem("cb.masked." + user.id, "1");
+    else sessionStorage.removeItem("cb.masked." + user.id);
+    setMasked(value);
+  }
+  if (masked && user && !user.is_platform_admin && !user.workspace_position) {
+    return <PresentationView onClose={(path) => {
+      if (path) {sessionStorage.removeItem("cb.masked." + user.id); window.location.assign(path);}
+      else toggleMask(false);
+    }}/>;
+  }
+
   // Suspense boundaries: views and the drawer read useSearchParams(), which
   // Next 14 requires to be inside <Suspense> for static prerendering.
   return (
     <div className="fixed inset-0 flex overflow-hidden bg-surface-muted">
-      <div className="hidden w-64 shrink-0 md:block"><Sidebar role={user?.role} platform={!!user?.is_platform_admin} /></div>
+      <div className="hidden w-64 shrink-0 md:block"><Sidebar role={user?.role} platform={!!user?.is_platform_admin} restricted={!!user?.workspace_position} /></div>
       {menuOpen && (
         <dialog ref={menuRef} aria-label="Uygulama menüsü" onCancel={() => setMenuOpen(false)}
           onClick={(event) => { if (event.target === event.currentTarget) setMenuOpen(false); }}
-          className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[calc(100vw-2rem)] border-0 bg-accent-50 p-0 text-navy-900 shadow-xl backdrop:bg-navy-950/50">
+          className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[calc(100vw-2rem)] border-0 bg-accent-50 p-0 text-navy-900 shadow-xl backdrop:bg-scrim">
           <div className="flex h-full flex-col">
             <button type="button" onClick={() => setMenuOpen(false)} className="m-3 self-end rounded-lg border border-accent-200 bg-white px-3 py-2 text-sm font-medium">Menüyü kapat</button>
             <div className="min-h-0 flex-1" onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMenuOpen(false); }}>
-              <Sidebar role={user?.role} platform={!!user?.is_platform_admin} />
+              <Sidebar role={user?.role} platform={!!user?.is_platform_admin} restricted={!!user?.workspace_position} />
             </div>
           </div>
         </dialog>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <WorkspaceHeader user={user} onMenuToggle={() => setMenuOpen(true)} menuOpen={menuOpen} />
+        <Suspense fallback={null}><GuideTour user={user} /></Suspense>
         <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
           <ErrorBoundary>
-            <Suspense fallback={null}>{children}</Suspense>
+            <WorkspaceUserContext.Provider value={user}><Suspense fallback={null}>{children}</Suspense></WorkspaceUserContext.Provider>
           </ErrorBoundary>
           </div>
         </main>
@@ -102,6 +134,8 @@ export function AppShell({ children, platform = false }: { children: React.React
       <Suspense fallback={null}>
         <CaseQuickView />
       </Suspense>
+      {/* Same audience as the CaseBridge AI menu: not for restricted workspace accounts or the platform panel. */}
+      {canUseAiAssistant(user) && <Suspense fallback={null}><AiMascot /></Suspense>}
     </div>
   );
 }

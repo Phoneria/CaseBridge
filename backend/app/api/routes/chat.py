@@ -7,6 +7,8 @@ from fastapi.responses import PlainTextResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.ai.chat.base import ChatProvider
+from app.ai.subagent import routing as subagent
+from app.ai.subagent.status import subagent_status
 from app.ai.chat.factory import get_chat_provider_status
 from app.ai.chat.levels import DEFAULT_CHAT_LEVEL, ChatLevel, get_level_config
 from app.ai.chat.prompt import system_prompt_for
@@ -25,8 +27,10 @@ from app.schemas.chat import (
     ChatStatusOut,
 )
 from app.services.audit import record_audit
+from app.services.chat_data_tools import ToolPrincipal
 from app.services.chat_service import ChatService
 from app.services.chat_stream import stream_assistant_reply
+from app.services.chat_tool_runner import ChatToolRunner, PageContext
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -49,6 +53,8 @@ def _conversation_out(service: ChatService, conversation) -> ChatConversationOut
 
 @router.get("/status", response_model=ChatStatusOut)
 def chat_status(current_user: User = Depends(get_current_user)):
+    if subagent.enabled_for(current_user):
+        return ChatStatusOut(**subagent_status())
     return ChatStatusOut(**get_chat_provider_status(ai_credential_scope(current_user)))
 
 
@@ -118,6 +124,16 @@ def send_message(
     record_audit(db, current_user, "ai.chat_message", target_type="chat_conversation", target_id=conversation.id,
                  flags={"level": level})
     history = service.build_history(conversation, level_config.history_limit, system_prompt_for(level))
+    tool_runner = None
+    if payload.data_tools:
+        context = payload.context
+        tool_runner = ChatToolRunner(
+            provider=provider,
+            principal=ToolPrincipal.of(current_user),
+            conversation_id=conversation.id,
+            session_factory=session_factory,
+            context=PageContext(route=context.route, case_id=context.case_id) if context else None,
+        )
     start_event = {
         "type": "start",
         "user_message": ChatMessageOut.model_validate(user_message).model_dump(mode="json"),
@@ -131,6 +147,7 @@ def send_message(
             assistant_message_id=assistant.id,
             conversation_id=conversation.id,
             session_factory=session_factory,
+            tool_runner=tool_runner,
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
@@ -162,13 +179,14 @@ def set_feedback(
 def export_training_data(
     model: Optional[str] = None,
     level: Optional[ChatLevel] = None,
+    include_data_tool_answers: bool = False,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return PlainTextResponse(
-        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level),
+        content=ChatService(db).export_jsonl(current_user.law_firm_id, model, level, include_data_tool_answers),
         media_type="application/jsonl; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=casebridge-chat-egitim.jsonl"},
     )

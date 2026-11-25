@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "changes": [{
+    "files": [".github/workflows/versioned-gallery.yml"],
+    "requirements": ["specs/010-versioned-gallery/spec.md#FR-002"],
+    "acceptance_tests": ["scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_capture_runner_is_pinned_to_supported_browser_os"],
+    "reason": "Actual run44970517414 safely rejected rolling ubuntu26.04 before capture; pin the compatible24.04 runner with the reviewed Playwright1.56.1 browser."
+  }]
+}

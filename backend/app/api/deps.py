@@ -2,7 +2,7 @@ import logging
 from functools import partial
 from typing import Callable, Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
@@ -14,11 +14,13 @@ from app.ai.case_intake import UNCONFIGURED_MESSAGE
 from app.ai.errors import AIProviderConfigError
 from app.ai.provider_factory import get_case_intake_provider, get_llm_provider
 from app.ai.providers.base import LLMProvider
+from app.core.config import settings
 from app.core.security import decode_access_token, password_epoch
 from app.db.session import SessionLocal, get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.services.firm_access import FIRM_SUSPENDED, firm_is_open
+from app.ai.subagent import routing as subagent
 
 logger = logging.getLogger("casebridge")
 
@@ -32,6 +34,7 @@ _CREDENTIALS_EXCEPTION = HTTPException(
 
 
 def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     db: Session = Depends(get_db),
 ) -> User:
@@ -65,6 +68,24 @@ def get_current_user(
         # 403, not 401: the session is valid, the firm is suspended. The
         # frontend shows the message on the login page.
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=FIRM_SUSPENDED)
+    # A restricted workspace is enforced at the shared dependency, including
+    # direct requests to legacy case/search/export/AI endpoints.
+    from app.models.management import WorkspaceAccess
+    grant = db.query(WorkspaceAccess).filter(
+        WorkspaceAccess.user_id == user.id,
+        WorkspaceAccess.law_firm_id == user.law_firm_id,
+    ).first()
+    user.workspace_position = grant.position if grant and user.role != UserRole.ADMIN else None
+    if grant and user.role != UserRole.ADMIN:
+        path = request.url.path.rstrip("/")
+        if not (path == "/users/me" or path in {"/auth/logout", "/auth/change-password"} or path == "/bureau/workspace" or path.startswith("/bureau/workspace/")):
+            raise HTTPException(403, "Bu hesap yalnızca kendisine ayrılan çalışma alanına erişebilir.")
+    from app.core.timeutil import utc_now
+    from datetime import timedelta
+    seen = utc_now().replace(tzinfo=None)
+    if user.last_seen_at is None or user.last_seen_at.replace(tzinfo=None) < seen - timedelta(minutes=5):
+        user.last_seen_at = seen
+        db.commit()
     return user
 
 
@@ -102,15 +123,45 @@ def get_llm_provider_dep(current_user: User = Depends(get_current_user)) -> LLMP
     """FastAPI dependency wrapping the provider factory - overridable in
     tests via app.dependency_overrides so no test ever needs a real
     OPENAI_API_KEY or hits the network."""
+    own = subagent.llm_provider_for(current_user)
+    if own is not None:
+        return own
     try:
         return get_llm_provider(ai_credential_scope(current_user))
     except AIProviderConfigError:
         raise HTTPException(status_code=503, detail="Büronuzun AI bağlantısı yapılandırılmamış. Ayarlar üzerinden API anahtarınızı ekleyin.") from None
 
 
+def get_similarity_llm_provider(
+    current_user: User = Depends(get_current_user),
+) -> Callable[[], Optional[LLMProvider]]:
+    """Lazy provider for the optional "Benzer Davalar" AI explanation. The returned callable
+    gives None when AI is off (LLM_PROVIDER=mock) or not configured, and the caller then uses
+    the extractive fallback. Built only when asked for; overridable in tests via
+    app.dependency_overrides."""
+    scope = ai_credential_scope(current_user)
+
+    own = subagent.enabled_for(current_user)
+
+    def build() -> Optional[LLMProvider]:
+        if own:
+            return subagent.llm_provider_for(current_user)
+        if settings.llm_provider == "mock":
+            return None
+        try:
+            return get_llm_provider(scope)
+        except AIProviderConfigError:
+            return None
+
+    return build
+
+
 def get_case_intake_provider_dep(current_user: User = Depends(get_current_user)) -> LLMProvider:
     """Provider for "Belgeden doldur". A misconfigured real provider is a 503
     with a generic message (the configuration error text is never exposed)."""
+    own = subagent.llm_provider_for(current_user)
+    if own is not None:
+        return own
     try:
         return get_case_intake_provider(ai_credential_scope(current_user))
     except AIProviderConfigError as exc:
@@ -121,11 +172,16 @@ def get_case_intake_provider_dep(current_user: User = Depends(get_current_user))
 def get_chat_provider_resolver(current_user: User = Depends(get_current_user)) -> Callable[[str], ChatProvider]:
     """Returns level -> configured chat provider (raises AIProviderConfigError
     when misconfigured). Overridable in tests."""
+    own = subagent.chat_provider_for(current_user)
+    if own is not None:
+        return lambda level=None: own
     return partial(get_chat_provider, law_firm_id=ai_credential_scope(current_user))
 
 
 def get_chat_level_classifier(current_user: User = Depends(get_current_user)) -> Callable[[str, Optional[str]], str]:
     """(question, previous_question) -> level. Overridable in tests."""
+    if subagent.enabled_for(current_user):
+        return lambda question, previous=None: "standard"  # no extra subagent run just to pick a level
     return partial(classify_chat_level, law_firm_id=ai_credential_scope(current_user))
 
 

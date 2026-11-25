@@ -313,3 +313,17 @@ def test_precedent_hearing_dates_are_not_turned_into_events(db_session, seeded, 
     import_folder(str(tmp_path), db=db_session)
 
     assert _hearings(db_session) == []
+
+
+def test_imports_udf_document(db_session, seeded, tmp_path):
+    from app.models.document import DocumentType
+    from tests.udf_samples import make_udf
+
+    _write(tmp_path, [{**CASE, "documents": [{"file": "karar.udf"}]}], {"karar.udf": make_udf("İlk derece kararı")})
+
+    stats = import_folder(str(tmp_path), db=db_session)
+
+    assert stats["documents"] == 1 and stats["errors"] == []
+    document = db_session.query(Document).one()
+    assert document.file_type == DocumentType.UDF
+    assert "İlk derece kararı" in document.extracted_text

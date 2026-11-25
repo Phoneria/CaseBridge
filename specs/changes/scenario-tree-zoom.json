@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "changes": [{
+    "files": ["frontend/app-version.json", "frontend/src/components/lab/ScenarioTreeView.tsx"],
+    "requirements": ["specs/014-demo-case-files/spec.md#FR-012"],
+    "acceptance_tests": ["frontend/src/components/__tests__/ScenarioTreeView.test.tsx::zooms the graph within limits and retains the selected branch"],
+    "reason": "Scale the complete graph while preserving navigation and selected evidence."
+  }]
+}

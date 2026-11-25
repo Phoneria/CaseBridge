@@ -1,0 +1,2467 @@
+{
+  "app": "http://127.0.0.1:3044",
+  "syntheticApi": true,
+  "results": [
+    {
+      "width": 1440,
+      "height": 1080,
+      "theme": "light",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 130.25,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 130.25,
+          "bottom": 175.078125,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 175.078125,
+          "bottom": 219.890625,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.890625,
+          "bottom": 264.71875,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 264.71875,
+          "bottom": 309.53125,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 309.53125,
+          "bottom": 354.359375,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 354.359375,
+          "bottom": 399.171875,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 399.171875,
+          "bottom": 444,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 444,
+          "bottom": 488.8125,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 488.8125,
+          "bottom": 533.625,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 574.625,
+          "bottom": 619.4375,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 619.4375,
+          "bottom": 664.265625,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 664.265625,
+          "bottom": 709.078125,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 709.078125,
+          "bottom": 753.90625,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 753.90625,
+          "bottom": 798.71875,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 798.71875,
+          "bottom": 843.546875,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 843.546875,
+          "bottom": 888.359375,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 888.359375,
+          "bottom": 933.1875,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 933.1875,
+          "bottom": 978,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 999,
+          "bottom": 1031,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 1080,
+      "theme": "dark",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 130.25,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 130.25,
+          "bottom": 175.078125,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 175.078125,
+          "bottom": 219.890625,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.890625,
+          "bottom": 264.71875,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 264.71875,
+          "bottom": 309.53125,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 309.53125,
+          "bottom": 354.359375,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 354.359375,
+          "bottom": 399.171875,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 399.171875,
+          "bottom": 444,
+          "left": 16,
+          "right": 235,
+          "height": 44.828125
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 444,
+          "bottom": 488.8125,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 488.8125,
+          "bottom": 533.625,
+          "left": 16,
+          "right": 235,
+          "height": 44.8125
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 574.625,
+          "bottom": 619.4375,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 619.4375,
+          "bottom": 664.265625,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 664.265625,
+          "bottom": 709.078125,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 709.078125,
+          "bottom": 753.90625,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 753.90625,
+          "bottom": 798.71875,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 798.71875,
+          "bottom": 843.546875,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 843.546875,
+          "bottom": 888.359375,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 888.359375,
+          "bottom": 933.1875,
+          "left": 25,
+          "right": 226,
+          "height": 44.828125
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 933.1875,
+          "bottom": 978,
+          "left": 25,
+          "right": 226,
+          "height": 44.8125
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 999,
+          "bottom": 1031,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 120.78125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 120.78125,
+          "bottom": 156.140625,
+          "left": 16,
+          "right": 235,
+          "height": 35.359375
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 156.140625,
+          "bottom": 191.484375,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 191.484375,
+          "bottom": 226.828125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 226.828125,
+          "bottom": 262.171875,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 262.171875,
+          "bottom": 297.515625,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 297.515625,
+          "bottom": 332.859375,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 332.859375,
+          "bottom": 368.203125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 368.203125,
+          "bottom": 403.546875,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 403.546875,
+          "bottom": 438.890625,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 479.890625,
+          "bottom": 515.234375,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 515.234375,
+          "bottom": 550.59375,
+          "left": 25,
+          "right": 226,
+          "height": 35.359375
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 550.59375,
+          "bottom": 585.9375,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 585.9375,
+          "bottom": 621.28125,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 621.28125,
+          "bottom": 656.625,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 656.625,
+          "bottom": 691.96875,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 691.96875,
+          "bottom": 727.3125,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 727.3125,
+          "bottom": 762.65625,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 762.65625,
+          "bottom": 798,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 819,
+          "bottom": 851,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 120.78125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 120.78125,
+          "bottom": 156.140625,
+          "left": 16,
+          "right": 235,
+          "height": 35.359375
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 156.140625,
+          "bottom": 191.484375,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 191.484375,
+          "bottom": 226.828125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 226.828125,
+          "bottom": 262.171875,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 262.171875,
+          "bottom": 297.515625,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 297.515625,
+          "bottom": 332.859375,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 332.859375,
+          "bottom": 368.203125,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 368.203125,
+          "bottom": 403.546875,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 403.546875,
+          "bottom": 438.890625,
+          "left": 16,
+          "right": 235,
+          "height": 35.34375
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 479.890625,
+          "bottom": 515.234375,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 515.234375,
+          "bottom": 550.59375,
+          "left": 25,
+          "right": 226,
+          "height": 35.359375
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 550.59375,
+          "bottom": 585.9375,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 585.9375,
+          "bottom": 621.28125,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 621.28125,
+          "bottom": 656.625,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 656.625,
+          "bottom": 691.96875,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 691.96875,
+          "bottom": 727.3125,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 727.3125,
+          "bottom": 762.65625,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 762.65625,
+          "bottom": 798,
+          "left": 25,
+          "right": 226,
+          "height": 35.34375
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 819,
+          "bottom": 851,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 768,
+      "theme": "light",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 113.828125,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 113.828125,
+          "bottom": 142.234375,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 142.234375,
+          "bottom": 170.625,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 170.625,
+          "bottom": 199.03125,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 199.03125,
+          "bottom": 227.421875,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 227.421875,
+          "bottom": 255.828125,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 255.828125,
+          "bottom": 284.21875,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 284.21875,
+          "bottom": 312.625,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 312.625,
+          "bottom": 341.015625,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 341.015625,
+          "bottom": 369.421875,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 410.421875,
+          "bottom": 438.8125,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 438.8125,
+          "bottom": 467.21875,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 467.21875,
+          "bottom": 495.609375,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 495.609375,
+          "bottom": 524.015625,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.015625,
+          "bottom": 552.40625,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 552.40625,
+          "bottom": 580.8125,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 580.8125,
+          "bottom": 609.203125,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 609.203125,
+          "bottom": 637.609375,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 637.609375,
+          "bottom": 666,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 687,
+          "bottom": 719,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 768,
+      "theme": "dark",
+      "desktopAll20AtOnce": true,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "not needed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 85.4375,
+          "bottom": 113.828125,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 113.828125,
+          "bottom": 142.234375,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 142.234375,
+          "bottom": 170.625,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 170.625,
+          "bottom": 199.03125,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 199.03125,
+          "bottom": 227.421875,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 227.421875,
+          "bottom": 255.828125,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 255.828125,
+          "bottom": 284.21875,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 284.21875,
+          "bottom": 312.625,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 312.625,
+          "bottom": 341.015625,
+          "left": 16,
+          "right": 235,
+          "height": 28.390625
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 341.015625,
+          "bottom": 369.421875,
+          "left": 16,
+          "right": 235,
+          "height": 28.40625
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 410.421875,
+          "bottom": 438.8125,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 438.8125,
+          "bottom": 467.21875,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 467.21875,
+          "bottom": 495.609375,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 495.609375,
+          "bottom": 524.015625,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.015625,
+          "bottom": 552.40625,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 552.40625,
+          "bottom": 580.8125,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 580.8125,
+          "bottom": 609.203125,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 609.203125,
+          "bottom": 637.609375,
+          "left": 25,
+          "right": 226,
+          "height": 28.40625
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 637.609375,
+          "bottom": 666,
+          "left": 25,
+          "right": 226,
+          "height": 28.390625
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 687,
+          "bottom": 719,
+          "left": 16,
+          "right": 239,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 176.5625,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 176.5625,
+          "bottom": 205.703125,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 205.703125,
+          "bottom": 234.828125,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 234.828125,
+          "bottom": 263.96875,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 263.96875,
+          "bottom": 293.09375,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 293.09375,
+          "bottom": 322.234375,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 322.234375,
+          "bottom": 351.359375,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 351.359375,
+          "bottom": 380.5,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 380.5,
+          "bottom": 409.640625,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 409.640625,
+          "bottom": 438.78125,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 479.78125,
+          "bottom": 508.90625,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 508.90625,
+          "bottom": 538.046875,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 538.046875,
+          "bottom": 567.171875,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 567.171875,
+          "bottom": 596.3125,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 596.3125,
+          "bottom": 625.4375,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 625.4375,
+          "bottom": 654.578125,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 654.578125,
+          "bottom": 683.71875,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 683.71875,
+          "bottom": 712.859375,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 712.859375,
+          "bottom": 742,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 763,
+          "bottom": 795,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 176.5625,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 176.5625,
+          "bottom": 205.703125,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 205.703125,
+          "bottom": 234.828125,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 234.828125,
+          "bottom": 263.96875,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 263.96875,
+          "bottom": 293.09375,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 293.09375,
+          "bottom": 322.234375,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 322.234375,
+          "bottom": 351.359375,
+          "left": 16,
+          "right": 267,
+          "height": 29.125
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 351.359375,
+          "bottom": 380.5,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 380.5,
+          "bottom": 409.640625,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 409.640625,
+          "bottom": 438.78125,
+          "left": 16,
+          "right": 267,
+          "height": 29.140625
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 479.78125,
+          "bottom": 508.90625,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 508.90625,
+          "bottom": 538.046875,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 538.046875,
+          "bottom": 567.171875,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 567.171875,
+          "bottom": 596.3125,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 596.3125,
+          "bottom": 625.4375,
+          "left": 25,
+          "right": 258,
+          "height": 29.125
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 625.4375,
+          "bottom": 654.578125,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 654.578125,
+          "bottom": 683.71875,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 683.71875,
+          "bottom": 712.859375,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 712.859375,
+          "bottom": 742,
+          "left": 25,
+          "right": 258,
+          "height": 29.140625
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 763,
+          "bottom": 795,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 171.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 171.4375,
+          "bottom": 195.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 195.4375,
+          "bottom": 219.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.4375,
+          "bottom": 243.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 243.4375,
+          "bottom": 267.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 267.4375,
+          "bottom": 291.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 291.4375,
+          "bottom": 315.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 315.4375,
+          "bottom": 339.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 339.4375,
+          "bottom": 363.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 363.4375,
+          "bottom": 387.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 428.4375,
+          "bottom": 452.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 452.4375,
+          "bottom": 476.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 476.4375,
+          "bottom": 500.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 500.4375,
+          "bottom": 524.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.4375,
+          "bottom": 548.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 548.4375,
+          "bottom": 572.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 572.4375,
+          "bottom": 596.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 596.4375,
+          "bottom": 620.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 620.4375,
+          "bottom": 644.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 487,
+          "bottom": 519,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 171.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 171.4375,
+          "bottom": 195.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 195.4375,
+          "bottom": 219.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.4375,
+          "bottom": 243.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 243.4375,
+          "bottom": 267.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 267.4375,
+          "bottom": 291.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 291.4375,
+          "bottom": 315.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 315.4375,
+          "bottom": 339.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 339.4375,
+          "bottom": 363.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 363.4375,
+          "bottom": 387.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 428.4375,
+          "bottom": 452.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 452.4375,
+          "bottom": 476.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 476.4375,
+          "bottom": 500.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 500.4375,
+          "bottom": 524.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.4375,
+          "bottom": 548.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 548.4375,
+          "bottom": 572.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 572.4375,
+          "bottom": 596.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 596.4375,
+          "bottom": 620.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 620.4375,
+          "bottom": 644.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 487,
+          "bottom": 519,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 720,
+      "height": 384,
+      "theme": "light",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 171.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 171.4375,
+          "bottom": 195.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 195.4375,
+          "bottom": 219.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.4375,
+          "bottom": 243.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 243.4375,
+          "bottom": 267.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 267.4375,
+          "bottom": 291.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 291.4375,
+          "bottom": 315.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 315.4375,
+          "bottom": 339.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 339.4375,
+          "bottom": 363.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 363.4375,
+          "bottom": 387.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 428.4375,
+          "bottom": 452.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 452.4375,
+          "bottom": 476.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 476.4375,
+          "bottom": 500.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 500.4375,
+          "bottom": 524.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.4375,
+          "bottom": 548.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 548.4375,
+          "bottom": 572.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 572.4375,
+          "bottom": 596.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 596.4375,
+          "bottom": 620.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 620.4375,
+          "bottom": 644.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 303,
+          "bottom": 335,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    },
+    {
+      "width": 720,
+      "height": 384,
+      "theme": "dark",
+      "desktopAll20AtOnce": false,
+      "aiRows": 9,
+      "headerLinks": 9,
+      "shortScrollAndFocus": "passed",
+      "geometry": [
+        {
+          "label": "B\u00fcro Y\u00f6netimi",
+          "href": "/buro",
+          "top": 147.4375,
+          "bottom": 171.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Admin Paneli",
+          "href": "/admin",
+          "top": 171.4375,
+          "bottom": 195.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel Bak\u0131\u015f",
+          "href": "/dashboard",
+          "top": 195.4375,
+          "bottom": 219.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Davalar",
+          "href": "/davalar",
+          "top": 219.4375,
+          "bottom": 243.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Emsal Kararlar",
+          "href": "/emsaller",
+          "top": 243.4375,
+          "bottom": 267.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Takvim",
+          "href": "/takvim",
+          "top": 267.4375,
+          "bottom": 291.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "G\u00f6revler",
+          "href": "/gorevler",
+          "top": 291.4375,
+          "bottom": 315.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Belgeler",
+          "href": "/belgeler",
+          "top": 315.4375,
+          "bottom": 339.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Analitik",
+          "href": "/analitik",
+          "top": 339.4375,
+          "bottom": 363.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Raporlar",
+          "href": "/raporlar",
+          "top": 363.4375,
+          "bottom": 387.4375,
+          "left": 16,
+          "right": 267,
+          "height": 24
+        },
+        {
+          "label": "Genel bak\u0131\u015f",
+          "href": "/ai",
+          "top": 428.4375,
+          "bottom": 452.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Sufle",
+          "href": "/ai/sufle",
+          "top": 452.4375,
+          "bottom": 476.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Dosya Analizi",
+          "href": "/ai/analiz",
+          "top": 476.4375,
+          "bottom": 500.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Canl\u0131 Duru\u015fma",
+          "href": "/ai/durusma",
+          "top": 500.4375,
+          "bottom": 524.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Hukuk Asistan\u0131",
+          "href": "/ai/sohbet",
+          "top": 524.4375,
+          "bottom": 548.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Kar\u015f\u0131 Taraf Analizi",
+          "href": "/ai/karsi-taraf",
+          "top": 548.4375,
+          "bottom": 572.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Y\u00f6netilen Duru\u015fma",
+          "href": "/ai/yonetmen",
+          "top": 572.4375,
+          "bottom": 596.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Bilgi Haritas\u0131",
+          "href": "/ai/harita",
+          "top": 596.4375,
+          "bottom": 620.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Olas\u0131l\u0131k A\u011fac\u0131",
+          "href": "/ai/olasilik",
+          "top": 620.4375,
+          "bottom": 644.4375,
+          "left": 25,
+          "right": 258,
+          "height": 24
+        },
+        {
+          "label": "Ayarlar",
+          "href": "/ayarlar",
+          "top": 303,
+          "bottom": 335,
+          "left": 16,
+          "right": 271,
+          "height": 32
+        }
+      ]
+    }
+  ],
+  "logos": [
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-light.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(237, 249, 252)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-light-ffffff.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(255, 255, 255)",
+      "alternate": true
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-light-dceaf4.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(220, 234, 244)",
+      "alternate": true
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-dark.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(23, 42, 40)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-dark-0b1220.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(11, 18, 32)",
+      "alternate": true
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-1080-dark-24354a.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1080
+      },
+      "background": "rgb(36, 53, 74)",
+      "alternate": true
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-900-light.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "background": "rgb(237, 249, 252)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-900-dark.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "background": "rgb(23, 42, 40)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-768-light.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      },
+      "background": "rgb(237, 249, 252)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "multiply",
+        "filter": "none",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    },
+    {
+      "file": "docs/validation/2026-11-22/balanced-logo-qa/balanced-logo-local-768-dark.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1280,
+        "height": 768
+      },
+      "background": "rgb(23, 42, 40)",
+      "meta": {
+        "src": "/casebridge-logo.png",
+        "natural": [
+          374,
+          108
+        ],
+        "width": 192,
+        "height": 55.4375,
+        "blend": "screen",
+        "filter": "invert(1) hue-rotate(180deg)",
+        "wrapperBackground": "rgba(0, 0, 0, 0)"
+      }
+    }
+  ],
+  "errors": []
+}

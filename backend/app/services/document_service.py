@@ -14,16 +14,29 @@ _EXTENSION_TO_TYPE = {
     ".pdf": DocumentType.PDF,
     ".docx": DocumentType.DOCX,
     ".txt": DocumentType.TXT,
+    ".udf": DocumentType.UDF,
+}
+
+MEDIA_TYPES = {
+    DocumentType.PDF: "application/pdf",
+    DocumentType.DOCX: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    DocumentType.TXT: "text/plain; charset=utf-8",
+    DocumentType.UDF: "application/octet-stream",
 }
 
 
+def media_type_for(document: Document) -> str:
+    """The download Content-Type for a stored document."""
+    return MEDIA_TYPES.get(document.file_type, "application/octet-stream")
+
+
 def resolve_document_type(filename: str) -> DocumentType:
-    """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt."""
+    """The DocumentType for a file name, or a 400 for anything but pdf/docx/txt/udf."""
     _, ext = os.path.splitext(filename.lower())
     if ext not in _EXTENSION_TO_TYPE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt.",
+            detail=f"Unsupported file type '{ext}'. Allowed: pdf, docx, txt, udf.",
         )
     return _EXTENSION_TO_TYPE[ext]
 

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "changes": [{
+    "files": ["frontend/app-version.json", "frontend/src/components/CaseDetailView.tsx", "frontend/src/components/lab/ScenarioTreeView.tsx", "frontend/src/components/lab/scenarioMap.ts"],
+    "requirements": ["specs/014-demo-case-files/spec.md#FR-013"],
+    "acceptance_tests": ["frontend/src/components/__tests__/ScenarioTreeView.test.tsx::zooms at the pointer with the wheel and keeps selection", "frontend/src/components/__tests__/ScenarioTreeView.test.tsx::separates recorded history from simulated percentages"],
+    "reason": "Show recorded case routes, universal scenario shares and pointer-centered wheel zoom."
+  }]
+}

@@ -75,10 +75,17 @@ export function ChatView() {
   // on screen (optimistic + streaming), so it must not be reloaded.
   const skipLoadRef = useRef<string | null>(null);
 
+  const initialHistoryLoaded = useRef(false);
   const refreshConversations = useCallback(
     () =>
       listChatConversations()
-        .then(setConversations)
+        .then(rows => {
+          setConversations(rows);
+          if (!initialHistoryLoaded.current) {
+            initialHistoryLoaded.current = true;
+            if (!activeRef.current && !paramRef.current && rows[0]?.title.startsWith("ÖRNEK · ")) setActiveId(rows[0].id);
+          }
+        })
         .catch(() => setError("Sohbetler yüklenemedi.")),
     [],
   );
@@ -279,7 +286,7 @@ export function ChatView() {
             <button
               type="button"
               onClick={exportTrainingData}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15"
+              className="rounded-xl bg-glass/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-glass/15"
             >
               Eğitim verisini indir (JSONL)
             </button>

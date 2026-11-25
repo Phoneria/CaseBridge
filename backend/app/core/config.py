@@ -31,12 +31,23 @@ class Settings(BaseSettings):
     # config-driven: no provider is ever silently substituted for
     # another. Defaults to "mock" so a fresh checkout / the default
     # automated test suite never accidentally calls a real provider.
-    llm_provider: Literal["qwen", "openai", "ollama", "mock"] = "mock"
+    llm_provider: Literal["qwen", "openai", "ollama", "anthropic", "mock"] = "mock"
+
+    # Dış LLM sağlayıcılarına (qwen/openai/anthropic) giden istemlerde kişisel verileri maskele.
+    anonymize_llm_input: bool = False
+    anonymize_use_ner: bool = True
+
+    # Claude (Anthropic). LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY.
+    anthropic_api_key: Optional[str] = None
+    anthropic_model: str = "claude-sonnet-5-5"
+    anthropic_timeout_seconds: float = 90
+    anthropic_max_output_tokens: int = 4096
 
     # OpenAI (optional at startup - MVP can run entirely on mocks)
     openai_api_key: Optional[str] = None
     ai_secrets_encryption_key: str = Field(default="", repr=False)
     openai_model: str = "gpt-4o-mini"
+    sufle_model: str = ""  # Empty uses this bureau connection's CHAT_MODEL.
     voice_transcription_model: str = "gpt-4o-mini-transcribe"
     voice_speech_model: str = "gpt-4o-mini-tts"
 
@@ -85,6 +96,10 @@ class Settings(BaseSettings):
     # Basit model. Off -> every question uses Standart.
     chat_auto_level: bool = True
     chat_classifier_timeout_seconds: PositiveFloat = 8
+
+    # "Benzer Davalar" optional AI explanation: total deadline for one request; on expiry the
+    # endpoint answers with the extractive fallback.
+    similarity_explain_timeout_seconds: PositiveFloat = 12
 
     # "Belgeden doldur" (new case page): at most this many characters of the
     # uploaded or pasted document are sent to the model; the rest is cut and
@@ -142,6 +157,24 @@ class Settings(BaseSettings):
     # and remove previously seeded demo cases (real data mode).
     seed_demo_data: bool = True
     max_upload_size_bytes: int = 10 * 1024 * 1024  # 10 MB
+
+    # Public "site cat" chat on the marketing site (POST /public/site-chat).
+    # It uses only the PLATFORM OpenAI key (never a bureau key), no database
+    # and no tools. LLM_PROVIDER=mock gives deterministic answers.
+    site_chat_enabled: bool = True
+    site_chat_model: str = "gpt-4o-mini"
+    site_chat_max_output_tokens: PositiveInt = 350
+    site_chat_timeout_seconds: float = 20.0
+    site_chat_per_ip_per_minute: PositiveInt = 10
+    site_chat_per_ip_per_day: PositiveInt = 50
+    # Tokens (prompt + completion) the site chat may spend per local day
+    # across all visitors; above it the endpoint answers "busy".
+    site_chat_daily_token_budget: PositiveInt = 1_500_000
+    # Comma-separated exact origins allowed to call /public/*; http://localhost
+    # and http://127.0.0.1 on any port are always allowed for development.
+    site_chat_allowed_origins: str = "https://casebridge.com.tr,https://www.casebridge.com.tr"
+    # Cloudflare Turnstile: off unless a secret is set.
+    site_chat_turnstile_secret: Optional[str] = None
 
     # Comma-separated list of extra allowed CORS origins (e.g. for E2E test
     # servers running on non-default ports). The default dev origins are

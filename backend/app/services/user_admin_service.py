@@ -76,6 +76,12 @@ def create_pending_user(db: Session, law_firm_id: str, data: AdminUserCreate) ->
     """A user who has to choose a password through the invite link. The stored
     hash is random and never revealed; login is refused while password_set_at
     is NULL anyway. Flushes; the caller commits."""
+    from app.models.management import FirmProfile
+    profile = db.query(FirmProfile).filter(FirmProfile.law_firm_id == law_firm_id).with_for_update().first()
+    if profile and profile.data.get("seats"):
+        seats = db.query(User).filter(User.law_firm_id == law_firm_id, User.is_active.is_(True)).count()
+        if seats >= profile.data["seats"]:
+            raise UserAdminError(409, "Büronun kullanıcı limiti dolu. Paket limitini güncelleyin veya bir kullanıcıyı pasifleştirin.")
     email = str(data.email).lower()
     if _email_in_use(db, email):
         raise UserAdminError(409, EMAIL_TAKEN)

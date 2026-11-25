@@ -1,0 +1,450 @@
+[
+  {
+    "width": 1440,
+    "time": 0,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 6.97,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": 0,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 8.11,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 0,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.64,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 0,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.11,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": 5,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 6.97,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": 5,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 8.11,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 5,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.64,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 5,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.11,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": 12,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 6.97,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": 12,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 8.11,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 12,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.64,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": 12,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.11,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": "poster",
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 7.65,
+    "required": 4.5
+  },
+  {
+    "width": 1440,
+    "time": "poster",
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 8.1,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": "poster",
+    "text": "yapay zekâ desteği",
+    "minimum": 5.69,
+    "required": 3
+  },
+  {
+    "width": 1440,
+    "time": "poster",
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.03,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 0,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 9.12,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 0,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 6.45,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 0,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.8,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 0,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 5.71,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 5,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 9.12,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 5,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 6.45,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 5,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.8,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 5,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 5.71,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 12,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 9.12,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": 12,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 6.45,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 12,
+    "text": "yapay zekâ desteği",
+    "minimum": 5.8,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": 12,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 5.71,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": "poster",
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 9.2,
+    "required": 4.5
+  },
+  {
+    "width": 768,
+    "time": "poster",
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 6.53,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": "poster",
+    "text": "yapay zekâ desteği",
+    "minimum": 5.84,
+    "required": 3
+  },
+  {
+    "width": 768,
+    "time": "poster",
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 5.75,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 0,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.82,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 0,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.59,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 0,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.46,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 0,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 9.02,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 5,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.82,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 5,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.59,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 5,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.46,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 5,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 9.02,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 12,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.82,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": 12,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.59,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 12,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.46,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": 12,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 9.02,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": "poster",
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.95,
+    "required": 4.5
+  },
+  {
+    "width": 390,
+    "time": "poster",
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.24,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": "poster",
+    "text": "yapay zekâ desteği",
+    "minimum": 6.24,
+    "required": 3
+  },
+  {
+    "width": 390,
+    "time": "poster",
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.92,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 0,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.7,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 0,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.21,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 0,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.5,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 0,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.92,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 5,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.7,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 5,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.21,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 5,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.5,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 5,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.92,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 12,
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.7,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": 12,
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 10.21,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 12,
+    "text": "yapay zekâ desteği",
+    "minimum": 6.5,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": 12,
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.92,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": "poster",
+    "text": "YAPAY ZEKÂ İLE DAVA ANALİZİ VE HUKUK BÜROSU Y",
+    "minimum": 8.85,
+    "required": 4.5
+  },
+  {
+    "width": 320,
+    "time": "poster",
+    "text": "Hukuk büronuz içinyapay zekâ desteği",
+    "minimum": 9.86,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": "poster",
+    "text": "yapay zekâ desteği",
+    "minimum": 6.0,
+    "required": 3
+  },
+  {
+    "width": 320,
+    "time": "poster",
+    "text": "CaseBridge, hukuki uyuşmazlıkları ve belgeler",
+    "minimum": 8.92,
+    "required": 4.5
+  }
+]

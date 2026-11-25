@@ -1,0 +1,84 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "headerLinks": 9,
+      "focus": "passed",
+      "overflow": false,
+      "textSources": true
+    }
+  ],
+  "errors": [],
+  "map": [
+    {
+      "port": 3045,
+      "hash": "4493acfae34853c7bdd057b812e1414eb8ce06330f4201078f8fad74934a9744"
+    },
+    {
+      "port": 3044,
+      "hash": "4493acfae34853c7bdd057b812e1414eb8ce06330f4201078f8fad74934a9744"
+    }
+  ],
+  "routes": 9,
+  "widgets": "passed",
+  "themePersistence": "passed",
+  "mapZoom": "passed",
+  "mapError": "passed"
+}

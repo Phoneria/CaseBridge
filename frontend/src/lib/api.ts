@@ -11,6 +11,10 @@ import type {
   ChatConversation,
   ChatConversationSummary,
   ChatMessage,
+  ChatPageContext,
+  ClaudeSubagentSettings,
+  ClaudeSubagentTestResult,
+  ClaudeSubagentUser,
   ChatStatus,
   AnalyticsOverview,
   Case,
@@ -24,6 +28,10 @@ import type {
   CaseOutcome,
   CaseStatus,
   CaseType,
+  SimilarCase,
+  AIExplanation,
+  SimilarPrecedentsQuery,
+  SimilarPrecedentsResponse,
   DocumentItem,
   HandoverReport,
   ReportKind,
@@ -55,6 +63,8 @@ import type {
   DocumentWithCase,
   Task,
   TaskStatus,
+  TaskStage,
+  TaskPriority,
   TaskWithCase,
   CourtroomAction,
   CourtroomRole,
@@ -92,7 +102,13 @@ async function throwApiError(response: Response, path: string): Promise<never> {
   let detail = `İstek başarısız oldu (${response.status}).`;
   try {
     const body = await response.json();
-    if (body?.detail) detail = typeof body.detail === "string" ? body.detail : detail;
+    if (body?.detail) {
+      if (typeof body.detail === "string") detail = body.detail;
+      else if ((path.startsWith("/bureau/") || path.startsWith("/platform/")) && Array.isArray(body.detail)) {
+        // Show validation messages without reflecting the submitted data.
+        detail = body.detail.map((item: {msg?: string}) => item.msg?.replace(/^Value error, /, "")).filter(Boolean).join(" ") || detail;
+      }
+    }
   } catch {
     // response had no JSON body - keep the generic message
   }
@@ -124,7 +140,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers = new Headers(options.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (options.body && !(options.body instanceof FormData)) {
+  if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -134,6 +150,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/** Shared authenticated transport for the bureau/platform workflow modules. */
+export function managementRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return request<T>(path, {...options, cache: "no-store"});
 }
 
 export async function login(email: string, password: string): Promise<{ access_token: string }> {
@@ -245,24 +266,24 @@ export async function resendPlatformAdminInvite(firmId: string, userId: string):
   return request(`/platform/firms/${firmId}/admins/${userId}/invite`, { method: "POST" });
 }
 
-export async function suspendPlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/suspend`, { method: "POST" });
+export async function suspendPlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/suspend`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
-export async function activatePlatformFirm(firmId: string): Promise<PlatformFirm> {
-  return request(`/platform/firms/${firmId}/activate`, { method: "POST" });
+export async function activatePlatformFirm(firmId: string, reason?: string): Promise<PlatformFirm> {
+  return request(`/platform/firms/${firmId}/activate`, { method: "POST", ...(reason ? {body: JSON.stringify({reason})} : {}) });
 }
 
-export async function listUsers(): Promise<AppUser[]> {
-  return request("/users");
+export async function listUsers(taskCaseId?: string | null): Promise<AppUser[]> {
+  return request(taskCaseId ? `/users?task_case_id=${encodeURIComponent(taskCaseId)}` : "/users");
 }
 
-export async function listAdminLawyers(): Promise<AppUser[]> {
-  return request("/admin/lawyers");
+export async function listAdminLawyers(includeDemo = false): Promise<AppUser[]> {
+  return request(includeDemo ? "/admin/lawyers?include_demo=true" : "/admin/lawyers");
 }
 
-export async function importDemoTemplate(): Promise<{ total_cases: number; added_cases: number }> {
-  return request("/admin/demo-template", { method: "POST" });
+export async function importDemoTemplate(pack: "bureau" | "dossiers" = "bureau"): Promise<{ total_cases: number; added_cases: number; added_records?: number; coverage?: Record<string, number> }> {
+  return request(pack === "dossiers" ? "/admin/demo-template?package=dossiers" : "/admin/demo-template", { method: "POST" });
 }
 
 export async function assignCaseLawyer(caseId: string, lawyerId: string): Promise<Case> {
@@ -291,18 +312,19 @@ export async function getAiConnectivity(force = false): Promise<AIConnectivity> 
   return request(`/system/ai-connectivity${force ? "?force=true" : ""}`);
 }
 
-export interface AIKeyStatus { configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
+export type AIKeyProvider = "openai" | "anthropic";
+export interface AIKeyStatus { active_provider?: AIKeyProvider | null; available_providers?: AIKeyProvider[]; configured: boolean; managed: boolean; pending: boolean; can_save: boolean }
 
 export async function getAiKeyStatus(): Promise<AIKeyStatus> {
   return request("/system/openai-key", { cache: "no-store" });
 }
 
-export async function saveAiKey(apiKey: string): Promise<AIKeyStatus> {
-  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey }), cache: "no-store" });
+export async function saveAiKey(apiKey: string, provider: "openai" | "anthropic" = "openai"): Promise<AIKeyStatus> {
+  return request("/system/openai-key", { method: "PUT", body: JSON.stringify({ api_key: apiKey, provider }), cache: "no-store" });
 }
 
-export async function activateAiKey(): Promise<AIConnectivity> {
-  return request("/system/openai-key/activate", { method: "POST", cache: "no-store" });
+export async function activateAiKey(provider?: AIKeyProvider): Promise<AIConnectivity> {
+  return request("/system/openai-key/activate" + (provider ? `?provider=${provider}` : ""), { method: "POST", cache: "no-store" });
 }
 
 export interface CaseListFilters {
@@ -332,8 +354,41 @@ export async function getCases(filters: CaseListFilters = {}): Promise<Case[]> {
   return request(`/cases${query ? `?${query}` : ""}`);
 }
 
-export async function getPrecedents(): Promise<Case[]> {
-  return request("/precedents");
+export async function getPrecedents(caseId?: string, allCategories = false): Promise<(Case & { linked_to_case?: boolean })[]> {
+  return request(caseId ? `/precedents?case_id=${encodeURIComponent(caseId)}${allCategories ? "&all_categories=true" : ""}` : "/precedents");
+}
+
+export function setPrecedentLink(caseId: string, precedentId: string, linked: boolean): Promise<void> {
+  return request(`/cases/${caseId}/precedents/${precedentId}`, { method: linked ? "PUT" : "DELETE" });
+}
+
+export async function getSimilarCases(caseId: string, limit = 5): Promise<SimilarCase[]> {
+  return request(`/cases/${encodeURIComponent(caseId)}/similar?limit=${limit}`);
+}
+
+export async function getSimilarPrecedents(
+  caseId: string, query: SimilarPrecedentsQuery = {},
+): Promise<SimilarPrecedentsResponse> {
+  const params = new URLSearchParams({ limit: String(query.limit ?? 5) });
+  for (const outcome of query.outcome ?? []) params.append("outcome", outcome);
+  if (query.court) params.set("court", query.court);
+  if (query.minScore) params.set("min_score", String(query.minScore));
+  if (query.explain) params.set("explain", "true");
+  if (query.precedentId) params.set("precedent_id", query.precedentId);
+  return request(`/cases/${encodeURIComponent(caseId)}/similar-precedents?${params.toString()}`);
+}
+
+/** The optional AI explanation for one precedent; the server falls back to stored data on timeout or error. */
+export async function explainSimilarPrecedent(caseId: string, precedentId: string): Promise<AIExplanation | null> {
+  const body = await getSimilarPrecedents(caseId, { limit: 1, explain: true, precedentId });
+  return body.items[0]?.ai_explanation ?? null;
+}
+
+export async function searchSimilarCases(text: string, caseType?: CaseType | null, limit = 5): Promise<SimilarCase[]> {
+  return request("/similar-cases/search", {
+    method: "POST",
+    body: JSON.stringify({ text, limit, ...(caseType ? { case_type: caseType } : {}) }),
+  });
 }
 
 export async function getPrecedentDocuments(precedentId: string): Promise<DocumentItem[]> {
@@ -362,6 +417,10 @@ export async function updateCase(id: string, payload: CaseUpdatePayload): Promis
 
 export async function closeCase(id: string, payload: CaseClosePayload): Promise<Case> {
   return request(`/cases/${id}/close`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function completeDecision(id: string, payload: CaseClosePayload): Promise<Case> {
+  return request(`/cases/${id}/decision`, { method: "POST", body: JSON.stringify(payload) });
 }
 
 export async function reopenCase(id: string): Promise<Case> {
@@ -401,9 +460,15 @@ export async function listCaseTasks(caseId: string): Promise<Task[]> {
 
 export async function createTask(
   caseId: string,
-  payload: { title: string; description?: string; due_date?: string; assigned_to?: string; reminder_days?: number[] }
+  payload: { title: string; description?: string; due_date?: string; assigned_to?: string; reminder_days?: number[]; stage?: TaskStage; priority?: TaskPriority }
 ): Promise<Task> {
   return request(`/cases/${caseId}/tasks`, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export type TaskPatch = Partial<Pick<Task, "title" | "description" | "due_date" | "assigned_to" | "stage" | "priority" | "reminder_days">>;
+
+export async function updateTask(caseId: string, taskId: string, changes: TaskPatch): Promise<Task> {
+  return request(`/cases/${caseId}/tasks/${taskId}`, { method: "PATCH", body: JSON.stringify(changes) });
 }
 
 export async function updateTaskStatus(caseId: string, taskId: string, status: TaskStatus): Promise<Task> {
@@ -626,6 +691,10 @@ export async function downloadAuditCsv(params: AuditCsvParams): Promise<Blob> {
   return response.blob();
 }
 
+export async function previewReport(kind: ReportKind): Promise<string[][]> {
+  return request(`/reports/${kind}/preview`);
+}
+
 export async function downloadReportCsv(kind: ReportKind): Promise<Blob> {
   return fetchBlob(`/reports/${kind}.csv`, "Rapor indirilemedi");
 }
@@ -640,6 +709,10 @@ export async function getReportSummary(): Promise<ReportSummary> {
 
 export async function downloadDocument(documentId: string): Promise<Blob> {
   return fetchBlob(`/documents/${documentId}/download`, "Belge indirilemedi");
+}
+
+export async function downloadWorkspaceDocument(documentId: string): Promise<Blob> {
+  return fetchBlob(`/bureau/workspace/documents/${encodeURIComponent(documentId)}`, "Belge indirilemedi");
 }
 
 // ---------- CaseBridge AI chat (Hukuk Asistanı) ----------
@@ -682,6 +755,7 @@ export async function openChatStream(
   conversationId: string,
   content: string,
   signal?: AbortSignal,
+  options: { dataTools?: boolean; context?: ChatPageContext } = {},
 ): Promise<Response> {
   const token = getToken();
   const headers = new Headers({ "Content-Type": "application/json", Accept: "text/event-stream" });
@@ -689,7 +763,9 @@ export async function openChatStream(
   const response = await fetch(`${API_BASE_URL}/chat/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(
+      options.dataTools ? { content, data_tools: true, ...(options.context ? { context: options.context } : {}) } : { content },
+    ),
     signal,
   });
   if (!response.ok) await throwApiError(response, `/chat/conversations/${conversationId}/messages`);
@@ -725,4 +801,157 @@ export async function updateClient(id: string, payload: Partial<ClientPayload>):
 
 export async function deleteClient(id: string): Promise<void> {
   return request(`/clients/${id}`, { method: "DELETE" });
+}
+
+export interface SufleTurn { id: number; speaker: "Avukat" | "Müvekkil" | "Görüşme"; text: string }
+export interface SufleCard {
+  priority: "urgent" | "important" | "normal";
+  category: "safety" | "question" | "evidence" | "contradiction" | "deadline";
+  title: string; reason: string; question: string; source_id: number; source_quote: string;
+}
+export interface SufleAdvice {
+  cards: SufleCard[]; summary: string; open_questions: string[]; documents: string[]; model: string; total_tokens: number;
+}
+export function getSufleStatus() {
+  return request<{ configured: boolean; model: string; transcription_model: string }>("/sufle/status");
+}
+export function analyzeSufle(body: { turns: SufleTurn[]; focus: string; previous_questions: string[]; mode: "live" | "summary"; acknowledged: true }, signal?: AbortSignal) {
+  return request<SufleAdvice>("/sufle/analyze", { method: "POST", body: JSON.stringify(body), signal });
+}
+export function transcribeSufle(audio: Blob, signal?: AbortSignal) {
+  const data = new FormData();
+  const extension = audio.type.includes("mp4") ? "mp4" : audio.type.includes("ogg") ? "ogg" : "webm";
+  data.append("file", audio, `sufle.${extension}`);
+  data.append("acknowledged", "true");
+  return request<{ text: string }>("/sufle/transcribe", { method: "POST", body: data, signal });
+}
+
+// ---- Legal lab (knowledge map, counter-side analysis, directed courtroom) ----
+export async function getLabStatus(): Promise<import("@/types/legalLab").LabStatus> {
+  return request("/legal-lab/status");
+}
+
+export async function getLegalMap(): Promise<import("@/types/legalLab").LegalGraph> {
+  return request("/legal-lab/map");
+}
+
+export async function runCounterAnalysis(
+  ref: import("@/types/legalLab").CaseRef,
+  side: "davaci" | "davali",
+): Promise<import("@/types/legalLab").CounterAnalysis> {
+  return request("/legal-lab/counter-analysis", { method: "POST", body: JSON.stringify({ ...ref, side }) });
+}
+
+export async function trialBeat(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+    interv: import("@/types/legalLab").Intervention | null;
+    manual: string[];
+  },
+): Promise<import("@/types/legalLab").BeatResult> {
+  return request("/legal-lab/trial/beat", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialGuide(
+  body: import("@/types/legalLab").CaseRef & {
+    role: import("@/types/legalLab").TrialSide;
+    stage_idx: number;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<import("@/types/legalLab").GuideResult> {
+  return request("/legal-lab/trial/guide", { method: "POST", body: JSON.stringify(body) });
+}
+
+export async function trialAsk(
+  body: import("@/types/legalLab").CaseRef & {
+    side: import("@/types/legalLab").TrialSide;
+    question: string;
+    transcript: import("@/types/legalLab").TrialTurn[];
+  },
+): Promise<{ answer: string; law: import("@/types/legalLab").LawRef[]; mode: string; note: string | null }> {
+  return request("/legal-lab/trial/ask", { method: "POST", body: JSON.stringify(body) });
+}
+
+/** A read-only, scoped view of existing case material; does not call a model. */
+export async function getScenarioTree(caseId: string, assumptions: Record<string, import('@/types/scenarioTree').SupportAssumption> = {}): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/cases/${encodeURIComponent(caseId)}/scenario-tree?assumptions=${encodeURIComponent(JSON.stringify(assumptions))}`);
+}
+
+export async function getScenarioDemo(document: import('@/types/scenarioTree').DocumentAssumption = 'unreviewed', payment: import('@/types/scenarioTree').PaymentAssumption = 'unknown'): Promise<import('@/types/scenarioTree').ScenarioTree> {
+  return request(`/legal-lab/scenario-demo?document=${document}&payment=${payment}`);
+}
+
+
+export interface DemoRemovalPreview { token: string; counts: Record<string, number>; kept_users: number; total_records: number }
+export async function previewDemoRemoval(): Promise<DemoRemovalPreview> {
+  return request("/admin/demo-template/removal-preview");
+}
+export async function removeDemoTemplate(token: string): Promise<{removed_records: number; kept_users: number}> {
+  return request("/admin/demo-template/remove", {method:"POST", body:JSON.stringify({token,confirm:true})});
+}
+
+export interface PresentationCase {
+  id: string;
+  title: string;
+  client: string;
+  opponent: string;
+}
+export interface PresentationFile extends PresentationCase {
+  facts: string;
+  closing: string;
+  documents: {id: string; title: string; day: string; text: string}[];
+  nodes: import("@/types/scenarioTree").ScenarioNode[];
+}
+export function getPresentationCatalogue() {
+  return request<{cases: PresentationCase[]; contacts: {name: string; phone: string | null; email: string | null}[]}>("/presentation", {cache:"no-store"});
+}
+export function getPresentationFile(id: string) {
+  return request<PresentationFile>("/presentation/" + encodeURIComponent(id), {cache:"no-store"});
+}
+export function downloadPresentationPdf(cid: string, did: string) {
+  return fetchBlob("/presentation/" + encodeURIComponent(cid) + "/documents/" + encodeURIComponent(did), "Maskeli PDF indirilemedi");
+}
+
+export interface MaskedTextResult {
+  text: string; counts: Record<string, number>;
+  report: Record<string, {mod: string; adet: number; farkli: number}>;
+  ner_available: boolean; review_required: boolean;
+}
+export function anonymizeText(text: string): Promise<MaskedTextResult> {
+  return request<MaskedTextResult>("/privacy/anonymize", {method: "POST", body: JSON.stringify({text}), cache: "no-store"});
+}
+
+export interface ExtractedPrivacyText {text: string; format: "pdf" | "docx" | "udf" | "text"; warnings: string[];}
+export function extractPrivacyFile(file: File): Promise<ExtractedPrivacyText> {
+  return request<ExtractedPrivacyText>("/privacy/extract-text", {
+    method: "POST", body: file, headers: {"Content-Type": "application/octet-stream"}, cache: "no-store",
+  });
+}
+
+// ---------- Claude setup-token (platform admin, personal use) ----------
+
+export async function getClaudeSubagent(): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent");
+}
+
+export async function saveClaudeSubagentToken(token: string): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/token", { method: "PUT", body: JSON.stringify({ token }) });
+}
+
+export async function removeClaudeSubagentToken(): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/token", { method: "DELETE" });
+}
+
+export async function testClaudeSubagent(): Promise<ClaudeSubagentTestResult> {
+  return request("/platform/claude-subagent/test", { method: "POST" });
+}
+
+export async function setClaudeSubagentUsers(userIds: string[]): Promise<ClaudeSubagentSettings> {
+  return request("/platform/claude-subagent/users", { method: "PUT", body: JSON.stringify({ user_ids: userIds }) });
+}
+
+export async function searchClaudeSubagentUsers(q: string): Promise<ClaudeSubagentUser[]> {
+  return request(`/platform/claude-subagent/users/search?q=${encodeURIComponent(q)}`);
 }

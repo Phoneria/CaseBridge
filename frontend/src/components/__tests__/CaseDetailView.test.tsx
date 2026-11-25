@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
+const getScenarioTree = vi.fn();
+const getPrecedents = vi.fn();
 const getCase = vi.fn();
 const getMe = vi.fn();
 const listSimulations = vi.fn();
@@ -23,8 +25,14 @@ const updateTaskStatus = vi.fn();
 const updateCase = vi.fn();
 const listClients = vi.fn();
 const createClient = vi.fn();
+const getSimilarPrecedents = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  getSimilarCases: () => Promise.resolve([]),
+  getSimilarPrecedents: (...args: unknown[]) => getSimilarPrecedents(...args),
+  setPrecedentLink: vi.fn(),
+  getPrecedents: (...args: unknown[]) => getPrecedents(...args),
+  getScenarioTree: (...args: unknown[]) => getScenarioTree(...args),
   getCase: (...args: unknown[]) => getCase(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   listSimulations: (...args: unknown[]) => listSimulations(...args),
@@ -99,6 +107,39 @@ afterEach(() => {
 });
 
 describe("CaseDetailView", () => {
+  it("opens the Benzer Davalar sidebar for the current case and closes it with Escape", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getSimilarPrecedents.mockReset().mockResolvedValue({
+      summary: { count: 0, outcomes: {}, avg_duration_months: null, duration_count: 0, avg_case_value: null,
+        value_count: 0, available_courts: [], excluded_signals: [] },
+      source: null,
+      items: [],
+    });
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "Benzer Davalar" }));
+    expect(screen.getByRole("dialog", { name: "Benzer Davalar" })).toBeVisible();
+    expect(getSimilarPrecedents).toHaveBeenCalledWith("c1", { limit: 20, outcome: [], court: null, minScore: 0 });
+    expect(await screen.findByText("Benzer emsal bulunamadı.")).toBeVisible();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "Benzer Davalar" })).toBeNull();
+  });
+
+  it("opens precedents and the interactive tree for the current case", async () => {
+    getCase.mockResolvedValue(caseDetail);
+    listSimulations.mockResolvedValue([]);
+    listDocuments.mockResolvedValue([]);
+    getPrecedents.mockResolvedValue([]);
+    getScenarioTree.mockResolvedValue(null);
+    render(<CaseDetailView caseId="c1" />);
+    await userEvent.click(await screen.findByRole("button", { name: "İlgili emsal kararları göster" }));
+    expect(getPrecedents).toHaveBeenCalledWith("c1", false);
+    await userEvent.click(screen.getByRole("tab", { name: "Olasılık Ağacı" }));
+    expect(getScenarioTree).toHaveBeenCalledWith("c1", {});
+    expect(screen.queryByText("Bir dava seçin")).toBeNull();
+  });
+
   it("renders the case overview with the AI card by default", async () => {
     getCase.mockResolvedValue(caseDetail);
     listSimulations.mockResolvedValue([]);
@@ -272,7 +313,7 @@ describe("CaseDetailView", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Raporu aç" }));
     expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument();
+    expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument();
   });
 
   it("resumes polling an in-flight simulation found on load (refresh-safe)", async () => {
@@ -286,7 +327,7 @@ describe("CaseDetailView", () => {
 
     await waitFor(() => expect(getSimulation).toHaveBeenCalledWith("c1", "sim1"));
     await userEvent.click(screen.getByRole("tab", { name: "CaseBridge AI" }));
-    await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument());
   });
 
   it("offers a retry button for a failed simulation and re-polls after retrying", async () => {
@@ -307,7 +348,7 @@ describe("CaseDetailView", () => {
     await userEvent.click(screen.getByRole("button", { name: /tekrar dene/i }));
 
     await waitFor(() => expect(retrySimulation).toHaveBeenCalledWith("c1", "sim2"));
-    await waitFor(() => expect(screen.getByText("AI Değerlendirmesi: %55")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Yapay Zekâ Değerlendirmesi: %55")).toBeInTheDocument());
   });
 
   it("shows an analysis (not simulation) error when starting fails", async () => {
@@ -527,9 +568,16 @@ describe("CaseDetailView", () => {
     setUrl("/davalar/c1?sekme=ai");
     const { unmount } = render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
-    expect(screen.getByText("Bu dava için henüz AI analizi yapılmadı.")).toBeInTheDocument();
+    expect(screen.getByText("Bu dava için henüz yapay zekâ analizi yapılmadı.")).toBeInTheDocument();
     unmount();
 
+    setUrl("/davalar/c1?sekme=ai&arac=durusma");
+    const hearing = render(<CaseDetailView caseId="c1" />);
+    expect(await screen.findByRole("button", { name: "Duruşmayı başlat" })).toBeEnabled();
+    expect(screen.queryByLabelText("Dava ara")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Karşı Taraf Analizi" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=karsi-taraf");
+    expect(screen.getByRole("link", { name: "Yönetilen Duruşma" })).toHaveAttribute("href", "/davalar/c1?sekme=ai&arac=yonetmen");
+    hearing.unmount();
     setUrl("/davalar/c1?sekme=simulasyonlar");
     render(<CaseDetailView caseId="c1" />);
     await waitFor(() => expect(screen.getByRole("tab", { name: "CaseBridge AI" })).toHaveAttribute("aria-selected", "true"));
@@ -587,7 +635,7 @@ describe("CaseDetailView", () => {
       await userEvent.click(await screen.findByRole("button", { name: "Tarafları düzenle" }));
       await userEvent.click(screen.getByRole("button", { name: "Kaydet" }));
 
-      await waitFor(() => expect(screen.getByText(/Deniz Arslan Yeni vs\. Mavi Yapı A\.Ş\./)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByText(/Deniz Arslan Yeni ile Mavi Yapı A\.Ş\./)).toBeInTheDocument());
       expect(updateCase).toHaveBeenCalledWith("c1", expect.objectContaining({ parties: expect.any(Array) }));
       expect(screen.getByText("Dava açıldı")).toBeInTheDocument();
     });

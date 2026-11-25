@@ -133,7 +133,7 @@ describe("AnalysisView", () => {
 
     const reports = await screen.findByRole("region", { name: "Raporlar" });
     expect(within(reports).getByRole("link", { name: "2026/14 - Ticari Kira Uyarlama Davası" })).toHaveAttribute("href", "/ai/analiz?onizle=c1");
-    expect(within(reports).getByText("AI Değerlendirmesi: %72")).toBeInTheDocument();
+    expect(within(reports).getByText("Yapay Zekâ Değerlendirmesi: %72")).toBeInTheDocument();
   });
 
   it("shows an empty state without reports", async () => {

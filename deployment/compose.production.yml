@@ -40,6 +40,10 @@ services:
     logging: *default-logging
 
   cb-backend:
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=128m"]
     build:
       context: ../backend
     restart: unless-stopped
@@ -54,6 +58,7 @@ services:
       STORAGE_DIR: /app/storage
       ENV: production
       SEED_DEMO_DATA: "false"
+      PYTHONDONTWRITEBYTECODE: "1"
     volumes:
       - storage:/app/storage
     networks:
@@ -71,6 +76,13 @@ services:
     logging: *default-logging
 
   cb-frontend:
+    read_only: true
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+      - /app/.next/cache:rw,nosuid,nodev,size=64m,uid=1000,gid=1000
     build:
       context: ../frontend
       args:

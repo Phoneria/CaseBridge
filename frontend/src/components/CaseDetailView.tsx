@@ -1,5 +1,6 @@
 "use client";
 
+import { announceCaseViewed } from "@/lib/mascot";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -31,6 +32,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import { EmptyState } from "@/components/EmptyState";
 import { SimulationResultCard } from "@/components/SimulationResultCard";
+import { CaseAiTools } from "@/components/ai/CaseAiTools";
 import { AiMark } from "@/components/ai/AiMark";
 import { AiBrand } from "@/components/ai/AiBrand";
 import { CaseAiSummaryCard } from "@/components/ai/CaseAiSummaryCard";
@@ -46,6 +48,11 @@ import { CaseCloseModal, type CloseResult } from "@/components/CaseCloseModal";
 import { CaseConfirmModal } from "@/components/CaseConfirmModal";
 import { CaseDecisionCard } from "@/components/CaseDecisionCard";
 import { CaseHearingsCard } from "@/components/CaseHearingsCard";
+import { SimilarCasesCard } from "@/components/similar/SimilarCasesCard";
+import { SimilarPrecedentsSidebar } from "@/components/similar/SimilarPrecedentsSidebar";
+
+import { PrecedentsView } from "@/components/PrecedentsView";
+import { ScenarioTreeView } from "@/components/lab/ScenarioTreeView";
 
 const TABS = [
   { slug: "genel", label: "Genel Bakış" },
@@ -53,6 +60,7 @@ const TABS = [
   { slug: "gelismeler", label: "Gelişmeler" },
   { slug: "gorevler", label: "Görevler" },
   { slug: "ai", label: "CaseBridge AI" },
+  { slug: "olasilik", label: "Olasılık Ağacı" },
   { slug: "devir", label: "Devir Raporu" },
   { slug: "notlar", label: "Notlar" },
 ] as const satisfies ReadonlyArray<{ slug: CaseTabSlug; label: string }>;
@@ -79,6 +87,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   const { params, setParams } = useUrlParams();
   const sekmeParam = params.get("sekme");
   const [activeTab, setActiveTab] = useState<Tab>(() => labelForSlug(parseCaseTab(sekmeParam)));
+  const [showPrecedents, setShowPrecedents] = useState(false);
+  const [showSimilarPrecedents, setShowSimilarPrecedents] = useState(false);
   const [simulationRunning, setSimulationRunning] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -180,6 +190,13 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   useEffect(() => {
     setActiveTab(labelForSlug(parseCaseTab(sekmeParam)));
   }, [sekmeParam]);
+
+  // The CaseBridge AI cat celebrates a won case (once per case and tab session).
+  const viewedId = caseDetail?.id;
+  const viewedOutcome = caseDetail?.outcome;
+  useEffect(() => {
+    if (viewedId) announceCaseViewed({ id: viewedId, outcome: viewedOutcome });
+  }, [viewedId, viewedOutcome]);
 
   function upsertSimulation(updated: Simulation) {
     setSimulations((prev) => {
@@ -311,7 +328,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
   function handleClosed({ updated, documentFailed }: CloseResult) {
     handleCaseSaved(updated);
     setDialog(null);
-    if (documentFailed) setActionNotice("Dava kapatıldı ancak karar belgesi yüklenemedi.");
+    if (documentFailed) setActionNotice(caseDetail?.status === "kapali" ? "Sonuç kaydedildi ancak karar belgesi yüklenemedi." : "Dava kapatıldı ancak karar belgesi yüklenemedi.");
     void refreshCaseAndDocuments();
   }
 
@@ -329,7 +346,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
 
   function selectTab(tab: (typeof TABS)[number]) {
     setActiveTab(tab.label);
-    setParams({ sekme: tab.slug === "genel" ? null : tab.slug });
+    setParams({ sekme: tab.slug === "genel" ? null : tab.slug, arac: null });
   }
 
   async function handleGenerateHandover() {
@@ -361,6 +378,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       : null;
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const latestEvents = [...caseDetail.timeline].sort((a, b) => b.event_date.localeCompare(a.event_date));
+  const dossierClosure = documents.filter(d => /^[CH]\d{2}-\d{2} · /.test(d.filename)).sort((a,b) => b.filename.localeCompare(a.filename, "tr"))[0];
   const latestDocuments = [...documents].sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at));
   const orderedTasks = [...tasks].sort((a, b) => {
     if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
@@ -389,7 +407,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
 
-      <div role="tablist" className="flex gap-1 border-b border-surface-border">
+      <div role="tablist" className="flex max-w-full gap-1 overflow-x-auto whitespace-nowrap border-b border-surface-border">
         {TABS.map((tab) => (
           <button
             key={tab.slug}
@@ -441,6 +459,28 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           </section>
 
           {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
+
+          {caseDetail.status === "kapali" && caseDetail.outcome === "ongoing" && canEditDetails &&
+            <button type="button" className="rounded-xl bg-accent-600 px-4 py-2 text-sm text-white" onClick={() => setDialog("close")}>Dava sonucunu kaydet</button>}
+
+          <section>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" aria-expanded={showPrecedents} onClick={() => setShowPrecedents(!showPrecedents)}
+                className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
+                {showPrecedents ? "İlgili emsal kararları gizle" : "İlgili emsal kararları göster"}
+              </button>
+              <button type="button" aria-haspopup="dialog" onClick={() => setShowSimilarPrecedents(true)}
+                className="rounded-xl border border-accent-200 bg-white px-4 py-2 text-sm font-semibold text-accent-700">
+                Benzer Davalar
+              </button>
+            </div>
+            {showSimilarPrecedents && (
+              <SimilarPrecedentsSidebar caseId={caseId} canLink={canEditDetails} onClose={() => setShowSimilarPrecedents(false)} />
+            )}
+            {showPrecedents && <div className="mt-4"><PrecedentsView key={caseId} caseId={caseId} canLink={canEditDetails} /></div>}
+          </section>
 
           <CaseHearingsCard caseDetail={caseDetail} hearings={hearings} readOnly={archived} onChanged={handleHearingsChanged} />
 
@@ -448,6 +488,8 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
             <CasePartiesCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
             <CaseDisputeCard caseDetail={caseDetail} onSaved={handleCaseSaved} canEdit={canEditDetails} />
           </div>
+
+          <SimilarCasesCard caseId={caseId} />
 
           <div className="grid grid-cols-3 gap-3">
             <button type="button" onClick={() => selectTab(TABS.find((tab) => tab.slug === "belgeler")!)} className="rounded-2xl border border-surface-border bg-white p-4 text-left shadow-card transition hover:border-accent-200 hover:bg-accent-50/30">
@@ -516,9 +558,18 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         </div>
       )}
 
+      {activeTab === "Olasılık Ağacı" && <div className="space-y-4">
+        {caseDetail.status === "kapali" && <CaseDecisionCard caseDetail={caseDetail} />}
+          {dossierClosure &&
+            <a className="text-sm font-medium text-accent-700 underline" href={`?sekme=belgeler&belge=${dossierClosure.id}`}>Dosyanın kapanış evrakını aç</a>}
+        <ScenarioTreeView key={caseId} fixedCaseId={caseId} caseFile={caseDetail} />
+      </div>}
+
       {activeTab === "Belgeler" && (
         <CaseDocumentsPanel
-          documents={documents}
+          key={params.get("belge") ?? "all"}
+          initialDocumentId={params.get("belge")}
+          documents={caseDetail.case_number.match(/^(?:CB|ÖRNEK)-[CH]\d{2}$/) ? [...documents].sort((a,b) => a.filename.localeCompare(b.filename, "tr")) : documents}
           uploading={uploading}
           uploadError={uploadError}
           onUpload={uploadFile}
@@ -530,6 +581,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       {activeTab === "Gelişmeler" && (
         <CaseTimelinePanel
           caseId={caseId}
+          documentIds={new Set(documents.map(d => d.id))}
           timeline={caseDetail.timeline}
           readOnly={archived}
           onAdded={(created) => setCaseDetail((prev) => (prev ? { ...prev, timeline: [...prev.timeline, created] } : prev))}
@@ -611,7 +663,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
       )}
 
       {activeTab === "CaseBridge AI" && (
-        <div className="space-y-4">
+        <CaseAiTools key={caseId} file={caseDetail} tool={params.get("arac")}>
           <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-navy-950 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ai-glow" />
             <div className="relative">
@@ -636,7 +688,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
           </div>
           {simulationError && <ErrorState message={simulationError} />}
           {simulations.length === 0 ? (
-            <EmptyState message="Bu dava için henüz AI analizi yapılmadı." />
+            <EmptyState message="Bu dava için henüz yapay zekâ analizi yapılmadı." />
           ) : (
             simulations.map((sim) =>
               sim.result ? (
@@ -663,7 +715,7 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
               )
             )
           )}
-        </div>
+        </CaseAiTools>
       )}
 
       {activeTab === "Devir Raporu" && (
@@ -752,6 +804,9 @@ export function CaseDetailView({ caseId }: { caseId: string }) {
         <CaseCloseModal
           caseId={caseId}
           openingDate={caseDetail.opening_date ?? null}
+          missingDecision={caseDetail.status === "kapali"}
+          decisionDate={caseDetail.decision_date}
+          closingNote={caseDetail.closing_note}
           pendingTaskCount={pendingTasks}
           onClose={() => setDialog(null)}
           onClosed={handleClosed}

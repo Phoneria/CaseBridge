@@ -1,0 +1,62 @@
+{
+  "app": "http://127.0.0.1:3044",
+  "syntheticApi": true,
+  "results": [
+    {
+      "width": 1600,
+      "theme": "light",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    },
+    {
+      "width": 1600,
+      "theme": "dark",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "light",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "demo": "numeric/assumption/missing/equal/graph-text passed",
+      "case": "independent 50→62→38 passed",
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "capture": {
+    "route": "/ai/olasilik?ornek=belge-dogrulama",
+    "assumptions": {
+      "document": "supports",
+      "payment": "unknown"
+    },
+    "viewport": {
+      "width": 1600,
+      "height": 1100
+    },
+    "sha256": "00ffb6331a15b9f6bd554112376f8fa709ec75e46b5e27fa5605bae2dae5077e",
+    "sourceHash": "ebd9564f5bbf1821056e9f973b1b138396bfc955f5f8d34bd2de9d79adc8cea2"
+  }
+}

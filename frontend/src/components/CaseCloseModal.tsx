@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 
-import { closeCase, uploadDocument } from "@/lib/api";
-import { checkDocumentFile } from "@/lib/caseIntake";
+import { closeCase, completeDecision, uploadDocument } from "@/lib/api";
+import { checkDocumentFile, DOCUMENT_EXTENSIONS } from "@/lib/caseIntake";
 import {
   CLOSING_OUTCOME_OPTIONS,
   buildClosePayload,
@@ -25,6 +25,9 @@ export interface CloseResult {
 
 interface Props {
   caseId: string;
+  missingDecision?: boolean;
+  decisionDate?: string | null;
+  closingNote?: string | null;
   /** The case's opening date: the earliest decision date accepted (the server checks it too). */
   openingDate: string | null;
   pendingTaskCount: number;
@@ -33,9 +36,9 @@ interface Props {
 }
 
 /** "Davayı kapat": outcome, decision date, note and an optional decision document. */
-export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose, onClosed }: Props) {
+export function CaseCloseModal({ caseId, missingDecision = false, decisionDate, closingNote, openingDate, pendingTaskCount, onClose, onClosed }: Props) {
   const today = todayLocalISO();
-  const [form, setForm] = useState<CloseFormState>({ outcome: "", decision_date: today, note: "" });
+  const [form, setForm] = useState<CloseFormState>({ outcome: "", decision_date: missingDecision ? decisionDate ?? "" : today, note: closingNote ?? "" });
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
@@ -66,9 +69,10 @@ export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose,
     setError(null);
     let updated: Case;
     try {
-      updated = await closeCase(caseId, buildClosePayload(form));
+      const save = missingDecision ? completeDecision : closeCase;
+      updated = await save(caseId, buildClosePayload(form));
     } catch (err) {
-      setError(userMessage(err, "Dava kapatılamadı. Lütfen tekrar deneyin."));
+      setError(userMessage(err, missingDecision ? "Karar kaydedilemedi. Lütfen tekrar deneyin." : "Dava kapatılamadı. Lütfen tekrar deneyin."));
       inFlight.current = false;
       setSaving(false);
       return;
@@ -87,7 +91,7 @@ export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose,
   }
 
   return (
-    <ModalFrame title="Davayı kapat" onClose={onClose} busy={saving}>
+    <ModalFrame title={missingDecision ? "Dava sonucunu kaydet" : "Davayı kapat"} onClose={onClose} busy={saving}>
       <form
         noValidate
         onSubmit={(event) => {
@@ -152,7 +156,7 @@ export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose,
           <input
             id="closing_document"
             type="file"
-            accept=".pdf,.docx,.txt"
+            accept={DOCUMENT_EXTENSIONS.join(",")}
             onChange={(e) => pickFile(e.target.files?.[0])}
             className="block w-full text-sm text-navy-700"
           />
@@ -163,7 +167,7 @@ export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose,
           )}
         </div>
 
-        {pendingTaskCount > 0 && (
+        {!missingDecision && pendingTaskCount > 0 && (
           <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             {`Bu davada ${pendingTaskCount} bekleyen görev var.`}
           </p>
@@ -186,7 +190,7 @@ export function CaseCloseModal({ caseId, openingDate, pendingTaskCount, onClose,
             Vazgeç
           </button>
           <button type="submit" aria-disabled={saving} className="rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white hover:bg-accent-700">
-            {saving ? "Kapatılıyor..." : "Davayı kapat"}
+            {missingDecision ? (saving ? "Kaydediliyor..." : "Sonucu kaydet") : (saving ? "Kapatılıyor..." : "Davayı kapat")}
           </button>
         </div>
       </form>

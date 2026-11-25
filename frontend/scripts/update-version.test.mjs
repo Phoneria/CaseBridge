@@ -16,8 +16,10 @@ test("starts at 0.1 and only advances when application content changes", () => {
     assert.equal(updateVersion(root), "0.1");
     assert.equal(readFileSync(path.join(root, "app-version.json"), "utf8"), first);
     writeFileSync(path.join(root, "src", "page.tsx"), "updated page");
+    assert.throws(() => updateVersion(root, { check: true }), /prepare and commit/);
+    assert.equal(readFileSync(path.join(root, "app-version.json"), "utf8"), first);
     assert.equal(updateVersion(root), "0.2");
-    assert.equal(updateVersion(root), "0.2");
+    assert.equal(updateVersion(root, { check: true }), "0.2");
     mkdirSync(path.join(root, "src", "__tests__"));
     writeFileSync(path.join(root, "src", "__tests__", "page.test.tsx"), "new test");
     assert.equal(updateVersion(root), "0.2");

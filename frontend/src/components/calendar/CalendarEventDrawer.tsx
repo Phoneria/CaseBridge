@@ -109,14 +109,14 @@ export function CalendarEventDrawer({
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      <div className="absolute inset-0 bg-navy-900/30" aria-hidden="true" onClick={() => !busy && onClose()} />
+      <div className="absolute inset-0 bg-scrim backdrop-blur-[2px]" aria-hidden="true" onClick={() => !busy && onClose()} />
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-drawer-title"
         tabIndex={-1}
-        className="relative flex h-full w-full flex-col bg-white shadow-xl outline-none sm:w-[420px]"
+        className="relative flex h-full w-full flex-col border-l border-surface-border bg-white shadow-xl outline-none sm:w-[420px]"
       >
         <div className="flex items-start justify-between gap-3 border-b border-surface-border px-5 py-4">
           <div className="min-w-0">

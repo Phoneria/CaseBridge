@@ -4,10 +4,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.security_headers import SecurityHeadersMiddleware
+from app.core.public_cors import PublicCORSMiddleware
 
-from app.api.routes import activity, admin, admin_users, analytics, auth, calendar, case_intake, cases, chat, clients, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, system, tasks, users
+from app.core.security_headers import SecurityHeadersMiddleware
+from app.api.routes import claude_subagent, legal_lab, platform_management, presentation, privacy, similar_cases, site_chat
+
+from app.api.routes import activity, admin, admin_users, analytics, auth, bureau, calendar, case_intake, cases, chat, clients, courtroom, documents, handover, health, notifications, platform, precedents, reports, simulations, sufle, system, tasks, users
 from app.ai.provider_factory import get_ai_provider_status, get_courtroom_provider, get_llm_provider
+from app.ai.subagent.routing import job_provider_factory
 from app.core.config import settings
 from app.core.log_redaction import install_access_log_redaction
 from app.services.platform_bootstrap import run_platform_bootstrap
@@ -49,10 +53,10 @@ async def lifespan(app: FastAPI):
     worker_stop_event = None
     courtroom_worker_stop_event = None
     if settings.env != "test":
-        worker_stop_event = start_worker_thread(provider_factory=get_llm_provider)
+        worker_stop_event = start_worker_thread(provider_factory=job_provider_factory(get_llm_provider))
         logger.info("Simulation worker thread started.")
         courtroom_worker_stop_event = start_courtroom_worker_thread(
-            provider_factory=get_courtroom_provider
+            provider_factory=job_provider_factory(get_courtroom_provider)
         )
         logger.info("Courtroom worker thread started.")
 
@@ -85,13 +89,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
+# Outermost: CORS for the public marketing endpoints only (casebridge.com.tr).
+app.add_middleware(PublicCORSMiddleware)
 
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(admin.router)
 app.include_router(admin_users.router)
+app.include_router(claude_subagent.router)  # before /platform/{...} routes
 app.include_router(platform.router)
+app.include_router(platform_management.router)
+app.include_router(bureau.router)
 app.include_router(cases.router)
 app.include_router(clients.router)
 app.include_router(case_intake.router)
@@ -109,5 +118,17 @@ app.include_router(activity.router)
 app.include_router(reports.router)
 app.include_router(system.router)
 app.include_router(calendar.router)
+app.include_router(site_chat.router)
 app.include_router(chat.router)
 app.include_router(notifications.router)
+
+app.include_router(sufle.router)
+
+app.include_router(legal_lab.router)
+
+app.include_router(presentation.router)
+
+app.include_router(privacy.router)
+
+app.include_router(similar_cases.cases_router)
+app.include_router(similar_cases.search_router)

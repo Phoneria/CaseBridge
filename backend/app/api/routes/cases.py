@@ -7,7 +7,7 @@ from app.api.case_access import NOT_NOTE_CHANGER, can_change_note, require_case_
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
-from app.models.case import CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole
+from app.models.case import Case, CasePrecedentLink, CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole
 from app.models.user import User, UserRole
 from app.schemas.calendar import CaseHearingOut
 from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseNoteUpdate, CaseOut, CaseUpdate
@@ -192,6 +192,35 @@ def close_case(
     record_audit(db, current_user, "case.closed", case=closed,
                  transitions={"outcome": (before_outcome, closed.outcome)}, counts={"open_days": max(open_days, 0)})
     return closed
+
+
+@router.put("/{case_id}/precedents/{precedent_id}", status_code=204)
+def link_precedent(case_id: str, precedent_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    if not db.query(Case.id).filter_by(id=precedent_id, law_firm_id=case.law_firm_id, is_precedent=True).first():
+        raise HTTPException(404, detail="Emsal bulunamadı")
+    fields = dict(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id)
+    if db.query(CasePrecedentLink).filter_by(**fields).first() is None:
+        db.add(CasePrecedentLink(**fields))
+    db.commit()
+
+
+@router.delete("/{case_id}/precedents/{precedent_id}", status_code=204)
+def unlink_precedent(case_id: str, precedent_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    db.query(CasePrecedentLink).filter_by(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id).delete()
+    db.commit()
+
+
+@router.post("/{case_id}/decision", response_model=CaseOut)
+def complete_decision(
+    case_id: str, payload: CaseClose, current_user: User = Depends(get_current_user), db: Session = Depends(get_db),
+):
+    case = _managed_case(db, case_id, current_user)
+    require_case_writable(case)
+    return _lifecycle(lambda: CaseLifecycleService(db).complete_decision(case, payload, current_user.id, local_today()))
 
 
 @router.post("/{case_id}/reopen", response_model=CaseOut)

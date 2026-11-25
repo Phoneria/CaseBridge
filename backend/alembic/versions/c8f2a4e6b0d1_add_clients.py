@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from alembic import op
+from alembic import context, op
 
 revision: str = "c8f2a4e6b0d1"
 down_revision: Union[str, Sequence[str], None] = "b9d3e7f1a520"
@@ -55,6 +55,10 @@ def upgrade() -> None:
         batch.add_column(sa.Column("client_id", sa.String(36), nullable=True))
         batch.create_foreign_key(FK_NAME, "clients", ["client_id"], ["id"])
         batch.create_index("ix_case_parties_client_id", ["client_id"])
+    if context.is_offline_mode():
+        # Linking reads existing rows, which offline (--sql) generation cannot do.
+        op.execute("-- clients: existing client parties are NOT linked to clients here; offline mode cannot read rows")
+        return
     _link_existing_parties(op.get_bind())
 
 

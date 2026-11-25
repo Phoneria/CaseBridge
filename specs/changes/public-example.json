@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json",
+        "web-page/ornek-dava.html",
+        "web-page/ornek-dava.css",
+        "web-page/ornek-dava.js"
+      ],
+      "requirements": [
+        "specs/009-demo-scenario-weights/spec.md#FR-008"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_public_example_preserves_homepage_and_opens_reviewable_documents",
+        "deployment/tests/test_release.py::ReleaseTests.test_marketing_dependency_closure_contains_public_case_reader"
+      ],
+      "reason": "Restore the public video homepage and open an editable fictional case with linked documents and a 3D decision tree."
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 """audit_events: metadata-only log of user actions for CaseBridge process analytics
 
 Revision ID: d4e6f8a0b2c4
-Revises: c8f2a4e6b0d1
+Revises: f3a5c7e9b1d2
 Create Date: 2026-11-17 12:00:00
 """
 from typing import Sequence, Union
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "d4e6f8a0b2c4"
-down_revision: Union[str, Sequence[str], None] = "c8f2a4e6b0d1"
+down_revision: Union[str, Sequence[str], None] = "f3a5c7e9b1d2"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { BRAND_ACCENT } from "@/lib/brand";
+import { CHART, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from "@/lib/chartTheme";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -92,14 +92,14 @@ export function AnalyticsView() {
           <>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={categoryData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e6e8ef" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#3d5170" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#3d5170" />
-                <Tooltip cursor={{ fill: "#edf9fc" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
+                <XAxis dataKey="name" stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+                <YAxis stroke={CHART.grid} tick={{ fontSize: 11, fill: CHART.axis }} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ fill: CHART.cursor }} />
                 <Bar
                   dataKey="Kazanma Oranı"
                   radius={[6, 6, 0, 0]}
-                  fill={BRAND_ACCENT[600]}
+                  fill={CHART.primary}
                   cursor="pointer"
                   onClick={(data: unknown) => {
                     const href = (data as { payload?: { href?: string } } | undefined)?.payload?.href;

@@ -1,0 +1,9 @@
+# Validation guide
+
+Run `python3 scripts/check-specs.py`; backend targeted scenario/demo tests, frontend tree tests and typecheck; then full suites/version tests/production build. Use a fresh synthetic SQLite backend (mock providers) for browser UI checks, never production bureau records or actual keys.
+
+Open /ai/olasilik, choose Örnek davayı aç. Note base [1,1,1], document contribution 2, payment contribution 1; change document from unreviewed to supports and compare. Group fractions must sum to 100.0% (1000 tenths). Mark a source missing -> all group values equal starting weights 33.4/33.3/33.3. Switch to a real synthetic fixture record, including one with mock/demo-template analysis -> independent numeric support weights, probability remains null. Change one branch assumption to support/contradict; linked analysis gives 62/38, no eligible record stays 50. Other branches remain unchanged and scores are not normalized. Check graph/text/source explanations, keyboard, 390/320px, deep-link reload and request races.
+
+Before main push read todo.md. Use existing immutable stage/activate/verify commands, preserve old artifact and protected data, verify public app/site versions and actual demo flow. Record exact outcomes in verification.md rather than inferring completion from documents.
+
+Latest authorized scope supersedes the initial synthetic-only/null plan: all normal scenario branches expose independent Demo tahmini support_weight. Base 50; linked eligible records >0 allow ±[10+min(10,2×distinct direct references)] for support/contradiction. No eligible records always yields 50; neutral always 50. Source count is illustrative sensitivity, not truth, independence or evidence strength. Case lookup is tenant scoped before parsing/evaluating assumptions. Inputs are enum-only branch mapping (max six), unknown IDs/invalid values rejected 422. No domain write/provider call.

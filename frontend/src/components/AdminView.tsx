@@ -1,6 +1,6 @@
 "use client";
 
-import { BRAND_ACCENT } from "@/lib/brand";
+import { CHART, STATUS_COLORS, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from "@/lib/chartTheme";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -13,7 +13,6 @@ import { userMessage } from "@/lib/userMessages";
 import type { AppUser, Case } from "@/types";
 
 const SELECT_CLASS = "w-full rounded-xl border border-surface-border bg-white px-3 py-2 text-xs font-medium text-navy-800 outline-none transition focus:border-accent-400 focus:ring-2 focus:ring-accent-100 disabled:opacity-60";
-const TOOLTIP_STYLE = { border: "1px solid #e6e8ef", borderRadius: 12, boxShadow: "0 8px 24px rgba(15,26,46,.08)", fontSize: 12 };
 
 function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
@@ -65,7 +64,7 @@ export function AdminView() {
         if (!cancelled) setDenied(true);
         return;
       }
-      const [lawyerRows, caseRows] = await Promise.all([listAdminLawyers(), getCases({ include_archived: true })]);
+      const [lawyerRows, caseRows] = await Promise.all([listAdminLawyers(true), getCases({ include_archived: true })]);
       if (!cancelled) { setLawyers(lawyerRows); setCases(caseRows); }
     }).catch(() => {
       if (!cancelled) setError("Admin verileri yüklenemedi.");
@@ -101,10 +100,10 @@ export function AdminView() {
   const workloadAxisWidth = Math.min(180, Math.max(80, Math.max(0, ...workloadData.map((row) => row.name.length)) * 7));
   const busiest = [...workloadData].sort((a, b) => (b.aktif + b.kapali) - (a.aktif + a.kapali))[0];
   const statusData = [
-    { name: "Aktif", value: cases.filter((item) => item.status === "devam_eden").length, color: "#10b981" },
-    { name: "Duruşma", value: cases.filter((item) => item.status === "durusma_bekleyen").length, color: "#f59e0b" },
-    { name: "Karar", value: cases.filter((item) => item.status === "karar_bekleyen").length, color: "#f97316" },
-    { name: "Kapalı", value: cases.filter((item) => item.status === "kapali").length, color: "#94a3b8" },
+    { name: "Aktif", value: cases.filter((item) => item.status === "devam_eden").length, color: STATUS_COLORS.devam_eden },
+    { name: "Duruşma", value: cases.filter((item) => item.status === "durusma_bekleyen").length, color: STATUS_COLORS.durusma_bekleyen },
+    { name: "Karar", value: cases.filter((item) => item.status === "karar_bekleyen").length, color: STATUS_COLORS.karar_bekleyen },
+    { name: "Kapalı", value: cases.filter((item) => item.status === "kapali").length, color: STATUS_COLORS.kapali },
   ].filter((row) => row.value > 0);
 
   if (loading) return <LoadingState label="Admin paneli yükleniyor..." />;
@@ -142,12 +141,12 @@ export function AdminView() {
           <div className="h-64" aria-label="Yeni dava trend grafiği">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-                <defs><linearGradient id="caseTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={BRAND_ACCENT[600]} stopOpacity={0.32}/><stop offset="100%" stopColor={BRAND_ACCENT[600]} stopOpacity={0.02}/></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" vertical={false} />
-                <XAxis dataKey="ay" tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: "#afe3f0" }} />
-                <Area type="monotone" dataKey="dava" name="Yeni dava" stroke={BRAND_ACCENT[600]} strokeWidth={3} fill="url(#caseTrend)" activeDot={{ r: 5, fill: BRAND_ACCENT[600], stroke: "white", strokeWidth: 2 }} />
+                <defs><linearGradient id="caseTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={CHART.primary} stopOpacity={0.32}/><stop offset="100%" stopColor={CHART.primary} stopOpacity={0.02}/></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} vertical={false} />
+                <XAxis dataKey="ay" tick={{ fontSize: 11, fill: CHART.axis }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: CHART.axis }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ stroke: CHART.cursorLine }} />
+                <Area type="monotone" dataKey="dava" name="Yeni dava" stroke={CHART.primary} strokeWidth={3} fill="url(#caseTrend)" activeDot={{ r: 5, fill: CHART.primary, stroke: CHART.node, strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -157,7 +156,7 @@ export function AdminView() {
           <div><h2 className="text-sm font-semibold text-navy-800">Durum Dağılımı</h2><p className="mt-1 text-xs text-navy-500">Portföyün anlık görünümü</p></div>
           <div className="relative h-52" aria-label="Dava durum dağılımı grafiği">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart><Pie data={statusData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={83} paddingAngle={3} stroke="none">{statusData.map((row) => <Cell key={row.name} fill={row.color} />)}</Pie><Tooltip contentStyle={TOOLTIP_STYLE} /></PieChart>
+              <PieChart><Pie data={statusData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={83} paddingAngle={3} stroke="none">{statusData.map((row) => <Cell key={row.name} fill={row.color} />)}</Pie><Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} /></PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 grid place-items-center"><div className="text-center"><p className="text-2xl font-bold text-navy-900">{cases.length}</p><p className="text-[10px] uppercase tracking-wide text-navy-400">Dava</p></div></div>
           </div>
@@ -168,17 +167,17 @@ export function AdminView() {
       <section className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div><h2 className="text-sm font-semibold text-navy-800">Avukat İş Yükü</h2><p className="mt-1 text-xs text-navy-500">Aktif ve kapanmış davaların sorumlu bazında karşılaştırması</p></div>
-          <div className="flex gap-4 text-[11px] text-navy-500"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-600" />Aktif</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-100" />Kapalı</span></div>
+          <div className="flex gap-4 text-[11px] text-navy-500"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: CHART.primary }} />Aktif</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: CHART.primarySoft }} />Kapalı</span></div>
         </div>
-        <div className="h-64" aria-label="Avukat iş yükü bar grafiği">
+        <div style={{ height: Math.max(256, workloadData.length * 40) }} aria-label="Avukat iş yükü bar grafiği">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={workloadData} layout="vertical" margin={{ top: 0, right: 18, left: 10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eef0f5" horizontal={false} />
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#3d5170" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: "#1d2d47" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: "#f7f8fb" }} />
-              <Bar dataKey="aktif" name="Aktif" stackId="cases" fill={BRAND_ACCENT[600]} radius={[6, 0, 0, 6]} />
-              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill="#d7f1f8" radius={[0, 6, 6, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART.grid} horizontal={false} />
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: CHART.axis }} axisLine={false} tickLine={false} />
+              <YAxis type="category" interval={0} dataKey="name" width={workloadAxisWidth} tick={{ fontSize: 11, fill: CHART.label }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={{ fill: CHART.cursor }} />
+              <Bar dataKey="aktif" name="Aktif" stackId="cases" fill={CHART.primary} radius={[6, 0, 0, 6]} />
+              <Bar dataKey="kapali" name="Kapalı" stackId="cases" fill={CHART.primarySoft} radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -203,7 +202,7 @@ export function AdminView() {
                       <div className="my-2 flex items-center gap-1.5 text-[10px] font-medium text-navy-500"><span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />{status.label}</div>
                       {item.is_archived ? <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Arşivli</span> : <select aria-label={`${item.case_name} sorumlu avukatı`} value={item.assigned_lawyer_id ?? ""} disabled={savingId === item.id} onChange={(event) => assign(item.id, event.target.value)} className={SELECT_CLASS}>
                         {!item.assigned_lawyer_id && <option value="">Atanmamış</option>}
-                        {lawyers.filter((row) => row.is_active || row.id === item.assigned_lawyer_id).map((row) => <option key={row.id} value={row.id}>{row.full_name}</option>)}
+                        {lawyers.filter((row) => (row.is_active || row.id === item.assigned_lawyer_id) && (!row.demo_case_ids || row.demo_case_ids.includes(item.id))).map((row) => <option key={row.id} value={row.id}>{row.full_name}</option>)}
                       </select>}
                     </article>;
                   })}

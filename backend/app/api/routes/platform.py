@@ -8,11 +8,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
+from app.services.management_service import audit
 
 from app.api.deps import get_current_platform_admin
 from app.db.session import get_db
 from app.models.law_firm import LawFirm
-from app.models.user import User, UserStatus
+from app.models.user import User, UserRole, UserStatus
 from app.schemas.platform import (
     PlatformAdminCreate,
     PlatformAdminInviteOut,
@@ -27,6 +29,7 @@ from app.services.platform_service import (
     check_can_invite,
     create_firm,
     firm_admins,
+    firm_lawyers,
     get_customer_firm,
     get_firm_admin,
     list_customer_firms,
@@ -39,11 +42,15 @@ logger = logging.getLogger("casebridge")
 router = APIRouter(prefix="/platform", tags=["platform"])
 
 
+class StatusReason(BaseModel):
+    reason: str = Field(default="Platform yöneticisi işlemi", min_length=3, max_length=1000)
+
+
 def _http(error: UserAdminError) -> HTTPException:
     return HTTPException(status_code=error.status_code, detail=error.detail)
 
 
-def _firm_out(firm: LawFirm) -> PlatformFirmOut:
+def _firm_out(db: Session, firm: LawFirm) -> PlatformFirmOut:
     return PlatformFirmOut(
         id=firm.id,
         name=firm.name,
@@ -52,6 +59,7 @@ def _firm_out(firm: LawFirm) -> PlatformFirmOut:
         suspended_at=firm.suspended_at,
         active_user_count=sum(1 for user in firm.users if user.status == UserStatus.ACTIVE),
         admins=[PlatformAdminOut.model_validate(user) for user in firm_admins(firm)],
+        lawyers=[PlatformAdminOut.model_validate(user) for user in firm_lawyers(db, firm)],
     )
 
 
@@ -69,7 +77,7 @@ def _firm(db: Session, firm_id: str) -> LawFirm:
 
 @router.get("/firms", response_model=list[PlatformFirmOut])
 def list_firms(_: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
-    return [_firm_out(firm) for firm in list_customer_firms(db)]
+    return [_firm_out(db, firm) for firm in list_customer_firms(db)]
 
 
 @router.post("/firms", response_model=PlatformFirmCreatedOut, status_code=status.HTTP_201_CREATED)
@@ -78,6 +86,7 @@ def create(
 ):
     try:
         firm, admin = create_firm(db, payload.name, payload.admin_full_name, str(payload.admin_email))
+        audit(db, actor, firm.id, "firm.created", "firm", firm.id, after={"name": firm.name})
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -90,7 +99,7 @@ def create(
     email_sent = send_invite(db, admin)
     db.refresh(firm)
     db.refresh(admin)
-    return PlatformFirmCreatedOut(firm=_firm_out(firm), admin=PlatformAdminOut.model_validate(admin), email_sent=email_sent)
+    return PlatformFirmCreatedOut(firm=_firm_out(db, firm), admin=PlatformAdminOut.model_validate(admin), email_sent=email_sent)
 
 
 @router.post("/firms/{firm_id}/admins", response_model=PlatformAdminInviteOut, status_code=status.HTTP_201_CREATED)
@@ -102,7 +111,9 @@ def add_admin(
 ):
     firm = _firm(db, firm_id)
     try:
-        admin = add_firm_admin(db, firm, payload.full_name, str(payload.email))
+        admin = add_firm_admin(db, firm, payload.full_name, str(payload.email), payload.role)
+        lawyer = payload.role == UserRole.LAWYER
+        audit(db, actor, firm.id, "lawyer.invited" if lawyer else "admin.invited", "platform_admin", admin.id)
         db.commit()
     except UserAdminError as error:
         db.rollback()
@@ -110,8 +121,8 @@ def add_admin(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=EMAIL_TAKEN)
-    _audit("yönetici_eklendi", firm.id, admin.id, actor)
-    # A suspended firm's admin is invited after the firm is activated again.
+    _audit("avukat_eklendi" if lawyer else "yönetici_eklendi", firm.id, admin.id, actor)
+    # A suspended firm's admin or lawyer is invited after the firm is activated again.
     email_sent = send_invite(db, admin) if firm.is_active else False
     db.refresh(admin)
     return PlatformAdminInviteOut(admin=PlatformAdminOut.model_validate(admin), email_sent=email_sent)
@@ -137,25 +148,29 @@ def resend_invite(
 
 
 @router.post("/firms/{firm_id}/suspend", response_model=PlatformFirmOut)
-def suspend(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def suspend(firm_id: str, payload: StatusReason | None = None, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
     changed = set_firm_active(firm, False)
+    if changed:
+        audit(db, actor, firm.id, "firm.suspended", "firm", firm.id, reason=payload.reason if payload else "Platform yöneticisi işlemi")
     db.commit()
     if changed:
         _audit("büro_askıya_alındı", firm.id, None, actor)
     db.refresh(firm)
-    return _firm_out(firm)
+    return _firm_out(db, firm)
 
 
 @router.post("/firms/{firm_id}/activate", response_model=PlatformFirmOut)
-def activate(firm_id: str, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
+def activate(firm_id: str, payload: StatusReason | None = None, actor: User = Depends(get_current_platform_admin), db: Session = Depends(get_db)):
     firm = _firm(db, firm_id)
     changed = set_firm_active(firm, True)
+    if changed:
+        audit(db, actor, firm.id, "firm.activated", "firm", firm.id, reason=payload.reason if payload else "Platform yöneticisi işlemi")
     db.commit()
     if changed:
         _audit("büro_aktifleştirildi", firm.id, None, actor)
     db.refresh(firm)
-    return _firm_out(firm)
+    return _firm_out(db, firm)
 
 
 @router.get("/audit-events.csv")

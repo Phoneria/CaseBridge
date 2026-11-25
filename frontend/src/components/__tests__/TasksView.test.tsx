@@ -1,17 +1,19 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", async () => (await import("@/test/navigation")).navigationModule);
 import { nav, resetNav, setUrl } from "@/test/navigation";
 
 const listAllTasks = vi.fn();
+const updateTask = vi.fn();
 const updateTaskStatus = vi.fn();
 const createTask = vi.fn();
 const getCases = vi.fn();
 const listUsers = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  updateTask: (...args: unknown[]) => updateTask(...args),
   listAllTasks: (...args: unknown[]) => listAllTasks(...args),
   updateTaskStatus: (...args: unknown[]) => updateTaskStatus(...args),
   createTask: (...args: unknown[]) => createTask(...args),
@@ -56,6 +58,27 @@ beforeEach(() => {
 });
 
 describe("TasksView", () => {
+  it("moves a card by drag and edits its priority notes and deadline", async () => {
+    listAllTasks.mockResolvedValue([pendingTask]);
+    updateTask.mockImplementation(async (_case, _id, patch) => ({ ...pendingTask, stage: "in_review", ...patch }));
+    render(<TasksView />);
+    const card = (await screen.findByTestId("task-title")).closest("li")!;
+    const target = screen.getByRole("region", { name: "İncelemede" });
+    fireEvent.dragStart(card, {dataTransfer: {setData: vi.fn()}});
+    fireEvent.drop(target);
+    expect(await within(target).findByText(pendingTask.title)).toBeInTheDocument();
+    expect(updateTask).toHaveBeenCalledWith("c1", "t1", {stage:"in_review"});
+    await userEvent.click(within(target).getByRole("button", {name:/görevini düzenle/}));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.type(within(dialog).getByLabelText("Görev notları"), "Kontrol edilecek");
+    await userEvent.selectOptions(within(dialog).getByLabelText("Öncelik"), "urgent");
+    fireEvent.change(within(dialog).getByLabelText("Son tarih"), {target:{value:"2027-03-01"}});
+    await userEvent.selectOptions(within(dialog).getByLabelText("Atanan kişi"), "u1");
+    await userEvent.click(within(dialog).getByRole("button", {name:"Kaydet"}));
+    expect(updateTask).toHaveBeenLastCalledWith("c1","t1",{description:"Kontrol edilecek",priority:"urgent",due_date:"2027-03-01",assigned_to:"u1"});
+    expect(await within(target).findByText("Acil")).toBeVisible();
+  });
+
   it("lists tasks across cases with the case name", async () => {
     listAllTasks.mockResolvedValue([pendingTask]);
 

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "frontend/app-version.json",
+        "frontend/src/components/AppShell.tsx",
+        "frontend/src/components/WorkspaceHeader.tsx"
+      ],
+      "requirements": [
+        "specs/014-demo-case-files/spec.md#FR-020"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/WorkspaceHeader.test.tsx::shows the current section, useful shortcuts and signed-in user"
+      ],
+      "reason": "Remove the eye button from the workspace header."
+    }
+  ]
+}

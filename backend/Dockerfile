@@ -11,6 +11,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# The Claude Agent SDK bundles the Claude Code CLI (spec 024). Fail the build,
+# not the first request, if the bundled CLI cannot run in this image.
+RUN CLAUDE_CLI="$(python -c 'import claude_agent_sdk, os; print(os.path.join(os.path.dirname(claude_agent_sdk.__file__), "_bundled", "claude"))')" \
+    && HOME=/tmp/claude-build-home "$CLAUDE_CLI" --version \
+    && rm -rf /tmp/claude-build-home
+
 COPY . .
 
 # Storage dir for uploaded documents - mount a volume here in

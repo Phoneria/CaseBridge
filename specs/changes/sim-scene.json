@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": ["web-page/index.html", "web-page/olasilik-agaci.html", "web-page/story3d.css", "web-page/story3d.js", "web-page/website-version.json"],
+      "requirements": ["specs/016-3d-story-homepage/spec.md#FR-007", "specs/011-team-roles/spec.md#FR-008"],
+      "acceptance_tests": [
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_tree_grows_rightward_simulation_scene_and_labels_on_top",
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_five_feature_chapters_with_real_ctas",
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_lease_tree_replaces_product_gallery_inline",
+        "scripts/tests/test_team_roles.py::TeamRolesAcceptance.test_five_members_have_nonconflicting_roles_and_public_professional_bios"
+      ],
+      "reason": "Team feedback: labels on top, rightward-growing tree, hero-to-timeline transition, courtroom simulation scene, app tree on its own page, two-item team bios; marketing-only v.0.58."
+    }
+  ]
+}

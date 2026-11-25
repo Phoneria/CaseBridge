@@ -106,14 +106,14 @@ export function CaseQuickView() {
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      <div className="absolute inset-0 bg-navy-900/30" aria-hidden="true" data-testid="quickview-backdrop" onClick={close} />
+      <div className="absolute inset-0 bg-scrim backdrop-blur-[2px]" aria-hidden="true" data-testid="quickview-backdrop" onClick={close} />
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="quickview-title"
         tabIndex={-1}
-        className="relative flex h-full w-full flex-col bg-white shadow-xl outline-none sm:w-[440px]"
+        className="relative flex h-full w-full flex-col border-l border-surface-border bg-white shadow-xl outline-none sm:w-[440px]"
       >
         <div className="flex items-start justify-between gap-3 border-b border-surface-border px-5 py-4">
           <div className="min-w-0">

@@ -57,7 +57,12 @@ def extract_case_draft(
         result = CaseIntakeService(provider).extract(document_text)
     except CaseIntakeError as exc:
         raise HTTPException(exc.status_code, exc.detail)
-    out = CaseIntakeExtractOut(draft=result.draft, truncated=result.truncated, source_chars=result.source_chars)
+    out = CaseIntakeExtractOut(
+        draft=result.draft,
+        truncated=result.truncated,
+        source_chars=result.source_chars,
+        source_text=result.source_text,
+    )
     filled = sum(1 for value in out.draft.model_dump().values() if value not in (None, "", [], {}))
     record_audit(db, current_user, "ai.case_intake", flags={"source": "file" if file is not None else "text"},
                  counts={"filled_fields": filled})

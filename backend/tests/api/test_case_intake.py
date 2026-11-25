@@ -281,3 +281,56 @@ def test_extraction_asks_for_the_standard_level(client, two_firms_two_users):
     router = _use(_RecordingRouter([VALID_ANSWER]))
     _extract(client, headers, data={"text": "metin"})
     assert router.tasks == ["case_intake.extract"]
+
+
+def test_a_udf_file_is_read(client, two_firms_two_users):
+    from tests.udf_samples import make_udf
+
+    headers = _headers(client, two_firms_two_users)
+    provider = _use(MockProvider(default_response=VALID_ANSWER))
+
+    response = _extract(
+        client, headers, files={"file": ("dilekce.udf", make_udf("Kira alacağı davası"), "application/octet-stream")}
+    )
+
+    assert response.status_code == 200
+    assert "Kira alacağı davası" in provider.calls[0]["user_prompt"]
+
+
+def test_an_unreadable_udf_is_rejected_with_the_hint(client, two_firms_two_users):
+    from app.api.routes.case_intake import NOT_READABLE
+
+    headers = _headers(client, two_firms_two_users)
+    _use(MockProvider(default_response=VALID_ANSWER))
+
+    response = _extract(client, headers, files={"file": ("bozuk.udf", b"not a zip", "application/octet-stream")})
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == NOT_READABLE
+
+
+def test_the_text_read_from_a_file_is_returned(client, two_firms_two_users):
+    from tests.udf_samples import make_udf
+
+    headers = _headers(client, two_firms_two_users)
+    _use(MockProvider(default_response=VALID_ANSWER))
+
+    response = _extract(
+        client, headers, files={"file": ("dilekce.udf", make_udf("Kira alacağı davası\nDavacı: Ayşe Yılmaz"), "application/octet-stream")}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["source_text"] == "Kira alacağı davası\nDavacı: Ayşe Yılmaz\n"
+
+
+def test_only_the_part_sent_to_the_model_is_returned_for_long_documents(client, monkeypatch, two_firms_two_users):
+    headers = _headers(client, two_firms_two_users)
+    provider = _use(MockProvider(default_response=VALID_ANSWER))
+    monkeypatch.setattr(settings, "case_intake_max_chars", 100)
+
+    response = _extract(client, headers, files={"file": ("uzun.txt", ("a" * 100 + "SONU").encode(), "text/plain")})
+
+    body = response.json()
+    assert body["truncated"] is True
+    assert body["source_text"] == "a" * 100
+    assert "SONU" not in provider.calls[0]["user_prompt"]

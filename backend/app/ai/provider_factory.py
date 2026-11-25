@@ -1,6 +1,6 @@
 """Single place the rest of the app asks for "the current LLM
 provider". LLM_PROVIDER is the explicit, config-driven selector
-(section 27) - qwen/openai/ollama/mock. Nothing here silently substitutes one
+(section 27) - qwen/openai/anthropic/ollama/mock. Nothing here silently substitutes one
 provider for another: a selected-but-misconfigured real provider
 raises AIProviderConfigError rather than quietly degrading to
 MockProvider, so startup / the AI health status can report it clearly.
@@ -13,11 +13,12 @@ from app.ai.errors import AIProviderConfigError
 from app.ai.llm_levels import level_for_task
 from app.ai.providers.base import LLMProvider
 from app.ai.providers.mock_provider import MockProvider
+from app.ai.providers.anthropic_provider import AnthropicProvider
 from app.ai.providers.openai_provider import OpenAIProvider
 from app.ai.providers.qwen_provider import QwenProvider
 from app.ai.providers.ollama_provider import OllamaProvider
 from app.core.config import settings
-from app.services.ai_credentials import get_openai_api_key
+from app.services.ai_credentials import get_claude_api_key, get_openai_api_key
 
 # Used whenever LLM_PROVIDER=mock (the default). Must be valid JSON matching
 # AIAnalysisResult (app/ai/schemas.py) so simulations/analyses still complete
@@ -34,12 +35,12 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
         "weak_points": [],
         "opposing_arguments": [],
         "missing_information": [
-            "Gerçek bir AI değerlendirmesi için LLM_PROVIDER=qwen veya openai yapılandırılmalıdır."
+            "Gerçek bir değerlendirme için büro AI bağlantısı yapılandırılmalıdır."
         ],
         "possible_scenarios": [],
         "questions": [],
         "recommended_actions": [
-            "Gerçek AI analizi için ortam değişkenlerinde bir sağlayıcı (Qwen veya OpenAI) yapılandırın."
+            "Büro yöneticiniz Ayarlar üzerinden AI bağlantısını kontrol edebilir."
         ],
         "assessment": {"score": 0, "confidence": "low"},
         "ai_disclaimer": (
@@ -54,6 +55,9 @@ _MOCK_DISABLED_RESPONSE = json.dumps(
 
 def build_llm_provider(model: str, *, law_firm_id=None) -> LLMProvider:
     """One real provider (LLM_PROVIDER=qwen/openai/ollama) for `model`."""
+    claude = get_claude_api_key(law_firm_id) if settings.llm_provider == "openai" else None
+    if claude:
+        return AnthropicProvider(claude, settings.anthropic_model, settings.anthropic_timeout_seconds, settings.anthropic_max_output_tokens)
     provider_name = settings.llm_provider
 
     if provider_name == "qwen":
@@ -90,6 +94,23 @@ def build_llm_provider(model: str, *, law_firm_id=None) -> LLMProvider:
             )
         return OpenAIProvider(api_key=api_key, model=model)
 
+    if provider_name == "anthropic":
+        if law_firm_id is not None:
+            raise AIProviderConfigError("Büro işlemleri için ortak Claude anahtarı kullanılamaz.")
+        key = settings.anthropic_api_key
+        if not key or not key.strip():
+            raise AIProviderConfigError(
+                "LLM_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set. "
+                "Set ANTHROPIC_API_KEY in your environment, or set "
+                "LLM_PROVIDER=mock to run without a real AI provider."
+            )
+        return AnthropicProvider(
+            api_key=key,
+            model=model,
+            timeout_seconds=settings.anthropic_timeout_seconds,
+            max_tokens=settings.anthropic_max_output_tokens,
+        )
+
     if provider_name == "ollama":
         return OllamaProvider(
             base_url=settings.ollama_base_url,
@@ -110,6 +131,8 @@ def standard_llm_model() -> str:
         return settings.openai_model
     if name == "ollama":
         return settings.ollama_model
+    if name == "anthropic":
+        return settings.anthropic_model
     return "mock"
 
 
@@ -160,7 +183,18 @@ class _TrackedProvider(LLMProvider):
 
     def complete(self, system_prompt: str, user_prompt: str, *, response_format: Optional[str] = None) -> str:
         self._router._last = self._inner
-        return self._inner.complete(system_prompt, user_prompt, response_format=response_format)
+        if not (settings.anonymize_llm_input and settings.llm_provider in ("qwen", "openai", "anthropic")):
+            return self._inner.complete(system_prompt, user_prompt, response_format=response_format)
+        # Kişisel veriler dış sağlayıcıya gitmeden maskelenir; yanıttaki etiketler geri çevrilir.
+        from app.privacy.anonymizer import anonymize
+
+        detectors = []
+        if settings.anonymize_use_ner:
+            from app.privacy.ner import detect
+
+            detectors.append(detect)
+        res = anonymize(user_prompt, extra_detectors=detectors)
+        return res.restore(self._inner.complete(system_prompt, res.text, response_format=response_format))
 
     @property
     def last_usage(self) -> Optional[dict]:  # type: ignore[override]
@@ -172,7 +206,7 @@ class _TrackedProvider(LLMProvider):
 
 
 def get_llm_provider(law_firm_id=None) -> LLMProvider:
-    if settings.llm_provider in ("qwen", "openai", "ollama"):
+    if settings.llm_provider in ("qwen", "openai", "ollama", "anthropic"):
         build = partial(build_llm_provider, law_firm_id=law_firm_id) if law_firm_id is not None else build_llm_provider
         return LevelRoutedProvider(build=build, model_for_level=llm_model_for_level)
     return MockProvider(default_response=_MOCK_DISABLED_RESPONSE)
@@ -206,4 +240,4 @@ def get_ai_provider_status(law_firm_id=None) -> dict:
         get_llm_provider(law_firm_id)
     except AIProviderConfigError as exc:
         return {"provider": settings.llm_provider, "configured": False, "error": str(exc)}
-    return {"provider": settings.llm_provider, "configured": True, "error": None}
+    return {"provider": "anthropic" if get_claude_api_key(law_firm_id) else settings.llm_provider, "configured": True, "error": None}

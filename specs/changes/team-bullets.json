@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": ["web-page/index.html", "web-page/story3d.css", "web-page/website-version.json"],
+      "requirements": ["specs/011-team-roles/spec.md#FR-007"],
+      "acceptance_tests": ["scripts/tests/test_team_roles.py::TeamRolesAcceptance.test_five_members_have_nonconflicting_roles_and_public_professional_bios"],
+      "reason": "User-requested team bios as concise bullet lists with the same facts; marketing-only v.0.56."
+    }
+  ]
+}

@@ -1,8 +1,11 @@
 "use client";
 
+import { readingMarkdown } from "@/lib/readingMarkdown";
+import ReactMarkdown from "react-markdown";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { deleteDocument, downloadDocument } from "@/lib/api";
+import { DOCUMENT_EXTENSIONS } from "@/lib/caseIntake";
 import { saveBlob } from "@/lib/download";
 import { formatDate } from "@/lib/labels";
 import { OUTCOME_LABELS, parseDocument, splitMatches, type DocOutcome } from "@/lib/documentParse";
@@ -21,6 +24,7 @@ const FONT_SIZES = ["text-[13px]", "text-sm", "text-[15px]", "text-base", "text-
 
 interface Props {
   documents: DocumentItem[];
+  initialDocumentId?: string | null;
   uploading: boolean;
   uploadError: string | null;
   onUpload: (file: File) => void;
@@ -29,8 +33,8 @@ interface Props {
   readOnly?: boolean;
 }
 
-export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload, onDeleted, readOnly = false }: Props) {
-  const [selectedId, setSelectedId] = useState<string | null>(documents[0]?.id ?? null);
+export function CaseDocumentsPanel({ documents, initialDocumentId, uploading, uploadError, onUpload, onDeleted, readOnly = false }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(initialDocumentId ?? documents[0]?.id ?? null);
   const [listFilter, setListFilter] = useState("");
   const [query, setQuery] = useState("");
   const [activeMatch, setActiveMatch] = useState(0);
@@ -91,7 +95,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
     setActiveSection(id);
     const container = viewerRef.current;
     const el = container?.querySelector(`#${id}`) as HTMLElement | null;
-    if (container && el) container.scrollTo({ top: el.offsetTop - container.offsetTop - 8, behavior: "smooth" });
+    if (container && el) el.scrollIntoView({ block: "center", behavior: "smooth" });
   }
 
   async function handleDownload() {
@@ -143,7 +147,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
         <mark
           key={i}
           data-match={idx}
-          className={`rounded px-0.5 ${idx === activeMatch ? "bg-accent-400 text-white" : "bg-amber-200 text-navy-900"}`}
+          className={`rounded px-0.5 ${idx === activeMatch ? "bg-accent-600 text-white" : "bg-amber-200 text-navy-900"}`}
         >
           {seg.text}
         </mark>
@@ -169,13 +173,13 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
       }`}
     >
       <label htmlFor="document-upload" className="block cursor-pointer text-sm font-medium text-accent-700">
-        {uploading ? "Yükleniyor..." : "Belge Yükle (PDF, DOCX, TXT)"}
+        {uploading ? "Yükleniyor..." : "Belge Yükle (PDF, DOCX, TXT, UDF)"}
       </label>
       <p className="mt-0.5 text-[11px] text-navy-500">veya dosyayı buraya sürükleyin</p>
       <input
         id="document-upload"
         type="file"
-        accept=".pdf,.docx,.txt"
+        accept={DOCUMENT_EXTENSIONS.join(",")}
         disabled={uploading}
         className="hidden"
         onChange={(e) => {
@@ -192,15 +196,15 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
       <div className="space-y-4 rounded-2xl border border-surface-border bg-white p-5 shadow-card">
         {uploadZone}
         {uploadError && <ErrorState message={uploadError} />}
-        <EmptyState message="Henüz belge yok." hint={readOnly ? undefined : "Bu davaya PDF, DOCX veya TXT belge yükleyin."} />
+        <EmptyState message="Henüz belge yok." hint={readOnly ? undefined : "Bu davaya PDF, DOCX, TXT veya UDF belge yükleyin."} />
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="min-w-0 space-y-4">
       {/* Left: upload + document list */}
-      <aside className="space-y-3 rounded-2xl border border-surface-border bg-white p-4 shadow-card lg:sticky lg:top-4 lg:self-start">
+      <aside className="space-y-3 rounded-2xl border border-surface-border bg-white p-4 shadow-card">
         {uploadZone}
         {uploadError && <ErrorState message={uploadError} />}
         <div className="flex items-center justify-between px-1">
@@ -217,7 +221,7 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
             className="w-full rounded-lg border border-surface-border px-3 py-1.5 text-sm outline-none focus:border-accent-400"
           />
         )}
-        <ul className="max-h-[60vh] space-y-1.5 overflow-y-auto">
+        <ul className="grid max-h-44 gap-1.5 overflow-y-auto md:grid-cols-2 xl:grid-cols-3">
           {visibleDocs.map((doc) => {
             const p = parsedById.get(doc.id)!;
             const active = doc.id === selectedId;
@@ -360,11 +364,11 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
             {actionError && <ErrorState message={actionError} />}
           </header>
 
-          <div className="grid xl:grid-cols-[200px_minmax(0,1fr)]">
+          <div className="min-w-0">
             {parsed.sections.length > 0 && (
               <nav aria-label="Bölümler" className="border-b border-surface-border p-4 xl:border-b-0 xl:border-r">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-navy-500">Bölümler</p>
-                <ol className="flex gap-1 overflow-x-auto xl:flex-col">
+                <ol className="flex gap-1 overflow-x-auto">
                   {parsed.sections.map((s) => (
                     <li key={s.id}>
                       <button
@@ -382,11 +386,15 @@ export function CaseDocumentsPanel({ documents, uploading, uploadError, onUpload
               </nav>
             )}
 
-            <div ref={viewerRef} className={`relative max-h-[70vh] overflow-y-auto p-5 leading-relaxed text-navy-800 ${FONT_SIZES[fontIdx]}`}>
+            <div ref={viewerRef} className={`relative min-w-0 px-5 py-7 sm:px-8 leading-relaxed text-navy-800 ${FONT_SIZES[fontIdx]}`}>
               {!selected.extracted_text ? (
                 <EmptyState message="Bu belge için metin çıkarılamadı." hint="Dosyayı indirerek görüntüleyebilirsiniz." />
+              ) : !query.trim() && !parsed.sections.length ? (
+                <article className="chat-markdown w-full break-words">
+                  <ReactMarkdown skipHtml components={{img: ({alt}) => <span>{alt}</span>}}>{readingMarkdown(selected.extracted_text)}</ReactMarkdown>
+                </article>
               ) : (
-                <article className="max-w-3xl space-y-3">
+                <article className="w-full space-y-3">
                   {parsed.preamble.map((line, i) => (
                     <p key={`p${i}`}>{renderText(line)}</p>
                   ))}

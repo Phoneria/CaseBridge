@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "deployment/auto-ui.py",
+        "deployment/casebridge-auto-ui.timer",
+        "deployment/casebridge-auto-ui.service",
+        ".github/workflows/ci.yml",
+        "deployment/release.py"
+      ],
+      "requirements": [
+        "specs/001-main-release/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_classify_runtime_boundaries_and_companion_files",
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_rename_out_of_backend_cannot_be_treated_as_ui",
+        "deployment/tests/test_auto_ui.py::AutoUiTests.test_publish_does_not_activate_if_stage_fails_or_backend_changes"
+      ],
+      "reason": "Route eligible UI changes from tested protected main to a pinned release; deny mixed paths."
+    }
+  ]
+}

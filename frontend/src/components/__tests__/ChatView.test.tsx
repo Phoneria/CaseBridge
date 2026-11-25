@@ -241,7 +241,7 @@ describe("ChatView", () => {
 
     api.getChatStatus.mockResolvedValue({ ...STATUS, provider: "ollama", external: false });
     render(<ChatView />);
-    expect(await screen.findByText("AI hizmeti yapılandırıldı")).toBeInTheDocument();
+    expect(await screen.findByText("Yapay zekâ hizmeti yapılandırıldı")).toBeInTheDocument();
     expect(screen.queryByText(/harici bir AI sağlayıcısına/)).not.toBeInTheDocument();
     expect(screen.getByText("CaseBridge AI hukuki danışmanlık yerine geçmez; yanıtları doğrulayın.")).toBeInTheDocument();
   });
@@ -361,4 +361,14 @@ describe("ChatView", () => {
     await waitFor(() => expect(streamChatMessage).toHaveBeenCalled());
     expect(streamChatMessage.mock.calls[0][2]).not.toHaveProperty("level");
   });
+});
+
+
+it("opens an imported example on first entry but preserves the new-chat action", async () => {
+  api.listChatConversations.mockResolvedValue([{ ...CONVERSATION, title: "ÖRNEK · Hazırlık" }]);
+  render(<ChatView />);
+  expect(await screen.findByText("TÜFE")).toBeInTheDocument();
+  expect(api.getChatConversation).toHaveBeenCalledWith("c1");
+  await userEvent.click(screen.getByRole("button", { name: "Yeni sohbet" }));
+  await waitFor(() => expect(screen.queryByText("TÜFE")).not.toBeInTheDocument());
 });

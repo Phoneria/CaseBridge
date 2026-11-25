@@ -122,11 +122,16 @@ describe("CaseCloseModal", () => {
     await waitFor(() => expect(onClosed).toHaveBeenCalledWith({ updated: closed, documentFailed: true }));
   });
 
+  it("offers pdf, docx, txt and udf in the file picker", () => {
+    renderModal();
+    expect(screen.getByLabelText("Karar belgesi ekle")).toHaveAttribute("accept", ".pdf,.docx,.txt,.udf");
+  });
+
   it("refuses an unsupported or oversized file before anything is sent", async () => {
     renderModal();
     const input = screen.getByLabelText("Karar belgesi ekle");
     await userEvent.upload(input, new File(["x"], "karar.exe"), { applyAccept: false });
-    expect(screen.getByRole("alert")).toHaveTextContent("karar.exe desteklenmeyen bir dosya türü (pdf, docx, txt).");
+    expect(screen.getByRole("alert")).toHaveTextContent("karar.exe desteklenmeyen bir dosya türü (pdf, docx, txt, udf).");
 
     const big = new File(["x"], "büyük.pdf");
     Object.defineProperty(big, "size", { value: 11 * 1024 * 1024 });

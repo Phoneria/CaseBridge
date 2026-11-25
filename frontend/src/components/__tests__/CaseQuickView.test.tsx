@@ -100,7 +100,7 @@ describe("CaseQuickView", () => {
     render(<CaseQuickView />);
 
     const dialog = await screen.findByRole("dialog");
-    const tasks = within(dialog).getAllByTestId("quickview-task");
+    const tasks = await within(dialog).findAllByTestId("quickview-task");
     expect(tasks).toHaveLength(3);
     expect(tasks[0]).toHaveTextContent("Görev t5");
     expect(tasks[0]).toHaveAttribute("data-focused", "true");

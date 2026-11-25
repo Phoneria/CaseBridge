@@ -1,0 +1,13 @@
+# Tasks
+- [x] T001 Map theming code (data-model.md#featurecontract).
+- [x] T002 Update brand.ts, tailwind.config.ts, globals.css, theme.css.
+- [x] T003 Apply outcome colours in charts, tree and map.
+- [x] T004 Self-host Manrope with licence.
+- [x] T005 Acceptance tests covering FR-001 through FR-005 (brandPalette.test.ts) and full suite.
+- [x] T006 Visual check of five screens in both themes; bump app version.
+- [ ] T007 Standard application release and public verification.
+- [x] T008 Per-role colour tokens (themeTokens.ts) wired into Tailwind; theme.css reduced to non-variable rules (FR-006).
+- [x] T009 Contrast acceptance test over all class lists, both themes, hover included; FR-001 through FR-009 covered (themeContrast.test.ts) (FR-007).
+- [x] T010 Chart colours via chartTheme.ts; unified status colours (FR-008).
+- [x] T011 Scrim and drawer edge; visual check of admin, dashboard and case drawer in both themes; bump app to v.0.46 (FR-009).
+- [ ] T012 Standard application release of v.0.46 and public verification.

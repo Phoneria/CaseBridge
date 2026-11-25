@@ -69,9 +69,8 @@ describe("DashboardAiCard", () => {
     expect(screen.getByText("Kira Uyarlama")).toBeInTheDocument();
     expect(screen.getByText("81/100")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Oturumu aç" })).toHaveAttribute("href", "/ai/durusma/oturum/o1");
-    expect(screen.getByRole("link", { name: "Dosya analizi başlat" })).toHaveAttribute("href", "/ai/analiz");
+    expect(screen.getByRole("link", { name: "Analiz için dava seç" })).toHaveAttribute("href", "/davalar");
     expect(screen.getByRole("link", { name: "Duruşmaya gir" })).toHaveAttribute("href", "/ai/durusma");
-    expect(screen.getByRole("link", { name: "Tümü →" })).toHaveAttribute("href", "/ai");
   });
 
   it("shows the AI disclaimer next to the analysis score", async () => {

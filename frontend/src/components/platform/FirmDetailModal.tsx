@@ -1,6 +1,7 @@
 "use client";
 
 import { ModalFrame } from "@/components/ModalFrame";
+import Link from "next/link";
 import { NoticeLine, type Notice } from "@/components/platform/NoticeLine";
 import type { PlatformAdmin, PlatformFirm, UserStatus } from "@/types";
 
@@ -13,7 +14,36 @@ const STATUS_STYLES: Record<UserStatus, string> = {
 const SECONDARY =
   "rounded-xl border border-surface-border px-3 py-1.5 text-sm font-medium text-navy-700 hover:bg-surface-muted aria-disabled:opacity-60";
 
-/** One firm: its administrators and the platform actions on it. */
+function MemberList({ members, firm, busy, onResend }: { members: PlatformAdmin[]; firm: PlatformFirm; busy: boolean; onResend: (member: PlatformAdmin) => void }) {
+  return (
+    <ul className="divide-y divide-surface-border">
+      {members.map((admin) => (
+        <li key={admin.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+          <div className="min-w-0">
+            <p className="font-medium text-navy-800">{admin.full_name}</p>
+            <p className="truncate text-navy-500">{admin.email}</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[admin.status]}`}>{STATUS_LABELS[admin.status]}</span>
+            {admin.status === "pending" && firm.is_active && (
+              <button
+                type="button"
+                aria-disabled={busy}
+                aria-label={`Daveti yeniden gönder, ${admin.full_name}`}
+                onClick={() => !busy && onResend(admin)}
+                className={SECONDARY}
+              >
+                Daveti yeniden gönder
+              </button>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One firm: its administrators, its lawyers and the platform actions on it. */
 export function FirmDetailModal({
   firm,
   notice,
@@ -36,33 +66,18 @@ export function FirmDetailModal({
       <p className="mb-3 text-sm text-navy-600">
         Durum: {firm.is_active ? "Aktif" : "Askıda"} · Aktif kullanıcı: {firm.active_user_count}
       </p>
+      <Link href={`/platform/${firm.id}`} className="mb-4 inline-block rounded-xl bg-accent-50 px-3 py-2 text-sm font-medium text-accent-800 hover:bg-accent-100">Büro profili, kurulum ve destek →</Link>
       {notice && <NoticeLine notice={notice} />}
 
       <h3 className="mb-2 text-sm font-medium text-navy-700">Yöneticiler</h3>
-      <ul className="divide-y divide-surface-border">
-        {firm.admins.map((admin) => (
-          <li key={admin.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-            <div className="min-w-0">
-              <p className="font-medium text-navy-800">{admin.full_name}</p>
-              <p className="truncate text-navy-500">{admin.email}</p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[admin.status]}`}>{STATUS_LABELS[admin.status]}</span>
-              {admin.status === "pending" && firm.is_active && (
-                <button
-                  type="button"
-                  aria-disabled={busy}
-                  aria-label={`Daveti yeniden gönder, ${admin.full_name}`}
-                  onClick={() => !busy && onResend(admin)}
-                  className={SECONDARY}
-                >
-                  Daveti yeniden gönder
-                </button>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+      <MemberList members={firm.admins} firm={firm} busy={busy} onResend={onResend} />
+
+      <h3 className="mb-2 mt-4 text-sm font-medium text-navy-700">Avukatlar</h3>
+      {(firm.lawyers ?? []).length === 0 ? (
+        <p className="text-sm text-navy-500">Henüz avukat yok.</p>
+      ) : (
+        <MemberList members={firm.lawyers ?? []} firm={firm} busy={busy} onResend={onResend} />
+      )}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
         <button
@@ -79,7 +94,7 @@ export function FirmDetailModal({
         </button>
         <div className="flex gap-2">
           <button type="button" aria-disabled={busy} onClick={() => !busy && onAddAdmin()} className={SECONDARY}>
-            Yönetici ekle
+            Kullanıcı davet et
           </button>
           <button type="button" aria-disabled={busy} onClick={() => !busy && onClose()} className={SECONDARY}>
             Kapat

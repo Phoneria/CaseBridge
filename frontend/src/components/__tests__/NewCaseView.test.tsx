@@ -34,6 +34,7 @@ import type { CaseIntakeResult } from "@/types";
 const RESULT: CaseIntakeResult = {
   truncated: false,
   source_chars: 900,
+  source_text: "Davacı vekili dilekçesi",
   draft: {
     case_name: "Alacak Davası",
     case_type: "ticaret_hukuku",

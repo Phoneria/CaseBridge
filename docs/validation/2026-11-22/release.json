@@ -1,0 +1,31 @@
+{
+  "deployed_commit": "70fabd06f695f03477203a3fc86291f06e3e2f7c",
+  "application_version": "v.0.20",
+  "marketing_version": "v.0.44",
+  "scope": "all",
+  "state": "verified",
+  "application_source_hash": "13f7c8352023418a05f6a44ee864781df8bdcd483ca68f8f7ed02ee97f1a758d",
+  "images": {
+    "backend": "sha256:828c5de1f7f77326009ccf1ac2d6462af40307d81144225a9e5f040f8c084b8f",
+    "frontend": "sha256:b32c6d4b336669024fe8cb8586f5bce880edaf9bcdfa91bff8044c23b25f0191"
+  },
+  "verified_artifact_files": {
+    "source": 897,
+    "frontend_js_css": 54,
+    "marketing": 48
+  },
+  "previous_verified_commit": "b640c54a4c180df0d46ee3d210541f1238039d60",
+  "public_application": "https://app.casebridge.com.tr",
+  "public_marketing": "https://casebridge.com.tr",
+  "health": "https://app.casebridge.com.tr/api/health",
+  "verified_at_utc": "2026-11-21T23:22:14+00:00",
+  "protected_configuration_and_encrypted_versions": "unchanged, paired backup retained outside artifacts",
+  "deployment_trigger": "manual; no automatic schedule selected",
+  "notes": "This final documentation commit does not change deployed application/marketing code or require a rebuild. Public UI checks use actual served JS and isolated synthetic API responses; production health and unauthenticated route boundary are checked directly.",
+  "user_review_statement": {
+    "text": "İncelemeyi tamamladım ve kabul ediyorum",
+    "source": "Separate direct user reply to the S05 async review question, 2026-11-22; distinct from earlier authorization to implement",
+    "status": "user declaration only",
+    "independent_verification": "not performed; reviewer identity/independence/expertise and findings were not supplied or independently verified"
+  }
+}

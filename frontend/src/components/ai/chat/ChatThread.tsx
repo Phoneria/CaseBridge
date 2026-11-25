@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 
 import { answerLabel } from "@/lib/chatLevels";
 import { AiMark } from "@/components/ai/AiMark";
+import { SourceChips } from "@/components/ai/chat/SourceChips";
 import type { ChatFeedbackValue, ChatMessage } from "@/types";
 
 /** A message as shown in the thread; errorText is the live SSE error text. */
@@ -98,6 +99,7 @@ function AssistantMessage({
             Yanıt uzunluk sınırında kesildi · soruyu daraltarak tekrar sorabilirsiniz.
           </p>
         )}
+        <SourceChips sources={message.sources ?? []} />
         {message.status === "complete" && (
           <div className="mt-1 flex gap-1">
             <FeedbackButton label="Faydalı" icon="👍" pressed={message.feedback === 1} onClick={() => onFeedback(message, 1)} />
@@ -143,9 +145,9 @@ export function ChatThread({
         <AiMark className="h-8 w-8 text-accent-500" />
         <div>
           <h2 className="text-base font-semibold text-navy-900">Bugün size nasıl yardımcı olabilirim?</h2>
-          <p className="mt-1 text-sm text-navy-500">Türk hukukuna dair genel bir soru sorun ya da bir örnekle başlayın.</p>
+          <p className="mt-1 text-sm text-navy-500">Türk hukukuna dair genel bir soru sorun ya da bir önerilen sorulardan birini seçin.</p>
         </div>
-        <ul aria-label="Örnek sorular" className="flex flex-wrap justify-center gap-2">
+        <ul aria-label="Önerilen sorular" className="flex flex-wrap justify-center gap-2">
           {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
             <li key={prompt}>
               <button

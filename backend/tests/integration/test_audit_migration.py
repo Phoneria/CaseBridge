@@ -7,7 +7,7 @@ from alembic.config import Config
 from app.core.config import settings
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
-PREVIOUS_HEAD = "c8f2a4e6b0d1"
+PREVIOUS_HEAD = "f3a5c7e9b1d2"
 
 
 def test_audit_events_table_upgrades_and_downgrades(tmp_path, monkeypatch):

@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/006-product-captures/spec.md#FR-004"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_tree_is_unique_first_selected_with_matching_current_panel",
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_visible_marketing_version_matches_release_source"
+      ],
+      "reason": "Show the single current Olas\u0131l\u0131k A\u011fac\u0131 feature first and by default; preserve analysis next, remaining order, ARIA panel mapping and separate marketing release identity."
+    },
+    {
+      "files": [
+        "frontend/src/components/Sidebar.tsx",
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/002-header-ai/spec.md#FR-001",
+        "specs/002-header-ai/spec.md#FR-002",
+        "specs/002-header-ai/spec.md#FR-003",
+        "specs/002-header-ai/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/Sidebar.test.tsx::shows every authorized AI tool in an expanded sidebar group",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::keeps scoped accounts inside their own workspace",
+        "frontend/src/components/__tests__/Sidebar.test.tsx::shows only the platform items to a platform admin"
+      ],
+      "reason": "Restore all nine permitted AI links in a compact expanded single-column sidebar while retaining header access and account boundaries."
+    },
+    {
+      "files": [
+        "web-page/assets/feature-screens/tr-current/analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/evaluation.jpg",
+        "web-page/assets/feature-screens/tr-current/conversation.jpg",
+        "web-page/assets/feature-screens/tr-current/evidence.jpg",
+        "web-page/assets/feature-screens/tr-current/assistant.jpg",
+        "web-page/assets/feature-screens/tr-current/case-documents.jpg",
+        "web-page/assets/feature-screens/tr-current/calendar.jpg",
+        "web-page/assets/feature-screens/tr-current/reports.jpg",
+        "web-page/assets/feature-screens/tr-current/knowledge-map.jpg",
+        "web-page/assets/feature-screens/tr-current/counter-analysis.jpg",
+        "web-page/assets/feature-screens/tr-current/directed-trial.jpg",
+        "web-page/assets/feature-screens/tr-current/scenario-tree.jpg"
+      ],
+      "requirements": [
+        "specs/006-product-captures/spec.md#FR-001",
+        "specs/006-product-captures/spec.md#FR-002",
+        "specs/006-product-captures/spec.md#FR-003"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_marketing_default.py::MarketingDefaultAcceptance.test_current_gallery_matches_native_capture_provenance"
+      ],
+      "reason": "Refresh all twelve actual native synthetic product captures after the visible sidebar change; bind bytes and build fingerprint to audited capture metadata."
+    }
+  ]
+}

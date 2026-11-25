@@ -136,3 +136,48 @@ def test_customer_status_never_reports_shared_platform_credentials(client, offic
     keys.activate_openai_api_key(office.firm_a.id)
     assert client.get("/system/ai-status", headers=headers).json()["configured"] is True
     assert client.get("/chat/status", headers=headers).json()["configured"] is True
+
+
+def test_claude_key_switches_only_its_firm_and_never_reaches_openai(client, office, auth_headers, bureau_keys, monkeypatch):
+    from app.ai.providers.anthropic_provider import AnthropicProvider
+    from app.ai.chat.factory import get_chat_provider
+    from app.ai.provider_factory import build_llm_provider
+    monkeypatch.setattr(AnthropicProvider, "complete", lambda *args: "OK")
+    firm, headers = office.firm_a.id, auth_headers(office.admin_a)
+    key = "sk-ant-api-test-only-not-a-credential"
+    path = "/system/openai-key"
+    keys.save_openai_api_key(KEY_A, firm)
+    keys.activate_openai_api_key(firm)
+    assert client.put(path, headers=headers, json={"provider":"anthropic","api_key":key}).status_code == 200
+    assert keys.get_openai_api_key(firm) == KEY_A
+    assert client.post(path + "/activate", headers=headers).status_code == 200
+    assert keys.get_openai_api_key(firm) is None and keys.get_claude_api_key(firm) == key
+    assert keys.get_claude_api_key(office.firm_b.id) is None
+    assert keys._read_secret(keys._path("previous", firm), firm) == KEY_A
+    assert isinstance(build_llm_provider("unused", law_firm_id=firm), AnthropicProvider)
+    assert get_chat_provider(law_firm_id=firm).provider == "anthropic"
+    for invalid in ({"api_key":key}, {"provider":"anthropic","api_key":"sk-ant-oat-fake-token"}):
+        response = client.put(path, headers=headers, json=invalid)
+        assert response.status_code == 400 and invalid["api_key"] not in response.text
+
+
+def test_switch_saved_provider_preserves_pending_and_firm_scope(client, office, auth_headers, bureau_keys, monkeypatch):
+    from app.ai.providers.anthropic_provider import AnthropicProvider
+    monkeypatch.setattr(AnthropicProvider, "complete", lambda *args: "OK")
+    firm = office.firm_a.id
+    path = "/system/openai-key"
+    headers = auth_headers(office.admin_a)
+    claude = "sk-ant-api-test-only-provider-choice"
+    for key in (KEY_A, claude):
+        keys.save_openai_api_key(key, firm)
+        keys.activate_openai_api_key(firm)
+    keys.save_openai_api_key(KEY_B, firm)
+    assert client.post(path+"/activate?provider=openai", headers=headers).status_code == 200
+    status = client.get(path, headers=headers).json()
+    assert set(status["available_providers"]) == {"openai", "anthropic"}
+    assert status["active_provider"] == "openai" and status["pending"]
+    assert keys.get_openai_api_key(firm) == KEY_A
+    assert client.post(path+"/activate?provider=anthropic", headers=headers).status_code == 200
+    assert keys.get_claude_api_key(firm) == claude
+    assert client.post(path+"/activate?provider=anthropic", headers=auth_headers(office.admin_b)).status_code == 400
+    assert client.post(path+"/activate?provider=openai", headers=auth_headers(office.lawyer_a1)).status_code == 403

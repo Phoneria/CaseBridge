@@ -2,11 +2,17 @@
 summary - real data pulled from the same services used everywhere else,
 not a separate/duplicated query path.
 """
+import csv
+import io
+from typing import Literal
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_law_firm_id
+from app.api.deps import get_current_law_firm_id, get_current_user
+from app.models.user import User
+from app.services.management_service import audit, commit
 from app.db.session import get_db
 from app.schemas.report import ReportSummary
 from app.services.report_service import ReportService
@@ -26,7 +32,10 @@ def _csv_response(content: str, filename: str) -> PlainTextResponse:
 def export_cases_csv(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
 ):
+    audit(db, actor, law_firm_id, "report.downloaded", "report", law_firm_id, after={"report": "cases"})
+    commit(db)
     return _csv_response(ReportService(db).cases_csv(law_firm_id), "davalar.csv")
 
 
@@ -34,7 +43,10 @@ def export_cases_csv(
 def export_hearings_csv(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
 ):
+    audit(db, actor, law_firm_id, "report.downloaded", "report", law_firm_id, after={"report": "hearings"})
+    commit(db)
     return _csv_response(ReportService(db).hearings_csv(law_firm_id), "durusmalar.csv")
 
 
@@ -42,7 +54,10 @@ def export_hearings_csv(
 def export_tasks_csv(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
 ):
+    audit(db, actor, law_firm_id, "report.downloaded", "report", law_firm_id, after={"report": "tasks"})
+    commit(db)
     return _csv_response(ReportService(db).tasks_csv(law_firm_id), "gorevler.csv")
 
 
@@ -50,7 +65,10 @@ def export_tasks_csv(
 def export_performance_csv(
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
+    actor: User = Depends(get_current_user),
 ):
+    audit(db, actor, law_firm_id, "report.downloaded", "report", law_firm_id, after={"report": "performance"})
+    commit(db)
     return _csv_response(ReportService(db).performance_csv(law_firm_id), "performans.csv")
 
 
@@ -60,3 +78,14 @@ def report_summary(
     db: Session = Depends(get_db),
 ):
     return ReportService(db).summary(law_firm_id)
+
+@router.get("/{kind}/preview", response_model=list[list[str]])
+def preview_report(
+    kind: Literal["cases", "hearings", "tasks", "performance"],
+    law_firm_id: str = Depends(get_current_law_firm_id),
+    db: Session = Depends(get_db),
+):
+    reports = ReportService(db)
+    render = {"cases": reports.cases_csv, "hearings": reports.hearings_csv,
+              "tasks": reports.tasks_csv, "performance": reports.performance_csv}[kind]
+    return list(csv.reader(io.StringIO(render(law_firm_id).removeprefix("\ufeff"), newline="")))

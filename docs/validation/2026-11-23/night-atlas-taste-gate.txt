@@ -1,0 +1,185 @@
+gate: checking web-page/index.html (software); this takes a few minutes on a CPU Chrome
+gate: rounds used up; 60 FAIL open
+  FAIL no-visual        section#gecmis "Kararın öncesine dönün."  [1440, 390]
+       no picture, effect or mock in this section; a feature section needs a visual
+       fix: give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits
+  FAIL no-visual        section#olasilik "Aynı dosya. İki olası yol."  [1440, 390]
+       no picture, effect or mock in this section; a feature section needs a visual
+       fix: give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits
+  FAIL no-visual        section#prova "Argümanı duruşmadan önce deneyin."  [1440, 390]
+       no picture, effect or mock in this section; a feature section needs a visual
+       fix: give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits
+  FAIL text-only        section#buro "Dosyadan büro planına."  [1440, 390]
+       the section is only text: no picture, icon, mock or effect in it (2 sections like it at this width)
+       fix: give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground
+  FAIL text-only        section#urun "Bu örneği geçin. Ürünü görün."  [1440, 390]
+       the closing section is only text: no picture, icon, mock or effect in it (2 sections like it at this width)
+       fix: give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground
+  FAIL button-styles    (one screen)  [1440, 390]
+       5 button styles on one screen: soft, fill #0b2030, outline #36766f ("Sözleşme"); soft, fill #68dfcf ("Demo talep et"); soft, outline #284354 ("Haritayı sola döndür"); soft, fill #262a2a, outline #8e6b40 ("Teslim kaydı");
+       fix: one primary and one secondary button: one shape, one height per size, one label size
+  FAIL button-styles    (the page)  [1440, 390]
+       6 button styles on the page: soft, fill #68dfcf x4 ("Demo talep et"); soft, fill #0b2030, outline #36766f x5 ("Sözleşme"); soft, fill #262a2a, outline #8e6b40 x1 ("Teslim kaydı"); soft, fill #0b2030, outline #586348 x1 (
+       fix: one primary and one secondary button: one shape, one height per size, one label size
+  FAIL copy-headings    section#gecmis > div.wrap > div.section-heading > h2 "Kararın öncesine dönün."  [1440]
+       "Kararın öncesine dönün." names no product, part, place or section (6 headings like it; at most one brand line per page) (and 5 more like it: "Aynı dosya. İki olası yo", "Kişi bazında iş yükü", "Yaklaşan ajanda", "Bu örn
+       fix: name the thing in every heading: the product, a part, the place or a section noun
+  FAIL copy-actions     div#case-map > a.map-node.amber-node "Teslim kaydı"  [1440, 390]
+       11 actions in the hero ("Örnek davayı keşfet", "Sözleşme", "Teslim kaydı", "Kısmi ödeme", "Teslime itiraz", "Duruşma provası", "Büro ve avukat", "Kritik bulgu", "Haritayı sola döndür", "Haritayı sağa döndür", "Görünümü s
+       fix: few actions, one wording: at most 2 in the hero, the main action word for word in nav, hero and close
+  FAIL heading-scale    h3#trial-branch "Kısmi ödeme doğrulanırsa"  [1440]
+       h3 headings in 3 sizes, 18px ("Kişi bazında iş yükü") to 28px (x1.56)
+       fix: size headings by level: the h1 largest, one size per level, each level below the one above
+  FAIL off-grid         ol#timeline > li:nth-of-type(2) > button "18 Eyl 2026 Teslim kaydı Dosyadaki kriti"  [1440]
+       left edge at 98px, 18px off the page margin at 80px (28 elements, like strong)
+       fix: move it onto the page margin, or the column edge its section uses
+  FAIL off-grid         div.wrap > div.faq > details:nth-of-type(1) > summary "Bu sayfa gerçek bir davayı mı anali  [1440, 390]
+       left edge at 97px, 17px off the page margin at 80px (28 elements, like h2); 2 more in this section off the grid too (summary at 97px, summary at 97px)
+       fix: move it onto the page margin, or the column edge its section uses
+  FAIL motion-layer     html[data-motion]  [1440]
+       the page marks <html data-motion> but motion.css is not loaded: buttons, links, cards and photos answer nothing on hover
+       fix: link assets/motion/motion.css after cards.css and keep data-motion on <html> (both, or neither)
+  FAIL empty-area       footer#demo "Bir sonraki dosyayı birlikte inceleyelim"  [1440]
+       52% of the section is empty: 80px of empty rows between its content, 38% beside content that covers under half the container, in its 592px of rows (WARN over 35%, FAIL over 50%)
+       fix: fill the section: a picture or a second column beside the words, or more of its own content; the section stays one or two screens tall (T-height)
+  FAIL hero-enter       section#top  [1440]
+       the hero does not enter on load: no head line setting html.m-enter (motion.md, The hero's entrance)
+       fix: put data-enter on the hero <section> and keep the head line from starter.html that sets html.m-enter
+  FAIL moment-none      (the page)  [1440]
+       a software page (--type) deals no moment: every kind carries one, two on a long page (moments.md)
+       fix: deal one (moments.mjs pick --page software) and mount it in its own section
+  FAIL section-height (screen-height) section#urun "Bu örneği geçin. Ürünü görün.Buradaki hi"  [1440]
+       the section is 1296px tall (1.4 screens), 396px over one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)
+       fix: set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit
+  FAIL section-height   footer#demo "Bir sonraki dosyayı birlikte inceleyelim"  [1440]
+       the section is 724px tall (0.8 screens), 176px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)
+       fix: set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit
+  FAIL section-height (screen-height) section#gecmis "Kararın öncesine dönün.Bir dosya yalnız "  [1440]
+       the section is 983px tall (1.1 screens), 83px over one screen (900px): every section after the hero is one screen or two, 2px either way (and 3 more like it: "Argümanı duruşmadan önce", "Dosyadan büro planına.Po", "Aynı 
+       fix: set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit
+  FAIL section-height (screen-short, screen-height) section#prova "Argümanı duruşmadan önce deneyin.Seçtiği"  [1440]
+       the section starts at 2794px, 94px below the screen grid (3 x 900px): sections start on whole screens (SR-2)
+       fix: make every section above it exactly one or two screens tall, so this one starts on a whole screen
+  FAIL section-height (screen-short) section#top "Bu dava hangi yöne gidebilir?Geçmiş dosy"  [1440]
+       the section starts at 89px, 89px below the screen grid (0 x 900px): sections start on whole screens (and 3 more like it: "Aynı dosya. İki olası yo", "Bu örneği geçin. Ürünü g", "Dosyadan büro planına.Po") (SR-2)
+       fix: make every section above it exactly one or two screens tall, so this one starts on a whole screen
+  FAIL section-air      section#urun > div.wrap > div.product-links "01Dava belgeleri, tarihli gelişmeler ve "  [1440]
+       a top border across 100% of the container, between the section's content: sections and their parts are told apart by air and ground, not lines (SR-3)
+       fix: take the rule out: sections and their parts are parted by their ground and the air between them
+  FAIL one-section (neighbour) section#urun "Bu örneği geçin. Ürünü görün.Buradaki hi"  [1440, 390]
+       the screen at scroll 5400px (stride 6) shows 363px of section 6 and the content of 2 sections, over 24px each beside section 7: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)
+       fix: make each section exactly one screen or two, so a screen shows one section and no neighbour peeks
+  FAIL one-section (neighbour) section#gecmis "Kararın öncesine dönün.Bir dosya yalnız "  [1440, 390]
+       the screen at scroll 89px (the top of section 1) shows 88px of section 2 beside section 1: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)
+       fix: make each section exactly one screen or two, so a screen shows one section and no neighbour peeks
+  FAIL one-section (neighbour) section#buro > div.wrap > div.office-surface "Kurgu büroKıyı Hukuk · kurguYaka Hukuk ·"  [1440, 390]
+       a band: a box 89% of the section wide on a ground of its own that holds only text: the section's own ground is the band (SR-4)
+       fix: put every block of <main> in a <section>, and give a band its own section instead of a ground inside one
+  FAIL container-edges  a.skip-link "İçeriğe geç"  [1440]
+       a <a> at the top of the page, outside header.nav, main, footer.closing and nav.actionbar (SR-6)
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  header.site-header "Menüyü aç Dosya geçmişiOlasılık ağacıDur"  [1440]
+       a <header> at the top of the page, outside header.nav, main, footer.closing and nav.actionbar (SR-6)
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  p#journey-status  [1440]
+       a <p> at the top of the page, outside header.nav, main, footer.closing and nav.actionbar (and 2 more like it: "Bu dava hangi yöne gideb", "Bir sonraki dosyayı birl") (SR-6)
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  div.wrap > div.footer-row > div:nth-of-type(2) > a:nth-of-type(4) "Yol haritası"  [1440]
+       1 text block starts on a left line at x 1251, 1171px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (SR-6)
+       fix: start the text on the container's left, or on the one split line every split shares
+  FAIL container-edges  h3#document-title "Teslim belgesi"  [1440]
+       6 text blocks start on a left line at x 757, 677px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (also "Fatura F-104’e bağlı ekipmanın t", "İnceleme notu: imzalı a
+       fix: start the text on the container's left, or on the one split line every split shares
+  FAIL container-edges  section#olasilik > div.wrap > p.honest-note "Sayısal olasılık hesaplanmadı. Dallar, b"  [1440]
+       "Sayısal olasılık hesaplanmadı. D" is set centred across 640px, over half the 1280px container: text that wide is set left (SR-6)
+       fix: set the text left (text-align: start)
+  FAIL container-edges  div#case-map > canvas  [1440]
+       a <canvas> over half the container wide runs 652-1360px, not on the container's lines at 80-1360px (SR-6)
+       fix: run the picture or box from the container's left line to its right line, or put it in a row or a split
+  FAIL container-edges  div#case-map > svg.map-leaders  [1440]
+       a <svg> over half the container wide runs 652-1360px, not on the container's lines at 80-1360px (and 3 more like it: "Bu sayfa gerçek bir dava", "Dallardaki sonuçlar bir ", "Demo talebi nasıl ilerli") (SR-6)
+       fix: run the picture or box from the container's left line to its right line, or put it in a row or a split
+  FAIL row-lines        section#buro > div.wrap > div.office-surface > div.office-toolbar "Kurgu büroKıyı Hukuk ·   [1440]
+       a row of 2 items: its first item starts at 116px, the container's left line at 80px; its last item ends at 843px, the container's right line at 1360px (2px either way) (SR-7)
+       fix: start the row's first item on the container's left line and end its last on the right line, every item one height
+  FAIL split-pair       section#prova > div.wrap > div.rehearsal-layout "Hazırlık provası · kurguKısmi ödeme doğr"  [1440]
+       the two columns of the split start 110px apart at the top (centred on each other): a split's columns are top-aligned, 8px either way (SR-8)
+       fix: top-align both columns of the split (align-items: start)
+  FAIL split-pair       section#gecmis > div.wrap > div.section-heading "Kararın öncesine dönün.Bir dosya yalnız "  [1440]
+       the two columns of the split start 10px apart at the top: a split's columns are top-aligned, 8px either way (SR-8)
+       fix: top-align both columns of the split (align-items: start)
+  FAIL split-pair       section#prova > div.wrap > div.section-heading "Argümanı duruşmadan önce deneyin.Seçtiği"  [1440]
+       the two columns of the split start 10px apart at the top: a split's columns are top-aligned, 8px either way (and 1 more like it: "Bu örneği geçin. Ürünü g") (SR-8)
+       fix: top-align both columns of the split (align-items: start)
+  FAIL split-pair       footer#demo > div.wrap > div.close-row "Bir sonraki dosyayı birlikte inceleyelim"  [1440]
+       the split's columns are off the page's one pair of lines: its right column starts at x 758, the first split's at 755; its right column starts at x 758, on none of the split lines 623 (k=5), 732 (k=6), 841 (k=7) (SR-8)
+       fix: start every split's right column on one shared line (wrap.left + k x (width + 24) / 12, k 5, 6 or 7; 6 on a place page) and end the left one 24px before it
+  FAIL card-visual      ol#timeline "08 Eyl 2026 Sözleşme İşlemin başlangıcı "  [390]
+       4 cards hold only text: no picture, icon, UI fragment or effect in any of them
+       fix: give the cards a visual: an inset panel with a UI fragment, a photograph or real icons
+  FAIL heading-scale    h3#document-title "Teslim belgesi"  [390]
+       h3 headings in 4 sizes, 18px ("Kişi bazında iş yükü") to 28.8px (x1.60)
+       fix: size headings by level: the h1 largest, one size per level, each level below the one above
+  FAIL off-grid         div#case-map > a.map-node:nth-of-type(2) "Sözleşme"  [390]
+       left edge at 36.5px, 10.5px off a common edge of its section at 47px (4 elements); 2 more in this section off the grid too (a.map-node:nth-of-type(4) at 225.5px, a.map-node:nth-of-type(6) at 252px)
+       fix: move it onto the page margin, or the column edge its section uses
+  FAIL off-grid         section#olasilik > div.wrap > div.branch-choices > button.branch-choice:nth-of-type(1) "Kı  [390]
+       left edge at 42px, 22px off the page margin at 20px (60 elements, like span); 1 more in this section off the grid too (button.branch-choice:nth-of-type(2) at 42px)
+       fix: move it onto the page margin, or the column edge its section uses
+  FAIL edge-left        #top div.map-region "Alacak dosyası · kurguAda Atölye"  [1440]
+       starts at x 652.4; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #top p.map-help "Haritayı yatay sürükleyin veya y"  [1440]
+       starts at x 784.1; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #gecmis p "Bir dosya yalnız sonuçtan ibaret"  [1440]
+       starts at x 755; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #gecmis p "Teslim alan kişi ve yetkisi beli"  [1440]
+       starts at x 719.3; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #olasilik p "Bir varsayımı değiştirin; araştı"  [1440]
+       starts at x 755; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #olasilik p "75.000 TL kurgu bakiye üzerinden"  [1440]
+       starts at x 310; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #prova p "Seçtiğiniz dalı takip eden soruy"  [1440]
+       starts at x 755; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #prova p.question "Karşı taraf 45.000 TL ödediğini "  [1440]
+       starts at x 652; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #buro p "Portföyü, yaklaşan işleri ve kiş"  [1440]
+       starts at x 755; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #buro h3 "Kişi bazında iş yükü"  [1440]
+       starts at x 117; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #buro p "Henüz planlanmadı"  [1440]
+       starts at x 117; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #buro h3 "Yaklaşan ajanda"  [1440]
+       starts at x 752.5; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #buro ol "24Kasım 2026Dosya belgesi incele"  [1440]
+       starts at x 752.5; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL edge-left        #urun p "Buradaki hikâye etkileşimli bir "  [1440]
+       starts at x 755; the lines are 80 and the column starts
+       fix: start it on the .wrap left line
+  FAIL screen-height    #olasilik section.paths.section "Aynı dosya. İki olası yol.Bir va"  [1440]
+       909px, 1.01 screens; a section is exactly one or two (--h)
+       fix: make the section exactly one or two screens (--h: 1 or 2)
+  FAIL neighbour-ground #prova section.rehearsal.section "Argümanı duruşmadan önce deneyin"  [1440]
+       framed, 78px of #buro section.office.section "Dosyadan büro planına.Portföyü, "'s ground shows
+       fix: end the ground with the section
+  FAIL screen-height    #buro section.office.section "Dosyadan büro planına.Portföyü, "  [1440]
+       940px, 1.04 screens; a section is exactly one or two (--h)
+       fix: make the section exactly one or two screens (--h: 1 or 2)
+  FAIL hero-fold        #top section.hero "Bu dava hangi yöne gidebilir?Geç"  [1440, 390]
+       starts at y 89, not under the nav
+       fix: the hero fills the first screen alone, its button inside it
+  26 WARN (not blocking), first: copy-buttons header.site-header > div.wrap.header-inn; copy-actions (the page); copy-actions section#top > div.wrap.hero-layout > div; copy-actions div#case-map > a.map-node:nth-of-type(4); copy-actions div#case-map > a.map-node:nth-of-type(6)
+Stop fixing: put these open FAILs and the waivers in your report, then finish.
+GATE: OPEN 60 (rounds used up)

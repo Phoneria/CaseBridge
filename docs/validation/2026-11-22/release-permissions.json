@@ -1,0 +1,13 @@
+{
+  "proje-agent_code_write_denied": true,
+  "proje-agent_general_sudo_denied": true,
+  "proje-agent_docker_denied": true,
+  "cb-release_code_write_denied": true,
+  "cb-release_general_sudo_denied": true,
+  "cb-release_docker_denied": true,
+  "restricted_status_allowed": true,
+  "non_main_rejected": true,
+  "unverified_rollback_rejected": true,
+  "rejected_operations_did_not_restart_services": true,
+  "existing_admin_access_preserved": true
+}

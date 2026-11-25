@@ -56,3 +56,6 @@ data/import/*
 # Mail files written by EMAIL_BACKEND=file
 backend/var/
 /var/
+
+# Also ignore dependency symlinks in isolated worktrees.
+node_modules

@@ -1,0 +1,45 @@
+{
+  "rates": [
+    [
+      "kira",
+      66.67
+    ],
+    [
+      "is_hukuku",
+      33.33
+    ],
+    [
+      "ticaret_hukuku",
+      60
+    ],
+    [
+      "sozlesme",
+      25
+    ],
+    [
+      "icra",
+      33.33
+    ]
+  ],
+  "results": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "drag": true,
+      "stageAndDetailsPersist": true,
+      "caseDecisionAndTree": true,
+      "reportPreviews": 4
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "drag": false,
+      "stageAndDetailsPersist": true,
+      "caseDecisionAndTree": true,
+      "reportPreviews": 4
+    }
+  ],
+  "appVersion": "v.0.25",
+  "applicationCommit": "ec61b3e",
+  "environment": "Disposable local SQLite bureau, real FastAPI and production Next.js build, Chromium."
+}

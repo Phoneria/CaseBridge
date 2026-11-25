@@ -1,5 +1,6 @@
 {
-  "version": "v.0.40",
-  "date": "2026-11-15",
-  "scope": "marketing-website"
+  "version": "v.0.68",
+  "date": "2026-11-24",
+  "scope": "marketing-website",
+  "product_gallery": "disabled"
 }

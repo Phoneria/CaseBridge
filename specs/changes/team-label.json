@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/011-team-roles/spec.md#FR-010"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_team_roles.py::TeamRolesAcceptance.test_five_members_have_nonconflicting_roles_and_public_professional_bios"
+      ],
+      "reason": "User-requested label change: 'CaseBridge’de' -> 'CaseBridge' on team cards; marketing-only v.0.65."
+    }
+  ]
+}

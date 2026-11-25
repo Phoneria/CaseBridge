@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+from urllib.parse import quote
+
+from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
 from app.api.case_access import require_case_id_writable, require_case_writable
@@ -11,7 +13,7 @@ from app.models.user import User
 from app.schemas.document import DocumentOut, DocumentWithCaseOut
 from app.services.audit import record_audit
 from app.services.case_service import CaseService
-from app.services.document_service import DocumentService
+from app.services.document_service import DocumentService, media_type_for
 
 cases_router = APIRouter(prefix="/cases", tags=["documents"])
 documents_router = APIRouter(prefix="/documents", tags=["documents"])
@@ -45,6 +47,19 @@ async def upload_document(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File exceeds the {settings.max_upload_size_bytes} byte upload limit.",
         )
+    from app.models.management import FirmProfile
+    from app.models.document import Document
+    profile = db.query(FirmProfile).filter(FirmProfile.law_firm_id == law_firm_id).with_for_update().first()
+    if profile and profile.data.get("storage_limit_mb"):
+        total = 0
+        service = DocumentService(db)
+        for stored in db.query(Document).filter(Document.law_firm_id == law_firm_id).all():
+            path = service.resolve_download_path(stored)
+            if path:
+                from pathlib import Path
+                total += Path(path).stat().st_size
+        if total + len(raw_bytes) > profile.data["storage_limit_mb"] * 1024 * 1024:
+            raise HTTPException(409, "Büronun depolama limiti dolu.")
     document = DocumentService(db).upload(
         case_id=case_id,
         law_firm_id=law_firm_id,
@@ -83,28 +98,34 @@ def list_all_documents(
     ]
 
 
-_MEDIA_TYPES = {
-    "pdf": "application/pdf",
-    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "txt": "text/plain; charset=utf-8",
-}
-
-
 @documents_router.get("/{document_id}/download")
 def download_document(
     document_id: str,
     law_firm_id: str = Depends(get_current_law_firm_id),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = DocumentService(db)
     document = service.get(document_id, law_firm_id)
+    from app.services.management_service import audit, commit
+    if document is not None and document.storage_path == "demo://dossier/" + document.id:
+        from app.services.dossier_pdf import render_dossier
+        content = render_dossier(document.extracted_text)
+        audit(db, current_user, law_firm_id, "document.downloaded", "document", document.id)
+        commit(db)
+        return Response(content=content, media_type="application/pdf", headers={
+            "Content-Disposition": "attachment; filename*=UTF-8''" + quote(document.filename, safe=""),
+        })
     path = service.resolve_download_path(document) if document is not None else None
     if path is None:
         # Same answer for "not yours" and "file gone" - no information leak.
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    from app.services.management_service import audit, commit
+    audit(db, current_user, law_firm_id, "document.downloaded", "document", document.id)
+    commit(db)
     return FileResponse(
         path,
-        media_type=_MEDIA_TYPES.get(document.file_type.value, "application/octet-stream"),
+        media_type=media_type_for(document),
         filename=document.filename,
     )
 

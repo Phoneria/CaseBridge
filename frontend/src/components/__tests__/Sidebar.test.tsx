@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 let pathname = "/dashboard";
 vi.mock("next/navigation", () => ({
@@ -10,6 +10,7 @@ vi.mock("@/lib/api", () => ({
   getAiConnectivity: vi.fn(() => new Promise(() => {})),
 }));
 
+import { AI_NAVIGATION } from "@/lib/aiNavigation";
 import { Sidebar } from "@/components/Sidebar";
 
 beforeEach(() => {
@@ -17,54 +18,46 @@ beforeEach(() => {
 });
 
 describe("Sidebar", () => {
+  it("keeps scoped accounts inside their own workspace", () => {
+    render(<Sidebar role="lawyer" restricted />);
+    expect(screen.getByRole("link", { name: "Çalışma Alanım" })).toHaveAttribute("href", "/calisma-alanim");
+    expect(screen.queryByRole("group", {name:"CaseBridge AI"})).not.toBeInTheDocument();
+    for (const label of ["Davalar", "Ayarlar", "Büro Yönetimi", "Dosya Analizi"]) expect(screen.queryByRole("link", {name:label})).not.toBeInTheDocument();
+  });
   it("renders the main navigation without the old Simülasyonlar item", () => {
     render(<Sidebar />);
-    for (const label of ["Dashboard", "Davalar", "Müvekkiller", "Takvim", "Görevler", "Belgeler", "Analitik", "Raporlar", "Ayarlar"]) {
+    for (const label of ["Genel Bakış", "Davalar", "Müvekkiller", "Takvim", "Görevler", "Analitik", "Raporlar", "Ayarlar"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
+    for (const label of ["Belgeler", "Emsal Kararlar"]) expect(screen.queryByRole("link", { name: label })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Müvekkiller" })).toHaveAttribute("href", "/muvekkiller");
     expect(screen.queryByText("Simülasyonlar")).not.toBeInTheDocument();
   });
 
-  it("renders the CaseBridge AI block", () => {
-    render(<Sidebar />);
-    expect(screen.getByRole("group", { name: "CaseBridge AI" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("href", "/ai");
-    expect(screen.getByRole("link", { name: "Dosya Analizi" })).toHaveAttribute("href", "/ai/analiz");
-    expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("href", "/ai/durusma");
-    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("href", "/ai/sohbet");
+  it("shows every authorized AI tool in the restored expanded blue panel", () => {
+    render(<Sidebar role="admin" />);
+    const group=screen.getByRole("group", {name:"CaseBridge AI"});
+    expect(within(group).getAllByRole("link")).toHaveLength(6);
+    for(const item of AI_NAVIGATION) expect(within(group).getByRole("link",{name:item.label})).toHaveAttribute("href",item.href);
+    expect(within(group).queryByRole("button")).not.toBeInTheDocument();
+    expect(group.querySelector("details")).toBeNull();
+    expect(group.className).toContain("bg-navy-950");
+    expect(group.querySelector(".bg-ai-glow")).not.toBeNull();
+    expect(group.className).not.toMatch(/ring-\d/);
   });
 
   it("marks the current route as active", () => {
     render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Genel Bakış" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("marks AI routes as active, including session pages", () => {
-    pathname = "/ai/durusma/oturum/x1";
-    const { unmount } = render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Canlı Duruşma" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).not.toHaveAttribute("aria-current");
-    unmount();
-
-    pathname = "/ai";
-    render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "CaseBridge AI" })).toHaveAttribute("aria-current", "page");
-  });
-
-  it("marks the chat route as active with a conversation open", () => {
-    pathname = "/ai/sohbet";
-    render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "Hukuk Asistanı" })).toHaveAttribute("aria-current", "page");
-  });
-
-  it("renders the AI connection indicator", () => {
-    render(<Sidebar />);
-    const indicator = screen.getByRole("button", { name: /AI kontrol ediliyor/ });
-    const settings = screen.getByRole("link", { name: "Ayarlar" });
-
-    expect(indicator).toBeInTheDocument();
-    expect(indicator.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  it.each(["/ai/anonimlestirme", "/ai/benzer-davalar", "/ai/karsi-taraf", "/ai/harita", "/ai/sohbet", "/ai/durusma/oturum/x1", "/ai/olasilik"])("marks one matching AI tool on %s", path => {
+    pathname = path; render(<Sidebar />);
+    const group=screen.getByRole("group", {name:"CaseBridge AI"});
+    const active=group.querySelectorAll('a[aria-current="page"]');
+    expect(active).toHaveLength(1);
+    expect(active[0]).toHaveAttribute("href",path.startsWith("/ai/durusma/") || path === "/ai/karsi-taraf" ? "/ai/durusma" : path === "/ai/harita" ? "/ai/olasilik" : path);
+    expect(screen.queryByRole("button", {name:/AI kontrol/})).not.toBeInTheDocument();
   });
 
   it("renders the CaseBridge brand name", () => {

@@ -15,6 +15,7 @@ const updateCase = vi.fn();
 const unarchiveCase = vi.fn();
 
 vi.mock("@/lib/api", () => ({
+  getSimilarCases: () => Promise.resolve([]),
   getCase: (...args: unknown[]) => getCase(...args),
   getMe: (...args: unknown[]) => getMe(...args),
   listSimulations: (...args: unknown[]) => listSimulations(...args),

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/assets/night-atlas/OFL.txt",
+        "web-page/assets/night-atlas/manrope-latin-ext-v23.woff2",
+        "web-page/assets/night-atlas/manrope-latin-v23.woff2",
+        "web-page/assets/night-atlas/share.jpg",
+        "web-page/index.html",
+        "web-page/night-atlas-map.js",
+        "web-page/night-atlas-model.mjs",
+        "web-page/night-atlas.css",
+        "web-page/night-atlas.js",
+        "web-page/team.html",
+        "web-page/website-version.json"
+      ],
+      "requirements": [
+        "specs/015-night-atlas/spec.md#FR-001",
+        "specs/015-night-atlas/spec.md#FR-002",
+        "specs/015-night-atlas/spec.md#FR-003",
+        "specs/015-night-atlas/spec.md#FR-004",
+        "specs/015-night-atlas/spec.md#FR-005"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_night_atlas.py::NightAtlas.test_fictional_journey_model",
+        "scripts/tests/test_night_atlas.py::NightAtlas.test_static_resources_and_real_conversion",
+        "scripts/tests/test_team_roles.py::TeamRolesAcceptance.test_five_members_have_nonconflicting_roles_and_public_professional_bios"
+      ],
+      "reason": "Approved original Night Atlas marketing experience; fictional state model and genuine 3D graph, real booking and retained professional team; no application behavior changes."
+    },
+    {
+      "files": [
+        "scripts/versioned-gallery.py"
+      ],
+      "requirements": [
+        "specs/015-night-atlas/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_versioned_gallery.py::VersionedGalleryTests.test_disabled_manifest_prevents_network_capture_or_publication"
+      ],
+      "reason": "Prevent retired screenshot gallery automation from capturing or publishing over the explicitly approved screenshot-free homepage."
+    }
+  ]
+}

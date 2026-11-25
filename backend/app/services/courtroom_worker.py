@@ -12,6 +12,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.ai.subagent.routing import build_job_provider
 from app.ai.errors import AIProviderConfigError, AIProviderError, AIProviderTimeoutError, AIResponseValidationError
 from app.ai.providers.base import LLMProvider
 from app.db.session import SessionLocal
@@ -33,7 +34,7 @@ def process_one_pending_courtroom_turn(
     service = CourtroomService(db)
     try:
         if provider_factory is not None:
-            provider = provider_factory(law_firm_id=session.law_firm_id)
+            provider = build_job_provider(provider_factory, session.law_firm_id, session.user_id)
         return service.process_pending_turn(session, provider)
     except CourtroomConflictError:
         db.rollback()

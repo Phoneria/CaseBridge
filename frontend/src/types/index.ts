@@ -1,4 +1,4 @@
-export type CaseType = "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
+export type CaseType = "ceza" | "is_hukuku" | "ticaret_hukuku" | "sozlesme" | "kira" | "icra" | "diger";
 export type CaseStatus = "devam_eden" | "durusma_bekleyen" | "karar_bekleyen" | "kapali";
 export type CaseOutcome = "ongoing" | "won" | "lost" | "settled";
 /** The statuses a case can be edited between; "kapali" is reached only by closing. */
@@ -144,6 +144,8 @@ export interface CaseIntakeResult {
   draft: CaseIntakeDraft;
   truncated: boolean;
   source_chars: number;
+  /** Exactly the text the AI read (the first part of a long document). */
+  source_text: string;
 }
 
 export interface CaseEvent {
@@ -164,7 +166,13 @@ export interface CaseDetail extends Case {
 
 export type TaskStatus = "pending" | "completed";
 
+export type TaskStage = "backlog" | "todo" | "in_progress" | "in_review" | "done";
+export type TaskPriority = "low" | "normal" | "high" | "urgent";
+
 export interface Task {
+  assignee_name?: string | null;
+  stage?: TaskStage;
+  priority?: TaskPriority;
   id: string;
   case_id: string;
   title: string;
@@ -319,6 +327,9 @@ export interface AppUser {
   is_active: boolean;
   /** CaseBridge team member who manages customer firms (/platform). */
   is_platform_admin?: boolean;
+  workspace_position?: string | null;
+  /** Admin assignment endpoint: explicit sample-only allowlist; absent/null for ordinary lawyers. */
+  demo_case_ids?: string[] | null;
 }
 
 export type UserStatus = "pending" | "active" | "inactive";
@@ -347,6 +358,8 @@ export interface PlatformAdmin {
   id: string;
   full_name: string;
   email: string;
+  /** "admin" or "lawyer"; absent in data from before v.0.54. */
+  role?: UserRole;
   status: UserStatus;
   invited_at: string | null;
 }
@@ -360,6 +373,8 @@ export interface PlatformFirm {
   suspended_at: string | null;
   active_user_count: number;
   admins: PlatformAdmin[];
+  /** The firm's own lawyers (never scoped client/expert users). */
+  lawyers?: PlatformAdmin[];
 }
 
 export interface PlatformFirmPayload {
@@ -378,6 +393,8 @@ export interface PlatformFirmCreated {
 export interface PlatformAdminPayload {
   full_name: string;
   email: string;
+  /** Defaults to "admin" on the server. */
+  role?: UserRole;
 }
 
 export interface PlatformAdminInvite {
@@ -397,6 +414,7 @@ export type ManagedUserUpdate = Partial<ManagedUserPayload>;
 export interface UserWorkload {
   open_cases: { id: string; case_number: string; case_name: string }[];
   pending_tasks: { id: string; title: string; case_name: string }[];
+  management_work?: { id: string; title: string; case_name: string }[];
   precedents_reviewing: number;
   /** Calendar events assigned to the user that start today or later. */
   upcoming_events: number;
@@ -455,7 +473,7 @@ export interface DocumentItem {
   id: string;
   case_id: string;
   filename: string;
-  file_type: "pdf" | "docx" | "txt";
+  file_type: "pdf" | "docx" | "txt" | "udf";
   extracted_text: string | null;
   uploaded_at: string;
 }
@@ -702,6 +720,8 @@ export interface ChatMessage {
   /** True when a complete reply was cut off by the level's length limit. */
   truncated?: boolean | null;
   feedback: ChatFeedbackValue | null;
+  /** Answers given with the CaseBridge AI data tools: the records they used. */
+  sources?: ChatSource[] | null;
   created_at: string;
 }
 
@@ -715,10 +735,26 @@ export interface ChatConversation extends ChatConversationSummary {
   messages: ChatMessage[];
 }
 
+/** A record the CaseBridge AI answer used (data tools); href is an app path. */
+export interface ChatSource {
+  kind: "case" | "document" | "precedent" | "client" | "calendar";
+  id: string;
+  label: string;
+  href: string;
+}
+
+/** Page context the floating assistant sends with a data-tools question. */
+export interface ChatPageContext {
+  route: string;
+  case_id?: string | null;
+}
+
 export type ChatStreamEvent =
   | { type: "start"; user_message: ChatMessage; assistant_message_id: string }
+  | { type: "tool"; name: string; status: "start" | "done"; count?: number }
+  | { type: "sources"; sources: ChatSource[] }
   | { type: "delta"; text: string }
-  | { type: "done"; message: ChatMessage | null }
+  | { type: "done"; message: ChatMessage | null; sources?: ChatSource[] }
   | { type: "error"; message: string };
 
 export type ClientType = "person" | "company";
@@ -778,4 +814,157 @@ export interface ClientPayload {
   email: string | null;
   address: string | null;
   notes: string | null;
+}
+
+/** GET /cases/{id}/similar and POST /similar-cases/search (stage 1, no AI). */
+export interface SimilarCase {
+  case_id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  status: CaseStatus;
+  outcome: CaseOutcome;
+  decision_date: string | null;
+  duration_days: number | null;
+  duration_ongoing: boolean;
+  assigned_lawyer_name: string | null;
+  is_precedent: boolean;
+  score: number;
+  reasons: string[];
+}
+
+export interface TextHighlight {
+  start: number;
+  end: number;
+}
+
+export interface PassagePair {
+  case_label: string;
+  case_text: string;
+  case_highlights: TextHighlight[];
+  precedent_label: string;
+  precedent_text: string;
+  precedent_highlights: TextHighlight[];
+}
+
+export interface SimilarPrecedent {
+  precedent_id: string;
+  case_number: string;
+  case_name: string;
+  case_type: CaseType;
+  court: string | null;
+  outcome: CaseOutcome;
+  decision_date: string | null;
+  score: number;
+  text_score: number;
+  linked_to_case: boolean;
+  explanation: {
+    shared_terms: string[];
+    shared_statutes: string[];
+    matching_fields: string[];
+    passages: PassagePair[];
+  };
+}
+
+export interface ScoreComponent {
+  key: "text" | "case_type" | "court" | "statutes";
+  label: string;
+  points: number;
+  max_points: number;
+}
+
+export interface PrecedentTimelineEvent {
+  event_date: string;
+  event_type: CaseEventType;
+  title: string;
+}
+
+export interface KeyDifference {
+  label: string;
+  case_value: string;
+  precedent_value: string;
+}
+
+/** Stored facts of the case or a precedent, as compared side by side. */
+export interface SimilarityFacts {
+  case_type: CaseType;
+  court: string | null;
+  court_type: string | null;
+  client_role: string | null;
+  case_value: number | null;
+  opening_date: string | null;
+  decision_date: string | null;
+  duration_months: number | null;
+  outcome: CaseOutcome;
+  evidence: string[];
+  has_expert_report: boolean;
+  document_count: number;
+  statutes: string[];
+}
+
+export interface AIExplanation {
+  status: "ai" | "fallback";
+  text: string;
+  notice: string | null;
+}
+
+export interface SimilarPrecedentDetail extends SimilarPrecedent {
+  case_value: number | null;
+  duration_months: number | null;
+  score_breakdown: ScoreComponent[];
+  key_differences: KeyDifference[];
+  timeline: PrecedentTimelineEvent[];
+  facts: SimilarityFacts;
+  ai_explanation: AIExplanation | null;
+}
+
+export interface SimilarPrecedentsSummary {
+  count: number;
+  outcomes: Partial<Record<CaseOutcome, number>>;
+  avg_duration_months: number | null;
+  duration_count: number;
+  avg_case_value: number | null;
+  value_count: number;
+  available_courts: string[];
+  excluded_signals: string[];
+}
+
+export interface SimilarPrecedentsResponse {
+  summary: SimilarPrecedentsSummary;
+  source: SimilarityFacts;
+  items: SimilarPrecedentDetail[];
+}
+
+export interface SimilarPrecedentsQuery {
+  limit?: number;
+  outcome?: CaseOutcome[];
+  court?: string | null;
+  minScore?: number;
+  explain?: boolean;
+  precedentId?: string;
+}
+
+/** Platform admin: the owner's Claude setup-token (personal use; never the value). */
+export interface ClaudeSubagentUser {
+  id: string;
+  full_name: string;
+  email: string;
+  firm_name: string;
+  is_active: boolean;
+  is_platform_admin: boolean;
+}
+
+export interface ClaudeSubagentSettings {
+  set: boolean;
+  last4: string | null;
+  updated_at: string | null;
+  status: "none" | "unknown" | "ok" | "invalid" | "error";
+  checked_at: string | null;
+  users: ClaudeSubagentUser[];
+}
+
+export interface ClaudeSubagentTestResult {
+  ok: boolean;
+  message: string;
+  status: ClaudeSubagentSettings["status"];
 }
