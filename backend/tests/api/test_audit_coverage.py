@@ -39,6 +39,21 @@ AUDITED = {
     ("POST", "/courtroom-sessions/{session_id}/abandon"): "ai.courtroom_abandoned",
     ("POST", "/chat/conversations/{conversation_id}/messages"): "ai.chat_message",
     ("PUT", "/chat/messages/{message_id}/feedback"): "ai.chat_feedback",
+    ("POST", "/cases/{case_id}/decision"): "case.decision_recorded",
+    ("PUT", "/cases/{case_id}/precedents/{precedent_id}"): "case.precedent_linked",
+    ("DELETE", "/cases/{case_id}/precedents/{precedent_id}"): "case.precedent_unlinked",
+    ("POST", "/legal-lab/counter-analysis"): "ai.counter_analysis",
+    ("POST", "/legal-lab/trial/beat"): "ai.trial_beat",
+    ("POST", "/legal-lab/trial/guide"): "ai.trial_guide",
+    ("POST", "/legal-lab/trial/ask"): "ai.trial_ask",
+    ("POST", "/sufle/analyze"): "ai.sufle_analysis",
+    ("POST", "/bureau/records"): "record.created",
+    ("PUT", "/bureau/records/{record_id}"): "record.updated",
+    ("POST", "/bureau/records/{record_id}/trash"): "record.trashed",
+    ("POST", "/bureau/records/{record_id}/restore"): "record.restored",
+    ("POST", "/bureau/workspace/records/{record_id}/decision"): "record.updated",
+    ("POST", "/bureau/workspace/records/{record_id}/step"): "record.updated",
+    ("POST", "/bureau/workspace/tasks/{task_id}/complete"): "task.updated",
 }
 
 NOT_AUDITED = {
@@ -55,6 +70,18 @@ NOT_AUDITED = {
     ("POST", "/chat/conversations"), ("PATCH", "/chat/conversations/{conversation_id}"),
     ("DELETE", "/chat/conversations/{conversation_id}"),
     ("POST", "/notifications/test-email"), ("POST", "/system/openai-key/activate"), ("PUT", "/system/openai-key"),
+    # Bureau administration: people, access, budgets and work transfers (ManagementAudit keeps those for the firm).
+    ("POST", "/admin/demo-template/remove"), ("POST", "/bureau/access/invite"), ("PUT", "/bureau/access/{user_id}"),
+    ("PUT", "/bureau/ai-budget"), ("POST", "/bureau/transfer/{user_id}"),
+    ("POST", "/bureau/workspace/transfers/{transfer_id}/accept"),
+    # Platform operations.
+    ("PUT", "/platform/claude-subagent/token"), ("DELETE", "/platform/claude-subagent/token"),
+    ("POST", "/platform/claude-subagent/test"), ("PUT", "/platform/claude-subagent/users"),
+    ("PUT", "/platform/firms/{firm_id}/profile"), ("POST", "/platform/firms/{firm_id}/support"),
+    ("PUT", "/platform/firms/{firm_id}/support/{record_id}"),
+    # Stateless helpers and reads sent as POST; the public site chat has no user or firm.
+    ("POST", "/privacy/anonymize"), ("POST", "/privacy/extract-text"), ("POST", "/similar-cases/search"),
+    ("POST", "/sufle/transcribe"), ("POST", "/public/site-chat"),
 }
 
 # Routes that can record a second action besides the one in AUDITED.

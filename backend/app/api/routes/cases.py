@@ -203,15 +203,20 @@ def link_precedent(case_id: str, precedent_id: str, current_user: User = Depends
     fields = dict(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id)
     if db.query(CasePrecedentLink).filter_by(**fields).first() is None:
         db.add(CasePrecedentLink(**fields))
-    db.commit()
+        db.commit()
+        record_audit(db, current_user, "case.precedent_linked", case=case, target_type="precedent", target_id=precedent_id)
+    else:
+        db.commit()
 
 
 @router.delete("/{case_id}/precedents/{precedent_id}", status_code=204)
 def unlink_precedent(case_id: str, precedent_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    db.query(CasePrecedentLink).filter_by(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id).delete()
+    removed = db.query(CasePrecedentLink).filter_by(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id).delete()
     db.commit()
+    if removed:
+        record_audit(db, current_user, "case.precedent_unlinked", case=case, target_type="precedent", target_id=precedent_id)
 
 
 @router.post("/{case_id}/decision", response_model=CaseOut)
@@ -220,7 +225,11 @@ def complete_decision(
 ):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    return _lifecycle(lambda: CaseLifecycleService(db).complete_decision(case, payload, current_user.id, local_today()))
+    before_outcome = case.outcome
+    decided = _lifecycle(lambda: CaseLifecycleService(db).complete_decision(case, payload, current_user.id, local_today()))
+    record_audit(db, current_user, "case.decision_recorded", case=decided,
+                 transitions={"outcome": (before_outcome, decided.outcome)})
+    return decided
 
 
 @router.post("/{case_id}/reopen", response_model=CaseOut)

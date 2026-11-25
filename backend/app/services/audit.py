@@ -10,7 +10,7 @@ that is a programmer error and must surface in tests."""
 import logging
 import re
 from enum import Enum
-from typing import Iterable, Mapping, Optional
+from typing import Iterable, Mapping, Optional, get_args
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -21,13 +21,15 @@ from app.models.user import User
 from app.schemas.calendar import CalendarEventUpdate
 from app.schemas.case import CaseNoteUpdate, CaseUpdate
 from app.schemas.client import ClientUpdate
+from app.schemas.management import Kind
 from app.schemas.task import TaskUpdate
 
 logger = logging.getLogger("casebridge")
 
 ACTIONS = frozenset({
     "case.created", "case.updated", "case.lawyer_changed", "case.parties_changed", "case.closed",
-    "case.reopened", "case.archived", "case.unarchived", "case.handover_created",
+    "case.reopened", "case.archived", "case.unarchived", "case.handover_created", "case.decision_recorded",
+    "case.precedent_linked", "case.precedent_unlinked",
     "case_event.created", "case_event.updated", "case_event.deleted",
     "document.uploaded", "document.deleted",
     "task.created", "task.updated",
@@ -37,6 +39,8 @@ ACTIONS = frozenset({
     "ai.case_intake", "ai.analysis_started", "ai.analysis_retried",
     "ai.courtroom_started", "ai.courtroom_move", "ai.courtroom_finished", "ai.courtroom_abandoned",
     "ai.chat_message", "ai.chat_feedback",
+    "ai.counter_analysis", "ai.trial_beat", "ai.trial_guide", "ai.trial_ask", "ai.sufle_analysis",
+    "record.created", "record.updated", "record.trashed", "record.restored",
 })
 # Field names are not content; every editable field of the audited update schemas is allowed.
 AUDITED_FIELDS = frozenset(
@@ -56,9 +60,12 @@ FLAG_VALUES: dict[str, frozenset[str]] = {
     "client_type": frozenset({"person", "company"}),
     "feedback": frozenset({"up", "down", "cleared"}),
     "level": frozenset({"basic", "standard", "deep"}),
+    "mode": frozenset({"live", "summary"}),
+    "record_kind": frozenset(get_args(Kind)),
 }
 TARGET_TYPES = frozenset({
     "event", "document", "task", "calendar_event", "client", "courtroom_session", "simulation", "chat_conversation",
+    "precedent", "record",
 })
 _UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
