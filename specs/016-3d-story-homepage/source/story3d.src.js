@@ -2,8 +2,8 @@
 import * as THREE from 'three';
 
 const C = {
-  bg: 0x08131f, paper: 0xeee8d9, teal: 0x68dfcf, amber: 0xedb45d, red: 0xe36b5f,
-  navy: 0x16304d, steel: 0x8fa3b8, blue: 0x5b8def, rose: 0xd98aa8,
+  bg: 0xfaf3e0, paper: 0x4a3424, teal: 0xa8774c, amber: 0xc49a3c, red: 0xb5523f,
+  navy: 0xe9d7ae, steel: 0xa48d73, blue: 0x6d8199, rose: 0xc47f6b,
 };
 const FONT = 'Manrope, "Segoe UI", system-ui, sans-serif';
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -15,7 +15,7 @@ const pct = (v) => '%' + Math.round(v * 100);
 const LS = innerWidth < 600 ? 1.45 : 1.15;
 
 /* ---------- helpers ---------- */
-function labelSprite(text, { color = '#eee8d9', size = 30, weight = 600, bg = null, pad = 14, height = 0.32 } = {}) {
+function labelSprite(text, { color = '#3b2a1d', size = 30, weight = 600, bg = null, pad = 14, height = 0.32 } = {}) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   const scale = 2;
@@ -98,7 +98,7 @@ const PAGE_BODY = {
 function pageTexture(title, { seed = 1 } = {}) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 704;
   const x = c.getContext('2d');
-  x.fillStyle = '#eee8d9'; x.fillRect(0, 0, 512, 704);
+  x.fillStyle = '#fffaf0'; x.fillRect(0, 0, 512, 704);
   x.fillStyle = 'rgba(22,48,77,.55)'; x.font = `600 15px ${FONT}`;
   x.fillText('T.C. ANKARA 9. SULH HUKUK MAHKEMESİ', 46, 52);
   x.fillText(`Esas No: 2025/${100 + seed * 7}   ·   Kurgusal örnek`, 46, 74);
@@ -135,7 +135,7 @@ try {
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
 camera.position.set(0, 0.6, 9);
-scene.add(new THREE.AmbientLight(0xbfd4ff, 0.55));
+scene.add(new THREE.AmbientLight(0xfff1d6, 0.55));
 const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4, 6, 5); scene.add(key);
 const rim = new THREE.PointLight(C.teal, 18, 20); rim.position.set(-4, 2, -3); scene.add(rim);
 
@@ -164,14 +164,14 @@ scenes[0] = (() => {
   titles.forEach((t, i) => {
     const mat = new THREE.MeshStandardMaterial({ map: pageTexture(t, { seed: i + 3 }), roughness: 0.9 });
     const p = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.012, 2.9), [mat.clone(), mat.clone(), mat, mat.clone(), mat.clone(), mat.clone()]);
-    p.material.forEach((m, k) => { if (k !== 2) { m.map = null; m.color.set(C.paper); } });
+    p.material.forEach((m, k) => { if (k !== 2) { m.map = null; m.color.set(0xfffaf0); } });
     const ang = (i / n) * Math.PI * 2;
     const r = 2.3 + (i % 3) * 0.55;
     p.userData = { start: new THREE.Vector3(0, -0.15 + i * 0.022, 0), end: new THREE.Vector3(Math.cos(ang) * r, Math.sin(ang * 2) * 0.6 + (i % 2 ? 0.5 : -0.5), Math.sin(ang) * r * 0.7), rot: (Math.random() - 0.5) * 1.6 };
     g.add(p); pages.push(p);
     const node = glowSphere(0.09 + (i % 3) * 0.03, i % 4 === 0 ? C.amber : C.teal, 1.1);
     node.position.copy(p.userData.end); node.userData.alpha = 1; g.add(node); nodes.push(node);
-    const tag = labelSprite(t, { size: 20, weight: 700, color: i % 4 === 0 ? '#edb45d' : '#bfeee7', height: 0.17 });
+    const tag = labelSprite(t, { size: 20, weight: 700, color: i % 4 === 0 ? '#a87e22' : '#7a5636', height: 0.17 });
     tag.position.copy(p.userData.end).add(new THREE.Vector3(0, 0.3, 0)); g.add(tag); node.userData.tag = tag;
     net.push(p.userData.end);
   });
@@ -225,7 +225,7 @@ scenes[1] = (() => {
   const labels = []; const dots = [];
   pts.forEach((p, i) => {
     const s = glowSphere(i === 4 ? 0.17 : 0.12, i === 4 ? C.red : C.paper, i === 4 ? 0.9 : 0.3); s.position.copy(p); g.add(s); dots.push(s);
-    const l = labelSprite(evts[i][0], { size: 26, color: i === 4 ? '#f1a49b' : '#eee8d9', height: 0.26 });
+    const l = labelSprite(evts[i][0], { size: 26, color: i === 4 ? '#a8432f' : '#3b2a1d', height: 0.26 });
     l.position.copy(p).add(new THREE.Vector3(0, i % 2 ? -0.45 : 0.45, 0)); g.add(l); labels.push(l);
   });
   // the hero network is handed over as-is: same nodes, names and links, re-expressed in this scene's space
@@ -235,7 +235,7 @@ scenes[1] = (() => {
     const n = glowSphere(0.1, heroNet.colors[i], 1.1);
     n.userData.from = end.clone().applyMatrix4(heroM).applyMatrix4(toLocal);
     n.userData.to = pts[Math.min(4, Math.floor(i / 3))];
-    n.userData.tag = labelSprite(heroNet.titles[i], { size: 20, weight: 700, color: i % 4 === 0 ? '#edb45d' : '#bfeee7', height: 0.17 });
+    n.userData.tag = labelSprite(heroNet.titles[i], { size: 20, weight: 700, color: i % 4 === 0 ? '#a87e22' : '#7a5636', height: 0.17 });
     g.add(n); g.add(n.userData.tag); return n;
   });
   const N = incoming.length; const pairs = [];
@@ -254,7 +254,7 @@ scenes[1] = (() => {
   const altEnd = glowSphere(0.2, C.amber, 1.2); altEnd.position.copy(altCurve.getPoint(1)); g.add(altEnd);
   const altMid = labelSprite('Rapora süresinde itiraz\n+ emsal kira delili', { size: 24, color: '#1b1409', bg: 'rgba(237,180,93,.95)', height: 0.24 });
   altMid.position.copy(altCurve.getPoint(0.42)).add(new THREE.Vector3(-0.95, 0.35, 0)); g.add(altMid);
-  const altLbl = labelSprite('Daha güçlü yol: kısmi kabul', { size: 26, color: '#edb45d', height: 0.27 });
+  const altLbl = labelSprite('Daha güçlü yol: kısmi kabul', { size: 26, color: '#a87e22', height: 0.27 });
   altLbl.position.copy(altCurve.getPoint(1)).add(new THREE.Vector3(-1.1, 0.5, 0)); g.add(altLbl);
   const total = altGeo.index.count;
   return {
@@ -353,7 +353,7 @@ scenes[2] = (() => {
     Object.entries(pathP).forEach(([k, v]) => {
       if (k !== 'root') { edgeMeshes[k].userData.target = 0.018 + v * 0.16; }
       nodeMeshes[k].userData.target = k === 'root' ? 0.2 : 0.07 + Math.sqrt(v) * 0.22;
-      if (k !== 'root') setText(nodeLabels[k], `${names[k]}  ${pct(v)}`, { size: 24, height: 0.25, color: outcomeKeys.includes(k) ? '#eee8d9' : '#b9c9d8' });
+      if (k !== 'root') setText(nodeLabels[k], `${names[k]}  ${pct(v)}`, { size: 24, height: 0.25, color: outcomeKeys.includes(k) ? '#3b2a1d' : '#6b5444' });
       if (instant) { if (edgeMeshes[k]) edgeMeshes[k].userData.r = edgeMeshes[k].userData.target; nodeMeshes[k].scale.setScalar(nodeMeshes[k].userData.target); }
     });
   }
@@ -402,7 +402,7 @@ scenes[3] = (() => {
   ];
   function draw(masked) {
     const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
-    x.fillStyle = '#eee8d9'; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#fffaf0'; x.fillRect(0, 0, W, H);
     x.font = `500 25px ${FONT}`; x.textBaseline = 'middle';
     doc.forEach((line, i) => {
       let cx = 56; const cy = 80 + i * 47;
@@ -411,7 +411,7 @@ scenes[3] = (() => {
         const w = x.measureText(text).width;
         if (tag && masked) {
           x.fillStyle = '#16304d'; x.beginPath(); x.roundRect(cx - 4, cy - 18, w + 8, 36, 8); x.fill();
-          x.fillStyle = '#68dfcf'; x.font = `700 17px ${FONT}`;
+          x.fillStyle = '#f3d9a4'; x.font = `700 17px ${FONT}`;
           const tw = x.measureText(`[${tag}]`).width; x.fillText(`[${tag}]`, cx + (w - tw) / 2, cy + 1);
         } else {
           x.fillStyle = tag ? '#7a2a22' : '#16304d'; x.fillText(text, cx, cy);
@@ -428,7 +428,7 @@ scenes[3] = (() => {
     fragmentShader: `uniform sampler2D a; uniform sampler2D b; uniform float beam; uniform float opacity; varying vec2 vUv;
       void main(){ float y=1.0-vUv.y; vec4 ca=texture2D(a,vUv); vec4 cb=texture2D(b,vUv);
         vec4 col = y<beam ? cb : ca; float glow = smoothstep(0.03,0.0,abs(y-beam))*step(0.001,beam)*step(beam,0.999);
-        col.rgb = mix(col.rgb, vec3(0.41,0.87,0.81), glow*0.85); gl_FragColor=vec4(col.rgb, opacity); }`,
+        col.rgb = mix(col.rgb, vec3(0.66,0.47,0.30), glow*0.85); gl_FragColor=vec4(col.rgb, opacity); }`,
   });
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(2.55, 2.55 * H / W), mat);
   g.add(plane);
@@ -450,7 +450,7 @@ scenes[3] = (() => {
   lock.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.48, 0.18), lockMat));
   const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.05, 12, 32, Math.PI), lockMat); shackle.position.y = 0.24; lock.add(shackle);
   lock.position.set(1.65, -2.15, 0.5); vault.add(lock);
-  const vLabel = labelSprite('Büroya özel · şifreli', { size: 24, color: '#68dfcf', height: 0.25 });
+  const vLabel = labelSprite('Büroya özel · şifreli', { size: 24, color: '#9c6b43', height: 0.25 });
   vLabel.position.set(0, 2.45, 0); vault.add(vLabel);
   g.add(vault);
   const halfH = 2.55 * H / W / 2;
@@ -497,7 +497,7 @@ scenes[4] = (() => {
   const g = new THREE.Group();
   const floor = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.4, 0.06, 64), new THREE.MeshStandardMaterial({ color: C.navy, roughness: 0.8, transparent: true, opacity: 0.85 }));
   floor.position.y = -1.6; g.add(floor);
-  const grid = new THREE.PolarGridHelper(4.3, 10, 6, 64, 0x2c4b6c, 0x2c4b6c); grid.position.y = -1.56; g.add(grid);
+  const grid = new THREE.PolarGridHelper(4.3, 10, 6, 64, 0xc9ad84, 0xc9ad84); grid.position.y = -1.56; g.add(grid);
   const unit = 0.17; const bars = []; const tops = []; const rings = []; const hit = [];
   bureau.forEach((L, i) => {
     const ang = -1.2 + i * 0.6; const R = 3.1;
@@ -558,11 +558,11 @@ scenes[5] = (() => {
   ];
   const cards = cardsSpec.map(([kicker, title, l1, l2, col], i) => {
     const c = document.createElement('canvas'); c.width = 760; c.height = 300; const x = c.getContext('2d');
-    x.fillStyle = 'rgba(14,30,48,.96)'; x.beginPath(); x.roundRect(0, 0, 760, 300, 26); x.fill();
+    x.fillStyle = 'rgba(255,250,238,.96)'; x.beginPath(); x.roundRect(0, 0, 760, 300, 26); x.fill();
     x.fillStyle = '#' + new THREE.Color(col).getHexString(); x.fillRect(0, 0, 10, 300);
     x.font = `800 26px ${FONT}`; x.fillText(kicker, 44, 62);
-    x.fillStyle = '#eee8d9'; x.font = `700 38px ${FONT}`; x.fillText(title, 44, 126);
-    x.fillStyle = '#b9c9d8'; x.font = `500 27px ${FONT}`; x.fillText(l1, 44, 196); x.fillText(l2, 44, 238);
+    x.fillStyle = '#3b2a1d'; x.font = `700 38px ${FONT}`; x.fillText(title, 44, 126);
+    x.fillStyle = '#6b5444'; x.font = `500 27px ${FONT}`; x.fillText(l1, 44, 196); x.fillText(l2, 44, 238);
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6 * 300 / 760), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
     m.userData = { end: new THREE.Vector3(2.3, 1.45 - i * 1.15, 0.2 - i * 0.1), start: new THREE.Vector3(6, 1.45 - i * 1.15, -1.5) };
@@ -598,29 +598,29 @@ scenes[6] = (() => {
   const g = new THREE.Group();
   const floor = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.05, 64), new THREE.MeshStandardMaterial({ color: C.navy, roughness: 0.85, transparent: true, opacity: 0.9 }));
   floor.position.y = -1.55; g.add(floor);
-  const ring = new THREE.PolarGridHelper(4.5, 12, 4, 64, 0x2c4b6c, 0x2c4b6c); ring.position.y = -1.52; g.add(ring);
+  const ring = new THREE.PolarGridHelper(4.5, 12, 4, 64, 0xc9ad84, 0xc9ad84); ring.position.y = -1.52; g.add(ring);
   const wood = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, metalness: 0.05 });
   const bench = new THREE.Group();
-  const b1 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.5, 0.8), wood(0x22405f)); b1.position.y = -0.8; bench.add(b1);
-  const b2 = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.0), wood(0x2e5579)); b2.position.y = -0.02; bench.add(b2);
+  const b1 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.5, 0.8), wood(0xc8a77d)); b1.position.y = -0.8; bench.add(b1);
+  const b2 = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.0), wood(0xd8bb90)); b2.position.y = -0.02; bench.add(b2);
   bench.position.set(0, 0.25, -1.8); g.add(bench);
   const judge = glowSphere(0.26, C.paper, 0.4); judge.position.set(0, 0.75, -2.0); g.add(judge);
-  const podium = (x, col) => { const m = new THREE.Group(); const a = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.6), wood(0x1d3a5a)); a.position.y = -1.0; m.add(a); const top = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.06, 0.75), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.4 })); top.position.y = -0.42; m.add(top); m.position.set(x, 0, 0.9); g.add(m); return m; };
+  const podium = (x, col) => { const m = new THREE.Group(); const a = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.6), wood(0xb89468)); a.position.y = -1.0; m.add(a); const top = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.06, 0.75), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.4 })); top.position.y = -0.42; m.add(top); m.position.set(x, 0, 0.9); g.add(m); return m; };
   podium(-2.6, C.teal); podium(2.6, C.amber);
   const you = glowSphere(0.22, C.teal, 0.8); you.position.set(-2.6, -0.1, 0.9); g.add(you);
   const opp = glowSphere(0.22, C.amber, 0.8); opp.position.set(2.6, -0.1, 0.9); g.add(opp);
   const tags = [
-    [labelSprite('Hâkim · yapay zekâ', { size: 22, color: '#eee8d9', height: 0.22 }), [0, 1.2, -2.0]],
-    [labelSprite('Siz · davacı vekili', { size: 22, color: '#68dfcf', height: 0.22 }), [-2.6, -1.85, 1.2]],
-    [labelSprite('Karşı vekil · yapay zekâ', { size: 22, color: '#edb45d', height: 0.22 }), [2.6, -1.85, 1.2]],
+    [labelSprite('Hâkim · yapay zekâ', { size: 22, color: '#3b2a1d', height: 0.22 }), [0, 1.2, -2.0]],
+    [labelSprite('Siz · davacı vekili', { size: 22, color: '#9c6b43', height: 0.22 }), [-2.6, -1.85, 1.2]],
+    [labelSprite('Karşı vekil · yapay zekâ', { size: 22, color: '#a87e22', height: 0.22 }), [2.6, -1.85, 1.2]],
   ];
   tags.forEach(([l, pos]) => { l.position.set(...pos); g.add(l); });
   function card(who, col, text) {
     const c = document.createElement('canvas'); c.width = 720; c.height = 230; const x = c.getContext('2d');
-    x.fillStyle = 'rgba(14,30,48,.96)'; x.beginPath(); x.roundRect(0, 0, 720, 230, 24); x.fill();
+    x.fillStyle = 'rgba(255,250,238,.96)'; x.beginPath(); x.roundRect(0, 0, 720, 230, 24); x.fill();
     x.fillStyle = '#' + new THREE.Color(col).getHexString(); x.fillRect(0, 0, 9, 230);
     x.font = `800 24px ${FONT}`; x.fillText(who, 36, 50);
-    x.fillStyle = '#eee8d9'; x.font = `500 28px ${FONT}`;
+    x.fillStyle = '#3b2a1d'; x.font = `500 28px ${FONT}`;
     let line = '', y = 100; for (const w of text.split(' ')) { if (x.measureText(line + w).width > 640) { x.fillText(line, 36, y); y += 38; line = ''; } line += w + ' '; } x.fillText(line, 36, y);
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 2.7 * 230 / 720), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthTest: false }));
@@ -635,14 +635,14 @@ scenes[6] = (() => {
   // evaluation board: 4 criteria x 25
   const crit = [['Hukuki dayanak', 20], ['Delil kullanımı', 19], ['İkna ve tutarlılık', 18], ['Usul ve süreler', 17]];
   const bc = document.createElement('canvas'); bc.width = 760; bc.height = 470; const bx = bc.getContext('2d');
-  bx.fillStyle = 'rgba(10,24,40,.97)'; bx.beginPath(); bx.roundRect(0, 0, 760, 470, 28); bx.fill();
-  bx.strokeStyle = '#68dfcf'; bx.lineWidth = 3; bx.beginPath(); bx.roundRect(1.5, 1.5, 757, 467, 27); bx.stroke();
-  bx.fillStyle = '#68dfcf'; bx.font = `800 24px ${FONT}`; bx.fillText('HÂKİM DEĞERLENDİRMESİ · EĞİTİM PUANI', 40, 58);
-  bx.fillStyle = '#eee8d9'; bx.font = `700 72px ${FONT}`; bx.fillText('74', 40, 145); bx.font = `500 34px ${FONT}`; bx.fillStyle = '#a9b8c7'; bx.fillText('/ 100', 130, 145);
+  bx.fillStyle = 'rgba(255,250,238,.97)'; bx.beginPath(); bx.roundRect(0, 0, 760, 470, 28); bx.fill();
+  bx.strokeStyle = '#9c6b43'; bx.lineWidth = 3; bx.beginPath(); bx.roundRect(1.5, 1.5, 757, 467, 27); bx.stroke();
+  bx.fillStyle = '#9c6b43'; bx.font = `800 24px ${FONT}`; bx.fillText('HÂKİM DEĞERLENDİRMESİ · EĞİTİM PUANI', 40, 58);
+  bx.fillStyle = '#3b2a1d'; bx.font = `700 72px ${FONT}`; bx.fillText('74', 40, 145); bx.font = `500 34px ${FONT}`; bx.fillStyle = '#7a6150'; bx.fillText('/ 100', 130, 145);
   crit.forEach(([n, v], i) => {
-    const y = 210 + i * 62; bx.fillStyle = '#d4dbe2'; bx.font = `600 24px ${FONT}`; bx.fillText(n, 40, y);
-    bx.fillStyle = 'rgba(238,232,217,.12)'; bx.fillRect(330, y - 16, 300, 14); bx.fillStyle = '#68dfcf'; bx.fillRect(330, y - 16, 300 * v / 25, 14);
-    bx.fillStyle = '#eee8d9'; bx.font = `700 22px ${FONT}`; bx.fillText(`${v}/25`, 650, y);
+    const y = 210 + i * 62; bx.fillStyle = '#5a4332'; bx.font = `600 24px ${FONT}`; bx.fillText(n, 40, y);
+    bx.fillStyle = 'rgba(92,64,40,.12)'; bx.fillRect(330, y - 16, 300, 14); bx.fillStyle = '#9c6b43'; bx.fillRect(330, y - 16, 300 * v / 25, 14);
+    bx.fillStyle = '#3b2a1d'; bx.font = `700 22px ${FONT}`; bx.fillText(`${v}/25`, 650, y);
   });
   const btex = new THREE.CanvasTexture(bc); btex.colorSpace = THREE.SRGBColorSpace; btex.anisotropy = 8;
   const board = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4 * 470 / 760), new THREE.MeshBasicMaterial({ map: btex, transparent: true, depthTest: false }));

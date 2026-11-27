@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="240" height="100" role="img" aria-label="CaseBridge">
+  <title>CaseBridge</title>
+  <g font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif" font-weight="400" fill="#1f2d4f" text-anchor="middle">
+    <text x="120" y="38" font-size="36" letter-spacing="10">CASE</text>
+    <text x="120" y="92" font-size="36" letter-spacing="8">BRIDGE</text>
+  </g>
+  <path d="M22 56 Q120 38 218 56" fill="none" stroke="#c49a3c" stroke-width="3.2" stroke-linecap="round"/>
+</svg>
