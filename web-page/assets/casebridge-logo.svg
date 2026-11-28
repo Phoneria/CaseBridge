@@ -1,8 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="92 34 370 136" width="370" height="136" role="img" aria-label="CaseBridge">
-  <title>CaseBridge</title>
-  <path d="M140 95 A35 35 0 1 0 140 160" fill="none" stroke="#3b2a1d" stroke-width="14" stroke-linecap="round"/>
-  <path d="M140 95 Q160 70 180 95" fill="none" stroke="#c49a3c" stroke-width="6" stroke-linecap="round"/>
-  <path d="M180 45 V160" stroke="#3b2a1d" stroke-width="14" stroke-linecap="round"/>
-  <circle cx="212" cy="127" r="30" fill="none" stroke="#3b2a1d" stroke-width="14"/>
-  <text x="275" y="138" font-family="'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="300" fill="#3b2a1d">casebridge</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="56 50 336 122" width="336" height="122" role="img" aria-label="CaseBridge" ><title>CaseBridge</title>
+<text x="110" y="160" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="96" fill="#3b2a1d">C</text>
+<text x="250" y="160" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="96" fill="#3b2a1d">B</text>
+<line x1="181" y1="66" x2="181" y2="158" stroke="#c49a3c" stroke-width="4"/>
+<circle cx="181" cy="62" r="5" fill="#c49a3c"/>
+<path d="M153 80 Q181 70 209 80" fill="none" stroke="#c49a3c" stroke-width="4" stroke-linecap="round"/>
+<g stroke="#c49a3c" stroke-width="1.5"><line x1="153" y1="80" x2="143" y2="114"/><line x1="153" y1="80" x2="163" y2="114"/><line x1="209" y1="80" x2="199" y2="114"/><line x1="209" y1="80" x2="219" y2="114"/></g>
+<path d="M140 114 Q153 126 166 114 Z" fill="#c49a3c"/><path d="M196 114 Q209 126 222 114 Z" fill="#c49a3c"/>
+<rect x="166" y="155" width="30" height="5" fill="#c49a3c"/>
+<line x1="135" y1="165" x2="225" y2="165" stroke="#c49a3c" stroke-width="3"/>
+<text x="310" y="112" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#3b2a1d">Case</text>
+<text x="310" y="142" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#3b2a1d">Bridge</text></svg>

@@ -52,7 +52,7 @@ main a, main button, main details, main summary, main .copy, main .team-surface,
 .wordmark-line { position: absolute; left: 0; top: -.26em; width: 100%; height: .62em; overflow: visible; pointer-events: none; }
 .wordmark-line path { fill: none; stroke: var(--teal); stroke-width: 1.1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .brand-lockup > small { font-size: 7.5px; letter-spacing: 1.1px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.brand-logo { display: block; height: 50px; width: auto; }
+.brand-logo { display: block; height: 58px; width: auto; }
 .footer .brand-logo { height: 44px; }
 
 /* chapters */
