@@ -207,7 +207,7 @@
       "acceptance_tests": [
         "scripts/tests/test_audit_log.py::AuditLogAcceptance.test_app_version_manifest_matches_the_sources"
       ],
-      "reason": "Version manifest regenerated with update-version.mjs (v.0.58)."
+      "reason": "Version manifest regenerated with update-version.mjs (v.0.59)."
     }
   ]
 }

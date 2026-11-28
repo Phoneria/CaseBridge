@@ -1,4 +1,4 @@
-# Audit log: metadata-only process analytics for CaseBridge (application v.0.58, unreleased)
+# Audit log: metadata-only process analytics for CaseBridge (application v.0.59, unreleased)
 
 User request (17 Nov 2026, extended 25 Nov 2026): CaseBridge needs a record of who did what, when and in which case, to analyse how firms use the product. It must never hold case content: no names, titles, notes, texts, file names or e-mails. Platform administrators export it as CSV for all firms or one firm, and browse one firm's events in the platform panel's API. Every write route added later must either record an action or be listed as deliberately not recorded.
 
@@ -19,7 +19,7 @@ User request (17 Nov 2026, extended 25 Nov 2026): CaseBridge needs a record of w
 - **FR-007**: `GET /platform/audit-events.csv` (platform admins only) streams a UTF-8 BOM CSV of customer firms' rows in a date range (default 30 days, at most 366, 422 with a Turkish message otherwise), optionally for one firm (404 if unknown), ordered by time; the export is logged with ids only. The platform panel's "Hareket kayıtları" card downloads it.
 - **FR-008**: `GET /platform/firms/{firm_id}/audit-events` (platform admins only; 404 for unknown and the platform firm) returns `{firm_id, firm_name, from, to, total, limit, offset, by_action, items}` newest first with the CSV's date rules, optional `action` (422 if unknown), `actor_user_id`, `case_id`, `limit` 1–200 (default 50) and `offset`; views are logged with ids only.
 - **FR-009**: Neither output contains case content, user names or e-mails; demo cleanup removes a demo user's and the demo firm's audit rows so they never block the cleanup.
-- **FR-010**: Application version: `frontend/app-version.json` regenerated with `frontend/scripts/update-version.mjs` (v.0.58), never hand-edited.
+- **FR-010**: Application version: `frontend/app-version.json` regenerated with `frontend/scripts/update-version.mjs` (v.0.59 with spec 026), never hand-edited.
 - **FR-011**: The platform firm profile has a "Hareket kayıtları" tab built on FR-008: date and action filters (actions grouped, Turkish labels from `lib/auditEvents.ts`, raw code for an unknown action), user and case filters by clicking with removable chips, a total and the three most frequent actions as filter cards, a table of 50 rows per page with Önceki/Sonraki, an empty state and the server's error message. User names come from the platform's firm list (admins and lawyers); unknown users show role and short id, cases only their type and short id. Every backend action has a label.
 
 ## Success Criteria
