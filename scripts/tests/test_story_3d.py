@@ -133,7 +133,7 @@ class Story3DHomepage(unittest.TestCase):
         self.assertEqual(self.html.count('src="assets/casebridge-logo.svg'), 2)
         self.assertNotIn('bridge-wordmark', self.html)
         logo = (SITE / 'assets/casebridge-logo.svg').read_text()
-        for part in ['>CASE<', '>BRIDGE<', '#c49a3c']:
+        for part in ['>casebridge<', '#3b2a1d', '#c49a3c']:
             self.assertIn(part, logo)
         css = (SITE / 'story3d.css').read_text()
         self.assertIn('--bg: #faf3e0;', css)
