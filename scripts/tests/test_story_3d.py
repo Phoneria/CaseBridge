@@ -133,14 +133,14 @@ class Story3DHomepage(unittest.TestCase):
         self.assertEqual(self.html.count('src="assets/casebridge-logo.svg'), 2)
         self.assertNotIn('bridge-wordmark', self.html)
         logo = (SITE / 'assets/casebridge-logo.svg').read_text()
-        for part in ['>CASE<', '>BRIDGE<', '#c23b52', '#f2ede3']:
+        for part in ['>CASE<', '>BRIDGE<', '#b5475a', '#1f1a1f']:
             self.assertIn(part, logo)
         css = (SITE / 'story3d.css').read_text()
-        self.assertIn('--bg: #111014;', css)
-        self.assertIn('--teal: #b8324a;', css)
-        self.assertIn('color-scheme: dark;', css)
+        self.assertIn('--bg: #f7f1ea;', css)
+        self.assertIn('--teal: #b5475a;', css)
+        self.assertIn('color-scheme: light;', css)
         self.assertNotIn('#68dfcf', css + (SITE / 'site-cat.css').read_text())
-        self.assertIn('<meta name="theme-color" content="#111014">', self.html)
+        self.assertIn('<meta name="theme-color" content="#f7f1ea">', self.html)
 
 
 if __name__ == '__main__':
