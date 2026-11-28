@@ -129,6 +129,19 @@ class Story3DHomepage(unittest.TestCase):
         self.assertIn('if (from >= storyEnd() && dy > 0) return release();', source)
         self.assertIn('return release();', source.split('if (scrollY > storyEnd() + innerHeight * 0.25 && dy < 0)')[1][:20])
 
+    def test_case_bridge_logo_and_blue_white_palette(self):
+        self.assertEqual(self.html.count('src="assets/casebridge-logo.svg'), 2)
+        self.assertNotIn('bridge-wordmark', self.html)
+        logo = (SITE / 'assets/casebridge-logo.svg').read_text()
+        for part in ['>CASE<', '>BRIDGE<', '#3b82d6', '#0f2340']:
+            self.assertIn(part, logo)
+        css = (SITE / 'story3d.css').read_text()
+        self.assertIn('--bg: #f5f9ff;', css)
+        self.assertIn('--teal: #1f5fbf;', css)
+        self.assertIn('color-scheme: light;', css)
+        self.assertNotIn('#68dfcf', css + (SITE / 'site-cat.css').read_text())
+        self.assertIn('<meta name="theme-color" content="#f5f9ff">', self.html)
+
 
 if __name__ == '__main__':
     unittest.main()
