@@ -5,6 +5,7 @@ import type {
   ClientPayload,
   PlatformAdminInvite,
   PlatformAdminPayload,
+  AuditEventPage,
   PlatformFirm,
   PlatformFirmCreated,
   PlatformFirmPayload,
@@ -663,6 +664,27 @@ async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {
     throw new ApiError(`${errorPrefix} (${response.status}).`, response.status);
   }
   return response.blob();
+}
+
+export interface AuditEventQuery {
+  from: string;
+  to: string;
+  action?: string;
+  actorUserId?: string;
+  caseId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/** One firm's audit events, newest first (platform admins only). */
+export async function listFirmAuditEvents(firmId: string, params: AuditEventQuery): Promise<AuditEventPage> {
+  const query = new URLSearchParams({ from: params.from, to: params.to });
+  if (params.action) query.set("action", params.action);
+  if (params.actorUserId) query.set("actor_user_id", params.actorUserId);
+  if (params.caseId) query.set("case_id", params.caseId);
+  if (params.limit !== undefined) query.set("limit", String(params.limit));
+  if (params.offset) query.set("offset", String(params.offset));
+  return request(`/platform/firms/${encodeURIComponent(firmId)}/audit-events?${query}`);
 }
 
 export interface AuditCsvParams {

@@ -6,4 +6,5 @@
 - [x] CSV export and per-firm JSON view for platform admins (FR-007, FR-008).
 - [x] No content in either output; demo cleanup unaffected (FR-009).
 - [x] Version manifest regenerated, not hand-edited (FR-010).
+- [x] Firm profile Hareket kayıtları tab (FR-011).
 - [x] Every requirement has an automated acceptance test.

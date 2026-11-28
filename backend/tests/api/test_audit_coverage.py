@@ -1,4 +1,6 @@
 """Every write endpoint either records an audit action or is listed as not audited."""
+from pathlib import Path
+
 from fastapi.routing import APIRoute
 
 from app.main import app
@@ -113,3 +115,12 @@ def test_every_write_route_is_audited_or_explicitly_not():
 def test_every_mapped_action_exists_and_every_action_is_used():
     assert set(ALSO_RECORDED) <= set(AUDITED)
     assert set(AUDITED.values()) | set(ALSO_RECORDED.values()) == set(ACTIONS)
+
+
+PANEL_LABELS = Path(__file__).resolve().parents[3] / "frontend" / "src" / "lib" / "auditEvents.ts"
+
+
+def test_every_action_has_a_platform_panel_label():
+    labels = PANEL_LABELS.read_text(encoding="utf-8")
+    missing = sorted(action for action in ACTIONS if f'"{action}":' not in labels)
+    assert not missing, f"Add Turkish labels to frontend/src/lib/auditEvents.ts for: {missing}"
