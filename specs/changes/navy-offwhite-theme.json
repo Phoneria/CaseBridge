@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "web-page/index.html",
+        "web-page/olasilik-agaci.html",
+        "web-page/story3d.css",
+        "web-page/story3d.js",
+        "web-page/site-cat.css",
+        "web-page/site-cat.js",
+        "web-page/site-cat-loader.js",
+        "web-page/assets/casebridge-logo.svg",
+        "web-page/website-version.json",
+        "web-page/team.html",
+        "web-page/investors.html",
+        "web-page/timeline.html",
+        "web-page/gorsel-kaynaklari.html"
+      ],
+      "requirements": [
+        "specs/016-3d-story-homepage/spec.md#FR-014"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_case_bridge_logo_and_robe_palette"
+      ],
+      "reason": "User request: try an off-white and navy palette with the CASE/BRIDGE logo recoloured to match; marketing-only v.0.71."
+    }
+  ]
+}
