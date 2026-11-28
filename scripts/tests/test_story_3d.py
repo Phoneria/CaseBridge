@@ -129,18 +129,18 @@ class Story3DHomepage(unittest.TestCase):
         self.assertIn('if (from >= storyEnd() && dy > 0) return release();', source)
         self.assertIn('return release();', source.split('if (scrollY > storyEnd() + innerHeight * 0.25 && dy < 0)')[1][:20])
 
-    def test_case_bridge_logo_and_navy_offwhite_palette(self):
+    def test_case_bridge_logo_and_robe_palette(self):
         self.assertEqual(self.html.count('src="assets/casebridge-logo.svg'), 2)
         self.assertNotIn('bridge-wordmark', self.html)
         logo = (SITE / 'assets/casebridge-logo.svg').read_text()
-        for part in ['>CASE<', '>BRIDGE<', '#4a6394', '#14213d']:
+        for part in ['>CASE<', '>BRIDGE<', '#c23b52', '#f2ede3']:
             self.assertIn(part, logo)
         css = (SITE / 'story3d.css').read_text()
-        self.assertIn('--bg: #f7f4ec;', css)
-        self.assertIn('--teal: #1c2e5a;', css)
-        self.assertIn('color-scheme: light;', css)
+        self.assertIn('--bg: #111014;', css)
+        self.assertIn('--teal: #b8324a;', css)
+        self.assertIn('color-scheme: dark;', css)
         self.assertNotIn('#68dfcf', css + (SITE / 'site-cat.css').read_text())
-        self.assertIn('<meta name="theme-color" content="#f7f4ec">', self.html)
+        self.assertIn('<meta name="theme-color" content="#111014">', self.html)
 
 
 if __name__ == '__main__':

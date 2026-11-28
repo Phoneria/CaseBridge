@@ -21,7 +21,7 @@
         "specs/016-3d-story-homepage/spec.md#FR-013"
       ],
       "acceptance_tests": [
-        "scripts/tests/test_story_3d.py::Story3DHomepage.test_case_bridge_logo_and_navy_offwhite_palette"
+        "scripts/tests/test_story_3d.py::Story3DHomepage.test_case_bridge_logo_and_robe_palette"
       ],
       "reason": "User request: try a blue-and-white palette with the CASE/BRIDGE logo recoloured to match; marketing-only v.0.70."
     }

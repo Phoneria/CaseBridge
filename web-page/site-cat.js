@@ -6,7 +6,7 @@ import {
   BOOKING_URL, COPY, CROSSFADE_MS, CYCLE_MS, FAQ, MAX_USER_CHARS, MAX_USER_TURNS, POSES, POSITION_KEY, SLEEP_AFTER_MS,
   VICTORY_MS, clampPosition, defaultPosition, faqAnswer, failureMessage, initialPose, languageOf, leftOf, linkParts,
   parsePosition, poseOf, poseReducer, snapPosition, visibleSection,
-} from './site-cat-model.mjs?v=0.71';
+} from './site-cat-model.mjs?v=0.72';
 
 const SIZE = () => (window.innerWidth < 640 ? 64 : 76);
 const config = window.__casebridgeSiteCat || {};

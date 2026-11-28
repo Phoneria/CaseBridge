@@ -14,11 +14,11 @@
   function load() {
     var css = document.createElement('link');
     css.rel = 'stylesheet';
-    css.href = base + 'site-cat.css?v=0.71';
+    css.href = base + 'site-cat.css?v=0.72';
     document.head.appendChild(css);
     var script = document.createElement('script');
     script.type = 'module';
-    script.src = base + 'site-cat.js?v=0.71';
+    script.src = base + 'site-cat.js?v=0.72';
     document.body.appendChild(script);
   }
   function idle() { (window.requestIdleCallback || function (cb) { setTimeout(cb, 300); })(load, {timeout: 3000}); }
