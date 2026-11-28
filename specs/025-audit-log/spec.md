@@ -1,0 +1,27 @@
+# Audit log: metadata-only process analytics for CaseBridge (application v.0.57, unreleased)
+
+User request (17 Nov 2026, extended 25 Nov 2026): CaseBridge needs a record of who did what, when and in which case, to analyse how firms use the product. It must never hold case content: no names, titles, notes, texts, file names or e-mails. Platform administrators export it as CSV for all firms or one firm, and browse one firm's events in the platform panel's API. Every write route added later must either record an action or be listed as deliberately not recorded.
+
+## User Scenarios
+1. A lawyer creates, edits, closes and reopens a case, adds notes, documents, tasks and calendar entries, links a precedent and uses the AI tools; each successful action leaves one `audit_events` row with the actor's id and role, the case id and type, and only field names, enum/uuid transitions, integer counts and flags from fixed sets.
+2. A firm administrator edits bureau records and reassigns a case's lawyer; a workspace user completes a task or decides an approval; these are recorded the same way, while the firm's own management history (`ManagementAudit`) is unchanged.
+3. A platform administrator downloads "Hareket kayıtları" as CSV for the last 30 days, or for one firm and a chosen range of at most 366 days; the file opens in Excel with Turkish characters intact and contains no case content.
+4. A platform administrator calls `GET /platform/firms/{firm_id}/audit-events` to page through one firm's events newest first, filtered by action, user or case, with a count per action for the range.
+5. A database error while writing an audit row is logged and never undoes the user's action.
+
+### Functional Requirements
+- **FR-001**: Table `audit_events` (`id`, `law_firm_id`, `actor_user_id`, `actor_role`, `action`, `case_id` without a foreign key, `case_type`, `target_type`, `target_id`, `details` JSON, `occurred_at` naive UTC) with indexes on (`law_firm_id`, `occurred_at`), `case_id` and `actor_user_id`; the migration follows main's head and downgrades cleanly.
+- **FR-002**: `app.services.audit.record_audit` is the only writer. It accepts only actions from `ACTIONS`, target types from `TARGET_TYPES`, field names of the audited update schemas, transitions whose values are enum members, uuids or None, integer counts from `COUNT_NAMES` and flags from `FLAG_VALUES`; anything else raises `AuditDetailError`. It runs after the route's own commit and swallows (logs) a database error.
+- **FR-003**: Case lifecycle and content routes record their action: case create (party/client counts, form `source`), update (changed field names, status/outcome/case_type/client_role transitions), party changes, close, late decision, reopen, archive, unarchive, handover, lawyer change, precedent link/unlink (only when the link changes), case events, documents, tasks (including workspace completion), calendar events, hearing results and clients.
+- **FR-004**: AI routes record usage without prompt, answer or move text: case intake, analysis start/retry, courtroom start/move/finish/abandon, chat message and feedback, legal-lab counter analysis and trial beat/guide/ask, Sufle analysis.
+- **FR-005**: Bureau records (create, update, trash, restore) and workspace record decisions and checklist steps record `record.*` with the record kind only.
+- **FR-006**: Every write route is either mapped to an action or listed in `NOT_AUDITED` (authentication, user and bureau administration, platform operations, stateless helpers, the public site chat); a new unmapped route fails the coverage test.
+- **FR-007**: `GET /platform/audit-events.csv` (platform admins only) streams a UTF-8 BOM CSV of customer firms' rows in a date range (default 30 days, at most 366, 422 with a Turkish message otherwise), optionally for one firm (404 if unknown), ordered by time; the export is logged with ids only. The platform panel's "Hareket kayıtları" card downloads it.
+- **FR-008**: `GET /platform/firms/{firm_id}/audit-events` (platform admins only; 404 for unknown and the platform firm) returns `{firm_id, firm_name, from, to, total, limit, offset, by_action, items}` newest first with the CSV's date rules, optional `action` (422 if unknown), `actor_user_id`, `case_id`, `limit` 1–200 (default 50) and `offset`; views are logged with ids only.
+- **FR-009**: Neither output contains case content, user names or e-mails; demo cleanup removes a demo user's and the demo firm's audit rows so they never block the cleanup.
+- **FR-010**: Application version: `frontend/app-version.json` regenerated with `frontend/scripts/update-version.mjs` (v.0.57), never hand-edited.
+
+## Success Criteria
+- Backend unit and API tests prove the allow-lists, the swallowed database error, every recorded action family, the coverage map, both platform outputs, their date and filter rules and the absence of content.
+- Vitest proves the CSV card's default range, request parameters and error message, the new-case `source`, and the card on the platform page.
+- The full backend suite (1,409 tests) and Vitest (896 tests) pass on the merged branch.

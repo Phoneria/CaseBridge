@@ -1,0 +1,4 @@
+# Plan
+- Backend: `models/audit.py` + migration `d4e6f8a0b2c4`; `services/audit.py` (allow-lists, `record_audit`, `snapshot`/`changed_fields`); calls after the commit in the case, event, document, task, calendar, client, handover, admin, chat, courtroom, simulation, case-intake, legal-lab, Sufle and bureau routes; `services/audit_export.py` + `GET /platform/audit-events.csv`; `services/audit_query.py` + `GET /platform/firms/{id}/audit-events`; `schemas/case.py` `source` (audit only, excluded from the case in `case_service.py`); `db/demo_cleanup.py` ignores and removes audit rows.
+- Frontend: `AuditExportCard` under the firm list in `PlatformView`, `downloadAuditCsv` in `api.ts`, `NewCaseView` sends `source`.
+- No new dependency. `ManagementAudit` (firm-facing history with before/after and reason) is separate and unchanged.
