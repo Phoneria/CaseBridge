@@ -20,6 +20,7 @@ A law-firm visitor scrolls one continuous story. A case file opens into a networ
 - **FR-011**: Bug fix: once the wheel leaves the story (team, FAQ, footer), any pending capped glide is cancelled so the page stays where the visitor scrolled and is never pulled back up.
 - **FR-012**: User request (27 Nov): the header (and footer) show the supplied CASE/BRIDGE logo (navy serif "CASE", gold arc, "BRIDGE") instead of the teal CaseBridge wordmark, and the homepage, 3D scene and site cat switch from the dark navy/teal palette to a light soft-yellow and light-brown palette; marketing-only v.0.69.
 - **FR-013**: User request (28 Nov): alternative blue-and-white palette (white/ice-blue background, navy text, blue accent) for the homepage, 3D scene and site cat, with the CASE/BRIDGE logo recoloured to navy text and a blue arc; marketing-only v.0.70.
+- **FR-014**: User request (28 Nov): alternative off-white and navy palette (off-white background, navy text and buttons) for the homepage, 3D scene and site cat, with the CASE/BRIDGE logo recoloured to navy text and a slate-navy arc; marketing-only v.0.71.
 
 ## Success Criteria
 All six scenes render on 1440×900 and 390×844 without overflow or console errors; tree moves change both views; acceptance tests in `scripts/tests/test_story_3d.py` pass; public `/website-version.json` reports v.0.54 and serves the new `story3d.js`.
