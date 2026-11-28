@@ -5,6 +5,7 @@ from app.models.management import ManagementRecord, ManagementAudit, WorkspaceAc
 from app.models.user import User, UserRole, UserStatus  # noqa: F401
 from app.models.user_token import TokenPurpose, UserToken  # noqa: F401
 from app.models.client import Client, ClientType  # noqa: F401
+from app.models.audit import AuditEvent  # noqa: F401
 from app.models.case import (  # noqa: F401
     Case,
     CaseEvent,

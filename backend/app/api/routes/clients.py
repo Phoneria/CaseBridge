@@ -16,6 +16,7 @@ from app.schemas.client import (
     ClientStats,
     ClientUpdate,
 )
+from app.services.audit import changed_fields, record_audit, snapshot
 from app.services.client_service import ClientHasCasesError, ClientService
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -52,10 +53,16 @@ def list_clients(
     ]
 
 
+def _client_type(client) -> str:
+    return getattr(client.client_type, "value", client.client_type)
+
+
 @router.post("", response_model=ClientOut, status_code=status.HTTP_201_CREATED)
 def create_client(payload: ClientCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     client = ClientService(db).create(current_user.law_firm_id, payload, current_user.id)
     _log("created", client.id, current_user)
+    record_audit(db, current_user, "client.created", target_type="client", target_id=client.id,
+                 flags={"client_type": _client_type(client)})
     return client
 
 
@@ -76,8 +83,14 @@ def update_client(
     client_id: str, payload: ClientUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     service = ClientService(db)
-    client = service.update(_client_or_404(service, client_id, current_user), payload)
+    found = _client_or_404(service, client_id, current_user)
+    before = snapshot(found, sorted(payload.model_fields_set))
+    client = service.update(found, payload)
     _log("updated", client.id, current_user)
+    changed = changed_fields(client, before)
+    if changed:
+        record_audit(db, current_user, "client.updated", target_type="client", target_id=client.id, fields=changed,
+                     flags={"client_type": _client_type(client)})
     return client
 
 
@@ -87,9 +100,12 @@ def delete_client(client_id: str, current_user: User = Depends(get_current_user)
     client = _client_or_404(service, client_id, current_user)
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=ONLY_ADMIN_DELETES)
+    client_type = _client_type(client)
     try:
         service.delete(client)
     except ClientHasCasesError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     _log("deleted", client_id, current_user)
+    record_audit(db, current_user, "client.deleted", target_type="client", target_id=client_id,
+                 flags={"client_type": client_type})
     return Response(status_code=status.HTTP_204_NO_CONTENT)

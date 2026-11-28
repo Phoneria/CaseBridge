@@ -26,6 +26,7 @@ from app.schemas.chat import (
     ChatMessageOut,
     ChatStatusOut,
 )
+from app.services.audit import record_audit
 from app.services.chat_data_tools import ToolPrincipal
 from app.services.chat_service import ChatService
 from app.services.chat_stream import stream_assistant_reply
@@ -120,6 +121,8 @@ def send_message(
     level_config = get_level_config(level)
     user_message = service.add_user_message(conversation, payload.content)
     assistant = service.create_assistant_placeholder(conversation, provider.model, level)
+    record_audit(db, current_user, "ai.chat_message", target_type="chat_conversation", target_id=conversation.id,
+                 flags={"level": level})
     history = service.build_history(conversation, level_config.history_limit, system_prompt_for(level))
     tool_runner = None
     if payload.data_tools:
@@ -151,6 +154,9 @@ def send_message(
     )
 
 
+_FEEDBACK = {1: "up", -1: "down", 0: "cleared"}
+
+
 @router.put("/messages/{message_id}/feedback", response_model=ChatMessageOut)
 def set_feedback(
     message_id: str,
@@ -164,6 +170,8 @@ def set_feedback(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
     if message is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mesaj bulunamadı.")
+    record_audit(db, current_user, "ai.chat_feedback", target_type="chat_conversation",
+                 target_id=message.conversation_id, flags={"feedback": _FEEDBACK[payload.value]})
     return message
 
 

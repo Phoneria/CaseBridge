@@ -21,7 +21,9 @@ from app.legal_lab import mock, service
 from app.legal_lab.graph import get_graph
 from app.legal_lab.scenario_tree import ScenarioTree, build_tree
 from app.legal_lab.scenario_demo import build_demo, DocumentAssumption, PaymentAssumption
+from app.models.case import Case
 from app.models.user import User
+from app.services.audit import record_audit
 from app.services.case_service import CaseService
 
 router = APIRouter(prefix="/legal-lab", tags=["legal-lab"])
@@ -70,6 +72,13 @@ def _summary(db: Session, ref: CaseRef, law_firm_id: str) -> str:
     raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="case_id or summary is required")
 
 
+def _audit(db: Session, user: User, action: str, ref: CaseRef, moves: Optional[int] = None) -> None:
+    """After a successful AI call; _summary has already checked the case belongs to the firm."""
+    case = db.get(Case, ref.case_id) if ref.case_id else None
+    record_audit(db, user, action, case=case, flags={"source": "case" if case is not None else "text"},
+                 counts={"moves": moves} if moves is not None else None)
+
+
 @router.get("/status")
 def lab_status(provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     return {"mode": "mock" if provider is None else "ai", "note": mock.MOCK_NOTE if provider is None else None,
@@ -88,7 +97,9 @@ class CounterBody(CaseRef):
 @router.post("/counter-analysis")
 def counter_analysis(body: CounterBody, user: User = Depends(get_current_user), db: Session = Depends(get_db),
                      provider: Optional[LLMProvider] = Depends(get_optional_provider)):
-    return service.counter_analysis(provider, _summary(db, body, user.law_firm_id), body.side)
+    result = service.counter_analysis(provider, _summary(db, body, user.law_firm_id), body.side)
+    _audit(db, user, "ai.counter_analysis", body)
+    return result
 
 
 class Interv(BaseModel):
@@ -110,8 +121,10 @@ class BeatBody(CaseRef):
 def trial_beat(body: BeatBody, user: User = Depends(get_current_user), db: Session = Depends(get_db),
                provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     summary = _summary(db, body, user.law_firm_id)
-    return service.trial_beat(provider, summary, body.side, body.stage_idx, [t.model_dump() for t in body.transcript],
-                              body.interv.model_dump() if body.interv else None, body.manual)
+    result = service.trial_beat(provider, summary, body.side, body.stage_idx, [t.model_dump() for t in body.transcript],
+                                body.interv.model_dump() if body.interv else None, body.manual)
+    _audit(db, user, "ai.trial_beat", body, moves=len(body.transcript))
+    return result
 
 
 class GuideBody(CaseRef):
@@ -124,7 +137,9 @@ class GuideBody(CaseRef):
 def trial_guide(body: GuideBody, user: User = Depends(get_current_user), db: Session = Depends(get_db),
                 provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     summary = _summary(db, body, user.law_firm_id)
-    return service.trial_guide(provider, summary, [t.model_dump() for t in body.transcript], body.stage_idx, body.role)
+    result = service.trial_guide(provider, summary, [t.model_dump() for t in body.transcript], body.stage_idx, body.role)
+    _audit(db, user, "ai.trial_guide", body, moves=len(body.transcript))
+    return result
 
 
 class AskBody(CaseRef):
@@ -137,7 +152,9 @@ class AskBody(CaseRef):
 def trial_ask(body: AskBody, user: User = Depends(get_current_user), db: Session = Depends(get_db),
               provider: Optional[LLMProvider] = Depends(get_optional_provider)):
     summary = _summary(db, body, user.law_firm_id)
-    return service.trial_ask(provider, summary, body.side, [t.model_dump() for t in body.transcript], body.question)
+    result = service.trial_ask(provider, summary, body.side, [t.model_dump() for t in body.transcript], body.question)
+    _audit(db, user, "ai.trial_ask", body, moves=len(body.transcript))
+    return result
 
 
 @router.get('/cases/{case_id}/scenario-tree', response_model=ScenarioTree)

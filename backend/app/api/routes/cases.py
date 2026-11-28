@@ -7,11 +7,12 @@ from app.api.case_access import NOT_NOTE_CHANGER, can_change_note, require_case_
 from app.api.deps import get_current_law_firm_id, get_current_user
 from app.core.timeutil import local_today
 from app.db.session import get_db
-from app.models.case import Case, CasePrecedentLink, CaseEventType, CaseOutcome, CaseStatus, CaseType
+from app.models.case import Case, CasePrecedentLink, CaseEventType, CaseOutcome, CaseStatus, CaseType, ClientRole
 from app.models.user import User, UserRole
 from app.schemas.calendar import CaseHearingOut
 from app.schemas.case import CaseClose, CaseCreate, CaseDetailOut, CaseEventCreate, CaseEventOut, CaseNoteUpdate, CaseOut, CaseUpdate
 from app.repositories.case_event_repository import CaseEventRepository
+from app.services.audit import changed_fields, record_audit, snapshot
 from app.services.case_events import CaseEventInputError, clean_note_text, note_title
 from app.services.case_lifecycle import CaseLifecycleService, CaseStateError
 from app.services.case_parties import InvalidPartiesError
@@ -26,6 +27,18 @@ def _get_owned_case_or_404(service: CaseService, case_id: str, law_firm_id: str,
     if case is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
     return case
+
+
+_TRANSITION_ENUMS = {"status": CaseStatus, "outcome": CaseOutcome, "case_type": CaseType, "client_role": ClientRole}
+
+
+def _as_enum(name: str, value):
+    """client_role is a plain string column; the audit log only takes enum members."""
+    return None if value is None else _TRANSITION_ENUMS[name](value)
+
+
+def _party_counts(case) -> dict:
+    return {"parties": len(case.parties), "clients": sum(1 for p in case.parties if p.is_client)}
 
 
 def _managed_case(db: Session, case_id: str, current_user: User):
@@ -66,11 +79,14 @@ def create_case(
         raise HTTPException(status_code=422, detail="Choose a responsible lawyer")
     payload = payload.model_copy(update={"assigned_lawyer_id": lawyer_id})
     try:
-        return CaseService(db).create_case(current_user.law_firm_id, payload, current_user.id, local_today())
+        case = CaseService(db).create_case(current_user.law_firm_id, payload, current_user.id, local_today())
     except DuplicateCaseNumberError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except InvalidPartiesError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    record_audit(db, current_user, "case.created", case=case, counts=_party_counts(case),
+                 flags={"source": payload.source})
+    return case
 
 
 @router.get("", response_model=list[CaseOut])
@@ -142,10 +158,23 @@ def update_case(
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
     _lifecycle(lambda: CaseLifecycleService.ensure_patch_allowed(case, payload))
+    tracked = sorted(payload.model_fields_set - {"parties"})
+    before = snapshot(case, tracked)
     try:
-        return CaseService(db).update_case(case, payload, current_user.id)
+        updated = CaseService(db).update_case(case, payload, current_user.id)
     except InvalidPartiesError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    changed = changed_fields(updated, before)
+    if changed:
+        transitions = {
+            name: (_as_enum(name, before[name]), _as_enum(name, getattr(updated, name)))
+            for name in ("status", "outcome", "case_type", "client_role")
+            if name in changed
+        }
+        record_audit(db, current_user, "case.updated", case=updated, fields=changed, transitions=transitions)
+    if payload.parties is not None:
+        record_audit(db, current_user, "case.parties_changed", case=updated, counts=_party_counts(updated))
+    return updated
 
 
 @router.post("/{case_id}/close", response_model=CaseOut)
@@ -157,7 +186,12 @@ def close_case(
 ):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    return _lifecycle(lambda: CaseLifecycleService(db).close(case, payload, current_user.id, local_today()))
+    before_outcome = case.outcome
+    closed = _lifecycle(lambda: CaseLifecycleService(db).close(case, payload, current_user.id, local_today()))
+    open_days = (local_today() - closed.opening_date).days if closed.opening_date else 0
+    record_audit(db, current_user, "case.closed", case=closed,
+                 transitions={"outcome": (before_outcome, closed.outcome)}, counts={"open_days": max(open_days, 0)})
+    return closed
 
 
 @router.put("/{case_id}/precedents/{precedent_id}", status_code=204)
@@ -169,15 +203,20 @@ def link_precedent(case_id: str, precedent_id: str, current_user: User = Depends
     fields = dict(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id)
     if db.query(CasePrecedentLink).filter_by(**fields).first() is None:
         db.add(CasePrecedentLink(**fields))
-    db.commit()
+        db.commit()
+        record_audit(db, current_user, "case.precedent_linked", case=case, target_type="precedent", target_id=precedent_id)
+    else:
+        db.commit()
 
 
 @router.delete("/{case_id}/precedents/{precedent_id}", status_code=204)
 def unlink_precedent(case_id: str, precedent_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    db.query(CasePrecedentLink).filter_by(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id).delete()
+    removed = db.query(CasePrecedentLink).filter_by(case_id=case.id, law_firm_id=case.law_firm_id, precedent_id=precedent_id).delete()
     db.commit()
+    if removed:
+        record_audit(db, current_user, "case.precedent_unlinked", case=case, target_type="precedent", target_id=precedent_id)
 
 
 @router.post("/{case_id}/decision", response_model=CaseOut)
@@ -186,7 +225,11 @@ def complete_decision(
 ):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    return _lifecycle(lambda: CaseLifecycleService(db).complete_decision(case, payload, current_user.id, local_today()))
+    before_outcome = case.outcome
+    decided = _lifecycle(lambda: CaseLifecycleService(db).complete_decision(case, payload, current_user.id, local_today()))
+    record_audit(db, current_user, "case.decision_recorded", case=decided,
+                 transitions={"outcome": (before_outcome, decided.outcome)})
+    return decided
 
 
 @router.post("/{case_id}/reopen", response_model=CaseOut)
@@ -197,7 +240,9 @@ def reopen_case(
 ):
     case = _managed_case(db, case_id, current_user)
     require_case_writable(case)
-    return _lifecycle(lambda: CaseLifecycleService(db).reopen(case, current_user.id, local_today()))
+    result = _lifecycle(lambda: CaseLifecycleService(db).reopen(case, current_user.id, local_today()))
+    record_audit(db, current_user, "case.reopened", case=result)
+    return result
 
 
 @router.post("/{case_id}/archive", response_model=CaseOut)
@@ -207,7 +252,9 @@ def archive_case(
     db: Session = Depends(get_db),
 ):
     case = _managed_case(db, case_id, current_user)
-    return _lifecycle(lambda: CaseLifecycleService(db).archive(case))
+    result = _lifecycle(lambda: CaseLifecycleService(db).archive(case))
+    record_audit(db, current_user, "case.archived", case=result)
+    return result
 
 
 @router.post("/{case_id}/unarchive", response_model=CaseOut)
@@ -217,7 +264,9 @@ def unarchive_case(
     db: Session = Depends(get_db),
 ):
     case = _managed_case(db, case_id, current_user)
-    return CaseLifecycleService(db).unarchive(case)
+    result = CaseLifecycleService(db).unarchive(case)
+    record_audit(db, current_user, "case.unarchived", case=result)
+    return result
 
 
 @router.post("/{case_id}/events", response_model=CaseEventOut, status_code=status.HTTP_201_CREATED)
@@ -232,9 +281,12 @@ def add_case_event(
     case = _get_owned_case_or_404(service, case_id, law_firm_id)
     require_case_writable(case)
     try:
-        return service.add_event(case, payload, created_by=current_user.id)
+        event = service.add_event(case, payload, created_by=current_user.id)
     except CaseEventInputError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.detail) from exc
+    record_audit(db, current_user, "case_event.created", case=case, target_type="event", target_id=event.id,
+                 transitions={"event_type": (None, event.event_type)})
+    return event
 
 
 NOTE_NOT_FOUND = "Kayıt bulunamadı."
@@ -265,6 +317,7 @@ def update_case_note(
     db: Session = Depends(get_db),
 ):
     events, event = _changeable_note(db, case_id, event_id, current_user)
+    before = snapshot(event, ["description", "event_date"])
     if payload.description is not None:
         try:
             text = clean_note_text(payload.description)
@@ -274,7 +327,12 @@ def update_case_note(
         event.title = note_title(text)
     if payload.event_date is not None:
         event.event_date = payload.event_date
-    return events.save(event)
+    saved = events.save(event)
+    changed = changed_fields(saved, before)
+    if changed:
+        record_audit(db, current_user, "case_event.updated", case=saved.case, target_type="event", target_id=saved.id,
+                     fields=changed)
+    return saved
 
 
 @router.delete("/{case_id}/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -285,4 +343,7 @@ def delete_case_note(
     db: Session = Depends(get_db),
 ):
     events, event = _changeable_note(db, case_id, event_id, current_user)
+    case, event_id, event_type = event.case, event.id, event.event_type
     events.delete(event)
+    record_audit(db, current_user, "case_event.deleted", case=case, target_type="event", target_id=event_id,
+                 transitions={"event_type": (event_type, None)})

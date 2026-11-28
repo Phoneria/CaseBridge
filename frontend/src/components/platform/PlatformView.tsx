@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ReasonDialog } from "@/components/management/RecordPanel";
+import { AuditExportCard } from "@/components/platform/AuditExportCard";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
 import { FirmDetailModal } from "@/components/platform/FirmDetailModal";
@@ -136,6 +137,7 @@ export function PlatformView() {
   );
 
   return (
+    <div className="space-y-5">
     <section aria-labelledby="platform-firms" className="rounded-2xl border border-surface-border bg-white p-5 shadow-card">
       <div className="mb-3 flex items-center justify-between">
         <h1 id="platform-firms" className="text-base font-semibold text-navy-900">
@@ -248,5 +250,7 @@ export function PlatformView() {
         />
       )}
     </section>
+    <AuditExportCard firms={firms} />
+    </div>
   );
 }

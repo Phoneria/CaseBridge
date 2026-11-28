@@ -82,6 +82,8 @@ export interface CasePayload {
   defendant_position?: string;
   description?: string;
   assigned_lawyer_id?: string;
+  /** Audit only: where the new-case form was filled from. Never stored on the case. */
+  source?: "form" | "ai_intake" | "client_page";
 }
 
 /** PATCH /cases/{id}: any subset; null clears an optional field. The status is one of the open statuses and is not sent for a closed case. */
@@ -373,6 +375,41 @@ export interface PlatformFirm {
   admins: PlatformAdmin[];
   /** The firm's own lawyers (never scoped client/expert users). */
   lawyers?: PlatformAdmin[];
+}
+
+/** One audit_events row: metadata only, never case content or names. */
+export interface AuditEventDetails {
+  fields?: string[];
+  transitions?: Record<string, [string | null, string | null]>;
+  counts?: Record<string, number>;
+  flags?: Record<string, string>;
+}
+
+export interface AuditEvent {
+  id: string;
+  /** Naive UTC from the backend, ending in Z. */
+  occurred_at: string;
+  actor_user_id: string | null;
+  actor_role: string | null;
+  action: string;
+  case_id: string | null;
+  case_type: string | null;
+  target_type: string | null;
+  target_id: string | null;
+  details: AuditEventDetails;
+}
+
+/** GET /platform/firms/{id}/audit-events */
+export interface AuditEventPage {
+  firm_id: string;
+  firm_name: string;
+  from: string;
+  to: string;
+  total: number;
+  limit: number;
+  offset: number;
+  by_action: Record<string, number>;
+  items: AuditEvent[];
 }
 
 export interface PlatformFirmPayload {

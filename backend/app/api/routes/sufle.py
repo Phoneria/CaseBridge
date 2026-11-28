@@ -1,13 +1,16 @@
 """Authenticated stateless Sufle APIs. Tenant comes exclusively from the session."""
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
 from app.ai.subagent import routing as subagent
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.core.rate_limit import is_rate_limited, record_attempt
+from app.db.session import get_db
 from app.models.user import User
 from app.services import sufle_service, voice_service
+from app.services.audit import record_audit
 
 router = APIRouter(prefix="/sufle", tags=["sufle"])
 
@@ -35,13 +38,15 @@ def status(user: User = Depends(get_current_user)):
 
 
 @router.post("/analyze")
-def analyze(payload: sufle_service.AnalysisRequest, user: User = Depends(get_current_user)):
+def analyze(payload: sufle_service.AnalysisRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     firm = _bureau(user)
     _limit(user, "analyze")
     try:
-        return sufle_service.analyze(payload, firm, provider=subagent.llm_provider_for(user))
+        result = sufle_service.analyze(payload, firm, provider=subagent.llm_provider_for(user))
     except sufle_service.SufleUnavailable as exc:
         raise HTTPException(503, str(exc)) from None
+    record_audit(db, user, "ai.sufle_analysis", flags={"mode": payload.mode}, counts={"moves": len(payload.turns)})
+    return result
 
 
 @router.post("/transcribe")

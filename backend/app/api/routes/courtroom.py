@@ -1,4 +1,6 @@
 """Interactive courtroom training endpoints."""
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -24,9 +26,24 @@ from app.services.courtroom_service import (
     CourtroomService,
 )
 from app.services import voice_service
+from app.services.audit import record_audit
 from app.services.case_courtroom import scenario_from_case
 
 router = APIRouter(tags=["courtroom"])
+
+
+def _session_case(db, session):
+    case_id = session.scenario.source_case_id if session.scenario is not None else None
+    return db.get(Case, case_id) if case_id else None
+
+
+def _move_counts(session, with_duration: bool = False) -> dict:
+    counts = {"moves": session.round_number}
+    if with_duration:
+        started = session.created_at.replace(tzinfo=None) if session.created_at else None
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        counts["duration_min"] = max(0, int((now - started).total_seconds() // 60)) if started else 0
+    return counts
 
 
 def _owned_session_or_404(
@@ -74,6 +91,8 @@ def create_session(
     session = CourtroomService(db).create_session(
         scenario, law_firm_id, current_user.id, payload.chosen_role, conversation_mode=payload.conversation_mode
     )
+    record_audit(db, current_user, "ai.courtroom_started", target_type="courtroom_session", target_id=session.id,
+                 flags={"source": "scenario"})
     return CourtroomService.detail_out(session)
 
 
@@ -93,6 +112,8 @@ def create_session_from_case(
         raise HTTPException(status_code=404, detail="Dava bulunamadı")
     scenario = scenario_from_case(db, case, payload.chosen_role)
     session = CourtroomService(db).create_session(scenario, law_firm_id, current_user.id, payload.chosen_role, conversation_mode=payload.conversation_mode)
+    record_audit(db, current_user, "ai.courtroom_started", case=case, target_type="courtroom_session",
+                 target_id=session.id, flags={"source": "case"})
     return CourtroomService.detail_out(session)
 
 
@@ -197,6 +218,8 @@ def add_move(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except CourtroomInputError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    record_audit(db, current_user, "ai.courtroom_move", case=_session_case(db, result), target_type="courtroom_session",
+                 target_id=result.id, counts=_move_counts(result))
     return CourtroomService.detail_out(result)
 
 
@@ -214,6 +237,8 @@ def finish_session(
         raise HTTPException(409, str(exc)) from None
     except CourtroomInputError as exc:
         raise HTTPException(422, str(exc)) from None
+    record_audit(db, current_user, "ai.courtroom_finished", case=_session_case(db, result),
+                 target_type="courtroom_session", target_id=result.id, counts=_move_counts(result, with_duration=True))
     return CourtroomService.detail_out(result)
 
 
@@ -234,6 +259,8 @@ def retry_session(
     except CourtroomConflictError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     refreshed = _owned_session_or_404(db, result.id, law_firm_id, current_user.id)
+    record_audit(db, current_user, "ai.courtroom_move", case=_session_case(db, refreshed),
+                 target_type="courtroom_session", target_id=refreshed.id, counts=_move_counts(refreshed))
     return CourtroomService.detail_out(refreshed)
 
 
@@ -250,4 +277,7 @@ def abandon_session(
     except CourtroomConflictError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     refreshed = _owned_session_or_404(db, session_id, law_firm_id, current_user.id)
+    record_audit(db, current_user, "ai.courtroom_abandoned", case=_session_case(db, refreshed),
+                 target_type="courtroom_session", target_id=refreshed.id,
+                 counts=_move_counts(refreshed, with_duration=True))
     return CourtroomService.detail_out(refreshed)

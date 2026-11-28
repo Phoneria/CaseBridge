@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.models.user import UserRole, UserStatus
 from app.schemas.text_rules import clean_full_name, clean_single_line
@@ -74,3 +75,29 @@ class PlatformFirmCreatedOut(BaseModel):
 class PlatformAdminInviteOut(BaseModel):
     admin: PlatformAdminOut
     email_sent: bool
+
+
+class AuditEventOut(BaseModel):
+    """One audit_events row; occurred_at as naive-UTC ISO text ending in Z, like the CSV."""
+    id: str
+    occurred_at: str
+    actor_user_id: Optional[str]
+    actor_role: Optional[str]
+    action: str
+    case_id: Optional[str]
+    case_type: Optional[str]
+    target_type: Optional[str]
+    target_id: Optional[str]
+    details: dict
+
+
+class AuditEventPage(BaseModel):
+    firm_id: str
+    firm_name: str
+    from_: date = Field(serialization_alias="from")
+    to: date
+    total: int
+    limit: int
+    offset: int
+    by_action: dict[str, int]
+    items: list[AuditEventOut]

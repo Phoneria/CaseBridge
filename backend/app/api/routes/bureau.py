@@ -20,6 +20,7 @@ from app.models.user import User, UserRole
 from app.schemas.admin_user import AdminUserCreate
 from app.schemas.management import AccessWrite, Kind, RecordWrite, ScopedInvite, VersionAction
 from app.services.account_service import deliver, prepare_invite_email
+from app.services.audit import record_audit
 from app.services.document_service import DocumentService, media_type_for
 from app.services.management_service import (
     access_for, audit, case_in_firm, check_version, commit, conflict_search,
@@ -28,6 +29,14 @@ from app.services.management_service import (
 from app.services.user_admin_service import UserAdminError, create_pending_user
 
 router = APIRouter(prefix="/bureau", tags=["bureau"])
+
+
+def _audit_record(db: Session, actor: User, action: str, out: dict) -> dict:
+    """Process analytics for a saved bureau record; the title, data and reason stay out."""
+    case = db.get(Case, out["case_id"]) if out.get("case_id") else None
+    record_audit(db, actor, action, case=case, target_type="record", target_id=out["id"],
+                 flags={"record_kind": out["kind"]})
+    return out
 
 
 def bureau_admin(actor: User = Depends(get_current_admin)):
@@ -52,12 +61,13 @@ def list_records(kind: Kind | None = None, deleted: bool = False, actor: User = 
 
 @router.post("/records", status_code=201)
 def create_record(payload: RecordWrite, actor: User = Depends(bureau_admin), db: Session = Depends(get_db)):
-    return save_record(db, actor, actor.law_firm_id, payload)
+    return _audit_record(db, actor, "record.created", save_record(db, actor, actor.law_firm_id, payload))
 
 
 @router.put("/records/{record_id}")
 def edit_record(record_id: str, payload: RecordWrite, actor: User = Depends(bureau_admin), db: Session = Depends(get_db)):
-    return save_record(db, actor, actor.law_firm_id, payload, get_record(db, actor.law_firm_id, record_id))
+    out = save_record(db, actor, actor.law_firm_id, payload, get_record(db, actor.law_firm_id, record_id))
+    return _audit_record(db, actor, "record.updated", out)
 
 
 @router.post("/records/{record_id}/trash")
@@ -74,7 +84,7 @@ def trash_record(record_id: str, payload: VersionAction, actor: User = Depends(b
     flush(db)
     audit(db, actor, actor.law_firm_id, "record.trashed", row.kind, row.id, before, record_out(row), payload.reason)
     commit(db)
-    return record_out(row)
+    return _audit_record(db, actor, "record.trashed", record_out(row))
 
 
 @router.post("/records/{record_id}/restore")
@@ -94,7 +104,7 @@ def restore_record(record_id: str, payload: VersionAction, actor: User = Depends
     flush(db)
     audit(db, actor, actor.law_firm_id, "record.restored", row.kind, row.id, before, record_out(row), payload.reason)
     commit(db)
-    return record_out(row)
+    return _audit_record(db, actor, "record.restored", record_out(row))
 
 
 @router.get("/audit")
@@ -290,7 +300,7 @@ def scoped_decision(record_id: str, payload: Decision, actor: User = Depends(get
     else:
         fail("Geçersiz işlem.")
     body = RecordWrite(kind=row.kind, title=row.title, status=payload.status, case_id=row.case_id, owner_id=row.owner_id, due_date=row.due_date, data=data, version=payload.version)
-    return save_record(db, actor, actor.law_firm_id, body, row)
+    return _audit_record(db, actor, "record.updated", save_record(db, actor, actor.law_firm_id, body, row))
 
 
 class ChecklistStepUpdate(BaseModel):
@@ -319,7 +329,7 @@ def update_checklist_step(record_id: str, payload: ChecklistStepUpdate, actor: U
             if depends is not None and not items[depends]["done"]:
                 items[index]["done"] = False
     body = RecordWrite(kind=row.kind, title=row.title, status="completed" if all(i["done"] for i in items) else "open", case_id=row.case_id, owner_id=row.owner_id, due_date=row.due_date, data={**row.data, "items": items}, version=payload.version)
-    return save_record(db, actor, actor.law_firm_id, body, row)
+    return _audit_record(db, actor, "record.updated", save_record(db, actor, actor.law_firm_id, body, row))
 
 
 @router.post("/workspace/tasks/{task_id}/complete")
@@ -329,10 +339,13 @@ def complete_workspace_task(task_id: str, actor: User = Depends(get_current_user
     if not task or task.assigned_to != actor.id or (grant and (grant.position in {"client", "accountant"} or task.case_id not in grant.case_ids)):
         fail("Görev bulunamadı.", 404)
     case_in_firm(db, actor.law_firm_id, task.case_id, writable=True)
+    before_status = task.status
     task.status = TaskStatus.COMPLETED
     task.completed_at = now()
     audit(db, actor, actor.law_firm_id, "task.completed", "task", task.id)
     commit(db)
+    record_audit(db, actor, "task.updated", case=db.get(Case, task.case_id), target_type="task", target_id=task.id,
+                 fields=["status"], transitions={"task_status": (before_status, TaskStatus.COMPLETED)})
     return {"id": task.id, "status": "completed"}
 
 

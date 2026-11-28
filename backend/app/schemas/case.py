@@ -84,6 +84,8 @@ class CaseCreate(BaseModel):
     plaintiff_position: Optional[str] = None
     defendant_position: Optional[str] = None
     parties: Optional[list[CasePartyIn]] = Field(default=None, min_length=1, max_length=20)
+    # Where the new-case form was filled from; only recorded in the audit log, never stored on the case.
+    source: Literal["form", "ai_intake", "client_page"] = "form"
 
     @model_validator(mode="after")
     def _client_name_is_required_without_parties(self):

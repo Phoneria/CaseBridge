@@ -8,6 +8,7 @@ import pytest
 from app.api.deps import get_current_user
 from app.core.config import settings
 from app.main import app
+from app.models.user import UserRole
 from app.services import sufle_service as service, voice_service
 
 
@@ -25,7 +26,8 @@ def advice():
 
 @pytest.fixture()
 def bureau(client, monkeypatch):
-    user = SimpleNamespace(id="user-a", law_firm_id="firm-a", law_firm=SimpleNamespace(is_platform=False))
+    user = SimpleNamespace(id="user-a", law_firm_id="firm-a", role=UserRole.LAWYER,
+                           law_firm=SimpleNamespace(is_platform=False))
     app.dependency_overrides[get_current_user] = lambda: user
     monkeypatch.setattr(settings, "chat_provider", "openai")
     return client, user
@@ -201,3 +203,13 @@ def test_invalid_card_does_not_hide_other_grounded_advice(bureau, monkeypatch):
     response = client.post("/sufle/analyze", json=payload())
     assert response.status_code == 200
     assert len(response.json()["cards"]) == 1
+
+
+def test_analysis_is_audited_without_conversation_text(bureau, monkeypatch, db_session):
+    from tests.api.audit_helpers import audit_rows
+    client, _ = bureau
+    provider(monkeypatch)
+    assert client.post("/sufle/analyze", json=payload()).status_code == 200
+    [row] = audit_rows(db_session, "ai.sufle_analysis")
+    assert row.details == {"counts": {"moves": 1}, "flags": {"mode": "live"}}
+    assert row.actor_role == "lawyer" and row.law_firm_id == "firm-a"

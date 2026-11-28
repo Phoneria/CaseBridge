@@ -1,8 +1,11 @@
 """The platform panel's API: customer firms and their administrators
 (platform admins only)."""
 import logging
+from datetime import date, datetime, timezone
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -18,8 +21,13 @@ from app.schemas.platform import (
     PlatformAdminOut,
     PlatformFirmCreate,
     PlatformFirmCreatedOut,
+    AuditEventOut,
+    AuditEventPage,
     PlatformFirmOut,
 )
+from app.services.audit import ACTIONS
+from app.services.audit_export import AuditRangeError, iter_chunks, resolve_range, write_audit_csv
+from app.services.audit_query import AuditFilters, list_firm_audit_events
 from app.services.platform_service import (
     add_firm_admin,
     check_can_invite,
@@ -167,3 +175,66 @@ def activate(firm_id: str, payload: StatusReason | None = None, actor: User = De
         _audit("büro_aktifleştirildi", firm.id, None, actor)
     db.refresh(firm)
     return _firm_out(db, firm)
+
+
+@router.get("/firms/{firm_id}/audit-events", response_model=AuditEventPage, response_model_by_alias=True)
+def firm_audit_events(
+    firm_id: str,
+    start: Optional[date] = Query(default=None, alias="from"),
+    end: Optional[date] = Query(default=None, alias="to"),
+    action: Optional[str] = Query(default=None, max_length=64),
+    actor_user_id: Optional[str] = Query(default=None, max_length=36),
+    case_id: Optional[str] = Query(default=None, max_length=36),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    actor: User = Depends(get_current_platform_admin),
+    db: Session = Depends(get_db),
+):
+    firm = _firm(db, firm_id)
+    if action is not None and action not in ACTIONS:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Bilinmeyen hareket türü.")
+    try:
+        start, end = resolve_range(start, end, datetime.now(timezone.utc).date())
+    except AuditRangeError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from None
+    filters = AuditFilters(start=start, end=end, action=action, actor_user_id=actor_user_id, case_id=case_id)
+    total, by_action, rows = list_firm_audit_events(db, firm.id, filters, limit, offset)
+    logger.info("Hareket kayıtları görüntülendi: işlemi yapan=%s büro=%s aralık=%s..%s",
+                actor.id, firm.id, start.isoformat(), end.isoformat())
+    return AuditEventPage(
+        firm_id=firm.id, firm_name=firm.name, from_=start, to=end, total=total, limit=limit, offset=offset,
+        by_action=by_action,
+        items=[
+            AuditEventOut(
+                id=row.id, occurred_at=row.occurred_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                actor_user_id=row.actor_user_id, actor_role=row.actor_role, action=row.action, case_id=row.case_id,
+                case_type=row.case_type, target_type=row.target_type, target_id=row.target_id,
+                details=row.details or {},
+            )
+            for row in rows
+        ],
+    )
+
+
+@router.get("/audit-events.csv")
+def export_audit_events(
+    firm_id: Optional[str] = None,
+    start: Optional[date] = Query(default=None, alias="from"),
+    end: Optional[date] = Query(default=None, alias="to"),
+    actor: User = Depends(get_current_platform_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        start, end = resolve_range(start, end, datetime.now(timezone.utc).date())
+    except AuditRangeError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from None
+    if firm_id is not None:
+        _firm(db, firm_id)
+    spool = write_audit_csv(db, start, end, firm_id)
+    logger.info("Hareket kaydı dışa aktarıldı: işlemi yapan=%s büro=%s aralık=%s..%s",
+                actor.id, firm_id or "tümü", start.isoformat(), end.isoformat())
+    return StreamingResponse(
+        iter_chunks(spool),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="casebridge-hareketler-{start}-{end}.csv"'},
+    )

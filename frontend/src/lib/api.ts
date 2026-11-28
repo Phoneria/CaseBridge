@@ -5,6 +5,7 @@ import type {
   ClientPayload,
   PlatformAdminInvite,
   PlatformAdminPayload,
+  AuditEventPage,
   PlatformFirm,
   PlatformFirmCreated,
   PlatformFirmPayload,
@@ -661,6 +662,53 @@ async function fetchBlob(path: string, errorPrefix: string): Promise<Blob> {
   const response = await fetch(`${API_BASE_URL}${path}`, { headers });
   if (!response.ok) {
     throw new ApiError(`${errorPrefix} (${response.status}).`, response.status);
+  }
+  return response.blob();
+}
+
+export interface AuditEventQuery {
+  from: string;
+  to: string;
+  action?: string;
+  actorUserId?: string;
+  caseId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/** One firm's audit events, newest first (platform admins only). */
+export async function listFirmAuditEvents(firmId: string, params: AuditEventQuery): Promise<AuditEventPage> {
+  const query = new URLSearchParams({ from: params.from, to: params.to });
+  if (params.action) query.set("action", params.action);
+  if (params.actorUserId) query.set("actor_user_id", params.actorUserId);
+  if (params.caseId) query.set("case_id", params.caseId);
+  if (params.limit !== undefined) query.set("limit", String(params.limit));
+  if (params.offset) query.set("offset", String(params.offset));
+  return request(`/platform/firms/${encodeURIComponent(firmId)}/audit-events?${query}`);
+}
+
+export interface AuditCsvParams {
+  firmId?: string;
+  from: string;
+  to: string;
+}
+
+/** The platform audit CSV. Unlike fetchBlob, a failure carries the server's Turkish `detail`. */
+export async function downloadAuditCsv(params: AuditCsvParams): Promise<Blob> {
+  const query = new URLSearchParams({ from: params.from, to: params.to });
+  if (params.firmId) query.set("firm_id", params.firmId);
+  const token = getToken();
+  const headers = new Headers();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const response = await fetch(`${API_BASE_URL}/platform/audit-events.csv?${query}`, { headers });
+  if (!response.ok) {
+    let detail: unknown = null;
+    try {
+      detail = (await response.json())?.detail;
+    } catch {
+      detail = null;
+    }
+    throw new ApiError(typeof detail === "string" ? detail : `Kayıtlar indirilemedi (${response.status}).`, response.status);
   }
   return response.blob();
 }

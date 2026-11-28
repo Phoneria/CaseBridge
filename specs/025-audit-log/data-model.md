@@ -1,0 +1,3 @@
+# Data model
+## FeatureContract
+New table `audit_events`: `id` (uuid), `law_firm_id` (FK law_firms), `actor_user_id` (FK users, nullable), `actor_role`, `action` (one of `ACTIONS`), `case_id` (no FK), `case_type`, `target_type` (one of `TARGET_TYPES`), `target_id`, `details` JSON `{fields?: [name], transitions?: {name: [old, new]}, counts?: {name: int}, flags?: {name: value}}`, `occurred_at` (naive UTC). `CaseCreate.source?: "form" | "ai_intake" | "client_page"` (audit only, never stored). CSV columns: `occurred_at, firm_id, firm_name, actor_user_id, actor_role, action, case_id, case_type, target_type, target_id, details`. JSON view: `AuditEventPage {firm_id, firm_name, from, to, total, limit, offset, by_action, items: AuditEventOut[]}`. No browser storage.

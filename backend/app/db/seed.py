@@ -658,7 +658,9 @@ def _seed_case_detail(db, case: Case, lawyer: User, *, evidence_number: str | No
         ("Birincil delilleri temin et", f"Öncelikle şu belgeyi iste ve dosyala: {evidence[0]}. Ardından {evidence[1]} için kaynak ve tarih kontrolü yap.", 5),
         ("Dosya sonucunu ve takibi kontrol et" if closed else "Duruşma ve süre takibini güncelle",
          ("Kayıtlı sonuç " + result.lower() + "; gerekçeli karar, kesinleşme, olası kanun yolu ve tahsilat durumunu asıl dosyadan doğrula."
-          if closed else f"Sonraki duruşma {case.next_hearing_date:%d.%m.%Y} olarak kayıtlı. Tebliğleri, süreleri ve delil sunma durumunu asıl dosyadan teyit et."), 7),
+          if closed else (f"Sonraki duruşma {case.next_hearing_date:%d.%m.%Y} olarak kayıtlı. " if case.next_hearing_date
+                          else "Sonraki duruşma tarihi kayıtlı değil. ")
+          + "Tebliğleri, süreleri ve delil sunma durumunu asıl dosyadan teyit et."), 7),
     ]
     for title, description, due_in_days in actions:
         _get_or_create_task(db, case, lawyer, title=title, description=description,

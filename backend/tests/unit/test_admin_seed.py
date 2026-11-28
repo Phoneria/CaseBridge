@@ -31,3 +31,32 @@ def test_seed_has_three_named_lawyers_and_assigns_every_demo_case(monkeypatch):
     finally:
         Base.metadata.drop_all(bind=engine)
         engine.dispose()
+
+
+def test_reseed_survives_an_open_demo_case_without_a_next_hearing(monkeypatch):
+    from app.models.case import CaseStatus
+    from app.models.task import Task
+
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Session = sessionmaker(bind=engine)
+    monkeypatch.setattr(seed_module, "engine", engine)
+    monkeypatch.setattr(seed_module, "SessionLocal", Session)
+    monkeypatch.setattr(seed_module.settings, "seed_demo_data", True)
+    title = "Duruşma ve süre takibini güncelle"
+    try:
+        seed_module.seed()
+        with Session() as db:
+            # A hearing that passed or was removed in the app leaves an open case without a date.
+            case = db.query(Case).filter(Case.status != CaseStatus.KAPALI, Case.next_hearing_date.isnot(None),
+                                         Case.case_number != "2026/153").first()
+            case.next_hearing_date = None
+            db.query(Task).filter(Task.case_id == case.id, Task.title == title).delete()
+            db.commit()
+            case_id = case.id
+        seed_module.seed()
+        with Session() as db:
+            task = db.query(Task).filter(Task.case_id == case_id, Task.title == title).one()
+            assert task.description.startswith("Sonraki duruşma tarihi kayıtlı değil.")
+    finally:
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()

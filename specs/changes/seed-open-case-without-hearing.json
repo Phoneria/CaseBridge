@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": ["backend/app/db/seed.py"],
+      "requirements": ["specs/026-seed-open-case-without-hearing/spec.md#FR-001"],
+      "acceptance_tests": [
+        "backend/tests/unit/test_admin_seed.py::test_reseed_survives_an_open_demo_case_without_a_next_hearing",
+        "backend/tests/unit/test_admin_seed.py::test_seed_has_three_named_lawyers_and_assigns_every_demo_case"
+      ],
+      "reason": "Bug 28 Nov 2026: the seed crashed on an open demo case without a next hearing and kept the backend container down."
+    },
+    {
+      "files": ["frontend/app-version.json"],
+      "requirements": ["specs/026-seed-open-case-without-hearing/spec.md#FR-002"],
+      "acceptance_tests": ["scripts/tests/test_audit_log.py::AuditLogAcceptance.test_app_version_manifest_matches_the_sources"],
+      "reason": "Version manifest regenerated with update-version.mjs (v.0.59)."
+    }
+  ]
+}

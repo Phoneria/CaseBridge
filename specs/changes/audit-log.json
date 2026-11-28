@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "files": [
+        "backend/alembic/versions/d4e6f8a0b2c4_add_audit_events.py",
+        "backend/app/models/audit.py",
+        "backend/app/models/__init__.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-001"
+      ],
+      "acceptance_tests": [
+        "backend/tests/integration/test_audit_migration.py::test_audit_events_table_upgrades_and_downgrades",
+        "backend/tests/unit/test_audit_service.py::test_record_writes_one_metadata_row"
+      ],
+      "reason": "Metadata-only audit_events table, migration on main's head f3a5c7e9b1d2."
+    },
+    {
+      "files": [
+        "backend/app/services/audit.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-002",
+        "specs/025-audit-log/spec.md#FR-006",
+        "specs/025-audit-log/spec.md#FR-011"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_audit_service.py::test_record_writes_one_metadata_row",
+        "backend/tests/unit/test_audit_service.py::test_firm_comes_from_the_actor_when_there_is_no_case",
+        "backend/tests/unit/test_audit_service.py::test_anything_outside_the_allow_lists_is_a_programmer_error",
+        "backend/tests/unit/test_audit_service.py::test_build_details_accepts_uuids_and_none_in_transitions",
+        "backend/tests/unit/test_audit_service.py::test_a_database_error_is_logged_and_swallowed",
+        "backend/tests/unit/test_audit_service.py::test_changed_fields_compares_a_snapshot_with_the_object",
+        "backend/tests/api/test_audit_coverage.py::test_every_write_route_is_audited_or_explicitly_not",
+        "backend/tests/api/test_audit_coverage.py::test_every_mapped_action_exists_and_every_action_is_used",
+        "backend/tests/api/test_audit_coverage.py::test_every_action_has_a_platform_panel_label"
+      ],
+      "reason": "record_audit is the only writer, accepts only allow-listed metadata and never undoes the action; every action is used by a mapped route."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/cases.py",
+        "backend/app/api/routes/admin.py",
+        "backend/app/api/routes/handover.py",
+        "backend/app/api/routes/documents.py",
+        "backend/app/api/routes/tasks.py",
+        "backend/app/api/routes/calendar.py",
+        "backend/app/api/routes/clients.py",
+        "backend/app/schemas/case.py",
+        "backend/app/services/case_service.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-003",
+        "specs/025-audit-log/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_audit_cases.py::test_create_records_source_and_party_counts",
+        "backend/tests/api/test_audit_cases.py::test_a_failed_create_records_nothing",
+        "backend/tests/api/test_audit_cases.py::test_update_records_changed_fields_and_transitions_only",
+        "backend/tests/api/test_audit_cases.py::test_an_update_that_changes_nothing_records_nothing",
+        "backend/tests/api/test_audit_cases.py::test_a_client_role_change_is_a_transition",
+        "backend/tests/api/test_audit_cases.py::test_party_changes_are_their_own_action",
+        "backend/tests/api/test_audit_cases.py::test_close_reopen_archive_unarchive",
+        "backend/tests/api/test_audit_cases.py::test_admin_lawyer_change_records_both_ids",
+        "backend/tests/api/test_audit_cases.py::test_handover_is_recorded",
+        "backend/tests/api/test_audit_case_content.py::test_note_create_update_delete",
+        "backend/tests/api/test_audit_case_content.py::test_document_upload_and_delete",
+        "backend/tests/api/test_audit_case_content.py::test_task_create_and_status_change",
+        "backend/tests/api/test_audit_case_content.py::test_calendar_event_and_hearing_result",
+        "backend/tests/api/test_audit_case_content.py::test_client_actions",
+        "backend/tests/api/test_audit_new_routes.py::test_precedent_link_and_unlink_are_recorded_once",
+        "backend/tests/api/test_audit_new_routes.py::test_late_decision_records_the_outcome_transition",
+        "backend/tests/api/test_audit_coverage.py::test_every_write_route_is_audited_or_explicitly_not"
+      ],
+      "reason": "Case lifecycle and content routes record their action after the commit; CaseCreate.source is audit-only and never stored on the case."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/case_intake.py",
+        "backend/app/api/routes/simulations.py",
+        "backend/app/api/routes/courtroom.py",
+        "backend/app/api/routes/chat.py",
+        "backend/app/api/routes/legal_lab.py",
+        "backend/app/api/routes/sufle.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-004",
+        "specs/025-audit-log/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_audit_ai.py::test_case_intake_records_source_and_filled_fields",
+        "backend/tests/api/test_audit_ai.py::test_analysis_start_is_recorded",
+        "backend/tests/api/test_audit_ai.py::test_courtroom_start_move_and_abandon",
+        "backend/tests/api/test_audit_ai.py::test_chat_message_and_feedback",
+        "backend/tests/api/test_audit_new_routes.py::test_legal_lab_calls_record_source_and_turn_count",
+        "backend/tests/api/test_sufle.py::test_analysis_is_audited_without_conversation_text"
+      ],
+      "reason": "AI usage is recorded with sources, counts and fixed flags only, never prompts, answers or moves."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/bureau.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-003",
+        "specs/025-audit-log/spec.md#FR-005",
+        "specs/025-audit-log/spec.md#FR-006"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_audit_new_routes.py::test_bureau_records_and_workspace_task_are_recorded"
+      ],
+      "reason": "Bureau records and workspace decisions/steps record record.* with the kind only; workspace task completion is task.updated. ManagementAudit is unchanged."
+    },
+    {
+      "files": [
+        "backend/app/api/routes/platform.py",
+        "backend/app/services/audit_export.py",
+        "backend/app/services/audit_query.py",
+        "backend/app/schemas/platform.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-007",
+        "specs/025-audit-log/spec.md#FR-008",
+        "specs/025-audit-log/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "backend/tests/api/test_audit_export.py::test_only_platform_admins_can_export",
+        "backend/tests/api/test_audit_export.py::test_export_lists_rows_in_range_in_order_without_the_platform_firm",
+        "backend/tests/api/test_audit_export.py::test_firm_filter_and_inclusive_dates",
+        "backend/tests/api/test_audit_export.py::test_range_rules",
+        "backend/tests/api/test_audit_view.py::test_only_platform_admins_and_customer_firms",
+        "backend/tests/api/test_audit_view.py::test_lists_one_firm_newest_first_with_summary",
+        "backend/tests/api/test_audit_view.py::test_filters_and_paging",
+        "backend/tests/api/test_audit_view.py::test_rejects_bad_parameters",
+        "backend/tests/api/test_audit_view.py::test_shows_no_content",
+        "backend/tests/api/test_audit_privacy.py::test_the_export_contains_no_content"
+      ],
+      "reason": "Platform admins export the audit log as CSV and browse one firm's events as JSON; neither carries content."
+    },
+    {
+      "files": [
+        "backend/app/db/demo_cleanup.py"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-009"
+      ],
+      "acceptance_tests": [
+        "backend/tests/unit/test_client_seed_and_import.py::test_audit_rows_do_not_keep_demo_users_or_the_demo_firm"
+      ],
+      "reason": "Audit rows never keep demo users or the demo firm alive; they are removed with them."
+    },
+    {
+      "files": [
+        "frontend/src/components/platform/AuditExportCard.tsx",
+        "frontend/src/components/platform/PlatformView.tsx",
+        "frontend/src/lib/api.ts",
+        "frontend/src/components/NewCaseView.tsx",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-003",
+        "specs/025-audit-log/spec.md#FR-007"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/AuditExportCard.test.tsx::is the last 30 days ending today in UTC",
+        "frontend/src/components/__tests__/AuditExportCard.test.tsx::downloads all firms for the default range",
+        "frontend/src/components/__tests__/AuditExportCard.test.tsx::sends the chosen firm and dates",
+        "frontend/src/components/__tests__/AuditExportCard.test.tsx::shows the server's message and ignores a second click while downloading",
+        "frontend/src/components/__tests__/PlatformView.test.tsx::lists the firms with status, user count and pending invites",
+        "frontend/src/components/__tests__/NewCaseView.test.tsx::sends the client page as the form's source"
+      ],
+      "reason": "Hareket kayıtları card under the firm list downloads the CSV; the new-case form sends its source."
+    },
+    {
+      "files": [
+        "frontend/src/components/platform/FirmAuditEventsPanel.tsx",
+        "frontend/src/components/platform/FirmProfileView.tsx",
+        "frontend/src/lib/auditEvents.ts",
+        "frontend/src/lib/api.ts",
+        "frontend/src/types/index.ts"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-008",
+        "specs/025-audit-log/spec.md#FR-011"
+      ],
+      "acceptance_tests": [
+        "frontend/src/components/__tests__/FirmAuditEventsPanel.test.tsx::shows the firm's events with names, Turkish labels and readable details",
+        "frontend/src/components/__tests__/FirmAuditEventsPanel.test.tsx::filters by date and action, and by clicking a user or a case",
+        "frontend/src/components/__tests__/FirmAuditEventsPanel.test.tsx::pages through the results",
+        "frontend/src/components/__tests__/FirmAuditEventsPanel.test.tsx::filters by an action from the summary cards",
+        "frontend/src/components/__tests__/FirmAuditEventsPanel.test.tsx::shows an empty state and the server's error message",
+        "frontend/src/lib/__tests__/auditEvents.test.ts::puts every labelled action in exactly one filter group",
+        "frontend/src/lib/__tests__/auditEvents.test.ts::falls back to the raw code for an action it does not know yet",
+        "frontend/src/lib/__tests__/auditEvents.test.ts::describes fields, transitions, counts and flags, naming known lawyers only",
+        "frontend/src/components/__tests__/FirmProfileView.test.tsx::opens the firm's audit events from the Hareket kayıtları tab"
+      ],
+      "reason": "Platform firm profile: Hareket kayıtları tab browsing one firm's audit events with names resolved from the platform's own firm list."
+    },
+    {
+      "files": [
+        "frontend/app-version.json"
+      ],
+      "requirements": [
+        "specs/025-audit-log/spec.md#FR-010"
+      ],
+      "acceptance_tests": [
+        "scripts/tests/test_audit_log.py::AuditLogAcceptance.test_app_version_manifest_matches_the_sources"
+      ],
+      "reason": "Version manifest regenerated with update-version.mjs (v.0.59)."
+    }
+  ]
+}
